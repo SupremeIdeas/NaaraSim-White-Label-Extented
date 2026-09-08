@@ -9,6 +9,36 @@
 
 ## DONE
 
+### 🎟️ Platform Updater — Batch 7: real tier entitlement ordering — 2026-09-08
+The last batch of the 7-batch Updater & White-Label License System. Batch 4 gated
+package tiers with an exact-match stopgap (an instance saw a tiered package only if
+its tier string matched exactly); Batch 6 finally set instance tiers to real values
+at license issuance. This batch replaces the stopgap with the real ORDERING those
+tiers were always meant to carry.
+- **Entitlement is inclusive upward** — `WhiteLabelInstance::TIERS` is an ordered
+  list (`normal` < `extended`) and a package requiring a given tier is available to
+  that tier and every richer one. So an **extended** instance is now eligible for
+  both normal-tier and extended-tier packages (not just an exact `extended` match),
+  while a **normal** instance is still blocked from extended-only packages. Untiered
+  packages continue to reach everyone.
+- **Fails closed**, because entitlement is a paid boundary: a package whose
+  `tier_requirement` isn't a known tier can only be satisfied by an exact string
+  match (never widened by "a higher rank"), and an instance with no tier is denied
+  any tiered package. An unrecognised value must never accidentally grant more.
+- Single, isolated change to `PackageDistribution::tierAllows()` (the one source of
+  truth both `check` and `download` already run through — so the ordering is enforced
+  on the download re-check too, not just the listing), plus the `tierRank()`/
+  `rankOf()` helpers added on `WhiteLabelInstance` in Batch 6. The protected engine
+  classes and the whole API surface were untouched.
+- 15 new tests: an exhaustive 12-case tier matrix (untiered/normal/extended
+  instances × untiered/normal/extended/unknown package requirements, including the
+  fail-closed unknown-tier and untiered-instance cases) driven through the real
+  `isEligible()`; an explicit assertion that the ordering constant is cheapest→
+  richest so a future reorder can't silently invert entitlement; plus two end-to-end
+  HTTP cases (a richer tier sees a cheaper tier's package; a cheaper tier is blocked
+  from a richer package both in the list and on a direct download 403). Full suite
+  green.
+
 ### 🔑 Platform Updater — Batch 6: License Authority + API Key/Token System — 2026-09-08
 The money/security path of the Updater program (master platform = the authority).
 Batch 4 defined `white_label_instances` as a registry but nothing populated it;
@@ -2778,17 +2808,19 @@ Rate limits (Section 19.2): `api` limiter 300/min auth · 60/min public (on `rou
 > (loyalty milestones, travel timeline, admin-defined achievements paying
 > NaaraCredits) that used to top this list are now DONE — see DONE above.
 
-### ▶ TOP OF NEXT (Updater track) — Batch 5: White-Label Updater Screen (subscriber side)
-Batches 1-4 are DONE. Batch 5 per `NaaraSim_Updater_Batch5_WhiteLabelScreen.md`:
-the SUBSCRIBER side, built INTO the white-label repos (NaaraSim-WhiteLabel and
-NaaraSim-White-Label-Extented). A white-label instance uses its issued token to
-call the master's distribution API (Batch 4) — check for updates/themes, pull a
-package, verify it locally with Batch 1's `PackageVerifier`, then hand it to
-Batch 2's `UpdateApplier` / Batch 3's `ThemeInstaller`. This is a cross-repo
-build: the client code + screen land in the white-label forks, pointing at the
-master's API base URL. Reuse the existing engine — do NOT re-implement apply or
-verify. (Per the model plan this is a Sonnet-capable batch, but its seam with
-the apply engine deserves an Opus review before merge.)
+### ✅ Updater track — ALL 7 BATCHES COMPLETE (2026-09-08)
+The Updater & White-Label License System is fully built end to end (master =
+publisher/authority; the two forks = Normal- and Extended-license subscribers):
+Batch 1 signed package format · Batch 2 apply engine + auto-rollback · Batch 3
+theme installer · Batch 4 distribution API + registry · Batch 5 subscriber pull
+screen (in both forks) + master report endpoint · Batch 6 License Authority
+(key→token exchange, revoke/suspend, admin onboarding) · Batch 7 real tier
+entitlement ordering — see the DONE entries above for each.
+**Owner follow-ups before this goes live** (deliberately NOT built here, they need
+real config/keys per the money-safety rules): wire the fork's activate flow into a
+real purchase/payment step so a paid tier maps to an issued key; run keygen on the
+production master and distribute the public key with the forks; decide token-rotation
+cadence. Pick these up when doing go-live hardening, not as feature work.
 
 ### ▶ TOP OF NEXT (Theme track) — Theme visual rebuild: batch 4 of 8 (next 5 themes to full-suite status)
 Batches 1-3 are DONE (15 themes now at full-suite status: neon-vertex,

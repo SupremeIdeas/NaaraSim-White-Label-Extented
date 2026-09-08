@@ -202,6 +202,44 @@ class WhiteLabelDistributionApiTest extends TestCase
         );
     }
 
+    public function test_a_richer_tier_instance_sees_a_cheaper_tier_package_over_the_api(): void
+    {
+        // Batch 7 ordering, end to end: an extended instance is entitled to a
+        // normal-tier package (upward inclusion), not just an exact 'extended' one.
+        $this->enable();
+        $current = '2026.09.05-1';
+        $normalPkg = $this->publish(['version' => '2026.09.10-1', 'tier_requirement' => 'normal']);
+        $extendedPkg = $this->publish(['version' => '2026.09.11-1', 'tier_requirement' => 'extended']);
+
+        $res = $this->withToken($this->token($this->makeInstance(tier: 'extended')))
+            ->getJson("/api/v1/white-label/updates/check?current_version={$current}&product=naarasim-whitelabel")
+            ->assertOk();
+
+        $this->assertEqualsCanonicalizing(
+            [$normalPkg->package_id, $extendedPkg->package_id],
+            collect($res->json('packages'))->pluck('package_id')->all()
+        );
+    }
+
+    public function test_a_cheaper_tier_instance_is_blocked_from_a_richer_tier_package_over_the_api(): void
+    {
+        $this->enable();
+        $current = '2026.09.05-1';
+        $normalPkg = $this->publish(['version' => '2026.09.10-1', 'tier_requirement' => 'normal']);
+        $extendedPkg = $this->publish(['version' => '2026.09.11-1', 'tier_requirement' => 'extended']);
+
+        // A normal instance sees the normal package but never the extended one —
+        // proven both in the list and on a direct download re-check (403).
+        $res = $this->withToken($this->token($this->makeInstance(tier: 'normal')))
+            ->getJson("/api/v1/white-label/updates/check?current_version={$current}&product=naarasim-whitelabel")
+            ->assertOk();
+        $this->assertEqualsCanonicalizing([$normalPkg->package_id], collect($res->json('packages'))->pluck('package_id')->all());
+
+        $this->withToken($this->token($this->makeInstance(tier: 'normal')))
+            ->getJson("/api/v1/white-label/updates/{$extendedPkg->package_id}/download?current_version={$current}")
+            ->assertStatus(403);
+    }
+
     // --- Download re-validation + streaming ---
 
     public function test_download_streams_an_eligible_package(): void
