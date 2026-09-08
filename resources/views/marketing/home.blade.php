@@ -1,4 +1,8 @@
-<x-layouts.marketing>
+{{-- A referral link is the homepage itself with a ?ref= query string
+     (App\Livewire\Referrals::mount()), so the referral-specific preview image
+     only applies here, gated on that query param — every other visit keeps
+     the site-wide default. --}}
+<x-layouts.marketing :og-image="request()->filled('ref') ? \App\Support\LinkPreviewSettings::resolve('referral') : null">
     {{-- Per-theme custom landing page (owner request, 2026-09-07): a theme
          with its OWN hand-built landing layout (see LandingHeroLibrary)
          takes over the whole homepage content area — 'default' (every
@@ -36,4 +40,8 @@
     @endif
     @endif
 
+    {{-- Always the last section on the homepage, regardless of which content
+         path above is active (theme landing page, Section Builder, or the
+         legacy CMS loop) — see the partial's own docblock. --}}
+    @include('marketing.home._banner_carousel')
 </x-layouts.marketing>

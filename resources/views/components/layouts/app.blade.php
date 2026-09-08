@@ -6,12 +6,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ $title ?? config('app.name', 'NaaraSim') }}</title>
+    <meta property="og:title" content="{{ $title ?? config('app.name', 'NaaraSim') }}">
     @if (! empty($description ?? null))
         <meta name="description" content="{{ $description }}">
-        <meta property="og:title" content="{{ $title ?? config('app.name', 'NaaraSim') }}">
         <meta property="og:description" content="{{ $description }}">
-        @if (! empty($ogImage ?? null))<meta property="og:image" content="{{ $ogImage }}">@endif
     @endif
+    {{-- Every shared link gets a real preview image — not just the handful of
+         pages that pass their own $ogImage — so a chat app never falls back to
+         the bare favicon. Falls back to the admin-set site-wide default
+         (App\Support\LinkPreviewSettings), independent of whether a
+         description happens to be set. --}}
+    <meta property="og:image" content="{{ $ogImage ?? \App\Support\LinkPreviewSettings::resolve('default') }}">
 
     {{-- Favicon / app icon (Module 26): admin-uploaded if set, else the default. --}}
     @php($favicon = \App\Support\BrandSettings::favicon())

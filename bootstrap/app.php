@@ -47,6 +47,10 @@ return Application::configure(basePath: dirname(__DIR__))
             'api.enabled' => \App\Http\Middleware\EnsureDeveloperApiEnabled::class,
             'api.client' => \App\Http\Middleware\EnsureApiClientUsable::class,
             'api.scope' => \App\Http\Middleware\ApiScope::class,
+            // White-label distribution API (Updater Batch 4) — same shape as the
+            // Developer API gates above; api.scope is reused unchanged.
+            'whitelabel.enabled' => \App\Http\Middleware\EnsureWhiteLabelApiEnabled::class,
+            'whitelabel.usable' => \App\Http\Middleware\EnsureWhiteLabelInstanceUsable::class,
             // KYC level gate (ROADMAP §Layer 0.3): kyc:2 to withdraw, kyc:3 to
             // become a merchant.
             'kyc' => \App\Http\Middleware\EnsureKycLevel::class,

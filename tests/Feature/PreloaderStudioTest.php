@@ -115,6 +115,30 @@ class PreloaderStudioTest extends TestCase
         $this->assertStringContainsString('id="nx-preloader"', $html);
     }
 
+    /**
+     * Regression (2026-09-08): the preloader only listened for the browser
+     * `load` event, which never fires again on a Livewire `wire:navigate`
+     * transition (a client-side morph of an already-loaded page) — so every
+     * in-app navigation sat idle for the full 4s hard-fallback before
+     * self-removing, a multi-second hang on every single page. Fixed by
+     * finishing immediately when `document.readyState` is already
+     * `'complete'` at the moment the script runs (true on every wire:navigate
+     * swap, never true on the real first load) — assert the guard is present
+     * in the rendered script so a future edit can't silently drop it again.
+     */
+    public function test_the_script_finishes_immediately_when_the_document_is_already_complete(): void
+    {
+        PreloaderSettings::saveAssignment('marketing', array_merge(
+            PreloaderSettings::safeDefault(),
+            ['preset' => 'equalizer', 'enabled' => true],
+        ));
+
+        $html = Blade::render('<x-brand-preloader page-type="marketing" />');
+
+        $this->assertStringContainsString("document.readyState === 'complete'", $html);
+        $this->assertStringContainsString('window.addEventListener(\'load\', finish)', $html);
+    }
+
     public function test_admin_preview_query_param_forces_a_preset_only_for_privileged_users(): void
     {
         // Guest: preview param is ignored (nothing renders when disabled).

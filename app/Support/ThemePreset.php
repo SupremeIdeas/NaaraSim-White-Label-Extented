@@ -91,6 +91,15 @@ class ThemePreset
     /** The three structural layout partials a page may pick between. */
     public const VARIANTS = ['variant-a', 'variant-b', 'variant-c'];
 
+    /** Valid icon_family.style values (Theme Installer Batch 3 — shared with iconFamily()'s own read-time fallback). */
+    public const ICON_STYLES = ['3d', 'sprite'];
+
+    /** icon_family.set pattern — shared by iconFamily() and the Theme Installer's install-time validation. */
+    public const ICON_SET_PATTERN = '/^[a-z0-9\-]{1,40}$/';
+
+    /** hero_assets value pattern — shared by heroFor() and the Theme Installer's post-copy URL check. */
+    public const HERO_ASSET_PATTERN = '#^(/[\w./-]+|https?://[\w./:?=&%-]+)$#';
+
     /**
      * Swappable CHROME sections (owner request, 2026-09-07): unlike
      * layout_variants (a page's own content), these are shared UI shells —
@@ -239,8 +248,8 @@ class ThemePreset
         $fam = self::active()['icon_family'];
 
         return [
-            'style' => in_array($fam['style'] ?? null, ['3d', 'sprite'], true) ? $fam['style'] : '3d',
-            'set' => is_string($fam['set'] ?? null) && preg_match('/^[a-z0-9\-]{1,40}$/', $fam['set']) ? $fam['set'] : 'default',
+            'style' => in_array($fam['style'] ?? null, self::ICON_STYLES, true) ? $fam['style'] : '3d',
+            'set' => is_string($fam['set'] ?? null) && preg_match(self::ICON_SET_PATTERN, $fam['set']) ? $fam['set'] : 'default',
         ];
     }
 
@@ -263,7 +272,7 @@ class ThemePreset
             return null;
         }
 
-        return preg_match('#^(/[\w./-]+|https?://[\w./:?=&%-]+)$#', $val) === 1 ? $val : null;
+        return preg_match(self::HERO_ASSET_PATTERN, $val) === 1 ? $val : null;
     }
 
     /**
@@ -534,6 +543,31 @@ class ThemePreset
     public static function bust(): void
     {
         Cache::forget(self::CACHE_KEY);
+    }
+
+    /**
+     * The current font allow-list (Theme Installer Batch 3). A live accessor,
+     * not a copy — the installer's font-warning check must always compare
+     * against whatever this list actually is right now, so it never drifts
+     * out of sync when a future code update extends FONT_ALLOW.
+     *
+     * @return list<string>
+     */
+    public static function fontAllowList(): array
+    {
+        return self::FONT_ALLOW;
+    }
+
+    /**
+     * Public wrapper around the private channel-triple validator (Theme
+     * Installer Batch 3) — lets untrusted, not-yet-saved theme data (an
+     * uploaded package's tokens.colors, before it ever reaches the database)
+     * be checked with the exact same rule emitVars() enforces at render time,
+     * so a preview screen never has to guess at, or duplicate, that pattern.
+     */
+    public static function isValidColorTriple(mixed $v): bool
+    {
+        return self::validChannelTriple($v);
     }
 
     /**
