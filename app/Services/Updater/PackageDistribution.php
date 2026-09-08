@@ -22,10 +22,10 @@ use Illuminate\Support\Collection;
  *   - min_compatible_version <= the instance's current version (never offer a
  *     package the instance can't safely apply yet)
  *   - tier: an untiered package (tier_requirement null) is always eligible; a
- *     tiered one is eligible only when the instance's tier matches it. Batch 7
- *     replaces this exact-match with a real entitlement ordering — for now the
- *     wiring is correct but has little to gate since tiers aren't populated by
- *     a real payment flow yet.
+ *     tiered one uses a real entitlement ordering (Batch 7) — normal < extended,
+ *     inclusive upward, so a richer tier is eligible for everything a cheaper one
+ *     is plus its own. See tierAllows() for the fail-closed handling of unknown
+ *     tiers and untiered instances.
  */
 class PackageDistribution
 {
@@ -78,13 +78,40 @@ class PackageDistribution
         return $this->tierAllows($package, $instance);
     }
 
+    /**
+     * Tier entitlement (Batch 7 — the real ordering that replaced Batch 4's
+     * exact-match stopgap). Tiers are ranked (WhiteLabelInstance::TIERS: normal <
+     * extended) and entitlement is INCLUSIVE UPWARD — a richer tier gets everything
+     * a cheaper one does plus its own, so an extended instance is eligible for both
+     * normal-tier and extended-tier packages, while a normal instance is not
+     * eligible for extended-only ones. An untiered package (null/empty requirement)
+     * is available to everyone, tier or not.
+     *
+     * Fail-closed on anything unrecognised: a package whose tier_requirement isn't a
+     * known tier can only match by exact string (never widened by the ordering), and
+     * an instance with no tier is denied any tiered package. Entitlement gating is a
+     * paid boundary — an unknown value must never accidentally grant more.
+     */
     private function tierAllows(DistributedPackage $package, WhiteLabelInstance $instance): bool
     {
-        if ($package->tier_requirement === null || $package->tier_requirement === '') {
+        $required = $package->tier_requirement;
+
+        // Untiered package → everyone.
+        if ($required === null || $required === '') {
             return true;
         }
 
-        // Batch 7 will generalise this to a real tier ordering / entitlement check.
-        return $instance->tier !== null && $instance->tier === $package->tier_requirement;
+        $requiredRank = WhiteLabelInstance::rankOf($required);
+        $instanceRank = $instance->tierRank();
+
+        // Unknown required tier (not in the ordering): fall back to strict exact
+        // match — never let an unrecognised value be satisfied by "a higher rank".
+        if ($requiredRank === null) {
+            return $instance->tier !== null && $instance->tier === $required;
+        }
+
+        // Known required tier: the instance must have a known tier ranked at least
+        // as high. No tier → no tiered entitlement.
+        return $instanceRank !== null && $instanceRank >= $requiredRank;
     }
 }

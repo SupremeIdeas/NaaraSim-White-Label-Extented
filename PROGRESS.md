@@ -82,6 +82,112 @@ key stays whatever the master signs with — never generate a fresh keypair here
   NaaraSim-White-Label-Extented (no tier differentiation exists yet — that's
   Batch 6/7).
 
+### 🔗 Link previews + homepage carousel + Numbers page/modal toggle — 2026-09-08
+Owner-requested batch, independent of the Updater program above.
+- **Preloader hang fixed** (root cause of "every page hangs ~5s, preloaders
+  look frozen"): `x-brand-preloader`'s script only listened for the browser's
+  real `load` event; `wire:navigate` never re-fires it, so every in-app click
+  sat through the full 4s hard-fallback before the preloader removed itself.
+  Fixed with a `document.readyState === 'complete'` check.
+- **Link-preview images** (`App\Support\LinkPreviewSettings`) — admin-editable
+  Open Graph image per context (default/invoice/referral), each seeded with a
+  real banner. Wired into the shared layout (every page now gets a real
+  og:image), the public invoice link, and the homepage under `?ref=`.
+  `Admin\LinkPreviews` screen to manage them.
+- **Homepage banner carousel** — reuses the existing `x-storytelling-carousel`
+  component (real nav, touch-swipe, lazy images) rather than a new carousel
+  system; always the last homepage section; admin on/off via a Setting.
+- **Numbers modal-vs-page toggle** — admin can choose, per bento card, whether
+  verify/rent/line open as a modal or a dedicated page (the other three cards
+  were already dedicated pages). Reuses the exact same `GetNumber` state
+  machine and modal content partials — only the chrome differs.
+- **Defensive resilience**: every new DB-backed lookup that now runs on every
+  page render degrades to its shipped default rather than 500ing a page over
+  a missing/unmigrated `settings` table (same posture as `NumbersBento`'s own
+  existing pattern) — caught and fixed via the full suite before shipping.
+- 19 new tests. Full suite green (1890 passed).
+- **Not done this batch** (parked per instruction, see
+  `docs/ui-component-library/`): the wider preloader PRESET overhaul (18
+  existing Studio presets were checked and are structurally complete — no
+  missing CSS, no incomplete markup — so the wire:navigate fix above is very
+  likely what was actually seen as "frozen/incomplete"), and wiring the
+  parked react-bits/loader snippets into the theme.
+
+### 🎟️ Platform Updater — Batch 7: real tier entitlement ordering — 2026-09-08
+The last batch of the 7-batch Updater & White-Label License System. Batch 4 gated
+package tiers with an exact-match stopgap (an instance saw a tiered package only if
+its tier string matched exactly); Batch 6 finally set instance tiers to real values
+at license issuance. This batch replaces the stopgap with the real ORDERING those
+tiers were always meant to carry.
+- **Entitlement is inclusive upward** — `WhiteLabelInstance::TIERS` is an ordered
+  list (`normal` < `extended`) and a package requiring a given tier is available to
+  that tier and every richer one. So an **extended** instance is now eligible for
+  both normal-tier and extended-tier packages (not just an exact `extended` match),
+  while a **normal** instance is still blocked from extended-only packages. Untiered
+  packages continue to reach everyone.
+- **Fails closed**, because entitlement is a paid boundary: a package whose
+  `tier_requirement` isn't a known tier can only be satisfied by an exact string
+  match (never widened by "a higher rank"), and an instance with no tier is denied
+  any tiered package. An unrecognised value must never accidentally grant more.
+- Single, isolated change to `PackageDistribution::tierAllows()` (the one source of
+  truth both `check` and `download` already run through — so the ordering is enforced
+  on the download re-check too, not just the listing), plus the `tierRank()`/
+  `rankOf()` helpers added on `WhiteLabelInstance` in Batch 6. The protected engine
+  classes and the whole API surface were untouched.
+- 15 new tests: an exhaustive 12-case tier matrix (untiered/normal/extended
+  instances × untiered/normal/extended/unknown package requirements, including the
+  fail-closed unknown-tier and untiered-instance cases) driven through the real
+  `isEligible()`; an explicit assertion that the ordering constant is cheapest→
+  richest so a future reorder can't silently invert entitlement; plus two end-to-end
+  HTTP cases (a richer tier sees a cheaper tier's package; a cheaper tier is blocked
+  from a richer package both in the list and on a direct download 403). Full suite
+  green.
+
+### 🔑 Platform Updater — Batch 6: License Authority + API Key/Token System — 2026-09-08
+The money/security path of the Updater program (master platform = the authority).
+Batch 4 defined `white_label_instances` as a registry but nothing populated it;
+this batch turns it into a real license authority with a deliberate TWO-credential
+model — the one design decision the whole batch turns on:
+- **License KEY** — the durable enrolment credential (`NAARA-XXXX-XXXX-XXXX`, an
+  unambiguous no-0/O/1/I/L alphabet, uniqueness-checked). Issued by an admin, tied
+  to a tier, handed to the buyer. It is NOT a bearer token and grants no API access
+  on its own; it only ever buys ONE thing — the right to mint an API token.
+- **Sanctum API TOKEN** — the rotatable operational credential the deployed fork
+  actually calls the distribution API with (what `NAARA_UPDATE_API_TOKEN` becomes).
+  We keep only `api_token_last_four` for display, exactly like `ApiClient`.
+- **`WhiteLabelLicenseService`** — kept structurally parallel to `ApiClientService`
+  so the token discipline is identical: plaintext token returned exactly ONCE at
+  mint, never stored; any access-cutting change deletes every live token.
+  `register()` (pending, no key) → `issueLicense()` (key + tier + active + review
+  trail) → `activateWithKey()` (the fork exchanges its key for a token) plus
+  `suspend`/`restore`/`reject`/`revokeLicense`/`issueTokenDirectly`.
+  - **`license_revoked_at` is the permanent kill switch**, distinct from a
+    `suspended` status: suspend cuts the token but the SAME key revives on restore;
+    revoke kills the key forever (activation refuses it) — proven both ways in tests.
+- **Enrolment API** (`/api/v1/white-label/register` + `/activate`) — same feature
+  flag as the distribution API but deliberately OUTSIDE `auth:sanctum` (a fresh fork
+  has no token yet), rate-limited. **Not a brute-force oracle:** every unusable-key
+  path (unknown / revoked / suspended) returns the identical generic 403, with the
+  real reason logged server-side only — a prober can't tell an existing-but-revoked
+  key from one that was never issued.
+- **Admin controls on `Admin\WhiteLabelRegistry`** — issue a license (mint key + set
+  tier), approve/reject a self-serve registration at a chosen tier, suspend/restore,
+  regenerate a leaked key, permanently revoke, and — the firewalled-fork fallback,
+  mirroring Batch 5's "the manual path must always work" — issue a token directly.
+  A freshly minted key shows in a one-time banner (the buyer's credential); a
+  directly-issued token is a bearer credential shown once and never re-echoed.
+- **Tier is finally set to a real value** at issuance (`normal`/`extended`, defined
+  as an ORDERED list on `WhiteLabelInstance` with `tierRank()` helpers). Batch 7 uses
+  that ordering to make package entitlement real; every tier still holds the full
+  scope set — tier gates WHICH PACKAGES, not which endpoints.
+- 18 new tests: issuance activates + keys + tiers, key uniqueness, the key→token
+  exchange mints a token that genuinely reaches the distribution API end to end,
+  revoked-key-is-permanently-dead, suspend-kills-token-but-same-key-revives-on-restore,
+  regenerate-kills-the-old-token, direct-issue needs a live license, register files a
+  pending row and reveals nothing, the whole enrolment surface 404s until the flag is
+  on, and the no-oracle property (revoked looks identical to unknown); plus the six
+  admin-screen actions. Full suite green (1853 passed).
+
 ### 🛰️ Platform Updater — Batch 4: distribution API + white-label registry — 2026-09-08
 The publisher side, on the master platform: registered white-label instances
 discover and download signed `.naaraupdate` packages (code AND theme) instead
@@ -2806,17 +2912,19 @@ Rate limits (Section 19.2): `api` limiter 300/min auth · 60/min public (on `rou
 > (loyalty milestones, travel timeline, admin-defined achievements paying
 > NaaraCredits) that used to top this list are now DONE — see DONE above.
 
-### ▶ TOP OF NEXT (Updater track) — Batch 6: License Authority + API Key/Token System
-Batches 1-5 are DONE (this fork now has the full shared updater engine plus its
-own pull-based Updater screen). Batch 6 per
-`NaaraSim_Updater_Batch6_LicenseAuthority.md`: on the MASTER platform —
-registration + approval workflow that actually populates `WhiteLabelInstance`
-rows (currently just a schema Batch 4 defined) and issues the Sanctum API token
-this fork's `NAARA_UPDATE_API_TOKEN` expects, plus the license-key/tier logic
-`distributed_packages.tier_requirement` and `WhiteLabelInstance.tier` were
-wired for but don't yet enforce meaningfully. This is a money/security-path
-batch (license issuance, tier entitlement) — do not start it on Sonnet without
-checking the current model-assignment plan first.
+### ✅ Updater track — ALL 7 BATCHES COMPLETE (2026-09-08)
+The Updater & White-Label License System is fully built end to end (master =
+publisher/authority; the two forks = Normal- and Extended-license subscribers):
+Batch 1 signed package format · Batch 2 apply engine + auto-rollback · Batch 3
+theme installer · Batch 4 distribution API + registry · Batch 5 subscriber pull
+screen (in both forks) + master report endpoint · Batch 6 License Authority
+(key→token exchange, revoke/suspend, admin onboarding) · Batch 7 real tier
+entitlement ordering — see the DONE entries above for each.
+**Owner follow-ups before this goes live** (deliberately NOT built here, they need
+real config/keys per the money-safety rules): wire the fork's activate flow into a
+real purchase/payment step so a paid tier maps to an issued key; run keygen on the
+production master and distribute the public key with the forks; decide token-rotation
+cadence. Pick these up when doing go-live hardening, not as feature work.
 
 ### ▶ TOP OF NEXT (Theme track) — Theme visual rebuild: batch 4 of 8 (next 5 themes to full-suite status)
 Batches 1-3 are DONE (15 themes now at full-suite status: neon-vertex,
