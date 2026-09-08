@@ -9,6 +9,196 @@
 
 ## DONE
 
+### 🛰️ Platform Updater — Batch 4: distribution API + white-label registry — 2026-09-08
+The publisher side, on the master platform: registered white-label instances
+discover and download signed `.naaraupdate` packages (code AND theme) instead
+of a manual upload. This is where license-tier access control first becomes
+real. Built by reusing the Developer API's exact auth/scoping pattern —
+nothing new invented.
+- **`white_label_instances`** registry (model is a Sanctum tokenable, exactly
+  like `ApiClient`) — mirrors Merchant's status/tier/review-trail shape.
+  Registration + activation + token issuance is Batch 6's license flow; this
+  batch defines the table it populates. Scopes: `updates.check/download`,
+  `themes.check/download`.
+- **`distributed_packages`** — one row per package the master offers. Built ≠
+  published: `is_published` is flipped deliberately, so a package can be staged
+  and privately tested before being offered broadly. The check endpoint only
+  ever considers published rows.
+- **`white_label_api_logs`** — append-only oversight log (no updated_at, like
+  AuditLog) of what external instances did when they called in; deliberately
+  separate from `platform_update_attempts` (which is about THIS instance).
+- **Middleware** (mirror the Developer API gates exactly): `whitelabel.enabled`
+  (404s the whole surface when off — never advertises its existence),
+  `whitelabel.usable` (active-instance check + stamps `last_checked_in_at` +
+  records EXACTLY ONE oversight log per authenticated call). `api.scope` is
+  reused UNCHANGED (it's tokenable-agnostic). Registered as new aliases.
+  - Notable correctness fix caught pre-test: a downstream `abort()` (scope
+    denial 403, validation 422) throws and would unwind past a naive
+    post-`$next` log — the middleware now catch-and-rethrows so every outcome,
+    success or failure, is logged once with its true final status.
+- **`PackageDistribution`** — the single source of truth for eligibility
+  (published + same product + right family + strictly newer + `min_compatible`
+  satisfied + tier). Both `check` (list) and `download` (re-authorise the one
+  package) run through it — never trust that a client only requests what
+  `check` showed it. Tier is exact-match-or-untiered for now; Batch 7
+  generalises it to a real entitlement ordering.
+- **`PackagePublisher`** — verify → store the file on the PRIVATE `local` disk
+  under `distribution/` (never a public URL) → upsert the row. Shared by
+  `update:package --publish` (new flag) and the admin publish action.
+- **Endpoints** (`routes/api.php`, `/api/v1/white-label/...`):
+  `updates/check`, `updates/{package}/download`, `themes/check`,
+  `themes/{package}/download` — two thin controllers over a shared
+  `DistributesPackages` trait. Check returns metadata only (cheap, frequent);
+  download re-validates then streams. Downloads are still expected to be
+  `PackageVerifier`-verified locally on receipt (defence in depth — never trust
+  the network channel alone).
+- **`Admin\WhiteLabelRegistry`** oversight screen (admin/super_admin) — the
+  registry table with per-brand API-log drill-down, the API feature-flag
+  toggle, and publish/unpublish/withdraw controls for distributable packages.
+- 17 tests: 404-when-disabled (not 403), scope enforcement (check-only can't
+  download), suspended-instance rejection, newer+compatible version filtering,
+  current_version required/valid, tier gating (each identity in its own test —
+  the auth guard caches the first user across requests within one test method,
+  a harness artifact, not a production issue), download streaming + tier
+  re-check + 404 for unpublished/unknown, theme endpoints serve only themes,
+  exactly-one-log-per-call with the true status, plus the admin screen's gate/
+  toggle/publish/withdraw/drill-down. Full suite green (1830 passed).
+
+### 🎨 Platform Updater — Batch 3: theme installer — 2026-09-08
+Meaningfully lower-risk than Batch 2 by design: direct inspection of
+`App\Support\ThemePreset` confirms a theme is PAINT, never plumbing — its
+render path (`emitVars()`) only ever emits a small whitelisted set of CSS
+variables and silently drops anything invalid, so even a malicious theme
+upload cannot inject CSS or execute code. Installing one is a same-request DB
+write (one `theme_presets` row) + a few file copies, so this batch deliberately
+does NOT reuse Batch 2's maintenance-mode/backup/health-check/rollback
+pipeline — that would be pure overhead here.
+- **Extends Batch 1's container, not a new format** — a theme package IS a
+  `.naaraupdate` file with `package_type: "theme"` and `payload/theme.json`
+  instead of code; `PackageVerifier`/`PackageBuilder` needed zero changes.
+- **`App\Services\Updater\ThemeInstaller`** — `preview()` (verify + validate,
+  no writes, feeds the admin confirmation screen) and `install()` (re-verifies
+  from scratch, never trusts a prior preview call). Validates theme.json
+  against `ThemePreset`'s real expectations: slug pattern + **rejects outright**
+  a collision with a built-in theme's slug; `icon_family` against the real
+  style/set rules; **rejects, doesn't silently drop**, any `layout_variants`
+  value outside the three real structural partials. Copies `hero_assets` into
+  public storage under `themes/{slug}/`, then validates each resulting URL
+  against the *exact* pattern `heroFor()` checks at render time — rejects the
+  whole install (with cleanup of any already-copied files) rather than saving
+  a hero image that could never display. `is_built_in` is never settable from
+  an upload; re-installing an existing slug preserves admin-set `sort_order`.
+- **The font allow-list UX fix from §2.3** — every `tokens.typography.*` value
+  is checked against `ThemePreset::fontAllowList()` (a new live public
+  accessor, so this can never drift from the real list) and surfaces a clear,
+  actionable warning for anything unapproved — the theme still installs and
+  applies everything else; only that one override silently does nothing at
+  render time, exactly as documented, but now the admin is TOLD why.
+- **`App\Support\ThemePreset` refactor (behavior-preserving)** — exposed
+  `ICON_STYLES`/`ICON_SET_PATTERN`/`HERO_ASSET_PATTERN` as public consts (used
+  internally by `iconFamily()`/`heroFor()` exactly as before) plus
+  `fontAllowList()` and `isValidColorTriple()` accessors, so the installer
+  validates untrusted upload data with the SAME rules the render path already
+  trusts, never a duplicated-and-liable-to-drift copy.
+- **Themes tab** added to the existing `Admin\Updater` screen (kept under one
+  "install something onto the platform" umbrella per the blueprint's own
+  suggestion) — verify → preview (name/persona/**validated-only** colour
+  swatches — an unvalidated swatch value would be a CSS-injection risk into
+  the admin's own browser via the inline `style` attribute, so only
+  already-validated values ever reach that view — /font warnings) → confirm →
+  install; grid of installed themes with Activate (same primitives as
+  `ThemePicker::apply()` — `Setting` + `bust()` + audit) and Remove
+  (non-built-in only; resets the active-theme setting first if removing the
+  currently-active one, deletes its stored assets). A theme package uploaded
+  to the Code-updates tab is now caught and routed to Themes instead of
+  running the full apply pipeline for something that doesn't need it.
+- **Kept the same strict super_admin gate** on the whole Updater screen
+  (including this new tab) rather than splitting access by action — this
+  stays the one "install a package" screen; the existing day-to-day
+  `ThemePicker` (activate/tweak an already-installed theme) keeps its own
+  broader admin/`theme.manage` gate, unchanged.
+- 15 new tests: round-trip preview+install, hero URL passes `heroFor()`,
+  activating changes `bodyClass()`; re-install preserves sort_order; font
+  warning surfaces AND the theme still applies its other tokens; built-in slug
+  rejected; invalid layout_variant rejected (not dropped); invalid icon_family
+  rejected; invalid slug shape rejected; tampered signature rejected at the
+  same verifier step as any other package type; a code package rejected by the
+  theme installer; a missing referenced asset rejected with zero orphaned
+  files; the admin screen's preview→install flow (never touches the code-apply
+  job); code-tab routing guard; activate/remove actions; built-in removal
+  blocked; non-super-admin 403. Full suite green (1813 passed).
+
+### 🚀 Platform Updater — Batch 2: core apply engine + auto-rollback — 2026-09-08
+The highest-stakes module — the first that writes to a running app. Every step
+is reversible until an automated health check proves it safe.
+- **`App\Services\Updater\UpdateApplier`** — the single apply pipeline both the
+  master's manual-upload flow and Batch 5's white-label pull flow call. Steps:
+  verify (reuse `PackageVerifier`) → compatibility check vs
+  `min_compatible_version` → pre-flight (disk space, `Cache::lock('update:applying')`
+  so two applies never overlap) → DB snapshot (`BackupManager::runNow()` +
+  capture the archive) AND per-file snapshot → maintenance mode → apply files
+  (a failed write throws → rollback, never silently swallowed) → scoped
+  `migrate --path` (exactly this package's migrations) → automated health-check
+  gate (DB reachable + critical tables queryable + core money-path services
+  resolve) → on pass record success + bump `Setting('platform.version')`; on any
+  failure restore files (restore-or-delete) + DB (`RestoreService::importArchive`,
+  newly exposed) + bring the app back up on the old version. A DB-restore failure
+  is the one true worst case: app left DOWN deliberately + loudest alert
+  (`AlertAdminJob`), status `failed_unrecoverable`.
+- **`platform_update_attempts`** table + model — per-attempt history (status,
+  backup archive, files/migrations counts, downtime seconds, health result,
+  failure reason).
+- **`App\Jobs\ApplyUpdateJob`** — queued (never inline), `$tries=1` (money/ops
+  rule 7: never blind-retry), cleans up the uploaded package after.
+- **`Admin\Updater`** Livewire page at `/adminmaster/updater` + nav entry —
+  **super_admin only** (one notch tighter than the blueprint's suggested
+  admin+super gate, since rollback restores the DB and this is the single most
+  sensitive screen). Upload → verify + show manifest BEFORE an Apply button
+  (confirmation with real info) → queued apply with `wire:poll` live status +
+  history table.
+- Reuses `BackupManager`, `RestoreService`, `SchedulerHealth`/`EnvironmentGuard`,
+  `Auditor`, `AlertAdminJob`, Laravel maintenance mode — nothing reinvented. One
+  small refactor: `RestoreService::importArchive()` made public so the pipeline
+  can restore a specific snapshot without re-entering maintenance mode.
+- 9 new tests: happy-path apply (files written, migration ran, version bumped);
+  broken migration → full rollback (files restored, DB restore invoked, app up,
+  version unchanged); failed file write → rollback; concurrent-apply lock refusal;
+  incompatible-version refusal; tampered-package rejection; plus the screen's
+  super-admin gate, verify-then-queue, and tampered-upload rejection. Full suite
+  green (1798 passed).
+
+### 📦 Platform Updater — Batch 1: package format + signing — 2026-09-08
+First module of the 7-batch Updater & White-Label License System (master
+NaaraSim = publisher/authority; the two white-label forks = Normal- and
+Extended-license subscribers). Batch 1 is the trust layer only — it touches
+nothing live: you can build one signed `.naaraupdate` file and prove it's
+genuine, with the running app untouched.
+- **`config/updater.php`** — Ed25519 `public_key` (env `NAARA_UPDATE_PUBLIC_KEY`),
+  `package_storage_path`, and `product_identifier` (`naarasim-core` on master,
+  env-overridable to `naarasim-whitelabel` on a fork so a package for one line
+  can't be applied to the other).
+- **`App\Support\UpdateManifest`** — typed DTO over `manifest.json` (+ version
+  format validation and correct `YYYY.MM.DD-N` ordering) so Batches 2/4/5 read
+  fields, not raw array keys.
+- **`App\Services\Updater\PackageVerifier`** — the single trust gate: verifies
+  the detached Ed25519 signature over SHA-256(manifest), then re-hashes every
+  payload file against the manifest. Reads payload bytes by expected name (no
+  disk extraction) and rejects path-traversal entries — every failure mode
+  (no key, malformed key, mismatched key, missing signature) returns a clear
+  reason, never a crash.
+- **`App\Services\Updater\PackageBuilder`** — builds + signs. Migrations ship as
+  checksummed payload files (closing the §1.3-example gap where they were listed
+  by name only) AND are named in `migrations[]` for Batch 2's `migrate --path`
+  scoping. Private key passed at build time, never stored.
+- **Commands:** `update:package` (git-diff → build+sign, self-verifies before
+  handing back), `update:verify` (scriptable, exit 0/1), `update:keygen`
+  (mirrors `webpush:vapid`). Auto-discovered (Laravel 12).
+- 10 new tests (round-trip; corrupted payload → checksum fail; edited manifest
+  → signature fail; mismatched/missing key → graceful fail; missing signature;
+  traversal entry; empty/keyless build refused; version ordering) + a CLI
+  end-to-end smoke (keygen → build → `update:verify` VERIFIED, exit 0). Full
+  suite green (1789 passed). Private signing key kept entirely out of git.
+
 ### 🗄️ No-terminal database-migration runner (System Health) — 2026-09-08
 Owner request: after uploading fresh code to an already-installed shared
 cPanel server (no terminal/SSH access), there was no way to actually apply
@@ -2543,7 +2733,19 @@ Rate limits (Section 19.2): `api` limiter 300/min auth · 60/min public (on `rou
 > (loyalty milestones, travel timeline, admin-defined achievements paying
 > NaaraCredits) that used to top this list are now DONE — see DONE above.
 
-### ▶ TOP OF NEXT — Theme visual rebuild: batch 4 of 8 (next 5 themes to full-suite status)
+### ▶ TOP OF NEXT (Updater track) — Batch 5: White-Label Updater Screen (subscriber side)
+Batches 1-4 are DONE. Batch 5 per `NaaraSim_Updater_Batch5_WhiteLabelScreen.md`:
+the SUBSCRIBER side, built INTO the white-label repos (NaaraSim-WhiteLabel and
+NaaraSim-White-Label-Extented). A white-label instance uses its issued token to
+call the master's distribution API (Batch 4) — check for updates/themes, pull a
+package, verify it locally with Batch 1's `PackageVerifier`, then hand it to
+Batch 2's `UpdateApplier` / Batch 3's `ThemeInstaller`. This is a cross-repo
+build: the client code + screen land in the white-label forks, pointing at the
+master's API base URL. Reuse the existing engine — do NOT re-implement apply or
+verify. (Per the model plan this is a Sonnet-capable batch, but its seam with
+the apply engine deserves an Opus review before merge.)
+
+### ▶ TOP OF NEXT (Theme track) — Theme visual rebuild: batch 4 of 8 (next 5 themes to full-suite status)
 Batches 1-3 are DONE (15 themes now at full-suite status: neon-vertex,
 midnight-signal, aries-contrast, paperwhite, origin-bold, solar-flare,
 noir-reserve, aurora-shift, sunset-transit, fintra-clean, capable-mono,

@@ -55,6 +55,7 @@
         $more[] = ['route' => 'admin.merchants', 'label' => 'Merchants', 'icon' => 'id-card'];
         $more[] = ['route' => 'admin.partners', 'label' => 'Partners', 'icon' => 'users'];
         $more[] = ['route' => 'admin.developer-api', 'label' => 'Developer API', 'icon' => 'key'];
+        $more[] = ['route' => 'admin.white-label', 'label' => 'White-Label Oversight', 'icon' => 'users'];
 
         // Website (public front end + branding).
         $more[] = ['heading' => 'Website'];
@@ -122,6 +123,7 @@
         $more[] = ['route' => 'admin.email', 'label' => 'Email', 'icon' => 'mail'];
         $more[] = ['route' => 'admin.errors', 'label' => 'Error log', 'icon' => 'file-text'];
         $more[] = ['route' => 'admin.backups', 'label' => 'Backups', 'icon' => 'package'];
+        $more[] = ['route' => 'admin.updater', 'label' => 'Platform updater', 'icon' => 'upload'];
         $more[] = ['route' => 'admin.maintenance', 'label' => 'Maintenance', 'icon' => 'refresh'];
         $more[] = ['route' => 'admin.ui-kit', 'label' => 'UI Kit', 'icon' => 'grid'];
     }

@@ -63,6 +63,7 @@ use App\Livewire\Admin\JourneyGoals;
 use App\Livewire\Admin\KycReview;
 use App\Livewire\Admin\LegalEditor;
 use App\Livewire\Admin\Maintenance;
+use App\Livewire\Admin\Updater;
 use App\Livewire\Admin\MarketingCopyStudio;
 use App\Livewire\Admin\Merchants;
 use App\Livewire\Admin\NavSlots;
@@ -412,6 +413,8 @@ Route::middleware(['admin', 'throttle:admin'])
             Route::get('/analytics', Analytics::class)->name('analytics');
             Route::get('/tax-rates', TaxRates::class)->name('tax-rates');
             Route::get('/system-health', SystemHealth::class)->name('system-health');
+            // White-label distribution oversight (Updater Batch 4).
+            Route::get('/white-label', App\Livewire\Admin\WhiteLabelRegistry::class)->name('white-label');
             Route::get('/gateways', Gateways::class)->name('gateways');
             Route::get('/kyc', KycReview::class)->name('kyc');
             Route::get('/merchants', Merchants::class)->name('merchants');
@@ -453,6 +456,9 @@ Route::middleware(['admin', 'throttle:admin'])
             Route::get('/email', EmailSettings::class)->name('email');
             Route::get('/backups', Backups::class)->name('backups');
             Route::get('/maintenance', Maintenance::class)->name('maintenance');
+            // Platform updater (Updater Batch 2) — apply signed .naaraupdate
+            // packages with automatic rollback. Most sensitive screen: super_admin.
+            Route::get('/updater', Updater::class)->name('updater');
             Route::get('/ui-kit', UiKit::class)->name('ui-kit');
         });
     });
