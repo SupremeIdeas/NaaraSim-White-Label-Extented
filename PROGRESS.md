@@ -9,6 +9,37 @@
 
 ## DONE
 
+### 🔗 Link previews + homepage carousel + Numbers page/modal toggle — 2026-09-08
+Owner-requested batch, independent of the Updater program above.
+- **Preloader hang fixed** (root cause of "every page hangs ~5s, preloaders
+  look frozen"): `x-brand-preloader`'s script only listened for the browser's
+  real `load` event; `wire:navigate` never re-fires it, so every in-app click
+  sat through the full 4s hard-fallback before the preloader removed itself.
+  Fixed with a `document.readyState === 'complete'` check.
+- **Link-preview images** (`App\Support\LinkPreviewSettings`) — admin-editable
+  Open Graph image per context (default/invoice/referral), each seeded with a
+  real banner. Wired into the shared layout (every page now gets a real
+  og:image), the public invoice link, and the homepage under `?ref=`.
+  `Admin\LinkPreviews` screen to manage them.
+- **Homepage banner carousel** — reuses the existing `x-storytelling-carousel`
+  component (real nav, touch-swipe, lazy images) rather than a new carousel
+  system; always the last homepage section; admin on/off via a Setting.
+- **Numbers modal-vs-page toggle** — admin can choose, per bento card, whether
+  verify/rent/line open as a modal or a dedicated page (the other three cards
+  were already dedicated pages). Reuses the exact same `GetNumber` state
+  machine and modal content partials — only the chrome differs.
+- **Defensive resilience**: every new DB-backed lookup that now runs on every
+  page render degrades to its shipped default rather than 500ing a page over
+  a missing/unmigrated `settings` table (same posture as `NumbersBento`'s own
+  existing pattern) — caught and fixed via the full suite before shipping.
+- 19 new tests. Full suite green (1890 passed).
+- **Not done this batch** (parked per instruction, see
+  `docs/ui-component-library/`): the wider preloader PRESET overhaul (18
+  existing Studio presets were checked and are structurally complete — no
+  missing CSS, no incomplete markup — so the wire:navigate fix above is very
+  likely what was actually seen as "frozen/incomplete"), and wiring the
+  parked react-bits/loader snippets into the theme.
+
 ### 🎟️ Platform Updater — Batch 7: real tier entitlement ordering — 2026-09-08
 The last batch of the 7-batch Updater & White-Label License System. Batch 4 gated
 package tiers with an exact-match stopgap (an instance saw a tiered package only if
