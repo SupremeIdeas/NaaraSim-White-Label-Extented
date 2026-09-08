@@ -9,6 +9,45 @@
 
 ## DONE
 
+### 🚀 Platform Updater — Batch 2: core apply engine + auto-rollback — 2026-09-08
+The highest-stakes module — the first that writes to a running app. Every step
+is reversible until an automated health check proves it safe.
+- **`App\Services\Updater\UpdateApplier`** — the single apply pipeline both the
+  master's manual-upload flow and Batch 5's white-label pull flow call. Steps:
+  verify (reuse `PackageVerifier`) → compatibility check vs
+  `min_compatible_version` → pre-flight (disk space, `Cache::lock('update:applying')`
+  so two applies never overlap) → DB snapshot (`BackupManager::runNow()` +
+  capture the archive) AND per-file snapshot → maintenance mode → apply files
+  (a failed write throws → rollback, never silently swallowed) → scoped
+  `migrate --path` (exactly this package's migrations) → automated health-check
+  gate (DB reachable + critical tables queryable + core money-path services
+  resolve) → on pass record success + bump `Setting('platform.version')`; on any
+  failure restore files (restore-or-delete) + DB (`RestoreService::importArchive`,
+  newly exposed) + bring the app back up on the old version. A DB-restore failure
+  is the one true worst case: app left DOWN deliberately + loudest alert
+  (`AlertAdminJob`), status `failed_unrecoverable`.
+- **`platform_update_attempts`** table + model — per-attempt history (status,
+  backup archive, files/migrations counts, downtime seconds, health result,
+  failure reason).
+- **`App\Jobs\ApplyUpdateJob`** — queued (never inline), `$tries=1` (money/ops
+  rule 7: never blind-retry), cleans up the uploaded package after.
+- **`Admin\Updater`** Livewire page at `/adminmaster/updater` + nav entry —
+  **super_admin only** (one notch tighter than the blueprint's suggested
+  admin+super gate, since rollback restores the DB and this is the single most
+  sensitive screen). Upload → verify + show manifest BEFORE an Apply button
+  (confirmation with real info) → queued apply with `wire:poll` live status +
+  history table.
+- Reuses `BackupManager`, `RestoreService`, `SchedulerHealth`/`EnvironmentGuard`,
+  `Auditor`, `AlertAdminJob`, Laravel maintenance mode — nothing reinvented. One
+  small refactor: `RestoreService::importArchive()` made public so the pipeline
+  can restore a specific snapshot without re-entering maintenance mode.
+- 9 new tests: happy-path apply (files written, migration ran, version bumped);
+  broken migration → full rollback (files restored, DB restore invoked, app up,
+  version unchanged); failed file write → rollback; concurrent-apply lock refusal;
+  incompatible-version refusal; tampered-package rejection; plus the screen's
+  super-admin gate, verify-then-queue, and tampered-upload rejection. Full suite
+  green (1798 passed).
+
 ### 📦 Platform Updater — Batch 1: package format + signing — 2026-09-08
 First module of the 7-batch Updater & White-Label License System (master
 NaaraSim = publisher/authority; the two white-label forks = Normal- and
@@ -2575,22 +2614,15 @@ Rate limits (Section 19.2): `api` limiter 300/min auth · 60/min public (on `rou
 > (loyalty milestones, travel timeline, admin-defined achievements paying
 > NaaraCredits) that used to top this list are now DONE — see DONE above.
 
-### ▶ TOP OF NEXT (Updater track) — Batch 2: Core Updater Engine (apply, health-check, auto-rollback)
-Batch 1 (package format + signing) is DONE. Batch 2 is the highest-stakes
-module in the whole roadmap — it's the first one that writes to a running app,
-so every step must be reversible until an automated health check proves it
-safe. Build `App\Services\Updater\UpdateApplier` (the single class both the
-master's manual-upload flow and Batch 5's white-label pull flow call) per
-`NaaraSim_Updater_Batch2_CoreEngine.md`: verify (reuse `PackageVerifier`) →
-compatibility check vs `min_compatible_version` → pre-flight (disk, queue
-health via `SchedulerHealth`/`EnvironmentGuard`, `Cache::lock('update:applying')`)
-→ DB snapshot (`BackupManager::runNow()`) + file snapshot → maintenance mode →
-apply files → scoped `migrate --path` → health-check gate → on pass record
-success, on any failure full file+DB rollback (reuse `RestoreService`) and
-admin alert (`AlertAdminJob`). New `platform_update_attempts` table + an
-`Admin\Updater` Livewire page (super_admin/admin only, queued apply, `wire:poll`
-status). This is a separate workstream from the theme rebuild below — do NOT
-start it until the owner confirms; both tracks are active owner instructions.
+### ▶ TOP OF NEXT (Updater track) — Batch 3: Theme Installer
+Batches 1 (package format + signing) and 2 (apply engine + auto-rollback) are
+DONE. Batch 3 per `NaaraSim_Updater_Batch3_ThemeInstaller.md`: install a
+theme-only package (a `package_type: theme` `.naaraupdate`) — themes are
+data + assets, not code + migrations, so this is a lighter, more frequent path
+than the full apply engine, reusing the same `PackageVerifier` trust gate.
+Build on Batch 2's verified-package plumbing; do NOT duplicate the apply
+pipeline. This is a separate workstream from the theme visual rebuild below —
+both are active owner instructions.
 
 ### ▶ TOP OF NEXT (Theme track) — Theme visual rebuild: batch 4 of 8 (next 5 themes to full-suite status)
 Batches 1-3 are DONE (15 themes now at full-suite status: neon-vertex,

@@ -122,6 +122,7 @@
         $more[] = ['route' => 'admin.email', 'label' => 'Email', 'icon' => 'mail'];
         $more[] = ['route' => 'admin.errors', 'label' => 'Error log', 'icon' => 'file-text'];
         $more[] = ['route' => 'admin.backups', 'label' => 'Backups', 'icon' => 'package'];
+        $more[] = ['route' => 'admin.updater', 'label' => 'Platform updater', 'icon' => 'upload'];
         $more[] = ['route' => 'admin.maintenance', 'label' => 'Maintenance', 'icon' => 'refresh'];
         $more[] = ['route' => 'admin.ui-kit', 'label' => 'UI Kit', 'icon' => 'grid'];
     }
