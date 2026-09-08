@@ -9,6 +9,38 @@
 
 ## DONE
 
+### 📦 Platform Updater — Batch 1: package format + signing — 2026-09-08
+First module of the 7-batch Updater & White-Label License System (master
+NaaraSim = publisher/authority; the two white-label forks = Normal- and
+Extended-license subscribers). Batch 1 is the trust layer only — it touches
+nothing live: you can build one signed `.naaraupdate` file and prove it's
+genuine, with the running app untouched.
+- **`config/updater.php`** — Ed25519 `public_key` (env `NAARA_UPDATE_PUBLIC_KEY`),
+  `package_storage_path`, and `product_identifier` (`naarasim-core` on master,
+  env-overridable to `naarasim-whitelabel` on a fork so a package for one line
+  can't be applied to the other).
+- **`App\Support\UpdateManifest`** — typed DTO over `manifest.json` (+ version
+  format validation and correct `YYYY.MM.DD-N` ordering) so Batches 2/4/5 read
+  fields, not raw array keys.
+- **`App\Services\Updater\PackageVerifier`** — the single trust gate: verifies
+  the detached Ed25519 signature over SHA-256(manifest), then re-hashes every
+  payload file against the manifest. Reads payload bytes by expected name (no
+  disk extraction) and rejects path-traversal entries — every failure mode
+  (no key, malformed key, mismatched key, missing signature) returns a clear
+  reason, never a crash.
+- **`App\Services\Updater\PackageBuilder`** — builds + signs. Migrations ship as
+  checksummed payload files (closing the §1.3-example gap where they were listed
+  by name only) AND are named in `migrations[]` for Batch 2's `migrate --path`
+  scoping. Private key passed at build time, never stored.
+- **Commands:** `update:package` (git-diff → build+sign, self-verifies before
+  handing back), `update:verify` (scriptable, exit 0/1), `update:keygen`
+  (mirrors `webpush:vapid`). Auto-discovered (Laravel 12).
+- 10 new tests (round-trip; corrupted payload → checksum fail; edited manifest
+  → signature fail; mismatched/missing key → graceful fail; missing signature;
+  traversal entry; empty/keyless build refused; version ordering) + a CLI
+  end-to-end smoke (keygen → build → `update:verify` VERIFIED, exit 0). Full
+  suite green (1789 passed). Private signing key kept entirely out of git.
+
 ### 🗄️ No-terminal database-migration runner (System Health) — 2026-09-08
 Owner request: after uploading fresh code to an already-installed shared
 cPanel server (no terminal/SSH access), there was no way to actually apply
@@ -2543,7 +2575,24 @@ Rate limits (Section 19.2): `api` limiter 300/min auth · 60/min public (on `rou
 > (loyalty milestones, travel timeline, admin-defined achievements paying
 > NaaraCredits) that used to top this list are now DONE — see DONE above.
 
-### ▶ TOP OF NEXT — Theme visual rebuild: batch 4 of 8 (next 5 themes to full-suite status)
+### ▶ TOP OF NEXT (Updater track) — Batch 2: Core Updater Engine (apply, health-check, auto-rollback)
+Batch 1 (package format + signing) is DONE. Batch 2 is the highest-stakes
+module in the whole roadmap — it's the first one that writes to a running app,
+so every step must be reversible until an automated health check proves it
+safe. Build `App\Services\Updater\UpdateApplier` (the single class both the
+master's manual-upload flow and Batch 5's white-label pull flow call) per
+`NaaraSim_Updater_Batch2_CoreEngine.md`: verify (reuse `PackageVerifier`) →
+compatibility check vs `min_compatible_version` → pre-flight (disk, queue
+health via `SchedulerHealth`/`EnvironmentGuard`, `Cache::lock('update:applying')`)
+→ DB snapshot (`BackupManager::runNow()`) + file snapshot → maintenance mode →
+apply files → scoped `migrate --path` → health-check gate → on pass record
+success, on any failure full file+DB rollback (reuse `RestoreService`) and
+admin alert (`AlertAdminJob`). New `platform_update_attempts` table + an
+`Admin\Updater` Livewire page (super_admin/admin only, queued apply, `wire:poll`
+status). This is a separate workstream from the theme rebuild below — do NOT
+start it until the owner confirms; both tracks are active owner instructions.
+
+### ▶ TOP OF NEXT (Theme track) — Theme visual rebuild: batch 4 of 8 (next 5 themes to full-suite status)
 Batches 1-3 are DONE (15 themes now at full-suite status: neon-vertex,
 midnight-signal, aries-contrast, paperwhite, origin-bold, solar-flare,
 noir-reserve, aurora-shift, sunset-transit, fintra-clean, capable-mono,
