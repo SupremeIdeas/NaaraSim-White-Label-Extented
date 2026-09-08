@@ -1,4 +1,6 @@
-<x-layouts.app :title="'Invoice from '.($invoice->merchant->business_name ?: 'your provider')">
+<x-layouts.app :title="'Invoice from '.($invoice->merchant->business_name ?: 'your provider')"
+    :description="'Invoice '.$invoice->reference.' — '.number_format((float) $invoice->amount, 2).' USD due from '.($invoice->merchant->business_name ?: 'your provider').'.'"
+    :og-image="\App\Support\LinkPreviewSettings::resolve('invoice')">
     @php
         $merchant = $invoice->merchant;
         $badge = match (true) {

@@ -59,6 +59,9 @@ class NumbersBento extends Component
                 'bullets' => implode("\n", (array) $card->bullets),
                 'is_active' => $card->is_active,
                 'image_path' => $card->image_path,
+                // 'modal' (default) or 'page'. Only togglable keys (owner
+                // request, 2026-09-08) — see App\Support\NumbersBento::TOGGLABLE.
+                'display_mode' => $card->display_mode ?? 'modal',
             ];
         }
     }
@@ -83,6 +86,7 @@ class NumbersBento extends Component
             "form.{$key}.title" => 'required|string|max:60',
             "form.{$key}.subtitle" => 'required|string|max:500',
             "form.{$key}.bullets" => 'nullable|string|max:400',
+            "form.{$key}.display_mode" => 'required|in:modal,page',
             "images.{$key}" => 'nullable|image|mimes:webp,jpg,jpeg,png|max:800',
         ])['form'][$key];
 
@@ -104,6 +108,9 @@ class NumbersBento extends Component
             'subtitle' => trim($data['subtitle']),
             'bullets' => $bullets,
             'is_active' => (bool) ($this->form[$key]['is_active'] ?? true),
+            // Only meaningful for a togglable key (verify/rent/line) — stored
+            // regardless so a card promoted to togglable later just works.
+            'display_mode' => $data['display_mode'] ?? 'modal',
         ])->save();
 
         NumbersBentoContent::flush();

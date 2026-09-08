@@ -48,8 +48,15 @@ class RestoreService
      * the dump back into the database. SQLite restores by replacing the file;
      * MySQL replays the .sql through PDO so it works even without the mysql
      * client binary.
+     *
+     * Public so the Updater's UpdateApplier (Batch 2) can restore the database
+     * from the specific pre-apply snapshot it recorded, WITHOUT re-entering
+     * maintenance mode or taking a second safety snapshot the way restore()
+     * does — the apply pipeline already owns maintenance mode and already took
+     * its snapshot, so it needs just the DB-import step, not the full
+     * admin-driven restore wrapper. Behaviour of restore() is unchanged.
      */
-    protected function importArchive(string $archivePath): void
+    public function importArchive(string $archivePath): void
     {
         $work = storage_path('app/backup-temp/restore-'.Str::uuid());
         File::ensureDirectoryExists($work);

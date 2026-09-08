@@ -14,7 +14,16 @@ use Illuminate\Support\Facades\Cache;
  */
 class NumbersBento
 {
-    private const CACHE = 'numbers.bento.v1';
+    private const CACHE = 'numbers.bento.v2'; // v2: display_mode toggle added
+
+    /**
+     * Cards whose entrance is admin-choosable between a modal and a dedicated
+     * page (owner request, 2026-09-08). The other three keys already land on
+     * their own route in every install and are never modal — not togglable.
+     *
+     * @var list<string>
+     */
+    public const TOGGLABLE = ['verify', 'rent', 'line'];
 
     /**
      * Fixed order — the bento rhythm (on a 6-column grid):
@@ -99,13 +108,7 @@ class NumbersBento
      */
     public static function cards(): array
     {
-        $rows = Cache::remember(self::CACHE, now()->addMinutes(10), function () {
-            try {
-                return NumbersBentoCard::all()->keyBy('key');
-            } catch (\Throwable) {
-                return collect();
-            }
-        });
+        $rows = self::rows();
 
         $out = [];
         foreach (self::ORDER as $key) {
@@ -126,11 +129,60 @@ class NumbersBento
                 'title' => $row->title ?? $def['title'],
                 'subtitle' => $row->subtitle ?? $def['subtitle'],
                 'bullets' => self::bulletsFor($key, $row?->bullets ?? $def['bullets']),
-                'link' => $def['link'],
+                'link' => self::resolveLink($key, $def['link']),
             ];
         }
 
         return $out;
+    }
+
+    /**
+     * A togglable card's link becomes a real route (to /numbers?modal={key},
+     * matching the URL the modal itself already reflects via
+     * `#[Url(as: 'modal')]` on GetNumber) once an admin sets its display mode
+     * to 'page' — the bento view already renders any `['route' => ...]` link
+     * as a real `<a href>` `wire:navigate` anchor, exactly like the three
+     * cards that were always dedicated pages. Untouched (still a modal
+     * trigger) for every other key/mode.
+     *
+     * @param  array{modal?:string,route?:string}  $default
+     * @return array{modal?:string,route?:string,query?:array}
+     */
+    private static function resolveLink(string $key, array $default): array
+    {
+        if (in_array($key, self::TOGGLABLE, true) && self::isPageMode($key)) {
+            return ['route' => 'numbers', 'query' => ['modal' => $key]];
+        }
+
+        return $default;
+    }
+
+    /**
+     * True when this togglable key's admin-set display mode is 'page'. A
+     * non-togglable key (already always a dedicated page) or an unset
+     * override both resolve to the card's own hardcoded default — 'modal'
+     * for every currently togglable key, so an untouched install never
+     * changes behaviour.
+     */
+    public static function isPageMode(string $key): bool
+    {
+        if (! in_array($key, self::TOGGLABLE, true)) {
+            return false;
+        }
+
+        return self::rows()->get($key)?->display_mode === 'page';
+    }
+
+    /** @return \Illuminate\Support\Collection<string, NumbersBentoCard> */
+    private static function rows(): \Illuminate\Support\Collection
+    {
+        return Cache::remember(self::CACHE, now()->addMinutes(10), function () {
+            try {
+                return NumbersBentoCard::all()->keyBy('key');
+            } catch (\Throwable) {
+                return collect();
+            }
+        });
     }
 
     /** The verify card appends a live "+N more" from the real service catalogue. */

@@ -119,7 +119,20 @@
                 setTimeout(hide, bar ? 250 : 150);
             };
 
-            window.addEventListener('load', finish);
+            // Livewire `wire:navigate` swaps this whole overlay in fresh on every
+            // in-app link click — but it's a client-side morph of an ALREADY-LOADED
+            // page, not a real navigation, so the browser's `load` event never fires
+            // again. Without this check every single in-app click sat here doing
+            // nothing until the 4s hard-fallback below, which is exactly the
+            // multi-second "hang on every page" bug this fixes: if the document is
+            // already complete by the time this script runs (true on every
+            // wire:navigate transition, never true on the real first load), finish
+            // immediately instead of waiting on an event that will never come.
+            if (document.readyState === 'complete') {
+                finish();
+            } else {
+                window.addEventListener('load', finish);
+            }
             setTimeout(finish, 4000); // hard fallback — never trap the page
         })();
     </script>

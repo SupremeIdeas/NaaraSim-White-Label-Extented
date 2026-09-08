@@ -41,6 +41,7 @@ use App\Livewire\Admin\Banners;
 use App\Livewire\Admin\BentoIcons;
 use App\Livewire\Admin\BrandDirectory;
 use App\Livewire\Admin\Branding;
+use App\Livewire\Admin\LinkPreviews;
 use App\Livewire\Admin\Coupons;
 use App\Livewire\Admin\Credits;
 use App\Livewire\Admin\CustomPages;
@@ -63,6 +64,7 @@ use App\Livewire\Admin\JourneyGoals;
 use App\Livewire\Admin\KycReview;
 use App\Livewire\Admin\LegalEditor;
 use App\Livewire\Admin\Maintenance;
+use App\Livewire\Admin\WhiteLabelUpdater;
 use App\Livewire\Admin\MarketingCopyStudio;
 use App\Livewire\Admin\Merchants;
 use App\Livewire\Admin\NavSlots;
@@ -376,6 +378,7 @@ Route::middleware(['admin', 'throttle:admin'])
             // Theme picker — switch the platform-wide visual skin (Theme Batch 2 §4).
             Route::get('/theme', ThemePicker::class)->name('theme');
             Route::get('/branding', Branding::class)->name('branding');
+            Route::get('/link-previews', LinkPreviews::class)->name('link-previews');
             Route::get('/site', SiteEditor::class)->name('site');
             Route::get('/product-lines', ProductLines::class)->name('product-lines');
             Route::get('/email-studio', EmailStudio::class)->name('email-studio');
@@ -412,6 +415,8 @@ Route::middleware(['admin', 'throttle:admin'])
             Route::get('/analytics', Analytics::class)->name('analytics');
             Route::get('/tax-rates', TaxRates::class)->name('tax-rates');
             Route::get('/system-health', SystemHealth::class)->name('system-health');
+            // White-label distribution oversight (Updater Batch 4).
+            Route::get('/white-label', App\Livewire\Admin\WhiteLabelRegistry::class)->name('white-label');
             Route::get('/gateways', Gateways::class)->name('gateways');
             Route::get('/kyc', KycReview::class)->name('kyc');
             Route::get('/merchants', Merchants::class)->name('merchants');
@@ -453,6 +458,13 @@ Route::middleware(['admin', 'throttle:admin'])
             Route::get('/email', EmailSettings::class)->name('email');
             Route::get('/backups', Backups::class)->name('backups');
             Route::get('/maintenance', Maintenance::class)->name('maintenance');
+            // Platform updater — WHITE-LABEL SUBSCRIBER screen (Updater Batch 5):
+            // pull signed .naaraupdate packages from the original platform, or
+            // upload one directly. Apply itself is the same engine + rollback
+            // guarantees as Admin\Updater (which this fork keeps but does not
+            // route to — the original platform is the publisher-only screen).
+            // Most sensitive screen: super_admin.
+            Route::get('/updater', WhiteLabelUpdater::class)->name('updater');
             Route::get('/ui-kit', UiKit::class)->name('ui-kit');
         });
     });

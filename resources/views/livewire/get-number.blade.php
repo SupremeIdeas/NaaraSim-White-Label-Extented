@@ -8,14 +8,23 @@
          (Numbers V6 §1) changes. variant-a = hero then bento (baseline);
          variant-b = bento then hero (action-first personas). Defaults to
          variant-a. Both partials are unchanged. --}}
-    @php($numbersVariant = \App\Support\ThemePreset::layoutVariant('numbers'))
-    @if ($numbersVariant === 'variant-b')
-        @include('partials.numbers-bento')
-        @include('partials.numbers-hero')
-    @else
-        @include('partials.numbers-hero')
-        @include('partials.numbers-bento')
-    @endif
+    {{-- Admin-chosen "dedicated page" mode (owner request, 2026-09-08) for a
+         normally-modal card (verify/rent/line): while that card's flow is
+         open, this IS the dedicated page — hide the hero + bento grid behind
+         it, the same way the platform never shows the bento grid on top of
+         numbers.dialer/numbers.contacts either. Closing (`$modal = ''`)
+         naturally brings the grid back, no separate "back" plumbing needed. --}}
+    @php($pageMode = $modal !== '' && \App\Support\NumbersBento::isPageMode($modal))
+    @unless ($pageMode)
+        @php($numbersVariant = \App\Support\ThemePreset::layoutVariant('numbers'))
+        @if ($numbersVariant === 'variant-b')
+            @include('partials.numbers-bento')
+            @include('partials.numbers-hero')
+        @else
+            @include('partials.numbers-hero')
+            @include('partials.numbers-bento')
+        @endif
+    @endunless
 
     {{-- Active order surfaced on the page when no modal is open, so an
          in-progress number/OTP stays visible after the modal is closed. The
@@ -50,7 +59,7 @@
     @endif
 
     {{-- Product modals (pop like the mobile sheet) + the shared pickers. --}}
-    @include('partials.numbers-modals')
+    @include('partials.numbers-modals', ['pageMode' => $pageMode])
     <livewire:country-picker />
     <livewire:service-picker />
     {{-- Send-message modal host (§6.1) — reachable from the active-line card. --}}
