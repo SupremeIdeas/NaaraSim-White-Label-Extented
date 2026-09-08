@@ -413,6 +413,8 @@ Route::middleware(['admin', 'throttle:admin'])
             Route::get('/analytics', Analytics::class)->name('analytics');
             Route::get('/tax-rates', TaxRates::class)->name('tax-rates');
             Route::get('/system-health', SystemHealth::class)->name('system-health');
+            // White-label distribution oversight (Updater Batch 4).
+            Route::get('/white-label', App\Livewire\Admin\WhiteLabelRegistry::class)->name('white-label');
             Route::get('/gateways', Gateways::class)->name('gateways');
             Route::get('/kyc', KycReview::class)->name('kyc');
             Route::get('/merchants', Merchants::class)->name('merchants');

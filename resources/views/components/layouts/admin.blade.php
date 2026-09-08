@@ -55,6 +55,7 @@
         $more[] = ['route' => 'admin.merchants', 'label' => 'Merchants', 'icon' => 'id-card'];
         $more[] = ['route' => 'admin.partners', 'label' => 'Partners', 'icon' => 'users'];
         $more[] = ['route' => 'admin.developer-api', 'label' => 'Developer API', 'icon' => 'key'];
+        $more[] = ['route' => 'admin.white-label', 'label' => 'White-Label Oversight', 'icon' => 'users'];
 
         // Website (public front end + branding).
         $more[] = ['heading' => 'Website'];

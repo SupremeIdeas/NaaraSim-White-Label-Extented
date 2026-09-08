@@ -28,11 +28,12 @@ class UpdatePackageCommand extends Command
         {--tier= : Tier requirement key (default: none — a core update)}
         {--requires-composer : Flag that applying needs composer install}
         {--requires-npm : Flag that applying needs an npm build}
+        {--publish : After building, register + publish it to the distribution API (Batch 4)}
         {--dry-run : Resolve and print the file list without writing a package}';
 
     protected $description = 'Build and sign a NaaraSim update package (.naaraupdate)';
 
-    public function handle(PackageBuilder $builder, PackageVerifier $verifier): int
+    public function handle(PackageBuilder $builder, PackageVerifier $verifier, \App\Services\Updater\PackagePublisher $publisher): int
     {
         $base = base_path();
         $ref = $this->option('from') ?: $this->defaultRef($base);
@@ -102,6 +103,11 @@ class UpdatePackageCommand extends Command
         $this->newLine();
         $this->info('Wrote and self-verified: '.$path);
         $this->line('  Version: '.$result->manifest->version);
+
+        if ($this->option('publish')) {
+            $row = $publisher->register($path, publish: true);
+            $this->info('Published to distribution as package '.$row->package_id.' (product: '.$row->product.').');
+        }
 
         return self::SUCCESS;
     }

@@ -9,6 +9,61 @@
 
 ## DONE
 
+### 🛰️ Platform Updater — Batch 4: distribution API + white-label registry — 2026-09-08
+The publisher side, on the master platform: registered white-label instances
+discover and download signed `.naaraupdate` packages (code AND theme) instead
+of a manual upload. This is where license-tier access control first becomes
+real. Built by reusing the Developer API's exact auth/scoping pattern —
+nothing new invented.
+- **`white_label_instances`** registry (model is a Sanctum tokenable, exactly
+  like `ApiClient`) — mirrors Merchant's status/tier/review-trail shape.
+  Registration + activation + token issuance is Batch 6's license flow; this
+  batch defines the table it populates. Scopes: `updates.check/download`,
+  `themes.check/download`.
+- **`distributed_packages`** — one row per package the master offers. Built ≠
+  published: `is_published` is flipped deliberately, so a package can be staged
+  and privately tested before being offered broadly. The check endpoint only
+  ever considers published rows.
+- **`white_label_api_logs`** — append-only oversight log (no updated_at, like
+  AuditLog) of what external instances did when they called in; deliberately
+  separate from `platform_update_attempts` (which is about THIS instance).
+- **Middleware** (mirror the Developer API gates exactly): `whitelabel.enabled`
+  (404s the whole surface when off — never advertises its existence),
+  `whitelabel.usable` (active-instance check + stamps `last_checked_in_at` +
+  records EXACTLY ONE oversight log per authenticated call). `api.scope` is
+  reused UNCHANGED (it's tokenable-agnostic). Registered as new aliases.
+  - Notable correctness fix caught pre-test: a downstream `abort()` (scope
+    denial 403, validation 422) throws and would unwind past a naive
+    post-`$next` log — the middleware now catch-and-rethrows so every outcome,
+    success or failure, is logged once with its true final status.
+- **`PackageDistribution`** — the single source of truth for eligibility
+  (published + same product + right family + strictly newer + `min_compatible`
+  satisfied + tier). Both `check` (list) and `download` (re-authorise the one
+  package) run through it — never trust that a client only requests what
+  `check` showed it. Tier is exact-match-or-untiered for now; Batch 7
+  generalises it to a real entitlement ordering.
+- **`PackagePublisher`** — verify → store the file on the PRIVATE `local` disk
+  under `distribution/` (never a public URL) → upsert the row. Shared by
+  `update:package --publish` (new flag) and the admin publish action.
+- **Endpoints** (`routes/api.php`, `/api/v1/white-label/...`):
+  `updates/check`, `updates/{package}/download`, `themes/check`,
+  `themes/{package}/download` — two thin controllers over a shared
+  `DistributesPackages` trait. Check returns metadata only (cheap, frequent);
+  download re-validates then streams. Downloads are still expected to be
+  `PackageVerifier`-verified locally on receipt (defence in depth — never trust
+  the network channel alone).
+- **`Admin\WhiteLabelRegistry`** oversight screen (admin/super_admin) — the
+  registry table with per-brand API-log drill-down, the API feature-flag
+  toggle, and publish/unpublish/withdraw controls for distributable packages.
+- 17 tests: 404-when-disabled (not 403), scope enforcement (check-only can't
+  download), suspended-instance rejection, newer+compatible version filtering,
+  current_version required/valid, tier gating (each identity in its own test —
+  the auth guard caches the first user across requests within one test method,
+  a harness artifact, not a production issue), download streaming + tier
+  re-check + 404 for unpublished/unknown, theme endpoints serve only themes,
+  exactly-one-log-per-call with the true status, plus the admin screen's gate/
+  toggle/publish/withdraw/drill-down. Full suite green (1830 passed).
+
 ### 🎨 Platform Updater — Batch 3: theme installer — 2026-09-08
 Meaningfully lower-risk than Batch 2 by design: direct inspection of
 `App\Support\ThemePreset` confirms a theme is PAINT, never plumbing — its
@@ -2678,19 +2733,17 @@ Rate limits (Section 19.2): `api` limiter 300/min auth · 60/min public (on `rou
 > (loyalty milestones, travel timeline, admin-defined achievements paying
 > NaaraCredits) that used to top this list are now DONE — see DONE above.
 
-### ▶ TOP OF NEXT (Updater track) — Batch 4: Update Distribution API
-Batches 1-3 (package format + signing, apply engine + auto-rollback, theme
-installer) are DONE. Batch 4 per `NaaraSim_Updater_Batch4_DistributionAPI.md`:
-the PUBLISHER side, built on the original NaaraSim (master) — an API that lets
-white-label instances discover and download available `.naaraupdate` packages
-(code AND theme) instead of a manual upload. This is where access control by
-license tier first matters (a package's `tier_requirement` from Batch 1 §1.3
-finally gets a reader) — money/access-control surface, build carefully: no
-package should ever be servable to an instance whose tier doesn't cover it,
-and every download must be authenticated (this is what Batch 6's License
-Authority will issue the credentials for, so design the auth boundary now
-even though the issuer doesn't exist until Batch 6). Do NOT start Batch 5
-(white-label pull screen) until this API exists to pull from.
+### ▶ TOP OF NEXT (Updater track) — Batch 5: White-Label Updater Screen (subscriber side)
+Batches 1-4 are DONE. Batch 5 per `NaaraSim_Updater_Batch5_WhiteLabelScreen.md`:
+the SUBSCRIBER side, built INTO the white-label repos (NaaraSim-WhiteLabel and
+NaaraSim-White-Label-Extented). A white-label instance uses its issued token to
+call the master's distribution API (Batch 4) — check for updates/themes, pull a
+package, verify it locally with Batch 1's `PackageVerifier`, then hand it to
+Batch 2's `UpdateApplier` / Batch 3's `ThemeInstaller`. This is a cross-repo
+build: the client code + screen land in the white-label forks, pointing at the
+master's API base URL. Reuse the existing engine — do NOT re-implement apply or
+verify. (Per the model plan this is a Sonnet-capable batch, but its seam with
+the apply engine deserves an Opus review before merge.)
 
 ### ▶ TOP OF NEXT (Theme track) — Theme visual rebuild: batch 4 of 8 (next 5 themes to full-suite status)
 Batches 1-3 are DONE (15 themes now at full-suite status: neon-vertex,
