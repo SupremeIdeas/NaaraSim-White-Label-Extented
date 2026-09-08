@@ -9,6 +9,79 @@
 
 ## DONE
 
+### 📡 Platform Updater — Batch 5: white-label updater screen (subscriber side) — 2026-09-08
+The lightest engineering batch on purpose — Batches 1-2 already built the only
+risk-bearing pieces (trustworthy signed packages, a safe apply-with-rollback
+engine), and the design was to share both byte-for-byte, not reimplement them
+on the fork. This batch is genuinely wiring: point this fork at the master's
+distribution API and hand whatever it downloads to the SAME unmodified
+`UpdateApplier`/`ThemeInstaller`/`PackageVerifier` classes.
+
+**Prerequisite this batch surfaced:** this fork was seeded as a content
+snapshot of master (not a git clone — master is a shallow clone in this
+environment), so it had none of Batches 1-4's code yet. Merged master's
+`claude/graphify-codebase-mapping-715iyi` branch in first
+(`--allow-unrelated-histories`; every conflict was an "add/add" the fork
+either hadn't touched since seeding or had only touched via the earlier
+Graphify wiring — resolved by keeping this fork's Graphify additions and
+taking upstream's content everywhere else). One inherited test assertion
+needed a one-line fix (`UpdaterScreenTest` asserted the OLD default
+`product_identifier`, which this fork's fork-time config edit correctly
+changed to `naarasim-whitelabel`) — confirmed via full-suite run, not assumed.
+
+**Fork-time config (Batch 5 §1):** `config/updater.php`'s `product_identifier`
+default flips to `naarasim-whitelabel`; two new keys,
+`original_platform_base_url` / `api_token` (env: `NAARA_ORIGINAL_PLATFORM_URL`
+/ `NAARA_UPDATE_API_TOKEN`), added for this fork only. The public verification
+key stays whatever the master signs with — never generate a fresh keypair here.
+
+- **`App\Services\Updater\WhiteLabelUpdateClient`** (fork-only) —
+  `checkForUpdates()` never throws into the UI (a clean `{ok,packages,error}`
+  result on any failure: not configured, no current version recorded yet,
+  connectivity, a non-2xx response); `download()` buffers the full response
+  before writing anything to disk (a dropped connection throws before a
+  single byte is written — no partial file to clean up) then runs the
+  unmodified `PackageVerifier::verify()` before ever returning a path — a
+  failed/tampered download is rejected exactly like a corrupted manual
+  upload; `reportOutcome()` is fire-and-forget-ish (logs locally on failure,
+  never throws — a failed report call must never retroactively fail an
+  update that already applied or rolled back correctly).
+- **`Admin\WhiteLabelUpdater`** (fork-only, replaces the routed `Admin\Updater`
+  on this fork) — two tabs, each with BOTH entry points ending at the
+  identical apply pipeline: pull ("Check for updates" → pick → download,
+  already verified → hand to the same `ApplyUpdateJob`/`ThemeInstaller::install()`
+  the manual flow uses) and the Batch 2/3 manual-upload form kept present,
+  unchanged — so a firewalled instance, or one that hasn't been registered
+  with an API token yet, can still apply a `.naaraupdate` emailed directly.
+  Confirmed by test that the manual path keeps working end-to-end with
+  `NAARA_UPDATE_API_TOKEN` unset. Same strict super_admin gate throughout.
+- **Closing the oversight loop (Batch 5 §4, master-side)** — new
+  `POST /api/v1/white-label/updates/report` on the master, reusing the
+  `updates.check` scope (no new scope needed). Themes report inline
+  (synchronous install); code updates report from a small, GUARDED addition
+  to the shared `ApplyUpdateJob` — `class_exists(WhiteLabelUpdateClient::class)`
+  is a file-presence check, not a container binding, so it's a true no-op on
+  the master (that class is never added there) without any master-side
+  change or a branch inside the protected engine classes themselves. The
+  master's `EnsureWhiteLabelInstanceUsable` middleware now captures a small,
+  explicit set of request fields generically (query params for check/download,
+  body fields for report) so a new endpoint never needs a middleware change
+  just to be logged usefully; fires `AlertAdminJob` on a rolled_back/failed
+  report.
+- Deliberately NOT touched: `UpdateApplier`, `ThemeInstaller`, `PackageVerifier`
+  — every white-label-specific decision lives in the client/job/screen layer,
+  never inside the shared engine.
+- 21 new tests across 3 files (client: check/download/report failure modes
+  including the no-partial-file-on-dropped-connection property; screen: both
+  tabs' pull flow, the not-configured error state, and the manual-fallback
+  resilience test; the `ApplyUpdateJob` report hook, invoked directly against
+  a throwaway app root exactly like `UpdateApplierTest`, proving both the
+  success→applied and rollback→rolled_back status mappings) + 1 master-side
+  report endpoint addition (5 tests, shipped separately on the master repo).
+  Full suite green in this fork (1856 passed). Identical work applied to
+  NaaraSim-White-Label-Extented (no tier differentiation exists yet — that's
+  Batch 6/7).
+
 ### 🛰️ Platform Updater — Batch 4: distribution API + white-label registry — 2026-09-08
 The publisher side, on the master platform: registered white-label instances
 discover and download signed `.naaraupdate` packages (code AND theme) instead
@@ -2733,17 +2806,17 @@ Rate limits (Section 19.2): `api` limiter 300/min auth · 60/min public (on `rou
 > (loyalty milestones, travel timeline, admin-defined achievements paying
 > NaaraCredits) that used to top this list are now DONE — see DONE above.
 
-### ▶ TOP OF NEXT (Updater track) — Batch 5: White-Label Updater Screen (subscriber side)
-Batches 1-4 are DONE. Batch 5 per `NaaraSim_Updater_Batch5_WhiteLabelScreen.md`:
-the SUBSCRIBER side, built INTO the white-label repos (NaaraSim-WhiteLabel and
-NaaraSim-White-Label-Extented). A white-label instance uses its issued token to
-call the master's distribution API (Batch 4) — check for updates/themes, pull a
-package, verify it locally with Batch 1's `PackageVerifier`, then hand it to
-Batch 2's `UpdateApplier` / Batch 3's `ThemeInstaller`. This is a cross-repo
-build: the client code + screen land in the white-label forks, pointing at the
-master's API base URL. Reuse the existing engine — do NOT re-implement apply or
-verify. (Per the model plan this is a Sonnet-capable batch, but its seam with
-the apply engine deserves an Opus review before merge.)
+### ▶ TOP OF NEXT (Updater track) — Batch 6: License Authority + API Key/Token System
+Batches 1-5 are DONE (this fork now has the full shared updater engine plus its
+own pull-based Updater screen). Batch 6 per
+`NaaraSim_Updater_Batch6_LicenseAuthority.md`: on the MASTER platform —
+registration + approval workflow that actually populates `WhiteLabelInstance`
+rows (currently just a schema Batch 4 defined) and issues the Sanctum API token
+this fork's `NAARA_UPDATE_API_TOKEN` expects, plus the license-key/tier logic
+`distributed_packages.tier_requirement` and `WhiteLabelInstance.tier` were
+wired for but don't yet enforce meaningfully. This is a money/security-path
+batch (license issuance, tier entitlement) — do not start it on Sonnet without
+checking the current model-assignment plan first.
 
 ### ▶ TOP OF NEXT (Theme track) — Theme visual rebuild: batch 4 of 8 (next 5 themes to full-suite status)
 Batches 1-3 are DONE (15 themes now at full-suite status: neon-vertex,

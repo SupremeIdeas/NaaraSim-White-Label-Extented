@@ -63,7 +63,7 @@ use App\Livewire\Admin\JourneyGoals;
 use App\Livewire\Admin\KycReview;
 use App\Livewire\Admin\LegalEditor;
 use App\Livewire\Admin\Maintenance;
-use App\Livewire\Admin\Updater;
+use App\Livewire\Admin\WhiteLabelUpdater;
 use App\Livewire\Admin\MarketingCopyStudio;
 use App\Livewire\Admin\Merchants;
 use App\Livewire\Admin\NavSlots;
@@ -456,9 +456,13 @@ Route::middleware(['admin', 'throttle:admin'])
             Route::get('/email', EmailSettings::class)->name('email');
             Route::get('/backups', Backups::class)->name('backups');
             Route::get('/maintenance', Maintenance::class)->name('maintenance');
-            // Platform updater (Updater Batch 2) — apply signed .naaraupdate
-            // packages with automatic rollback. Most sensitive screen: super_admin.
-            Route::get('/updater', Updater::class)->name('updater');
+            // Platform updater — WHITE-LABEL SUBSCRIBER screen (Updater Batch 5):
+            // pull signed .naaraupdate packages from the original platform, or
+            // upload one directly. Apply itself is the same engine + rollback
+            // guarantees as Admin\Updater (which this fork keeps but does not
+            // route to — the original platform is the publisher-only screen).
+            // Most sensitive screen: super_admin.
+            Route::get('/updater', WhiteLabelUpdater::class)->name('updater');
             Route::get('/ui-kit', UiKit::class)->name('ui-kit');
         });
     });

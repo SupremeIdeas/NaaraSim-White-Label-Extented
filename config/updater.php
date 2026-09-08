@@ -50,6 +50,26 @@ return [
     |
     */
 
-    'product_identifier' => env('NAARA_UPDATE_PRODUCT', 'naarasim-core'),
+    'product_identifier' => env('NAARA_UPDATE_PRODUCT', 'naarasim-whitelabel'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Distribution client (white-label subscriber only — Updater Batch 5)
+    |--------------------------------------------------------------------------
+    |
+    | Set at registration time (Batch 6's license-issuance flow): the master
+    | platform's own base URL, and this instance's Sanctum API token, scoped to
+    | updates.check/download + themes.check/download (Batch 4 §1). The token is
+    | deliberately narrow — a registered-but-unpaid instance can still receive
+    | core platform updates without that being tangled up in which product
+    | features it's paid to unlock (Batch 5 §5).
+    |
+    | Never in the database, never in a committed config file — .env only.
+    |
+    */
+
+    'original_platform_base_url' => env('NAARA_ORIGINAL_PLATFORM_URL'),
+
+    'api_token' => env('NAARA_UPDATE_API_TOKEN'),
 
 ];

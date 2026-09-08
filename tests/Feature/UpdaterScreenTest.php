@@ -83,7 +83,7 @@ class UpdaterScreenTest extends TestCase
             ->set('package', $this->validUpload())
             ->call('verifyPackage')
             ->assertSet('verifyError', null)
-            ->assertSet('verified.product', 'naarasim-core')
+            ->assertSet('verified.product', 'naarasim-whitelabel')
             ->assertSet('verified.files', 1)
             ->call('applyPackage')
             ->assertSet('status', fn ($s) => str_contains((string) $s, 'queued'));
