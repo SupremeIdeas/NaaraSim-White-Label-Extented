@@ -9,6 +9,70 @@
 
 ## DONE
 
+### 🎨 Platform Updater — Batch 3: theme installer — 2026-09-08
+Meaningfully lower-risk than Batch 2 by design: direct inspection of
+`App\Support\ThemePreset` confirms a theme is PAINT, never plumbing — its
+render path (`emitVars()`) only ever emits a small whitelisted set of CSS
+variables and silently drops anything invalid, so even a malicious theme
+upload cannot inject CSS or execute code. Installing one is a same-request DB
+write (one `theme_presets` row) + a few file copies, so this batch deliberately
+does NOT reuse Batch 2's maintenance-mode/backup/health-check/rollback
+pipeline — that would be pure overhead here.
+- **Extends Batch 1's container, not a new format** — a theme package IS a
+  `.naaraupdate` file with `package_type: "theme"` and `payload/theme.json`
+  instead of code; `PackageVerifier`/`PackageBuilder` needed zero changes.
+- **`App\Services\Updater\ThemeInstaller`** — `preview()` (verify + validate,
+  no writes, feeds the admin confirmation screen) and `install()` (re-verifies
+  from scratch, never trusts a prior preview call). Validates theme.json
+  against `ThemePreset`'s real expectations: slug pattern + **rejects outright**
+  a collision with a built-in theme's slug; `icon_family` against the real
+  style/set rules; **rejects, doesn't silently drop**, any `layout_variants`
+  value outside the three real structural partials. Copies `hero_assets` into
+  public storage under `themes/{slug}/`, then validates each resulting URL
+  against the *exact* pattern `heroFor()` checks at render time — rejects the
+  whole install (with cleanup of any already-copied files) rather than saving
+  a hero image that could never display. `is_built_in` is never settable from
+  an upload; re-installing an existing slug preserves admin-set `sort_order`.
+- **The font allow-list UX fix from §2.3** — every `tokens.typography.*` value
+  is checked against `ThemePreset::fontAllowList()` (a new live public
+  accessor, so this can never drift from the real list) and surfaces a clear,
+  actionable warning for anything unapproved — the theme still installs and
+  applies everything else; only that one override silently does nothing at
+  render time, exactly as documented, but now the admin is TOLD why.
+- **`App\Support\ThemePreset` refactor (behavior-preserving)** — exposed
+  `ICON_STYLES`/`ICON_SET_PATTERN`/`HERO_ASSET_PATTERN` as public consts (used
+  internally by `iconFamily()`/`heroFor()` exactly as before) plus
+  `fontAllowList()` and `isValidColorTriple()` accessors, so the installer
+  validates untrusted upload data with the SAME rules the render path already
+  trusts, never a duplicated-and-liable-to-drift copy.
+- **Themes tab** added to the existing `Admin\Updater` screen (kept under one
+  "install something onto the platform" umbrella per the blueprint's own
+  suggestion) — verify → preview (name/persona/**validated-only** colour
+  swatches — an unvalidated swatch value would be a CSS-injection risk into
+  the admin's own browser via the inline `style` attribute, so only
+  already-validated values ever reach that view — /font warnings) → confirm →
+  install; grid of installed themes with Activate (same primitives as
+  `ThemePicker::apply()` — `Setting` + `bust()` + audit) and Remove
+  (non-built-in only; resets the active-theme setting first if removing the
+  currently-active one, deletes its stored assets). A theme package uploaded
+  to the Code-updates tab is now caught and routed to Themes instead of
+  running the full apply pipeline for something that doesn't need it.
+- **Kept the same strict super_admin gate** on the whole Updater screen
+  (including this new tab) rather than splitting access by action — this
+  stays the one "install a package" screen; the existing day-to-day
+  `ThemePicker` (activate/tweak an already-installed theme) keeps its own
+  broader admin/`theme.manage` gate, unchanged.
+- 15 new tests: round-trip preview+install, hero URL passes `heroFor()`,
+  activating changes `bodyClass()`; re-install preserves sort_order; font
+  warning surfaces AND the theme still applies its other tokens; built-in slug
+  rejected; invalid layout_variant rejected (not dropped); invalid icon_family
+  rejected; invalid slug shape rejected; tampered signature rejected at the
+  same verifier step as any other package type; a code package rejected by the
+  theme installer; a missing referenced asset rejected with zero orphaned
+  files; the admin screen's preview→install flow (never touches the code-apply
+  job); code-tab routing guard; activate/remove actions; built-in removal
+  blocked; non-super-admin 403. Full suite green (1813 passed).
+
 ### 🚀 Platform Updater — Batch 2: core apply engine + auto-rollback — 2026-09-08
 The highest-stakes module — the first that writes to a running app. Every step
 is reversible until an automated health check proves it safe.
@@ -2614,15 +2678,19 @@ Rate limits (Section 19.2): `api` limiter 300/min auth · 60/min public (on `rou
 > (loyalty milestones, travel timeline, admin-defined achievements paying
 > NaaraCredits) that used to top this list are now DONE — see DONE above.
 
-### ▶ TOP OF NEXT (Updater track) — Batch 3: Theme Installer
-Batches 1 (package format + signing) and 2 (apply engine + auto-rollback) are
-DONE. Batch 3 per `NaaraSim_Updater_Batch3_ThemeInstaller.md`: install a
-theme-only package (a `package_type: theme` `.naaraupdate`) — themes are
-data + assets, not code + migrations, so this is a lighter, more frequent path
-than the full apply engine, reusing the same `PackageVerifier` trust gate.
-Build on Batch 2's verified-package plumbing; do NOT duplicate the apply
-pipeline. This is a separate workstream from the theme visual rebuild below —
-both are active owner instructions.
+### ▶ TOP OF NEXT (Updater track) — Batch 4: Update Distribution API
+Batches 1-3 (package format + signing, apply engine + auto-rollback, theme
+installer) are DONE. Batch 4 per `NaaraSim_Updater_Batch4_DistributionAPI.md`:
+the PUBLISHER side, built on the original NaaraSim (master) — an API that lets
+white-label instances discover and download available `.naaraupdate` packages
+(code AND theme) instead of a manual upload. This is where access control by
+license tier first matters (a package's `tier_requirement` from Batch 1 §1.3
+finally gets a reader) — money/access-control surface, build carefully: no
+package should ever be servable to an instance whose tier doesn't cover it,
+and every download must be authenticated (this is what Batch 6's License
+Authority will issue the credentials for, so design the auth boundary now
+even though the issuer doesn't exist until Batch 6). Do NOT start Batch 5
+(white-label pull screen) until this API exists to pull from.
 
 ### ▶ TOP OF NEXT (Theme track) — Theme visual rebuild: batch 4 of 8 (next 5 themes to full-suite status)
 Batches 1-3 are DONE (15 themes now at full-suite status: neon-vertex,
