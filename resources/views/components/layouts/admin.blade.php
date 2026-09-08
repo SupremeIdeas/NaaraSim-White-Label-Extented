@@ -74,6 +74,7 @@
         $more[] = ['route' => 'admin.legal', 'label' => 'Legal', 'icon' => 'shield'];
         $more[] = ['route' => 'admin.incidents', 'label' => 'Status incidents', 'icon' => 'bell'];
         $more[] = ['route' => 'admin.branding', 'label' => 'Branding', 'icon' => 'image'];
+        $more[] = ['route' => 'admin.link-previews', 'label' => 'Link previews', 'icon' => 'share'];
         $more[] = ['route' => 'admin.chrome', 'label' => 'Auth & footer', 'icon' => 'image'];
         $more[] = ['route' => 'admin.appearance', 'label' => 'Splash', 'icon' => 'zap'];
         $more[] = ['route' => 'admin.preloader-studio', 'label' => 'Preloader Studio', 'icon' => 'refresh'];

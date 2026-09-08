@@ -70,6 +70,18 @@
                     @error("form.{$key}.subtitle") <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
                 </div>
 
+                @if (in_array($key, \App\Support\NumbersBento::TOGGLABLE, true))
+                    <div class="mt-3">
+                        <label class="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-300">Opens as</label>
+                        <select wire:model="form.{{ $key }}.display_mode"
+                                class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100 sm:w-64">
+                            <option value="modal">Modal (pop-up sheet)</option>
+                            <option value="page">Dedicated page</option>
+                        </select>
+                        <p class="mt-1 text-[11px] text-slate-400">A dedicated page replaces the bento grid with this flow full-page, like the eSIM catalogue's purchase screen — the flow itself is unchanged either way.</p>
+                    </div>
+                @endif
+
                 <div class="mt-3 grid gap-3 sm:grid-cols-2">
                     <div>
                         <label class="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-300">Bullets (one per line, max 4)</label>

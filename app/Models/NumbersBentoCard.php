@@ -11,7 +11,7 @@ class NumbersBentoCard extends Model
 {
     protected $fillable = [
         'key', 'badge_label', 'icon_path', 'image_path',
-        'title', 'subtitle', 'bullets', 'sort_order', 'is_active',
+        'title', 'subtitle', 'bullets', 'sort_order', 'is_active', 'display_mode',
     ];
 
     protected function casts(): array

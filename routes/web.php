@@ -41,6 +41,7 @@ use App\Livewire\Admin\Banners;
 use App\Livewire\Admin\BentoIcons;
 use App\Livewire\Admin\BrandDirectory;
 use App\Livewire\Admin\Branding;
+use App\Livewire\Admin\LinkPreviews;
 use App\Livewire\Admin\Coupons;
 use App\Livewire\Admin\Credits;
 use App\Livewire\Admin\CustomPages;
@@ -377,6 +378,7 @@ Route::middleware(['admin', 'throttle:admin'])
             // Theme picker — switch the platform-wide visual skin (Theme Batch 2 §4).
             Route::get('/theme', ThemePicker::class)->name('theme');
             Route::get('/branding', Branding::class)->name('branding');
+            Route::get('/link-previews', LinkPreviews::class)->name('link-previews');
             Route::get('/site', SiteEditor::class)->name('site');
             Route::get('/product-lines', ProductLines::class)->name('product-lines');
             Route::get('/email-studio', EmailStudio::class)->name('email-studio');
