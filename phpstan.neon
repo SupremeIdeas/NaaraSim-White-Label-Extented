@@ -1,0 +1,12 @@
+includes:
+    - vendor/larastan/larastan/extension.neon
+
+parameters:
+    level: 4
+    paths:
+        - app
+    # Skeleton provider services throw "not wired yet" by design (blueprint rule
+    # 1.1) and dumpers bridge third-party classes — analysed loosely.
+    ignoreErrors:
+        - identifier: missingType.iterableValue
+    reportUnmatchedIgnoredErrors: false

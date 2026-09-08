@@ -1,0 +1,1626 @@
+/* =============================================================================
+   NaaraSim branded UI elements (Module 32 part 1).
+   Adapted from the operator's hand-picked Uiverse.io components
+   (github.com/SupremeIdeas/Uicomponents, MIT) — re-tokenized to the NaaraSim
+   brand (Deep Teal / Warm Gold / Midnight Navy), dark-mode aware, accessible,
+   and compiled into our own bundle (no third-party runtime, CSP-safe).
+   Attribution for each adapted source lives in resources/views/components/ui/CREDITS.md.
+   ========================================================================== */
+
+:root {
+    /* The nx-* component tokens now FOLLOW the brand palette (Module 26), so an
+       admin colour change re-skins buttons/switches/tags/etc. too. The
+       --brand-* channel triples default in app.css and are overridden at
+       runtime by the admin Branding <style>. */
+    --ui-primary: rgb(var(--brand-primary));
+    --ui-primary-dark: rgb(var(--brand-primary-dark));
+    --ui-accent: rgb(var(--brand-accent));
+    --ui-navy: rgb(var(--brand-navy));
+    --ui-action: rgb(var(--brand-action));
+    --ui-success: #16A34A;
+    --ui-danger: #DC2626;
+}
+
+/* ---------------------------------------------------------------- buttons --
+   Premium action button: soft lift + a light sweep on hover; solid loading
+   state. Adapted from the "buttons" picks (shine/border-glow family). */
+.nx-btn {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.625rem 1.5rem;
+    /* Follows the admin control-roundness setting (Module 26); +0.25rem so
+       nx-btn stays a touch softer than inputs, as before. */
+    border-radius: calc(var(--brand-radius, 0.5rem) + 0.25rem);
+    font-weight: 600;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    cursor: pointer;
+    overflow: hidden;
+    transition: transform 0.25s cubic-bezier(0.23, 1, 0.32, 1), box-shadow 0.25s, background-color 0.2s;
+    -webkit-tap-highlight-color: transparent;
+}
+.nx-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+.nx-btn:focus-visible { outline: 2px solid var(--ui-accent); outline-offset: 2px; }
+
+/* light sweep */
+.nx-btn::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(100deg, transparent 20%, rgb(255 255 255 / 0.25) 50%, transparent 80%);
+    transform: translateX(-120%);
+    transition: transform 0.7s cubic-bezier(0.23, 1, 0.32, 1);
+    pointer-events: none;
+}
+.nx-btn:hover:not(:disabled)::after { transform: translateX(120%); }
+
+.nx-btn--primary {
+    background: var(--ui-primary);
+    color: #fff;
+    box-shadow: 0 4px 14px rgb(10 110 110 / 0.35);
+}
+.nx-btn--primary:hover:not(:disabled) {
+    background: var(--ui-primary-dark);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgb(10 110 110 / 0.45);
+}
+.nx-btn--primary:active:not(:disabled) { transform: translateY(0); }
+
+.nx-btn--gold {
+    background: linear-gradient(135deg, var(--ui-accent), #b8860b);
+    color: var(--ui-navy);
+    box-shadow: 0 4px 14px rgb(212 160 23 / 0.4);
+}
+.nx-btn--gold:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 6px 20px rgb(212 160 23 / 0.5); }
+
+.nx-btn--ghost {
+    background: transparent;
+    color: var(--ui-primary);
+    box-shadow: inset 0 0 0 1.5px var(--ui-primary);
+}
+.dark .nx-btn--ghost { color: #5eead4; box-shadow: inset 0 0 0 1.5px rgb(94 234 212 / 0.6); }
+.nx-btn--ghost:hover:not(:disabled) { background: rgb(10 110 110 / 0.08); }
+.dark .nx-btn--ghost:hover:not(:disabled) { background: rgb(94 234 212 / 0.08); }
+
+.nx-btn--danger {
+    background: var(--ui-danger);
+    color: #fff;
+    box-shadow: 0 4px 14px rgb(220 38 38 / 0.35);
+}
+.nx-btn--danger:hover:not(:disabled) { transform: translateY(-1px); }
+
+/* --- Extra variants (component-library batch 2), all re-tokenised to brand.
+   Attribution: glow ← mrhyddenn, get-started ← catraco, pill-reveal ←
+   alexmaracinaru, edit ← aaronross1 (Uiverse.io, MIT). The emoji-morph pick
+   (ercnersoy) is intentionally NOT ported — the platform is emoji-free. --- */
+
+/* Border-glow: a conic sheen chases the border. For hero/marketing CTAs. The
+   glow sits on a ::before behind the button so the label stays crisp. */
+.nx-btn--glow {
+    background: var(--ui-primary);
+    color: #fff;
+    box-shadow: 0 4px 14px rgb(10 110 110 / 0.35);
+    z-index: 0;
+}
+.nx-btn--glow::before {
+    content: "";
+    position: absolute;
+    inset: -2px;
+    z-index: -1;
+    border-radius: inherit;
+    background: conic-gradient(from var(--nx-glow-angle, 0deg),
+        var(--ui-accent), var(--ui-primary), var(--ui-accent), var(--ui-primary), var(--ui-accent));
+    filter: blur(6px);
+    opacity: 0;
+    transition: opacity 0.35s ease;
+}
+.nx-btn--glow:hover:not(:disabled) { transform: translateY(-1px); }
+.nx-btn--glow:hover:not(:disabled)::before { opacity: 0.85; animation: nx-glow-spin 3s linear infinite; }
+@property --nx-glow-angle { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
+@keyframes nx-glow-spin { to { --nx-glow-angle: 360deg; } }
+@media (prefers-reduced-motion: reduce) {
+    .nx-btn--glow:hover:not(:disabled)::before { animation: none; }
+}
+
+/* Get-started: a tilted ghost plate rotates flat + an arrow slides in on hover.
+   For onboarding / primary-conversion moments. */
+.nx-btn--get-started { background: var(--ui-primary); color: #fff; z-index: 0; }
+.nx-btn--get-started::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    background: var(--ui-primary);
+    box-shadow: inset 0 0 0 2px rgb(255 255 255 / 0.7);
+    opacity: 0.2;
+    transform: rotate(8deg) scale(1.04);
+    transition: transform 0.5s cubic-bezier(0.23, 1, 0.32, 1), opacity 0.5s;
+}
+.nx-btn--get-started:hover:not(:disabled) { transform: scale(1.04); filter: brightness(1.08); }
+.nx-btn--get-started:hover:not(:disabled)::before { transform: rotate(0deg) scale(1.04); opacity: 1; }
+.nx-btn--get-started .nx-btn__arrow {
+    width: 0;
+    opacity: 0;
+    transform: translateX(-100%);
+    transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+    overflow: hidden;
+}
+.nx-btn--get-started:hover:not(:disabled) .nx-btn__arrow { width: 1.1rem; opacity: 1; transform: translateX(0); }
+
+/* Premium: a slow on-brand teal↔gold shimmer, for "Unlock Pro" upsells. NOT the
+   rainbow of the source pick — that would break the brand palette; this stays
+   inside Teal/Gold/Navy while still reading as special. */
+.nx-btn--premium {
+    color: var(--ui-navy);
+    background: linear-gradient(110deg, var(--ui-accent), var(--ui-primary), var(--ui-accent), #f0c96b, var(--ui-accent));
+    background-size: 300% 100%;
+    box-shadow: 0 4px 16px rgb(212 160 23 / 0.4);
+    animation: nx-premium-pan 6s linear infinite;
+}
+.dark .nx-btn--premium { color: #06201f; }
+.nx-btn--premium:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 6px 22px rgb(212 160 23 / 0.5); }
+@keyframes nx-premium-pan { to { background-position: 300% 0; } }
+@media (prefers-reduced-motion: reduce) { .nx-btn--premium { animation: none; } }
+
+/* Pill-reveal: label slides up and out on hover while a short call-word rises in.
+   Uses the child spans .nx-btn__face / .nx-btn__reveal. */
+.nx-btn--pill-reveal { background: var(--ui-navy); color: #fff; border-radius: 999px; }
+.dark .nx-btn--pill-reveal { background: var(--ui-primary); }
+.nx-btn--pill-reveal .nx-btn__stack { position: relative; display: inline-grid; overflow: hidden; }
+.nx-btn--pill-reveal .nx-btn__face,
+.nx-btn--pill-reveal .nx-btn__reveal { grid-area: 1 / 1; transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1); }
+.nx-btn--pill-reveal .nx-btn__reveal { transform: translateY(120%); color: var(--ui-accent); }
+.nx-btn--pill-reveal:hover:not(:disabled) .nx-btn__face { transform: translateY(-120%); }
+.nx-btn--pill-reveal:hover:not(:disabled) .nx-btn__reveal { transform: translateY(0); }
+
+/* Danger-confirm: a deliberately heavier destructive button for high-stakes,
+   irreversible actions (delete account, wipe data) — always paired with
+   wire:confirm. The ring makes it visually distinct from routine .nx-btn--danger. */
+.nx-btn--danger-confirm {
+    background: var(--ui-danger);
+    color: #fff;
+    box-shadow: 0 0 0 3px rgb(220 38 38 / 0.18), 0 4px 14px rgb(220 38 38 / 0.4);
+    letter-spacing: 0.02em;
+}
+.nx-btn--danger-confirm:hover:not(:disabled) {
+    background: #b91c1c;
+    transform: translateY(-1px);
+    box-shadow: 0 0 0 4px rgb(220 38 38 / 0.25), 0 6px 20px rgb(220 38 38 / 0.5);
+}
+
+/* Edit-reveal: a compact circular icon button that expands to reveal an "Edit"
+   label on hover — for inline row actions. Neutral until hovered. */
+.nx-btn--edit-reveal {
+    width: 2.5rem;
+    padding: 0;
+    gap: 0;
+    border-radius: 999px;
+    background: var(--ui-navy);
+    color: #fff;
+    box-shadow: 0 2px 10px rgb(13 27 42 / 0.25);
+    white-space: nowrap;
+    transition: width 0.35s cubic-bezier(0.23, 1, 0.32, 1), background-color 0.3s, box-shadow 0.3s;
+}
+.dark .nx-btn--edit-reveal { background: var(--ui-primary); }
+.nx-btn--edit-reveal .nx-btn__label {
+    max-width: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition: max-width 0.35s cubic-bezier(0.23, 1, 0.32, 1), opacity 0.3s, margin 0.35s;
+}
+.nx-btn--edit-reveal:hover:not(:disabled),
+.nx-btn--edit-reveal:focus-visible {
+    width: 6.5rem;
+    background: var(--ui-primary);
+}
+.dark .nx-btn--edit-reveal:hover:not(:disabled),
+.dark .nx-btn--edit-reveal:focus-visible { background: var(--ui-primary-dark); }
+.nx-btn--edit-reveal:hover:not(:disabled) .nx-btn__label,
+.nx-btn--edit-reveal:focus-visible .nx-btn__label { max-width: 4rem; opacity: 1; margin-left: 0.4rem; }
+
+/* ----------------------------------------------------------------- switch --
+   Accessible toggle: a real checkbox drives a pill track + sliding knob.
+   Adapted from the batch1 toggle-switch picks, sized for settings rows. */
+.nx-switch {
+    --w: 2.9rem;
+    --h: 1.6rem;
+    position: relative;
+    display: inline-block;
+    width: var(--w);
+    height: var(--h);
+    flex: none;
+}
+.nx-switch input {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    opacity: 0;
+    cursor: pointer;
+    z-index: 1;
+}
+.nx-switch__track {
+    position: absolute;
+    inset: 0;
+    border-radius: 999px;
+    background: #cbd5e1;
+    transition: background 0.3s cubic-bezier(0.23, 1, 0.32, 1), box-shadow 0.2s;
+}
+.dark .nx-switch__track { background: #334155; }
+.nx-switch__track::before {
+    content: "";
+    position: absolute;
+    top: 0.175rem;
+    left: 0.2rem;
+    width: 1.25rem;
+    height: 1.25rem;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 2px 6px rgb(13 27 42 / 0.35);
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.nx-switch input:checked + .nx-switch__track { background: var(--ui-primary); }
+.nx-switch input:checked + .nx-switch__track::before { transform: translateX(1.3rem); }
+.nx-switch input:focus-visible + .nx-switch__track { box-shadow: 0 0 0 3px rgb(212 160 23 / 0.55); }
+.nx-switch input:disabled + .nx-switch__track { opacity: 0.5; }
+
+/* --------------------------------------------------------------- checkbox --
+   Brand checkbox with a drawn check. Adapted from the checkbox picks. */
+.nx-check {
+    position: relative;
+    display: inline-flex;
+    width: 1.25rem;
+    height: 1.25rem;
+    flex: none;
+}
+.nx-check input {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    opacity: 0;
+    cursor: pointer;
+    z-index: 1;
+}
+.nx-check__box {
+    position: absolute;
+    inset: 0;
+    border-radius: 0.375rem;
+    border: 2px solid #94a3b8;
+    background: transparent;
+    transition: background 0.25s, border-color 0.25s;
+}
+.dark .nx-check__box { border-color: #475569; }
+.nx-check__box::after {
+    content: "";
+    position: absolute;
+    left: 0.3rem;
+    top: 0.06rem;
+    width: 0.38rem;
+    height: 0.7rem;
+    border: solid #fff;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg) scale(0);
+    transform-origin: center;
+    transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.nx-check input:checked + .nx-check__box {
+    background: var(--ui-primary);
+    border-color: var(--ui-primary);
+}
+.nx-check input:checked + .nx-check__box::after { transform: rotate(45deg) scale(1); }
+.nx-check input:focus-visible + .nx-check__box { box-shadow: 0 0 0 3px rgb(212 160 23 / 0.55); }
+
+/* ------------------------------------------------------------------ toast --
+   Slide-in notification toasts (success/error/info). Adapted from the toast
+   pick; colors re-tokenized, dark-mode variants added. */
+.nx-toast {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    width: 21rem;
+    max-width: calc(100vw - 2rem);
+    padding: 0.7rem 0.85rem;
+    border-radius: 0.9rem;
+    border: 1px solid rgb(13 27 42 / 0.06);
+    /* Toasts pop up constantly — an opaque surface (no backdrop-filter) is the
+       cheap, glitch-free choice. Blur here forced a full-page GPU repaint on
+       every toast; a solid card reads just as clean and never stutters. */
+    background: #ffffff;
+    box-shadow: 0 10px 30px rgb(13 27 42 / 0.16);
+    color: #0D1B2A;
+    font-size: 0.85rem;
+    line-height: 1.35;
+    animation: nx-toast-in 0.4s cubic-bezier(0.21, 1.02, 0.73, 1);
+}
+.dark .nx-toast { background: #1a2840; border-color: rgb(255 255 255 / 0.08); color: #f1f5f9; box-shadow: 0 10px 30px rgb(0 0 0 / 0.4); }
+@keyframes nx-toast-in {
+    from { transform: translateY(0.75rem) scale(0.97); opacity: 0; }
+    to { transform: translateY(0) scale(1); opacity: 1; }
+}
+/* A small round gradient glyph carries the status colour (fintech-clean —
+   the card body stays a neutral surface, not a full colour wash). */
+.nx-toast__glyph {
+    display: flex; flex-shrink: 0; align-items: center; justify-content: center;
+    width: 1.5rem; height: 1.5rem; border-radius: 9999px; color: #fff;
+}
+.nx-toast__glyph--success { background-image: linear-gradient(135deg, #14b8a6, #0A6E6E); }
+.nx-toast__glyph--error { background-image: linear-gradient(135deg, #fb7185, #E8412A); }
+.nx-toast__glyph--info { background-image: linear-gradient(135deg, #38bdf8, #0A6E6E); }
+
+/* --------------------------------------------------------------- hero toast --
+   A big, CENTRED success/status moment (fintech-style) for money/activity
+   outcomes (checkout, top-up, refund, credits) — clear of the header, focused
+   by a scrim. Success/info auto-dismiss; failures stay. Server-anchored. */
+.nx-hero {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 0.35rem;
+    width: 22rem;
+    max-width: calc(100vw - 2rem);
+    padding: 2rem 1.5rem 1.6rem;
+    border-radius: 1.5rem;
+    border: 1px solid rgb(13 27 42 / 0.06);
+    background: #ffffff;
+    box-shadow: 0 30px 70px rgb(13 27 42 / 0.35);
+}
+.dark .nx-hero { background: #16233d; border-color: rgb(255 255 255 / 0.08); box-shadow: 0 30px 70px rgb(0 0 0 / 0.6); }
+.nx-hero-enter { animation: nx-hero-in 0.45s cubic-bezier(0.34, 1.56, 0.64, 1); }
+@keyframes nx-hero-in {
+    from { transform: translateY(0.5rem) scale(0.9); opacity: 0; }
+    to { transform: translateY(0) scale(1); opacity: 1; }
+}
+/* Big gradient status circle that "pops" in, with a soft halo ring. */
+.nx-hero__glyph {
+    position: relative; flex-shrink: 0; width: 4.25rem; height: 4.25rem;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 0.6rem; border-radius: 9999px; color: #fff;
+    animation: nx-hero-pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+.nx-hero__glyph::after {
+    content: ""; position: absolute; inset: -0.4rem; border-radius: 9999px;
+    border: 2px solid currentColor; opacity: 0.18;
+}
+@keyframes nx-hero-pop { from { transform: scale(0); } to { transform: scale(1); } }
+.nx-hero__glyph--success { background-image: linear-gradient(135deg, #14b8a6, #0A6E6E); }
+.nx-hero__glyph--error { background-image: linear-gradient(135deg, #fb7185, #E8412A); }
+.nx-hero__glyph--pending { background-image: linear-gradient(135deg, #94a3b8, #64748b); }
+.nx-hero__glyph--info { background-image: linear-gradient(135deg, #38bdf8, #0A6E6E); }
+.nx-hero__draw { width: 3rem; height: 3rem; }
+.nx-hero__tick { stroke: #fff; stroke-dasharray: 60; stroke-dashoffset: 60; animation: nx-hero-draw 0.45s 0.2s ease forwards; }
+.nx-hero__spin { width: 2.4rem; height: 2.4rem; animation: nx-spin 0.9s linear infinite; }
+@keyframes nx-hero-draw { to { stroke-dashoffset: 0; } }
+.nx-hero__title { font-weight: 800; font-size: 1.15rem; line-height: 1.25; color: #0D1B2A; }
+.dark .nx-hero__title { color: #f1f5f9; }
+.nx-hero__msg { margin-top: 0.1rem; font-size: 0.9rem; line-height: 1.45; color: #64748b; }
+.dark .nx-hero__msg { color: #cbd5e1; }
+/* CTA is a real button now (fintech-style), full-width under the message. */
+.nx-hero__cta {
+    display: block; width: 100%; margin-top: 1rem; padding: 0.7rem 1rem;
+    border-radius: 0.9rem; font-size: 0.9rem; font-weight: 600; text-align: center;
+    text-decoration: none; color: #fff; background-image: linear-gradient(135deg, #0A6E6E, #085555);
+    box-shadow: 0 8px 20px rgb(10 110 110 / 0.30); transition: filter 0.15s;
+}
+.nx-hero__cta:hover { filter: brightness(1.06); }
+.nx-hero--error .nx-hero__cta { background-image: linear-gradient(135deg, #E8412A, #b91c1c); box-shadow: 0 8px 20px rgb(232 65 42 / 0.30); }
+.nx-hero__close {
+    position: absolute; top: 0.75rem; right: 0.75rem; display: flex; align-items: center;
+    justify-content: center; width: 1.75rem; height: 1.75rem; border-radius: 9999px;
+    color: #94a3b8; opacity: 0.7; transition: opacity 0.15s, background-color 0.15s;
+}
+.nx-hero__close:hover { opacity: 1; background: rgb(13 27 42 / 0.06); }
+.dark .nx-hero__close:hover { background: rgb(255 255 255 / 0.08); }
+
+@media (prefers-reduced-motion: reduce) {
+    .nx-hero-enter, .nx-hero__glyph { animation: none; }
+    .nx-hero__tick { animation: none; stroke-dashoffset: 0; }
+    .nx-hero__spin { animation-duration: 1.6s; }
+}
+
+/* -------------------------------------------------------------- preloader --
+   Branded orbit loader (SIM-signal feel) + shimmer skeletons for loading
+   states. Adapted from the preloader/loaders picks. */
+.nx-loader {
+    --size: 2.5rem;
+    position: relative;
+    width: var(--size);
+    height: var(--size);
+    flex: none;
+}
+.nx-loader::before,
+.nx-loader::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    border: 3px solid transparent;
+}
+.nx-loader::before {
+    border-top-color: var(--ui-primary);
+    border-right-color: var(--ui-primary);
+    animation: nx-spin 0.9s linear infinite;
+}
+.nx-loader::after {
+    inset: 0.45rem;
+    border-bottom-color: var(--ui-accent);
+    animation: nx-spin 1.4s linear infinite reverse;
+}
+@keyframes nx-spin { to { transform: rotate(360deg); } }
+
+/* Two-tone brand gradient on a stroked icon (owner request — premium menu icons).
+   CSS beats the symbol's presentation attribute, so the inherited gradient wins
+   over its stroke="currentColor". Active items keep a solid colour and simply
+   don't get this class. */
+.nx-grad-icon { stroke: url(#nx-icon-gradient); }
+
+/* eSIM/Numbers hero — interchanging IMAGE REVEAL (owner request), not a slide.
+   Slides are stacked; the active one wipes in via clip-path + crossfades + a slow
+   Ken-Burns scale, so it reads as a genuine reveal. */
+/* Full-bleed image-reveal banner (eSIM + Numbers heroes). A UNIQUE class so it
+   never inherits the toast-notification .nx-hero (which is a fixed 26rem card). */
+.nx-imghero { position: relative; width: 100%; overflow: hidden; }
+.nx-imghero__slide {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transform: scale(1.08);
+    clip-path: inset(0 100% 0 0);
+    transition: opacity 0.9s ease, clip-path 0.9s cubic-bezier(0.65, 0, 0.35, 1);
+    will-change: opacity, clip-path, transform;
+}
+.nx-imghero__slide.is-active {
+    opacity: 1;
+    transform: scale(1);
+    clip-path: inset(0 0 0 0);
+    transition: opacity 0.9s ease, clip-path 0.9s cubic-bezier(0.65, 0, 0.35, 1), transform 6s ease-out;
+}
+.nx-imghero__slide img { width: 100%; height: 100%; object-fit: cover; object-position: center; }
+@media (prefers-reduced-motion: reduce) {
+    .nx-imghero__slide { transition: opacity 0.4s ease; transform: none; clip-path: none; }
+    .nx-imghero__slide.is-active { transform: none; }
+}
+
+/* ---- Apple-style 3-up PEEK carousel (Theme Batch 1 §3). Scoped under
+   .nx-imghero--peek so it never inherits the absolute-positioned crossfade
+   rules above (which drive the <3-image single-slide fallback). The centered
+   slide sits at 84% width; a flex track translates so the active index is
+   centered, cropping the neighbours into edge slivers via overflow:hidden. */
+.nx-imghero--peek { overflow: hidden; border-radius: var(--radius-card, 1.5rem); }
+.nx-imghero__track {
+    display: flex;
+    align-items: stretch;
+    height: 100%;
+    transition: transform 0.45s cubic-bezier(0.65, 0, 0.35, 1);
+    will-change: transform;
+}
+/* Override the base .nx-imghero__slide (absolute/opacity-0) for the peek track. */
+.nx-imghero--peek .nx-imghero__slide {
+    position: relative;
+    inset: auto;
+    flex: 0 0 84%;
+    height: 100%;
+    padding: 0 0.4rem;
+    box-sizing: border-box;
+    opacity: 0.55;
+    transform: scale(0.94);
+    clip-path: none;
+    cursor: pointer;
+    transition: opacity 0.45s ease, transform 0.45s ease;
+    will-change: opacity, transform;
+}
+.nx-imghero--peek .nx-imghero__slide.is-active { opacity: 1; transform: scale(1); cursor: default; }
+.nx-imghero--peek .nx-imghero__slide > * { overflow: hidden; border-radius: var(--radius-card, 1.5rem); }
+.nx-imghero--peek:focus-visible { outline: 2px solid rgb(var(--brand-primary) / 0.7); outline-offset: 3px; }
+@media (prefers-reduced-motion: reduce) {
+    .nx-imghero__track { transition: none; }
+    .nx-imghero--peek .nx-imghero__slide { transition: none; transform: none; }
+    .nx-imghero--peek .nx-imghero__slide.is-active { transform: none; }
+}
+
+/* ---- Premium bento card: brand gradient border + corner glow on hover/focus.
+   The border is a masked gradient ring (primary → accent) that fades in; two
+   soft radial glows bloom from opposite corners. Follows admin brand vars. --- */
+.nx-bento::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1.5px;
+    background: linear-gradient(135deg,
+        rgb(var(--brand-primary)), rgb(var(--brand-accent)) 55%, rgb(var(--brand-primary)));
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask-composite: exclude;
+    opacity: 0;
+    transition: opacity 0.35s ease;
+    pointer-events: none;
+    z-index: 5;
+}
+.nx-bento::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background:
+        radial-gradient(120px 120px at 0% 100%, rgb(var(--brand-primary) / 0.22), transparent 70%),
+        radial-gradient(120px 120px at 100% 0%, rgb(var(--brand-accent) / 0.18), transparent 70%);
+    opacity: 0;
+    transition: opacity 0.35s ease;
+    pointer-events: none;
+    z-index: 1;
+}
+.nx-bento:hover::before, .nx-bento:focus-visible::before,
+.nx-bento:hover::after, .nx-bento:focus-visible::after { opacity: 1; }
+.nx-bento:hover, .nx-bento:focus-visible {
+    box-shadow: 0 18px 44px -20px rgb(var(--brand-primary) / 0.45);
+}
+.nx-bento:focus-visible { outline: none; }
+@media (prefers-reduced-motion: reduce) {
+    .nx-bento { transition: none; }
+    .nx-bento:hover { transform: none; }
+}
+
+/* ---- "Connected tab" active nav item. The active pill takes the PAGE
+   background colour so it reads as carved out of the tinted sidebar and flowing
+   into the content — like the DeskIn reference — lifted by a soft shadow, with
+   brand-coloured icon + label. Not a blocky tint. -- */
+.nx-navlink { position: relative; transition: background 0.25s ease, color 0.2s ease, box-shadow 0.25s ease; }
+.nx-navlink.is-active {
+    background: #F8F9FA; /* == page background (light) */
+    color: rgb(var(--brand-primary-dark));
+    box-shadow: 0 6px 18px -6px rgb(15 23 42 / 0.14);
+}
+.dark .nx-navlink.is-active {
+    background: rgb(var(--brand-navy)); /* == page background (dark) */
+    color: rgb(94 234 212);
+    box-shadow: 0 6px 18px -6px rgb(0 0 0 / 0.55);
+}
+
+/* The one app-wide spinner (owner request — replaces the spinning refresh icon).
+   A soft dual-tone ring: a faint full track + a solid moving arc in currentColor,
+   so it inherits the button/text colour and drops into any inline context. The
+   easing is a gentle cubic-bezier (not linear) so it reads smooth, not
+   mechanical. Sized by the element's width/height (e.g. Tailwind h-4 w-4). */
+.nx-spinner {
+    display: inline-block;
+    border-radius: 9999px;
+    border: 2px solid color-mix(in srgb, currentColor 22%, transparent);
+    border-top-color: currentColor;
+    animation: nx-spin 0.7s cubic-bezier(0.5, 0.15, 0.5, 0.85) infinite;
+    vertical-align: -0.125em;
+}
+/* Fallback for engines without color-mix: a plain faded track. */
+@supports not (color: color-mix(in srgb, red, blue)) {
+    .nx-spinner { border-color: rgb(148 163 184 / 0.35); border-top-color: currentColor; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .nx-spinner { animation: nx-pulse 1.4s ease-in-out infinite; }
+}
+@keyframes nx-pulse { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; } }
+
+/* -------------------------------------------------- pulse-logo loaders (§7) --
+   The impulse ("heartbeat") logo motif, shared by the full-screen page
+   preloader and the scoped in-card action loader (<x-brand-loader>). Both use
+   the brand favicon mark + a soft brand-accent glow ring. Reduced-motion stops
+   all pulse. */
+.nx-pulse { position: relative; display: inline-flex; align-items: center; justify-content: center; }
+.nx-pulse::before {
+    content: ""; position: absolute; inset: -26%; border-radius: 9999px;
+    background: radial-gradient(circle, rgb(var(--brand-accent) / 0.28) 0%, transparent 68%);
+    animation: nx-pulse-glow 1.1s ease-in-out infinite;
+}
+.nx-pulse img {
+    position: relative; display: block; width: 100%; height: 100%; object-fit: contain;
+    filter: drop-shadow(0 6px 18px rgb(0 0 0 / 0.35));
+    animation: nx-pulse-impulse 1.1s ease-in-out infinite;
+}
+@keyframes nx-pulse-impulse { 0%, 100% { transform: scale(1); opacity: 0.9; } 50% { transform: scale(1.12); opacity: 1; } }
+@keyframes nx-pulse-glow { 0%, 100% { transform: scale(0.9); opacity: 0.55; } 50% { transform: scale(1.1); opacity: 1; } }
+@media (prefers-reduced-motion: reduce) {
+    .nx-pulse::before, .nx-pulse img { animation: none; }
+}
+
+.nx-skeleton {
+    position: relative;
+    overflow: hidden;
+    border-radius: 0.5rem;
+    background: #e2e8f0;
+}
+.dark .nx-skeleton { background: #243352; }
+.nx-skeleton::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    /* Softer, slower sweep for a premium feel. */
+    background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.55), transparent);
+    animation: nx-shimmer 2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+.dark .nx-skeleton { background: #1f2e48; }
+.dark .nx-skeleton::after {
+    background: linear-gradient(90deg, transparent, rgb(148 163 184 / 0.14), transparent);
+}
+@keyframes nx-shimmer { to { transform: translateX(100%); } }
+/* Reduced motion: hold a calm static tint instead of sweeping. */
+@media (prefers-reduced-motion: reduce) {
+    .nx-skeleton::after { animation: none; opacity: 0.5; }
+}
+
+/* ------------------------------------------------------------- alert card --
+   Admin alert cards with a colored rail + soft tint. Adapted from the
+   admin-alert-cards picks. */
+.nx-alert {
+    position: relative;
+    display: flex;
+    gap: 0.75rem;
+    padding: 0.9rem 1rem 0.9rem 1.1rem;
+    border-radius: 0.9rem;
+    border: 1px solid;
+    overflow: hidden;
+}
+.nx-alert::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 0.28rem;
+}
+.nx-alert--info { background: #f0fdfa; border-color: #99f6e4; color: #134e4a; }
+.nx-alert--info::before { background: var(--ui-primary); }
+.dark .nx-alert--info { background: rgb(10 110 110 / 0.12); border-color: rgb(15 118 110 / 0.5); color: #99f6e4; }
+.nx-alert--warning { background: #fffbeb; border-color: #fcd34d; color: #78350f; }
+.nx-alert--warning::before { background: var(--ui-accent); }
+.dark .nx-alert--warning { background: rgb(212 160 23 / 0.1); border-color: rgb(212 160 23 / 0.4); color: #fde68a; }
+.nx-alert--danger { background: #fef2f2; border-color: #fca5a5; color: #7f1d1d; }
+.nx-alert--danger::before { background: var(--ui-danger); }
+.dark .nx-alert--danger { background: rgb(220 38 38 / 0.12); border-color: rgb(153 27 27 / 0.6); color: #fecaca; }
+
+/* -------------------------------------------------------------------- tag --
+   Status tags/chips with a subtle pulse dot for "live" states. */
+.nx-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.2rem 0.7rem;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+}
+.nx-tag__dot { width: 0.45rem; height: 0.45rem; border-radius: 50%; flex: none; }
+.nx-tag--live { background: #f0fdf4; color: #15803d; }
+.dark .nx-tag--live { background: rgb(22 163 74 / 0.15); color: #86efac; }
+.nx-tag--live .nx-tag__dot { background: var(--ui-success); animation: nx-pulse 1.8s ease-in-out infinite; }
+.nx-tag--soon { background: #f1f5f9; color: #64748b; }
+.dark .nx-tag--soon { background: rgb(148 163 184 / 0.12); color: #94a3b8; }
+.nx-tag--soon .nx-tag__dot { background: #94a3b8; }
+.nx-tag--gold { background: #fffbeb; color: #92400e; }
+.dark .nx-tag--gold { background: rgb(212 160 23 / 0.14); color: #fcd34d; }
+.nx-tag--gold .nx-tag__dot { background: var(--ui-accent); }
+@keyframes nx-pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgb(22 163 74 / 0.45); }
+    50% { box-shadow: 0 0 0 4px rgb(22 163 74 / 0); }
+}
+
+/* ----------------------------------------------------------------- upload --
+   Drag-and-drop upload zone styling. Adapted from the upload-utility picks. */
+.nx-upload {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    padding: 1.4rem 1rem;
+    border-radius: 1rem;
+    border: 2px dashed #cbd5e1;
+    background: #f8fafc;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.25s, background 0.25s, transform 0.25s;
+}
+.dark .nx-upload { border-color: #2d4060; background: rgb(36 51 82 / 0.4); }
+.nx-upload:hover { border-color: var(--ui-primary); background: rgb(10 110 110 / 0.04); }
+.dark .nx-upload:hover { background: rgb(10 110 110 / 0.12); }
+.nx-upload input[type="file"] {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+}
+
+/* ================================================================ marketing --
+   Scroll-craft for the public pages (Module 27): text reveal on scroll,
+   stacking step cards, section background transitions, sticky CTA, premium
+   feature/testimonial cards (adapted from the premium-custom-cards picks).
+   All CSS + a tiny IntersectionObserver in app.js — no external libraries. */
+
+/* Text reveal on scroll: elements with [data-reveal] start hidden and slide
+   up when .is-revealed lands. Staggered children via --reveal-delay. */
+.js-enabled [data-reveal] {
+    opacity: 0;
+    transform: translateY(1.4rem);
+    transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1), transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+    transition-delay: var(--reveal-delay, 0s);
+    will-change: opacity, transform;
+}
+.js-enabled [data-reveal].is-revealed { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: reduce) {
+    .js-enabled [data-reveal] { opacity: 1; transform: none; transition: none; }
+}
+
+/* Section background change on scroll: the wrapper interpolates between
+   themes as [data-bg] sections become active (class set by the observer). */
+.mkt-bg {
+    transition: background-color 0.8s ease, color 0.8s ease;
+    background-color: #F8F9FA;
+}
+.dark .mkt-bg { background-color: #0D1B2A; }
+.mkt-bg.bg-navy-scene { background-color: #0D1B2A; color: #e2e8f0; }
+.mkt-bg.bg-teal-scene { background-color: #07403f; color: #ccfbf1; }
+
+/* Stacking step cards: each card is sticky, so the next stacks over it. */
+.mkt-stack { display: grid; gap: 1.25rem; }
+.mkt-stack__card {
+    position: sticky;
+    top: 5.5rem;
+    border-radius: 1.25rem;
+    padding: 2rem;
+    box-shadow: 0 18px 40px rgb(13 27 42 / 0.16);
+}
+
+/* Premium card (feature/testimonial): glassmorphism + lift + gradient edge glow
+   on hover. Translucent + blurred so it reads as premium over hero art and
+   gradients, with enough opacity that text contrast stays strong on plain pages
+   (owner request — premium feel, must not hurt readability). Softer curves. */
+.nx-card {
+    position: relative;
+    border-radius: 1.25rem;
+    padding: 1.5rem;
+    background: rgb(255 255 255 / 0.72);
+    -webkit-backdrop-filter: blur(14px) saturate(140%);
+    backdrop-filter: blur(14px) saturate(140%);
+    border: 1px solid rgb(255 255 255 / 0.6);
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.5), 0 6px 20px rgb(13 27 42 / 0.06);
+    transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.35s;
+}
+.dark .nx-card {
+    background: rgb(22 35 61 / 0.62);
+    border-color: rgb(255 255 255 / 0.08);
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.06), 0 6px 20px rgb(0 0 0 / 0.25);
+}
+/* Fallback: if the browser can't blur, fall back to a solid surface so the card
+   never looks washed-out. */
+@supports not ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+    .nx-card { background: #ffffff; }
+    .dark .nx-card { background: #16233d; }
+}
+.nx-card::before {
+    content: "";
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(135deg, rgb(10 110 110 / 0), rgb(10 110 110 / 0.65), rgb(212 160 23 / 0.55));
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    /* Ambient by default (BLUEPRINT-ambient-gradient §2). Was opacity:0 / hover-only
+       — but :hover doesn't exist on touch, so on a phone (the primary device) this
+       brand gradient border was never seen, reading as "flat". A subtle floor now,
+       full strength on real interaction. Theme-independent (same cause both modes). */
+    opacity: 0.35;
+    transition: opacity 0.35s;
+    pointer-events: none;
+}
+.nx-card:hover { transform: translateY(-4px); box-shadow: 0 16px 36px rgb(13 27 42 / 0.14); }
+.nx-card:hover::before, .nx-card:focus-within::before { opacity: 1; }
+@media (prefers-reduced-motion: reduce) {
+    .nx-card, .nx-card:hover { transform: none; }
+}
+
+/* Reusable glass panel (owner request — premium feel for flat areas). Additive:
+   drop `nx-glass` on any container to give it a translucent, blurred, softly
+   curved surface. Readability-safe alpha; solid fallback where blur is absent. */
+.nx-glass {
+    background: rgb(255 255 255 / 0.68);
+    -webkit-backdrop-filter: blur(16px) saturate(150%);
+    backdrop-filter: blur(16px) saturate(150%);
+    border: 1px solid rgb(255 255 255 / 0.55);
+    border-radius: 1.25rem;
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.5), 0 8px 24px rgb(13 27 42 / 0.07);
+}
+.dark .nx-glass {
+    background: rgb(16 27 42 / 0.55);
+    border-color: rgb(255 255 255 / 0.08);
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.06), 0 8px 24px rgb(0 0 0 / 0.3);
+}
+@supports not ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+    .nx-glass { background: #ffffff; }
+    .dark .nx-glass { background: #16233d; }
+}
+
+/* Lightweight glass for plain SOLID-surface cards so the dashboard background
+   shows through (Platform Theme glass-audit rule). Unlike .nx-glass it only
+   swaps the fill + adds blur — the card keeps its own radius / border / padding
+   / shadow — so it drops onto an existing `bg-white dark:bg-[#1A2840]` card by
+   replacing just those two colour classes. Readability-safe alpha; solid
+   fallback where blur is unavailable.
+
+   NEVER apply to a card that already owns a gradient (.nx-aurora / .nx-anim-card
+   and anything like them) — those stay exactly as they are, no blur, no
+   opacity change. This is a binary per-component flag, not a spectrum. */
+.nx-glass-tile {
+    background: rgb(255 255 255 / var(--nx-glass-opacity-light, 0.62));
+    -webkit-backdrop-filter: blur(var(--nx-glass-blur, 12px)) saturate(140%);
+    backdrop-filter: blur(var(--nx-glass-blur, 12px)) saturate(140%);
+}
+.dark .nx-glass-tile {
+    /* Tinted with --brand-card-dark (theme-coverage audit) so this widely-
+       applied class repaints with the active Theme Preset instead of staying
+       frozen on Naara's own navy — and the tint STRENGTH follows the admin
+       glassmorphism opacity dial (--nx-glass-opacity-dark, a 0-1 fraction
+       scaled to a percentage), so both features compose. */
+    background: color-mix(in srgb, var(--brand-card-dark) calc(var(--nx-glass-opacity-dark, 0.55) * 100%), transparent);
+}
+@supports not (color: color-mix(in srgb, red, blue)) {
+    .dark .nx-glass-tile { background: var(--brand-card-dark); }
+}
+@supports not ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+    .nx-glass-tile { background: #ffffff; }
+    .dark .nx-glass-tile { background: var(--brand-card-dark); }
+}
+
+/* Pinned products crossfade (Module 27.5): panels only overlap when GSAP has
+   actually initialised (.gsap-pin added by app.js) — reduced-motion and no-JS
+   visitors get the normal stacked flow. */
+[data-products-pin].gsap-pin [data-product-panel] { grid-area: 1 / 1; }
+[data-products-pin].gsap-pin .grid { gap: 0; }
+
+/* ==========================================================================
+   Module 32 — handpicked Uiverse components, rebuilt on brand tokens.
+   Sources credited in resources/views/components/ui/CREDITS.md. Every family
+   has dark-mode parity and respects prefers-reduced-motion.
+   ========================================================================== */
+
+/* --- Aurora spending card (after Gidarx) ---------------------------------- */
+.nx-aurora {
+    position: relative;
+    overflow: hidden;
+    border-radius: 1.5rem;
+    padding: 1.75rem;
+    color: #fff;
+    background: linear-gradient(135deg, #0a6e6e 0%, #085555 45%, #0d1b2a 100%);
+    box-shadow: 0 18px 40px rgb(10 110 110 / 0.25);
+}
+.nx-aurora__glow {
+    position: absolute;
+    border-radius: 9999px;
+    filter: blur(48px);
+    pointer-events: none;
+    animation: nx-aurora-drift 9s ease-in-out infinite alternate;
+}
+.nx-aurora__glow--1 {
+    width: 16rem; height: 16rem; top: -6rem; right: -4rem;
+    background: rgb(212 160 23 / 0.35);
+}
+.nx-aurora__glow--2 {
+    width: 14rem; height: 14rem; bottom: -7rem; left: -3rem;
+    background: rgb(76 159 159 / 0.4);
+    animation-delay: -4.5s;
+}
+@keyframes nx-aurora-drift {
+    from { transform: translate3d(0, 0, 0) scale(1); }
+    to { transform: translate3d(-1.5rem, 1.25rem, 0) scale(1.15); }
+}
+@media (prefers-reduced-motion: reduce) {
+    .nx-aurora__glow { animation: none; }
+}
+
+/* --- Animated-border revenue card (after anand_4957) ----------------------- */
+.nx-anim-card {
+    position: relative;
+    border-radius: 1.5rem;
+    padding: 2px; /* the moving border lives in this gap */
+    background: linear-gradient(115deg, #0a6e6e, #d4a017, #4c9f9f, #0a6e6e);
+    background-size: 300% 300%;
+    animation: nx-border-flow 8s linear infinite;
+}
+.nx-anim-card__inner {
+    border-radius: calc(1.5rem - 2px);
+    background: linear-gradient(150deg, #10243c 0%, #0d1b2a 70%);
+    padding: 1.5rem;
+    height: 100%;
+}
+@keyframes nx-border-flow {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+.nx-anim-card__bar {
+    height: var(--bar-h, 8%);
+    border-radius: 0.375rem 0.375rem 0.2rem 0.2rem;
+    background: linear-gradient(180deg, #d4a017, rgb(212 160 23 / 0.45));
+    box-shadow: 0 0 12px rgb(212 160 23 / 0.25);
+    transform-origin: bottom;
+    animation: nx-bar-grow 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation-delay: var(--bar-delay, 0ms);
+    transition: filter 0.2s;
+}
+.group:hover > .nx-anim-card__bar { filter: brightness(1.2); }
+@keyframes nx-bar-grow {
+    from { transform: scaleY(0); }
+    to { transform: scaleY(1); }
+}
+@media (prefers-reduced-motion: reduce) {
+    .nx-anim-card { animation: none; }
+    .nx-anim-card__bar { animation: none; }
+}
+
+/* ==========================================================================
+   Dashboard background / theme system (Platform Theme).
+   A brand-gradient wallpaper that sits BEHIND the authenticated app shell
+   (customer + admin), so glass cards let it show through. Applied by adding
+   `dashboard-bg` to <body> from the customer/admin layouts only — the
+   marketing site and auth pages are explicitly out of scope.
+
+   Everything is driven by the live --brand-* channel triples (so a Module-26
+   admin recolour cascades in) and by --dbg-* tuning variables (so the admin
+   Platform Theme panel can override per-bloom intensity / feather / spread /
+   extra stop by emitting a <style> block — no rebuild, same pattern as
+   BrandSettings::themeCss()). The colour set is scoped STRICTLY by the `.dark`
+   class — light and dark never cross-fade — and the base colour paints on the
+   body while the blooms live in a viewport-fixed ::before, so the treatment
+   is stable while content scrolls and never flashes the wrong theme (the
+   pre-paint .dark toggle already runs in the <head>).
+
+   NOTE: this NEVER touches .nx-aurora or .nx-anim-card — cards that already
+   carry their own gradient are hands-off (see the glass-audit rule).
+   ========================================================================== */
+
+/* Typed custom properties for the drifting bloom anchors — @property lets them
+   interpolate smoothly (a plain custom property would jump between keyframes).
+   Only the two primary anchors drift; everything else stays put. */
+@property --dbg-up-x { syntax: "<percentage>"; inherits: true; initial-value: 72%; }
+@property --dbg-up-y { syntax: "<percentage>"; inherits: true; initial-value: 6%; }
+@property --dbg-lo-x { syntax: "<percentage>"; inherits: true; initial-value: 25%; }
+@property --dbg-lo-y { syntax: "<percentage>"; inherits: true; initial-value: 96%; }
+
+/* Tuning variables + the two composed bloom gradients live on :root, so the
+   admin live-preview (.dbg-preview) can reuse the EXACT same gradient formula
+   just by overriding the --dbg-* values locally — no second copy to drift out
+   of sync. The admin override <style> raises specificity with `.dashboard-bg
+   {…}`, and the preview raises it with inline styles; both beat these defaults. */
+:root {
+    --dbg-up-x: 72%;   --dbg-up-y: 6%;    /* upper bloom anchor  */
+    --dbg-lo-x: 25%;   --dbg-lo-y: 96%;   /* lower bloom anchor  */
+    --dbg-up-intensity: 1;                /* 0.5–1.5 opacity scale, upper bloom */
+    --dbg-lo-intensity: 1;                /* 0.5–1.5 opacity scale, lower bloom */
+    --dbg-up-feather: 82%;                /* where the upper bloom hits transparent */
+    --dbg-lo-feather: 88%;                /* where the lower bloom hits transparent */
+    --dbg-up-size: 65% 55%;               /* upper bloom ellipse size  */
+    --dbg-lo-size: 70% 60%;               /* lower bloom ellipse size  */
+    --dbg-extra-color: var(--brand-primary);
+    --dbg-extra-alpha: 0;                 /* optional single extra stop, off by default */
+
+    /* LIGHT bloom — two anchor regions, each travelling teal → gold → coral
+       internally (Section 3a), feathering to transparent. */
+    --dbg-bloom-light:
+        radial-gradient(var(--dbg-up-size) at var(--dbg-up-x) var(--dbg-up-y),
+            rgb(var(--brand-primary) / calc(0.40 * var(--dbg-up-intensity))) 0%,
+            rgb(var(--brand-accent) / calc(0.14 * var(--dbg-up-intensity))) 38%,
+            rgb(var(--brand-action) / calc(0.08 * var(--dbg-up-intensity))) 62%,
+            transparent var(--dbg-up-feather)),
+        radial-gradient(45% 40% at 55% 18%,
+            rgb(var(--brand-accent) / calc(0.10 * var(--dbg-up-intensity))) 0%,
+            rgb(var(--brand-action) / calc(0.05 * var(--dbg-up-intensity))) 50%,
+            transparent 75%),
+        radial-gradient(40% 35% at 50% 40%,
+            rgb(var(--dbg-extra-color) / var(--dbg-extra-alpha)) 0%,
+            transparent 70%),
+        radial-gradient(var(--dbg-lo-size) at var(--dbg-lo-x) var(--dbg-lo-y),
+            rgb(var(--brand-primary) / calc(0.22 * var(--dbg-lo-intensity))) 0%,
+            rgb(var(--brand-action) / calc(0.11 * var(--dbg-lo-intensity))) 40%,
+            rgb(var(--brand-accent) / calc(0.07 * var(--dbg-lo-intensity))) 65%,
+            transparent var(--dbg-lo-feather));
+
+    /* DARK bloom — teal leads and dominates, gold is the only accent, NO coral
+       (red reads as "off" over navy — intentional asymmetry, documented). */
+    --dbg-bloom-dark:
+        radial-gradient(var(--dbg-up-size) at var(--dbg-up-x) var(--dbg-up-y),
+            rgb(var(--brand-primary) / calc(0.58 * var(--dbg-up-intensity))) 0%,
+            rgb(var(--brand-accent) / calc(0.20 * var(--dbg-up-intensity))) 45%,
+            transparent var(--dbg-up-feather)),
+        radial-gradient(45% 40% at 55% 18%,
+            rgb(var(--brand-accent) / calc(0.14 * var(--dbg-up-intensity))) 0%,
+            transparent 70%),
+        radial-gradient(40% 35% at 50% 40%,
+            rgb(var(--dbg-extra-color) / var(--dbg-extra-alpha)) 0%,
+            transparent 70%),
+        radial-gradient(var(--dbg-lo-size) at var(--dbg-lo-x) var(--dbg-lo-y),
+            rgb(var(--brand-primary) / calc(0.32 * var(--dbg-lo-intensity))) 0%,
+            rgb(var(--brand-accent) / calc(0.10 * var(--dbg-lo-intensity))) 55%,
+            transparent var(--dbg-lo-feather));
+}
+
+.dashboard-bg {
+    position: relative;
+    background-color: #F8F9FA; /* the blooms feather to transparent over this */
+}
+.dark .dashboard-bg { background-color: rgb(var(--brand-navy)); }
+
+/* The wallpaper: a viewport-fixed layer painted over the body's base colour but
+   beneath all in-flow content (negative-z positioned pseudo). */
+.dashboard-bg::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background: var(--dbg-bloom-light);
+}
+.dark .dashboard-bg::before { background: var(--dbg-bloom-dark); }
+
+/* Admin live-preview: the SAME bloom, contained (absolute, not fixed) so it can
+   render a light and a dark swatch side-by-side regardless of the admin's own
+   theme. The wrapper sets local --dbg-* values (inline, from the sliders) which
+   the reused --dbg-bloom-* formula resolves against — instant, no round-trip. */
+.dbg-preview { position: relative; overflow: hidden; background-color: #F8F9FA; }
+.dbg-preview--dark { background-color: rgb(var(--brand-navy)); }
+.dbg-preview::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: var(--dbg-bloom-light);
+}
+.dbg-preview--dark::before { background: var(--dbg-bloom-dark); }
+.dbg-preview--animated::before { animation: naara-bg-drift 22s ease-in-out infinite; }
+
+/* Animated mode (opt-in): only the two anchor positions drift — the colour
+   layer never moves, so it reads as "the static treatment, gently breathing".
+   The palette swap on a theme toggle is instant (scoped by .dark); this drift
+   keeps running uninterrupted across the toggle because it animates position
+   variables that are identical in both themes. */
+@keyframes naara-bg-drift {
+    50% {
+        --dbg-up-x: 60%;  --dbg-up-y: 16%;
+        --dbg-lo-x: 36%;  --dbg-lo-y: 84%;
+    }
+}
+.dashboard-bg--animated::before {
+    animation: naara-bg-drift 22s ease-in-out infinite;
+}
+/* Reduced motion → the static treatment (no drift). */
+@media (prefers-reduced-motion: reduce) {
+    .dashboard-bg--animated::before,
+    .dbg-preview--animated::before { animation: none; }
+}
+
+/* Product badge (FEATURED / POPULAR / PREMIUM / BEST …). A teal→gold DUAL
+   gradient with white text — never yellow-on-light, which washed out on the
+   light cards. Brand-var driven, readable in both themes. */
+.nx-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    border-radius: 9999px;
+    padding: 0.125rem 0.5rem;
+    font-size: 0.625rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #ffffff;
+    background-image: linear-gradient(120deg, rgb(var(--brand-primary)), rgb(var(--brand-accent)));
+    box-shadow: 0 2px 8px rgb(var(--brand-primary) / 0.30);
+}
+
+/* Call screen (Dialer in-call) — a premium, soft two-tone gradient instead of a
+   flat colour: a teal glow blooming from the top (a brand LIGHT colour, iOS-like)
+   into a navy base, with a faint warm-gold catch at the very bottom for depth.
+   Brand-var driven so it tracks a recolour. It reads the same in light or dark —
+   an in-call screen is always dark-styled, like iOS. */
+.nx-callbg {
+    background:
+        radial-gradient(95% 60% at 50% -12%, rgb(var(--brand-primary) / 0.55) 0%, rgb(var(--brand-primary) / 0.12) 34%, transparent 62%),
+        radial-gradient(80% 45% at 50% 112%, rgb(var(--brand-accent) / 0.14) 0%, transparent 55%),
+        linear-gradient(162deg, #0d2b33 0%, rgb(var(--brand-navy)) 55%, #081019 100%);
+}
+
+/* --- Donut stat card (after code-town3) ------------------------------------ */
+.nx-donut {
+    width: 7rem;
+    height: 7rem;
+    border-radius: 9999px;
+    background: var(--donut, conic-gradient(#e2e8f0 0% 100%));
+    display: grid;
+    place-items: center;
+}
+.dark .nx-donut { background: var(--donut, conic-gradient(#2d4060 0% 100%)); }
+.nx-donut__hole {
+    width: 4.5rem;
+    height: 4.5rem;
+    border-radius: 9999px;
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    line-height: 1.2;
+}
+.dark .nx-donut__hole { background: #1a2840; }
+
+/* --- 3D glass product cards (after om_5409 / chase2k25) -------------------- */
+.nx-card3d { perspective: 900px; }
+.nx-card3d__body {
+    position: relative;
+    height: 100%;
+    border-radius: 1.5rem;
+    border: 1px solid rgb(226 232 240);
+    background: linear-gradient(150deg, #ffffff 0%, #f0f7f7 100%);
+    padding: 1.5rem;
+    transform-style: preserve-3d;
+    transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.45s;
+    box-shadow: 0 10px 24px rgb(13 27 42 / 0.08);
+}
+.dark .nx-card3d__body {
+    border-color: rgb(255 255 255 / 0.1);
+    background: linear-gradient(150deg, #1a2840 0%, #10243c 100%);
+}
+.nx-card3d:hover .nx-card3d__body {
+    transform: rotateX(7deg) rotateY(-7deg) translateY(-6px);
+    box-shadow: 0 26px 48px rgb(10 110 110 / 0.22);
+}
+.nx-card3d__glass {
+    position: absolute;
+    inset: 0.55rem;
+    border-radius: 1.1rem;
+    border: 1px solid rgb(255 255 255 / 0.55);
+    background: linear-gradient(160deg, rgb(255 255 255 / 0.5), rgb(255 255 255 / 0.06));
+    transform: translateZ(28px);
+    pointer-events: none;
+}
+.dark .nx-card3d__glass {
+    border-color: rgb(255 255 255 / 0.12);
+    background: linear-gradient(160deg, rgb(255 255 255 / 0.08), rgb(255 255 255 / 0.01));
+}
+.nx-card3d__icon {
+    position: relative;
+    display: flex;
+    width: 3rem;
+    height: 3rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: 1rem;
+    color: #fff;
+    background: linear-gradient(140deg, #0a6e6e, #085555);
+    box-shadow: 0 8px 18px rgb(10 110 110 / 0.35);
+    transform: translateZ(40px);
+    transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.nx-card3d:hover .nx-card3d__icon { transform: translateZ(52px) scale(1.08); }
+@media (prefers-reduced-motion: reduce) {
+    .nx-card3d:hover .nx-card3d__body,
+    .nx-card3d:hover .nx-card3d__icon { transform: none; }
+}
+/* Bento variant: the 3D icon sits as a background watermark in the bottom-right,
+   clipped to the card's rounded corners, behind fully-opaque text. */
+.nx-card3d__body--bento {
+    overflow: hidden;
+    min-height: 190px;
+}
+.nx-card3d__bg {
+    z-index: 0;
+    transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.nx-card3d:hover .nx-card3d__bg { transform: scale(1.06); }
+/* Text content always paints above the watermark, unaffected by its fade. */
+.nx-card3d__body--bento > h3,
+.nx-card3d__body--bento > p,
+.nx-card3d__body--bento > span:not(.nx-card3d__glass):not(.nx-card3d__bg) {
+    z-index: 2;
+}
+@media (prefers-reduced-motion: reduce) {
+    .nx-card3d:hover .nx-card3d__bg { transform: none; }
+}
+
+/* --- Floating-light promo card (after ayman-ashine) ------------------------ */
+.nx-float-card {
+    position: relative;
+    overflow: hidden;
+    border-radius: 1.25rem;
+    padding: 1.25rem;
+    background: linear-gradient(150deg, #10243c, #0d1b2a);
+    border: 1px solid rgb(255 255 255 / 0.08);
+}
+.nx-float-card__light {
+    position: absolute;
+    top: -3.5rem;
+    right: -2rem;
+    width: 10rem;
+    height: 10rem;
+    border-radius: 9999px;
+    background: radial-gradient(circle, rgb(212 160 23 / 0.5), transparent 65%);
+    animation: nx-float-drift 6s ease-in-out infinite alternate;
+    pointer-events: none;
+}
+.nx-float-card__ring {
+    position: absolute;
+    bottom: -4rem;
+    left: -2.5rem;
+    width: 9rem;
+    height: 9rem;
+    border-radius: 9999px;
+    border: 1.5px solid rgb(10 110 110 / 0.5);
+    animation: nx-float-drift 7s ease-in-out infinite alternate-reverse;
+    pointer-events: none;
+}
+@keyframes nx-float-drift {
+    from { transform: translate3d(0, 0, 0); }
+    to { transform: translate3d(-0.9rem, 0.7rem, 0) scale(1.08); }
+}
+@media (prefers-reduced-motion: reduce) {
+    .nx-float-card__light, .nx-float-card__ring { animation: none; }
+}
+
+/* --- Day/night theme scene (after witer33's phone toggle) ------------------ */
+.nx-theme-scene {
+    position: relative;
+    overflow: hidden;
+    border-radius: 1rem;
+    padding: 1.5rem;
+    border: 1px solid rgb(226 232 240 / 0.9);
+    transition: background 0.6s ease, border-color 0.6s ease;
+    background: linear-gradient(160deg, #d9f0f0 0%, #f6fbfb 60%);
+}
+.nx-theme-scene.is-night {
+    border-color: rgb(45 64 96);
+    background: linear-gradient(160deg, #0d1b2a 0%, #10243c 70%);
+}
+.nx-theme-scene__sky { position: absolute; inset: 0; pointer-events: none; }
+.nx-theme-scene__orb {
+    position: absolute;
+    top: 0.9rem;
+    right: 5.5rem;
+    width: 2.6rem;
+    height: 2.6rem;
+    border-radius: 9999px;
+    background: radial-gradient(circle at 35% 35%, #f4c430, #d4a017);
+    box-shadow: 0 0 24px rgb(212 160 23 / 0.55);
+    transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1), background 0.7s, box-shadow 0.7s;
+}
+.is-night .nx-theme-scene__orb {
+    transform: translateX(-3.5rem) scale(0.9);
+    background: radial-gradient(circle at 62% 35%, #f1f5f9, #94a3b8);
+    box-shadow: 0 0 18px rgb(148 163 184 / 0.45);
+}
+.nx-theme-scene__cloud {
+    position: absolute;
+    height: 0.75rem;
+    border-radius: 9999px;
+    background: rgb(255 255 255 / 0.85);
+    transition: opacity 0.6s;
+}
+.nx-theme-scene__cloud--1 { top: 1.2rem; right: 2rem; width: 3.2rem; }
+.nx-theme-scene__cloud--2 { top: 2.6rem; right: 8.6rem; width: 2.4rem; }
+.is-night .nx-theme-scene__cloud { opacity: 0; }
+.nx-theme-scene__star {
+    position: absolute;
+    width: 0.28rem;
+    height: 0.28rem;
+    border-radius: 9999px;
+    background: #e2e8f0;
+    opacity: 0;
+    transition: opacity 0.6s;
+}
+.nx-theme-scene__star--1 { top: 1.1rem; right: 2.4rem; }
+.nx-theme-scene__star--2 { top: 2.4rem; right: 4.4rem; transition-delay: 0.15s; }
+.nx-theme-scene__star--3 { top: 0.9rem; right: 7.8rem; transition-delay: 0.3s; }
+.is-night .nx-theme-scene__star { opacity: 1; }
+.nx-theme-scene__switch {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    width: 3.6rem;
+    height: 2rem;
+    flex-shrink: 0;
+    border-radius: 9999px;
+    border: 1px solid rgb(203 213 225);
+    background: rgb(255 255 255 / 0.8);
+    transition: background 0.5s, border-color 0.5s;
+}
+.is-night .nx-theme-scene__switch {
+    border-color: rgb(45 64 96);
+    background: rgb(13 27 42 / 0.85);
+}
+.nx-theme-scene__knob {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 9999px;
+    margin-left: 0.2rem;
+    background: #fff;
+    box-shadow: 0 1px 4px rgb(13 27 42 / 0.25);
+    transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1), background 0.45s;
+}
+.is-night .nx-theme-scene__knob {
+    transform: translateX(1.55rem);
+    background: #243352;
+}
+@media (prefers-reduced-motion: reduce) {
+    .nx-theme-scene, .nx-theme-scene__orb, .nx-theme-scene__knob { transition: none; }
+}
+
+/* --- Collapsible top-up card (after Na3ar-17) ------------------------------ */
+.nx-topup { overflow: hidden; }
+
+/* --- Flag marquee (Module 27.5 — premium "no borders" flag carousels) -------
+   Two rows scrolling in opposite directions. The track holds the flags twice so
+   a -50% translate loops seamlessly. Paused for reduced-motion. */
+.nx-marquee { overflow: hidden; -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); }
+.nx-marquee__track { display: flex; width: max-content; gap: 1rem; will-change: transform; }
+.nx-marquee__track--ltr { animation: nx-marquee-ltr 42s linear infinite; }
+.nx-marquee__track--rtl { animation: nx-marquee-rtl 42s linear infinite; }
+.nx-marquee:hover .nx-marquee__track { animation-play-state: paused; }
+@keyframes nx-marquee-ltr { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+@keyframes nx-marquee-rtl { from { transform: translateX(-50%); } to { transform: translateX(0); } }
+@media (prefers-reduced-motion: reduce) {
+    .nx-marquee__track--ltr, .nx-marquee__track--rtl { animation: none; }
+}
+
+/* --- Hero flag orbit (premium "connections across borders" overlay) ---------
+   Floating flag/comms nodes over the WebGL hero, joined by faint gold "signal"
+   lines whose dash flows to feel alive. Static for reduced-motion. */
+.nx-orbit__line { stroke-dasharray: 5 9; animation: nx-signal 2.6s linear infinite; }
+.nx-orbit__node { animation: nx-float-a 6s ease-in-out infinite; }
+.nx-orbit__node:nth-child(3n) { animation-name: nx-float-b; animation-duration: 7.5s; }
+.nx-orbit__node:nth-child(3n+1) { animation-name: nx-float-c; animation-duration: 8.5s; }
+@keyframes nx-signal { to { stroke-dashoffset: -140; } }
+@keyframes nx-float-a { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+@keyframes nx-float-b { 0%,100% { transform: translateY(0); } 50% { transform: translateY(9px); } }
+@keyframes nx-float-c { 0%,100% { transform: translateY(-6px); } 50% { transform: translateY(7px); } }
+@media (prefers-reduced-motion: reduce) {
+    .nx-orbit__line { animation: none; }
+    .nx-orbit__node { animation: none; }
+}
+
+/* --- Stripe-inspired gradient text (premium headline treatment) -------------
+   Brand-reactive: two of the three stops follow the admin brand vars, so a
+   re-skin flows through. Animated sheen (paused for reduced-motion). */
+.nx-gradient-text {
+    background-image: linear-gradient(100deg,
+        rgb(var(--brand-primary)) 0%,
+        #2dd4bf 42%,
+        rgb(var(--brand-accent)) 100%);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+    animation: nx-gradient-pan 8s ease-in-out infinite;
+}
+.dark .nx-gradient-text {
+    background-image: linear-gradient(100deg,
+        #5eead4 0%,
+        #2dd4bf 40%,
+        #f0c04a 100%);
+}
+@keyframes nx-gradient-pan { 0%, 100% { background-position: 0% center; } 50% { background-position: 100% center; } }
+@media (prefers-reduced-motion: reduce) { .nx-gradient-text { animation: none; } }
+
+/* --- Wizard launcher: refined brand-gradient edge (subtle, professional) ----
+   Toned down (owner request): the launcher sits next to Nia's own conic halo,
+   so a single soft edge-glow here — not a second rotating aurora — keeps the
+   two from competing. Kept deliberately faint. */
+.nx-wiz-glow { animation: nx-wiz-glow 5s ease-in-out infinite; }
+@keyframes nx-wiz-glow { 0%, 100% { opacity: 0.12; } 50% { opacity: 0.24; } }
+@media (prefers-reduced-motion: reduce) { .nx-wiz-glow { animation: none; opacity: 0.16; } }
+
+/* BUILD-3 §4: "Confused? Use The Wizard" attention state on the eSIM / Number
+   sections — the launcher gives a gentle swell toward the screen. Transform
+   only (no rotating electric halo any more — it doubled up with Nia's glow and
+   read as noise), so it holds 60fps on low-end devices and stays calm; fully
+   stilled for reduced-motion. */
+.nx-wiz-swell { animation: nx-wiz-swell 3.2s ease-in-out infinite; will-change: transform; }
+@keyframes nx-wiz-swell {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    50% { transform: translate(-2px, -4px) scale(1.03); }
+}
+@media (prefers-reduced-motion: reduce) {
+    .nx-wiz-swell { animation: none; }
+}
+
+/* In-call control buttons (dialer live screen). The mute button swaps its
+   icon + label and fills when engaged; speaker just fills. Driven by
+   aria-pressed, which dialer.js toggles from the live Twilio call state. */
+.nx-callctl-off { display: none; }
+.nx-callctl[aria-pressed="true"] .nx-callctl-on { display: none; }
+.nx-callctl[aria-pressed="true"] .nx-callctl-off { display: inline; }
+.nx-callctl[aria-pressed="true"] .nx-callctl-btn { background: #ffffff; color: #0D1B2A; }
+.nx-callctl[aria-pressed="true"] { color: #ffffff; }
+
+/* =============================================================================
+ * Theme toggle — sun/moon switch (Uiverse.io by RiccardoRapelli, rebuilt on
+ * brand). BLUEPRINT-batch1-sections §2. Class-scoped (no global IDs) so it can
+ * appear twice on one page (mobile header + desktop rail) as valid HTML, and
+ * brand-tokenised (day track = teal, night track = navy, sun = warm gold accent)
+ * so it re-tints with Branding colours. Reduced-motion disables the ambient
+ * cloud/star/rotation motion. The Alpine behavioural contract is unchanged.
+ * ========================================================================== */
+.nx-switch { position: relative; display: inline-block; width: 60px; height: 34px; }
+.nx-switch input { position: absolute; opacity: 0; width: 0; height: 0; }
+.nx-switch .slider { position: absolute; inset: 0; cursor: pointer; z-index: 0; overflow: hidden;
+  border-radius: 34px; transition: .4s; background: rgb(var(--brand-primary)); }
+.nx-switch input:focus-visible + .slider { box-shadow: 0 0 0 2px rgb(var(--brand-accent)); }
+.nx-switch input:checked + .slider { background: rgb(var(--brand-navy)); }
+
+.nx-switch .sun-moon { position: absolute; height: 26px; width: 26px; left: 4px; bottom: 4px;
+  border-radius: 50%; background: rgb(var(--brand-accent)); transition: .4s; }
+.nx-switch input:checked + .slider .sun-moon { transform: translateX(26px); background: #f2f4f8;
+  animation: nx-tg-rotate .6s ease-in-out both; }
+@keyframes nx-tg-rotate { 0%{ transform: translateX(26px) rotate(0) } 100%{ transform: translateX(26px) rotate(-90deg) } }
+
+.nx-switch .moon-dot { position: absolute; border-radius: 50%; background: #c3c9d4; opacity: 0; transition: .4s; }
+.nx-switch input:checked + .slider .sun-moon .moon-dot { opacity: 1; }
+.nx-switch .moon-dot.d1 { left: 10px; top: 3px; width: 6px; height: 6px; }
+.nx-switch .moon-dot.d2 { left: 2px; top: 10px; width: 10px; height: 10px; }
+.nx-switch .moon-dot.d3 { left: 16px; top: 18px; width: 3px; height: 3px; }
+
+.nx-switch .light-ray { position: absolute; border-radius: 50%; background: #ffffff; opacity: .1; }
+.nx-switch .light-ray.r1 { left: -8px; top: -8px; width: 43px; height: 43px; }
+.nx-switch .light-ray.r2 { left: -13px; top: -13px; width: 55px; height: 55px; }
+.nx-switch .light-ray.r3 { left: -18px; top: -18px; width: 60px; height: 60px; }
+.nx-switch input:checked + .slider .light-ray { opacity: 0; }
+
+.nx-switch .cloud { position: absolute; border-radius: 50%; background: #eef1f6; opacity: .9;
+  animation: nx-tg-cloud 6s infinite ease-in-out; }
+.nx-switch .cloud.c1 { left: 30px; top: 15px; width: 20px; height: 20px; }
+.nx-switch .cloud.c2 { left: 44px; top: 10px; width: 12px; height: 12px; animation-delay: 1s; }
+.nx-switch .cloud.c3 { left: 22px; top: 22px; width: 16px; height: 16px; animation-delay: .4s; }
+.nx-switch input:checked + .slider .cloud { opacity: 0; }
+@keyframes nx-tg-cloud { 0%,100%{ transform: translateX(0) } 40%{ transform: translateX(3px) } 80%{ transform: translateX(-3px) } }
+
+.nx-switch .stars { position: absolute; inset: 0; transform: translateY(-30px); opacity: 0; transition: .4s; }
+.nx-switch input:checked + .slider .stars { transform: translateY(0); opacity: 1; }
+.nx-switch .star { position: absolute; border-radius: 50%; background: #ffffff; animation: nx-tg-twinkle 2s infinite ease-in-out; }
+.nx-switch .star.s1 { width: 4px; height: 4px; top: 6px; left: 8px; }
+.nx-switch .star.s2 { width: 3px; height: 3px; top: 16px; left: 6px; animation-delay: .4s; }
+.nx-switch .star.s3 { width: 3px; height: 3px; top: 20px; left: 14px; animation-delay: .6s; }
+.nx-switch .star.s4 { width: 4px; height: 4px; top: 5px; left: 20px; animation-delay: 1.1s; }
+@keyframes nx-tg-twinkle { 0%,100%{ transform: scale(1) } 40%{ transform: scale(1.35) } 80%{ transform: scale(.7) } }
+
+@media (prefers-reduced-motion: reduce) {
+  .nx-switch .cloud, .nx-switch .star, .nx-switch input:checked + .slider .sun-moon { animation: none; }
+}
+
+/* =============================================================================
+ * "Invisible until you need it" header (BLUEPRINT-batch1-sections §1). A soft
+ * gradient-fade glass surface with NO hard border — the header's own background
+ * fades to transparent at the bottom so scrolling content passes under it with
+ * no visible edge. Theme-aware via the brand surface tokens (white / navy), so
+ * it re-tints automatically. Direct children (logo, action buttons) stay fully
+ * opaque and get a subtle drop-shadow so they keep contrast over busy content.
+ * ========================================================================== */
+/* No backdrop-filter here on purpose (perf + glitch fix): a full-width fixed
+   header blurring the whole page on every scroll frame was the heaviest GPU cost
+   on the platform, and its backdrop-filter created a containing block that
+   trapped `fixed` descendants (menus/modals) inside the header's box. The
+   gradient fade alone keeps the soft "invisible header" look; the top stop is
+   firmed slightly so labels stay readable over busy content without any blur.
+
+   Owner-reported bug: the old 55%→100% fade started ITS transition while the
+   logo/icon row was still inside that zone, so a bold heading or stat number
+   scrolling underneath (e.g. Merchant Invoices' "‹ Clients" link) visibly
+   bled through and collided with the logo. Held flat at 95% through 70% of
+   the header's own height now — comfortably past the logo/icon row on every
+   page — and the fade to transparent is compressed into the last 30%, which
+   is just the empty bottom padding, never actual header content. */
+.nx-header-fade {
+  background: linear-gradient(to bottom, rgb(255 255 255 / .95) 0%, rgb(255 255 255 / .95) 70%, rgb(255 255 255 / 0) 100%);
+  border-bottom: none;
+}
+.dark .nx-header-fade {
+  background: linear-gradient(to bottom, rgb(var(--brand-navy) / .95) 0%, rgb(var(--brand-navy) / .95) 70%, rgb(var(--brand-navy) / 0) 100%);
+}
+/* =============================================================================
+ * Dashboard home hero (reference-matched). Text left, photo bleeding into the
+ * top-right with NO card/border — the image is FADED into the page background on
+ * its left and bottom edges by a mask, so it dissolves with no hard edge. Because
+ * the mask fades to transparent, it blends to whatever is behind it: a faint,
+ * light dissolve on the light background and a deeper one on the dark navy — no
+ * per-theme colour needed. The subject sits on the right (object-position) so it
+ * stays visible while the left melts under the headline.
+ * ========================================================================== */
+/* Height follows the CONTENT (headline + subtitle + pills) — no fixed min-height,
+   so there is never dead space between the CTAs and the card below. The image is
+   absolutely positioned (it never adds layout height) and simply tracks the text
+   block's height, with a floor so it always reads as a proper hero. */
+.nx-home-hero { position: relative; }
+.nx-home-hero__media {
+  position: absolute;
+  top: -0.5rem;
+  right: -1.25rem;
+  width: 58%;
+  max-width: 26rem;
+  height: calc(100% + 1rem);
+  min-height: 13.5rem;
+  pointer-events: none;
+  z-index: 0;
+}
+.nx-home-hero__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: right top;
+  /* Fade the left edge (into the headline) AND the bottom edge (clearing the CTA
+     row so the pills sit on clean background, like the reference) — intersect so
+     the image only shows where BOTH are opaque. */
+  -webkit-mask-image: linear-gradient(to left, #000 36%, transparent 86%),
+                      linear-gradient(to bottom, #000 46%, transparent 82%);
+  -webkit-mask-composite: source-in;
+  mask-image: linear-gradient(to left, #000 36%, transparent 86%),
+              linear-gradient(to bottom, #000 46%, transparent 82%);
+  mask-composite: intersect;
+}
+/* Fallback for the rare engine without mask-composite: a single left-fade so the
+   image never shows a hard vertical edge against the text. */
+@supports not ((mask-composite: intersect) or (-webkit-mask-composite: source-in)) {
+  .nx-home-hero__img {
+    -webkit-mask-image: linear-gradient(to left, #000 38%, transparent 88%);
+    mask-image: linear-gradient(to left, #000 38%, transparent 88%);
+  }
+}
+
+/* Hero headline accent (owner request — shared by the dashboard home hero and
+   the Naara Gift hero). The brand gradient reads fine in light mode against a
+   light hero, but several Theme Presets (Paperwhite, Capable, Aries…) set a
+   near-black primary/accent — unmodified, that gradient would render as
+   dark-on-dark and vanish against the dark navy hero in dark mode. In dark
+   mode only, both stops are mixed toward white so the headline stays legible
+   no matter how dark the active theme's raw brand colours are. */
+.nx-hero-accent {
+  background: linear-gradient(to right, rgb(var(--brand-primary)), rgb(var(--brand-accent)));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.dark .nx-hero-accent {
+  background: linear-gradient(to right,
+    color-mix(in srgb, rgb(var(--brand-primary)) 45%, white),
+    color-mix(in srgb, rgb(var(--brand-accent)) 45%, white));
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+/* Fallback for engines without color-mix: a plain, guaranteed-legible white
+   headline in dark mode rather than risking an invisible dark-on-dark one. */
+@supports not (color: color-mix(in srgb, red, blue)) {
+  .dark .nx-hero-accent {
+    background: none;
+    -webkit-background-clip: initial;
+    background-clip: initial;
+    color: #fff;
+  }
+}
+/* Same dark-mode legibility floor as .nx-hero-accent above, for a plain
+   (non-gradient) themed icon/label sitting on a dark surface — e.g. the hero's
+   secondary CTA icon. */
+.nx-icon-accent { color: rgb(var(--brand-primary)); }
+.dark .nx-icon-accent { color: color-mix(in srgb, rgb(var(--brand-primary)) 55%, white); }
+@supports not (color: color-mix(in srgb, red, blue)) {
+  .dark .nx-icon-accent { color: #fff; }
+}
+.nx-header-fade > * { filter: drop-shadow(0 1px 2px rgb(15 23 42 / .12)); }
+.dark .nx-header-fade > * { filter: drop-shadow(0 1px 3px rgb(0 0 0 / .45)); }

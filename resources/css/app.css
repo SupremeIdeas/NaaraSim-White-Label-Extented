@@ -1,0 +1,165 @@
+/* Branded UI elements adapted from the hand-picked Uiverse set (Module 32).
+   Vite resolves and inlines this at build time — one bundle, CSP-safe. */
+@import './ui-elements.css';
+
+/* Section Builder — hero + preview styling (universal page builder). */
+@import './sections.css';
+
+/* NaaraCare "Nia" chat glow (BUILD-3 §5) — scoped to the Nia input + AI bubbles. */
+@import './nia-glow.css';
+
+/* Preloader Studio presets (brand-aware, compiled — never inline). */
+@import './preloaders.css';
+
+/* Country flags — self-hosted SVG set (flag-icons, MIT), bundled at build so
+   no CDN is touched. Used via `fi fi-ng` classes (Module 27.5). */
+@import 'flag-icons/css/flag-icons.min.css';
+
+/* --- Brand fonts (self-hosted; no external CDN, CSP-safe). Module 26. -----
+   Titles & headings: "Supreme Display" (the Supreme Ideas Agency custom font).
+   Body text:          "Didact Gothic" (Google, self-hosted woff2).
+   Swap either file in public/fonts and keep these names to re-brand. */
+@font-face {
+    font-family: 'Supreme Display';
+    src: url('/fonts/supreme-display.ttf') format('truetype');
+    font-weight: 400 900;
+    font-style: normal;
+    font-display: swap;
+}
+@font-face {
+    font-family: 'Didact Gothic';
+    src: url('/fonts/didact-gothic.woff2') format('woff2');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+/* --- Brand palette defaults (Module 26). Channel triples so Tailwind's
+   `rgb(var(--brand-*) / <alpha>)` colours + /opacity utilities work. The admin
+   Branding page injects an override <style> in the layout head to recolour the
+   whole platform at runtime — no rebuild. --brand-radius scales button/input
+   roundness. */
+:root {
+    --brand-primary: 10 110 110;      /* Deep Teal   #0A6E6E */
+    --brand-primary-dark: 8 85 85;    /* Teal Dark   #085555 */
+    --brand-accent: 212 160 23;       /* Warm Gold   #D4A017 */
+    /* Text/icon-safe darkened accent (color-system skill, §05 "Badges, tags
+       and status pills"): the raw accent value is tuned to look good as a
+       FILL (buttons, gradient orbs, hero glows), not as small text or an
+       icon directly on a white/near-white surface — measured contrast for
+       --brand-accent on white is ~2.4:1, well under the WCAG 4.5:1 text /
+       3:1 UI-component floor. --brand-accent-dark is the same hue mixed
+       toward black until it clears 4.5:1 on white (30% for the shipped
+       gold); every `text-accent`/`fill-accent` instance that sits on a
+       plain or lightly-tinted light surface should use `-dark` instead,
+       reserving the bare accent for use on dark/saturated backgrounds
+       (navy cards, primary gradients) where it already contrasts well. */
+    --brand-accent-dark: 148 112 16;
+    --brand-navy: 13 27 42;           /* Midnight Navy #0D1B2A */
+    --brand-action: 232 65 42;        /* Coral Red   #E8412A */
+    --brand-radius: 0.5rem;           /* default control roundness */
+
+    /* Site-wide font override (admin Branding page). Defaults to the shipped
+       Naara fonts so an unconfigured install is byte-identical to before —
+       the quoted names match the @font-face declarations above exactly. */
+    --font-display: 'Supreme Display';
+    --font-sans: 'Didact Gothic';
+
+    /* Dark-mode card-surface tones (theme-coverage audit, owner request: card
+       containers site-wide must repaint with the active theme instead of
+       staying frozen on Naara's own navy). Each is one step lighter than
+       --brand-navy for visual elevation against the page background — fixed
+       hex fallback for engines without color-mix, overridden below on ones
+       that support it. These derive from --brand-navy rather than carrying
+       their own hex so they automatically follow whatever navy is active:
+       Naara Official's own navy here, or the one shared dark palette every
+       other preset collapses to in dark mode (ThemePreset::styleCss()) — so
+       card surfaces always match the sidebar/nav chrome instead of clashing
+       with it. Approximate, not pixel-identical to the original hex — see
+       .nx-hero-accent for the same documented tradeoff. */
+    --brand-card-dark: #1A2840;         /* card fill, was dark:bg-[#1A2840] */
+    --brand-card-border-dark: #2D4060;  /* card border, was dark:border-[#2D4060] */
+    --brand-card-inner-dark: #152238;   /* nested/inner tile, was dark:bg-[#152238] */
+    --brand-card-hover-dark: #1B2A44;   /* hover tint, was dark:hover:bg-[#1B2A44] */
+}
+@supports (color: color-mix(in srgb, red, blue)) {
+    :root {
+        --brand-card-dark: color-mix(in srgb, rgb(var(--brand-navy)) 92%, white 8%);
+        --brand-card-border-dark: color-mix(in srgb, rgb(var(--brand-navy)) 82%, white 18%);
+        --brand-card-inner-dark: color-mix(in srgb, rgb(var(--brand-navy)) 96%, white 4%);
+        --brand-card-hover-dark: color-mix(in srgb, rgb(var(--brand-navy)) 89%, white 11%);
+    }
+}
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    /* Body copy defaults to Didact Gothic (the `sans` family). The CSS variable
+       is read first so the admin font system (site-wide override) can repaint
+       every element at runtime; theme('fontFamily.sans') is the static
+       fallback stack if --font-sans is ever unset. */
+    body {
+        font-family: var(--font-sans), theme('fontFamily.sans');
+    }
+    /* Titles & headings use the branded display font. */
+    h1, h2, h3, h4, h5, h6 {
+        font-family: var(--font-display), theme('fontFamily.display');
+        letter-spacing: -0.01em;
+    }
+}
+
+/* Utility to force the display font on any element (e.g. the wordmark). */
+.font-display {
+    font-family: var(--font-display), theme('fontFamily.display');
+}
+
+/* Hide Alpine-cloaked elements until Alpine initializes (prevents icon flash). */
+[x-cloak] {
+    display: none !important;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Sleek, on-brand scrollbars (owner request). The default OS scrollbar looked
+   chunky and off-brand on the desktop side menu and inside modals. This makes
+   every scrollable surface a thin, rounded, subtle bar — slate in light mode,
+   soft white in dark — that warms to the brand teal on hover. Overlay-friendly
+   (transparent track, inset thumb) so it never fights the glass panels.
+   ───────────────────────────────────────────────────────────────────────── */
+* {
+    scrollbar-width: thin;                              /* Firefox */
+    scrollbar-color: rgb(100 116 139 / 0.40) transparent;
+}
+*::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+*::-webkit-scrollbar-track {
+    background: transparent;
+}
+*::-webkit-scrollbar-thumb {
+    background-color: rgb(100 116 139 / 0.38);
+    border-radius: 9999px;
+    border: 2px solid transparent;                      /* inset the thumb */
+    background-clip: content-box;
+}
+*::-webkit-scrollbar-thumb:hover {
+    background-color: rgb(10 110 110 / 0.65);            /* brand teal on hover */
+    background-clip: content-box;
+}
+*::-webkit-scrollbar-corner {
+    background: transparent;
+}
+/* Dark mode — the theme toggles `.dark` on <html>. */
+.dark * {
+    scrollbar-color: rgb(255 255 255 / 0.16) transparent;
+}
+.dark *::-webkit-scrollbar-thumb {
+    background-color: rgb(255 255 255 / 0.16);
+    background-clip: content-box;
+}
+.dark *::-webkit-scrollbar-thumb:hover {
+    background-color: rgb(45 212 191 / 0.55);           /* bright teal on hover */
+    background-clip: content-box;
+}

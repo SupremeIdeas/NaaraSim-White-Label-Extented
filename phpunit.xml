@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
+         bootstrap="vendor/autoload.php"
+         colors="true"
+>
+    <testsuites>
+        <testsuite name="Unit">
+            <directory>tests/Unit</directory>
+        </testsuite>
+        <testsuite name="Feature">
+            <directory>tests/Feature</directory>
+        </testsuite>
+    </testsuites>
+    <source>
+        <include>
+            <directory>app</directory>
+        </include>
+    </source>
+    <php>
+        <env name="APP_ENV" value="testing"/>
+        <env name="APP_MAINTENANCE_DRIVER" value="file"/>
+        <env name="BCRYPT_ROUNDS" value="4"/>
+        <env name="CACHE_STORE" value="array"/>
+        <env name="ADMIN_REQUIRE_2FA" value="false"/>
+        <env name="DB_CONNECTION" value="sqlite"/>
+        <env name="DB_DATABASE" value=":memory:"/>
+        <env name="MAIL_MAILER" value="array"/>
+        <env name="PULSE_ENABLED" value="false"/>
+        <env name="QUEUE_CONNECTION" value="sync"/>
+        <env name="SESSION_DRIVER" value="array"/>
+        <env name="TELESCOPE_ENABLED" value="false"/>
+        <!-- Provider keys are blank in tests so ProviderStatus is deterministic
+             regardless of the real credentials in a dev/live .env. Tests opt a
+             provider "active" explicitly via config() when they need it. -->
+
+        <env name="ESIMGO_API_KEY" value=""/>
+        <env name="QUIBITY_API_KEY" value=""/>
+        <env name="AIRALO_CLIENT_ID" value=""/>
+        <env name="AIRALO_CLIENT_SECRET" value=""/>
+        <env name="GETATEXT_API_KEY" value=""/>
+        <env name="FIVESIM_API_KEY" value=""/>
+        <env name="HEROSMS_API_KEY" value=""/>
+        <env name="VIRTSMS_API_KEY" value=""/>
+        <env name="TWILIO_ACCOUNT_SID" value=""/>
+        <env name="TWILIO_AUTH_TOKEN" value=""/>
+        <env name="TELNYX_API_KEY" value=""/>
+        <env name="ZENDIT_API_KEY" value=""/>
+        <env name="ZENDIT_SANDBOX" value="false"/>
+        <env name="ONEGLOBAL_CLIENT_ID" value=""/>
+        <env name="ONEGLOBAL_CLIENT_SECRET" value=""/>
+        <env name="MONTYMOBILE_API_KEY" value=""/>
+        <env name="GIGS_API_KEY" value=""/>
+        <env name="GIGS_PROJECT" value=""/>
+    </php>
+</phpunit>

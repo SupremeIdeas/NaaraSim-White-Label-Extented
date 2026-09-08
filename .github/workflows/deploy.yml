@@ -1,0 +1,71 @@
+name: Deploy
+
+# Build, test, then deploy on push to the default branch (blueprint Section
+# 22.3). The SSH deploy step only runs when the required secrets are present,
+# so forks and key-less setups still get a green build.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite, gd
+          coverage: none
+
+      - name: Install Composer dependencies
+        run: composer install --prefer-dist --no-interaction --no-progress --no-dev --optimize-autoloader
+
+      - name: Install & build assets
+        run: npm ci && npm run build
+
+      - name: Prepare environment
+        run: cp .env.example .env && php artisan key:generate
+
+      - name: Run tests
+        run: |
+          composer install --prefer-dist --no-interaction --no-progress
+          vendor/bin/phpunit
+
+  deploy:
+    needs: build-test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy over SSH
+        if: ${{ secrets.DEPLOY_SSH_KEY != '' }}
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          script: |
+            cd ${{ secrets.DEPLOY_PATH }}
+            php artisan down --retry=15
+            git pull --ff-only
+            composer install --no-dev --optimize-autoloader --no-interaction
+            npm ci && npm run build
+            php artisan migrate --force
+            php artisan config:cache
+            php artisan route:cache
+            php artisan view:cache
+            php artisan icons:cache
+            php artisan horizon:terminate
+            php artisan up
+
+      - name: Note when deploy secrets are absent
+        if: ${{ secrets.DEPLOY_SSH_KEY == '' }}
+        run: echo "No DEPLOY_SSH_KEY secret set — build verified, SSH deploy skipped."

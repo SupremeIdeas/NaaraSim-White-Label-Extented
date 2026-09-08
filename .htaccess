@@ -1,0 +1,39 @@
+# NaaraSim — shared-hosting front door (cPanel / LiteSpeed / Apache).
+#
+# WHY THIS FILE EXISTS
+# Laravel serves from the `public/` folder, but on most cPanel accounts the
+# domain's document root is `public_html/` (which you often cannot change on the
+# primary domain). If you upload the whole project into `public_html`, a request
+# for `/install` looks for `public_html/install` — which does not exist — and the
+# server returns its own "404 Not Found". This file fixes that by routing every
+# request INTO Laravel's `public/` web root, so the app runs from `public_html`
+# with no document-root change. Files outside `public/` (.env, app/, config/,
+# vendor/ …) are never reachable by URL because their URLs resolve inside
+# `public/`, where they don't exist.
+#
+# PREFERRED ALTERNATIVE (more secure, if your host allows it): point the domain's
+# document root directly at the `public/` folder (cPanel → Domains → edit the
+# document root, append `/public`). If you do that, this file is simply ignored.
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Don't re-route requests that already resolve inside public/ (loop-safe,
+    # and works whether the app is at the domain root or in a subfolder).
+    RewriteCond %{REQUEST_URI} !(^|/)public/
+    RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>
+
+# Belt-and-suspenders: never serve sensitive files even if mod_rewrite is off.
+<FilesMatch "(^\.env|^\.env\..*|composer\.(json|lock)|package(-lock)?\.json|^artisan$|phpunit\.xml|\.gitignore|\.gitattributes)">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</FilesMatch>
+
+# Block access to the whole .git directory if it ever gets uploaded.
+RedirectMatch 404 /\.git

@@ -1,0 +1,25 @@
+{
+  "appId": "sim.naara.app",
+  "appName": "NaaraSim",
+  "webDir": "public",
+  "bundledWebRuntime": false,
+  "server": {
+    "url": "https://app.naara.sim",
+    "cleartext": false,
+    "androidScheme": "https"
+  },
+  "android": {
+    "allowMixedContent": false
+  },
+  "ios": {
+    "contentInset": "always",
+    "limitsNavigationsToAppBoundDomains": true
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 1200,
+      "backgroundColor": "#0D1B2A",
+      "showSpinner": false
+    }
+  }
+}

@@ -1,0 +1,243 @@
+/* =============================================================================
+ * Preloader Studio presets (BLUEPRINT-preloader-studio §2/§5).
+ *
+ * Ported from the supplied Uiverse.io presets, compiled through the normal Vite
+ * pipeline (imported from app.css) — never inline <style> in Blade, so these get
+ * purged/minified/cached like all app CSS.
+ *
+ * Hard rules enforced here:
+ *  - NO hardcoded colours. Every colour is rgb(var(--nx-pl-cN, var(--brand-*)))
+ *    so a Branding colour change re-tints every preset with no resave, and the
+ *    Studio's manual-colour override (--nx-pl-cN) wins when set.
+ *  - Every animation duration is calc(base / var(--nx-pl-speed,1)) so the Studio
+ *    speed slider drives all presets uniformly.
+ *  - Reduced motion handled ONCE at the bottom for every preset by construction.
+ *
+ * Colour slot convention (fallbacks): c1→accent, c2→primary, c3→action,
+ * c4→navy, c5→accent. Scoped under .nx-pl--{slug}; sizing/opacity come from the
+ * wrapper (.nx-pl-wrapper transforms) so partials keep native dimensions.
+ * ========================================================================== */
+
+.nx-pl { --nx-pl-speed: 1; display: flex; align-items: center; justify-content: center; }
+.nx-pl * { box-sizing: border-box; }
+
+/* 1 — Equalizer bars (elijahgummer). */
+.nx-pl--equalizer { position: relative; width: 120px; height: 80px; }
+.nx-pl--equalizer .nx-eq { display: flex; gap: 6px; align-items: flex-end; height: 70px; }
+.nx-pl--equalizer i { width: 10px; height: 70px; display: block; transform-origin: bottom center;
+  border-radius: 20px 20px 0 0; box-shadow: 5px 10px 20px inset rgb(var(--nx-pl-c2, var(--brand-primary)) / .8);
+  animation: nx-eq calc(1.2s / var(--nx-pl-speed)) linear infinite; }
+.nx-pl--equalizer i:nth-child(1){animation-delay:.1s} .nx-pl--equalizer i:nth-child(2){animation-delay:.2s}
+.nx-pl--equalizer i:nth-child(3){animation-delay:.3s} .nx-pl--equalizer i:nth-child(4){animation-delay:.4s}
+.nx-pl--equalizer i:nth-child(5){animation-delay:.5s} .nx-pl--equalizer i:nth-child(6){animation-delay:.6s}
+.nx-pl--equalizer i:nth-child(7){animation-delay:.7s} .nx-pl--equalizer i:nth-child(8){animation-delay:.8s}
+@keyframes nx-eq { 0%{transform:scaleY(.1);background:transparent} 50%{transform:scaleY(1);background:rgb(var(--nx-pl-c2, var(--brand-primary)))} 100%{transform:scaleY(.1);background:transparent} }
+
+/* 2 — Signal rings (paesjr). Concentric wifi-style rings. */
+.nx-pl--wifi-rings { width: 86px; height: 86px; position: relative; display: flex; align-items: center; justify-content: center; }
+.nx-pl--wifi-rings svg { position: absolute; display: flex; align-items: center; justify-content: center; }
+.nx-pl--wifi-rings svg circle { position: absolute; fill: none; stroke-width: 6px; stroke-linecap: round;
+  stroke-linejoin: round; transform: rotate(-100deg); transform-origin: center; }
+.nx-pl--wifi-rings svg circle.back { stroke: rgb(var(--brand-navy) / .35); }
+.nx-pl--wifi-rings svg circle.front { stroke: rgb(var(--nx-pl-c1, var(--brand-accent))); }
+.nx-pl--wifi-rings svg.circle-outer { height: 86px; width: 86px; }
+.nx-pl--wifi-rings svg.circle-outer circle { stroke-dasharray: 62.75 188.25; }
+.nx-pl--wifi-rings svg.circle-outer circle.back { animation: nx-wifi-o calc(1.8s / var(--nx-pl-speed)) ease infinite .3s; }
+.nx-pl--wifi-rings svg.circle-outer circle.front { animation: nx-wifi-o calc(1.8s / var(--nx-pl-speed)) ease infinite .15s; }
+.nx-pl--wifi-rings svg.circle-middle { height: 60px; width: 60px; }
+.nx-pl--wifi-rings svg.circle-middle circle { stroke: rgb(var(--nx-pl-c2, var(--brand-primary))); stroke-dasharray: 42.5 127.5; }
+.nx-pl--wifi-rings svg.circle-middle circle.back { animation: nx-wifi-m calc(1.8s / var(--nx-pl-speed)) ease infinite .25s; }
+.nx-pl--wifi-rings svg.circle-middle circle.front { animation: nx-wifi-m calc(1.8s / var(--nx-pl-speed)) ease infinite .1s; }
+.nx-pl--wifi-rings .nx-pl-text { position: absolute; bottom: -34px; font-size: 13px; font-weight: 500;
+  letter-spacing: .2px; color: rgb(var(--nx-pl-c2, var(--brand-primary))); white-space: nowrap; }
+@keyframes nx-wifi-o { 0%{stroke-dashoffset:25} 25%{stroke-dashoffset:0} 65%{stroke-dashoffset:301} 80%,100%{stroke-dashoffset:276} }
+@keyframes nx-wifi-m { 0%{stroke-dashoffset:17} 25%{stroke-dashoffset:0} 65%{stroke-dashoffset:204} 80%,100%{stroke-dashoffset:187} }
+
+/* 3 — Corner beams (satyamchaudharydev). Four gradient beams sweeping the frame. */
+.nx-pl--corner-beams { position: relative; width: 100px; height: 100px; overflow: hidden; }
+.nx-pl--corner-beams span { position: absolute; }
+.nx-pl--corner-beams span:nth-child(1){ top:0; left:-100%; width:100%; height:30px;
+  background: linear-gradient(90deg, transparent, rgb(var(--nx-pl-c1, var(--brand-accent)))); animation: nx-cb1 calc(1s / var(--nx-pl-speed)) linear infinite; }
+.nx-pl--corner-beams span:nth-child(2){ top:-100%; right:0; width:30px; height:100%;
+  background: linear-gradient(180deg, transparent, rgb(var(--nx-pl-c1, var(--brand-accent)))); animation: nx-cb2 calc(1s / var(--nx-pl-speed)) linear infinite .25s; }
+.nx-pl--corner-beams span:nth-child(3){ bottom:0; right:-100%; width:100%; height:30px;
+  background: linear-gradient(270deg, transparent, rgb(var(--nx-pl-c1, var(--brand-accent)))); animation: nx-cb3 calc(1s / var(--nx-pl-speed)) linear infinite .5s; }
+.nx-pl--corner-beams span:nth-child(4){ bottom:-100%; left:0; width:30px; height:100%;
+  background: linear-gradient(360deg, transparent, rgb(var(--nx-pl-c1, var(--brand-accent)))); animation: nx-cb4 calc(1s / var(--nx-pl-speed)) linear infinite .75s; }
+@keyframes nx-cb1 { 0%{left:-100%} 50%,100%{left:100%} }
+@keyframes nx-cb2 { 0%{top:-100%} 50%,100%{top:100%} }
+@keyframes nx-cb3 { 0%{right:-100%} 50%,100%{right:100%} }
+@keyframes nx-cb4 { 0%{bottom:-100%} 50%,100%{bottom:100%} }
+
+/* 4 — Crystal prisms (Z4drus). 3D rotating gems, brand-tinted gradient. */
+.nx-pl--crystals { position: relative; width: 200px; height: 200px; perspective: 800px; }
+.nx-pl--crystals .crystal { position: absolute; top: 50%; left: 50%; width: 60px; height: 60px; opacity: 0;
+  transform-origin: bottom center; border-radius: 10px; visibility: hidden;
+  background: linear-gradient(45deg, rgb(var(--nx-pl-c4, var(--brand-navy))), rgb(var(--nx-pl-c2, var(--brand-primary))));
+  transform: translate(-50%,-50%) rotateX(45deg) rotateZ(0deg);
+  animation: nx-crystal-spin calc(4s / var(--nx-pl-speed)) linear infinite, nx-crystal-emerge calc(2s / var(--nx-pl-speed)) ease-in-out infinite alternate, nx-crystal-fade .3s ease-out forwards; }
+.nx-pl--crystals .crystal:nth-child(2){animation-delay:.3s} .nx-pl--crystals .crystal:nth-child(3){animation-delay:.6s}
+.nx-pl--crystals .crystal:nth-child(4){animation-delay:.9s} .nx-pl--crystals .crystal:nth-child(5){animation-delay:1.2s}
+.nx-pl--crystals .crystal:nth-child(6){animation-delay:1.5s}
+@keyframes nx-crystal-spin { from{transform:translate(-50%,-50%) rotateX(45deg) rotateZ(0)} to{transform:translate(-50%,-50%) rotateX(45deg) rotateZ(360deg)} }
+@keyframes nx-crystal-emerge { 0%,100%{transform:translate(-50%,-50%) scale(.5);opacity:0} 50%{transform:translate(-50%,-50%) scale(1);opacity:1} }
+@keyframes nx-crystal-fade { to{visibility:visible;opacity:.8} }
+
+/* 5 — Orbit rings (Nawsome). Multi-ring SVG; four brand slots. */
+.nx-pl--svg-rings { width: 6em; height: 6em; }
+.nx-pl--svg-rings .pl__ring { animation: nx-ringA calc(2s / var(--nx-pl-speed)) linear infinite; }
+.nx-pl--svg-rings .pl__ring--a { stroke: rgb(var(--nx-pl-c3, var(--brand-action))); }
+.nx-pl--svg-rings .pl__ring--b { animation-name: nx-ringB; stroke: rgb(var(--nx-pl-c1, var(--brand-accent))); }
+.nx-pl--svg-rings .pl__ring--c { animation-name: nx-ringC; stroke: rgb(var(--nx-pl-c2, var(--brand-primary))); }
+.nx-pl--svg-rings .pl__ring--d { animation-name: nx-ringD; stroke: rgb(var(--nx-pl-c4, var(--brand-navy))); }
+@keyframes nx-ringA { from,4%{stroke-dasharray:0 660;stroke-width:20;stroke-dashoffset:-330} 12%{stroke-dasharray:60 600;stroke-width:30;stroke-dashoffset:-335} 32%{stroke-dasharray:60 600;stroke-width:30;stroke-dashoffset:-595} 40%,54%{stroke-dasharray:0 660;stroke-width:20;stroke-dashoffset:-660} 62%{stroke-dasharray:60 600;stroke-width:30;stroke-dashoffset:-665} 82%{stroke-dasharray:60 600;stroke-width:30;stroke-dashoffset:-925} 90%,to{stroke-dasharray:0 660;stroke-width:20;stroke-dashoffset:-990} }
+@keyframes nx-ringB { from,12%{stroke-dasharray:0 220;stroke-width:20;stroke-dashoffset:-110} 20%{stroke-dasharray:20 200;stroke-width:30;stroke-dashoffset:-115} 40%{stroke-dasharray:20 200;stroke-width:30;stroke-dashoffset:-195} 48%,62%{stroke-dasharray:0 220;stroke-width:20;stroke-dashoffset:-220} 70%{stroke-dasharray:20 200;stroke-width:30;stroke-dashoffset:-225} 90%{stroke-dasharray:20 200;stroke-width:30;stroke-dashoffset:-305} 98%,to{stroke-dasharray:0 220;stroke-width:20;stroke-dashoffset:-330} }
+@keyframes nx-ringC { from{stroke-dasharray:0 440;stroke-width:20;stroke-dashoffset:0} 8%{stroke-dasharray:40 400;stroke-width:30;stroke-dashoffset:-5} 28%{stroke-dasharray:40 400;stroke-width:30;stroke-dashoffset:-175} 36%,58%{stroke-dasharray:0 440;stroke-width:20;stroke-dashoffset:-220} 66%{stroke-dasharray:40 400;stroke-width:30;stroke-dashoffset:-225} 86%{stroke-dasharray:40 400;stroke-width:30;stroke-dashoffset:-395} 94%,to{stroke-dasharray:0 440;stroke-width:20;stroke-dashoffset:-440} }
+@keyframes nx-ringD { from,8%{stroke-dasharray:0 440;stroke-width:20;stroke-dashoffset:0} 16%{stroke-dasharray:40 400;stroke-width:30;stroke-dashoffset:-5} 36%{stroke-dasharray:40 400;stroke-width:30;stroke-dashoffset:-175} 44%,50%{stroke-dasharray:0 440;stroke-width:20;stroke-dashoffset:-220} 58%{stroke-dasharray:40 400;stroke-width:30;stroke-dashoffset:-225} 78%{stroke-dasharray:40 400;stroke-width:30;stroke-dashoffset:-395} 86%,to{stroke-dasharray:0 440;stroke-width:20;stroke-dashoffset:-440} }
+
+/* 6 — Pulsing cubes (ahmedyasserdev). */
+.nx-pl--cube-pulse { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; width: 80px; height: 80px;
+  transform: rotate(45deg); animation: nx-cube-rot calc(2s / var(--nx-pl-speed)) cubic-bezier(.6,.2,.1,1) infinite; }
+.nx-pl--cube-pulse .cube { width: 35px; height: 35px; border-radius: 12px;
+  background: linear-gradient(145deg, rgb(var(--nx-pl-c1, var(--brand-accent))), rgb(var(--nx-pl-c2, var(--brand-primary))));
+  box-shadow: 0 0 12px rgb(var(--nx-pl-c1, var(--brand-accent)) / .6), inset 0 0 8px rgb(var(--nx-pl-c1, var(--brand-accent)) / .8);
+  animation: nx-cube-pulse calc(1.6s / var(--nx-pl-speed)) ease-in-out infinite; }
+.nx-pl--cube-pulse .cube:nth-child(2){animation-delay:.2s} .nx-pl--cube-pulse .cube:nth-child(3){animation-delay:.4s} .nx-pl--cube-pulse .cube:nth-child(4){animation-delay:.6s}
+@keyframes nx-cube-pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.3)} }
+@keyframes nx-cube-rot { 0%{transform:rotate(45deg)} 50%{transform:rotate(225deg)} 100%{transform:rotate(405deg)} }
+
+/* 7 — Dot blast (Avishek). Neutral-by-design spark burst (allow_neutral). */
+.nx-pl--dot-blast { width: 48px; height: 48px; position: relative; }
+.nx-pl--dot-blast::before, .nx-pl--dot-blast::after { content: ''; position: absolute; left: 50%; top: 50%;
+  transform: translate(-50%,-50%); width: 48em; height: 48em; border-radius: 50%; font-size: .5px; background-repeat: no-repeat; }
+.nx-pl--dot-blast::before {
+  background-image: radial-gradient(circle 10px, rgb(var(--nx-pl-c1, var(--brand-accent))) 100%, transparent 0),
+    radial-gradient(circle 10px, rgb(var(--nx-pl-c1, var(--brand-accent))) 100%, transparent 0),
+    radial-gradient(circle 10px, rgb(var(--nx-pl-c1, var(--brand-accent))) 100%, transparent 0),
+    radial-gradient(circle 10px, rgb(var(--nx-pl-c1, var(--brand-accent))) 100%, transparent 0),
+    radial-gradient(circle 10px, rgb(var(--nx-pl-c1, var(--brand-accent))) 100%, transparent 0),
+    radial-gradient(circle 10px, rgb(var(--nx-pl-c1, var(--brand-accent))) 100%, transparent 0),
+    radial-gradient(circle 10px, rgb(var(--nx-pl-c1, var(--brand-accent))) 100%, transparent 0),
+    radial-gradient(circle 10px, rgb(var(--nx-pl-c1, var(--brand-accent))) 100%, transparent 0);
+  background-position: 0 -18em, 0 18em, 18em 0, -18em 0, 13em -13em, -13em -13em, 13em 13em, -13em 13em;
+  animation: nx-blast calc(1s / var(--nx-pl-speed)) ease-in infinite; }
+.nx-pl--dot-blast::after { font-size: 1px; background: rgb(var(--nx-pl-c1, var(--brand-accent))); animation: nx-blast-bounce calc(1s / var(--nx-pl-speed)) ease-in infinite; }
+@keyframes nx-blast-bounce { 0%,100%{font-size:.75px} 50%{font-size:1.5px} }
+@keyframes nx-blast { 0%,40%{font-size:.5px} 70%{opacity:1;font-size:4px} 100%{font-size:6px;opacity:0} }
+
+/* 8 — 3D dot orbit (Pradeepsaranbishnoi). */
+.nx-pl--dot-orbit-3d { position: relative; width: 200px; height: 200px; perspective: 600px; }
+.nx-pl--dot-orbit-3d .dot { position: absolute; top: 50%; left: 50%; width: 100px; height: 100px; margin: -50px 0 0 -50px;
+  border-radius: 100px; border: 20px solid rgb(var(--nx-pl-c4, var(--brand-navy))); transform: scale(0) rotateX(60deg);
+  animation: nx-orbit calc(3s / var(--nx-pl-speed)) cubic-bezier(.67,.08,.46,1.5) infinite; }
+.nx-pl--dot-orbit-3d .dot:nth-child(2){animation-delay:.2s} .nx-pl--dot-orbit-3d .dot:nth-child(3){animation-delay:.4s}
+.nx-pl--dot-orbit-3d .dot:nth-child(4){animation-delay:.6s} .nx-pl--dot-orbit-3d .dot:nth-child(5){animation-delay:.8s}
+.nx-pl--dot-orbit-3d .dot:nth-child(6){animation-delay:1s} .nx-pl--dot-orbit-3d .dot:nth-child(7){animation-delay:1.2s}
+.nx-pl--dot-orbit-3d .dot:nth-child(8){animation-delay:1.4s}
+@keyframes nx-orbit { 0%{opacity:0;border-color:rgb(var(--nx-pl-c2, var(--brand-primary)));transform:rotateX(60deg) rotateY(45deg) translateZ(-100px) scale(.1)} 40%{opacity:1;transform:rotateX(0) rotateY(20deg) translateZ(0) scale(1)} 100%{opacity:0;transform:rotateX(60deg) rotateY(-45deg) translateZ(-100px) scale(.1)} }
+
+/* 9 — Simple pulse (JkHuger). */
+.nx-pl--simple-pulse { width: 64px; height: 64px; border-radius: 50%; background: rgb(var(--nx-pl-c1, var(--brand-accent)));
+  animation: nx-simple-pulse calc(.85s / var(--nx-pl-speed)) infinite linear; }
+@keyframes nx-simple-pulse { 0%{transform:scale(.15);opacity:0} 50%{opacity:1} 100%{transform:scale(1);opacity:0} }
+
+/* 10 — Heartbeat (SouravBandyopadhyay, reinterpreted as a clean beating heart). */
+.nx-pl--heart-square { width: 60px; height: 60px; position: relative; transform: rotate(-45deg);
+  animation: nx-heart calc(1.4s / var(--nx-pl-speed)) ease-in-out infinite; }
+.nx-pl--heart-square, .nx-pl--heart-square::before, .nx-pl--heart-square::after { background: rgb(var(--nx-pl-c1, var(--brand-action))); }
+.nx-pl--heart-square::before, .nx-pl--heart-square::after { content: ''; position: absolute; width: 60px; height: 60px; border-radius: 50%; }
+.nx-pl--heart-square::before { top: -30px; left: 0; } .nx-pl--heart-square::after { top: 0; right: -30px; }
+@keyframes nx-heart { 0%,100%{transform:rotate(-45deg) scale(.8)} 15%{transform:rotate(-45deg) scale(1)} 30%{transform:rotate(-45deg) scale(.85)} 45%{transform:rotate(-45deg) scale(1.05)} }
+
+/* 11 — Dot grid (Satwinder04). */
+.nx-pl--dot-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; width: 56px; height: 56px;
+  animation: nx-grid-rot calc(2s / var(--nx-pl-speed)) linear infinite; }
+.nx-pl--dot-grid i { width: 12px; height: 12px; border-radius: 50%; background: rgb(var(--nx-pl-c1, var(--brand-accent)));
+  animation: nx-grid-fade calc(1.2s / var(--nx-pl-speed)) ease-in-out infinite; }
+.nx-pl--dot-grid i:nth-child(1){animation-delay:0s} .nx-pl--dot-grid i:nth-child(2){animation-delay:.1s} .nx-pl--dot-grid i:nth-child(3){animation-delay:.2s}
+.nx-pl--dot-grid i:nth-child(4){animation-delay:.1s} .nx-pl--dot-grid i:nth-child(5){animation-delay:.2s} .nx-pl--dot-grid i:nth-child(6){animation-delay:.3s}
+.nx-pl--dot-grid i:nth-child(7){animation-delay:.2s} .nx-pl--dot-grid i:nth-child(8){animation-delay:.3s} .nx-pl--dot-grid i:nth-child(9){animation-delay:.4s}
+@keyframes nx-grid-rot { to{transform:rotate(360deg)} }
+@keyframes nx-grid-fade { 0%,100%{opacity:.2;transform:scale(.7)} 50%{opacity:1;transform:scale(1)} }
+
+/* 12 — Sphere wave (andrew-manzyk). HEAVY: rotate + hue-rotate filter. */
+.nx-pl--sphere-wave { width: 100px; height: 100px; animation: nx-sphere-rot calc(3s / var(--nx-pl-speed)) linear infinite; }
+.nx-pl--sphere-wave .w1 { fill: rgb(var(--nx-pl-c1, var(--brand-accent))); }
+.nx-pl--sphere-wave .w2 { fill: rgb(var(--nx-pl-c2, var(--brand-primary))); }
+.nx-pl--sphere-wave .w3 { fill: rgb(var(--nx-pl-c3, var(--brand-action))); }
+.nx-pl--sphere-wave .wave { animation: nx-sphere-wave calc(2s / var(--nx-pl-speed)) ease-in-out infinite; transform-origin: center; }
+.nx-pl--sphere-wave .wave.d2 { animation-delay: .4s; } .nx-pl--sphere-wave .wave.d3 { animation-delay: .8s; }
+@keyframes nx-sphere-rot { to{transform:rotate(360deg)} }
+@keyframes nx-sphere-wave { 0%,100%{transform:translateY(0) scale(1)} 50%{transform:translateY(-6px) scale(1.05)} }
+
+/* 13 — Progress text (asgardOP). Bar + animated ellipsis; text set inline. */
+.nx-pl--progress-text { display: flex; flex-direction: column; align-items: center; gap: 14px; }
+.nx-pl--progress-text .nx-pt-bar { width: min(50vw,180px); height: 4px; border-radius: 9999px; overflow: hidden;
+  background: rgb(var(--brand-navy) / .18); }
+.nx-pl--progress-text .nx-pt-bar i { display: block; height: 100%; width: 40%; border-radius: 9999px;
+  background: rgb(var(--nx-pl-c1, var(--brand-accent))); animation: nx-pt-slide calc(1.2s / var(--nx-pl-speed)) ease-in-out infinite; }
+.nx-pl--progress-text .nx-pt-label { font-size: 13px; font-weight: 600; letter-spacing: .3px;
+  color: rgb(var(--nx-pl-c1, var(--brand-accent))); }
+.nx-pl--progress-text .nx-pt-label::after { content: ''; animation: nx-pt-dots calc(1.4s / var(--nx-pl-speed)) steps(1,end) infinite; }
+@keyframes nx-pt-slide { 0%{margin-left:-40%} 100%{margin-left:100%} }
+@keyframes nx-pt-dots { 0%{content:''} 25%{content:'.'} 50%{content:'..'} 75%{content:'...'} 100%{content:''} }
+
+/* 14 — Worm ring (Bethel-nz). */
+.nx-pl--worm-ring { width: 80px; height: 80px; }
+.nx-pl--worm-ring .track { stroke: rgb(var(--brand-navy) / .18); }
+.nx-pl--worm-ring .worm { stroke: rgb(var(--nx-pl-c1, var(--brand-accent))); stroke-linecap: round;
+  animation: nx-worm calc(2s / var(--nx-pl-speed)) ease-in-out infinite; transform-origin: center; }
+@keyframes nx-worm { 0%{stroke-dasharray:20 180;stroke-dashoffset:0;transform:rotate(0)} 50%{stroke-dasharray:120 80;stroke-dashoffset:-60} 100%{stroke-dasharray:20 180;stroke-dashoffset:-200;transform:rotate(360deg)} }
+
+/* 15 — Generating letters (dexter-st). Supreme Ideas favorite; text set inline. */
+.nx-pl--letters { position: relative; display: flex; align-items: center; justify-content: center; height: 60px;
+  font-weight: 600; font-size: 1.4em; letter-spacing: .5px; color: rgb(var(--nx-pl-c1, var(--brand-accent))); }
+.nx-pl--letters .nx-letter { display: inline-block; opacity: 0; animation: nx-letter calc(4s / var(--nx-pl-speed)) infinite linear; }
+.nx-pl--letters .nx-letter:nth-child(1){animation-delay:.1s} .nx-pl--letters .nx-letter:nth-child(2){animation-delay:.205s}
+.nx-pl--letters .nx-letter:nth-child(3){animation-delay:.31s} .nx-pl--letters .nx-letter:nth-child(4){animation-delay:.415s}
+.nx-pl--letters .nx-letter:nth-child(5){animation-delay:.521s} .nx-pl--letters .nx-letter:nth-child(6){animation-delay:.626s}
+.nx-pl--letters .nx-letter:nth-child(7){animation-delay:.731s} .nx-pl--letters .nx-letter:nth-child(8){animation-delay:.837s}
+.nx-pl--letters .nx-letter:nth-child(9){animation-delay:.942s} .nx-pl--letters .nx-letter:nth-child(10){animation-delay:1.047s}
+.nx-pl--letters .nx-letter:nth-child(11){animation-delay:1.152s} .nx-pl--letters .nx-letter:nth-child(12){animation-delay:1.257s}
+@keyframes nx-letter { 0%{filter:blur(0);opacity:0} 5%{opacity:1;filter:blur(0);transform:scale(1.1) translateY(-2px)} 20%{opacity:.2;filter:blur(0)} 100%{filter:blur(5px);opacity:0} }
+
+/* 16 — Spoke spinner (andrew-demchenk0). Supreme Ideas favorite. */
+.nx-pl--spokes { position: relative; width: 80px; height: 80px; }
+.nx-pl--spokes i { position: absolute; inset: 0; transform-origin: 40px 40px; animation: nx-spoke calc(1.2s / var(--nx-pl-speed)) linear infinite; }
+.nx-pl--spokes i::after { content: ''; display: block; position: absolute; top: 3px; left: 37px; width: 6px; height: 18px;
+  border-radius: 20%; background: rgb(var(--nx-pl-c1, var(--brand-accent))); }
+.nx-pl--spokes i:nth-child(1){transform:rotate(0);animation-delay:-1.1s} .nx-pl--spokes i:nth-child(2){transform:rotate(30deg);animation-delay:-1s}
+.nx-pl--spokes i:nth-child(3){transform:rotate(60deg);animation-delay:-.9s} .nx-pl--spokes i:nth-child(4){transform:rotate(90deg);animation-delay:-.8s}
+.nx-pl--spokes i:nth-child(5){transform:rotate(120deg);animation-delay:-.7s} .nx-pl--spokes i:nth-child(6){transform:rotate(150deg);animation-delay:-.6s}
+.nx-pl--spokes i:nth-child(7){transform:rotate(180deg);animation-delay:-.5s} .nx-pl--spokes i:nth-child(8){transform:rotate(210deg);animation-delay:-.4s}
+.nx-pl--spokes i:nth-child(9){transform:rotate(240deg);animation-delay:-.3s} .nx-pl--spokes i:nth-child(10){transform:rotate(270deg);animation-delay:-.2s}
+.nx-pl--spokes i:nth-child(11){transform:rotate(300deg);animation-delay:-.1s} .nx-pl--spokes i:nth-child(12){transform:rotate(330deg);animation-delay:0s}
+@keyframes nx-spoke { 0%{opacity:1} 100%{opacity:0} }
+
+/* 17 — Liquid dots (Sourcesketch). Supreme Ideas favorite; goo metaball filter. */
+.nx-pl--goo-dots { position: relative; width: 160px; height: 160px; filter: url(#nx-goo); animation: nx-goo-rot calc(2s / var(--nx-pl-speed)) ease-in-out infinite; }
+.nx-pl--goo-dots .dot { width: 56px; height: 56px; border-radius: 50%; position: absolute; inset: 0; margin: auto; }
+.nx-pl--goo-dots .dot-1 { background: rgb(var(--nx-pl-c1, var(--brand-accent))); animation: nx-goo1 calc(2s / var(--nx-pl-speed)) ease infinite; }
+.nx-pl--goo-dots .dot-2 { background: rgb(var(--nx-pl-c2, var(--brand-primary))); animation: nx-goo2 calc(2s / var(--nx-pl-speed)) ease infinite; }
+.nx-pl--goo-dots .dot-3 { background: rgb(var(--nx-pl-c3, var(--brand-action))); animation: nx-goo3 calc(2s / var(--nx-pl-speed)) ease infinite; }
+@keyframes nx-goo-rot { 55%{transform:rotate(0)} 80%{transform:rotate(360deg)} 100%{transform:rotate(360deg)} }
+@keyframes nx-goo1 { 20%{transform:scale(1)} 45%{transform:translate(14px,10px) scale(.45)} 60%,80%{transform:translate(64px,48px) scale(.45)} 100%{transform:translateY(0) scale(1)} }
+@keyframes nx-goo2 { 20%{transform:scale(1)} 45%{transform:translate(-14px,10px) scale(.45)} 60%,80%{transform:translate(-64px,48px) scale(.45)} 100%{transform:translateY(0) scale(1)} }
+@keyframes nx-goo3 { 20%{transform:scale(1)} 45%{transform:translateY(-16px) scale(.45)} 60%,80%{transform:translateY(-72px) scale(.45)} 100%{transform:translateY(0) scale(1)} }
+
+/* 18 — Neon rings (omriluz). Supreme Ideas favorite. HEAVY: hue-rotate filter. */
+.nx-pl--neon-rings { position: relative; width: 160px; height: 160px; display: flex; align-items: center; justify-content: center; }
+.nx-pl--neon-rings .ring { position: absolute; width: 160px; height: 160px; border-radius: 50%; animation: nx-neon calc(2s / var(--nx-pl-speed)) linear infinite; }
+.nx-pl--neon-rings .ring:nth-child(2){animation-delay:-1s}
+.nx-pl--neon-rings .ring::before { content: ''; position: absolute; top: 0; left: 0; width: 50%; height: 100%;
+  background: linear-gradient(to top, transparent, rgb(var(--nx-pl-c1, var(--brand-accent)) / .5));
+  border-radius: 100px 0 0 100px; }
+.nx-pl--neon-rings .core { position: absolute; width: 22px; height: 22px; border-radius: 50%;
+  background: rgb(var(--nx-pl-c1, var(--brand-accent))); box-shadow: 0 0 12px rgb(var(--nx-pl-c1, var(--brand-accent))), 0 0 32px rgb(var(--nx-pl-c1, var(--brand-accent))), 0 0 60px rgb(var(--nx-pl-c1, var(--brand-accent))); }
+@keyframes nx-neon { 0%{transform:rotate(0);filter:hue-rotate(0)} 100%{transform:rotate(360deg);filter:hue-rotate(90deg)} }
+
+/* ---- Accessibility: one rule covers every preset by construction. ---- */
+@media (prefers-reduced-motion: reduce) {
+  .nx-pl *, .nx-pl *::before, .nx-pl *::after,
+  .nx-pl--simple-pulse, .nx-pl--heart-square, .nx-pl--goo-dots, .nx-pl--cube-pulse, .nx-pl--dot-grid { animation: none !important; }
+}

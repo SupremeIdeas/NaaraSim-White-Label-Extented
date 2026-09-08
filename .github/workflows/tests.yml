@@ -1,0 +1,95 @@
+name: Tests
+
+on:
+  push:
+    branches:
+      - master
+      - '*.x'
+  pull_request:
+  schedule:
+    - cron: '0 0 * * *'
+
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: true
+      matrix:
+        php: [8.2, 8.3, 8.4]
+
+    name: PHP ${{ matrix.php }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite
+          coverage: none
+
+      - name: Install Composer dependencies
+        run: composer install --prefer-dist --no-interaction --no-progress
+
+      - name: Copy environment file
+        run: cp .env.example .env
+
+      - name: Generate app key
+        run: php artisan key:generate
+
+      - name: Execute tests
+        run: vendor/bin/phpunit
+
+  # Install-integrity gate — fails if any install-critical file has drifted out
+  # of the repo or a migration timestamp collision was introduced. Guards the
+  # exact class of silent drift that once broke cPanel installs (see
+  # docs/PLATFORM-STATE.md). Pure filesystem check — no PHP extensions or DB.
+  install-integrity:
+    runs-on: ubuntu-latest
+    name: Install integrity
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          coverage: none
+
+      - name: Check install-critical files
+        run: php bin/check-install-integrity.php
+
+  # Dependency security gate (blueprint Section 30) — fails on any vulnerable
+  # dependency except the documented, accepted allow-list in
+  # bin/security-audit.php.
+  security:
+    runs-on: ubuntu-latest
+    name: Security audit
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          coverage: none
+
+      - name: Install Composer dependencies
+        run: composer install --prefer-dist --no-interaction --no-progress
+
+      - name: Audit dependencies
+        run: php bin/security-audit.php
+
+  # NOTE: static analysis (Larastan) is available as an OPTIONAL local developer
+  # check — `composer require --dev larastan/larastan && vendor/bin/phpstan
+  # analyse` (config in phpstan.neon). It is intentionally NOT a CI gate: it is a
+  # code-quality aid for developers, never runs on the live platform, and its
+  # findings were noise for a non-technical maintainer. See SECURITY.md.

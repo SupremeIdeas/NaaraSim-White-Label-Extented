@@ -1,0 +1,95 @@
+name: Android App Build
+
+# Compiles the Capacitor Android app (signed APK for direct download + AAB for
+# the Play Store) on a standard Linux runner, then reports status back to the
+# platform's build webhook (App Export §1). iOS is NOT built here — it requires
+# a macOS environment; see docs/APP-EXPORT.md.
+#
+# Triggered by the admin "Generate Build" action via a repository_dispatch of
+# type `app-build`, or manually. Signing secrets live in the repo/Actions
+# secrets, never in the repo tree.
+
+on:
+  workflow_dispatch:
+    inputs:
+      build_id:
+        description: Platform build record id (for the status callback)
+        required: false
+      version:
+        description: Version name (x.y.z)
+        required: false
+        default: "1.0.0"
+      build_number:
+        description: Version code (integer)
+        required: false
+        default: "1"
+  repository_dispatch:
+    types: [app-build]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Resolve build metadata
+        id: meta
+        run: |
+          echo "build_id=${{ github.event.inputs.build_id || github.event.client_payload.build_id }}" >> "$GITHUB_OUTPUT"
+          echo "version=${{ github.event.inputs.version || github.event.client_payload.version || '1.0.0' }}" >> "$GITHUB_OUTPUT"
+          echo "build_number=${{ github.event.inputs.build_number || github.event.client_payload.build_number || '1' }}" >> "$GITHUB_OUTPUT"
+          echo "callback=${{ github.event.client_payload.callback_url }}" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Install deps + sync Capacitor
+        run: |
+          npm ci
+          npx cap sync android
+
+      - name: Decode signing keystore
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        run: |
+          echo "$KEYSTORE_BASE64" | base64 -d > android/app/release.keystore
+
+      - name: Build signed APK + AAB
+        working-directory: android
+        env:
+          NAARA_STORE_PASSWORD: ${{ secrets.ANDROID_STORE_PASSWORD }}
+          NAARA_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          NAARA_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          ./gradlew assembleRelease bundleRelease \
+            -PversionName=${{ steps.meta.outputs.version }} \
+            -PversionCode=${{ steps.meta.outputs.build_number }}
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: naara-android-${{ steps.meta.outputs.version }}
+          path: |
+            android/app/build/outputs/apk/release/*.apk
+            android/app/build/outputs/bundle/release/*.aab
+
+      - name: Report status to platform
+        if: always() && steps.meta.outputs.callback != ''
+        env:
+          SECRET: ${{ secrets.APPEXPORT_CI_SECRET }}
+        run: |
+          STATUS=$([ "${{ job.status }}" = "success" ] && echo ready || echo failed)
+          BODY=$(jq -nc --arg id "${{ steps.meta.outputs.build_id }}" --arg s "$STATUS" \
+            '{build_id: ($id|tonumber), status: $s}')
+          SIG=$(printf '%s' "$BODY" | openssl dgst -sha256 -hmac "$SECRET" | awk '{print $2}')
+          curl -sS -X POST "${{ steps.meta.outputs.callback }}" \
+            -H "Content-Type: application/json" \
+            -H "X-Naara-Signature: $SIG" \
+            -d "$BODY" || true
