@@ -193,3 +193,5 @@ platform.
 - When the graph is stale (code changed since it was built — compare
   `git rev-parse HEAD` to the report's build commit), run `graphify update .`
   before relying on it for architectural decisions.
+- If `graphify-out/wiki/index.md` exists, use it for broad navigation instead
+  of raw source browsing (falls back to `GRAPH_REPORT.md`).
