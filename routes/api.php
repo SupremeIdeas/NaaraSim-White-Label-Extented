@@ -49,6 +49,11 @@ Route::prefix('v1/white-label')
             ->middleware('api.scope:updates.check')->name('updates.check');
         Route::get('updates/{package}/download', [WhiteLabelUpdateController::class, 'download'])
             ->middleware('api.scope:updates.download')->name('updates.download');
+        // Batch 5 §4 — closes the oversight loop: reports what happened when a
+        // downloaded package was actually applied. Reuses updates.check (no new
+        // scope needed) and serves both code and theme outcome reports.
+        Route::post('updates/report', [WhiteLabelUpdateController::class, 'report'])
+            ->middleware('api.scope:updates.check')->name('updates.report');
         Route::get('themes/check', [WhiteLabelThemeController::class, 'check'])
             ->middleware('api.scope:themes.check')->name('themes.check');
         Route::get('themes/{package}/download', [WhiteLabelThemeController::class, 'download'])

@@ -61,19 +61,28 @@ class EnsureWhiteLabelInstanceUsable
         };
     }
 
+    /**
+     * Fields any current or future endpoint in this route group may want
+     * captured on its oversight log row — query params (check/download) and
+     * body fields (report, Batch 5 §4) in one generic list, so a new endpoint
+     * never needs a middleware change just to be logged with useful context.
+     */
+    private const LOGGED_FIELDS = [
+        'current_version', 'product', 'package_id', 'status', 'downtime_seconds', 'applied_at', 'notes',
+    ];
+
     private function log(WhiteLabelInstance $instance, Request $request, int $status): void
     {
+        $context = $request->only(self::LOGGED_FIELDS);
+        $context['package'] = $request->route('package');
+
         WhiteLabelActivityLogger::record(
             instance: $instance,
             endpoint: $request->route()?->getName() ?? $request->path(),
             method: $request->method(),
             status: $status,
             ip: $request->ip(),
-            context: array_filter([
-                'current_version' => $request->query('current_version'),
-                'product' => $request->query('product'),
-                'package' => $request->route('package'),
-            ], fn ($v) => $v !== null),
+            context: array_filter($context, fn ($v) => $v !== null),
         );
     }
 }

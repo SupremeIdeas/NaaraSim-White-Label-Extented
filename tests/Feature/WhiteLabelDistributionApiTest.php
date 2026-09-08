@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Jobs\AlertAdminJob;
 use App\Models\DistributedPackage;
 use App\Models\Setting;
 use App\Models\WhiteLabelApiLog;
@@ -10,6 +11,7 @@ use App\Services\Updater\PackageBuilder;
 use App\Services\Updater\PackagePublisher;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
@@ -285,5 +287,86 @@ class WhiteLabelDistributionApiTest extends TestCase
         // The check call also recorded the instance's reported version + stamped check-in.
         $this->assertSame('2026.09.05-1', $instance->fresh()->current_platform_version);
         $this->assertNotNull($instance->fresh()->last_checked_in_at);
+    }
+
+    // --- Batch 5 §4: outcome reporting closes the oversight loop ---
+
+    public function test_reporting_a_successful_apply_logs_it_and_raises_no_alert(): void
+    {
+        Queue::fake();
+        $this->enable();
+        $instance = $this->makeInstance();
+
+        $this->withToken($this->token($instance))
+            ->postJson('/api/v1/white-label/updates/report', [
+                'package_id' => 'pkg-123',
+                'status' => 'applied',
+                'downtime_seconds' => 42,
+                'applied_at' => now()->toIso8601String(),
+            ])
+            ->assertOk();
+
+        $log = WhiteLabelApiLog::where('white_label_instance_id', $instance->id)->first();
+        $this->assertSame('white-label.updates.report', $log->endpoint);
+        $this->assertSame(200, $log->response_status);
+        $this->assertSame('pkg-123', $log->context['package_id']);
+        $this->assertSame('applied', $log->context['status']);
+        $this->assertSame('42', (string) $log->context['downtime_seconds']);
+
+        Queue::assertNotPushed(AlertAdminJob::class);
+    }
+
+    public function test_reporting_a_rollback_logs_it_and_alerts_admins(): void
+    {
+        Queue::fake();
+        $this->enable();
+        $instance = $this->makeInstance();
+
+        $this->withToken($this->token($instance))
+            ->postJson('/api/v1/white-label/updates/report', [
+                'package_id' => 'pkg-456',
+                'status' => 'rolled_back',
+                'notes' => 'health check failed post-apply',
+            ])
+            ->assertOk();
+
+        Queue::assertPushed(
+            AlertAdminJob::class,
+            fn ($job) => $job->code === 'white_label.update_rolled_back' && str_contains($job->message, $instance->brand_name)
+        );
+    }
+
+    public function test_report_rejects_an_invalid_status(): void
+    {
+        $this->enable();
+        $this->withToken($this->token($this->makeInstance()))
+            ->postJson('/api/v1/white-label/updates/report', ['package_id' => 'x', 'status' => 'bogus'])
+            ->assertStatus(422);
+    }
+
+    // NOTE: split into two tests (one identity, one request, each) — Laravel's
+    // auth guard caches the first resolved user across multiple requests within
+    // a single test method, which would make the second call below silently
+    // reuse the first token's identity (a harness artifact, not a production
+    // concern: each real HTTP request is its own process).
+
+    public function test_report_accepts_a_token_with_only_the_updates_check_scope(): void
+    {
+        $this->enable();
+        $checkOnlyToken = $this->token($this->makeInstance(), ['updates.check']);
+
+        $this->withToken($checkOnlyToken)
+            ->postJson('/api/v1/white-label/updates/report', ['package_id' => 'x', 'status' => 'applied'])
+            ->assertOk();
+    }
+
+    public function test_report_rejects_a_token_with_no_relevant_scope(): void
+    {
+        $this->enable();
+        $noScopeToken = $this->makeInstance()->createToken('t', [])->plainTextToken;
+
+        $this->withToken($noScopeToken)
+            ->postJson('/api/v1/white-label/updates/report', ['package_id' => 'x', 'status' => 'applied'])
+            ->assertForbidden();
     }
 }
