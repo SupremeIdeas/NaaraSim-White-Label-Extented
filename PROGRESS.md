@@ -9,6 +9,51 @@
 
 ## DONE
 
+### 🔑 Platform Updater — Batch 6: License Authority + API Key/Token System — 2026-09-08
+The money/security path of the Updater program (master platform = the authority).
+Batch 4 defined `white_label_instances` as a registry but nothing populated it;
+this batch turns it into a real license authority with a deliberate TWO-credential
+model — the one design decision the whole batch turns on:
+- **License KEY** — the durable enrolment credential (`NAARA-XXXX-XXXX-XXXX`, an
+  unambiguous no-0/O/1/I/L alphabet, uniqueness-checked). Issued by an admin, tied
+  to a tier, handed to the buyer. It is NOT a bearer token and grants no API access
+  on its own; it only ever buys ONE thing — the right to mint an API token.
+- **Sanctum API TOKEN** — the rotatable operational credential the deployed fork
+  actually calls the distribution API with (what `NAARA_UPDATE_API_TOKEN` becomes).
+  We keep only `api_token_last_four` for display, exactly like `ApiClient`.
+- **`WhiteLabelLicenseService`** — kept structurally parallel to `ApiClientService`
+  so the token discipline is identical: plaintext token returned exactly ONCE at
+  mint, never stored; any access-cutting change deletes every live token.
+  `register()` (pending, no key) → `issueLicense()` (key + tier + active + review
+  trail) → `activateWithKey()` (the fork exchanges its key for a token) plus
+  `suspend`/`restore`/`reject`/`revokeLicense`/`issueTokenDirectly`.
+  - **`license_revoked_at` is the permanent kill switch**, distinct from a
+    `suspended` status: suspend cuts the token but the SAME key revives on restore;
+    revoke kills the key forever (activation refuses it) — proven both ways in tests.
+- **Enrolment API** (`/api/v1/white-label/register` + `/activate`) — same feature
+  flag as the distribution API but deliberately OUTSIDE `auth:sanctum` (a fresh fork
+  has no token yet), rate-limited. **Not a brute-force oracle:** every unusable-key
+  path (unknown / revoked / suspended) returns the identical generic 403, with the
+  real reason logged server-side only — a prober can't tell an existing-but-revoked
+  key from one that was never issued.
+- **Admin controls on `Admin\WhiteLabelRegistry`** — issue a license (mint key + set
+  tier), approve/reject a self-serve registration at a chosen tier, suspend/restore,
+  regenerate a leaked key, permanently revoke, and — the firewalled-fork fallback,
+  mirroring Batch 5's "the manual path must always work" — issue a token directly.
+  A freshly minted key shows in a one-time banner (the buyer's credential); a
+  directly-issued token is a bearer credential shown once and never re-echoed.
+- **Tier is finally set to a real value** at issuance (`normal`/`extended`, defined
+  as an ORDERED list on `WhiteLabelInstance` with `tierRank()` helpers). Batch 7 uses
+  that ordering to make package entitlement real; every tier still holds the full
+  scope set — tier gates WHICH PACKAGES, not which endpoints.
+- 18 new tests: issuance activates + keys + tiers, key uniqueness, the key→token
+  exchange mints a token that genuinely reaches the distribution API end to end,
+  revoked-key-is-permanently-dead, suspend-kills-token-but-same-key-revives-on-restore,
+  regenerate-kills-the-old-token, direct-issue needs a live license, register files a
+  pending row and reveals nothing, the whole enrolment surface 404s until the flag is
+  on, and the no-oracle property (revoked looks identical to unknown); plus the six
+  admin-screen actions. Full suite green (1853 passed).
+
 ### 🛰️ Platform Updater — Batch 4: distribution API + white-label registry — 2026-09-08
 The publisher side, on the master platform: registered white-label instances
 discover and download signed `.naaraupdate` packages (code AND theme) instead

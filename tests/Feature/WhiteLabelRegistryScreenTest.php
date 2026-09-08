@@ -111,4 +111,84 @@ class WhiteLabelRegistryScreenTest extends TestCase
             ->assertSet('selectedInstanceId', $instance->id)
             ->assertSee('white-label.updates.check');
     }
+
+    // --- Batch 6: license authority admin controls ---
+
+    public function test_issuing_a_license_creates_an_active_instance_and_reveals_the_key(): void
+    {
+        Livewire::actingAs($this->admin())
+            ->test(WhiteLabelRegistry::class)
+            ->set('newBrand', 'Fresh Brand')
+            ->set('newEmail', 'fresh@brand.test')
+            ->set('newTier', 'extended')
+            ->call('issueNewLicense')
+            ->assertSet('revealedKey', fn ($k) => is_string($k) && str_starts_with($k, 'NAARA-'));
+
+        $instance = WhiteLabelInstance::where('contact_email', 'fresh@brand.test')->first();
+        $this->assertNotNull($instance);
+        $this->assertSame('active', $instance->status);
+        $this->assertSame('extended', $instance->tier);
+    }
+
+    public function test_approving_a_pending_request_issues_a_key_and_activates_it(): void
+    {
+        $instance = WhiteLabelInstance::create([
+            'brand_name' => 'Waiting', 'slug' => 'waiting', 'contact_email' => 'w@w.test', 'status' => 'pending',
+        ]);
+
+        Livewire::actingAs($this->admin())
+            ->test(WhiteLabelRegistry::class)
+            ->call('approveInstance', $instance->id, 'normal')
+            ->assertSet('revealedKey', fn ($k) => is_string($k) && str_starts_with($k, 'NAARA-'));
+
+        $this->assertSame('active', $instance->fresh()->status);
+        $this->assertSame('normal', $instance->fresh()->tier);
+    }
+
+    public function test_suspending_from_the_screen_revokes_the_token(): void
+    {
+        $instance = WhiteLabelInstance::create([
+            'brand_name' => 'Live', 'slug' => 'live', 'contact_email' => 'l@l.test', 'status' => 'active',
+            'tier' => 'normal', 'license_key' => 'NAARA-AAAA-BBBB-CCCC', 'license_issued_at' => now(),
+        ]);
+        $instance->createToken('t', WhiteLabelInstance::SCOPES);
+        $this->assertSame(1, $instance->tokens()->count());
+
+        Livewire::actingAs($this->admin())
+            ->test(WhiteLabelRegistry::class)
+            ->call('suspendInstance', $instance->id);
+
+        $this->assertSame('suspended', $instance->fresh()->status);
+        $this->assertSame(0, $instance->fresh()->tokens()->count());
+    }
+
+    public function test_revoking_from_the_screen_permanently_kills_the_key(): void
+    {
+        $instance = WhiteLabelInstance::create([
+            'brand_name' => 'Gone', 'slug' => 'gone', 'contact_email' => 'g@g.test', 'status' => 'active',
+            'tier' => 'normal', 'license_key' => 'NAARA-DDDD-EEEE-FFFF', 'license_issued_at' => now(),
+        ]);
+
+        Livewire::actingAs($this->admin())
+            ->test(WhiteLabelRegistry::class)
+            ->call('revokeLicense', $instance->id);
+
+        $this->assertNotNull($instance->fresh()->license_revoked_at);
+        $this->assertSame('suspended', $instance->fresh()->status);
+    }
+
+    public function test_issue_token_directly_reveals_a_bearer_token_once(): void
+    {
+        $instance = WhiteLabelInstance::create([
+            'brand_name' => 'Firewalled', 'slug' => 'fw', 'contact_email' => 'f@f.test', 'status' => 'active',
+            'tier' => 'normal', 'license_key' => 'NAARA-GGGG-HHHH-JJJJ', 'license_issued_at' => now(),
+        ]);
+
+        Livewire::actingAs($this->admin())
+            ->test(WhiteLabelRegistry::class)
+            ->call('issueTokenFor', $instance->id)
+            ->assertSet('revealedToken', fn ($t) => is_string($t) && str_contains($t, '|'));
+
+        $this->assertSame(1, $instance->fresh()->tokens()->count());
+    }
 }

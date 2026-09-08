@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\V1\CatalogueController;
 use App\Http\Controllers\Api\V1\OrderController;
 use App\Http\Controllers\Api\V1\QuoteController;
+use App\Http\Controllers\Api\V1\WhiteLabel\WhiteLabelLicenseController;
 use App\Http\Controllers\Api\V1\WhiteLabel\WhiteLabelThemeController;
 use App\Http\Controllers\Api\V1\WhiteLabel\WhiteLabelUpdateController;
 use Illuminate\Http\Request;
@@ -58,4 +59,21 @@ Route::prefix('v1/white-label')
             ->middleware('api.scope:themes.check')->name('themes.check');
         Route::get('themes/{package}/download', [WhiteLabelThemeController::class, 'download'])
             ->middleware('api.scope:themes.download')->name('themes.download');
+    });
+
+/*
+ | White-label License Authority — enrolment surface (Updater Batch 6). Same
+ | feature flag as the distribution API, but deliberately OUTSIDE auth:sanctum:
+ | a fresh fork has no token yet. `register` files a pending request an admin
+ | reviews; `activate` exchanges an admin-issued license key for the Sanctum API
+ | token the fork then uses (what NAARA_UPDATE_API_TOKEN becomes). Rate-limited —
+ | activate is the one place a valid key mints access, so it must not be a
+ | brute-force oracle (every unusable key returns the same generic 403).
+ */
+Route::prefix('v1/white-label')
+    ->middleware(['throttle:api', 'whitelabel.enabled'])
+    ->name('white-label.')
+    ->group(function () {
+        Route::post('register', [WhiteLabelLicenseController::class, 'register'])->name('register');
+        Route::post('activate', [WhiteLabelLicenseController::class, 'activate'])->name('activate');
     });
