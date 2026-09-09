@@ -21,6 +21,13 @@ class GetListed extends Component
 {
     public ?string $error = null;
 
+    public function booted(): void
+    {
+        // Batch 8: the "get listed" surface is part of the Brand Hunt feature —
+        // locked with it. Inert on the master (never locked there).
+        abort_if(\App\Support\FeatureEntitlements::locked(\App\Support\FeatureLocks::F_BRAND_HUNT), 404);
+    }
+
     public function choose(int $planId, BrandSubscriptionService $subs)
     {
         $plan = BrandSubscriptionPlan::active()->find($planId);

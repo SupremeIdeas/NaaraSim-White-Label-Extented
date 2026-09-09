@@ -9,6 +9,50 @@
 
 ## DONE
 
+### 🔒 Platform Updater — Batch 8: Feature-Entitlement Gating (master side) — 2026-09-09
+The license system now gates FEATURES, not just package downloads. A second axis
+was added alongside Batch 7's package `tier`: `entitlement_level` (basic <
+standard < full), which decides which app features a white-label fork's users may
+use. `tier` = product line (which packages); `entitlement_level` = payment
+progression (which features). Not 1:1 — Extended is always `full`; a Normal fork
+is `basic` on issue and the operator raises it to `standard` once paid.
+- **Authority (`App\Support\FeatureLocks`, master)** — the lockable-feature catalog
+  (`gift_cards`, `esim_voice` = full voice eSIM, `preloader_customization`,
+  `brand_hunt`) + the per-level default lock lists, all admin-editable via a
+  `Setting` without a migration. Defaults are strictly nested (richer level =
+  fewer locks): basic locks all four; standard locks only gift cards; full locks
+  nothing. Every saved override is filtered back to the catalog so a stale key
+  can never leak as a phantom lock.
+- **Enforcement (`App\Support\FeatureEntitlements`, universal)** — one gate,
+  `locked($key)`, wired into every lockable surface. Because the forks are
+  byte-for-byte copies of the master, the CODE is universal and only the DATA
+  differs: on the master it's inert (guarded by product identity — `naarasim-core`
+  is never locked), and on a fork it reads the lock list that fork received from
+  the master. No list yet (fresh fork / master unreachable) → FAIL OPEN, never a
+  surprise hard-lock (Batch 5's resilience posture).
+- **Gates**: gift cards, the Preloader Studio, Brand Hunt / Get Listed / Brand
+  Manage all 404 (hidden like any disabled feature) when locked; the eSIM
+  catalogue hides the full voice line and forces data-only when `esim_voice` is
+  locked (data-only eSIM + numbers still sell — exactly the owner's Normal-basic
+  spec). Nav links to locked features are dropped too.
+- **API**: the resolved lock list rides the activate response (a fork enforces
+  correctly from first activation) and a new authenticated `GET
+  /api/v1/white-label/entitlement` the fork re-polls on check-in (reuses the
+  `updates.check` scope). `WhiteLabelLicenseService::setEntitlementLevel()` is the
+  operator's "mark this Normal fork as paid" action (basic→standard) — a
+  feature-lock change only, never touching the token/key/tier.
+- **Admin**: the White-Label Oversight screen gained a per-instance level control
+  and a "Feature locks by level" matrix (tick = locked).
+- **Progression stays off-platform** (mirrors Merchant Invoices): the operator
+  gets paid, then flips the level from the admin screen. No new payment gateway.
+- 34 new tests (authority + resolver + master-never-gated + fail-open + API +
+  admin + all four gates). `UpdateApplier`/`ThemeInstaller`/`PackageVerifier`
+  untouched. Full suite green (1916 passed).
+- **Remaining (Batch 8B fork side, next):** sync this to both forks and add the
+  fork-only entitlement fetch (`WhiteLabelUpdateClient`) that actually stores the
+  lock list on check-in, so the gates activate on a real deployment. Every gate
+  above is already proven by simulating a fork in tests.
+
 ### 🔗 Link previews + homepage carousel + Numbers page/modal toggle — 2026-09-08
 Owner-requested batch, independent of the Updater program above.
 - **Preloader hang fixed** (root cause of "every page hangs ~5s, preloaders
