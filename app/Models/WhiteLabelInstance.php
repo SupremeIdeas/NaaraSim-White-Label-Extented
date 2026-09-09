@@ -44,6 +44,22 @@ class WhiteLabelInstance extends Model
 
     public const TIERS = [self::TIER_NORMAL, self::TIER_EXTENDED];
 
+    /**
+     * Feature-entitlement levels (Batch 8), cheapest → richest. Orthogonal to
+     * `tier`: `tier` decides which PACKAGES a fork may download, `entitlement_level`
+     * decides which FEATURES its users may use (see App\Support\FeatureLocks).
+     *   - basic    — Normal fork pre-payment (most features locked).
+     *   - standard — Normal fork post-payment (only the richest features locked).
+     *   - full     — Extended fork (nothing locked).
+     */
+    public const LEVEL_BASIC = 'basic';
+
+    public const LEVEL_STANDARD = 'standard';
+
+    public const LEVEL_FULL = 'full';
+
+    public const LEVELS = [self::LEVEL_BASIC, self::LEVEL_STANDARD, self::LEVEL_FULL];
+
     /** Sanctum token abilities a white-label instance may hold. Every tier gets
      *  the full set — tier gates WHICH PACKAGES are eligible (PackageDistribution),
      *  not which endpoints can be reached. */
@@ -56,6 +72,7 @@ class WhiteLabelInstance extends Model
         'owner_user_id',
         'status',
         'tier',
+        'entitlement_level',
         'license_key',
         'api_token_last_four',
         'license_issued_at',
@@ -112,6 +129,18 @@ class WhiteLabelInstance extends Model
         $index = array_search($tier, self::TIERS, true);
 
         return $index === false ? null : $index;
+    }
+
+    /**
+     * The feature-entitlement level a freshly-issued license of the given tier
+     * starts at (Batch 8): an Extended fork is fully unlocked from day one; a
+     * Normal fork starts locked-down (basic) and the operator raises it to
+     * `standard` once the buyer has paid up. An unknown/null tier gets the
+     * safest paid-nothing-yet default.
+     */
+    public static function defaultLevelForTier(?string $tier): string
+    {
+        return $tier === self::TIER_EXTENDED ? self::LEVEL_FULL : self::LEVEL_BASIC;
     }
 
     public function owner(): BelongsTo

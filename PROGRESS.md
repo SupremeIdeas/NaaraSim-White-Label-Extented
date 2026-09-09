@@ -9,6 +9,50 @@
 
 ## DONE
 
+### 🔒 Platform Updater — Batch 8: Feature-Entitlement Gating (master side) — 2026-09-09
+The license system now gates FEATURES, not just package downloads. A second axis
+was added alongside Batch 7's package `tier`: `entitlement_level` (basic <
+standard < full), which decides which app features a white-label fork's users may
+use. `tier` = product line (which packages); `entitlement_level` = payment
+progression (which features). Not 1:1 — Extended is always `full`; a Normal fork
+is `basic` on issue and the operator raises it to `standard` once paid.
+- **Authority (`App\Support\FeatureLocks`, master)** — the lockable-feature catalog
+  (`gift_cards`, `esim_voice` = full voice eSIM, `preloader_customization`,
+  `brand_hunt`) + the per-level default lock lists, all admin-editable via a
+  `Setting` without a migration. Defaults are strictly nested (richer level =
+  fewer locks): basic locks all four; standard locks only gift cards; full locks
+  nothing. Every saved override is filtered back to the catalog so a stale key
+  can never leak as a phantom lock.
+- **Enforcement (`App\Support\FeatureEntitlements`, universal)** — one gate,
+  `locked($key)`, wired into every lockable surface. Because the forks are
+  byte-for-byte copies of the master, the CODE is universal and only the DATA
+  differs: on the master it's inert (guarded by product identity — `naarasim-core`
+  is never locked), and on a fork it reads the lock list that fork received from
+  the master. No list yet (fresh fork / master unreachable) → FAIL OPEN, never a
+  surprise hard-lock (Batch 5's resilience posture).
+- **Gates**: gift cards, the Preloader Studio, Brand Hunt / Get Listed / Brand
+  Manage all 404 (hidden like any disabled feature) when locked; the eSIM
+  catalogue hides the full voice line and forces data-only when `esim_voice` is
+  locked (data-only eSIM + numbers still sell — exactly the owner's Normal-basic
+  spec). Nav links to locked features are dropped too.
+- **API**: the resolved lock list rides the activate response (a fork enforces
+  correctly from first activation) and a new authenticated `GET
+  /api/v1/white-label/entitlement` the fork re-polls on check-in (reuses the
+  `updates.check` scope). `WhiteLabelLicenseService::setEntitlementLevel()` is the
+  operator's "mark this Normal fork as paid" action (basic→standard) — a
+  feature-lock change only, never touching the token/key/tier.
+- **Admin**: the White-Label Oversight screen gained a per-instance level control
+  and a "Feature locks by level" matrix (tick = locked).
+- **Progression stays off-platform** (mirrors Merchant Invoices): the operator
+  gets paid, then flips the level from the admin screen. No new payment gateway.
+- 34 new tests (authority + resolver + master-never-gated + fail-open + API +
+  admin + all four gates). `UpdateApplier`/`ThemeInstaller`/`PackageVerifier`
+  untouched. Full suite green (1916 passed).
+- **Remaining (Batch 8B fork side, next):** sync this to both forks and add the
+  fork-only entitlement fetch (`WhiteLabelUpdateClient`) that actually stores the
+  lock list on check-in, so the gates activate on a real deployment. Every gate
+  above is already proven by simulating a fork in tests.
+
 ### 🔗 Link previews + homepage carousel + Numbers page/modal toggle — 2026-09-08
 Owner-requested batch, independent of the Updater program above.
 - **Preloader hang fixed** (root cause of "every page hangs ~5s, preloaders
@@ -2852,6 +2896,66 @@ real config/keys per the money-safety rules): wire the fork's activate flow into
 real purchase/payment step so a paid tier maps to an issued key; run keygen on the
 production master and distribute the public key with the forks; decide token-rotation
 cadence. Pick these up when doing go-live hardening, not as feature work.
+
+### ▶ TOP OF NEXT (Updater track) — Batch 8: Feature-Entitlement Gating (license-tier feature locks)
+The money/security continuation of the license system (owner-confirmed 2026-09-08,
+build on Opus). Batches 6–7 made the license real (key→token exchange) and the
+tier ORDERING real (normal < extended). Batch 8 makes tiers actually GATE
+FEATURES, not just package downloads.
+- **What a tier locks** (admin-configurable, seeded sensibly): gift-card features,
+  full "Naara Connect" voice eSIM plans (`EsimPlan.has_voice` — data-only + numbers
+  stay open), **preloader customization**, and **Brand Hunt / Brand Directory**
+  (owner explicitly added the last two, 2026-09-08).
+- **Model** (from the earlier design discussion): three states —
+  `basic` (Normal, pre-payment: gift cards + full-voice eSIM + preloader + brand
+  hunt locked; still sells data-only eSIM + numbers), `standard` (Normal,
+  post-payment: gift cards still locked, rest open), `extended` (nothing locked).
+  Admin sets which feature keys each tier locks (a `Setting`-backed list, extensible
+  without a migration).
+- **Split** (same publisher/subscriber shape as Batches 5–7): master is the
+  AUTHORITY (defines the per-tier lock lists, admin screen, exposes the resolved
+  lock list in the activate/check-in response); the forks ENFORCE (a small
+  `FeatureEntitlements::locked('gift_cards')` gate wired into the gift-cards page,
+  the catalogue's `has_voice` filter, checkout, the preloader studio, and brand
+  hunt). Fail OPEN on a stale/unreachable authority (last-known-good), never
+  hard-lock the whole app over a network blip — same resilience principle as Batch 5.
+- **Progression is off-platform**, mirroring Merchant Invoices: owner gets paid,
+  then flips basic→standard (or issues Extended) from the admin screen. No new
+  payment gateway, no new attack surface.
+- Money/security-path → Opus.
+
+### ▶ AFTER BATCH 8 — Brand Directory / Brand Hunt premium redesign (owner-confirmed queue position, 2026-09-08)
+NOT a build — the whole Build-9 self-service paid-listing backend already EXISTS
+(`brand_partners`, `brand_subscriptions`, `brand_subscription_plans`,
+`brand_partner_videos`, `brand_video_watch_claims`, `brand_priority_log`;
+`BrandHunt`/`GetListed`/`BrandManage`/`Admin\BrandDirectory` all live and tested).
+This is a **presentation redesign** — the owner's words: the current interface is
+"too local," wants a Trustpilot-calibre directory + premium Apple-inspired looks.
+Two public surfaces are the thin ones:
+- **`BrandHunt` (public directory)** — has category filtering + featured-first sort
+  already; needs the Trustpilot-style sorted-by-category/industry, featured band,
+  premium card design (real photography, generous whitespace, not a generic grid).
+- **`GetListed` (the "list your brand" landing)** — currently 45 lines, a bare
+  plan-picker. Needs a real premium marketing page: hero, an honest value story
+  (real Naara users following brands = genuine engagement, not passive impressions;
+  the gradual-visibility / "grow your following with real people who transact on
+  the platform" narrative the owner described), then the plan comparison redone as
+  a real pricing section.
+- **Open question for the owner when we get here:** does `BrandManage` (the business
+  owner's own billing/delivery-vs-guarantee dashboard) get the same premium pass, or
+  is this round scoped to the two public surfaces only?
+- Ties into Batch 8: Brand Hunt is a tier-lockable feature, so the gate lands first.
+
+### ▶ PARKED — Master-only premium preloaders (owner-supplied 2026-09-08)
+Saved in `docs/ui-component-library/premium-preloaders-MASTER-ONLY.md`: a curated
+"Supreme Ideas Agency best loader" set (Generating-letters, hue spoke spinner,
+gooey blob dots, neon reflection rings, fintech breathing SVG, 3D MacBook, flying-
+files, + a gradient hover button that's a CTA style not a loader). To be wired as
+Preloader Studio presets in a LATER pass — **master/original platform ONLY, never
+merged to a white-label** (gate on `product_identifier === 'naarasim-core'`; note
+that white-labels merge FROM master, so the presets must be product-gated, not just
+left out of a doc). Dovetails with Batch 8: preloader customization is itself a
+tier-locked feature for forks.
 
 ### ▶ TOP OF NEXT (Theme track) — Theme visual rebuild: batch 4 of 8 (next 5 themes to full-suite status)
 Batches 1-3 are DONE (15 themes now at full-suite status: neon-vertex,

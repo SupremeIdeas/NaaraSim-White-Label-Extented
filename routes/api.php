@@ -55,6 +55,11 @@ Route::prefix('v1/white-label')
         // scope needed) and serves both code and theme outcome reports.
         Route::post('updates/report', [WhiteLabelUpdateController::class, 'report'])
             ->middleware('api.scope:updates.check')->name('updates.report');
+        // Batch 8 — the fork polls its feature-entitlement (level + lock list)
+        // on check-in. Reuses updates.check (reading what you're entitled to is
+        // a natural part of the checking relationship).
+        Route::get('entitlement', [WhiteLabelUpdateController::class, 'entitlement'])
+            ->middleware('api.scope:updates.check')->name('entitlement');
         Route::get('themes/check', [WhiteLabelThemeController::class, 'check'])
             ->middleware('api.scope:themes.check')->name('themes.check');
         Route::get('themes/{package}/download', [WhiteLabelThemeController::class, 'download'])

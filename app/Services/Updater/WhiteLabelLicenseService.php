@@ -75,6 +75,9 @@ class WhiteLabelLicenseService
 
         $instance->forceFill([
             'tier' => $tier,
+            // Batch 8: a freshly-issued license starts at the level its tier
+            // implies — Extended fully unlocked, Normal locked-down until paid.
+            'entitlement_level' => WhiteLabelInstance::defaultLevelForTier($tier),
             'license_key' => $this->generateUniqueKey(),
             'api_token_last_four' => null,
             'license_issued_at' => now(),
@@ -87,6 +90,28 @@ class WhiteLabelLicenseService
         Auditor::log('white_label.license_issued', WhiteLabelInstance::class, $instance->id, [
             'brand' => $instance->brand_name,
             'tier' => $tier,
+            'entitlement_level' => $instance->entitlement_level,
+        ]);
+
+        return $instance;
+    }
+
+    /**
+     * Raise (or lower) a live instance's feature-entitlement level (Batch 8) —
+     * the operator's "mark this Normal fork as paid" action, moving it from
+     * `basic` to `standard` (or any admin-chosen level). Purely a feature-lock
+     * change: it never touches the token, the key, or the package tier, so the
+     * fork keeps working and simply unlocks more features on its next check-in.
+     */
+    public function setEntitlementLevel(WhiteLabelInstance $instance, string $level): WhiteLabelInstance
+    {
+        $level = in_array($level, WhiteLabelInstance::LEVELS, true) ? $level : WhiteLabelInstance::LEVEL_BASIC;
+
+        $instance->forceFill(['entitlement_level' => $level])->save();
+
+        Auditor::log('white_label.entitlement_level_set', WhiteLabelInstance::class, $instance->id, [
+            'brand' => $instance->brand_name,
+            'entitlement_level' => $level,
         ]);
 
         return $instance;

@@ -48,6 +48,10 @@ class GiftCards extends Component
         // reachable, but renders a Coming-Soon state (flips live automatically
         // the moment the keys are saved — no manual editing).
         abort_unless(FeatureFlags::adminEnabled('naara_gift'), 404);
+        // Batch 8: a white-label fork whose license tier locks gift cards has
+        // the feature hidden entirely (a 404, like any disabled feature) until
+        // the operator pays up. Inert on the master (never locked there).
+        abort_if(\App\Support\FeatureEntitlements::locked(\App\Support\FeatureLocks::F_GIFT_CARDS), 404);
         $this->live = FeatureFlags::configured('naara_gift');
     }
 

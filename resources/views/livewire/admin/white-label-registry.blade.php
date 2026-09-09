@@ -99,7 +99,21 @@
                                     @endphp
                                     <span class="rounded-full px-2 py-0.5 text-xs font-medium {{ $tone }}">{{ $i->status }}</span>
                                 </td>
-                                <td class="py-2 pr-4">{{ $i->tier ? ucfirst($i->tier) : '—' }}</td>
+                                <td class="py-2 pr-4">
+                                    <span>{{ $i->tier ? ucfirst($i->tier) : '—' }}</span>
+                                    {{-- Batch 8: feature-entitlement level. Live-editable for an active
+                                         instance (raise a paid Normal fork basic→standard). --}}
+                                    @if ($i->status === 'active' && $i->entitlement_level)
+                                        <select wire:change="setLevel({{ $i->id }}, $event.target.value)"
+                                            class="mt-1 block w-full rounded-md border border-slate-200 bg-white px-1.5 py-0.5 text-[11px] text-slate-600 dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-300">
+                                            @foreach ($this->featureLevels as $lvl)
+                                                <option value="{{ $lvl }}" @selected($i->entitlement_level === $lvl)>{{ ucfirst($lvl) }}</option>
+                                            @endforeach
+                                        </select>
+                                    @elseif ($i->entitlement_level)
+                                        <span class="block text-[11px] text-slate-400">{{ ucfirst($i->entitlement_level) }}</span>
+                                    @endif
+                                </td>
                                 <td class="py-2 pr-4">
                                     @if ($i->license_revoked_at)
                                         <span class="text-xs font-medium text-red-600 dark:text-red-400">Revoked</span>
@@ -168,6 +182,38 @@
                 </table>
             </div>
         @endif
+    </div>
+
+    {{-- Feature locks by level (Batch 8) --}}
+    <div class="mb-6 rounded-2xl border border-slate-200 bg-white p-5 dark:border-[#2D4060] dark:bg-[#1B2A45]">
+        <h2 class="mb-1 text-lg font-semibold text-slate-900 dark:text-slate-100">Feature locks by level</h2>
+        <p class="mb-3 text-xs text-slate-500 dark:text-slate-400">Which features each entitlement level locks for white-label forks. A ticked box means the feature is <strong>locked</strong> at that level. Basic is a Normal fork before it pays up; Standard after; Full is Extended (everything open). Forks pick up changes on their next check-in.</p>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm">
+                <thead class="text-xs uppercase text-slate-400 dark:text-slate-500">
+                    <tr>
+                        <th class="py-2 pr-4">Feature</th>
+                        @foreach ($this->featureLevels as $lvl)
+                            <th class="py-2 pr-4 text-center">{{ ucfirst($lvl) }}</th>
+                        @endforeach
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 dark:divide-[#2D4060]">
+                    @foreach ($this->featureCatalog as $key => $label)
+                        <tr class="text-slate-700 dark:text-slate-200">
+                            <td class="py-2 pr-4 font-medium">{{ $label }}</td>
+                            @foreach ($this->featureLevels as $lvl)
+                                <td class="py-2 pr-4 text-center">
+                                    <input type="checkbox" wire:click="toggleFeatureLock('{{ $lvl }}', '{{ $key }}')"
+                                        @checked(in_array($key, $this->featureLocks[$lvl] ?? [], true))
+                                        class="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary dark:border-[#2D4060] dark:bg-[#243352]">
+                                </td>
+                            @endforeach
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
     </div>
 
     {{-- Published packages --}}

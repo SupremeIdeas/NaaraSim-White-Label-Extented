@@ -197,6 +197,56 @@ class WhiteLabelRegistry extends Component
         }
     }
 
+    /**
+     * Raise/lower an instance's feature-entitlement level (Batch 8) — the
+     * operator's "this Normal fork has paid up" action (basic → standard), or
+     * any admin-chosen level. Feature-lock change only; never touches the token,
+     * key, or package tier.
+     */
+    public function setLevel(int $id, string $level, WhiteLabelLicenseService $licenses): void
+    {
+        $this->guard();
+        $instance = WhiteLabelInstance::find($id);
+        if ($instance !== null) {
+            $licenses->setEntitlementLevel($instance, $level);
+            $this->dispatch('nx-toast', type: 'success', message: 'Feature level set to '.$instance->fresh()->entitlement_level.'. The fork unlocks on its next check-in.');
+        }
+    }
+
+    public function getFeatureCatalogProperty(): array
+    {
+        return \App\Support\FeatureLocks::catalog();
+    }
+
+    public function getFeatureLevelsProperty(): array
+    {
+        return WhiteLabelInstance::LEVELS;
+    }
+
+    public function getFeatureLocksProperty(): array
+    {
+        return \App\Support\FeatureLocks::all();
+    }
+
+    /** Toggle whether one feature is locked at one level (admin config). */
+    public function toggleFeatureLock(string $level, string $key): void
+    {
+        $this->guard();
+
+        if (! in_array($level, WhiteLabelInstance::LEVELS, true) || ! array_key_exists($key, \App\Support\FeatureLocks::catalog())) {
+            return;
+        }
+
+        $current = \App\Support\FeatureLocks::all()[$level] ?? [];
+        $next = in_array($key, $current, true)
+            ? array_values(array_diff($current, [$key]))
+            : array_values(array_merge($current, [$key]));
+
+        \App\Support\FeatureLocks::saveLevel($level, $next);
+        Auditor::log('white_label.feature_lock_toggled', null, null, ['level' => $level, 'key' => $key]);
+        $this->dispatch('nx-toast', type: 'success', message: 'Feature locks updated for '.$level.'.');
+    }
+
     private function revealCredential(int $id, ?string $key = null, ?string $token = null): void
     {
         $this->revealedForId = $id;
