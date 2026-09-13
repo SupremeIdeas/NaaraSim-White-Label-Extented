@@ -167,17 +167,22 @@
                 @if ($deviceResult === true)
                     <p class="mt-2 flex items-center gap-1 text-xs font-medium text-green-600 dark:text-green-400"><x-icon name="badge-check" class="h-4 w-4" /> Great — that device supports eSIM.</p>
                 @elseif ($deviceResult === false)
-                    <p class="mt-2 flex items-center gap-1 text-xs font-medium text-red-600 dark:text-red-400"><x-icon name="x" class="h-4 w-4" /> That device does not support eSIM — a purchase won’t work on it.</p>
+                    {{-- Warning, not a hard block (Prompt 10 §3): some buyers are purchasing
+                         for a second device or gifting the eSIM, so we surface the risk and
+                         require an explicit acknowledgment click rather than preventing checkout. --}}
+                    <p class="mt-2 flex items-center gap-1 text-xs font-medium text-amber-600 dark:text-amber-400"><x-icon name="alert-triangle" class="h-4 w-4" /> That model isn’t known to support eSIM — if it's for a different device, or you're gifting it, you can still continue.</p>
                 @elseif ($deviceResult === null && $device !== '')
                     <p class="mt-2 text-xs text-amber-600 dark:text-amber-400">We’re not sure about that model. {{ \App\Support\Niche\DeviceCompat::howToCheck() }}</p>
                 @endif
 
-                @if ($deviceResult !== false)
-                    <label class="mt-3 flex items-start gap-2 text-xs text-slate-600 dark:text-slate-300">
-                        <input type="checkbox" wire:model.live="deviceConfirmed" class="mt-0.5 rounded text-primary">
+                <label class="mt-3 flex items-start gap-2 text-xs text-slate-600 dark:text-slate-300">
+                    <input type="checkbox" wire:model.live="deviceConfirmed" class="mt-0.5 rounded text-primary">
+                    @if ($deviceResult === false)
+                        <span>I understand this device may not support eSIM and want to buy anyway (dial <span class="font-mono">*#06#</span> to double-check its EID).</span>
+                    @else
                         <span>I confirm my device supports eSIM (dial <span class="font-mono">*#06#</span> to find your EID).</span>
-                    </label>
-                @endif
+                    @endif
+                </label>
             </div>
 
             <button type="button" wire:click="purchase" wire:loading.attr="disabled" wire:target="purchase"
