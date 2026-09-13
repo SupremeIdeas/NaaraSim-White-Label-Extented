@@ -9,6 +9,21 @@
 
 ## DONE
 
+### 🧾 Prompt 10: checkout tax/fee line — 2026-09-13
+Audited first: `PricingEngine` and every checkout surface (eSIM `Checkout`,
+Naara Verify/Rent modals) confirmed no separate tax or fee is computed
+anywhere — `final_retail_usd`/`charged_to_user` is the whole charge. $0.00
+is the honest figure, so per the item's own framing the LINE itself is the
+trust signal (never leaving a customer wondering if something gets added
+before Pay), not a new pricing computation.
+- Added a plain "Taxes & fees — $0.00" row to all three checkout surfaces:
+  eSIM `Checkout.blade.php` (above the price summary), and both Numbers
+  modals (`numbers-modal/verify.blade.php`, `.../rent.blade.php`, in the
+  sticky footer above "You pay") — unconditional, so it renders on the
+  pre-purchase screen regardless of coupon/credits state.
+- 3 new tests (`CheckoutTaxFeeTest`): each of the three checkout surfaces
+  states "Taxes & fees" and "$0.00". Full suite green. Tested locally only.
+
 ### 📱 Prompt 10: WhatsApp's actual role audited (no code change) — 2026-09-13
 Per the item's own instruction — determine and report BEFORE scoping any
 two-way support follow-up. Read every WhatsApp file end to end
@@ -3246,11 +3261,10 @@ is ready.
 - **Prompt 10 (Trust & Transparency, Sonnet-safe, mostly surfacing existing
   logic) — §1 (refund guarantee), §3 (eSIM compatibility inline), the
   `publicSuccessRate()` CountryPicker projection, the mobile-money rail
-  audit, and the WhatsApp role audit are DONE, see DONE above (WhatsApp:
-  audited only, two-way support intentionally NOT scoped — a real product
-  decision for the owner). Remaining:**
-  checkout tax/fee line (real $0.00 is fine, the line itself is the trust
-  signal); consumer auto-renewal opt-out toggle + advance-notice (this is
+  audit, the WhatsApp role audit, and the checkout tax/fee line are DONE,
+  see DONE above (WhatsApp: audited only, two-way support intentionally
+  NOT scoped — a real product decision for the owner). Remaining:**
+  consumer auto-renewal opt-out toggle + advance-notice (this is
   also where `renewal_reminder`'s dead WhatsApp-template wiring belongs, per
   the WhatsApp audit above); any "unlimited" eSIM plan structurally required
   to disclose its fair-usage threshold.
