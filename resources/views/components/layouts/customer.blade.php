@@ -16,7 +16,9 @@
     // Naara Gift lives in the bar whenever the feature isn't switched off. It
     // shows a "Soon" badge until the API keys flip it live (the store page itself
     // renders a Coming-Soon state until then) — no manual editing needed.
-    if (\App\Support\FeatureFlags::adminEnabled('naara_gift')) {
+    // Batch 8: on a white-label fork whose license locks gift cards, don't
+    // surface the nav link (the page itself 404s). Inert on the master.
+    if (\App\Support\FeatureFlags::adminEnabled('naara_gift') && ! \App\Support\FeatureEntitlements::locked(\App\Support\FeatureLocks::F_GIFT_CARDS)) {
         $primary[] = ['route' => 'gift-cards', 'label' => 'Gifts', 'icon' => 'gift',
             'badge' => \App\Support\FeatureFlags::configured('naara_gift') ? null : 'Soon'];
     }
@@ -36,6 +38,12 @@
         ['route' => 'account', 'label' => 'Account', 'icon' => 'settings'],
         ['route' => 'security', 'label' => 'Security', 'icon' => 'shield'],
     ];
+
+    // Batch 8: drop the "List my brand" entry on a fork whose license locks
+    // Brand Hunt (its page 404s). Inert on the master.
+    if (\App\Support\FeatureEntitlements::locked(\App\Support\FeatureLocks::F_BRAND_HUNT)) {
+        $more = array_values(array_filter($more, fn ($item) => ($item['route'] ?? null) !== 'brand.get-listed'));
+    }
 
     // The in-browser dialer (Internet calls) only when voice is live — its page
     // 404s until Twilio is active, so we don't surface a dead link.

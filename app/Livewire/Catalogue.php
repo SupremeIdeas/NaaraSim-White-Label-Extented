@@ -59,9 +59,21 @@ class Catalogue extends Component
 
     private const VIEWS = ['popular', 'local', 'regional', 'global'];
 
+    /**
+     * Batch 8: the full voice eSIM line (calls + SMS) is a tier-locked feature.
+     * When a white-label fork's license locks it, only data-only plans are sold
+     * — the Full tab is hidden and any attempt to select it falls back to data.
+     * Inert on the master (never locked there).
+     */
+    public function getVoiceLockedProperty(): bool
+    {
+        return \App\Support\FeatureEntitlements::locked(\App\Support\FeatureLocks::F_ESIM_VOICE);
+    }
+
     public function setTab(string $tab): void
     {
-        $this->tab = in_array($tab, ['data', 'full'], true) ? $tab : 'data';
+        $allowed = $this->voiceLocked ? ['data'] : ['data', 'full'];
+        $this->tab = in_array($tab, $allowed, true) ? $tab : 'data';
         // A country/region with data plans may have none on the Full line (and
         // vice versa), so every drill-down resets when switching lines.
         $this->resetSelection();
@@ -165,6 +177,10 @@ class Catalogue extends Component
     {
         if ($this->claim !== '') {
             PendingCoupon::stash($this->claim);
+        }
+        // Never land a locked fork on the Full (voice) line via a ?tab=full deep link.
+        if ($this->voiceLocked) {
+            $this->tab = 'data';
         }
     }
 

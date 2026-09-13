@@ -38,6 +38,21 @@ class WhiteLabelUpdateController extends Controller
      * every authenticated call centrally; this action only validates the
      * payload and raises the alert a failed/rolled-back update deserves.
      */
+    /**
+     * The fork's feature-entitlement (Batch 8): its current level + the resolved
+     * lock list. The fork polls this on check-in and caches it locally, then
+     * enforces the locks through FeatureEntitlements. Reuses the `updates.check`
+     * scope — a fork allowed to check for updates is allowed to read what it's
+     * entitled to; no new scope, no new gate.
+     */
+    public function entitlement(Request $request): JsonResponse
+    {
+        /** @var WhiteLabelInstance $instance */
+        $instance = $request->user();
+
+        return response()->json(\App\Support\FeatureLocks::entitlementFor($instance->entitlement_level));
+    }
+
     public function report(Request $request): JsonResponse
     {
         /** @var WhiteLabelInstance $instance */

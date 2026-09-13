@@ -3,6 +3,7 @@
 namespace App\Services\Updater;
 
 use App\Models\Setting;
+use App\Support\FeatureEntitlements;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\RequestException;
@@ -65,7 +66,69 @@ class WhiteLabelUpdateClient
             return $this->failure('The original platform rejected the check: '.($response->json('message') ?? $response->status()));
         }
 
+        // A successful check-in is the natural moment to also refresh this
+        // fork's feature entitlement (Batch 8B) — the operator may have raised
+        // this instance's level (e.g. basic→standard once paid) since the last
+        // check. Fire-and-forget: the lock refresh must never change the result
+        // of, or throw out of, an update check. Only on the 'code' check so a
+        // paired code+theme poll doesn't double the call.
+        if ($family === 'code') {
+            $this->refreshEntitlement();
+        }
+
         return ['ok' => true, 'packages' => $response->json('packages') ?? [], 'error' => null];
+    }
+
+    /**
+     * Fork-only (Batch 8B): re-fetch this instance's feature entitlement from
+     * the master and cache the resolved lock list locally, so the universal
+     * gates (`App\Support\FeatureEntitlements`) enforce the operator's current
+     * decision on this live deployment — not just the copy baked into the last
+     * activation response. Exposed as its own action (the admin screen can call
+     * it directly) and also run opportunistically on every update check-in.
+     *
+     * Resilience matches the rest of this client and the Batch 5/8 posture:
+     * - Never throws into the UI — a clean {ok, level, locks, error} on any
+     *   failure (not configured, connectivity, a non-2xx or unreadable response).
+     * - Writes the cache ONLY on a clean 2xx with a well-formed lock list. A
+     *   transient failure leaves the last-known list untouched — never wiped
+     *   (no accidental unlock) and never invented (no surprise hard-lock).
+     *
+     * @return array{ok:bool, level:?string, locks:array<int,string>, error:?string}
+     */
+    public function refreshEntitlement(): array
+    {
+        $client = $this->client();
+        if ($client === null) {
+            return $this->entitlementFailure('This instance is not configured to reach the original platform yet (missing base URL or API token).');
+        }
+
+        try {
+            $response = $client->get('v1/white-label/entitlement');
+        } catch (ConnectionException $e) {
+            return $this->entitlementFailure('Could not reach the original platform: '.$e->getMessage());
+        }
+
+        if ($response->status() === 404) {
+            return $this->entitlementFailure('The distribution API is not enabled on the original platform right now.');
+        }
+        if (! $response->successful()) {
+            return $this->entitlementFailure('The original platform rejected the entitlement check: '.($response->json('message') ?? $response->status()));
+        }
+
+        $locks = $response->json('locks');
+        if (! is_array($locks)) {
+            // A malformed payload is a failure like any other: keep the
+            // last-known list rather than corrupting the cache with garbage.
+            return $this->entitlementFailure('The original platform returned an unreadable entitlement payload.');
+        }
+
+        $locks = array_values(array_filter($locks, 'is_string'));
+        FeatureEntitlements::store($locks);
+
+        $level = $response->json('level');
+
+        return ['ok' => true, 'level' => is_string($level) ? $level : null, 'locks' => $locks, 'error' => null];
     }
 
     /**
@@ -175,5 +238,11 @@ class WhiteLabelUpdateClient
     private function failure(string $message): array
     {
         return ['ok' => false, 'packages' => [], 'error' => $message];
+    }
+
+    /** @return array{ok:bool, level:null, locks:array<int,string>, error:string} */
+    private function entitlementFailure(string $message): array
+    {
+        return ['ok' => false, 'level' => null, 'locks' => [], 'error' => $message];
     }
 }

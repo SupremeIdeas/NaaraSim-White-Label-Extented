@@ -29,6 +29,10 @@
 {{-- Data Only / Data + Calls — the two hard-separated lines (§3.0), styled as
      the reference's full-width segmented toggle. "Naara Connect" (the full line's
      product name) stays in its own coming-soon state below. --}}
+{{-- Batch 8: on a white-label fork whose license locks the full voice line,
+     the Data/Calls toggle is hidden entirely — the store sells data-only eSIM.
+     Inert on the master (voiceLocked is always false there). --}}
+@unless ($this->voiceLocked)
 <div class="mb-4 grid grid-cols-2 gap-1 rounded-2xl border border-slate-200 bg-slate-100 p-1 dark:border-[var(--brand-card-border-dark)] dark:bg-[var(--brand-card-dark)]">
     <button wire:click="setTab('data')" @class([
         'flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition',
@@ -45,6 +49,7 @@
         <x-icon name="phone" class="h-4 w-4" /> Data + Calls
     </button>
 </div>
+@endunless
 
 {{-- Category chips (reference row): Trending / Countries / Regions / Global.
      Horizontal-scroll on small screens, active state highlighted. These are the
