@@ -9,6 +9,55 @@
 
 ## DONE
 
+### 📱 Prompt 10: WhatsApp's actual role audited (no code change) — 2026-09-13
+Per the item's own instruction — determine and report BEFORE scoping any
+two-way support follow-up. Read every WhatsApp file end to end
+(`WhatsAppAutopilot`, `WhatsAppCloudClient`, `WhatsAppWebhookController`,
+`SendWhatsAppTemplateJob`, `SupportLinks`, `config/naara.php`) plus every
+real call site, rather than assuming from the blueprint's own framing.
+Two genuinely separate roles exist today, and neither is two-way:
+
+1. **Support contact link** (`SupportLinks::whatsappUrl()`, config
+   `naara.support.whatsapp`) — a `wa.me/<number>?text=...` deep link with a
+   prefilled message, rendered on the customer app shell and every theme's
+   contact page (13 theme variants + the shared marketing contact page).
+   This is "live chat + WhatsApp" (S32) in name only: tapping it hands the
+   conversation to the user's own WhatsApp app and a human on NaaraSim's
+   side — nothing in this codebase reads or replies to those messages. It
+   is not built, gated, or logged by the platform at all.
+2. **WhatsApp Autopilot** (`WhatsAppAutopilot` → `WhatsAppCloudClient`, Meta
+   Cloud API) — opt-in (`users.whatsapp_opt_in`), template-only, ONE-WAY
+   business→customer notifications. Meta only allows pre-approved templates
+   outside a 24-hour customer-service session window (the client's own
+   docblock says so) — freeform two-way replies are structurally not what
+   this integration does. Of the 5 events configured in
+   `config/naara.php`'s `whatsapp_autopilot.templates`, only 2 are actually
+   wired to a real call site: `esim_delivered` (`Checkout.php`) and
+   `number_delivered` (`GetNumber.php`). **`renewal_reminder`,
+   `low_balance`, and `order_failed` are unwired — configured template
+   names with zero `notify()` call anywhere.** Traced further:
+   `RenewVirtualNumbersCommand` (the only renewal-lifecycle code) sends NO
+   notice of any kind today (not WhatsApp, not email) before or after
+   renewing — this is the same gap the already-planned "consumer
+   auto-renewal opt-out toggle + advance-notice" item exists to close, so
+   wiring `renewal_reminder` belongs there, not invented here standalone.
+   `low_balance` has no corresponding "your wallet is low" trigger anywhere
+   in the app to hook into either (the existing `LowBalanceException`/
+   `low_balance` error codes are all PROVIDER-balance, not user-wallet).
+3. **Inbound handling** is exactly one keyword: `WhatsAppWebhookController`
+   recognises STOP/UNSUBSCRIBE/CANCEL and flips `whatsapp_opt_in` off
+   (compliance — a user can always leave from WhatsApp itself). Delivery
+   STATUS callbacks are logged only. Nothing else inbound is read, parsed,
+   or acted on — there is no bot, no agent routing, no session state.
+
+**Conclusion, no code changed this pass:** WhatsApp today is (a) a manual,
+human-staffed contact channel and (b) a narrow, compliant, one-way
+transactional notifier — never two-way. A real two-way support channel
+would mean either live-agent tooling to reply inside Meta's 24-hour session
+window, or a different support-desk integration entirely — a genuine
+product decision for the owner, not a Sonnet-safe surfacing task. Filed as
+audited; two-way support stays a possible FUTURE follow-up, not scoped here.
+
 ### 💳 Prompt 10: mobile-money rails audited per gateway/country, named at checkout — 2026-09-13
 Audited what NaaraSim's own top-up gateways actually claim vs. what they
 really support — via each gateway's OWN developer/support docs (Paystack's
@@ -3196,13 +3245,15 @@ is ready.
   isn't there.
 - **Prompt 10 (Trust & Transparency, Sonnet-safe, mostly surfacing existing
   logic) — §1 (refund guarantee), §3 (eSIM compatibility inline), the
-  `publicSuccessRate()` CountryPicker projection, and the mobile-money rail
-  audit are DONE, see DONE above. Remaining:**
-  WhatsApp's actual role determined and reported
-  BEFORE scoping two-way support as a possible follow-up; checkout tax/fee
-  line (real $0.00 is fine, the line itself is the trust signal); consumer
-  auto-renewal opt-out toggle + advance-notice; any "unlimited" eSIM plan
-  structurally required to disclose its fair-usage threshold.
+  `publicSuccessRate()` CountryPicker projection, the mobile-money rail
+  audit, and the WhatsApp role audit are DONE, see DONE above (WhatsApp:
+  audited only, two-way support intentionally NOT scoped — a real product
+  decision for the owner). Remaining:**
+  checkout tax/fee line (real $0.00 is fine, the line itself is the trust
+  signal); consumer auto-renewal opt-out toggle + advance-notice (this is
+  also where `renewal_reminder`'s dead WhatsApp-template wiring belongs, per
+  the WhatsApp audit above); any "unlimited" eSIM plan structurally required
+  to disclose its fair-usage threshold.
 - **Prompt 11 (Net-New Features) — mixed:**
   - Sonnet-safe, no money-path: spam-report + auto-block (`Dialer`/
     `Contacts`, configurable threshold/window), voicemail + transcription
