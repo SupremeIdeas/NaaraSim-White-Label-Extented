@@ -9,6 +9,31 @@
 
 ## DONE
 
+### 📤 Prompt 11 Batch B: port-out / right-to-leave — 2026-09-13
+Second porting batch. Honest anti-lock-in: a customer can take their
+US/Canada Naara Line to another carrier and we never obstruct it. Only +1
+numbers are portable via our providers (the audit finding — porting an
+African/other mobile number into a VoIP/CPaaS carrier isn't available to
+individuals), so the affordance is +1-only; we never offer a port we can't
+facilitate.
+- `virtual_numbers.port_out_requested_at` (nullable timestamp) records the
+  request; `VirtualNumber::isUsCanada()` gates it (supportsMms now reuses it).
+- `MyLines::requestPortOut()` — owner-scoped, idempotent, +1-only (a non-+1
+  line is refused up front). Sets the marker, audit-logs
+  `line.port_out_requested`, and fires an `info`-severity `AlertAdminJob`
+  (`line_port_out_requested`) so ops send the customer what their new carrier
+  needs. Billing is deliberately left untouched — the customer still owns the
+  number until the port completes, so we neither stop charging (which would
+  release it) nor obstruct.
+- `my-connectivity.blade.php`: a +1 active/past_due Naara Line shows a
+  confirm-gated "Take this number to another carrier" action; once requested
+  it shows the pending "check your email" state; a non-+1 line shows nothing
+  (we never dangle a port we can't do). Uses the existing `phone-forwarded`
+  sprite icon.
+- 5 new `MyLinesTest` cases: +1 line offers the action, non-+1 never does,
+  request records + owner-scoped, non-+1 refused, requested line shows the
+  pending state. Full suite green locally. Tested locally only.
+
 ### 🚫 Prompt 11 Batch A: recycled-number pre-check — 2026-09-13
 Owner decided (2026-09-13) to build all three porting-audit outcomes:
 recycled-number pre-check, port-out, and US/Canada port-in intake — as

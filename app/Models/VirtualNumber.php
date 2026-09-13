@@ -19,6 +19,7 @@ class VirtualNumber extends Model
         'auto_renew',
         'next_billing_date',
         'renewal_notice_sent_at',
+        'port_out_requested_at',
         'provisioned_at',
         'expires_at',
     ];
@@ -41,6 +42,7 @@ class VirtualNumber extends Model
             'auto_renew' => 'boolean',
             'next_billing_date' => 'date',
             'renewal_notice_sent_at' => 'datetime',
+            'port_out_requested_at' => 'datetime',
             'provisioned_at' => 'datetime',
             'expires_at' => 'datetime',
         ];
@@ -79,6 +81,17 @@ class VirtualNumber extends Model
             return (bool) $caps['mms'];
         }
 
-        return str_starts_with(ltrim($this->phone_number, ' '), '+1');
+        return $this->isUsCanada();
+    }
+
+    /**
+     * Only US/Canada (+1) numbers can be ported out via our providers
+     * (Prompt 11 audit): porting an African/other mobile number into a
+     * VoIP/CPaaS carrier isn't available to individuals, so we never offer a
+     * port-out we can't honestly facilitate.
+     */
+    public function isUsCanada(): bool
+    {
+        return str_starts_with(ltrim((string) $this->phone_number, ' '), '+1');
     }
 }
