@@ -95,7 +95,7 @@
     <div class="border-t border-slate-200 dark:border-white/10">
         <div class="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-5 py-6 text-xs text-slate-400 dark:text-slate-500 sm:flex-row sm:px-6">
             <span class="flex items-center gap-1.5">
-                <span class="font-mono tabular-nums">&copy; {{ date('Y') }}</span> {{ $brand }}. A product of <span class="text-slate-600 dark:text-slate-300">Supreme Ideas Agency</span>. All rights reserved.
+                <x-footer-credit link-class="text-slate-600 dark:text-slate-300" year-class="font-mono tabular-nums" />
             </span>
             <span class="flex flex-wrap items-center justify-center gap-x-3 gap-y-1">
                 @foreach ($legal as $i => $link)

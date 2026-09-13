@@ -404,31 +404,45 @@ class ThemePreset
     }
 
     /**
-     * The single shared "Apple-inspired" dark palette every non-default theme
-     * falls back to in dark mode. Deliberately NOT derived from each preset's
-     * own light-mode tokens — the owner explicitly asked for one consistent,
-     * professionally-designed dark look across all 19 presets rather than a
-     * per-theme derived one, so the rest of the chrome (sidebar, bottom nav,
-     * card surfaces via --brand-navy) reads as one coherent dark UI instead of
-     * clashing per-theme tints. naara-official is untouched — this block never
-     * emits for it (see the early return above).
+     * Dark mode used to collapse every non-default theme to one shared
+     * "Apple-inspired" palette (an earlier owner request). Reversed 2026-09-13
+     * (owner-confirmed): every preset already ships its own authored
+     * `primary_dark`/`accent_dark` tokens in the seeder — this now reads
+     * THOSE instead, so a theme's actual recolour shows up in dark mode too
+     * instead of every custom theme collapsing to the same blue. `navy` and
+     * `action` have no separate dark variant (navy is already a
+     * dark-appropriate surface tone per theme; action is a status/CTA color
+     * kept consistent across modes), so they carry over unchanged from light.
+     *
+     * @return array{colors: array<string, string|null>} the token bag
+     *               emitVars() expects, remapped for the dark-mode override
      */
-    private const DARK_STANDARD = [
-        '--brand-primary' => '10 132 255',
-        '--brand-primary-dark' => '4 94 199',
-        '--brand-accent' => '255 159 10',
-        '--brand-navy' => '18 18 20',
-        '--brand-action' => '255 69 58',
-    ];
+    private static function darkOverrideTokens(array $tokens): array
+    {
+        $colors = $tokens['colors'] ?? [];
+
+        return [
+            'colors' => [
+                'primary' => $colors['primary_dark'] ?? null,
+                'accent' => $colors['accent_dark'] ?? null,
+                'navy' => $colors['navy'] ?? null,
+                'action' => $colors['action'] ?? null,
+            ],
+        ];
+    }
 
     /**
      * The runtime <style> body. EMPTY for the built-in naara-official (app.css
      * already renders that look — no diff, no regression). For every other
      * theme, emit the whitelisted `:root` variable overrides for LIGHT mode
      * (each value re-validated here so nothing arbitrary can reach the page),
-     * plus a second, higher-specificity rule that collapses dark mode to the
-     * one shared standard palette above — pure CSS cascade, no JS/PHP dark
-     * detection needed since `.dark` is a client-toggled class on <html>.
+     * plus a second, higher-specificity rule scoping THIS theme's own dark
+     * tokens to when both dark mode is on and this preset is active — pure
+     * CSS cascade, no JS/PHP dark detection needed since `.dark` is a
+     * client-toggled class on <html>. A theme with no dark tokens of its own
+     * (e.g. a bare admin-created custom theme) simply gets no dark-mode
+     * override block at all — it fails open to the same colors it already
+     * has in light mode, never to an unrelated forced palette.
      */
     public static function styleCss(): string
     {
@@ -440,8 +454,10 @@ class ThemePreset
         $vars = self::emitVars($preset['tokens']);
         $css = $vars === '' ? '' : ':root{'.$vars.'}';
 
-        $darkVars = implode(';', array_map(fn ($k, $v) => "{$k}:{$v}", array_keys(self::DARK_STANDARD), self::DARK_STANDARD)).';';
-        $css .= ':root.dark body.theme-'.$preset['slug'].'{'.$darkVars.'}';
+        $darkVars = self::emitVars(self::darkOverrideTokens($preset['tokens']));
+        if ($darkVars !== '') {
+            $css .= ':root.dark body.theme-'.$preset['slug'].'{'.$darkVars.'}';
+        }
 
         return $css;
     }

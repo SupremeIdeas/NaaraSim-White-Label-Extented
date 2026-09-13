@@ -15,6 +15,14 @@ class UpdateManifest
     /** The canonical, sortable version scheme: YYYY.MM.DD-N. */
     public const VERSION_PATTERN = '/^\d{4}\.\d{2}\.\d{2}-\d+$/';
 
+    /** Behaves exactly as today: the package can be published or withheld via the ordinary admin toggle. */
+    public const SCOPE_DISTRIBUTABLE = 'distributable';
+
+    /** Can NEVER be published to white label — enforced server-side in PackagePublisher, not just hidden in the UI (Naara Pro / master-only distribution lock). */
+    public const SCOPE_MASTER_ONLY = 'master_only';
+
+    public const DISTRIBUTION_SCOPES = [self::SCOPE_DISTRIBUTABLE, self::SCOPE_MASTER_ONLY];
+
     public function __construct(
         public readonly string $packageId,
         public readonly string $product,
@@ -34,6 +42,7 @@ class UpdateManifest
         public readonly bool $requiresComposerInstall,
         public readonly bool $requiresNpmBuild,
         public readonly ?string $tierRequirement,
+        public readonly string $distributionScope = self::SCOPE_DISTRIBUTABLE,
     ) {
     }
 
@@ -69,6 +78,13 @@ class UpdateManifest
             requiresComposerInstall: (bool) ($data['requires_composer_install'] ?? false),
             requiresNpmBuild: (bool) ($data['requires_npm_build'] ?? false),
             tierRequirement: isset($data['tier_requirement']) ? (string) $data['tier_requirement'] : null,
+            // Older/thinner manifests carry no distribution_scope at all — they
+            // predate this field and were always distributable, so that stays
+            // the safe default rather than defaulting to a stricter lock that
+            // would silently withdraw packages nobody asked to restrict.
+            distributionScope: in_array($data['distribution_scope'] ?? null, self::DISTRIBUTION_SCOPES, true)
+                ? (string) $data['distribution_scope']
+                : self::SCOPE_DISTRIBUTABLE,
         );
     }
 
@@ -97,7 +113,14 @@ class UpdateManifest
             'requires_composer_install' => $this->requiresComposerInstall,
             'requires_npm_build' => $this->requiresNpmBuild,
             'tier_requirement' => $this->tierRequirement,
+            'distribution_scope' => $this->distributionScope,
         ];
+    }
+
+    /** Can this package ever be published to a white-label instance? */
+    public function isMasterOnly(): bool
+    {
+        return $this->distributionScope === self::SCOPE_MASTER_ONLY;
     }
 
     /** Is a version string in the canonical YYYY.MM.DD-N form? */

@@ -34,10 +34,10 @@
                     @if ($alert->coupon_code)
                         <div class="mt-4 flex items-center justify-between gap-3 rounded-xl border border-dashed border-primary/40 bg-primary/5 px-4 py-3"
                              x-data="{ copied: false }">
-                            <span class="font-mono text-sm font-bold tracking-wider text-primary dark:text-teal-300">{{ $alert->coupon_code }}</span>
+                            <span class="font-mono text-sm font-bold tracking-wider text-primary">{{ $alert->coupon_code }}</span>
                             <button type="button"
                                 @click="navigator.clipboard.writeText('{{ $alert->coupon_code }}'); copied = true; setTimeout(() => copied = false, 1500)"
-                                class="inline-flex items-center gap-1 text-xs font-semibold text-primary dark:text-teal-300">
+                                class="inline-flex items-center gap-1 text-xs font-semibold text-primary">
                                 <x-icon name="copy" class="h-3.5 w-3.5" />
                                 <span x-text="copied ? 'Copied!' : 'Copy'"></span>
                             </button>

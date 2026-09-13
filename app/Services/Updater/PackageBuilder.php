@@ -72,6 +72,9 @@ class PackageBuilder
             requiresComposerInstall: (bool) ($params['requires_composer_install'] ?? false),
             requiresNpmBuild: (bool) ($params['requires_npm_build'] ?? false),
             tierRequirement: $params['tier_requirement'] ?? null,
+            distributionScope: in_array($params['distribution_scope'] ?? null, UpdateManifest::DISTRIBUTION_SCOPES, true)
+                ? $params['distribution_scope']
+                : UpdateManifest::SCOPE_DISTRIBUTABLE,
         );
 
         $manifestBytes = $this->encodeManifest($manifest);

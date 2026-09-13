@@ -244,7 +244,11 @@
                                 <td class="py-2 pr-4">{{ $p->package_type }}</td>
                                 <td class="py-2 pr-4">{{ $p->tier_requirement ?? '—' }}</td>
                                 <td class="py-2 pr-4">
-                                    @if ($p->is_published)
+                                    @if ($p->isMasterOnly())
+                                        <span class="inline-flex items-center gap-1 rounded-full bg-slate-800 px-2 py-0.5 text-xs font-medium text-white dark:bg-black">
+                                            <x-icon name="lock" class="h-3 w-3" /> Master-only
+                                        </span>
+                                    @elseif ($p->is_published)
                                         <span class="rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700 dark:bg-green-900/40 dark:text-green-300">Published</span>
                                     @else
                                         <span class="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600 dark:bg-[#243352] dark:text-slate-300">Staged</span>
@@ -252,10 +256,21 @@
                                 </td>
                                 <td class="py-2 pr-4">
                                     <div class="flex gap-2">
-                                        <button type="button" wire:click="togglePublish({{ $p->id }})"
-                                            class="rounded-lg border border-slate-200 px-2.5 py-1 text-xs font-medium text-slate-600 hover:bg-slate-50 dark:border-[#2D4060] dark:text-slate-300 dark:hover:bg-[#243352]">
-                                            {{ $p->is_published ? 'Unpublish' : 'Publish' }}
-                                        </button>
+                                        @if ($p->isMasterOnly())
+                                            {{-- Master-Only Distribution Lock: this package can NEVER be
+                                                 published to white label — enforced server-side in
+                                                 PackagePublisher, not just hidden here. No Publish
+                                                 button at all, so an admin never wonders why nothing
+                                                 happened. --}}
+                                            <span class="flex items-center gap-1 rounded-lg border border-slate-200 px-2.5 py-1 text-xs text-slate-400 dark:border-[#2D4060] dark:text-slate-500" title="Master-only packages can never be distributed to white label.">
+                                                <x-icon name="lock" class="h-3 w-3" /> Cannot be distributed
+                                            </span>
+                                        @else
+                                            <button type="button" wire:click="togglePublish({{ $p->id }})"
+                                                class="rounded-lg border border-slate-200 px-2.5 py-1 text-xs font-medium text-slate-600 hover:bg-slate-50 dark:border-[#2D4060] dark:text-slate-300 dark:hover:bg-[#243352]">
+                                                {{ $p->is_published ? 'Unpublish' : 'Publish' }}
+                                            </button>
+                                        @endif
                                         <button type="button" wire:click="withdrawPackage({{ $p->id }})" wire:confirm="Withdraw {{ $p->version }} from distribution and delete its file?"
                                             class="rounded-lg border border-red-200 px-2.5 py-1 text-xs font-medium text-red-600 hover:bg-red-50 dark:border-red-900/50 dark:text-red-300 dark:hover:bg-red-950/30">
                                             Withdraw
