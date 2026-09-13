@@ -129,6 +129,8 @@ use App\Livewire\MerchantInvoices;
 use App\Livewire\MerchantJoin;
 use App\Livewire\Messages;
 use App\Livewire\MyLines;
+use App\Livewire\PortIn;
+use App\Livewire\Admin\PortInRequests;
 use App\Livewire\Notifications;
 use App\Livewire\PartnerEarnings;
 use App\Livewire\PricingPage;
@@ -246,6 +248,9 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::get('/numbers/contacts', Contacts::class)->name('numbers.contacts');
         // Conversation inbox (Numbers overhaul §1) — inbound + outbound threads.
         Route::get('/numbers/messages', Messages::class)->name('numbers.messages');
+        // Port-in intake (Prompt 11) — bring an existing US/Canada number to Naara.
+        // Honest multi-day carrier process, not instant provisioning.
+        Route::get('/numbers/port-in', PortIn::class)->name('numbers.port-in');
         Route::get('/referrals', Referrals::class)->name('referrals');
 
         // NaaraCredits rewards area (loyalty module) — opt-in earning.
@@ -365,6 +370,9 @@ Route::middleware(['admin', 'throttle:admin'])
             Route::get('/errors', ErrorLogViewer::class)->name('errors');
             // Feature toggles (owner request) — switch features on/off + setup guides.
             Route::get('/features', Features::class)->name('features');
+            // Port-in requests (Prompt 11) — ops workflow for customers bringing
+            // a US/Canada number to Naara.
+            Route::get('/port-in-requests', PortInRequests::class)->name('port-in-requests');
             // eSIM storefront hero (esim_upgrade Part 2) — title, description, images.
             Route::get('/esim-hero', EsimHero::class)->name('esim-hero');
             Route::get('/numbers-hero', NumbersHero::class)->name('numbers-hero');
