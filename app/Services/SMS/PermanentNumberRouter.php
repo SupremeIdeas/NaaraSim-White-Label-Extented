@@ -38,6 +38,7 @@ class PermanentNumberRouter
         private readonly PricingEngine $pricing,
         private readonly CircuitBreaker $breaker = new CircuitBreaker,
         private readonly CandidateOrdering $ordering = new CandidateOrdering,
+        private readonly NumberBlocklist $blocklist = new NumberBlocklist,
     ) {}
 
     /** Providers in the lane that actually have keys configured. */
@@ -86,6 +87,17 @@ class PermanentNumberRouter
                     fn ($n) => $this->matchesSpec((string) ($n['number'] ?? ''), $digits, $position),
                 ));
             }
+
+            // Recycled-number pre-check (Prompt 11): never re-offer a number we
+            // pulled for abuse/complaint, whatever the provider recycles back.
+            $blocked = $this->blocklist->blockedAmong(array_map(fn ($n) => (string) ($n['number'] ?? ''), $found));
+            if ($blocked !== []) {
+                $found = array_values(array_filter(
+                    $found,
+                    fn ($n) => ! isset($blocked[$this->blocklist->normalize((string) ($n['number'] ?? ''))]),
+                ));
+            }
+
             if ($found === []) {
                 continue;
             }
@@ -137,6 +149,13 @@ class PermanentNumberRouter
     public function provision(User $user, string $country, string $number, string $provider): VirtualNumber
     {
         if (! in_array($provider, $this->lane, true) || ! $this->isConfigured($provider)) {
+            throw new SmsException('That number is no longer available.');
+        }
+
+        // Recycled-number pre-check (Prompt 11): refuse a blocked number before
+        // any charge — defence in depth behind the search-time filter, in case a
+        // stale/forged number reaches provision().
+        if ($this->blocklist->isBlocked($number)) {
             throw new SmsException('That number is no longer available.');
         }
 

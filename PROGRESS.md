@@ -9,6 +9,34 @@
 
 ## DONE
 
+### 🚫 Prompt 11 Batch A: recycled-number pre-check — 2026-09-13
+Owner decided (2026-09-13) to build all three porting-audit outcomes:
+recycled-number pre-check, port-out, and US/Canada port-in intake — as
+three small, independently-shipped batches. This is Batch A.
+Honest scope (owner's own framing): don't re-sell a permanent number we
+pulled for abuse/complaint. Scoped to OUR OWN released inventory — no
+cross-provider "clean number" guarantee (not offerable, deliberately not
+attempted).
+- New `blocked_numbers` table + `BlockedNumber` model — matched on `msisdn`
+  (digits only) so a number blocked as "+1 555-000-1234" still catches a
+  provider returning "+15550001234"; `provider` is hidden (money-rule 1.2
+  supplier masking).
+- New `App\Services\SMS\NumberBlocklist` service: `block/unblock/isBlocked`
+  + `blockedAmong()` (one query per search result set, not per candidate).
+- Wired into `PermanentNumberRouter`: `search()` filters blocked numbers out
+  of every result set; `provision()` hard-refuses a blocked number BEFORE
+  any wallet charge (defence in depth behind the search filter, against a
+  stale/forged provider param).
+- New `numbers:block` artisan command (block/`--unblock`, `--reason`,
+  `--provider`) as the ops control surface — audit-logged. A GUI block button
+  on a future admin numbers screen can layer on later; not built now (no
+  admin per-number management screen exists yet, and building one would be
+  scope creep for "pre-check").
+- 5 new tests (`NumberBlocklistTest`): formatting-insensitive match, unblock,
+  search never offers a blocked number, provision refuses without charging,
+  and the ops command round-trip. Full suite green locally. Tested locally
+  only.
+
 ### 🔌 Prompt 11: number-porting capability audit (no code — report-first, owner decision pending) — 2026-09-13
 Per the item's own instruction ("Report back before writing anything"),
 this is an audit only. Grounded in the real code first: porting can only
@@ -3432,13 +3460,22 @@ is ready.
     wallet/family-plan — touches `WalletService`, a CLAUDE.md money-path
     god-node; scope the smallest version (a shared eSIM data allowance) and
     inspect callers/side-effects before touching wallet code at all.
-  - **Audit-first, no code yet:** number porting — Twilio/Telnyx port-in/
-    port-out capability per country NaaraSim actually sells in, typical
-    processing time, LOA/compliance documentation required. Report back
-    before writing anything; port-in (lower risk, Naara's own funnel) before
-    port-out (no artificial retention friction beyond genuine provider
-    requirements). Pairs with a permanent-number blacklist pre-check on
-    recycled inventory if the provider exposes that capability.
+  - **Number porting — audit DONE, owner decided to build all three
+    outcomes (2026-09-13).** See the audit entry in DONE for the full
+    findings (African mobile port-in isn't offerable to individuals; only
+    +1 self-service works; every non-+1 port is a business-compliance
+    process). Shipping as three small batches:
+    - **Batch A — recycled-number pre-check: DONE** (see DONE above).
+    - **Batch B — port-out / right-to-leave (NEXT):** MyLines panel for a
+      +1 Naara Line — informational "how to port your number away" + an
+      audit-logged request action (flags the line, notifies ops) + honest
+      release discipline (never obstruct a leaving customer). No instant
+      carrier-side automation — Twilio/Telnyx port-out is carrier-initiated
+      by the gaining provider; our job is not to block it.
+    - **Batch C — US/Canada port-in intake:** a request model + status
+      tracking (submitted → review → submitted_to_carrier → completed/
+      rejected), +1-only guard, honest 5–15-day framing (NOT instant
+      provisioning), user intake UI + admin processing screen.
 
 ### ▶ AFTER THE ABOVE — Brand Directory / Brand Hunt premium redesign (still queued)
 > Note: the Updater track's own "ALL 7 BATCHES COMPLETE" / "Batch 8" planning
