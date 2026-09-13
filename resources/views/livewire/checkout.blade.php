@@ -44,6 +44,15 @@
                 @endif
             </div>
 
+            {{-- Fair-usage disclosure (Prompt 10): only an unlimited plan carries
+                 one — the accessor returns null for a data-capped plan. --}}
+            @if ($plan->display_fair_usage_note)
+                <p class="mt-3 flex items-start gap-2 rounded-lg bg-amber-50 p-2.5 text-[11px] leading-relaxed text-amber-800 dark:bg-amber-500/10 dark:text-amber-300">
+                    <x-icon name="info" class="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                    <span>{{ $plan->display_fair_usage_note }}</span>
+                </p>
+            @endif
+
             {{-- Coverage: flags for the countries this plan reaches. --}}
             @php($__countries = array_values(array_filter((array) $plan->countries)))
             @if (! empty($__countries))

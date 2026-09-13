@@ -19,6 +19,17 @@ class EsimPlan extends Model
     /** @var list<string> */
     public const COVERAGE_TYPES = [self::COVERAGE_LOCAL, self::COVERAGE_REGIONAL, self::COVERAGE_GLOBAL];
 
+    /**
+     * Prompt 10: every "unlimited" plan must disclose a fair-usage threshold.
+     * No provider integration (eSIM Go, Airalo, Quibity, Zendit, 1GLOBAL,
+     * Monty Mobile, Gigs) currently exposes a machine-readable per-plan FUP
+     * value, so a plan without an admin-entered real threshold falls back to
+     * this honest, non-numeric disclosure rather than a fabricated figure.
+     */
+    public const DEFAULT_FAIR_USAGE_NOTE = 'Unlimited data is subject to the provider\'s fair usage policy: '
+        .'full speed may be reduced after a daily high-speed data threshold to keep the service fair for everyone. '
+        .'Essentials like maps, messaging, and browsing keep working at reduced speed.';
+
     protected $fillable = [
         'provider',
         'provider_plan_id',
@@ -41,6 +52,7 @@ class EsimPlan extends Model
         'ai_tooltip',            // generated customer description (§5)
         'ai_tooltip_override',   // manual admin description — always wins (§4.6)
         'ai_tooltip_generated_at',
+        'fair_usage_note',       // admin-entered real FUP threshold for an unlimited plan (Prompt 10)
         'synced_at',
         // NOTE: final_retail_usd is a generated column and is intentionally NOT
         // fillable — the database computes COALESCE(manual, computed).
@@ -89,6 +101,21 @@ class EsimPlan extends Model
         return Attribute::get(fn () => filled($this->ai_tooltip_override)
             ? $this->ai_tooltip_override
             : $this->ai_tooltip);
+    }
+
+    /**
+     * The fair-usage disclosure actually shown to customers (Prompt 10): only
+     * an unlimited plan (data_mb === null) carries one at all — a data-capped
+     * plan has no fair-usage threshold to disclose. Prefers an admin-entered
+     * real threshold; falls back to the honest generic notice otherwise.
+     *
+     * @return Attribute<?string, never>
+     */
+    protected function displayFairUsageNote(): Attribute
+    {
+        return Attribute::get(fn () => $this->data_mb === null
+            ? (filled($this->fair_usage_note) ? $this->fair_usage_note : self::DEFAULT_FAIR_USAGE_NOTE)
+            : null);
     }
 
     public function orders(): HasMany

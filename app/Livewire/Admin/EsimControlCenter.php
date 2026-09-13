@@ -65,6 +65,11 @@ class EsimControlCenter extends Component
 
     public string $tooltipValue = '';
 
+    /** ---- Per-plan fair-usage note override buffer (Prompt 10) ---- */
+    public ?int $editingFairUsageId = null;
+
+    public string $fairUsageValue = '';
+
     /** ---- Bulk margin ---- */
     public string $bulkMargin = '';
 
@@ -278,6 +283,45 @@ class EsimControlCenter extends Component
     {
         $this->editingTooltipId = null;
         $this->tooltipValue = '';
+    }
+
+    // ------------------------------------------------------------ FAIR USAGE
+
+    /**
+     * Prompt 10: an unlimited plan's real, provider-published fair-usage
+     * threshold (when known) — the honest generic disclosure covers it
+     * otherwise, so this is only ever an admin OPTION, never required to ship.
+     */
+    public function editFairUsage(int $id): void
+    {
+        $plan = EsimPlan::find($id);
+        if (! $plan || $plan->data_mb !== null) {
+            return; // only an unlimited plan has a fair-usage threshold to set
+        }
+        $this->editingFairUsageId = $id;
+        $this->fairUsageValue = (string) ($plan->fair_usage_note ?? '');
+    }
+
+    public function saveFairUsage(int $id): void
+    {
+        $plan = EsimPlan::find($id);
+        if (! $plan || $plan->data_mb !== null) {
+            return;
+        }
+        $this->validate(['fairUsageValue' => 'nullable|string|max:300']);
+        $plan->fair_usage_note = trim($this->fairUsageValue) ?: null;
+        $plan->save();
+        EsimCatalogue::flush();
+        Auditor::log('esim.fair_usage_note_saved', 'esim_plan', $id, ['has_override' => filled($plan->fair_usage_note)]);
+        $this->editingFairUsageId = null;
+        $this->fairUsageValue = '';
+        $this->flash = 'Fair usage note saved.';
+    }
+
+    public function cancelFairUsage(): void
+    {
+        $this->editingFairUsageId = null;
+        $this->fairUsageValue = '';
     }
 
     // ----------------------------------------------------------------- IMAGES

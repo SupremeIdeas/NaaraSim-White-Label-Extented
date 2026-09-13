@@ -9,6 +9,45 @@
 
 ## DONE
 
+### 📶 Prompt 10: unlimited eSIM plans now disclose a fair-usage threshold — 2026-09-13
+The last Prompt 10 item. Audited before building: no current provider
+integration (`CatalogueSyncService::mapEsimGo/mapAiralo/mapQuibity/
+mapZendit/mapFullEsim`) reads or exposes a machine-readable per-plan
+fair-usage/throttle value anywhere — `data_mb === null` is the only signal
+an "unlimited" plan carries. Verified externally (not assumed) that real
+providers DO throttle "unlimited" data in practice — Airalo's own published
+fair-use policy states a 3GB/day threshold at 20 Mbps, then 1 Mbps until
+the next 24h reset, explicitly noting individual packages may differ;
+eSIM Go's exact per-plan number isn't publicly documented (partner-NDA
+API). Given that gap, inventing a single global numeric threshold for
+every "unlimited" plan across 7 different providers would be a fabricated
+UI claim — the honest fix is a real disclosure with an admin-fillable real
+number where known, not a made-up one everywhere.
+- `esim_plans` gained a nullable `fair_usage_note` column. `EsimPlan::
+  DEFAULT_FAIR_USAGE_NOTE` is the honest, non-numeric fallback ("subject to
+  the provider's fair usage policy: full speed may be reduced after a daily
+  high-speed data threshold… essentials keep working at reduced speed").
+  New `display_fair_usage_note` accessor: null for any data-capped plan
+  (nothing to disclose), the admin's real entered threshold when set,
+  otherwise the generic fallback — an unlimited plan is NEVER silent on
+  this.
+- Surfaced everywhere a customer sees "Unlimited data": the eSIM catalogue
+  plan-detail screen (next to the existing honest "facts" grid) and the
+  Checkout summary — both structurally tied to the accessor, so there is no
+  code path where an unlimited plan ships without the disclosure.
+- Admin (`EsimControlCenter`, eSIM Control Center → Plans): new "Fair
+  usage" column mirroring the existing tooltip-override pattern exactly
+  (`editFairUsage`/`saveFairUsage`/`cancelFairUsage`, audit-logged) — lets
+  an admin enter the REAL known threshold per plan/provider when it becomes
+  known, shown with an "override" vs "generic" badge; a data-capped plan's
+  cell is a plain "N/A", not an editable control, since it has no
+  fair-usage threshold to set.
+- 8 new tests (`UnlimitedFairUsageDisclosureTest`): generic fallback,
+  admin-override precedence, a capped plan never shows the note (model +
+  Checkout screen), the note appears on both the Checkout and plan-detail
+  screens, and the admin edit path (including that it's rejected outright
+  for a capped plan). Full suite green locally. Tested locally only.
+
 ### 🔁 Prompt 10: consumer auto-renewal opt-out + advance-notice (Naara Line) — 2026-09-13
 Investigated where this toggle should live before writing any UI, and found
 a real, pre-existing bug that was blocking it: **a purchased Naara Line
@@ -3441,15 +3480,13 @@ is ready.
   no scheduled fork-side check-for-updates exists today (manual, admin-
   triggered) — test that reality, don't test for automatic polling that
   isn't there.
-- **Prompt 10 (Trust & Transparency, Sonnet-safe, mostly surfacing existing
-  logic) — §1 (refund guarantee), §3 (eSIM compatibility inline), the
+- **Prompt 10 (Trust & Transparency) — DONE in full, see DONE above:**
+  §1 (refund guarantee), §3 (eSIM compatibility inline), the
   `publicSuccessRate()` CountryPicker projection, the mobile-money rail
-  audit, the WhatsApp role audit, the checkout tax/fee line, and the
-  consumer auto-renewal opt-out + advance-notice are DONE, see DONE above
-  (WhatsApp: audited only, two-way support intentionally NOT scoped — a
-  real product decision for the owner). Remaining:**
-  any "unlimited" eSIM plan structurally required to disclose its
-  fair-usage threshold — the last Prompt 10 item.
+  audit, the WhatsApp role audit, the checkout tax/fee line, the consumer
+  auto-renewal opt-out + advance-notice, and the unlimited-plan fair-usage
+  disclosure (WhatsApp: audited only, two-way support intentionally NOT
+  scoped — a real product decision for the owner).
 - **Prompt 11 (Net-New Features) — mixed:**
   - Sonnet-safe, no money-path: spam-report + auto-block (`Dialer`/
     `Contacts`, configurable threshold/window), voicemail + transcription
