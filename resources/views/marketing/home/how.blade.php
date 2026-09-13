@@ -17,7 +17,7 @@
                         <div class="flex items-start gap-5">
                             <span class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-primary font-display text-xl font-bold text-white shadow-lg shadow-primary/30">{{ $n }}</span>
                             <div>
-                                <p class="text-xs font-semibold uppercase tracking-widest text-primary/70 dark:text-teal-300/70">Step {{ $n }}</p>
+                                <p class="text-xs font-semibold uppercase tracking-widest text-primary/70">Step {{ $n }}</p>
                                 <h3 class="mt-1 text-xl font-bold text-slate-900 sm:text-2xl dark:text-white">{{ $s["step_{$n}_title"] }}</h3>
                             </div>
                         </div>

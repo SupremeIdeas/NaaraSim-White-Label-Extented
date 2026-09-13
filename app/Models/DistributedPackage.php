@@ -28,6 +28,7 @@ class DistributedPackage extends Model
         'storage_path',
         'size_bytes',
         'is_published',
+        'distribution_scope',
     ];
 
     protected function casts(): array
@@ -41,5 +42,11 @@ class DistributedPackage extends Model
     public function isTheme(): bool
     {
         return $this->package_type === self::THEME_TYPE;
+    }
+
+    /** Master-Only Distribution Lock — can this package EVER be published to a white-label instance? */
+    public function isMasterOnly(): bool
+    {
+        return $this->distribution_scope === \App\Support\UpdateManifest::SCOPE_MASTER_ONLY;
     }
 }

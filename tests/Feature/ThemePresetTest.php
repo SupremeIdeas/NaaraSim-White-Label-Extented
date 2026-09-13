@@ -82,12 +82,16 @@ class ThemePresetTest extends TestCase
         $this->assertStringNotContainsString('body{', $css);
     }
 
-    public function test_a_custom_theme_also_emits_the_shared_dark_standard_override(): void
+    public function test_a_theme_with_its_own_dark_tokens_emits_its_own_dark_override(): void
     {
         ThemePresetModel::create([
             'slug' => 'aurora-shift',
             'name' => 'Aurora Shift',
-            'tokens' => ['colors' => ['primary' => '30 64 175']],
+            'tokens' => ['colors' => [
+                'primary' => '30 64 175', 'primary_dark' => '20 44 120',
+                'accent' => '56 189 248', 'accent_dark' => '36 123 161',
+                'navy' => '10 20 35', 'action' => '230 60 45',
+            ]],
             'icon_family' => ['style' => 'sprite', 'set' => 'naara-sprite-01'],
             'is_built_in' => false,
             'sort_order' => 2,
@@ -97,26 +101,49 @@ class ThemePresetTest extends TestCase
 
         $css = ThemePreset::styleCss();
 
-        // Non-default themes never author their own dark palette — dark mode
-        // always collapses to the one shared standard, scoped tight enough
-        // (root.dark + this theme's own body class) that it only overrides
-        // when BOTH dark mode is on AND this preset is active.
+        // 2026-09-13 reversal (owner-confirmed): dark mode uses THIS theme's
+        // own primary_dark/accent_dark tokens, not a shared standard palette
+        // — scoped tight enough (root.dark + this theme's own body class)
+        // that it only overrides when BOTH dark mode is on AND this preset is
+        // active. navy/action carry over unchanged (no separate dark variant).
         $this->assertStringContainsString(':root.dark body.theme-aurora-shift{', $css);
-        $this->assertStringContainsString('--brand-navy:18 18 20', $css);
-        $this->assertStringContainsString('--brand-primary:10 132 255', $css);
-        $this->assertStringContainsString('--brand-primary-dark:4 94 199', $css);
-        $this->assertStringContainsString('--brand-accent:255 159 10', $css);
-        $this->assertStringContainsString('--brand-action:255 69 58', $css);
+        $this->assertStringContainsString('--brand-primary:20 44 120', $css);
+        $this->assertStringContainsString('--brand-accent:36 123 161', $css);
+        $this->assertStringContainsString('--brand-navy:10 20 35', $css);
+        $this->assertStringContainsString('--brand-action:230 60 45', $css);
     }
 
-    public function test_naara_official_never_gets_a_dark_standard_override(): void
+    public function test_a_theme_with_no_dark_tokens_gets_no_dark_override_block(): void
+    {
+        ThemePresetModel::create([
+            'slug' => 'bare-custom',
+            'name' => 'Bare Custom',
+            'tokens' => ['colors' => ['primary' => '30 64 175']],
+            'icon_family' => ['style' => 'sprite', 'set' => 'naara-sprite-01'],
+            'is_built_in' => false,
+            'sort_order' => 2,
+        ]);
+        Setting::setValue(ThemePreset::SETTING_KEY, 'bare-custom');
+        ThemePreset::bust();
+
+        $css = ThemePreset::styleCss();
+
+        // A theme with no dark-specific tokens (e.g. a bare admin-created
+        // custom theme) fails open: no dark-mode override at all, so dark
+        // mode simply keeps the same colors light mode already set — never a
+        // forced, unrelated palette.
+        $this->assertStringContainsString('--brand-primary:30 64 175', $css);
+        $this->assertStringNotContainsString(':root.dark', $css);
+    }
+
+    public function test_naara_official_never_gets_a_dark_mode_override(): void
     {
         $this->seed(ThemePresetSeeder::class);
         ThemePreset::bust();
 
         // The king theme keeps its own light AND dark mode exactly as shipped
-        // — styleCss() returns '' entirely, so the shared dark palette other
-        // presets fall back to never reaches naara-official's page.
+        // — styleCss() returns '' entirely, so no theme override CSS (light
+        // or dark) ever reaches naara-official's page.
         $this->assertSame('', ThemePreset::styleCss());
     }
 

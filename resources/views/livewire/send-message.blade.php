@@ -15,7 +15,7 @@
 
             <div class="flex items-center justify-between px-5 py-4">
                 <h2 class="flex items-center gap-2 text-base font-bold text-slate-900 dark:text-white">
-                    <x-icon name="message-circle" class="h-5 w-5 text-primary dark:text-teal-300" /> New message
+                    <x-icon name="message-circle" class="h-5 w-5 text-primary" /> New message
                 </h2>
                 <button type="button" @click="open = false" aria-label="Close" class="flex h-8 w-8 items-center justify-center rounded-full text-slate-400 hover:bg-slate-100 dark:hover:bg-white/10"><x-icon name="x" class="h-5 w-5" /></button>
             </div>
@@ -87,7 +87,7 @@
                             @if ($attachment)
                                 <div class="flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 dark:border-white/10 dark:bg-white/5">
                                     <span class="flex min-w-0 items-center gap-2 text-sm text-slate-700 dark:text-slate-200">
-                                        <x-icon name="image" class="h-4 w-4 shrink-0 text-primary dark:text-teal-300" />
+                                        <x-icon name="image" class="h-4 w-4 shrink-0 text-primary" />
                                         <span class="truncate">{{ method_exists($attachment, 'getClientOriginalName') ? $attachment->getClientOriginalName() : 'Image' }}</span>
                                     </span>
                                     <button type="button" wire:click="$set('attachment', null)" aria-label="Remove attachment" class="shrink-0 text-slate-400 hover:text-red-600"><x-icon name="x" class="h-4 w-4" /></button>
@@ -118,7 +118,7 @@
                     @if ($quote)
                         <div class="mt-4 flex items-center justify-between rounded-xl bg-primary/5 px-4 py-3 text-sm dark:bg-primary/10">
                             <span class="text-slate-600 dark:text-slate-300">Cost to send</span>
-                            <span class="font-semibold text-primary dark:text-teal-300">${{ number_format($quote['retail_total'], 2) }}</span>
+                            <span class="font-semibold text-primary">${{ number_format($quote['retail_total'], 2) }}</span>
                         </div>
                     @endif
 
