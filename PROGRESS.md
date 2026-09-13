@@ -9,6 +9,35 @@
 
 ## DONE
 
+### 🛡️ Prompt 10 §1: Refund guarantee surfaced — 2026-09-13
+"Confirmed: `PollSmsOtpJob` already auto-refunds the wallet when an OTP/SMS
+doesn't arrive in time. No customer-facing surface currently stated this."
+Surfaced truthfully in 4 places, all pulling the SAME real value —
+`PollSmsOtpJob::TIMEOUT_MINUTES` (now public, was private) — never a
+hardcoded guess anywhere:
+- **Naara Verify checkout modal** (`numbers-modal/verify.blade.php`) — the
+  existing vague "Auto-refund if no code arrives" line replaced with the
+  real window + "no ticket required." Also fixed 4 hardcoded-teal/hex
+  instances in the same file while in there (same §1.2 pattern).
+- **PricingPage** — a standing trust line above the data-estimator CTA
+  (this page is eSIM-plan-focused above, but the platform sells numbers too,
+  so the promise belongs here as a real line item), linking the full policy.
+- **FAQ** — the existing "What happens if my code never arrives?" answer
+  upgraded from vague to specific, with a link to the full policy.
+- **Refund & Reliability Policy page** — already existed
+  (`/refund-policy` + generic `/legal/refund`, `LegalContent::doc('refund')`)
+  and was already linked from the footer; its own "Verification numbers"
+  section said "the delivery window" vaguely — now states the real minutes
+  via a new `{otp_timeout_minutes}` placeholder (same substitution mechanism
+  `{brand}` already used).
+- Audited `PollSmsOtpJob` itself before writing any of this (didn't invent
+  a refund condition beyond what the job actually does) — confirmed the
+  auto-refund is unconditional on timeout, `cancel()` is best-effort and
+  never gates the refund, and the refund is idempotent per order.
+- 5 new tests (`RefundGuaranteeTrustTest`) proving all 4 surfaces state the
+  real number (not a copy-pasted guess) and link the policy page. Full
+  suite green: 1959 passed, 6318 assertions. Tested locally only.
+
 ### 📖 §4 Developer API docs — audit + fixes — 2026-09-13
 Per the blueprint's own instruction: audit BEFORE writing code, then scope the
 fix (content vs visual vs both) from real findings. Audited `DeveloperPortal`/
@@ -3063,8 +3092,7 @@ is ready.
   triggered) — test that reality, don't test for automatic polling that
   isn't there.
 - **Prompt 10 (Trust & Transparency, Sonnet-safe, mostly surfacing existing
-  logic):** refund-guarantee badge (pull the real timeout from
-  `PollSmsOtpJob`, don't hardcode a guess) in 3 places + a policy page;
+  logic) — §1 (refund guarantee) DONE, see DONE above. Remaining:**
   `NciScorer::publicSuccessRate()` read-only projection surfaced on
   Country/ServicePicker (min-sample threshold, cached); eSIM compatibility
   check moved inline to the actual purchase flow (warning, never a hard

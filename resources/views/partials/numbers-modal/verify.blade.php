@@ -12,7 +12,7 @@
             <p class="mt-0.5 select-all font-mono text-lg font-bold text-slate-900 dark:text-white">{{ $order->phone_number }}</p>
             @if ($order->otp_code)
                 <p class="mt-3 text-[11px] uppercase tracking-wide text-slate-400">Code</p>
-                <p class="select-all font-mono text-2xl font-bold text-primary dark:text-teal-300">{{ $order->otp_code }}</p>
+                <p class="select-all font-mono text-2xl font-bold text-primary">{{ $order->otp_code }}</p>
             @else
                 <p class="mt-3 inline-flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
                     <x-ui.spinner class="h-4 w-4" /> Waiting for the code…
@@ -30,7 +30,7 @@
     <div class="mb-4 inline-flex w-full rounded-full border border-slate-200 bg-slate-100 p-1 dark:border-white/10 dark:bg-white/5">
         @foreach (['manual' => 'Manual Buy', 'smart' => 'Smart Buy'] as $k => $label)
             <button type="button" wire:click="$set('buyMode', '{{ $k }}')"
-                    class="flex-1 rounded-full px-4 py-1.5 text-sm font-semibold transition {{ $buyMode === $k ? 'bg-white text-primary shadow-sm dark:bg-[#243352] dark:text-teal-300' : 'text-slate-500 dark:text-slate-400' }}">
+                    class="flex-1 rounded-full px-4 py-1.5 text-sm font-semibold transition {{ $buyMode === $k ? 'bg-white text-primary shadow-sm dark:bg-[var(--brand-card-dark)]' : 'text-slate-500 dark:text-slate-400' }}">
                 {{ $label }}
             </button>
         @endforeach
@@ -79,8 +79,8 @@
                 <p class="text-[11px] font-semibold uppercase tracking-wide text-slate-400">Networks</p>
                 <div class="flex items-center gap-2">
                     <div class="flex rounded-full border border-slate-200 bg-slate-100 p-0.5 text-[11px] font-semibold dark:border-white/10 dark:bg-white/5">
-                        <button type="button" @click="tab = 'prices'" :class="tab === 'prices' ? 'bg-white text-primary shadow-sm dark:bg-[#243352] dark:text-teal-300' : 'text-slate-400'" class="rounded-full px-2.5 py-1 transition">Prices</button>
-                        <button type="button" @click="tab = 'stats'" :class="tab === 'stats' ? 'bg-white text-primary shadow-sm dark:bg-[#243352] dark:text-teal-300' : 'text-slate-400'" class="rounded-full px-2.5 py-1 transition">Statistics</button>
+                        <button type="button" @click="tab = 'prices'" :class="tab === 'prices' ? 'bg-white text-primary shadow-sm dark:bg-[var(--brand-card-dark)]' : 'text-slate-400'" class="rounded-full px-2.5 py-1 transition">Prices</button>
+                        <button type="button" @click="tab = 'stats'" :class="tab === 'stats' ? 'bg-white text-primary shadow-sm dark:bg-[var(--brand-card-dark)]' : 'text-slate-400'" class="rounded-full px-2.5 py-1 transition">Statistics</button>
                     </div>
                     <button type="button" wire:click="exportOperatorsCsv" title="Export CSV"
                             class="flex h-7 w-7 items-center justify-center rounded-full text-slate-400 transition hover:bg-slate-100 hover:text-primary dark:hover:bg-white/10"><x-icon name="download" class="h-4 w-4" /></button>
@@ -152,6 +152,13 @@
             <span wire:loading.remove wire:target="order"><x-icon name="shield-check" class="mr-1 inline h-4 w-4" /> Get my code</span>
             <span wire:loading wire:target="order" class="inline-flex items-center gap-2"><x-ui.spinner class="h-4 w-4" /> Reserving…</span>
         </button>
-        <p class="mt-2 text-center text-[11px] text-slate-400">Charged from your wallet. Auto-refund if no code arrives.</p>
+        {{-- Refund guarantee, stated truthfully (Prompt 10 §1): the timeout
+             value is pulled from PollSmsOtpJob's own constant, never
+             hardcoded here, so this line can never silently drift out of
+             sync with what the job actually does. --}}
+        <p class="mt-2 flex items-center justify-center gap-1.5 text-center text-[11px] text-slate-400">
+            <x-icon name="shield-check" class="h-3 w-3 shrink-0 text-primary" />
+            No code within {{ \App\Jobs\PollSmsOtpJob::TIMEOUT_MINUTES }} minutes → automatic refund to your wallet, no ticket required.
+        </p>
     </div>
 @endif
