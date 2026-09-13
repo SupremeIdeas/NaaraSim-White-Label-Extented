@@ -130,4 +130,56 @@ class MyLinesTest extends TestCase
         $res->assertDontSee('Turn off auto-renew')->assertDontSee('Turn auto-renew back on');
         $res->assertSee('Archive')->assertSee($vn->phone_number);
     }
+
+    // ---- Prompt 11: port-out / right-to-leave -----------------------------
+
+    public function test_a_us_canada_line_offers_a_port_out_action(): void
+    {
+        $user = $this->verified();
+        $this->line($user); // +1 by default
+
+        $this->actingAs($user)->get('/numbers/lines')->assertOk()
+            ->assertSee('Take this number to another carrier');
+    }
+
+    public function test_a_non_us_canada_line_never_offers_a_port_out_action(): void
+    {
+        $user = $this->verified();
+        $this->line($user, ['phone_number' => '+2348012345678']); // Nigerian number
+
+        $this->actingAs($user)->get('/numbers/lines')->assertOk()
+            ->assertDontSee('Take this number to another carrier');
+    }
+
+    public function test_requesting_a_port_out_records_it_and_is_owner_scoped(): void
+    {
+        $owner = $this->verified();
+        $stranger = $this->verified();
+        $vn = $this->line($owner);
+
+        // A stranger cannot flag another user's line.
+        Livewire::actingAs($stranger)->test(MyLines::class)->call('requestPortOut', $vn->id);
+        $this->assertNull($vn->refresh()->port_out_requested_at);
+
+        Livewire::actingAs($owner)->test(MyLines::class)->call('requestPortOut', $vn->id);
+        $this->assertNotNull($vn->refresh()->port_out_requested_at);
+    }
+
+    public function test_a_non_us_canada_line_cannot_be_ported_out(): void
+    {
+        $user = $this->verified();
+        $vn = $this->line($user, ['phone_number' => '+2348012345678']);
+
+        Livewire::actingAs($user)->test(MyLines::class)->call('requestPortOut', $vn->id);
+        $this->assertNull($vn->refresh()->port_out_requested_at);
+    }
+
+    public function test_a_requested_line_shows_the_pending_state_not_the_action(): void
+    {
+        $user = $this->verified();
+        $this->line($user, ['port_out_requested_at' => now()]);
+
+        $res = $this->actingAs($user)->get('/numbers/lines')->assertOk();
+        $res->assertSee('Port-out requested')->assertDontSee('Take this number to another carrier');
+    }
 }

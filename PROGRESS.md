@@ -9,6 +9,63 @@
 
 ## DONE
 
+### 📥 Prompt 11 Batch C: US/Canada port-in intake — 2026-09-13
+Final porting batch. Honest intake + status tracking for bringing an existing
+US/Canada number to Naara — never instant provisioning (the audit: a multi-day,
+human-reviewed carrier process). +1-only (the audit boundary); anything else is
+refused up front.
+- New `port_in_requests` table + `PortInRequest` model. The losing-carrier
+  secrets (`account_number`, `pin`) are `encrypted`-cast at rest, hidden from
+  serialization, and PURGED the moment a request closes (completed or rejected)
+  — a spent transfer PIN is sensitive and no longer needed. `provider` is
+  hidden (supplier masking). Statuses: submitted → in_review →
+  submitted_to_carrier → completed / rejected.
+- Customer `App\Livewire\PortIn` (`/numbers/port-in`, numbers-section chrome):
+  a `rules()`-validated form (phone must match `^\+1\d{10}$`, honest error for
+  non-+1), one-open-request-per-number guard, audit-log + ops `AlertAdminJob`,
+  and a live list of the customer's own requests with status. Honest 5–15
+  business-day framing; nothing charged here.
+- Admin `App\Livewire\Admin\PortInRequests` (`/adminmaster/port-in-requests`,
+  `role:super_admin|admin`, `booted()` 403 guard): filter by status, see the
+  carrier details (admin-only, like cost elsewhere), advance status
+  (`setStatus`, completion purges secrets), reject-with-reason (`reject`,
+  reason required, purges secrets), edit ops notes + target provider. Every
+  action audit-logged. Added to the admin nav under People & support.
+- Entry point: a "Bring it to Naara" banner on My Lines.
+- **Deliberately out of scope (noted, not a gap):** turning a completed
+  port-in into a live, billed Naara Line needs hosted-number provisioning + a
+  billing-start decision (a money-path change) — a separate later step;
+  "completed" here records the carrier outcome only.
+- 7 new tests (`PortInTest`): +1 submit + encrypted round-trip, non-+1 refused,
+  duplicate-open blocked, My Lines links to it, completion purges secrets,
+  reject requires a reason + purges secrets, non-admin is 403 on the admin
+  screen. Full suite green locally. Tested locally only.
+
+### 📤 Prompt 11 Batch B: port-out / right-to-leave — 2026-09-13
+Second porting batch. Honest anti-lock-in: a customer can take their
+US/Canada Naara Line to another carrier and we never obstruct it. Only +1
+numbers are portable via our providers (the audit finding — porting an
+African/other mobile number into a VoIP/CPaaS carrier isn't available to
+individuals), so the affordance is +1-only; we never offer a port we can't
+facilitate.
+- `virtual_numbers.port_out_requested_at` (nullable timestamp) records the
+  request; `VirtualNumber::isUsCanada()` gates it (supportsMms now reuses it).
+- `MyLines::requestPortOut()` — owner-scoped, idempotent, +1-only (a non-+1
+  line is refused up front). Sets the marker, audit-logs
+  `line.port_out_requested`, and fires an `info`-severity `AlertAdminJob`
+  (`line_port_out_requested`) so ops send the customer what their new carrier
+  needs. Billing is deliberately left untouched — the customer still owns the
+  number until the port completes, so we neither stop charging (which would
+  release it) nor obstruct.
+- `my-connectivity.blade.php`: a +1 active/past_due Naara Line shows a
+  confirm-gated "Take this number to another carrier" action; once requested
+  it shows the pending "check your email" state; a non-+1 line shows nothing
+  (we never dangle a port we can't do). Uses the existing `phone-forwarded`
+  sprite icon.
+- 5 new `MyLinesTest` cases: +1 line offers the action, non-+1 never does,
+  request records + owner-scoped, non-+1 refused, requested line shows the
+  pending state. Full suite green locally. Tested locally only.
+
 ### 🚫 Prompt 11 Batch A: recycled-number pre-check — 2026-09-13
 Owner decided (2026-09-13) to build all three porting-audit outcomes:
 recycled-number pre-check, port-out, and US/Canada port-in intake — as
@@ -3597,16 +3654,12 @@ is ready.
     +1 self-service works; every non-+1 port is a business-compliance
     process). Shipping as three small batches:
     - **Batch A — recycled-number pre-check: DONE** (see DONE above).
-    - **Batch B — port-out / right-to-leave (NEXT):** MyLines panel for a
-      +1 Naara Line — informational "how to port your number away" + an
-      audit-logged request action (flags the line, notifies ops) + honest
-      release discipline (never obstruct a leaving customer). No instant
-      carrier-side automation — Twilio/Telnyx port-out is carrier-initiated
-      by the gaining provider; our job is not to block it.
-    - **Batch C — US/Canada port-in intake:** a request model + status
-      tracking (submitted → review → submitted_to_carrier → completed/
-      rejected), +1-only guard, honest 5–15-day framing (NOT instant
-      provisioning), user intake UI + admin processing screen.
+    - **Batch B — port-out / right-to-leave: DONE** (see DONE above).
+    - **Batch C — US/Canada port-in intake: DONE** (see DONE above).
+    - All three porting batches shipped. Possible follow-up (not scoped):
+      turn a completed port-in into a live, billed Naara Line (needs
+      hosted-number provisioning + a billing-start decision — a money-path
+      change warranting its own care).
 
 ### ▶ AFTER THE ABOVE — Brand Directory / Brand Hunt premium redesign (still queued)
 > Note: the Updater track's own "ALL 7 BATCHES COMPLETE" / "Batch 8" planning

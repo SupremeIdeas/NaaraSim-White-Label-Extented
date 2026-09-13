@@ -224,6 +224,30 @@
                                     </button>
                                 </div>
                             @endif
+
+                            {{-- Port-out / right-to-leave (Prompt 11): a customer can take a
+                                 US/Canada Naara Line to another carrier and we never obstruct
+                                 it. Only +1 numbers are portable via our providers (audit
+                                 finding), so the affordance only appears for those — we never
+                                 offer a port we can't honestly facilitate. --}}
+                            @if ($group['model']['key'] === 'naara_line' && in_array($number->status, ['active', 'past_due'], true) && $number->isUsCanada())
+                                <div class="mt-2 border-t border-slate-100 pt-2 text-xs dark:border-[#243352]">
+                                    @if ($number->port_out_requested_at)
+                                        <p class="flex items-center gap-1.5 text-slate-500 dark:text-slate-400">
+                                            <x-icon name="phone-forwarded" class="h-3.5 w-3.5 text-primary" />
+                                            Port-out requested — check your email for what your new carrier needs.
+                                        </p>
+                                    @else
+                                        <button type="button" wire:click="requestPortOut({{ $number->id }})"
+                                                wire:loading.attr="disabled" wire:target="requestPortOut({{ $number->id }})"
+                                                wire:confirm="Request to move this number to another carrier? We'll email you the details your new carrier needs and won't block the transfer."
+                                                class="inline-flex items-center gap-1.5 font-semibold text-slate-500 transition hover:text-primary disabled:opacity-60 dark:text-slate-400 dark:hover:text-primary">
+                                            <x-icon name="phone-forwarded" class="h-3.5 w-3.5" />
+                                            Take this number to another carrier
+                                        </button>
+                                    @endif
+                                </div>
+                            @endif
                         </div>
                     @endforeach
                 </div>
