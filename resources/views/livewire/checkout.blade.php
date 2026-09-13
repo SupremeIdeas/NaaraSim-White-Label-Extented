@@ -65,7 +65,15 @@
                  local-currency equivalent (live FX; charge is always in USD). --}}
             @php($__cur = \App\Support\LocaleCurrency::resolve(auth()->user()))
             @php($__fx = app(\App\Services\Pricing\CurrencyService::class))
-            <div class="mt-4 flex items-end justify-between border-t border-slate-200 pt-4 dark:border-[var(--brand-card-border-dark)]">
+            {{-- Taxes & fees (Prompt 10): NaaraSim charges no separate tax or fee
+                 on top of the retail price shown — the line itself is the trust
+                 signal, so the customer is never left wondering whether
+                 something will be added before Pay. --}}
+            <div class="mt-3 flex items-center justify-between border-t border-slate-200 pt-3 text-xs text-slate-500 dark:border-[var(--brand-card-border-dark)] dark:text-slate-400">
+                <span>Taxes &amp; fees</span>
+                <span class="font-medium text-slate-700 dark:text-slate-300">$0.00</span>
+            </div>
+            <div class="mt-2 flex items-end justify-between">
                 <span class="text-sm text-slate-500 dark:text-slate-400">You pay</span>
                 <div class="text-right">
                     @if ($couponPrice !== null)

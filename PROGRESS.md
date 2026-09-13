@@ -9,6 +9,107 @@
 
 ## DONE
 
+### 🧾 Prompt 10: checkout tax/fee line — 2026-09-13
+Audited first: `PricingEngine` and every checkout surface (eSIM `Checkout`,
+Naara Verify/Rent modals) confirmed no separate tax or fee is computed
+anywhere — `final_retail_usd`/`charged_to_user` is the whole charge. $0.00
+is the honest figure, so per the item's own framing the LINE itself is the
+trust signal (never leaving a customer wondering if something gets added
+before Pay), not a new pricing computation.
+- Added a plain "Taxes & fees — $0.00" row to all three checkout surfaces:
+  eSIM `Checkout.blade.php` (above the price summary), and both Numbers
+  modals (`numbers-modal/verify.blade.php`, `.../rent.blade.php`, in the
+  sticky footer above "You pay") — unconditional, so it renders on the
+  pre-purchase screen regardless of coupon/credits state.
+- 3 new tests (`CheckoutTaxFeeTest`): each of the three checkout surfaces
+  states "Taxes & fees" and "$0.00". Full suite green on master. Tested
+  locally only.
+
+### 📱 Prompt 10: WhatsApp's actual role audited (no code change) — 2026-09-13
+Per the item's own instruction — determine and report BEFORE scoping any
+two-way support follow-up. Read every WhatsApp file end to end
+(`WhatsAppAutopilot`, `WhatsAppCloudClient`, `WhatsAppWebhookController`,
+`SendWhatsAppTemplateJob`, `SupportLinks`, `config/naara.php`) plus every
+real call site, rather than assuming from the blueprint's own framing.
+Two genuinely separate roles exist today, and neither is two-way:
+
+1. **Support contact link** (`SupportLinks::whatsappUrl()`, config
+   `naara.support.whatsapp`) — a `wa.me/<number>?text=...` deep link with a
+   prefilled message, rendered on the customer app shell and every theme's
+   contact page (13 theme variants + the shared marketing contact page).
+   This is "live chat + WhatsApp" (S32) in name only: tapping it hands the
+   conversation to the user's own WhatsApp app and a human on NaaraSim's
+   side — nothing in this codebase reads or replies to those messages. It
+   is not built, gated, or logged by the platform at all.
+2. **WhatsApp Autopilot** (`WhatsAppAutopilot` → `WhatsAppCloudClient`, Meta
+   Cloud API) — opt-in (`users.whatsapp_opt_in`), template-only, ONE-WAY
+   business→customer notifications. Meta only allows pre-approved templates
+   outside a 24-hour customer-service session window (the client's own
+   docblock says so) — freeform two-way replies are structurally not what
+   this integration does. Of the 5 events configured in
+   `config/naara.php`'s `whatsapp_autopilot.templates`, only 2 are actually
+   wired to a real call site: `esim_delivered` (`Checkout.php`) and
+   `number_delivered` (`GetNumber.php`). **`renewal_reminder`,
+   `low_balance`, and `order_failed` are unwired — configured template
+   names with zero `notify()` call anywhere.** Traced further:
+   `RenewVirtualNumbersCommand` (the only renewal-lifecycle code) sends NO
+   notice of any kind today (not WhatsApp, not email) before or after
+   renewing — this is the same gap the already-planned "consumer
+   auto-renewal opt-out toggle + advance-notice" item exists to close, so
+   wiring `renewal_reminder` belongs there, not invented here standalone.
+   `low_balance` has no corresponding "your wallet is low" trigger anywhere
+   in the app to hook into either (the existing `LowBalanceException`/
+   `low_balance` error codes are all PROVIDER-balance, not user-wallet).
+3. **Inbound handling** is exactly one keyword: `WhatsAppWebhookController`
+   recognises STOP/UNSUBSCRIBE/CANCEL and flips `whatsapp_opt_in` off
+   (compliance — a user can always leave from WhatsApp itself). Delivery
+   STATUS callbacks are logged only. Nothing else inbound is read, parsed,
+   or acted on — there is no bot, no agent routing, no session state.
+
+**Conclusion, no code changed this pass:** WhatsApp today is (a) a manual,
+human-staffed contact channel and (b) a narrow, compliant, one-way
+transactional notifier — never two-way. A real two-way support channel
+would mean either live-agent tooling to reply inside Meta's 24-hour session
+window, or a different support-desk integration entirely — a genuine
+product decision for the owner, not a Sonnet-safe surfacing task. Filed as
+audited; two-way support stays a possible FUTURE follow-up, not scoped here.
+
+### 💳 Prompt 10: mobile-money rails audited per gateway/country, named at checkout — 2026-09-13
+Audited what NaaraSim's own top-up gateways actually claim vs. what they
+really support — via each gateway's OWN developer/support docs (Paystack's
+charge API + "Pay with Mobile Money"/"Pay with M-PESA" support articles;
+Flutterwave's developer docs for Ghana/Uganda/Zambia mobile money + its help
+centre payment-channels page), not guessed:
+- **Paystack's `mobile_money` channel** is scoped to Ghana (mtn/atl/vod →
+  MTN Mobile Money, AirtelTigo Money, Vodafone Cash), Kenya (mpesa → M-Pesa
+  via STK push), and Côte d'Ivoire (orange/wave, out of this platform's
+  current currency scope) — Nigeria and South Africa have NO mobile-money
+  channel on Paystack.
+- **Flutterwave's mobile money** is the same shape within this platform's
+  scope: Ghana (MTN/Vodafone/AirtelTigo), Kenya (M-Pesa) — Nigeria and South
+  Africa again have none, despite the wallet's old Flutterwave hint
+  ("Cards, mobile money & banks") implying it applied everywhere.
+- New `App\Support\MobileMoneyRails` — a small, currency-scoped table
+  (`gateway => currency => named rails`) restricted to currencies this
+  platform actually models (`CurrencyService::SUPPORTED` / the existing
+  `GatewayCurrencyMatrix` NG/GH/KE/ZA countries) — Uganda/Rwanda/Tanzania/
+  Zambia rails exist on both gateways too, but adding them without first
+  adding UGX/RWF/TZS/ZMW currency support would advertise something the
+  platform can't display or settle, so deliberately left out.
+- `Wallet::payGateways()` now rebuilds each gateway's hint FOR THE SELECTED
+  CURRENCY: Ghana shows "MTN Mobile Money, AirtelTigo Money & Vodafone Cash,
+  cards & bank" (Paystack) / "MTN Mobile Money, Vodafone Cash & AirtelTigo
+  Money, cards & bank" (Flutterwave); Kenya shows "M-Pesa, cards & bank" for
+  both; Nigeria/South Africa keep the honest base hint with NO mobile-money
+  claim. Flutterwave's overclaiming base hint fixed to "Cards & bank
+  transfers" (was "Cards, mobile money & banks" — true only for GH/KE, not
+  every currency it accepts). No blade change needed — the hint text itself
+  now carries the rail names through the existing render path.
+- 4 new tests (`MobileMoneyRailsTest`): the rail table only covers pairings
+  that really have one; Ghana/Kenya top-ups name the real rails for both
+  gateways; Nigeria/South-Africa top-ups never claim mobile money or M-Pesa.
+  Full suite green. Tested locally only.
+
 ### 🔄 Synced from master — Theme integrity, dev docs, Prompt 10 (§1/§3/publicSuccessRate) — 2026-09-13
 Five master commits pulled in via `git merge upstream/main` (the manual
 equivalent of the updater pipeline in this dev environment — none of these
@@ -3289,15 +3390,15 @@ is ready.
   triggered) — test that reality, don't test for automatic polling that
   isn't there.
 - **Prompt 10 (Trust & Transparency, Sonnet-safe, mostly surfacing existing
-  logic) — §1 (refund guarantee), §3 (eSIM compatibility inline), and the
-  `publicSuccessRate()` CountryPicker projection are DONE, see DONE above.
-  Remaining:**
-  mobile-money rails audited per gateway/country then shown as
-  named options at checkout; WhatsApp's actual role determined and reported
-  BEFORE scoping two-way support as a possible follow-up; checkout tax/fee
-  line (real $0.00 is fine, the line itself is the trust signal); consumer
-  auto-renewal opt-out toggle + advance-notice; any "unlimited" eSIM plan
-  structurally required to disclose its fair-usage threshold.
+  logic) — §1 (refund guarantee), §3 (eSIM compatibility inline), the
+  `publicSuccessRate()` CountryPicker projection, the mobile-money rail
+  audit, the WhatsApp role audit, and the checkout tax/fee line are DONE,
+  see DONE above (WhatsApp: audited only, two-way support intentionally
+  NOT scoped — a real product decision for the owner). Remaining:**
+  consumer auto-renewal opt-out toggle + advance-notice (this is
+  also where `renewal_reminder`'s dead WhatsApp-template wiring belongs, per
+  the WhatsApp audit above); any "unlimited" eSIM plan structurally required
+  to disclose its fair-usage threshold.
 - **Prompt 11 (Net-New Features) — mixed:**
   - Sonnet-safe, no money-path: spam-report + auto-block (`Dialer`/
     `Contacts`, configurable threshold/window), voicemail + transcription
