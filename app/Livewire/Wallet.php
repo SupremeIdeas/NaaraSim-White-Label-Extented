@@ -11,6 +11,7 @@ use App\Services\Payouts\WithdrawalService;
 use App\Services\Pricing\CurrencyService;
 use App\Support\GatewayCurrencyMatrix;
 use App\Support\LocaleCurrency;
+use App\Support\MobileMoneyRails;
 use App\Support\ProviderStatus;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Validate;
@@ -24,10 +25,16 @@ use Livewire\Component;
 #[Layout('components.layouts.customer')]
 class Wallet extends Component
 {
-    /** All wallet-funding gateways (slug => [label, hint]). */
+    /**
+     * All wallet-funding gateways (slug => [label, base hint]). The base hint
+     * is the honest claim for a currency with NO named mobile-money rail
+     * (payGateways() appends the real rails — MTN/M-Pesa/etc., per
+     * MobileMoneyRails — for the currencies that actually have one, instead
+     * of this blanket "mobile money" claim overclaiming for e.g. NGN/ZAR).
+     */
     public const GATEWAYS = [
         'paystack' => ['Paystack', 'Cards, bank transfer & USSD'],
-        'flutterwave' => ['Flutterwave', 'Cards, mobile money & banks'],
+        'flutterwave' => ['Flutterwave', 'Cards & bank transfers'],
         'stripe' => ['Stripe', 'International cards (USD)'],
         'paypal' => ['PayPal', 'PayPal balance & cards'],
         'binance' => ['Binance Pay', 'Pay with crypto — USDT & more'],
@@ -172,14 +179,51 @@ class Wallet extends Component
      * Gateways from availableGateways() that also accept the currently
      * selected TOP-UP currency (Part B §3.6) — the UI never offers a
      * gateway/currency pairing that gateway doesn't actually accept.
+     *
+     * The hint text is rebuilt per the SELECTED currency (Prompt 10): a
+     * gateway/currency pairing with a real named mobile-money rail
+     * (MobileMoneyRails — verified against each gateway's own docs) states it
+     * by name instead of the generic base hint, so a Ghana/Kenya customer
+     * knows MTN/M-Pesa/etc. is actually there before they reach the gateway's
+     * own hosted page, and a Nigeria/South Africa customer is never told
+     * "mobile money" is available when neither gateway offers it there.
      */
     public function payGateways(): array
     {
-        return array_filter(
+        $matching = array_filter(
             $this->availableGateways(),
             fn ($slug) => GatewayCurrencyMatrix::supports($slug, $this->currency),
             ARRAY_FILTER_USE_KEY,
         );
+
+        $withHints = [];
+        foreach ($matching as $slug => [$label, $baseHint]) {
+            $withHints[$slug] = [$label, $this->hintFor($slug, $baseHint)];
+        }
+
+        return $withHints;
+    }
+
+    /** The base hint, with any real named mobile-money rails for this currency prefixed on. */
+    private function hintFor(string $gateway, string $baseHint): string
+    {
+        $rails = MobileMoneyRails::forGatewayCurrency($gateway, $this->currency);
+        if ($rails === []) {
+            return $baseHint;
+        }
+
+        return $this->joinRails($rails).', cards & bank';
+    }
+
+    /** "MTN Mobile Money", ["A","B"] -> "A & B", ["A","B","C"] -> "A, B & C". */
+    private function joinRails(array $rails): string
+    {
+        if (count($rails) === 1) {
+            return $rails[0];
+        }
+        $last = array_pop($rails);
+
+        return implode(', ', $rails).' & '.$last;
     }
 
     /** Currency changed: if the current gateway no longer accepts it, switch
