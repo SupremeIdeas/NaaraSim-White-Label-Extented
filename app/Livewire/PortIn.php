@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use App\Jobs\AlertAdminJob;
 use App\Models\PortInRequest;
+use App\Services\SMS\PortabilityChecker;
 use App\Support\Auditor;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
@@ -12,10 +13,13 @@ use Livewire\Component;
  * US/Canada port-in intake (Prompt 11). Honest by design: bringing a number in
  * is a multi-day, human-reviewed carrier process — never instant provisioning —
  * so this captures the request + the losing-carrier details and tracks its
- * status. Only +1 (US/Canada) numbers are portable via our providers (the
- * audit finding); anything else is refused up front rather than promising a
- * port we can't facilitate. Nothing is charged here — billing only ever starts
- * if/when the port completes, a deliberate later step.
+ * status.
+ *
+ * Eligibility is checked with a REAL provider probe (PortabilityChecker →
+ * Twilio Portability API) before we ask for anything else: a number our
+ * providers can actually bring in sails straight through; one we can't verify
+ * gets an honest "sorry", never a promise we can't keep. Nothing is charged
+ * here — billing only ever starts if/when the port completes, a later step.
  */
 #[Layout('components.layouts.customer')]
 class PortIn extends Component
@@ -32,17 +36,49 @@ class PortIn extends Component
 
     public string $notes = '';
 
+    /** null = not yet checked; true/false = probe result for the current number. */
+    public ?bool $eligible = null;
+
+    public bool $pinRequired = true;
+
+    public string $eligibilityMessage = '';
+
+    /** Changing the number invalidates any prior eligibility check. */
+    public function updatedPhoneNumber(): void
+    {
+        $this->eligible = null;
+        $this->eligibilityMessage = '';
+    }
+
+    /**
+     * Step 1 — probe the carrier for this specific number. Only a confirmed
+     * "portable" reveals the rest of the form; anything else shows the honest
+     * sorry message.
+     */
+    public function checkEligibility(PortabilityChecker $checker): void
+    {
+        $this->validate(['phone_number' => ['required', 'string', 'max:20']]);
+
+        $result = $checker->checkPortIn($this->phone_number);
+        $this->eligible = $result['eligible'];
+        $this->pinRequired = $result['pin_required'];
+        $this->eligibilityMessage = (string) ($result['reason'] ?? '');
+
+        Auditor::log('port_in.eligibility_checked', 'PortInRequest', null, [
+            'phone_number' => $this->phone_number,
+            'eligible' => $this->eligible,
+        ]);
+    }
+
     /**
      * @return array<string, mixed>
      */
     protected function rules(): array
     {
         return [
-            // US/Canada E.164: +1 then 10 digits. The audit's honest boundary —
-            // we never accept a number we can't actually port in.
             'phone_number' => ['required', 'string', 'regex:/^\+1\d{10}$/'],
-            'account_number' => ['required', 'string', 'max:60'],
-            'pin' => ['required', 'string', 'max:40'],
+            'account_number' => [$this->pinRequired ? 'required' : 'nullable', 'string', 'max:60'],
+            'pin' => [$this->pinRequired ? 'required' : 'nullable', 'string', 'max:40'],
             'billing_name' => ['required', 'string', 'max:120'],
             'billing_address' => ['required', 'string', 'max:255'],
             'notes' => ['nullable', 'string', 'max:500'],
@@ -56,9 +92,20 @@ class PortIn extends Component
         ];
     }
 
-    public function submit(): void
+    public function submit(PortabilityChecker $checker): void
     {
         $data = $this->validate();
+
+        // Re-probe server-side — never trust a client-side "eligible" flag. A
+        // number that isn't verifiably portable is refused here regardless of
+        // what the form state claims.
+        $result = $checker->checkPortIn($data['phone_number']);
+        if (! $result['eligible']) {
+            $this->eligible = false;
+            $this->eligibilityMessage = (string) ($result['reason'] ?? 'Sorry — this number can\'t be brought in.');
+
+            return;
+        }
 
         // One open request per number, per user — don't let a double-submit
         // create duplicate carrier orders.
@@ -78,8 +125,8 @@ class PortIn extends Component
             'user_id' => auth()->id(),
             'phone_number' => $data['phone_number'],
             'status' => PortInRequest::STATUS_SUBMITTED,
-            'account_number' => $data['account_number'],
-            'pin' => $data['pin'],
+            'account_number' => $data['account_number'] ?: null,
+            'pin' => $data['pin'] ?: null,
             'billing_name' => $data['billing_name'],
             'billing_address' => $data['billing_address'],
             'notes' => $data['notes'] ?: null,
@@ -93,7 +140,7 @@ class PortIn extends Component
             severity: 'info',
         );
 
-        $this->reset(['phone_number', 'account_number', 'pin', 'billing_name', 'billing_address', 'notes']);
+        $this->reset(['phone_number', 'account_number', 'pin', 'billing_name', 'billing_address', 'notes', 'eligible', 'eligibilityMessage']);
         $this->dispatch('nx-toast', type: 'success',
             message: 'Port-in request submitted. Bringing a number in usually takes 5–15 business days — we\'ll keep you posted by email.');
     }
