@@ -10,6 +10,7 @@ use App\Models\WalletTransaction;
 use App\Services\Pricing\PricingEngine;
 use App\Services\SMS\PermanentNumberRouter;
 use App\Services\Wallet\WalletService;
+use App\Support\MailSettings;
 use App\Support\ProviderKeys;
 use App\Support\ProviderModels;
 use Database\Seeders\PricingSettingsSeeder;
@@ -31,6 +32,9 @@ class PermanentNumberTest extends TestCase
         // Make Twilio "configured" so the lane is live, and bind a fake over it.
         config(['services.twilio.account_sid' => 'AC_test', 'services.twilio.auth_token' => 'tok']);
         ProviderKeys::flush();
+        // Real mailer (Prompt 10 renewal-notice tests) — Mailer::notify() is a
+        // silent no-op while MailSettings::isConfigured() is false (log/array).
+        MailSettings::save(['mailer' => 'smtp', 'from_address' => 'a@b.co', 'from_name' => 'N']);
     }
 
     private function fakeTwilio(FakePermanentProvider $fake): void
@@ -218,5 +222,79 @@ class PermanentNumberTest extends TestCase
         $vn->refresh();
         $this->assertSame('expired', $vn->status);
         $this->assertContains('SID-lapsed', $fake->released);
+    }
+
+    // ---- Prompt 10: auto-renewal opt-out + advance notice ------------------
+
+    public function test_an_opted_out_number_ends_cleanly_with_no_charge_when_due(): void
+    {
+        $fake = new FakePermanentProvider;
+        $this->fakeTwilio($fake);
+        $u = User::factory()->create();
+        app(WalletService::class)->credit($u, 10, 'USD'); // funds available — must NOT be touched
+        $vn = $this->subscription($u, ['auto_renew' => false, 'sid' => 'SID-optout']);
+
+        $this->artisan('virtual:renew')->assertSuccessful();
+
+        $vn->refresh();
+        $this->assertSame('expired', $vn->status);
+        $this->assertContains('SID-optout', $fake->released);
+        // Opting out is a choice, not a payment failure — never past_due, never charged.
+        $this->assertSame('10.0000', (string) $u->wallet->fresh()->usd_balance);
+        $this->assertSame(0, WalletTransaction::where('user_id', $u->id)->where('type', 'debit')->count());
+    }
+
+    public function test_a_successful_renewal_resets_the_notice_marker_for_the_next_cycle(): void
+    {
+        $u = User::factory()->create();
+        app(WalletService::class)->credit($u, 10, 'USD');
+        $vn = $this->subscription($u, ['renewal_notice_sent_at' => now()->subDays(2)]);
+
+        $this->artisan('virtual:renew')->assertSuccessful();
+
+        $this->assertNull($vn->refresh()->renewal_notice_sent_at);
+    }
+
+    public function test_a_renewing_number_due_soon_gets_an_advance_notice_and_is_not_charged_yet(): void
+    {
+        \Illuminate\Support\Facades\Notification::fake();
+        $u = User::factory()->create();
+        app(WalletService::class)->credit($u, 10, 'USD');
+        $vn = $this->subscription($u, ['next_billing_date' => today()->addDays(2)->toDateString()]);
+
+        $this->artisan('virtual:renew')->assertSuccessful();
+
+        \Illuminate\Support\Facades\Notification::assertSentTo($u, \App\Notifications\VirtualNumberRenewalNotification::class,
+            fn ($n) => $n->line->is($vn) && $n->line->auto_renew === true);
+        $this->assertNotNull($vn->refresh()->renewal_notice_sent_at);
+        // Not due today — no charge yet, just the notice.
+        $this->assertSame('10.0000', (string) $u->wallet->fresh()->usd_balance);
+    }
+
+    public function test_an_opted_out_number_due_soon_gets_an_ending_notice(): void
+    {
+        \Illuminate\Support\Facades\Notification::fake();
+        $u = User::factory()->create();
+        $vn = $this->subscription($u, [
+            'auto_renew' => false, 'next_billing_date' => today()->addDays(1)->toDateString(),
+        ]);
+
+        $this->artisan('virtual:renew')->assertSuccessful();
+
+        \Illuminate\Support\Facades\Notification::assertSentTo($u, \App\Notifications\VirtualNumberRenewalNotification::class,
+            fn ($n) => $n->line->is($vn) && $n->line->auto_renew === false);
+    }
+
+    public function test_the_advance_notice_is_sent_only_once_per_cycle(): void
+    {
+        \Illuminate\Support\Facades\Notification::fake();
+        $u = User::factory()->create();
+        app(WalletService::class)->credit($u, 10, 'USD');
+        $this->subscription($u, ['next_billing_date' => today()->addDays(2)->toDateString()]);
+
+        $this->artisan('virtual:renew')->assertSuccessful();
+        $this->artisan('virtual:renew')->assertSuccessful();
+
+        \Illuminate\Support\Facades\Notification::assertSentToTimes($u, \App\Notifications\VirtualNumberRenewalNotification::class, 1);
     }
 }
