@@ -27,7 +27,24 @@ class FakePermanentProvider implements NumberProviderInterface
         private bool $throwOnBuy = false,
         private float $smsCost = 0.0079,
         private bool $throwOnSend = false,
+        private bool $portable = true,
     ) {
+    }
+
+    /**
+     * Twilio-only port-in eligibility probe (Prompt 11). Not part of
+     * NumberProviderInterface — the PortabilityChecker calls it on the bound
+     * twilio instance. Configurable so eligibility flows can be tested both ways.
+     *
+     * @return array{portable: bool, pin_required: bool, reason: ?string}
+     */
+    public function portabilityProbe(string $number): array
+    {
+        return [
+            'portable' => $this->portable,
+            'pin_required' => true,
+            'reason' => $this->portable ? null : 'NUMBER_NOT_PORTABLE',
+        ];
     }
 
     public function searchNumbers(string $country, array $options = []): array

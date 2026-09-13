@@ -8,7 +8,9 @@ use App\Models\PortInRequest;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use App\Support\ProviderKeys;
 use Livewire\Livewire;
+use Tests\Support\FakePermanentProvider;
 use Tests\TestCase;
 
 /**
@@ -34,6 +36,14 @@ class PortInTest extends TestCase
         return $admin;
     }
 
+    /** Bind a Twilio double whose portability probe returns the given verdict. */
+    private function fakeTwilio(bool $portable = true): void
+    {
+        config(['services.twilio.account_sid' => 'AC_test', 'services.twilio.auth_token' => 'tok']);
+        ProviderKeys::flush();
+        $this->app->instance('number.twilio', new FakePermanentProvider(portable: $portable));
+    }
+
     private function fill(\Livewire\Features\SupportTesting\Testable $c): \Livewire\Features\SupportTesting\Testable
     {
         return $c->set('phone_number', '+15550001234')
@@ -45,6 +55,7 @@ class PortInTest extends TestCase
 
     public function test_a_customer_can_submit_a_us_canada_port_in_request(): void
     {
+        $this->fakeTwilio(portable: true);
         $user = $this->verified();
 
         $this->fill(Livewire::actingAs($user)->test(PortIn::class))->call('submit');
@@ -74,6 +85,7 @@ class PortInTest extends TestCase
 
     public function test_a_duplicate_open_request_for_the_same_number_is_blocked(): void
     {
+        $this->fakeTwilio(portable: true);
         $user = $this->verified();
         PortInRequest::create([
             'user_id' => $user->id, 'phone_number' => '+15550001234',
@@ -137,5 +149,51 @@ class PortInTest extends TestCase
     public function test_a_non_admin_cannot_open_the_port_in_admin_screen(): void
     {
         Livewire::actingAs($this->verified())->test(PortInRequests::class)->assertForbidden();
+    }
+
+    // ---- Batch D: eligibility probe -----------------------------------------
+
+    public function test_an_eligible_number_passes_the_probe_and_reveals_the_form(): void
+    {
+        $this->fakeTwilio(portable: true);
+
+        Livewire::actingAs($this->verified())->test(PortIn::class)
+            ->set('phone_number', '+15550001234')
+            ->call('checkEligibility')
+            ->assertSet('eligible', true);
+    }
+
+    public function test_a_number_the_carrier_wont_release_gets_an_honest_sorry(): void
+    {
+        $this->fakeTwilio(portable: false);
+
+        $c = Livewire::actingAs($this->verified())->test(PortIn::class)
+            ->set('phone_number', '+15550001234')
+            ->call('checkEligibility')
+            ->assertSet('eligible', false);
+
+        $this->assertNotSame('', $c->get('eligibilityMessage'));
+    }
+
+    public function test_a_non_us_canada_number_is_ineligible_without_needing_the_probe(): void
+    {
+        // No Twilio bound at all — the +1 gate rejects it before any probe.
+        Livewire::actingAs($this->verified())->test(PortIn::class)
+            ->set('phone_number', '+2348012345678')
+            ->call('checkEligibility')
+            ->assertSet('eligible', false);
+    }
+
+    public function test_submit_is_refused_server_side_when_the_number_is_not_portable(): void
+    {
+        $this->fakeTwilio(portable: false);
+        $user = $this->verified();
+
+        // Even with every field filled, a non-portable number never creates a request.
+        $this->fill(Livewire::actingAs($user)->test(PortIn::class))
+            ->call('submit')
+            ->assertSet('eligible', false);
+
+        $this->assertSame(0, PortInRequest::count());
     }
 }
