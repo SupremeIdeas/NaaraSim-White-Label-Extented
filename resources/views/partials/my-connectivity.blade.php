@@ -201,6 +201,29 @@
                                     </a>
                                 </div>
                             @endif
+
+                            {{-- Naara Line billing + auto-renewal (Prompt 10): a real subscription,
+                                 so this card is the only one that shows a recurring price, the next
+                                 charge date, and an explicit opt-out — never a silent forever-charge. --}}
+                            @if ($group['model']['key'] === 'naara_line' && in_array($number->status, ['active', 'past_due'], true))
+                                <div class="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 pt-3 text-xs dark:border-[#243352]">
+                                    <span class="text-slate-500 dark:text-slate-400">
+                                        ${{ number_format((float) $number->monthly_retail, 2) }}/mo
+                                        @if ($number->auto_renew)
+                                            · renews {{ $number->next_billing_date?->format('M j') }}
+                                        @else
+                                            · <span class="font-medium text-amber-600 dark:text-amber-400">ends {{ $number->next_billing_date?->format('M j') }}</span>
+                                        @endif
+                                    </span>
+                                    <button type="button" wire:click="toggleAutoRenew({{ $number->id }})"
+                                            wire:loading.attr="disabled" wire:target="toggleAutoRenew({{ $number->id }})"
+                                            @if ($number->auto_renew) wire:confirm="Turn off auto-renew? This number will be released on its next billing date instead of renewing." @endif
+                                            class="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 font-semibold transition disabled:opacity-60 {{ $number->auto_renew ? 'border-slate-200 text-slate-600 hover:border-red-300 hover:text-red-600 dark:border-[var(--brand-card-border-dark)] dark:text-slate-300' : 'border-primary/40 text-primary hover:bg-primary/10' }}">
+                                        <x-icon name="{{ $number->auto_renew ? 'x' : 'refresh' }}" class="h-3 w-3" />
+                                        {{ $number->auto_renew ? 'Turn off auto-renew' : 'Turn auto-renew back on' }}
+                                    </button>
+                                </div>
+                            @endif
                         </div>
                     @endforeach
                 </div>

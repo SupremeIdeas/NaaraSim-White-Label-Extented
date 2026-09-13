@@ -39,14 +39,34 @@ class ConnectivityHub
             ->map(fn ($items, $key) => [
                 'model' => ProviderModels::find($key) ?? ProviderModels::find('naara_verify'),
                 'items' => $items->values(),
-            ])
+            ]);
+
+        // Permanent numbers (Naara Line) live in VirtualNumber, not SmsOrder —
+        // PermanentNumberRouter never writes an SmsOrder row for one. Without
+        // this merge a purchased Naara Line was invisible on this exact page
+        // (and the Dashboard summary that shares this hub) — confirmed by
+        // reading PermanentNumberRouter before assuming otherwise.
+        $lines = $user->virtualNumbers()->latest()->limit(20)->get();
+        $lineArchived = fn ($l) => $l->status === 'expired';
+        $linesActive = $lines->reject($lineArchived)->values();
+        $linesArchived = $lines->filter($lineArchived)->values();
+
+        if ($linesActive->isNotEmpty()) {
+            $existing = $numberGroups->get('naara_line');
+            $numberGroups->put('naara_line', [
+                'model' => ProviderModels::find('naara_line'),
+                'items' => $existing ? $existing['items']->concat($linesActive)->values() : $linesActive,
+            ]);
+        }
+
+        $numberGroups = $numberGroups
             ->sortBy(fn ($g, $key) => array_search($key, self::GROUP_ORDER) === false
                 ? 99 : array_search($key, self::GROUP_ORDER))
             ->values();
 
         $esimsActive = $esims->reject($esimArchived)->values();
         $esimsArchived = $esims->filter($esimArchived)->values();
-        $numbersArchived = $numbers->filter($numberArchived)->values();
+        $numbersArchived = $numbers->filter($numberArchived)->values()->concat($linesArchived)->values();
         $numberActiveCount = $numberGroups->sum(fn ($g) => $g['items']->count());
 
         return [
@@ -54,7 +74,7 @@ class ConnectivityHub
             'esimsArchived' => $esimsArchived,
             'numberGroups' => $numberGroups,
             'numbersArchived' => $numbersArchived,
-            'hasAny' => $esims->isNotEmpty() || $numbers->isNotEmpty(),
+            'hasAny' => $esims->isNotEmpty() || $numbers->isNotEmpty() || $lines->isNotEmpty(),
             'esimActiveCount' => $esimsActive->count(),
             'numberActiveCount' => $numberActiveCount,
             'archivedCount' => $esimsArchived->count() + $numbersArchived->count(),
