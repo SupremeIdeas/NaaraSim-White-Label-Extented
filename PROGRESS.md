@@ -9,6 +9,58 @@
 
 ## DONE
 
+### 🔁 Prompt 10: consumer auto-renewal opt-out + advance-notice (Naara Line) — 2026-09-13
+Investigated where this toggle should live before writing any UI, and found
+a real, pre-existing bug that was blocking it: **a purchased Naara Line
+(permanent number) was invisible on "My Lines" and the Dashboard summary.**
+`PermanentNumberRouter` only ever writes a `VirtualNumber` row — never an
+`SmsOrder` — but `App\Support\ConnectivityHub` (the single hub both pages
+read) built `numberGroups` exclusively from `$user->smsOrders()`. A user
+who bought a Naara Line saw nothing about it anywhere in their own account.
+The `naara_line` group key already existed in `ConnectivityHub::GROUP_ORDER`
+and `ProviderModels` — the wiring was just never finished.
+
+Fixed the visibility gap first (a prerequisite, not scope creep — you can't
+toggle something you can't see), mirroring the exact `auto_renew` +
+reset-per-cycle-notice-marker pattern already proven for merchant client
+subscriptions (`MerchantClientSubscription.due_alerted_at` /
+`MerchantClientSubscriptionsCommand`), rather than inventing a new one:
+- `ConnectivityHub::for()` now merges `$user->virtualNumbers()` into the
+  `naara_line` group (active) and into `numbersArchived` (expired) —
+  confirmed against `PermanentNumberRouter` before assuming, not guessed.
+- `VirtualNumber` gained `auto_renew` (bool, default true — preserves every
+  existing line's current behavior) and `renewal_notice_sent_at`
+  (nullable timestamp, reset to null on every successful renewal — unlike a
+  one-shot subscription expiry, a Naara Line renews indefinitely while
+  auto_renew stays true, so the marker must clear every cycle or a customer
+  would only ever be notified once in the line's whole lifetime).
+  Also added `service_name`/`type` display accessors so a `VirtualNumber`
+  duck-types into the same card partial `SmsOrder` rows already render.
+- **`RenewVirtualNumbersCommand`** (`virtual:renew`): billing now runs only
+  for `auto_renew = true`; an opted-out line whose `next_billing_date`
+  arrives ends cleanly (released at the provider, marked expired) with NO
+  charge attempt and NO past_due grace period — this is the customer's own
+  choice, not a payment failure, so the existing grace-period path is
+  deliberately skipped for it. A new step sends a real advance notice
+  (`--notice-days=3` default) to everything due within the window, whichever
+  direction it's headed: a renewing line states the real charge date +
+  amount; an opted-out line states the real end date. Sent via email
+  (`VirtualNumberRenewalNotification`) AND — closing the exact gap the
+  WhatsApp audit flagged — WhatsApp Autopilot's previously-dead
+  `renewal_reminder` template, now finally wired to a real call site.
+- **`MyLines`**: new owner-scoped `toggleAutoRenew()` action (a stranger's
+  attempt is a silent no-op) with an audit-logged, idempotent flip; the
+  Naara Line card in `my-connectivity.blade.php` shows the real monthly
+  price + next billing date (or end date) and a confirm-gated toggle button
+  — money-adjacent, so it gets the same `wire:confirm` + loading-state
+  treatment as every other money action in this codebase.
+- 11 new tests across `PermanentNumberTest` (opt-out ends cleanly with zero
+  charge, notice-marker reset, advance notice fires for both directions,
+  sent only once per cycle) and `MyLinesTest` (a Naara Line is now actually
+  visible, price/date display, owner-scoped toggle, an expired line still
+  lands correctly in the Archive). Full suite green: 1987 tests, 6406
+  assertions. Tested locally only.
+
 ### 🧾 Prompt 10: checkout tax/fee line — 2026-09-13
 Audited first: `PricingEngine` and every checkout surface (eSIM `Checkout`,
 Naara Verify/Rent modals) confirmed no separate tax or fee is computed
@@ -3392,13 +3444,12 @@ is ready.
 - **Prompt 10 (Trust & Transparency, Sonnet-safe, mostly surfacing existing
   logic) — §1 (refund guarantee), §3 (eSIM compatibility inline), the
   `publicSuccessRate()` CountryPicker projection, the mobile-money rail
-  audit, the WhatsApp role audit, and the checkout tax/fee line are DONE,
-  see DONE above (WhatsApp: audited only, two-way support intentionally
-  NOT scoped — a real product decision for the owner). Remaining:**
-  consumer auto-renewal opt-out toggle + advance-notice (this is
-  also where `renewal_reminder`'s dead WhatsApp-template wiring belongs, per
-  the WhatsApp audit above); any "unlimited" eSIM plan structurally required
-  to disclose its fair-usage threshold.
+  audit, the WhatsApp role audit, the checkout tax/fee line, and the
+  consumer auto-renewal opt-out + advance-notice are DONE, see DONE above
+  (WhatsApp: audited only, two-way support intentionally NOT scoped — a
+  real product decision for the owner). Remaining:**
+  any "unlimited" eSIM plan structurally required to disclose its
+  fair-usage threshold — the last Prompt 10 item.
 - **Prompt 11 (Net-New Features) — mixed:**
   - Sonnet-safe, no money-path: spam-report + auto-block (`Dialer`/
     `Contacts`, configurable threshold/window), voicemail + transcription

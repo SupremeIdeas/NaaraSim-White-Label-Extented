@@ -2,10 +2,13 @@
 
 namespace Tests\Feature;
 
+use App\Livewire\MyLines;
 use App\Models\EsimOrder;
 use App\Models\EsimPlan;
 use App\Models\User;
+use App\Models\VirtualNumber;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Livewire\Livewire;
 use Tests\TestCase;
 
 /**
@@ -50,5 +53,81 @@ class MyLinesTest extends TestCase
 
         $res = $this->actingAs($user)->get('/numbers/lines')->assertOk();
         $res->assertSee('USA 3GB')->assertSee('Naara Data')->assertDontSee('esimgo');
+    }
+
+    // ---- Prompt 10: Naara Line billing surfaced + auto-renew toggle --------
+
+    private function line(User $user, array $extra = []): VirtualNumber
+    {
+        return VirtualNumber::create(array_merge([
+            'user_id' => $user->id, 'provider' => 'twilio', 'phone_number' => '+1555000'.rand(1000, 9999),
+            'sid' => 'SID-'.uniqid(), 'monthly_cost' => 1.00, 'monthly_retail' => 2.50,
+            'status' => 'active', 'next_billing_date' => today()->addDays(10)->toDateString(),
+            'provisioned_at' => now(),
+        ], $extra));
+    }
+
+    /**
+     * PermanentNumberRouter never writes an SmsOrder for a Naara Line — this
+     * proves the ConnectivityHub merge actually surfaces it on My Lines,
+     * confirming the real bug the fix addresses (a purchased line was
+     * previously invisible here).
+     */
+    public function test_a_naara_line_number_is_visible_on_my_lines(): void
+    {
+        $user = $this->verified();
+        $vn = $this->line($user);
+
+        $res = $this->actingAs($user)->get('/numbers/lines')->assertOk();
+        $res->assertSee($vn->phone_number)->assertSee('Naara Line')->assertDontSee('twilio');
+    }
+
+    public function test_a_renewing_line_shows_its_price_and_next_billing_date(): void
+    {
+        $user = $this->verified();
+        $vn = $this->line($user, ['next_billing_date' => today()->addDays(10)->toDateString()]);
+
+        $res = $this->actingAs($user)->get('/numbers/lines')->assertOk();
+        $res->assertSee('$2.50/mo')->assertSee($vn->next_billing_date->format('M j'));
+        $res->assertSee('Turn off auto-renew');
+    }
+
+    public function test_an_opted_out_line_shows_its_end_date_and_the_re_enable_action(): void
+    {
+        $user = $this->verified();
+        $vn = $this->line($user, ['auto_renew' => false]);
+
+        $res = $this->actingAs($user)->get('/numbers/lines')->assertOk();
+        $res->assertSee('ends '.$vn->next_billing_date->format('M j'));
+        $res->assertSee('Turn auto-renew back on');
+    }
+
+    public function test_toggling_auto_renew_flips_the_flag_and_is_owner_scoped(): void
+    {
+        $owner = $this->verified();
+        $stranger = $this->verified();
+        $vn = $this->line($owner);
+
+        // A stranger's attempt is a silent no-op — never another user's line.
+        Livewire::actingAs($stranger)->test(MyLines::class)->call('toggleAutoRenew', $vn->id);
+        $this->assertTrue($vn->refresh()->auto_renew);
+
+        Livewire::actingAs($owner)->test(MyLines::class)->call('toggleAutoRenew', $vn->id);
+        $this->assertFalse($vn->refresh()->auto_renew);
+
+        // Idempotent both ways — toggling again turns it back on.
+        Livewire::actingAs($owner)->test(MyLines::class)->call('toggleAutoRenew', $vn->id);
+        $this->assertTrue($vn->refresh()->auto_renew);
+    }
+
+    public function test_an_expired_line_appears_in_the_archive_not_the_active_list(): void
+    {
+        $user = $this->verified();
+        $vn = $this->line($user, ['status' => 'expired']);
+
+        $res = $this->actingAs($user)->get('/numbers/lines')->assertOk();
+        // Archived, not active: no billing/auto-renew controls for a dead line.
+        $res->assertDontSee('Turn off auto-renew')->assertDontSee('Turn auto-renew back on');
+        $res->assertSee('Archive')->assertSee($vn->phone_number);
     }
 }
