@@ -9,6 +9,47 @@
 
 ## DONE
 
+### 📖 §4 Developer API docs — audit + fixes — 2026-09-13
+Per the blueprint's own instruction: audit BEFORE writing code, then scope the
+fix (content vs visual vs both) from real findings. Audited `DeveloperPortal`/
+`DeveloperDocsController`/`docs/DEVELOPER-API.md` against all three named
+criteria; did the SMALL amount of building the findings actually justified —
+this was NOT a from-scratch rebuild, the content was already good.
+- **Content/examples — verified copy-paste-correct** by reading the real
+  controllers (Catalogue/Quote/Order) field-by-field against every example
+  and response shape in the doc: all matched exactly. ONE real gap found and
+  fixed: the genuine `409 duplicate_in_progress` response (a real code path —
+  `OrderController::duplicateInProgress()`) was completely undocumented, in
+  neither the §6 errors table nor the `POST /orders` response list.
+- **Visual/contrast — solid already** (proper dual dark-mode support, both
+  `data-theme` attribute and `prefers-color-scheme` fallback, good contrast
+  ratios throughout) with one real theme-integrity gap: the inline `<style>`
+  block hardcoded brand teal/gold as raw `rgb(r g b)` literals — the exact
+  §1.2 anti-pattern, just in a form (`rgb()` not `#hex`) `bin/theme-token-
+  audit.php`'s regex can't catch (a noted, known gap in that tool's scope).
+  Fixed: links + the blockquote accent now read `rgb(var(--brand-primary))`/
+  `rgb(var(--brand-accent))`; the article card's dark background/border now
+  use the same `--brand-card-dark`/`--brand-card-border-dark` tokens the
+  rest of the §1.2 remediation already established.
+- **Information architecture — good ordering** (concepts before endpoints,
+  quick-start last), but a 270+ line single page had ZERO in-page navigation
+  beyond one hero "Jump to auth" link. Added a sticky sidebar TOC, built
+  SERVER-SIDE from the doc's own `## ` headings (`DeveloperDocsController::
+  tableOfContents()`) so it can never silently drift from the real section
+  list — add a heading to the .md file and it appears in the nav
+  automatically, no second place to update. Heading anchors (`<h2 id="...">`)
+  are injected positionally into the compiled HTML (GFM has no heading-
+  permalink extension installed) matched against the same parsed list, not
+  by re-parsing rendered text (fragile against inline `` `code` ``/**bold**).
+  TOC hidden on mobile (a long single page is read by scrolling there, not
+  jumping between sections).
+- 3 new regression tests (every TOC link resolves to a real `<h2 id>`, the
+  409 is documented, no literal brand-color rgb() leaks) + updated the
+  existing page test for the renamed cache key (the cached value's shape
+  changed from a string to a `[html, toc]` tuple, so the key changed too —
+  `-v2` — rather than risk a stale-shape cache hit on a live install).
+- Full suite green. Tested locally only per the GitHub Actions budget rule.
+
 ### 🎨 Theme integrity + footer/header cleanup + Master-Only Distribution Lock — 2026-09-13
 Per the "Theme Integrity, Branding, Dev Docs & Reseller API" blueprint (owner,
 Sept 9), §1–§3 plus the standalone Master-Only Distribution Lock spec. Master
@@ -2990,13 +3031,12 @@ with the owner — remaining, in the blueprint's own sequencing:
   merchant-clients.blade.php (174), merchant-dashboard.blade.php (114),
   become-merchant.blade.php (97), profile.blade.php (94),
   merchant-invoices.blade.php (94), install/setup.blade.php (84).
-- **§4 Dev docs overhaul (Sonnet-safe, audit first):** `DeveloperPortal`/
-  `DeveloperDocsController` already exist and are tested — this is a
-  redesign/hardening pass. Audit BEFORE writing code: (1) contrast in both
-  themes, (2) copy-paste-correct examples against the live API — run one
-  end-to-end, (3) information architecture. Report findings first; scope
-  differs a lot between a content fix and a visual fix. Settle this BEFORE
-  §5 so the new reseller-catalogue endpoints document into the good version.
+### ▶ NEXT — §5 Reseller catalogue API + beyond
+§4 (dev docs audit + fixes) is DONE — see DONE above. That was the
+prerequisite for §5 ("settle this before §5 so the new reseller-catalogue
+endpoints document into the good version") — the good version now exists
+(TOC + theme-token-clean), so §5 is unblocked whenever the owner input below
+is ready.
 - **§5 Reseller catalogue API (Opus-recommended — needs owner input, not
   code-only):** reuses the existing `WhiteLabelInstance` Sanctum-token
   pattern (same shape as the updater's `updates.check`/`updates.download`
