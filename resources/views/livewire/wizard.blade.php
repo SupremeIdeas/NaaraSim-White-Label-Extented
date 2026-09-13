@@ -25,7 +25,7 @@
         <button type="button" x-show="wizHidden" x-cloak @click="wizHidden = false"
                 aria-label="Show the NaaraSim helper"
                 class="flex h-11 w-11 items-center justify-center rounded-full bg-white p-px shadow-lg shadow-primary/20 ring-1 ring-primary/20 transition hover:shadow-primary/30 dark:bg-[#101d33] dark:ring-primary/30">
-            <span class="flex h-full w-full items-center justify-center rounded-full bg-primary/10 text-primary dark:bg-primary/20 dark:text-teal-300">
+            <span class="flex h-full w-full items-center justify-center rounded-full bg-primary/10 text-primary dark:bg-primary/20">
                 <x-icon name="message-circle" class="h-5 w-5" />
             </span>
             @if ($this->liveOtp)
@@ -182,7 +182,7 @@
                             <div class="flex items-center justify-between">
                                 <p class="text-sm text-slate-600 dark:text-slate-300">Which country?</p>
                                 <button type="button" wire:click="refreshCountries" title="Refresh list"
-                                        class="rounded-md p-1 text-slate-400 transition hover:text-primary dark:hover:text-teal-300">
+                                        class="rounded-md p-1 text-slate-400 transition hover:text-primary">
                                     <x-icon name="refresh" class="h-4 w-4" />
                                 </button>
                             </div>
@@ -207,7 +207,7 @@
                             <div class="flex items-center justify-between">
                                 <p class="text-sm text-slate-600 dark:text-slate-300">Which service is the number for?</p>
                                 <button type="button" wire:click="refreshServices" title="Refresh list"
-                                        class="rounded-md p-1 text-slate-400 transition hover:text-primary dark:hover:text-teal-300">
+                                        class="rounded-md p-1 text-slate-400 transition hover:text-primary">
                                     <x-icon name="refresh" class="h-4 w-4" />
                                 </button>
                             </div>
@@ -234,7 +234,7 @@
                         <p class="text-sm text-slate-600 dark:text-slate-300">Let’s make sure your phone supports eSIM.</p>
                         {{-- Make the pre-purchase protection visible (competitor gap: activation
                              failing on an unsupported device with no refund). --}}
-                        <p class="flex items-center gap-1.5 text-xs font-medium text-primary dark:text-teal-300">
+                        <p class="flex items-center gap-1.5 text-xs font-medium text-primary">
                             <x-icon name="shield" class="h-3.5 w-3.5 shrink-0" /> We check this before you pay — no surprises.
                         </p>
                         <input type="text" wire:model="device" placeholder="e.g. iPhone 14, Galaxy S22"

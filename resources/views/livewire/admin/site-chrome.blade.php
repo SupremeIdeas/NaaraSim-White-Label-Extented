@@ -147,6 +147,41 @@
             </div>
         </section>
 
+        {{-- Footer credit phrasing (theme-integrity blueprint §2). The
+             "Supreme Ideas Agency" name and its link to supremeideas.agency
+             are never removable — only the surrounding phrasing is yours to
+             pick. --}}
+        <section class="rounded-2xl border border-slate-200 bg-white p-6 dark:border-[#2D4060] dark:bg-[#1A2840]">
+            <h2 class="flex items-center gap-2 text-sm font-semibold text-slate-800 dark:text-slate-100">
+                <x-icon name="heart" class="h-4 w-4 text-primary" /> Footer credit line
+            </h2>
+            <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">The "Supreme Ideas Agency" attribution always shows and always links to supremeideas.agency — pick how it's phrased.</p>
+
+            <div class="mt-4 space-y-2">
+                <label class="flex cursor-pointer items-start gap-2 rounded-lg border border-slate-200 p-3 text-sm dark:border-[#2D4060]">
+                    <input type="radio" wire:model.live="credit_phrasing" value="product_of" class="mt-0.5 text-primary focus:ring-primary/40">
+                    <span>A product of <span class="font-semibold">Supreme Ideas Agency</span>.</span>
+                </label>
+                <label class="flex cursor-pointer items-start gap-2 rounded-lg border border-slate-200 p-3 text-sm dark:border-[#2D4060]">
+                    <input type="radio" wire:model.live="credit_phrasing" value="made_with_love" class="mt-0.5 text-primary focus:ring-primary/40">
+                    <span>Made with love by <span class="font-semibold">Supreme Ideas Agency</span>.</span>
+                </label>
+                <label class="flex cursor-pointer items-start gap-2 rounded-lg border border-slate-200 p-3 text-sm dark:border-[#2D4060]">
+                    <input type="radio" wire:model.live="credit_phrasing" value="custom" class="mt-0.5 text-primary focus:ring-primary/40">
+                    <span>Custom…</span>
+                </label>
+            </div>
+
+            @if ($credit_phrasing === 'custom')
+                <div class="mt-3">
+                    <input wire:model="credit_custom_text" type="text" maxlength="160" placeholder="e.g. An independent build by {agency}, for travellers everywhere."
+                           class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                    <p class="mt-1 text-xs text-slate-400">Must contain <code class="rounded bg-slate-100 px-1 dark:bg-white/10">{agency}</code> — that's where the linked name goes.</p>
+                    @error('credit_custom_text') <span class="mt-1 block text-xs text-red-600 dark:text-red-400">{{ $message }}</span> @enderror
+                </div>
+            @endif
+        </section>
+
         <button type="submit" wire:loading.attr="disabled" wire:target="save,media,poster"
                 class="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-white hover:bg-primary-dark disabled:opacity-60">
             <span wire:loading.remove wire:target="save" class="inline-flex items-center gap-2"><x-icon name="check" class="h-4 w-4" /> Save changes</span>

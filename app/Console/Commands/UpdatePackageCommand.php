@@ -29,6 +29,7 @@ class UpdatePackageCommand extends Command
         {--requires-composer : Flag that applying needs composer install}
         {--requires-npm : Flag that applying needs an npm build}
         {--publish : After building, register + publish it to the distribution API (Batch 4)}
+        {--master-only : Mark this package as never distributable to white label — enforced server-side (Naara Pro / master-only distribution lock), not just a UI hint. A build-time-only decision, not adjustable later from a toggle.}
         {--dry-run : Resolve and print the file list without writing a package}';
 
     protected $description = 'Build and sign a NaaraSim update package (.naaraupdate)';
@@ -64,6 +65,7 @@ class UpdatePackageCommand extends Command
         $this->line('  Content files:     '.count($files)." (of which {$migrationCount} migrations)");
         $this->line('  Deletions:         '.count($deletions));
         $this->line('  Product:           '.config('updater.product_identifier'));
+        $this->line('  Distribution:      '.($this->option('master-only') ? 'MASTER-ONLY (can never be published to white label)' : 'distributable'));
 
         if ($this->option('dry-run')) {
             foreach ($files as $f) {
@@ -89,6 +91,9 @@ class UpdatePackageCommand extends Command
             'tier_requirement' => $this->option('tier') ?: null,
             'requires_composer_install' => (bool) $this->option('requires-composer'),
             'requires_npm_build' => (bool) $this->option('requires-npm'),
+            'distribution_scope' => $this->option('master-only')
+                ? \App\Support\UpdateManifest::SCOPE_MASTER_ONLY
+                : \App\Support\UpdateManifest::SCOPE_DISTRIBUTABLE,
         ]);
 
         // Immediately verify what we just built, so the command can never hand
@@ -105,8 +110,18 @@ class UpdatePackageCommand extends Command
         $this->line('  Version: '.$result->manifest->version);
 
         if ($this->option('publish')) {
-            $row = $publisher->register($path, publish: true);
-            $this->info('Published to distribution as package '.$row->package_id.' (product: '.$row->product.').');
+            if ($this->option('master-only')) {
+                // register() itself also forces is_published=false for a
+                // master-only package — this pre-check exists so the CLI
+                // output tells the truth about what actually happened rather
+                // than looking like --publish succeeded.
+                $this->warn('This package is --master-only — registering it, but NOT publishing (master-only packages can never be distributed).');
+                $row = $publisher->register($path, publish: true);
+                $this->info('Registered (master-only, unpublished) as package '.$row->package_id.'.');
+            } else {
+                $row = $publisher->register($path, publish: true);
+                $this->info('Published to distribution as package '.$row->package_id.' (product: '.$row->product.').');
+            }
         }
 
         return self::SUCCESS;

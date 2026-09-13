@@ -50,8 +50,20 @@
                                 <span class="shrink-0 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary-dark dark:bg-primary/20 dark:text-teal-300">
                                     {{ $opt['count'] }} {{ Str::plural('plan', $opt['count']) }}
                                 </span>
-                            @elseif (! empty($opt['dial']))
-                                <span class="shrink-0 font-mono text-xs font-semibold text-slate-500 dark:text-slate-400">{{ $opt['dial'] }}</span>
+                            @elseif (array_key_exists('dial', $opt))
+                                <span class="flex shrink-0 items-center gap-1.5">
+                                    {{-- Prompt 10: a real, provider-outcome-backed success rate for this
+                                         country's OTP lane — never shown below the min-sample threshold,
+                                         so a thin badge here always means genuine confidence, not a guess. --}}
+                                    @if (($opt['success'] ?? null) !== null)
+                                        <span class="rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400">
+                                            {{ round($opt['success'] * 100) }}% success
+                                        </span>
+                                    @endif
+                                    @if (! empty($opt['dial']))
+                                        <span class="font-mono text-xs font-semibold text-slate-500 dark:text-slate-400">{{ $opt['dial'] }}</span>
+                                    @endif
+                                </span>
                             @endisset
                         </button>
                     @empty

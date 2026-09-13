@@ -68,7 +68,7 @@
                     @foreach ($legal as $l)
                         <a href="{{ $l['url'] }}" wire:navigate @click="open = false"
                            class="flex items-center gap-3 border-b border-slate-100 bg-white px-3.5 py-3 text-sm font-medium text-slate-700 transition last:border-0 hover:bg-slate-50 dark:border-white/5 dark:bg-transparent dark:text-slate-200 dark:hover:bg-white/5">
-                            <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary dark:bg-primary/20 dark:text-teal-300"><x-icon name="shield" class="h-4 w-4" /></span>
+                            <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary dark:bg-primary/20"><x-icon name="shield" class="h-4 w-4" /></span>
                             <span class="flex-1 truncate">{{ $l['label'] }}</span>
                             <x-icon name="chevron-right" class="h-4 w-4 shrink-0 text-slate-300 dark:text-slate-600" />
                         </a>
@@ -76,7 +76,7 @@
                     @foreach ($custom as $c)
                         <a href="{{ $c['url'] }}" @click="open = false"
                            class="flex items-center gap-3 border-b border-slate-100 bg-white px-3.5 py-3 text-sm font-medium text-slate-700 transition last:border-0 hover:bg-slate-50 dark:border-white/5 dark:bg-transparent dark:text-slate-200 dark:hover:bg-white/5">
-                            <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary dark:bg-primary/20 dark:text-teal-300"><x-icon :name="$c['icon'] ?: 'chevron-right'" class="h-4 w-4" /></span>
+                            <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary dark:bg-primary/20"><x-icon :name="$c['icon'] ?: 'chevron-right'" class="h-4 w-4" /></span>
                             <span class="flex-1 truncate">{{ $c['label'] }}</span>
                             <x-icon name="chevron-right" class="h-4 w-4 shrink-0 text-slate-300 dark:text-slate-600" />
                         </a>

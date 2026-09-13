@@ -116,4 +116,21 @@ class ThemeFooterStylesTest extends TestCase
             $response->assertSee($label);
         }
     }
+
+    /**
+     * Theme-integrity blueprint §1.4/§2 — every themed footer variant now
+     * renders through the SAME shared `<x-footer-credit>` component, so the
+     * agency link exists everywhere, not just on the default footer.
+     */
+    #[DataProvider('footerThemes')]
+    public function test_themed_footer_links_the_agency_name(string $slug): void
+    {
+        Setting::setValue(ThemePreset::SETTING_KEY, $slug);
+        ThemePreset::bust();
+
+        $this->get('/')
+            ->assertOk()
+            ->assertSee('href="https://supremeideas.agency"', false)
+            ->assertSee('Supreme Ideas Agency');
+    }
 }

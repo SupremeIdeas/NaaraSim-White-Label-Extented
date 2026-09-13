@@ -76,8 +76,15 @@ class LegalContent
         })[$slug] ?? ['slug' => $slug, 'title' => ucfirst($slug), 'body' => '', 'updated' => null];
 
         $brand = BrandSettings::name();
-        $merged['title'] = str_replace('{brand}', $brand, $merged['title']);
-        $merged['body'] = str_replace('{brand}', $brand, $merged['body']);
+        // {otp_timeout_minutes} (Prompt 10 §1): pulled from PollSmsOtpJob's own
+        // constant, never hardcoded here, so this legal text can never
+        // silently drift out of sync with what the job actually does.
+        $replacements = [
+            '{brand}' => $brand,
+            '{otp_timeout_minutes}' => (string) \App\Jobs\PollSmsOtpJob::TIMEOUT_MINUTES,
+        ];
+        $merged['title'] = strtr($merged['title'], $replacements);
+        $merged['body'] = strtr($merged['body'], $replacements);
 
         return $merged;
     }
@@ -149,7 +156,7 @@ We aim to be fair and honest about refunds.
 An eSIM bundle that has not been started (not yet activated on a device/network) is revocable and refundable to your {brand} wallet. Once a bundle has been activated and data has begun, it is consumed and generally non-refundable.
 
 ## Verification numbers
-If no code arrives within the delivery window, the number auto-refunds to your wallet automatically — you are not charged for a code you never received.
+If no code arrives within {otp_timeout_minutes} minutes of ordering, the number auto-refunds to your wallet automatically — you are not charged for a code you never received, and no support ticket is needed.
 
 ## Wallet balances
 Wallet balances are store credit, spendable across eSIMs and numbers. Top-ups are not withdrawable to cash unless required by law.

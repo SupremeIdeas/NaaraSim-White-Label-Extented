@@ -26,7 +26,13 @@ class PollSmsOtpJob implements ShouldQueue
 
     private const POLL_SECONDS = 5;
 
-    private const TIMEOUT_MINUTES = 15;
+    /**
+     * Public so customer-facing trust copy (Naara Verify/Rent modals,
+     * PricingPage, the Refund & Reliability Policy page) can state the real
+     * refund window instead of a hardcoded guess that would silently drift
+     * out of sync if this value ever changes (Prompt 10 §1).
+     */
+    public const TIMEOUT_MINUTES = 15;
 
     public function __construct(
         public int $smsOrderId,

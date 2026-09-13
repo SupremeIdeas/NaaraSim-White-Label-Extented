@@ -106,6 +106,18 @@
         </p>
     @endif
 
+    {{-- Trust line (Prompt 10 §1): the numbers/OTP refund guarantee, stated
+         truthfully — this page is eSIM-plan-focused above, but the platform
+         sells numbers too, so the promise belongs here as a real, standing
+         line item, not buried only in the purchase modal. Timeout pulled
+         from PollSmsOtpJob's own constant, never hardcoded. --}}
+    <div class="mt-10 flex items-center justify-center gap-2 text-center text-sm text-slate-500 dark:text-slate-400">
+        <x-icon name="shield-check" class="h-4 w-4 shrink-0 text-primary" />
+        Verification numbers are covered too: no code within {{ \App\Jobs\PollSmsOtpJob::TIMEOUT_MINUTES }} minutes
+        → automatic refund to your wallet, no ticket required.
+        <a href="{{ route('refund-policy') }}" class="font-semibold text-primary hover:underline">Refund &amp; reliability policy</a>
+    </div>
+
     {{-- Not sure? -> data estimator --}}
     <div class="mt-14 rounded-3xl bg-gradient-to-br from-primary via-primary-dark to-navy p-8 text-center text-white sm:p-10">
         <h2 class="font-display text-2xl font-bold">Not sure how much data you need?</h2>

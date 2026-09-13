@@ -51,7 +51,7 @@
     <aside class="hidden lg:fixed lg:inset-y-0 lg:left-0 lg:z-40 lg:flex lg:w-72 lg:flex-col lg:p-3 lg:transition-[width] lg:duration-300"
            :class="navCollapsed ? 'lg:!w-24' : ''">
         <div @class([
-                'flex h-full flex-col rounded-3xl border border-slate-200/70 bg-gradient-to-b from-teal-50 via-slate-50 to-slate-100 shadow-sm dark:border-white/10',
+                'flex h-full flex-col rounded-3xl border border-slate-200/70 bg-gradient-to-b from-primary/5 via-slate-50 to-slate-100 shadow-sm dark:border-white/10',
                 'dark:from-[#16233d] dark:via-[#141f36] dark:to-[#111a2e]' => \App\Support\ThemePreset::slug() === \App\Support\ThemePreset::DEFAULT_SLUG,
                 'dark:bg-none dark:bg-navy' => \App\Support\ThemePreset::slug() !== \App\Support\ThemePreset::DEFAULT_SLUG,
              ])>
@@ -120,12 +120,12 @@
              /numbers/* routes — the freed space Frank asked for. --}}
         <header class="nx-header-fade sticky top-0 z-30 flex items-center justify-between px-4 py-3 lg:hidden">
             <a href="{{ route('numbers.lines') }}" wire:navigate class="flex items-center gap-2 text-sm font-semibold text-slate-700 dark:text-slate-200">
-                <x-icon name="signal" class="h-5 w-5 text-primary dark:text-teal-300" /> Numbers
+                <x-icon name="signal" class="h-5 w-5 text-primary" /> Numbers
             </a>
             <div class="flex items-center gap-2">
-                <a href="{{ route('wallet') }}" wire:navigate class="flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1.5 text-sm font-bold text-primary transition hover:bg-primary/15 dark:bg-teal-500/15 dark:text-teal-300">
+                <a href="{{ route('wallet') }}" wire:navigate class="flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1.5 text-sm font-bold text-primary transition hover:bg-primary/15 dark:bg-primary/20">
                     <x-icon name="wallet" class="h-4 w-4" /> ${{ number_format($numbersWalletUsd, 2) }}
-                    <span class="flex h-5 w-5 items-center justify-center rounded-full bg-primary text-white dark:bg-teal-400 dark:text-navy"><x-icon name="plus" class="h-3 w-3" /></span>
+                    <span class="flex h-5 w-5 items-center justify-center rounded-full bg-primary text-white"><x-icon name="plus" class="h-3 w-3" /></span>
                 </a>
                 {{-- Global "More" sheet stays reachable from inside the Numbers
                      section (the section nav's centre is now My Lines). --}}
