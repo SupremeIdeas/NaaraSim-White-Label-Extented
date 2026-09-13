@@ -24,6 +24,14 @@ class BrandHunt extends Component
 {
     public ?string $flash = null;
 
+    public function booted(): void
+    {
+        // Batch 8: Brand Hunt / Brand Directory is a tier-locked feature — a
+        // basic white-label fork has it hidden (404) until it pays up. Inert on
+        // the master (never locked there).
+        abort_if(\App\Support\FeatureEntitlements::locked(\App\Support\FeatureLocks::F_BRAND_HUNT), 404);
+    }
+
     /** Claim a platform handle follow (self-confirmed tap → server grant). */
     public function followHandle(int $id, SocialFollowService $svc): void
     {

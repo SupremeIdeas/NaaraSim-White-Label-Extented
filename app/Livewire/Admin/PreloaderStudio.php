@@ -57,6 +57,10 @@ class PreloaderStudio extends Component
     public function booted(): void
     {
         abort_unless(Auth::user()?->hasAnyRole(['super_admin', 'admin']), 403);
+        // Batch 8: preloader customization is a tier-locked feature — a basic
+        // white-label fork can't reach the Studio until it pays up. Inert on
+        // the master (never locked there).
+        abort_if(\App\Support\FeatureEntitlements::locked(\App\Support\FeatureLocks::F_PRELOADER), 404);
     }
 
     public function mount(): void

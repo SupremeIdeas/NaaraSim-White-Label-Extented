@@ -59,6 +59,13 @@ class WhiteLabelUpdater extends Component
 
     public ?string $pullStatus = null;
 
+    // --- Feature entitlement (Batch 8B) ---
+
+    /** Result of the last refreshEntitlement() call: ['ok','level','locks','error']. */
+    public ?array $entitlement = null;
+
+    public ?string $entitlementStatus = null;
+
     // --- Manual upload (code) — unchanged from Batch 2 ---
 
     public $package;
@@ -193,6 +200,41 @@ class WhiteLabelUpdater extends Component
 
         $this->reset(['package', 'verified', 'stagedPath']);
         $this->status = 'Update queued. It runs in the background with a full backup and automatic rollback — watch the status below.';
+    }
+
+    // ==================== FEATURE ENTITLEMENT (Batch 8B) ====================
+
+    /**
+     * Manually re-pull this instance's feature entitlement from the original
+     * platform. It also refreshes automatically on every code check-in; this
+     * button is for the operator who just paid (or was just upgraded) and wants
+     * their locks to lift right now without waiting for the next update poll.
+     */
+    public function refreshEntitlement(WhiteLabelUpdateClient $client): void
+    {
+        abort_unless(Auth::user()->hasRole('super_admin'), 403);
+
+        $this->entitlement = $client->refreshEntitlement();
+        $this->entitlementStatus = $this->entitlement['ok']
+            ? 'Entitlement refreshed from the original platform.'
+            : ('Could not refresh entitlement: '.($this->entitlement['error'] ?? 'unknown error'));
+    }
+
+    /**
+     * The lock list currently cached on THIS instance (what the gates actually
+     * enforce right now), each mapped to its human label. Read straight from the
+     * universal resolver so it reflects reality, not just the last fetch result.
+     *
+     * @return array<int,array{key:string,label:string}>
+     */
+    public function getActiveLocksProperty(): array
+    {
+        $catalog = \App\Support\FeatureLocks::catalog();
+
+        return array_map(
+            fn (string $key) => ['key' => $key, 'label' => $catalog[$key] ?? $key],
+            \App\Support\FeatureEntitlements::all(),
+        );
     }
 
     public function getCurrentVersionProperty(): ?string

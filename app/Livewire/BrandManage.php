@@ -48,6 +48,10 @@ class BrandManage extends Component
 
     public function mount(BrandSubscriptionService $subs)
     {
+        // Batch 8: the brand-owner dashboard is part of the Brand Hunt feature —
+        // locked with it. Inert on the master (never locked there).
+        abort_if(\App\Support\FeatureEntitlements::locked(\App\Support\FeatureLocks::F_BRAND_HUNT), 404);
+
         $brand = BrandPartner::where('owner_user_id', Auth::id())->first();
         if (! $brand) {
             return redirect()->route('brand.get-listed');

@@ -1,13 +1,15 @@
 name: Tests
 
+# GitHub Actions budget rule (2026-09-13, owner request): the SupremeIdeas
+# account reached 90% of its 2,000 included Actions minutes/month. To stop CI
+# from silently burning minutes — the daily `schedule` run and a full matrix
+# re-run on every push to an open PR were the biggest drains — this suite is
+# MANUAL-ONLY for now. Run it deliberately from the Actions tab (or
+# `gh workflow run Tests`) when you want a full CI pass. Every build still runs
+# the suite LOCALLY (`vendor/bin/phpunit`). Re-enable `pull_request:` /
+# `schedule:` after usage resets on 2026-10-01.
 on:
-  push:
-    branches:
-      - master
-      - '*.x'
-  pull_request:
-  schedule:
-    - cron: '0 0 * * *'
+  workflow_dispatch:
 
 permissions:
   contents: read

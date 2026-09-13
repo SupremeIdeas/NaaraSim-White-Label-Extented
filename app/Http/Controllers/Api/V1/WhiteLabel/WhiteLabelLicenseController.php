@@ -82,6 +82,10 @@ class WhiteLabelLicenseController extends Controller
                 'tier' => $instance->tier,
                 'status' => $instance->status,
             ],
+            // Batch 8: hand the fork its feature-lock list immediately on
+            // activation, so it enforces the right locks before its first
+            // check-in — it re-fetches this from the entitlement endpoint later.
+            'entitlement' => \App\Support\FeatureLocks::entitlementFor($instance->entitlement_level),
         ]);
     }
 }
