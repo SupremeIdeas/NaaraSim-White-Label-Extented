@@ -16,7 +16,9 @@ class VirtualNumber extends Model
         'monthly_cost',
         'monthly_retail',
         'status',
+        'auto_renew',
         'next_billing_date',
+        'renewal_notice_sent_at',
         'provisioned_at',
         'expires_at',
     ];
@@ -36,7 +38,9 @@ class VirtualNumber extends Model
             'capabilities' => 'array',
             'monthly_cost' => 'decimal:4',
             'monthly_retail' => 'decimal:4',
+            'auto_renew' => 'boolean',
             'next_billing_date' => 'date',
+            'renewal_notice_sent_at' => 'datetime',
             'provisioned_at' => 'datetime',
             'expires_at' => 'datetime',
         ];
@@ -45,6 +49,22 @@ class VirtualNumber extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Display-shape compatibility with the SmsOrder rows "My Lines" otherwise
+     * renders in the same list (App\Support\ConnectivityHub merges both into
+     * the naara_line group) — a permanent line has no service/OTP, but the
+     * shared card partial expects these attributes to exist.
+     */
+    public function getServiceNameAttribute(): string
+    {
+        return 'Permanent line';
+    }
+
+    public function getTypeAttribute(): string
+    {
+        return 'permanent';
     }
 
     /**

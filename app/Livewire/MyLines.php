@@ -2,7 +2,9 @@
 
 namespace App\Livewire;
 
+use App\Models\VirtualNumber;
 use App\Services\Analytics\ConnectivityAnalyticsService;
+use App\Support\Auditor;
 use App\Support\ConnectivityHub;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
@@ -19,6 +21,34 @@ use Livewire\Component;
 #[Layout('components.layouts.customer')]
 class MyLines extends Component
 {
+    /**
+     * Prompt 10 — the consumer auto-renewal opt-out toggle. Owner-scoped
+     * (a number id arriving from the client must never let a user flip
+     * another user's line), and idempotent to call twice with the same
+     * value. Never touches the wallet or billing state directly — it only
+     * sets the flag `RenewVirtualNumbersCommand` reads on its next run.
+     */
+    public function toggleAutoRenew(int $virtualNumberId): void
+    {
+        $line = VirtualNumber::where('user_id', auth()->id())
+            ->whereIn('status', ['active', 'past_due'])
+            ->find($virtualNumberId);
+
+        if ($line === null) {
+            return;
+        }
+
+        $line->update(['auto_renew' => ! $line->auto_renew]);
+        Auditor::log(
+            $line->auto_renew ? 'line.auto_renew_enabled' : 'line.auto_renew_disabled',
+            'VirtualNumber', $line->id,
+        );
+
+        $this->dispatch('nx-toast', type: 'success', message: $line->auto_renew
+            ? 'Auto-renew is back on for '.$line->phone_number.'.'
+            : 'Auto-renew is off — '.$line->phone_number.' will end on its next billing date unless you turn it back on.');
+    }
+
     public function render(ConnectivityAnalyticsService $analytics)
     {
         $hub = ConnectivityHub::for(auth()->user());
