@@ -16,6 +16,17 @@
         </div>
     </div>
 
+    {{-- Port-in entry (Prompt 11): bring an existing US/Canada number to Naara.
+         Honest — a multi-day carrier process, surfaced where numbers are managed. --}}
+    <a href="{{ route('numbers.port-in') }}" wire:navigate
+       class="mb-5 flex items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm shadow-sm transition hover:border-primary/40 dark:border-[var(--brand-card-border-dark)] dark:bg-[var(--brand-card-dark)]">
+        <span class="flex items-center gap-2 text-slate-600 dark:text-slate-300">
+            <x-icon name="phone-forwarded" class="h-4 w-4 shrink-0 text-primary" />
+            Already have a US or Canada number? <span class="font-semibold text-primary">Bring it to Naara</span>
+        </span>
+        <x-icon name="chevron-right" class="h-4 w-4 shrink-0 text-slate-400" />
+    </a>
+
     @if ($hasAny)
         @include('partials.my-connectivity')
         @include('partials.my-lines-analytics')
