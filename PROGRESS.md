@@ -9,6 +9,41 @@
 
 ## DONE
 
+### 📊 Prompt 10: publicSuccessRate() surfaced on the Numbers CountryPicker — 2026-09-13
+`NciScorer::publicSuccessRate(string $providerKey): ?float` — a new, read-only
+projection deliberately separate from the internal `nci_score`:
+- `nci_score` folds in the §6 margin tie-break (a tiny internal ranking nudge)
+  and is shaped by the NCI kill switch/confidence weighting — none of that
+  belongs in a number a customer reads as "how often did this work."
+  `publicSuccessRate()` is the plain success/total ratio over the same
+  30-day window, nothing else, read directly from the outcome log.
+- Gated by a minimum sample (20 in-window outcomes) — below it, returns
+  `null` ("not enough data," never a guessed number or a misleading 0%/100%
+  from a handful of tries). Cached 15 minutes per provider (a pure read, so
+  no coupling to the CircuitBreaker's write path).
+- `bestPublicSuccessRate(array $providerKeys)` — the highest qualifying rate
+  among a lane, used so the badge reflects the SAME lane `SmsNumberRouter`
+  would actually try, not an arbitrary provider.
+- Wired into `CountryPickerSources::numbers()`: each country now also
+  reports the best public success rate across its real OTP lane
+  (`SmsNumberRouter::laneFor($slug, TYPE_OTP)`), cached alongside the
+  existing country list; the picker shows a green "NN% success" badge next
+  to the dial code only when a rate qualifies.
+- **ServicePicker was deliberately left alone** — audited first: outcomes
+  are recorded per `provider_key` + `stack` only (no service/operator
+  column), and `ServicePickerSources` has no country context to resolve a
+  lane from, so there is no honest per-service rate to compute. Fabricating
+  one would violate the "don't guess, don't invent a badge" rule the
+  eSIM-facts code already follows elsewhere. Recorded here rather than
+  silently skipped.
+- 8 new tests (`PublicSuccessRateTest`): min-sample gating, trailing-window
+  scoping, caching (survives new outcomes until flushed), lane best-of,
+  and the CountryPicker wiring itself (qualifying + thin-data cases).
+  Confirmed the existing NCI one-way-boundary test
+  (`test_no_router_imports_the_nci_namespace`) still holds — the new NCI
+  usage lives in `CountryPickerSources`, never in `SmsNumberRouter` itself.
+  Full suite green. Tested locally only.
+
 ### 📶 Prompt 10 §3: eSIM compatibility moved inline (warning, not a block) — 2026-09-13
 Traced every eSIM checkout entry point first, per the blueprint's own step 1:
 - `Catalogue.php`'s plan-detail screen (§3.4 — the actual point of eSIM plan
@@ -3124,11 +3159,10 @@ is ready.
   triggered) — test that reality, don't test for automatic polling that
   isn't there.
 - **Prompt 10 (Trust & Transparency, Sonnet-safe, mostly surfacing existing
-  logic) — §1 (refund guarantee) and §3 (eSIM compatibility inline) DONE,
-  see DONE above. Remaining:**
-  `NciScorer::publicSuccessRate()` read-only projection surfaced on
-  Country/ServicePicker (min-sample threshold, cached); mobile-money rails
-  audited per gateway/country then shown as
+  logic) — §1 (refund guarantee), §3 (eSIM compatibility inline), and the
+  `publicSuccessRate()` CountryPicker projection are DONE, see DONE above.
+  Remaining:**
+  mobile-money rails audited per gateway/country then shown as
   named options at checkout; WhatsApp's actual role determined and reported
   BEFORE scoping two-way support as a possible follow-up; checkout tax/fee
   line (real $0.00 is fine, the line itself is the trust signal); consumer
