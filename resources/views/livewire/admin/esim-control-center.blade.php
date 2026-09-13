@@ -100,6 +100,7 @@
                         <th class="px-3 py-2">Margin %</th>
                         <th class="px-3 py-2">Popular</th>
                         <th class="px-3 py-2">Tooltip</th>
+                        <th class="px-3 py-2">Fair usage</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100 dark:divide-white/5">
@@ -178,9 +179,27 @@
                                     </div>
                                 @endif
                             </td>
+                            <td class="px-3 py-3 text-xs">
+                                @if ($plan->data_mb !== null)
+                                    <span class="text-slate-400">— data-limited, N/A —</span>
+                                @elseif ($editingFairUsageId === $plan->id)
+                                    <textarea wire:model="fairUsageValue" rows="3" maxlength="300" placeholder="Real known threshold, e.g. 3GB/day @ 20Mbps, then 1Mbps…"
+                                              class="w-56 rounded border border-slate-300 px-2 py-1 text-xs dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100"></textarea>
+                                    <div class="mt-1 flex gap-2">
+                                        <button wire:click="saveFairUsage({{ $plan->id }})" class="rounded bg-primary px-2 py-1 font-semibold text-white">Save</button>
+                                        <button wire:click="cancelFairUsage" class="text-slate-400">Cancel</button>
+                                    </div>
+                                @else
+                                    <p class="max-w-xs text-slate-500 dark:text-slate-400">
+                                        {{ \Illuminate\Support\Str::limit($plan->display_fair_usage_note, 90) }}
+                                        @if ($plan->fair_usage_note)<span class="ml-1 rounded bg-amber-100 px-1 text-[10px] font-semibold text-amber-700 dark:bg-amber-500/15 dark:text-amber-300">override</span>@else<span class="ml-1 rounded bg-slate-100 px-1 text-[10px] font-semibold text-slate-500 dark:bg-white/10 dark:text-slate-400">generic</span>@endif
+                                    </p>
+                                    <button wire:click="editFairUsage({{ $plan->id }})" class="mt-1 font-semibold text-primary">Set real threshold</button>
+                                @endif
+                            </td>
                         </tr>
                     @empty
-                        <tr><td colspan="6" class="px-3 py-10 text-center text-slate-400">No plans match. Sync a provider or adjust the filter.</td></tr>
+                        <tr><td colspan="7" class="px-3 py-10 text-center text-slate-400">No plans match. Sync a provider or adjust the filter.</td></tr>
                     @endforelse
                 </tbody>
             </table>

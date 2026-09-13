@@ -46,6 +46,16 @@
                     @endforeach
                 </div>
 
+                {{-- Fair-usage disclosure (Prompt 10): structurally required for every
+                     unlimited plan, never optional — the accessor itself returns null
+                     for a data-capped plan, so this only ever renders when it applies. --}}
+                @if ($plan->display_fair_usage_note)
+                    <p class="mt-3 flex items-start gap-2 rounded-2xl bg-amber-50 p-3 text-xs leading-relaxed text-amber-800 dark:bg-amber-500/10 dark:text-amber-300">
+                        <x-icon name="info" class="mt-0.5 h-4 w-4 shrink-0" />
+                        <span>{{ $plan->display_fair_usage_note }}</span>
+                    </p>
+                @endif
+
                 {{-- AI tooltip (§5) as the "what am I buying" copy, when present. --}}
                 @if ($plan->display_tooltip)
                     <p class="mt-4 rounded-2xl bg-slate-50 p-4 text-sm leading-relaxed text-slate-600 dark:bg-[var(--brand-card-inner-dark)] dark:text-slate-300">
