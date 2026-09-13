@@ -9,6 +9,68 @@
 
 ## DONE
 
+### 🔌 Prompt 11: number-porting capability audit (no code — report-first, owner decision pending) — 2026-09-13
+Per the item's own instruction ("Report back before writing anything"),
+this is an audit only. Grounded in the real code first: porting can only
+ever concern **permanent numbers (Naara Line)** — the Twilio (primary) →
+Telnyx (backup) lane in `PermanentNumberRouter`. eSIMs are data plans (not
+phone numbers, not portable); disposable OTP / 5sim rentals aren't ownable.
+So "porting" = port-IN (bring your number to Naara) and port-OUT (take your
+Naara number elsewhere) of permanent numbers only. No porting fields exist
+on `VirtualNumber` today, and no recycled-inventory blacklist exists.
+
+External facts VERIFIED against provider docs (not assumed — CLAUDE.md rule):
+- **Twilio port-in:** 5–15 days typical, up to 4 weeks on carrier rejection;
+  e-LOA generated for digital signature; PortIn API covers landline+mobile
+  (not toll-free). International port-in EXISTS but not via Console — routed
+  through Twilio support, limited country list.
+- **Twilio non-US/Canada numbers need Regulatory Bundles:** business identity
+  docs, government ID of an authorized person, proof of address; address
+  validation enforced in AU/BR/FR/DE/IE/IT/MX/NL/PL/ES/LU/AT/UK. Nigeria: local
+  VOICE numbers exist but **Nigerian mobile numbers are NOT available to
+  individuals** (business-only). Kenya: local voice available. Ghana: not in
+  Twilio's coverage.
+- **Twilio port-OUT (away):** supported; wireless needs PIN + account number;
+  rejects on PIN/address/CSR mismatch, unpaid balance, unauthorized requester.
+- **Telnyx:** global porting, FastPort same-day for eligible, up to several
+  weeks international; port-out must be authorized within 2 business days.
+  **South Africa porting IS supported** but demands LOA-with-local-address +
+  latest invoice + ID/passport + **company registration certificate** + proof
+  of address; national numbers need a wet-signature LOA (no e-sign) on
+  letterhead/with stamp. No NG/GH/KE porting article surfaced.
+
+**The Pan-African crux (the honest finding):** porting an African MOBILE
+number (what a Nigerian/Ghanaian/Kenyan consumer actually holds) into a
+VoIP/CPaaS provider is effectively unavailable to individuals. Where mobile
+number portability exists in these markets (e.g. Nigeria since 2013) it
+governs mobile-carrier-to-mobile-carrier transfer, NOT porting to Twilio/
+Telnyx, who hold no mobile spectrum there. Every non-+1 port is a KYB/KYC-
+heavy, human-reviewed, days-to-weeks business-compliance process —
+fundamentally incompatible with a one-click consumer funnel. A self-service
+"bring your Nigerian number to Naara" feature would be selling what we can't
+honestly deliver (violates never-charge-without-delivering / honesty-first).
+
+**Where porting genuinely works self-service-ish:** US/Canada (+1) — no
+regulatory bundle, e-LOA, 5–15 days, PIN+account for wireless. That's also
+where Naara's permanent numbers are strongest (MMS is already +1-gated in
+`VirtualNumber::supportsMms()`), but few Pan-African users hold +1 numbers.
+
+**Recommendation (put to owner as a decision, below in NEXT):**
+1. **Port-OUT first** — it's a customer right-to-leave / anti-lock-in
+   obligation the blueprint already implies ("no artificial retention
+   friction"). Low effort, high trust: expose the account/provider ref + a
+   clear "how to port your number away" help path + honest release discipline
+   for +1 Naara numbers. Worth doing regardless of the port-in decision.
+2. **Port-IN** as a broad African consumer feature is NOT viable on the
+   current lane. The only honest port-in scope is a **US/Canada intake**
+   (request + document capture + multi-day status tracking — NOT instant
+   provisioning). Modest value for this audience; decide whether it's worth it.
+3. **Recycled-number pre-check:** a cross-provider "clean number" guarantee
+   is not offerable; a pre-purchase check against our OWN previously-released
+   `VirtualNumber` history (don't re-sell a number we pulled for abuse) IS
+   honest and doable — decide yes/no.
+No code written. Awaiting the owner's scope decision before anything ships.
+
 ### 📶 Prompt 10: unlimited eSIM plans now disclose a fair-usage threshold — 2026-09-13
 The last Prompt 10 item. Audited before building: no current provider
 integration (`CatalogueSyncService::mapEsimGo/mapAiralo/mapQuibity/
