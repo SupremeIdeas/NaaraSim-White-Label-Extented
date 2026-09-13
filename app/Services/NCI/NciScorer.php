@@ -4,6 +4,7 @@ namespace App\Services\NCI;
 
 use App\Models\ProviderOutcome;
 use App\Models\ProviderRegistry;
+use Illuminate\Support\Facades\Cache;
 
 /**
  * NAARA-BUILD-16 — Naara Core Intelligence, Layer 3 (learning). The scoring
@@ -38,6 +39,15 @@ class NciScorer
 
     /** Below this many outcomes, risk stays 'medium' (not enough to judge). */
     private const MIN_SAMPLE_FOR_RISK = 10;
+
+    /**
+     * Prompt 10 — below this many outcomes in the window, publicSuccessRate()
+     * returns null rather than a rate built on too little data to be honest.
+     */
+    private const PUBLIC_MIN_SAMPLE = 20;
+
+    /** How long a public success rate is cached before recomputing from outcomes. */
+    private const PUBLIC_RATE_TTL_MINUTES = 15;
 
     /**
      * §6 — the MOST a healthy margin can lift a provider's score. Deliberately
@@ -160,6 +170,59 @@ class NciScorer
         // Clamp: a negative margin never drags reliability down (the MarginGuard
         // and circuit breaker own loss-prevention); a 100%+ margin caps the bonus.
         return self::MARGIN_TIEBREAK * max(0.0, min(1.0, $avg));
+    }
+
+    /**
+     * Prompt 10 — a read-only, customer-safe success-rate projection for the
+     * Country/Service pickers. Deliberately NOT `nci_score`: that column folds
+     * in the §6 margin tie-break (an internal ranking nudge, however tiny) and
+     * is influenced by the NCI kill switch and confidence weighting — neither
+     * belongs in a number a customer reads as "how often did this work." This
+     * is the plain success/total ratio over the same trailing window, nothing
+     * else, computed directly from the outcome log NCI already learns from.
+     *
+     * Below PUBLIC_MIN_SAMPLE outcomes it returns null (not enough data to
+     * judge honestly) rather than a number built on a handful of tries — the
+     * caller must treat null as "don't show a rate," never as zero.
+     *
+     * A pure read: it never writes, and it is safe to call from page render
+     * (unlike recompute()/applyOutcome(), which stay queued-listener-only) —
+     * it only ever reads the outcome log, cached briefly so a picker showing
+     * many rows doesn't run this query once per row per request.
+     */
+    public function publicSuccessRate(string $providerKey): ?float
+    {
+        return Cache::remember(
+            "nci:public_success_rate:{$providerKey}",
+            now()->addMinutes(self::PUBLIC_RATE_TTL_MINUTES),
+            function () use ($providerKey) {
+                $since = now()->subDays(self::WINDOW_DAYS);
+                $base = ProviderOutcome::where('provider_key', $providerKey)->where('occurred_at', '>=', $since);
+
+                $total = (clone $base)->count();
+                if ($total < self::PUBLIC_MIN_SAMPLE) {
+                    return null;
+                }
+
+                $success = (clone $base)->where('outcome', ProviderOutcome::SUCCESS)->count();
+
+                return round($success / $total, 4);
+            }
+        );
+    }
+
+    /** Best (highest) public success rate among a lane of candidate providers, or null if none qualify. */
+    public function bestPublicSuccessRate(array $providerKeys): ?float
+    {
+        $rates = array_filter(array_map(fn ($key) => $this->publicSuccessRate($key), $providerKeys), fn ($r) => $r !== null);
+
+        return $rates === [] ? null : max($rates);
+    }
+
+    /** Drop a provider's cached public success rate (tests / an admin manual recompute). */
+    public static function flushPublicSuccessRate(string $providerKey): void
+    {
+        Cache::forget("nci:public_success_rate:{$providerKey}");
     }
 
     /** Recompute every provider (nci:recompute, and the health-tick refresh). */
