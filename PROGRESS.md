@@ -9,6 +9,38 @@
 
 ## DONE
 
+### 📶 Prompt 10 §3: eSIM compatibility moved inline (warning, not a block) — 2026-09-13
+Traced every eSIM checkout entry point first, per the blueprint's own step 1:
+- `Catalogue.php`'s plan-detail screen (§3.4 — the actual point of eSIM plan
+  selection) had **no** link to `EsimCompatibility` at all — the only
+  "Check compatibility" buttons lived in the marketing hero (`esim-hero.blade.php`),
+  shown on the front/grid screen, disconnected from the specific plan a user
+  is about to buy.
+- `Checkout.php` already had its own, separate device-compat gate (Section 32:
+  a free-text model field + `DeviceCompat::check()`) — but it was a **hard
+  block**: a known-incompatible result hid the acknowledgment checkbox
+  entirely and the Pay button stayed permanently disabled, with no path
+  forward even for a buyer purchasing for a second device or gifting the eSIM.
+  That directly contradicted the blueprint's explicit §3.3 requirement.
+
+Fixed both:
+- Added an inline "Is your device eSIM-ready? Check compatibility" prompt on
+  the plan-detail screen, dispatching the same `open-compatibility` event the
+  hero uses — one modal, reused, now reachable right where the buyer commits
+  to a plan (advisory only; the authoritative gate stays at Checkout).
+- Checkout's gate is now a warning: an unsupported-device result shows an
+  amber risk message ("if it's for a different device, or you're gifting it,
+  you can still continue") and keeps the acknowledgment checkbox visible and
+  functional — ticking it (an explicit click, never auto-checked for a
+  negative result) still unlocks Pay, same as before for a supported device.
+- Added the missing `alert-triangle` icon to the sprite (lucide-style stroke
+  paths) rather than reuse a mismatched icon, per the "verify it exists, add
+  it properly" rule.
+- 3 new tests (`EsimInlineCompatibilityTest`): the plan-detail prompt renders
+  and dispatches the right event; an unsupported device shows the warning
+  copy (not a block); a purchase actually succeeds end-to-end after the
+  explicit "buy anyway" acknowledgment. Full suite green. Tested locally only.
+
 ### 🛡️ Prompt 10 §1: Refund guarantee surfaced — 2026-09-13
 "Confirmed: `PollSmsOtpJob` already auto-refunds the wallet when an OTP/SMS
 doesn't arrive in time. No customer-facing surface currently stated this."
@@ -3092,11 +3124,11 @@ is ready.
   triggered) — test that reality, don't test for automatic polling that
   isn't there.
 - **Prompt 10 (Trust & Transparency, Sonnet-safe, mostly surfacing existing
-  logic) — §1 (refund guarantee) DONE, see DONE above. Remaining:**
+  logic) — §1 (refund guarantee) and §3 (eSIM compatibility inline) DONE,
+  see DONE above. Remaining:**
   `NciScorer::publicSuccessRate()` read-only projection surfaced on
-  Country/ServicePicker (min-sample threshold, cached); eSIM compatibility
-  check moved inline to the actual purchase flow (warning, never a hard
-  block); mobile-money rails audited per gateway/country then shown as
+  Country/ServicePicker (min-sample threshold, cached); mobile-money rails
+  audited per gateway/country then shown as
   named options at checkout; WhatsApp's actual role determined and reported
   BEFORE scoping two-way support as a possible follow-up; checkout tax/fee
   line (real $0.00 is fine, the line itself is the trust signal); consumer

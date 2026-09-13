@@ -53,9 +53,21 @@
                     </p>
                 @endif
 
+                {{-- Inline compatibility prompt at the point of plan selection (Prompt 10
+                     §3): a lightweight nudge before checkout, reusing the same modal +
+                     device catalogue as the marketing hero's "Check compatibility". This
+                     is advisory only — it never gates this screen; the authoritative,
+                     warning-not-block confirmation still runs at Checkout. --}}
+                <button type="button" @click="$dispatch('open-compatibility')"
+                        class="mt-5 flex w-full items-center gap-2 rounded-2xl border border-slate-200 bg-slate-50/70 px-4 py-3 text-left text-sm text-slate-600 transition hover:border-primary/40 hover:bg-primary/5 dark:border-[var(--brand-card-border-dark)] dark:bg-[var(--brand-card-inner-dark)] dark:text-slate-300">
+                    <x-icon name="signal" class="h-4 w-4 shrink-0 text-primary" />
+                    <span class="min-w-0 flex-1">Is your device eSIM-ready? <span class="font-semibold text-primary">Check compatibility</span></span>
+                    <x-icon name="chevron-right" class="h-4 w-4 shrink-0 text-slate-400" />
+                </button>
+
                 {{-- Sticky-feel price + CTA bar. --}}
                 @php($price = $fmt((float) $plan->final_retail_usd))
-                <div class="mt-6 flex flex-wrap items-center justify-between gap-4 border-t border-slate-200 pt-5 dark:border-[var(--brand-card-border-dark)]">
+                <div class="mt-4 flex flex-wrap items-center justify-between gap-4 border-t border-slate-200 pt-5 dark:border-[var(--brand-card-border-dark)]">
                     <div>
                         <p class="text-xs uppercase tracking-wide text-slate-400">You pay</p>
                         <div class="text-3xl font-extrabold text-slate-900 dark:text-slate-100">{{ $price['usd'] }}</div>
