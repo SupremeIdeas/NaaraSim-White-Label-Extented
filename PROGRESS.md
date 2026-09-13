@@ -9,6 +9,250 @@
 
 ## DONE
 
+### 🔄 Synced from master — Theme integrity, dev docs, Prompt 10 (§1/§3/publicSuccessRate) — 2026-09-13
+Five master commits pulled in via `git merge upstream/main` (the manual
+equivalent of the updater pipeline in this dev environment — none of these
+are `distribution_scope: master_only`, so they belong here too): the
+Master-Only Distribution Lock feature itself (§ below) IS master-only by
+definition, but its code ships to every repo the same way any core fix does
+— only the ADMIN who can flip `--master-only` differs (master's own team),
+never which repo carries the capability. Full detail per item:
+
+### 📊 Prompt 10: publicSuccessRate() surfaced on the Numbers CountryPicker — 2026-09-13
+`NciScorer::publicSuccessRate(string $providerKey): ?float` — a new, read-only
+projection deliberately separate from the internal `nci_score`:
+- `nci_score` folds in the §6 margin tie-break (a tiny internal ranking nudge)
+  and is shaped by the NCI kill switch/confidence weighting — none of that
+  belongs in a number a customer reads as "how often did this work."
+  `publicSuccessRate()` is the plain success/total ratio over the same
+  30-day window, nothing else, read directly from the outcome log.
+- Gated by a minimum sample (20 in-window outcomes) — below it, returns
+  `null` ("not enough data," never a guessed number or a misleading 0%/100%
+  from a handful of tries). Cached 15 minutes per provider (a pure read, so
+  no coupling to the CircuitBreaker's write path).
+- `bestPublicSuccessRate(array $providerKeys)` — the highest qualifying rate
+  among a lane, used so the badge reflects the SAME lane `SmsNumberRouter`
+  would actually try, not an arbitrary provider.
+- Wired into `CountryPickerSources::numbers()`: each country now also
+  reports the best public success rate across its real OTP lane
+  (`SmsNumberRouter::laneFor($slug, TYPE_OTP)`), cached alongside the
+  existing country list; the picker shows a green "NN% success" badge next
+  to the dial code only when a rate qualifies.
+- **ServicePicker was deliberately left alone** — audited first: outcomes
+  are recorded per `provider_key` + `stack` only (no service/operator
+  column), and `ServicePickerSources` has no country context to resolve a
+  lane from, so there is no honest per-service rate to compute. Fabricating
+  one would violate the "don't guess, don't invent a badge" rule the
+  eSIM-facts code already follows elsewhere. Recorded here rather than
+  silently skipped.
+- 8 new tests (`PublicSuccessRateTest`): min-sample gating, trailing-window
+  scoping, caching (survives new outcomes until flushed), lane best-of,
+  and the CountryPicker wiring itself (qualifying + thin-data cases).
+  Confirmed the existing NCI one-way-boundary test
+  (`test_no_router_imports_the_nci_namespace`) still holds — the new NCI
+  usage lives in `CountryPickerSources`, never in `SmsNumberRouter` itself.
+  Full suite green on master. Tested locally only.
+
+### 📶 Prompt 10 §3: eSIM compatibility moved inline (warning, not a block) — 2026-09-13
+Traced every eSIM checkout entry point first, per the blueprint's own step 1:
+- `Catalogue.php`'s plan-detail screen (§3.4 — the actual point of eSIM plan
+  selection) had **no** link to `EsimCompatibility` at all — the only
+  "Check compatibility" buttons lived in the marketing hero (`esim-hero.blade.php`),
+  shown on the front/grid screen, disconnected from the specific plan a user
+  is about to buy.
+- `Checkout.php` already had its own, separate device-compat gate (Section 32:
+  a free-text model field + `DeviceCompat::check()`) — but it was a **hard
+  block**: a known-incompatible result hid the acknowledgment checkbox
+  entirely and the Pay button stayed permanently disabled, with no path
+  forward even for a buyer purchasing for a second device or gifting the eSIM.
+  That directly contradicted the blueprint's explicit §3.3 requirement.
+
+Fixed both:
+- Added an inline "Is your device eSIM-ready? Check compatibility" prompt on
+  the plan-detail screen, dispatching the same `open-compatibility` event the
+  hero uses — one modal, reused, now reachable right where the buyer commits
+  to a plan (advisory only; the authoritative gate stays at Checkout).
+- Checkout's gate is now a warning: an unsupported-device result shows an
+  amber risk message ("if it's for a different device, or you're gifting it,
+  you can still continue") and keeps the acknowledgment checkbox visible and
+  functional — ticking it (an explicit click, never auto-checked for a
+  negative result) still unlocks Pay, same as before for a supported device.
+- Added the missing `alert-triangle` icon to the sprite (lucide-style stroke
+  paths) rather than reuse a mismatched icon, per the "verify it exists, add
+  it properly" rule.
+- 3 new tests (`EsimInlineCompatibilityTest`): the plan-detail prompt renders
+  and dispatches the right event; an unsupported device shows the warning
+  copy (not a block); a purchase actually succeeds end-to-end after the
+  explicit "buy anyway" acknowledgment. Full suite green on master. Tested
+  locally only.
+
+### 🛡️ Prompt 10 §1: Refund guarantee surfaced — 2026-09-13
+"Confirmed: `PollSmsOtpJob` already auto-refunds the wallet when an OTP/SMS
+doesn't arrive in time. No customer-facing surface currently stated this."
+Surfaced truthfully in 4 places, all pulling the SAME real value —
+`PollSmsOtpJob::TIMEOUT_MINUTES` (now public, was private) — never a
+hardcoded guess anywhere:
+- **Naara Verify checkout modal** (`numbers-modal/verify.blade.php`) — the
+  existing vague "Auto-refund if no code arrives" line replaced with the
+  real window + "no ticket required." Also fixed 4 hardcoded-teal/hex
+  instances in the same file while in there (same §1.2 pattern).
+- **PricingPage** — a standing trust line above the data-estimator CTA
+  (this page is eSIM-plan-focused above, but the platform sells numbers too,
+  so the promise belongs here as a real line item), linking the full policy.
+- **FAQ** — the existing "What happens if my code never arrives?" answer
+  upgraded from vague to specific, with a link to the full policy.
+- **Refund & Reliability Policy page** — already existed
+  (`/refund-policy` + generic `/legal/refund`, `LegalContent::doc('refund')`)
+  and was already linked from the footer; its own "Verification numbers"
+  section said "the delivery window" vaguely — now states the real minutes
+  via a new `{otp_timeout_minutes}` placeholder (same substitution mechanism
+  `{brand}` already used).
+- Audited `PollSmsOtpJob` itself before writing any of this (didn't invent
+  a refund condition beyond what the job actually does) — confirmed the
+  auto-refund is unconditional on timeout, `cancel()` is best-effort and
+  never gates the refund, and the refund is idempotent per order.
+- 5 new tests (`RefundGuaranteeTrustTest`) proving all 4 surfaces state the
+  real number (not a copy-pasted guess) and link the policy page. Full
+  suite green on master: 1959 passed, 6318 assertions. Tested locally only.
+
+### 📖 §4 Developer API docs — audit + fixes — 2026-09-13
+Per the blueprint's own instruction: audit BEFORE writing code, then scope the
+fix (content vs visual vs both) from real findings. Audited `DeveloperPortal`/
+`DeveloperDocsController`/`docs/DEVELOPER-API.md` against all three named
+criteria; did the SMALL amount of building the findings actually justified —
+this was NOT a from-scratch rebuild, the content was already good.
+- **Content/examples — verified copy-paste-correct** by reading the real
+  controllers (Catalogue/Quote/Order) field-by-field against every example
+  and response shape in the doc: all matched exactly. ONE real gap found and
+  fixed: the genuine `409 duplicate_in_progress` response (a real code path —
+  `OrderController::duplicateInProgress()`) was completely undocumented, in
+  neither the §6 errors table nor the `POST /orders` response list.
+- **Visual/contrast — solid already** (proper dual dark-mode support, both
+  `data-theme` attribute and `prefers-color-scheme` fallback, good contrast
+  ratios throughout) with one real theme-integrity gap: the inline `<style>`
+  block hardcoded brand teal/gold as raw `rgb(r g b)` literals — the exact
+  §1.2 anti-pattern, just in a form (`rgb()` not `#hex`) `bin/theme-token-
+  audit.php`'s regex can't catch (a noted, known gap in that tool's scope).
+  Fixed: links + the blockquote accent now read `rgb(var(--brand-primary))`/
+  `rgb(var(--brand-accent))`; the article card's dark background/border now
+  use the same `--brand-card-dark`/`--brand-card-border-dark` tokens the
+  rest of the §1.2 remediation already established.
+- **Information architecture — good ordering** (concepts before endpoints,
+  quick-start last), but a 270+ line single page had ZERO in-page navigation
+  beyond one hero "Jump to auth" link. Added a sticky sidebar TOC, built
+  SERVER-SIDE from the doc's own `## ` headings (`DeveloperDocsController::
+  tableOfContents()`) so it can never silently drift from the real section
+  list — add a heading to the .md file and it appears in the nav
+  automatically, no second place to update. Heading anchors (`<h2 id="...">`)
+  are injected positionally into the compiled HTML (GFM has no heading-
+  permalink extension installed) matched against the same parsed list, not
+  by re-parsing rendered text (fragile against inline `` `code` ``/**bold**).
+  TOC hidden on mobile (a long single page is read by scrolling there, not
+  jumping between sections).
+- 3 new regression tests (every TOC link resolves to a real `<h2 id>`, the
+  409 is documented, no literal brand-color rgb() leaks) + updated the
+  existing page test for the renamed cache key (the cached value's shape
+  changed from a string to a `[html, toc]` tuple, so the key changed too —
+  `-v2` — rather than risk a stale-shape cache hit on a live install).
+- Full suite green on master. Tested locally only per the GitHub Actions
+  budget rule.
+
+### 🎨 Theme integrity + footer/header cleanup + Master-Only Distribution Lock — 2026-09-13
+Per the "Theme Integrity, Branding, Dev Docs & Reseller API" blueprint (owner,
+Sept 9), §1–§3 plus the standalone Master-Only Distribution Lock spec. Master
+only — ships to both forks via the ordinary updater pipeline like any other
+core fix (§7 of that blueprint: `tier_requirement: null`).
+
+- **§1.1 Dark-mode reversal (owner-confirmed).** Dark mode used to collapse
+  every non-default theme to one shared "Apple-inspired" `DARK_STANDARD`
+  palette (an earlier owner request). Reversed: `ThemePreset::styleCss()` now
+  emits each theme's OWN authored `primary_dark`/`accent_dark` tokens (already
+  sitting in every seeded preset, previously unused) in the dark-mode override
+  block; `navy`/`action` carry over unchanged (no separate dark variant
+  exists). A theme with no dark tokens of its own (a bare admin-created
+  custom theme) gets no dark override at all — fails open to its own light
+  colors rather than a forced, unrelated palette. `DARK_STANDARD` removed.
+- **§1.3 `bin/theme-token-audit.php`** — a read-only static scanner (matches
+  the house `bin/*.php` dev-tool convention, not the blueprint's suggested
+  Python) flagging literal hex codes and non-semantic Tailwind default-palette
+  utility classes (red/rose/green/emerald/amber/yellow exempted as
+  conventional status colors, confirmed against actual usage) across
+  `resources/views/**/*.blade.php`. Excludes the icon sprite (decorative SVG)
+  and — confirmed by checking every `App\Livewire\Admin\*` component's
+  `#[Layout(...)]` — the whole `livewire/admin/**` tree, which is a
+  categorically separate, non-theme-token surface (own fixed navy/slate
+  design, `ThemePreset::styleCss()` never runs there). `--include-admin` and
+  `--strict` (future CI gate) flags. Customer-facing scope: 270 files, 5029
+  matches — sorted worst-first, this IS the backlog for future remediation
+  passes (see NEXT).
+- **§1.2 Hardcoded-color remediation** — the blueprint's own named offenders,
+  fully fixed and regression-tested: `wallet.blade.php`, `numbers-bento.blade.php`,
+  `partner-earnings.blade.php` (its "audit partners.blade.php too" step-1 ask
+  resolved: `partners.blade.php` is `Admin\Partners`, out of scope;
+  `partner-earnings.blade.php` is the real customer-facing one). Root pattern
+  everywhere: `dark:bg-[#243352]`/`dark:text-teal-300` hardcoding a color that
+  already has a proper token (`var(--brand-card-dark)`, `text-primary`) right
+  next to it. Also fixed the SAME pattern in every globally-embedded chrome
+  component the regression test caught rendering underneath those three pages
+  (`send-message.blade.php`, `withdraw.blade.php`, `app-shell.blade.php`,
+  `global-sidebar.blade.php`, `verify-email-banner.blade.php`,
+  `wizard.blade.php`, `alert-popup.blade.php`, `marketing/home/how.blade.php`)
+  — a themed page is only as fixed as its embedded pieces. New
+  `ThemeTokenRemediationTest` renders all three under a purple test theme and
+  asserts zero literal teal/hex leaks through.
+  **Known, deliberately out of scope this pass:** `.nx-aurora`'s own CSS class
+  (`ui-elements.css`) has a hardcoded teal→navy gradient background — a
+  CSS-file-level fix, bigger than a Blade remediation pass; flagged for later.
+- **§1.4 + §2 Shared footer credit component.** The `&copy; {year} {brand}. A
+  product of Supreme Ideas Agency. All rights reserved.` line was
+  hand-duplicated (styling only, NO real link) across `site-footer.blade.php`
+  and all 12 `theme-sections/footer/*.blade.php` variants. Now one
+  `<x-footer-credit>` component (`link-class`/`year-class` props preserve each
+  persona's exact styling, including fintra-clean's mono-numeral year) feeding
+  from `App\Support\SiteChrome`. "Supreme Ideas Agency" always renders, always
+  links to `https://supremeideas.agency` (new tab) — only the surrounding
+  PHRASING is admin-configurable (Admin → Auth & Footer): "A product of…",
+  "Made with love by…" (no emoji — CLAUDE.md rule; `IconSystemTest` actually
+  enforces this and caught a real ❤️ regression during this batch), or a
+  custom sentence with a required `{agency}` placeholder. Same mechanism
+  everywhere; only the SEEDED DEFAULT differs by repo (§2.3): master defaults
+  to "product of", either white-label fork defaults to "made with love" —
+  reusing Batch 8's `FeatureEntitlements::isMaster()` signal, so this is data,
+  not a new per-repo code branch. Fails open to the standard phrasing on any
+  unrecognized/malformed stored value. 9 new tests (`FooterCreditTest`) +
+  2 new tests across all 12 real theme footers (`ThemeFooterStylesTest`).
+- **§3 Decorative header-icon removal.** Audited all 13
+  `theme-sections/header/*.blade.php` files against real code (not just the
+  blueprint's own scan, which had one stale claim). Removed: aries-contrast's
+  ping-dot, midnight-signal's ping signal-icon, neon-vertex's static zap-icon
+  badge, waitlisty-soft's static smile-icon blob — all purely decorative,
+  redundant with `<x-brand-logo>` right next to them. Deliberately NOT
+  touched: aurora-shift's "equalizer bars" (its own docblock explicitly
+  differentiates it from the ping-dot pattern — a real persona signature, not
+  the bug), noir-reserve's "N" monogram (blueprint's own scan already
+  confirmed this one clean), solar-flare's "LIVE" chip (a separate, labeled,
+  meaningful sibling element, not logo-adjacent decoration).
+- **Master-Only Distribution Lock** (standalone spec, same session) — a
+  structural restriction for the future Naara Pro layer, not just an
+  unchecked toggle. `UpdateManifest`/`DistributedPackage` gain
+  `distribution_scope` ('distributable' default | 'master_only'), set ONCE at
+  build time via `update:package --master-only` — never adjustable later from
+  a toggle. The real gate is server-side: `PackagePublisher::register()`
+  forces `is_published = false` for a master-only manifest regardless of what
+  was requested; `setPublished(true)` throws outright (a loud rejection, not
+  a silent no-op) rather than quietly ignoring the request. Admin UI shows a
+  "Master-only — cannot be distributed" locked badge with no Publish button
+  at all (Withdraw still works); the Livewire action also catches the
+  exception cleanly (defense in depth against a direct wire:click bypassing
+  the UI). Applying on the master itself (`Admin\Updater`) is a completely
+  separate code path, fully unaffected. This fork inherits the SAME
+  enforcement code (so a fork admin can never accidentally publish a
+  master-only package either) — the `--master-only` BUILD flag itself is
+  something only the master's own team would ever set. 10 new tests
+  (`MasterOnlyDistributionLockTest`).
+- Full suite green on master: 1951 passed (6287 assertions). Tested LOCALLY
+  only — see GitHub Actions budget rule above.
+
 ### 🔒 Platform Updater — Batch 8B: Feature-Entitlement Gating (fork side) — 2026-09-13
 The fork half of Batch 8 — the master side (authority + universal gates + API)
 merged from upstream; this batch makes the gates activate on a real deployment.
@@ -2999,48 +3243,88 @@ Rate limits (Section 19.2): `api` limiter 300/min auth · 60/min public (on `rou
 > (loyalty milestones, travel timeline, admin-defined achievements paying
 > NaaraCredits) that used to top this list are now DONE — see DONE above.
 
-### ✅ Updater track — ALL 7 BATCHES COMPLETE (2026-09-08)
-The Updater & White-Label License System is fully built end to end (master =
-publisher/authority; the two forks = Normal- and Extended-license subscribers):
-Batch 1 signed package format · Batch 2 apply engine + auto-rollback · Batch 3
-theme installer · Batch 4 distribution API + registry · Batch 5 subscriber pull
-screen (in both forks) + master report endpoint · Batch 6 License Authority
-(key→token exchange, revoke/suspend, admin onboarding) · Batch 7 real tier
-entitlement ordering — see the DONE entries above for each.
-**Owner follow-ups before this goes live** (deliberately NOT built here, they need
-real config/keys per the money-safety rules): wire the fork's activate flow into a
-real purchase/payment step so a paid tier maps to an issued key; run keygen on the
-production master and distribute the public key with the forks; decide token-rotation
-cadence. Pick these up when doing go-live hardening, not as feature work.
+### ▶ TOP OF NEXT — Theme/Branding/Reseller-API blueprint, remaining sections
+Owner's 5-doc set (2026-09-13): theme integrity §1–§3 + Master-Only
+Distribution Lock are DONE (see above). Opus-vs-Sonnet triage already agreed
+with the owner — remaining, in the blueprint's own sequencing:
+- **§1.2 continued (Sonnet-safe, just large):** `bin/theme-token-audit.php`'s
+  report is the backlog — 270 customer-facing files, 5029 matches, sorted
+  worst-first. Work it file-by-file with real visual context (never a blind
+  regex pass); re-run the script after each file. Also: `.nx-aurora`'s own
+  hardcoded teal→navy CSS gradient (`ui-elements.css`) needs a `--brand-navy`
+  `color-mix()` derivation like `--brand-card-dark` already has.
+  Top offenders after the 3 named files: wizard.blade.php (191),
+  merchant-clients.blade.php (174), merchant-dashboard.blade.php (114),
+  become-merchant.blade.php (97), profile.blade.php (94),
+  merchant-invoices.blade.php (94), install/setup.blade.php (84).
+### ▶ NEXT — §5 Reseller catalogue API + beyond
+§4 (dev docs audit + fixes) is DONE — see DONE above. That was the
+prerequisite for §5 ("settle this before §5 so the new reseller-catalogue
+endpoints document into the good version") — the good version now exists
+(TOC + theme-token-clean), so §5 is unblocked whenever the owner input below
+is ready.
+- **§5 Reseller catalogue API (Opus-recommended — needs owner input, not
+  code-only):** reuses the existing `WhiteLabelInstance` Sanctum-token
+  pattern (same shape as the updater's `updates.check`/`updates.download`
+  scopes) with new scopes (`catalogue.read`, `esim.read`, `numbers.read`) —
+  NOT a second credential system. New `FeatureLocks` catalog key
+  (`reseller_catalogue_api`), owner decides which `entitlement_level` unlocks
+  it. §5.2 needs a real per-provider resale-terms audit BEFORE building —
+  owner: which providers do we have real terms clarity on, which need a
+  direct check? Don't ship an assumption here. §5.3 needs a
+  `WhiteLabelCatalogueClient` + scheduled command on the fork side, mirroring
+  `WhiteLabelUpdateClient`'s pattern.
+- **Live-Boot Integration Test** (separate doc, owner-requested end-to-end
+  proof): three genuinely separate booted instances (own DB, port, queue
+  worker) — master + both forks — proving the real network handoff: license
+  lifecycle, feature-entitlement gating live (including the downgrade
+  re-lock direction, the one most likely to hide a bug), the updater
+  pipeline package-by-package (tamper rejection, a deliberately-failing
+  migration proving the rollback claim literally, concurrency guard),
+  theme packages, and whether master's oversight screens are a trustworthy
+  record of what really happened on both forks. Long and mechanical
+  (Sonnet-fine) but genuinely time-consuming — run as its own dedicated pass,
+  not mixed into other work. Confirmed finding to build against, not around:
+  no scheduled fork-side check-for-updates exists today (manual, admin-
+  triggered) — test that reality, don't test for automatic polling that
+  isn't there.
+- **Prompt 10 (Trust & Transparency, Sonnet-safe, mostly surfacing existing
+  logic) — §1 (refund guarantee), §3 (eSIM compatibility inline), and the
+  `publicSuccessRate()` CountryPicker projection are DONE, see DONE above.
+  Remaining:**
+  mobile-money rails audited per gateway/country then shown as
+  named options at checkout; WhatsApp's actual role determined and reported
+  BEFORE scoping two-way support as a possible follow-up; checkout tax/fee
+  line (real $0.00 is fine, the line itself is the trust signal); consumer
+  auto-renewal opt-out toggle + advance-notice; any "unlimited" eSIM plan
+  structurally required to disclose its fair-usage threshold.
+- **Prompt 11 (Net-New Features) — mixed:**
+  - Sonnet-safe, no money-path: spam-report + auto-block (`Dialer`/
+    `Contacts`, configurable threshold/window), voicemail + transcription
+    (reuse whatever STT already exists under `app/Services/AI`, surface in
+    the existing Messages/NotificationCenter inbox — no separate UI).
+  - Sonnet-safe but large, phase it: localization — Phase A infra + Phase B
+    string extraction (Checkout/Verify-Rent/eSIM/Account first) can go now;
+    Phase C/D actual French/Portuguese/Arabic translation needs a real
+    reviewer for tone/terminology, and Arabic needs RTL verification, not
+    assumption. Ship Phase A+B as its own unit before any language.
+  - **Opus-recommended (owner flagged as needing extra scrutiny):** shared
+    wallet/family-plan — touches `WalletService`, a CLAUDE.md money-path
+    god-node; scope the smallest version (a shared eSIM data allowance) and
+    inspect callers/side-effects before touching wallet code at all.
+  - **Audit-first, no code yet:** number porting — Twilio/Telnyx port-in/
+    port-out capability per country NaaraSim actually sells in, typical
+    processing time, LOA/compliance documentation required. Report back
+    before writing anything; port-in (lower risk, Naara's own funnel) before
+    port-out (no artificial retention friction beyond genuine provider
+    requirements). Pairs with a permanent-number blacklist pre-check on
+    recycled inventory if the provider exposes that capability.
 
-### ▶ TOP OF NEXT (Updater track) — Batch 8: Feature-Entitlement Gating (license-tier feature locks)
-The money/security continuation of the license system (owner-confirmed 2026-09-08,
-build on Opus). Batches 6–7 made the license real (key→token exchange) and the
-tier ORDERING real (normal < extended). Batch 8 makes tiers actually GATE
-FEATURES, not just package downloads.
-- **What a tier locks** (admin-configurable, seeded sensibly): gift-card features,
-  full "Naara Connect" voice eSIM plans (`EsimPlan.has_voice` — data-only + numbers
-  stay open), **preloader customization**, and **Brand Hunt / Brand Directory**
-  (owner explicitly added the last two, 2026-09-08).
-- **Model** (from the earlier design discussion): three states —
-  `basic` (Normal, pre-payment: gift cards + full-voice eSIM + preloader + brand
-  hunt locked; still sells data-only eSIM + numbers), `standard` (Normal,
-  post-payment: gift cards still locked, rest open), `extended` (nothing locked).
-  Admin sets which feature keys each tier locks (a `Setting`-backed list, extensible
-  without a migration).
-- **Split** (same publisher/subscriber shape as Batches 5–7): master is the
-  AUTHORITY (defines the per-tier lock lists, admin screen, exposes the resolved
-  lock list in the activate/check-in response); the forks ENFORCE (a small
-  `FeatureEntitlements::locked('gift_cards')` gate wired into the gift-cards page,
-  the catalogue's `has_voice` filter, checkout, the preloader studio, and brand
-  hunt). Fail OPEN on a stale/unreachable authority (last-known-good), never
-  hard-lock the whole app over a network blip — same resilience principle as Batch 5.
-- **Progression is off-platform**, mirroring Merchant Invoices: owner gets paid,
-  then flips basic→standard (or issues Extended) from the admin screen. No new
-  payment gateway, no new attack surface.
-- Money/security-path → Opus.
-
-### ▶ AFTER BATCH 8 — Brand Directory / Brand Hunt premium redesign (owner-confirmed queue position, 2026-09-08)
+### ▶ AFTER THE ABOVE — Brand Directory / Brand Hunt premium redesign (still queued)
+> Note: the Updater track's own "ALL 7 BATCHES COMPLETE" / "Batch 8" planning
+> notes that used to sit here were pruned 2026-09-13 — Batch 8 (master AND
+> fork side) shipped and is fully documented in DONE above; keeping the
+> now-stale "next" text here was actively misleading.
 NOT a build — the whole Build-9 self-service paid-listing backend already EXISTS
 (`brand_partners`, `brand_subscriptions`, `brand_subscription_plans`,
 `brand_partner_videos`, `brand_video_watch_claims`, `brand_priority_log`;

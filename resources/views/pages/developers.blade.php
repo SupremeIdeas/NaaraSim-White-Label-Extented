@@ -21,11 +21,31 @@
         </div>
     </section>
 
-    {{-- Rendered reference (single source of truth: docs/DEVELOPER-API.md) --}}
-    <section class="mx-auto max-w-4xl px-4 pb-24">
-        <article class="api-docs rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-9 dark:border-[#22314e] dark:bg-[#101d33]">
-            {!! $html !!}
-        </article>
+    {{-- Rendered reference (single source of truth: docs/DEVELOPER-API.md).
+         A sticky TOC (built server-side from the doc's own `## ` headings —
+         see DeveloperDocsController — so it can never drift out of sync)
+         sits alongside the article on desktop; hidden on mobile, where a
+         270+ line single page is read by scrolling, not jumping around. --}}
+    <section class="mx-auto max-w-6xl px-4 pb-24">
+        <div class="lg:grid lg:grid-cols-[220px_1fr] lg:items-start lg:gap-8">
+            <nav aria-label="Table of contents" class="sticky top-24 hidden lg:block">
+                <p class="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">On this page</p>
+                <ul class="space-y-1 border-l border-slate-200 text-sm dark:border-[#22314e]">
+                    @foreach ($toc as $item)
+                        <li>
+                            <a href="#{{ $item['slug'] }}"
+                               class="-ml-px block border-l-2 border-transparent py-1 pl-3 text-slate-500 transition hover:border-primary hover:text-primary dark:text-slate-400 dark:hover:text-primary">
+                                {{ $item['title'] }}
+                            </a>
+                        </li>
+                    @endforeach
+                </ul>
+            </nav>
+
+            <article class="api-docs min-w-0 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-9 dark:border-[var(--brand-card-border-dark)] dark:bg-[var(--brand-card-dark)]">
+                {!! $html !!}
+            </article>
+        </div>
     </section>
 
     @push('head')
@@ -52,9 +72,14 @@
             .api-docs ul { list-style: disc; padding-left: 1.4rem; }
             .api-docs ol { list-style: decimal; padding-left: 1.4rem; }
             .api-docs li { margin: .25rem 0; }
-            .api-docs a { color: rgb(10 110 110); font-weight: 600; text-decoration: none; }
+            {{-- §4 audit (2026-09-13): was a literal teal/lighter-teal pair — the
+                 exact §1.2 anti-pattern, just in raw rgb() form instead of a hex
+                 or Tailwind class, so the theme-token scanner never caught it.
+                 One theme-aware color now, both modes — matches how other
+                 fixed surfaces (e.g. wallet.blade.php) drop a separate dark
+                 variant once the base color is a real token. --}}
+            .api-docs a { color: rgb(var(--brand-primary)); font-weight: 600; text-decoration: none; }
             .api-docs a:hover { text-decoration: underline; }
-            :root[data-theme="dark"] .api-docs a { color: rgb(45 212 191); }
 
             .api-docs code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .85em;
                 background: rgb(241 245 249); padding: .12em .4em; border-radius: .35rem; }
@@ -75,7 +100,7 @@
             :root[data-theme="dark"] .api-docs :where(th,td) { border-color: rgb(34 49 78); }
             :root[data-theme="dark"] .api-docs th { background: rgb(24 39 66); }
 
-            .api-docs blockquote { border-left: 3px solid rgb(212 160 23); background: rgb(212 160 23 / .08);
+            .api-docs blockquote { border-left: 3px solid rgb(var(--brand-accent)); background: rgb(var(--brand-accent) / .08);
                 padding: .6rem .9rem; margin: 1rem 0; border-radius: 0 .5rem .5rem 0; font-size: .9rem; }
             .api-docs hr { border: 0; border-top: 1px solid rgb(226 232 240); margin: 2rem 0; }
             :root[data-theme="dark"] .api-docs hr { border-color: rgb(34 49 78); }

@@ -12,7 +12,7 @@
                 Confirm your email to secure your account and receive receipts.
                 <form method="POST" action="{{ route('verification.send') }}" class="inline">
                     @csrf
-                    <button type="submit" class="font-semibold text-primary underline hover:text-primary-dark dark:text-teal-300">Resend the link</button>
+                    <button type="submit" class="font-semibold text-primary underline hover:text-primary-dark">Resend the link</button>
                 </form>
             </p>
             <button type="button" @click="show = false; try { sessionStorage.setItem('nx-verify-dismissed', '1'); } catch (e) {}"

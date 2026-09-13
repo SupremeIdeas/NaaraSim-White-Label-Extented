@@ -13,9 +13,9 @@
         <div class="nx-aurora__glow nx-aurora__glow--1"></div>
         <div class="nx-aurora__glow nx-aurora__glow--2"></div>
         <div class="relative">
-            <p class="text-xs font-semibold uppercase tracking-widest text-teal-100">Available to be paid out</p>
+            <p class="text-xs font-semibold uppercase tracking-widest text-white/80">Available to be paid out</p>
             <p class="mt-2 font-display text-4xl font-bold tracking-tight">${{ number_format($balance, 2) }}</p>
-            <div class="mt-4 flex flex-wrap gap-x-8 gap-y-2 text-sm text-teal-100/90">
+            <div class="mt-4 flex flex-wrap gap-x-8 gap-y-2 text-sm text-white/90">
                 <span>Lifetime earned <span class="font-semibold text-white">${{ number_format($lifetime, 2) }}</span></span>
                 @if ($nextDate)
                     <span>Next payout <span class="font-semibold text-white">{{ $nextDate->format('M j, Y') }}</span></span>

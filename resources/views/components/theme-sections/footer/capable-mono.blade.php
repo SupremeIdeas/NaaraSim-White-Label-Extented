@@ -84,7 +84,7 @@
 
     <div class="relative">
         <div class="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-4 py-5 font-mono text-[11px] text-white/30 sm:flex-row">
-            <span>&copy; {{ date('Y') }} {{ $brand }}. A product of <span class="text-white/50">Supreme Ideas Agency</span>. All rights reserved.</span>
+            <x-footer-credit link-class="text-white/50" />
             <span class="flex flex-wrap items-center justify-center gap-4">
                 @foreach ($legal as $link)
                     <a href="{{ $link['url'] }}" @if ($ext($link['url'])) target="_blank" rel="noopener" @endif

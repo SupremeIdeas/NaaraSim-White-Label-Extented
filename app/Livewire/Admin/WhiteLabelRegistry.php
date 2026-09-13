@@ -273,7 +273,19 @@ class WhiteLabelRegistry extends Component
             return;
         }
 
-        $publisher->setPublished($package, ! $package->is_published, Auth::id());
+        // Defense in depth: the Blade view never renders a clickable toggle
+        // for a master-only package (a locked badge shows instead) — this
+        // catch is only for a direct wire:click call that bypasses the UI.
+        // setPublished() is the real, server-side gate; this just turns its
+        // loud rejection into a clean toast instead of a Livewire error.
+        try {
+            $publisher->setPublished($package, ! $package->is_published, Auth::id());
+        } catch (\RuntimeException $e) {
+            $this->dispatch('nx-toast', type: 'error', message: $e->getMessage());
+
+            return;
+        }
+
         $this->dispatch('nx-toast', type: 'success', message: 'Package '.($package->fresh()->is_published ? 'published' : 'unpublished').'.');
     }
 

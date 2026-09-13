@@ -86,7 +86,7 @@
          separated by middot characters rather than loose spacing. --}}
     <div class="border-t border-slate-200 dark:border-white/10">
         <div class="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-5 py-6 text-xs text-slate-400 dark:text-slate-500 sm:flex-row sm:px-6">
-            <span>&copy; {{ date('Y') }} {{ $brand }}. A product of <span class="text-slate-600 dark:text-slate-300">Supreme Ideas Agency</span>. All rights reserved.</span>
+            <x-footer-credit link-class="text-slate-600 dark:text-slate-300" />
             <span class="flex flex-wrap items-center justify-center gap-x-2.5 gap-y-1">
                 @foreach ($legal as $i => $link)
                     @if ($i > 0)<span aria-hidden="true">&middot;</span>@endif

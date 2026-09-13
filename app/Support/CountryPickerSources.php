@@ -3,6 +3,9 @@
 namespace App\Support;
 
 use App\Models\EsimPlan;
+use App\Services\NCI\NciScorer;
+use App\Services\SMS\NumberRequest;
+use App\Services\SMS\SmsNumberRouter;
 use Illuminate\Support\Facades\Cache;
 
 /**
@@ -35,18 +38,35 @@ class CountryPickerSources
      * (the buy flow uses 5sim-style slugs), each with its dial code — the picker
      * shows flag + name + dial code in this mode.
      *
-     * @return array<int, array{code: string, name: string, dial: ?string}>
+     * `success` (Prompt 10) is the best public success rate (0-1, or null)
+     * among that country's OTP lane — the SAME lane SmsNumberRouter would
+     * actually try, so the badge reflects real routing, not a guess. Null
+     * means "not enough data yet," never "0%" — the view must treat it as
+     * hidden, not a bad score.
+     *
+     * @return array<int, array{code: string, name: string, dial: ?string, success: ?float}>
      */
     private static function numbers(): array
     {
-        $rows = [];
-        foreach (\App\Support\NumberCatalogue::countries() as $slug => $label) {
-            $rows[] = ['code' => $slug, 'name' => $label, 'dial' => \App\Support\DialCodes::for($slug)];
-        }
+        return Cache::remember('country_picker:numbers', now()->addMinutes(15), function () {
+            $router = app(SmsNumberRouter::class);
+            $scorer = app(NciScorer::class);
 
-        usort($rows, fn ($a, $b) => strcmp($a['name'], $b['name']));
+            $rows = [];
+            foreach (\App\Support\NumberCatalogue::countries() as $slug => $label) {
+                $lane = $router->laneFor($slug, NumberRequest::TYPE_OTP);
+                $rows[] = [
+                    'code' => $slug,
+                    'name' => $label,
+                    'dial' => \App\Support\DialCodes::for($slug),
+                    'success' => $scorer->bestPublicSuccessRate($lane),
+                ];
+            }
 
-        return $rows;
+            usort($rows, fn ($a, $b) => strcmp($a['name'], $b['name']));
+
+            return $rows;
+        });
     }
 
     /**
@@ -94,5 +114,6 @@ class CountryPickerSources
     {
         Cache::forget('country_picker:esim:data');
         Cache::forget('country_picker:esim:full');
+        Cache::forget('country_picker:numbers');
     }
 }

@@ -87,6 +87,7 @@ Auth/validation errors follow Laravel's shape (`{"message": "..."}`, and
 | `402` | Insufficient API balance |
 | `403` | Key lacks the required scope, or client not permitted |
 | `404` | API disabled, or resource not found |
+| `409` | `duplicate_in_progress` — an order with this `reference` is already being processed by another concurrent request; retry the SAME `reference` shortly, it will resolve to the order once persisted |
 | `429` | Rate limit exceeded |
 | `500` | Order could not be finalised (your balance is auto-refunded) |
 | `502` | No provider could fulfil right now (your balance is auto-refunded) |
@@ -221,8 +222,11 @@ once received, `status` becomes `completed` and `result.code` holds the code.
 | `reference` | string | optional idempotency key (≤ 64 chars) |
 
 Responses: `402` insufficient balance · `422` invalid plan / number unavailable ·
-`502` unfulfilled (refunded) · `500` finalisation failed (refunded). A repeated
-`reference` returns the original order with `200`.
+`502` unfulfilled (refunded) · `500` finalisation failed (refunded) · `409
+{ "error": "duplicate_in_progress" }` a concurrent request with this
+`reference` is still being processed — retry the same `reference` shortly. A
+repeated `reference` returns the original order with `200` once it has
+finished persisting.
 
 ### GET `/orders/{reference}` — order status
 Scope: `status`

@@ -40,6 +40,11 @@ class SiteChromePage extends Component
 
     public array $legal = [];
 
+    // Footer credit phrasing (theme-integrity blueprint §2).
+    public string $credit_phrasing = SiteChrome::CREDIT_PRODUCT_OF;
+
+    public string $credit_custom_text = '';
+
     public ?string $saved = null;
 
     public function mount(): void
@@ -51,6 +56,8 @@ class SiteChromePage extends Component
         $this->subtext = $auth['subtext'];
         $this->columns = SiteChrome::footerColumns();
         $this->legal = SiteChrome::footerLegal();
+        $this->credit_phrasing = SiteChrome::footerCreditPhrasing();
+        $this->credit_custom_text = SiteChrome::footerCreditCustomText();
     }
 
     // ---- footer editing -----------------------------------------------------
@@ -108,6 +115,16 @@ class SiteChromePage extends Component
             'legal' => 'array|max:6',
             'legal.*.label' => 'required|string|max:30',
             'legal.*.url' => ['required', 'string', 'max:300', 'regex:#^(/|https?://)#i'],
+            'credit_phrasing' => ['required', 'string', 'in:'.implode(',', SiteChrome::CREDIT_PHRASINGS)],
+            'credit_custom_text' => [
+                'nullable', 'string', 'max:160',
+                'required_if:credit_phrasing,'.SiteChrome::CREDIT_CUSTOM,
+                function ($attribute, $value, $fail) {
+                    if ($this->credit_phrasing === SiteChrome::CREDIT_CUSTOM && ! str_contains((string) $value, '{agency}')) {
+                        $fail('Custom text must contain the {agency} placeholder — that\'s where the Supreme Ideas Agency link is inserted.');
+                    }
+                },
+            ],
         ], [
             'columns.*.links.*.url.regex' => 'Each link must be an in-app path (/…) or a full https:// URL.',
             'legal.*.url.regex' => 'Each link must be an in-app path (/…) or a full https:// URL.',
@@ -125,6 +142,8 @@ class SiteChromePage extends Component
         Setting::setValue('site.auth.subtext', trim($this->subtext), 'site');
         Setting::setValue('site.footer.columns', $this->columns, 'site');
         Setting::setValue('site.footer.legal', $this->legal, 'site');
+        Setting::setValue('site.footer.credit_phrasing', $this->credit_phrasing, 'site');
+        Setting::setValue('site.footer.credit_custom_text', trim($this->credit_custom_text), 'site');
 
         SiteChrome::flush();
         Auditor::log('site.chrome.updated', Setting::class, null, ['media_type' => $this->media_type]);
