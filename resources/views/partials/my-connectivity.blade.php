@@ -228,11 +228,17 @@
                             {{-- Port-out / right-to-leave (Prompt 11): a customer can take a
                                  US/Canada Naara Line to another carrier and we never obstruct
                                  it. Only +1 numbers are portable via our providers (audit
-                                 finding), so the affordance only appears for those — we never
-                                 offer a port we can't honestly facilitate. --}}
-                            @if ($group['model']['key'] === 'naara_line' && in_array($number->status, ['active', 'past_due'], true) && $number->isUsCanada())
+                                 finding) — a +1 line gets the action; any other country gets an
+                                 honest "not yet" note rather than silence, so a customer is never
+                                 left wondering. --}}
+                            @if ($group['model']['key'] === 'naara_line' && in_array($number->status, ['active', 'past_due'], true))
                                 <div class="mt-2 border-t border-slate-100 pt-2 text-xs dark:border-[#243352]">
-                                    @if ($number->port_out_requested_at)
+                                    @if (! $number->isUsCanada())
+                                        <p class="flex items-center gap-1.5 text-slate-400 dark:text-slate-500">
+                                            <x-icon name="info" class="h-3.5 w-3.5 shrink-0" />
+                                            Sorry — numbers in this country can’t be moved to another carrier yet.
+                                        </p>
+                                    @elseif ($number->port_out_requested_at)
                                         <p class="flex items-center gap-1.5 text-slate-500 dark:text-slate-400">
                                             <x-icon name="phone-forwarded" class="h-3.5 w-3.5 text-primary" />
                                             Port-out requested — check your email for what your new carrier needs.
