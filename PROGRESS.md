@@ -9,6 +9,42 @@
 
 ## DONE
 
+### 💳 Prompt 10: mobile-money rails audited per gateway/country, named at checkout — 2026-09-13
+Audited what NaaraSim's own top-up gateways actually claim vs. what they
+really support — via each gateway's OWN developer/support docs (Paystack's
+charge API + "Pay with Mobile Money"/"Pay with M-PESA" support articles;
+Flutterwave's developer docs for Ghana/Uganda/Zambia mobile money + its help
+centre payment-channels page), not guessed:
+- **Paystack's `mobile_money` channel** is scoped to Ghana (mtn/atl/vod →
+  MTN Mobile Money, AirtelTigo Money, Vodafone Cash), Kenya (mpesa → M-Pesa
+  via STK push), and Côte d'Ivoire (orange/wave, out of this platform's
+  current currency scope) — Nigeria and South Africa have NO mobile-money
+  channel on Paystack.
+- **Flutterwave's mobile money** is the same shape within this platform's
+  scope: Ghana (MTN/Vodafone/AirtelTigo), Kenya (M-Pesa) — Nigeria and South
+  Africa again have none, despite the wallet's old Flutterwave hint
+  ("Cards, mobile money & banks") implying it applied everywhere.
+- New `App\Support\MobileMoneyRails` — a small, currency-scoped table
+  (`gateway => currency => named rails`) restricted to currencies this
+  platform actually models (`CurrencyService::SUPPORTED` / the existing
+  `GatewayCurrencyMatrix` NG/GH/KE/ZA countries) — Uganda/Rwanda/Tanzania/
+  Zambia rails exist on both gateways too, but adding them without first
+  adding UGX/RWF/TZS/ZMW currency support would advertise something the
+  platform can't display or settle, so deliberately left out.
+- `Wallet::payGateways()` now rebuilds each gateway's hint FOR THE SELECTED
+  CURRENCY: Ghana shows "MTN Mobile Money, AirtelTigo Money & Vodafone Cash,
+  cards & bank" (Paystack) / "MTN Mobile Money, Vodafone Cash & AirtelTigo
+  Money, cards & bank" (Flutterwave); Kenya shows "M-Pesa, cards & bank" for
+  both; Nigeria/South Africa keep the honest base hint with NO mobile-money
+  claim. Flutterwave's overclaiming base hint fixed to "Cards & bank
+  transfers" (was "Cards, mobile money & banks" — true only for GH/KE, not
+  every currency it accepts). No blade change needed — the hint text itself
+  now carries the rail names through the existing render path.
+- 4 new tests (`MobileMoneyRailsTest`): the rail table only covers pairings
+  that really have one; Ghana/Kenya top-ups name the real rails for both
+  gateways; Nigeria/South-Africa top-ups never claim mobile money or M-Pesa.
+  Full suite green. Tested locally only.
+
 ### 📊 Prompt 10: publicSuccessRate() surfaced on the Numbers CountryPicker — 2026-09-13
 `NciScorer::publicSuccessRate(string $providerKey): ?float` — a new, read-only
 projection deliberately separate from the internal `nci_score`:
@@ -3159,11 +3195,10 @@ is ready.
   triggered) — test that reality, don't test for automatic polling that
   isn't there.
 - **Prompt 10 (Trust & Transparency, Sonnet-safe, mostly surfacing existing
-  logic) — §1 (refund guarantee), §3 (eSIM compatibility inline), and the
-  `publicSuccessRate()` CountryPicker projection are DONE, see DONE above.
-  Remaining:**
-  mobile-money rails audited per gateway/country then shown as
-  named options at checkout; WhatsApp's actual role determined and reported
+  logic) — §1 (refund guarantee), §3 (eSIM compatibility inline), the
+  `publicSuccessRate()` CountryPicker projection, and the mobile-money rail
+  audit are DONE, see DONE above. Remaining:**
+  WhatsApp's actual role determined and reported
   BEFORE scoping two-way support as a possible follow-up; checkout tax/fee
   line (real $0.00 is fine, the line itself is the trust signal); consumer
   auto-renewal opt-out toggle + advance-notice; any "unlimited" eSIM plan
