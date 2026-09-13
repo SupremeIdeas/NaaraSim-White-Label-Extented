@@ -296,6 +296,43 @@ class TwilioService implements NumberProviderInterface, VoiceProviderInterface
         }
     }
 
+    /**
+     * Port-in eligibility PROBE (Prompt 11). Asks Twilio's Portability API
+     * whether a number can actually be brought in — a real capability check,
+     * not a guess. Degrades to "not proven" (portable=false) whenever we can't
+     * confirm it (no keys, API error): honesty-first, we never promise a port
+     * we haven't verified. Endpoint + fields per twilio.com/docs
+     * (numbers.twilio.com/v1/Porting/Portability/PhoneNumber/{number}).
+     *
+     * @return array{portable: bool, pin_required: bool, reason: ?string}
+     */
+    public function portabilityProbe(string $number): array
+    {
+        $unproven = ['portable' => false, 'pin_required' => true, 'reason' => 'unverified'];
+        if (! $this->configured()) {
+            return $unproven;
+        }
+        try {
+            $res = Http::withBasicAuth(
+                (string) config('services.twilio.account_sid'),
+                (string) config('services.twilio.auth_token'),
+            )->connectTimeout(3)->timeout(20)
+                ->get('https://numbers.twilio.com/v1/Porting/Portability/PhoneNumber/'.rawurlencode($number));
+
+            if ($res->failed()) {
+                return $unproven;
+            }
+
+            return [
+                'portable' => (bool) $res->json('portable', false),
+                'pin_required' => (bool) $res->json('pin_and_account_number_required', true),
+                'reason' => $res->json('not_portable_reason'),
+            ];
+        } catch (\Throwable) {
+            return $unproven;
+        }
+    }
+
     /** Live monthly wholesale (USD) via the Twilio Pricing API, config fallback. */
     public function monthlyCost(string $country): float
     {

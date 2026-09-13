@@ -9,6 +9,35 @@
 
 ## DONE
 
+### 🔎 Prompt 11 Batch D: portability eligibility probe + clearer UX — 2026-09-13
+Owner request: make the porting features clearly tell a new user what they're
+doing, check whether they're eligible with a real PROVIDER PROBE, show an
+honest "sorry" when it can't be proven, and let users whose providers DO
+support it enjoy the full feature. Built exactly that.
+- **Real probe:** `TwilioService::portabilityProbe()` calls Twilio's
+  Portability API (`numbers.twilio.com/v1/Porting/Portability/PhoneNumber/{n}`,
+  verified against Twilio docs) → `{portable, pin_required, reason}`. Degrades
+  to "not proven" (portable=false) whenever it can't confirm (no keys, API
+  error): honesty-first, we never promise a port we haven't verified.
+- **`App\Services\SMS\PortabilityChecker`** — two honest gates, cheapest first:
+  (1) US/Canada (+1) only, the audit boundary; (2) the carrier probe. Returns
+  `{eligible, pin_required, reason}` with a friendly, situation-specific sorry
+  (couldn't-verify-retryable vs. carrier-won't-release).
+- **`PortIn` two-step flow:** the page now explains what port-in is, the 5–15
+  business-day carrier timeline, and that we check with the carrier first.
+  Step 1 is a "Check eligibility" probe on the number; only a confirmed
+  portable number reveals the details form, and `submit()` RE-probes
+  server-side (never trusts the client `eligible` flag) so an ineligible
+  number can't create a request. PIN/account fields become optional when the
+  probe says they aren't required.
+- **Port-out clarity:** a non-+1 Naara Line now shows an honest "Sorry —
+  numbers in this country can't be moved to another carrier yet" note instead
+  of silently hiding the option, so a customer is never left wondering.
+- 9 new tests (`PortabilityCheckerTest` ×4 incl. the degraded/unverifiable
+  path never falsely promising; `PortInTest` +5 for the eligibility flow and
+  server-side submit refusal). Existing submit tests updated to bind a
+  portability-probe double. Full suite green locally. Tested locally only.
+
 ### 📥 Prompt 11 Batch C: US/Canada port-in intake — 2026-09-13
 Final porting batch. Honest intake + status tracking for bringing an existing
 US/Canada number to Naara — never instant provisioning (the audit: a multi-day,
