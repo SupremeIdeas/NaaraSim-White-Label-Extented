@@ -103,6 +103,12 @@
     @endif
 
     <div class="sticky bottom-0 -mx-5 mt-5 border-t border-slate-100 bg-white px-5 pt-4 dark:border-white/10 dark:bg-[#0D1B2A]">
+        {{-- Taxes & fees (Prompt 10): no separate tax or fee is charged on top
+             of the price shown — the line itself is the trust signal. --}}
+        <div class="mb-2 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
+            <span>Taxes &amp; fees</span>
+            <span class="font-medium text-slate-700 dark:text-slate-300">$0.00</span>
+        </div>
         <div class="mb-3 flex items-center justify-between">
             <span class="text-sm text-slate-500 dark:text-slate-400">You pay</span>
             <span class="text-lg font-bold text-slate-900 dark:text-white">
