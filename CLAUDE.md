@@ -16,6 +16,27 @@
 
 ---
 
+## GITHUB ACTIONS BUDGET (non-negotiable until usage resets — 2026-10-01)
+
+The SupremeIdeas GitHub account hit 90% of its 2,000 included Actions
+minutes/month (owner alert, 2026-09-13). Until the allowance resets on
+2026-10-01, conserve Actions minutes hard:
+
+- **CI is manual-only.** `tests.yml` and `deploy.yml` in `.github/workflows/`
+  are set to `workflow_dispatch` — the daily test `schedule` cron and a full
+  PHP-matrix re-run on every push to an open PR were the drain. Do NOT
+  re-enable `push:` / `pull_request:` / `schedule:` triggers before the reset.
+- **Test locally, never on CI.** Run `vendor/bin/phpunit` (and `npm run build`
+  for view changes) in the dev environment — that is the acceptance gate while
+  we build. A manual CI pass (Actions tab / `gh workflow run Tests`) is only
+  for a deliberate milestone check the owner asks for.
+- **Push with `[skip ci]`** in the commit subject as a belt-and-suspenders
+  guard. Never kick CI with empty commits, re-runs, or close/reopen.
+- Applies to all three repos (master + both white-labels). Restore normal
+  push/PR CI triggers after 2026-10-01 only if the owner asks.
+
+---
+
 ## What we are building
 
 **NaaraSim** — a Pan-African travel-connectivity SaaS selling:

@@ -3,9 +3,12 @@ name: Deploy
 # Build, test, then deploy on push to the default branch (blueprint Section
 # 22.3). The SSH deploy step only runs when the required secrets are present,
 # so forks and key-less setups still get a green build.
+# GitHub Actions budget rule (2026-09-13, owner request): auto-deploy on every
+# push to main disabled to conserve Actions minutes (account hit 90% of the
+# monthly allowance). Trigger a deploy manually from the Actions tab when you
+# actually want one. Re-enable `push: branches: [main]` after usage resets on
+# 2026-10-01.
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
 
 permissions:
