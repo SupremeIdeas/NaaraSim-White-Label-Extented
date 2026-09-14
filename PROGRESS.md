@@ -9,6 +9,64 @@
 
 ## DONE
 
+### 📞 Prompt 12 §1 — Plivo finished + wired into the failover lane — 2026-09-14
+Owner's "dedicated pass" instruction — not interleaved with other work.
+Confirmed finding from the Sept-14 audit: `PlivoService` was fully coded,
+container-bound (`number.plivo`), and had admin key fields, but was wired
+into ZERO of the four lists that make a provider actually reachable — dead
+code, not a gap to build from scratch. Fixed as Batch A of this pass (the
+spec's own framing: "cheapest item in this prompt").
+
+- **The real bug, fixed with verified data, not a guess:** `PlivoService::
+  buyNumber()` hardcoded `'capabilities' => ['sms' => true, 'voice' => true]`
+  on every number regardless of country — Plivo's own coverage has no
+  African inbound voice. Verified via Plivo's actual API docs (fetched live):
+  the buy response itself carries no capability data (only api_id/message/
+  numbers[]/status); the real `voice_enabled`/`sms_enabled` flags live on the
+  AccountPhoneNumber object, so the fix makes a follow-up `GET /Number/
+  {number}/` right after buying and reads those two fields directly —
+  live per-number truth from Plivo itself, not a maintained country map that
+  could go stale. A failed/ambiguous lookup defaults to `voice: false` —
+  never claim a capability we can't confirm.
+- **Wired into all four lists** (the audit's own confirmed gap):
+  `PermanentNumberRouter::$lane` (last — weakest capability),
+  `ProviderModels::MODELS['naara_line']['lane']` + `PROVIDER_KEY_FIELD`,
+  `ProviderHealth::PROVIDERS`, `SmsInboundWebhookController::PROVIDERS`.
+  Added a short cross-reference comment to the top of all four files (the
+  spec's §6) so this exact drift is harder to repeat by accident. Also added
+  `PLIVO_WEBHOOK_TOKEN` (`.env.example` + `config/services.php`), matching
+  Getatext's existing inbound-webhook-token pattern.
+- **UI honesty fix (GetNumber/numbers-modal):** the post-purchase success
+  state used to unconditionally say "set up call forwarding or the dialer" —
+  now reads the just-provisioned line's REAL `capabilities.voice` and shows
+  an honest "SMS only" notice when it's false, instead of implying calling
+  works on a number that can't.
+- **Deliberately NOT done in this batch (VoiceProviderInterface):** confirmed
+  by grep that this interface is Twilio-only in the actual codebase today —
+  not even Telnyx (the existing permanent/voice BACKUP per CLAUDE.md)
+  implements it; every consumer (`VoiceDialerService`, the Twilio webhook
+  controllers) is hardcoded to `voice.twilio`. Building a genuine Vonage/
+  Sinch-shaped voice interface (their own NCCO/Voice-API call flows, not
+  Twilio's TwiML/JWT shape) is real, separate work with no current caller —
+  correctly out of scope for §1 (Plivo was never a voice-interface candidate
+  per the spec) and deferred with a documented reason for §2/§3 below.
+- **Two real gaps caught by the FULL suite, not the targeted tests:**
+  `EnvExampleSyncTest` (new `PLIVO_WEBHOOK_TOKEN` needed a slot in
+  `.env.example` — fixed) and `ProviderRegistryTest`'s hardcoded provider
+  count (`13`, now `count(ProviderHealth::PROVIDERS)` — a literal like that
+  is guaranteed to need updating every time a provider is added; fixed to
+  stop being fragile instead of just bumping the number).
+- New tests: `PlivoServiceTest` (3 — real voice=false/true from Plivo's own
+  data, safe default on a failed lookup), `PermanentNumberFailoverLaneTest`
+  (8 — all four lists actually wired, ordering, and an end-to-end search that
+  reaches Plivo when it's the only configured provider). Full suite: 2127
+  tests, 6711 assertions, green.
+- **Next in this pass:** §2/§3 — build `VonageService`/`SinchService`
+  (`NumberProviderInterface` only; `VoiceProviderInterface` explicitly
+  deferred per the reasoning above), wired into the same four lists ahead of
+  Plivo. §4 (Bandwidth) and §5 (MessageBird/Bird) are explicitly NOT built —
+  reasoning recorded, no code.
+
 ### 💳 A1 — WalletGroup/WalletGroupMember shared plan, Batch 1+2 — 2026-09-14
 Prompt 11 §3's last open item (audit's "Opus-recommended, needs extra
 scrutiny" flag — touches `WalletService`, a money-path god-node). Built with
@@ -4008,18 +4066,48 @@ Rate limits (Section 19.2): `api` limiter 300/min auth · 60/min public (on `rou
 > (loyalty milestones, travel timeline, admin-defined achievements paying
 > NaaraCredits) that used to top this list are now DONE — see DONE above.
 
-### ▶ TOP OF NEXT — C1 owner decision, then Prompt 12, then the Business Suite (2026-09-14)
-Owner instruction: finish the email overhaul, then finish everything pending
-before the Business Suite starts (master repo only). **A1 (WalletGroup/
-WalletGroupMember, Prompt 11 §3) is now fully DONE — all 3 batches shipped,
-see the DONE entry above. Prompt 11 is 100% shipped.** Left before the
-Business Suite (owner's explicit order):
-- **C1 — OWNER DECISION NEEDED** (agency-credit branding policy — see the
-  full options list further down this NEXT section). Not code-only; do not
-  build any of the three options without the owner picking one.
-- **Prompt 12 — multi-provider failover for Naara Line**, owner's own
-  framing: "save it as a dedicated pass," not to be interleaved with other
-  work (full scope further down this NEXT section).
+### ▶ TOP OF NEXT — Prompt 12 §2/§3: Vonage + Sinch (2026-09-14)
+Owner explicitly chose "start Prompt 12 now, leave C1 open" when asked.
+**A1 (WalletGroup/WalletGroupMember, Prompt 11 §3) is fully DONE — Prompt 11
+is 100% shipped, see the DONE entry above.** Prompt 12 §1 (Plivo finished +
+wired into all four lists) is DONE — see the DONE entry above. Still in this
+dedicated pass:
+- **§2/§3 — build `VonageService` and `SinchService`** implementing
+  `NumberProviderInterface` only (search/buy/sms/cost/release/monthly) —
+  same shape as `PlivoService`/`TwilioService`. `VoiceProviderInterface` is
+  explicitly NOT implemented for either, for a confirmed, documented reason
+  (see the Plivo DONE entry): that interface is Twilio-only throughout the
+  actual codebase today (`VoiceDialerService` and every Twilio webhook
+  controller hardcode `voice.twilio`; even Telnyx, the existing permanent/
+  voice BACKUP, doesn't implement it) — building a genuine Vonage NCCO /
+  Sinch Voice-API call-flow equivalent has zero current caller and is
+  separate, larger, unverified work with no sandbox access in this
+  environment to test against. Wire both into all four lists (§1's own list,
+  `PermanentNumberRouter::$lane`, `ProviderModels`, `ProviderHealth`,
+  `SmsInboundWebhookController`), positioned ahead of Plivo per the spec
+  (Vonage first — confirmed Nigeria voice restrictions/features page exists
+  with real operational content, i.e. genuinely supported, not just listed;
+  Sinch second — broad but its Africa-specific voice coverage couldn't be
+  confirmed via live fetch in this environment, so treated as SMS/number-only
+  for now same as Plivo, not assumed voice-capable). Config keys + admin
+  `ProviderKeys.php` entries + container bindings follow the exact
+  established pattern.
+- **§4 (Bandwidth) — do NOT build.** Deferred to Prompt 11 §5's US-focused
+  porting work per the spec's own reasoning (stronger US/Canada fit, thinner
+  unconfirmed African coverage). No code.
+- **§5 (MessageBird/Bird) — explicitly excluded.** Vendor financial-
+  stability risk (repeated layoff rounds, reported distress) for
+  infrastructure a paying customer's active number depends on. No code;
+  reasoning recorded here so a future reviewer doesn't reintroduce it
+  without knowing why it was skipped.
+- **§6 — DONE as of the Plivo batch** (cross-reference comments on all four
+  files, see the DONE entry above) — nothing left to do here once §2/§3 land.
+
+Then, still before the Business Suite (owner's explicit order):
+- **C1 — OWNER DECISION NEEDED**, left open at the owner's own choice
+  (agency-credit branding policy — see the full options list further down
+  this NEXT section). Not code-only; do not build any of the three options
+  without the owner picking one.
 - Only once ALL of the above is done: **QUEUED — Naara Business Suite,
   Prompts 13–19, MASTER REPO ONLY** (full scope further down this NEXT
   section) — never distributed to either white-label fork.

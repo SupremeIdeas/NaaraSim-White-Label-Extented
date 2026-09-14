@@ -377,6 +377,7 @@ return [
         'auth_id' => env('PLIVO_AUTH_ID'),
         'auth_token' => env('PLIVO_AUTH_TOKEN'),
         'base_url' => env('PLIVO_BASE_URL', 'https://api.plivo.com/v1'),
+        'webhook_token' => env('PLIVO_WEBHOOK_TOKEN'), // shared secret for /webhooks/sms-inbound/plivo
     ],
     'bitrefill' => [
         'api_id' => env('BITREFILL_API_ID'),

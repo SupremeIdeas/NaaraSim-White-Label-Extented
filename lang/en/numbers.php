@@ -79,6 +79,7 @@ return [
         'vanity_placeholder' => 'e.g. 777 or ends with 0000',
         'active_title' => 'Naara Line active',
         'active_hint' => 'Set up forwarding or the dialer from your dashboard.',
+        'active_hint_sms_only' => 'This number supports SMS only — voice calls and call forwarding aren’t available on it.',
         'monthly_note' => 'Naara Line is a monthly subscription — the first month is charged now, then it renews monthly. Voice & SMS included.',
         'mobile_fallback' => 'Mobile',
         'get_this_number' => 'Get this number',

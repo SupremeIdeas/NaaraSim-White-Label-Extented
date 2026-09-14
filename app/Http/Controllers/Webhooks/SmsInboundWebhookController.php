@@ -17,10 +17,14 @@ use Illuminate\Http\Request;
  * Field mapping is generic across providers (from/to/body/media use the common
  * key spellings), so a new SMS provider needs only a config token, not a new
  * controller.
+ *
+ * Prompt 12 — adding a provider to PROVIDERS below also requires adding it
+ * to: `PermanentNumberRouter::$lane`, `ProviderModels::MODELS[...]['lane']`
+ * (+ `PROVIDER_KEY_FIELD`), `ProviderHealth::PROVIDERS`.
  */
 class SmsInboundWebhookController extends Controller
 {
-    private const PROVIDERS = ['twilio', 'telnyx', 'fivesim', 'herosms', 'getatext'];
+    private const PROVIDERS = ['twilio', 'telnyx', 'fivesim', 'herosms', 'getatext', 'plivo'];
 
     public function __invoke(Request $request, string $provider): JsonResponse
     {

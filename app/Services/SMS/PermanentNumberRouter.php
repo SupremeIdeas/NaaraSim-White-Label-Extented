@@ -17,8 +17,8 @@ use Illuminate\Support\Facades\Log;
 use Throwable;
 
 /**
- * Permanent-number provisioning (Naara Line) — Twilio → Telnyx lane, billed
- * monthly. Money-safety mirrors the eSIM Checkout:
+ * Permanent-number provisioning (Naara Line) — Twilio → Telnyx → Plivo lane,
+ * billed monthly. Money-safety mirrors the eSIM Checkout:
  *   - the FIRST month's retail is debited before we provision; if provisioning
  *     fails the wallet is refunded and the next provider tried,
  *   - if the number is provisioned but the record can't be saved, the number is
@@ -27,11 +27,23 @@ use Throwable;
  *     skipped if it can't be sold at cost + minimum profit,
  *   - the provider is never exposed; the user sees only the Model (Naara Line).
  * Recurring monthly charges are handled by RenewVirtualNumbersJob.
+ *
+ * Prompt 12 — adding a provider to $lane also requires adding it to:
+ * `ProviderModels::MODELS['naara_line']['lane']` (+ `PROVIDER_KEY_FIELD`),
+ * `ProviderHealth::PROVIDERS`, `SmsInboundWebhookController::PROVIDERS`.
  */
 class PermanentNumberRouter
 {
-    /** @var list<string> */
-    protected array $lane = ['twilio', 'telnyx'];
+    /**
+     * Ordered strongest-capability-first: Twilio/Telnyx cover voice+SMS;
+     * Plivo is SMS/number-only (no African inbound voice — see
+     * PlivoService::realCapabilities()) and stays last so it's only ever
+     * tried once every voice-capable option has already failed a search.
+     * (Vonage/Sinch join this lane in a follow-up batch of the same pass.)
+     *
+     * @var list<string>
+     */
+    protected array $lane = ['twilio', 'telnyx', 'plivo'];
 
     public function __construct(
         private readonly WalletService $wallet,
