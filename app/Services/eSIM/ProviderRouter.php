@@ -54,20 +54,30 @@ class ProviderRouter
         private readonly CandidateOrdering $ordering = new CandidateOrdering,
     ) {}
 
-    public function orderPlan(string $naaraPlanId, User $user, string $currency = 'USD', ?float $charged = null): EsimOrderResult
+    /**
+     * $refundTo/$refundMeta (Prompt 11 §3, shared-plan purchases): when a
+     * purchase is paid from someone ELSE's wallet (a shared plan), $user
+     * stays the actual buyer for OrderLog attribution, but a failure must
+     * refund the wallet that was actually charged, not the buyer's own —
+     * both default to preserving the exact prior behaviour (refund $user)
+     * for every existing caller.
+     */
+    public function orderPlan(string $naaraPlanId, User $user, string $currency = 'USD', ?float $charged = null, ?User $refundTo = null, array $refundMeta = []): EsimOrderResult
     {
         $plan = EsimPlan::findOrFail($naaraPlanId);
         // Default to list price only when the caller doesn't pass the real
         // charged amount (keeps older callers/tests working).
         $charged = $charged ?? (float) $plan->final_retail_usd;
+        $refundTo ??= $user;
 
         try {
             return $this->fulfil($plan, $charged, $user);
         } catch (EsimProviderException $e) {
             // Never charge without delivering — refund the caller's wallet + alert.
-            $this->wallet->refund($user, $charged, $currency, [
+            $this->wallet->refund($refundTo, $charged, $currency, [
                 'description' => 'eSIM order failed — all providers unavailable or unprofitable',
                 'reference' => "esim-refund:{$plan->id}:{$user->id}:".now()->timestamp,
+                ...$refundMeta,
             ]);
 
             AlertAdminJob::dispatch(
