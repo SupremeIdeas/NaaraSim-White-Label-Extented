@@ -13,7 +13,7 @@
     @if ($screen === 'detail')
         <button type="button" wire:click="back"
                 class="mb-4 inline-flex items-center gap-1.5 text-sm font-semibold text-slate-500 transition hover:text-primary dark:text-slate-400">
-            <x-icon name="chevron-right" class="h-4 w-4 rotate-180" /> Back
+            <x-icon name="chevron-right" class="h-4 w-4 rotate-180" /> {{ __('esim.back') }}
         </button>
 
         <div class="overflow-hidden rounded-3xl border border-slate-200 nx-glass-tile shadow-sm dark:border-[var(--brand-card-border-dark)]">
@@ -30,7 +30,7 @@
                     </span>
                     <div class="min-w-0 pt-1">
                         <span class="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary-dark dark:bg-primary/20 dark:text-primary">
-                            <x-icon name="globe" class="h-3.5 w-3.5" /> {{ $plan->type ?? 'Data' }}
+                            <x-icon name="globe" class="h-3.5 w-3.5" /> {{ $plan->type ?? __('esim.data_type') }}
                         </span>
                         <h2 class="mt-2 text-xl font-bold text-slate-900 dark:text-slate-100">{{ $plan->name }}</h2>
                     </div>
@@ -71,7 +71,7 @@
                 <button type="button" @click="$dispatch('open-compatibility')"
                         class="mt-5 flex w-full items-center gap-2 rounded-2xl border border-slate-200 bg-slate-50/70 px-4 py-3 text-left text-sm text-slate-600 transition hover:border-primary/40 hover:bg-primary/5 dark:border-[var(--brand-card-border-dark)] dark:bg-[var(--brand-card-inner-dark)] dark:text-slate-300">
                     <x-icon name="signal" class="h-4 w-4 shrink-0 text-primary" />
-                    <span class="min-w-0 flex-1">Is your device eSIM-ready? <span class="font-semibold text-primary">Check compatibility</span></span>
+                    <span class="min-w-0 flex-1">{{ __('esim.compat_prompt') }} <span class="font-semibold text-primary">{{ __('esim.compat_check') }}</span></span>
                     <x-icon name="chevron-right" class="h-4 w-4 shrink-0 text-slate-400" />
                 </button>
 
@@ -79,7 +79,7 @@
                 @php($price = $fmt((float) $plan->final_retail_usd))
                 <div class="mt-4 flex flex-wrap items-center justify-between gap-4 border-t border-slate-200 pt-5 dark:border-[var(--brand-card-border-dark)]">
                     <div>
-                        <p class="text-xs uppercase tracking-wide text-slate-400">You pay</p>
+                        <p class="text-xs uppercase tracking-wide text-slate-400">{{ __('esim.you_pay') }}</p>
                         <div class="text-3xl font-extrabold text-slate-900 dark:text-slate-100">{{ $price['usd'] }}</div>
                         @if ($price['local'])
                             <div class="text-xs text-slate-500 dark:text-slate-400">≈ {{ $price['local'] }}</div>
@@ -87,7 +87,7 @@
                     </div>
                     <a href="{{ route('checkout', $plan) }}" wire:navigate
                        class="inline-flex flex-1 items-center justify-center gap-1.5 rounded-2xl bg-gradient-to-br from-primary via-primary-dark to-navy px-5 py-3.5 text-sm font-bold text-white shadow-lg shadow-primary/25 transition hover:-translate-y-0.5 hover:shadow-xl sm:flex-none">
-                        Buy this plan <x-icon name="chevron-right" class="h-4 w-4" />
+                        {{ __('esim.buy_this_plan') }} <x-icon name="chevron-right" class="h-4 w-4" />
                     </a>
                 </div>
             </div>
@@ -97,7 +97,7 @@
     @elseif ($screen === 'country' || $screen === 'region')
         <button type="button" wire:click="back"
                 class="mb-4 inline-flex items-center gap-1.5 text-sm font-semibold text-slate-500 transition hover:text-primary dark:text-slate-400">
-            <x-icon name="chevron-right" class="h-4 w-4 rotate-180" /> Back
+            <x-icon name="chevron-right" class="h-4 w-4 rotate-180" /> {{ __('esim.back') }}
         </button>
 
         @if ($screen === 'region')
@@ -111,7 +111,7 @@
                         <div class="absolute inset-0 bg-gradient-to-r from-black/60 via-black/10 to-transparent"></div>
                         <div class="absolute bottom-4 left-5 text-white">
                             <h1 class="text-xl font-bold drop-shadow">{{ $selName }}</h1>
-                            <p class="text-xs text-white/85">Regional plans</p>
+                            <p class="text-xs text-white/85">{{ __('esim.regional_plans') }}</p>
                         </div>
                     </div>
                 @else
@@ -121,7 +121,7 @@
                         </span>
                         <div>
                             <h1 class="text-xl font-bold text-slate-900 dark:text-slate-100">{{ $selName }}</h1>
-                            <p class="text-xs text-slate-500 dark:text-slate-400">Multi-country plans in this region</p>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">{{ __('esim.multi_country_plans') }}</p>
                         </div>
                     </div>
                 @endif
@@ -143,15 +143,15 @@
                         <h1 class="truncate text-xl font-bold text-slate-900 dark:text-slate-100">{{ $selName }}</h1>
                     </div>
                     <p class="text-xs text-slate-500 dark:text-slate-400">
-                        {{ $tab === 'full' ? 'Calls + data plans, valid in this country' : 'Data plans, valid in this country' }}
+                        {{ $tab === 'full' ? __('esim.full_plans_note') : __('esim.data_plans_note') }}
                     </p>
                 </div>
             </div>
         @endif
 
         <div class="mb-2 flex items-baseline justify-between">
-            <p class="text-sm font-semibold text-slate-700 dark:text-slate-200">Choose a package</p>
-            <p class="text-xs text-slate-400">{{ $plans->total() }} {{ \Illuminate\Support\Str::plural('plan', $plans->total()) }}</p>
+            <p class="text-sm font-semibold text-slate-700 dark:text-slate-200">{{ __('esim.choose_package') }}</p>
+            <p class="text-xs text-slate-400">{{ trans_choice('esim.plans_count', $plans->total(), ['count' => $plans->total()]) }}</p>
         </div>
         @include('livewire.catalogue._plan-list', ['plans' => $plans, 'fmt' => $fmt])
 
@@ -173,8 +173,8 @@
         @if ($tab === 'full' && $fullCount === 0 && $screen === 'grid')
             <div class="mb-6 flex flex-col items-center gap-2 rounded-3xl border border-dashed border-slate-300 py-14 text-center dark:border-[var(--brand-card-border-dark)]">
                 <span class="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary dark:bg-primary/20"><x-icon name="signal" class="h-6 w-6" gradient /></span>
-                <p class="font-semibold text-slate-800 dark:text-slate-100">Naara Connect is coming soon</p>
-                <p class="max-w-sm text-sm text-slate-500 dark:text-slate-400">Calls + data on one eSIM — with a number, minutes and SMS. We're finishing the last checks with our voice provider.</p>
+                <p class="font-semibold text-slate-800 dark:text-slate-100">{{ __('esim.full_coming_soon_title') }}</p>
+                <p class="max-w-sm text-sm text-slate-500 dark:text-slate-400">{{ __('esim.full_coming_soon_body') }}</p>
             </div>
         @endif
 
@@ -203,8 +203,8 @@
             @elseif ($view === 'local')
                 @if (count($grid['local']))
                     <div class="mb-2 flex items-baseline justify-between">
-                        <p class="text-sm font-semibold text-slate-700 dark:text-slate-200">Choose a country</p>
-                        <p class="text-xs text-slate-400">{{ count($grid['local']) }} {{ \Illuminate\Support\Str::plural('country', count($grid['local'])) }}</p>
+                        <p class="text-sm font-semibold text-slate-700 dark:text-slate-200">{{ __('esim.choose_country') }}</p>
+                        <p class="text-xs text-slate-400">{{ trans_choice('esim.countries_count', count($grid['local']), ['count' => count($grid['local'])]) }}</p>
                     </div>
                     <div class="grid grid-cols-1 gap-3 lg:grid-cols-2">
                         @foreach ($grid['local'] as $t)
@@ -217,7 +217,7 @@
 
             @elseif ($view === 'regional')
                 @if (count($grid['regions']))
-                    <p class="mb-2 text-sm font-semibold text-slate-700 dark:text-slate-200">Pick a region</p>
+                    <p class="mb-2 text-sm font-semibold text-slate-700 dark:text-slate-200">{{ __('esim.pick_region') }}</p>
                     <div class="grid grid-cols-1 gap-3 lg:grid-cols-2">
                         @foreach ($grid['regions'] as $t)
                             @include('livewire.catalogue._region-row', ['t' => $t, 'fmt' => $fmt])
@@ -235,9 +235,9 @@
                         @else
                             <x-icon name="globe" class="pointer-events-none absolute -right-2 top-2 h-28 w-28 text-primary/25" gradient />
                         @endif
-                        <p class="text-[11px] font-bold uppercase tracking-wider text-primary dark:text-teal-300">One plan, everywhere</p>
-                        <h2 class="mt-1 text-2xl font-bold text-slate-900 dark:text-slate-100">Global eSIM</h2>
-                        <p class="text-sm text-slate-500 dark:text-slate-400">Stay connected across 190+ countries on a single eSIM.</p>
+                        <p class="text-[11px] font-bold uppercase tracking-wider text-primary dark:text-teal-300">{{ __('esim.global_kicker') }}</p>
+                        <h2 class="mt-1 text-2xl font-bold text-slate-900 dark:text-slate-100">{{ __('esim.global_title') }}</h2>
+                        <p class="text-sm text-slate-500 dark:text-slate-400">{{ __('esim.global_body') }}</p>
                     </div>
                     @include('livewire.catalogue._plan-list', ['plans' => $plans, 'fmt' => $fmt])
                 @else
