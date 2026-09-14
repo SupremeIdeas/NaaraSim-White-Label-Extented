@@ -40,7 +40,7 @@ class FakeVoiceProvider implements VoiceProviderInterface
         return true;
     }
 
-    public function forwardTwiml(string $to, ?string $callerId = null, ?string $fallback = null): string
+    public function forwardTwiml(string $to, ?string $callerId = null, ?string $fallback = null, ?string $voicemailActionUrl = null): string
     {
         return '<Response><Dial>'.$to.'</Dial></Response>';
     }

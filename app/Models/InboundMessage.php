@@ -14,6 +14,7 @@ class InboundMessage extends Model
 {
     protected $fillable = [
         'user_id', 'virtual_number_id', 'from_number', 'body', 'attachment_url',
+        'voicemail_path', 'voicemail_duration_seconds',
         'provider', 'provider_ref', 'read_at', 'received_at',
     ];
 

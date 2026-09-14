@@ -75,12 +75,22 @@ class TwilioService implements NumberProviderInterface, VoiceProviderInterface
         return hash_equals($expected, $signature);
     }
 
-    public function forwardTwiml(string $to, ?string $callerId = null, ?string $fallback = null): string
+    /**
+     * $voicemailActionUrl (Prompt 11): when given, a <Say> + <Record> is
+     * appended after the dial attempt(s) — TwiML falls through to it only when
+     * neither the primary nor the fallback number answers, so an unanswered
+     * call captures a voicemail instead of just ending.
+     */
+    public function forwardTwiml(string $to, ?string $callerId = null, ?string $fallback = null, ?string $voicemailActionUrl = null): string
     {
         $caller = $callerId ? ' callerId="'.htmlspecialchars($callerId, ENT_QUOTES).'"' : '';
         $dial = '<Dial'.$caller.' timeout="20"><Number>'.htmlspecialchars($to, ENT_QUOTES).'</Number></Dial>';
         if ($fallback) {
             $dial .= '<Dial'.$caller.'><Number>'.htmlspecialchars($fallback, ENT_QUOTES).'</Number></Dial>';
+        }
+        if ($voicemailActionUrl) {
+            $dial .= '<Say>Please leave a message after the tone.</Say>'
+                .'<Record maxLength="120" playBeep="true" action="'.htmlspecialchars($voicemailActionUrl, ENT_QUOTES).'" />';
         }
 
         return '<?xml version="1.0" encoding="UTF-8"?><Response>'.$dial.'</Response>';
