@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Models\Contact;
+use App\Services\Voice\SpamReportService;
 use App\Support\ContactImport;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
@@ -93,6 +94,23 @@ class Contacts extends Component
     {
         $contact = Contact::where('user_id', Auth::id())->findOrFail($id);
         $contact->update(['is_favorite' => ! $contact->is_favorite]);
+    }
+
+    /**
+     * Spam-report + auto-block (Prompt 11): flag a contact's number as spam.
+     * Owner-scoped read of the contact, but the report itself is keyed on the
+     * NUMBER (not the contact row) — it feeds the same platform-wide count as
+     * a report made from the Dialer.
+     */
+    public function reportSpam(int $id, SpamReportService $spam): void
+    {
+        $contact = Contact::where('user_id', Auth::id())->find($id);
+        if ($contact === null) {
+            return;
+        }
+
+        $spam->report($contact->phone_number, Auth::user(), 'contacts');
+        $this->dispatch('nx-toast', type: 'success', message: 'Reported. Thanks for helping keep Naara safe.');
     }
 
     /** Bulk import from a CSV or vCard file. */

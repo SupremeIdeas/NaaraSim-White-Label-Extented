@@ -5,6 +5,7 @@ namespace App\Livewire;
 use App\Exceptions\InsufficientBalanceException;
 use App\Exceptions\SmsException;
 use App\Models\VoiceCall;
+use App\Services\Voice\SpamReportService;
 use App\Services\Voice\VoiceDialerService;
 use App\Support\ProviderStatus;
 use Illuminate\Support\Facades\Auth;
@@ -49,13 +50,23 @@ class Dialer extends Component
     }
 
     /** Live per-minute retail + how many minutes the wallet can fund right now. */
-    public function prepare(VoiceDialerService $dialer): void
+    public function prepare(VoiceDialerService $dialer, SpamReportService $spam): void
     {
         $this->error = null;
         $this->reset('quoted', 'ratePerMin', 'fundedMinutes');
 
-        if (! preg_match('/^\+[1-9]\d{6,14}$/', trim($this->destination))) {
+        $destination = trim($this->destination);
+        if (! preg_match('/^\+[1-9]\d{6,14}$/', $destination)) {
             $this->error = 'Enter a valid number in international format, e.g. +2348012345678.';
+
+            return;
+        }
+
+        // Spam-report auto-block (Prompt 11): an honest refusal here, before
+        // wasting a quote — the authoritative check still runs in
+        // VoiceDialerService::begin() before any wallet hold.
+        if ($spam->isBlocked($destination)) {
+            $this->error = 'This number has been reported as spam by multiple users and can’t be dialed.';
 
             return;
         }
@@ -123,6 +134,18 @@ class Dialer extends Component
         if ($call !== null) {
             $dialer->settle($call, max(0, $seconds), $status === 'completed' ? 'completed' : 'no-answer');
         }
+    }
+
+    /** Spam-report + auto-block (Prompt 11): flag a recent call's destination. */
+    public function reportSpam(int $callId, SpamReportService $spam): void
+    {
+        $call = VoiceCall::where('user_id', Auth::id())->find($callId);
+        if ($call === null) {
+            return;
+        }
+
+        $spam->report($call->destination, Auth::user(), 'dialer');
+        $this->dispatch('nx-toast', type: 'success', message: 'Reported. Thanks for helping keep Naara safe.');
     }
 
     public function render()
