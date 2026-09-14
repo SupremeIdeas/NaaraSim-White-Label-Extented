@@ -167,6 +167,12 @@
                                                 <button type="button" wire:click="revokeLicense({{ $i->id }})" wire:confirm="Permanently revoke this license? The key can never be used again." class="rounded-lg border border-red-200 px-2 py-1 text-xs font-medium text-red-600 hover:bg-red-50 dark:border-red-900/50 dark:text-red-300 dark:hover:bg-red-950/30">Revoke</button>
                                             @endunless
                                         @endif
+                                        @if ($i->intake)
+                                            <button type="button" wire:click="toggleIntakeDetail({{ $i->id }})"
+                                                class="rounded-lg border px-2 py-1 text-xs font-medium {{ $i->intake->status === 'pending' ? 'border-amber-300 text-amber-700 hover:bg-amber-50 dark:border-amber-900/50 dark:text-amber-300 dark:hover:bg-amber-950/30' : 'border-slate-200 text-slate-600 hover:bg-slate-50 dark:border-[#2D4060] dark:text-slate-300 dark:hover:bg-[#243352]' }}">
+                                                {{ $expandedIntakeInstanceId === $i->id ? 'Hide project' : 'Project ('.ucfirst(str_replace('_', ' ', $i->intake->status)).')' }}
+                                            </button>
+                                        @endif
                                         <button type="button" wire:click="selectInstance({{ $i->id }})"
                                             class="rounded-lg border border-slate-200 px-2 py-1 text-xs font-medium text-slate-600 hover:bg-slate-50 dark:border-[#2D4060] dark:text-slate-300 dark:hover:bg-[#243352]">
                                             {{ $selectedInstanceId === $i->id ? 'Hide log' : 'View log' }}
@@ -174,6 +180,68 @@
                                     </div>
                                 </td>
                             </tr>
+                            @if ($expandedIntakeInstanceId === $i->id && $i->intake)
+                                @php $intake = $i->intake; $progress = $this->intakeProgress; $dayOf = $this->intakeDayOf; @endphp
+                                <tr>
+                                    <td colspan="7" class="bg-slate-50 p-4 dark:bg-[#243352]">
+                                        <div class="grid gap-4 sm:grid-cols-2">
+                                            <div class="space-y-1 text-xs text-slate-600 dark:text-slate-300">
+                                                <p><span class="font-medium text-slate-800 dark:text-slate-100">Desired name:</span> {{ $intake->desired_brand_name }}</p>
+                                                <p><span class="font-medium text-slate-800 dark:text-slate-100">WhatsApp:</span> {{ $intake->whatsapp_number }}</p>
+                                                <p class="flex items-center gap-2">
+                                                    <span class="font-medium text-slate-800 dark:text-slate-100">Brand colours:</span>
+                                                    <span class="inline-block h-4 w-4 rounded-full border border-slate-300" style="background:{{ $intake->brand_primary_color }}"></span>
+                                                    <span class="inline-block h-4 w-4 rounded-full border border-slate-300" style="background:{{ $intake->brand_accent_color }}"></span>
+                                                    {{ $intake->brand_primary_color }} / {{ $intake->brand_accent_color }}
+                                                </p>
+                                                @if ($intake->logo_url)
+                                                    <p><span class="font-medium text-slate-800 dark:text-slate-100">Logo:</span> <a href="{{ $intake->logo_url }}" target="_blank" class="text-primary underline">View uploaded logo</a></p>
+                                                @elseif ($intake->logo_design_reference)
+                                                    <p><span class="font-medium text-slate-800 dark:text-slate-100">Logo design reference:</span> {{ $intake->logo_design_reference }}</p>
+                                                @endif
+                                                @if ($intake->banner_reference_url)
+                                                    <p><span class="font-medium text-slate-800 dark:text-slate-100">Banner reference:</span> <a href="{{ $intake->banner_reference_url }}" target="_blank" class="text-primary underline">View uploaded reference</a></p>
+                                                @endif
+                                                @if ($intake->banner_design_request)
+                                                    <p><span class="font-medium text-slate-800 dark:text-slate-100">Banner request:</span> {{ $intake->banner_design_request }}</p>
+                                                @endif
+                                                <p><span class="font-medium text-slate-800 dark:text-slate-100">Hosting:</span> {{ str_replace('_', ' ', ucfirst($intake->hosting_choice)) }}</p>
+                                                @if ($intake->isSelfHosted())
+                                                    <p><span class="font-medium text-slate-800 dark:text-slate-100">Host:</span> {{ $intake->hosting_host }}</p>
+                                                    <p><span class="font-medium text-slate-800 dark:text-slate-100">Username:</span> {{ $intake->hosting_username }}</p>
+                                                    <p><span class="font-medium text-slate-800 dark:text-slate-100">Password:</span> <span class="font-mono">{{ $intake->hosting_password }}</span></p>
+                                                    @if ($intake->hosting_notes)
+                                                        <p><span class="font-medium text-slate-800 dark:text-slate-100">Access notes:</span> {{ $intake->hosting_notes }}</p>
+                                                    @endif
+                                                @endif
+                                                @if ($intake->additional_notes)
+                                                    <p><span class="font-medium text-slate-800 dark:text-slate-100">Additional notes:</span> {{ $intake->additional_notes }}</p>
+                                                @endif
+                                            </div>
+                                            <div class="space-y-3">
+                                                @if ($intake->status === 'pending')
+                                                    <button type="button" wire:click="markIntakeSeen({{ $intake->id }})" class="rounded-lg border border-green-300 px-3 py-1.5 text-xs font-medium text-green-700 hover:bg-green-50 dark:border-green-900/50 dark:text-green-300 dark:hover:bg-green-950/30">Mark seen</button>
+                                                @elseif ($intake->status === 'seen')
+                                                    <div class="flex items-center gap-2">
+                                                        <input type="number" min="1" wire:model="deployDaysInputs.{{ $intake->id }}" placeholder="Days" class="w-24 rounded-lg border border-slate-200 px-2 py-1.5 text-xs dark:border-[#2D4060] dark:bg-[#1B2A45] dark:text-slate-100">
+                                                        <button type="button" wire:click="setIntakeDeployTimeline({{ $intake->id }})" class="rounded-lg border border-green-300 px-3 py-1.5 text-xs font-medium text-green-700 hover:bg-green-50 dark:border-green-900/50 dark:text-green-300 dark:hover:bg-green-950/30">Set deploy timeline</button>
+                                                    </div>
+                                                @elseif ($intake->status === 'in_progress')
+                                                    <p class="text-xs text-slate-500 dark:text-slate-400">Day {{ $dayOf['day'] }} of {{ $dayOf['of'] }} — {{ $progress }}%</p>
+                                                    <div class="h-2 w-full overflow-hidden rounded-full bg-slate-200 dark:bg-[#1B2A45]">
+                                                        <div class="h-full rounded-full bg-primary" style="width: {{ $progress }}%"></div>
+                                                    </div>
+                                                @elseif ($intake->status === 'completed')
+                                                    <p class="text-xs font-medium text-green-700 dark:text-green-300">Deployment complete.</p>
+                                                @endif
+                                                <a href="{{ route('admin.white-label.intake.pdf', $intake->id) }}" target="_blank" class="inline-flex items-center gap-1 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50 dark:border-[#2D4060] dark:text-slate-300 dark:hover:bg-[#243352]">
+                                                    <x-icon name="download" class="h-3.5 w-3.5" /> Export PDF
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endif
                             @if ($selectedInstanceId === $i->id)
                                 <tr>
                                     <td colspan="7" class="bg-slate-50 p-3 dark:bg-[#243352]">

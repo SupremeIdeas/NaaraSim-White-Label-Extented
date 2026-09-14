@@ -59,6 +59,150 @@
                     <p class="text-sm text-slate-500 dark:text-slate-400">This request was not approved.</p>
                 @endif
             </div>
+
+            {{-- Prompt 21-EXT2 §2/§4 — the post-purchase project intake form,
+                 once the license is live. --}}
+            @if ($this->instance->status === 'active')
+                <div class="mt-4 rounded-2xl border border-slate-200 nx-glass-tile p-5 dark:border-white/10">
+                    @if ($this->intake === null)
+                        <h2 class="mb-1 font-semibold text-slate-900 dark:text-white">Project commencement form</h2>
+                        <p class="mb-4 text-sm text-slate-500 dark:text-slate-400">Tell us about your white-label project so we can get it live.</p>
+
+                        @if ($intakeError)
+                            <div class="mb-3 rounded-lg border border-red-200 bg-red-50 p-2 text-sm text-red-700 dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-300">{{ $intakeError }}</div>
+                        @endif
+
+                        <div class="space-y-3">
+                            <div>
+                                <label class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">What do you want your white-label platform called?</label>
+                                <input type="text" wire:model="intakeDesiredBrandName" placeholder="e.g. ConnectNow" class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-white/10 dark:bg-white/5 dark:text-slate-100">
+                                @error('intakeDesiredBrandName') <span class="text-xs text-red-500">{{ $message }}</span> @enderror
+                            </div>
+                            <div>
+                                <label class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">WhatsApp number (so we can reach you when it's live)</label>
+                                <input type="text" wire:model="intakeWhatsapp" placeholder="+234…" class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-white/10 dark:bg-white/5 dark:text-slate-100">
+                                @error('intakeWhatsapp') <span class="text-xs text-red-500">{{ $message }}</span> @enderror
+                            </div>
+
+                            <div class="border-t border-slate-200 pt-3 dark:border-white/10">
+                                <p class="mb-2 text-sm font-medium text-slate-700 dark:text-slate-200">Brand identity</p>
+                                <p class="mb-3 text-xs text-slate-400">Same two-tone approach Naara itself uses (a primary + an accent colour) drives every themed surface on your white-label — pick yours below.</p>
+
+                                <div class="mb-3 grid gap-3 sm:grid-cols-2">
+                                    <div>
+                                        <label class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">Primary colour</label>
+                                        <div class="flex items-center gap-2">
+                                            <input type="color" wire:model="intakeBrandPrimaryColor" class="h-9 w-12 rounded border border-slate-200 dark:border-white/10">
+                                            <input type="text" wire:model="intakeBrandPrimaryColor" class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-white/10 dark:bg-white/5 dark:text-slate-100">
+                                        </div>
+                                        @error('intakeBrandPrimaryColor') <span class="text-xs text-red-500">{{ $message }}</span> @enderror
+                                    </div>
+                                    <div>
+                                        <label class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">Accent colour</label>
+                                        <div class="flex items-center gap-2">
+                                            <input type="color" wire:model="intakeBrandAccentColor" class="h-9 w-12 rounded border border-slate-200 dark:border-white/10">
+                                            <input type="text" wire:model="intakeBrandAccentColor" class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-white/10 dark:bg-white/5 dark:text-slate-100">
+                                        </div>
+                                        @error('intakeBrandAccentColor') <span class="text-xs text-red-500">{{ $message }}</span> @enderror
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">Logo</label>
+                                    <input type="file" wire:model="intakeLogoUpload" accept="image/webp,image/jpeg,image/png,image/svg+xml" class="block w-full text-xs text-slate-500 dark:text-slate-400">
+                                    @error('intakeLogoUpload') <span class="text-xs text-red-500">{{ $message }}</span> @enderror
+                                    <div wire:loading wire:target="intakeLogoUpload" class="mt-1 text-xs text-slate-400">Uploading…</div>
+                                    <p class="mt-2 mb-1 text-xs text-slate-400">Don't have a final logo yet? Link or describe a reference and our design team can create one for you instead:</p>
+                                    <textarea wire:model="intakeLogoDesignReference" rows="2" placeholder="e.g. a link to a logo you like, or a description of the style you want" class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-white/10 dark:bg-white/5 dark:text-slate-100"></textarea>
+                                    @error('intakeLogoDesignReference') <span class="text-xs text-red-500">{{ $message }}</span> @enderror
+                                </div>
+
+                                <div>
+                                    <label class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">Site-wide banner design request</label>
+                                    <p class="mb-2 text-xs text-slate-400">Tell us how you'd like your platform's banners to look — the same way Naara's own banners match its brand throughout the app.</p>
+                                    <input type="file" wire:model="intakeBannerReferenceUpload" accept="image/webp,image/jpeg,image/png" class="mb-2 block w-full text-xs text-slate-500 dark:text-slate-400">
+                                    @error('intakeBannerReferenceUpload') <span class="text-xs text-red-500">{{ $message }}</span> @enderror
+                                    <div wire:loading wire:target="intakeBannerReferenceUpload" class="mb-2 text-xs text-slate-400">Uploading…</div>
+                                    <textarea wire:model="intakeBannerDesignRequest" rows="2" placeholder="Describe the look and messaging you want your banners to have" class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-white/10 dark:bg-white/5 dark:text-slate-100"></textarea>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">Hosting</label>
+                                <select wire:model.live="intakeHostingChoice" class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-white/10 dark:bg-white/5 dark:text-slate-100">
+                                    <option value="supreme_ideas_server">Host on Supreme Ideas' server</option>
+                                    <option value="own_vps">Host on my own VPS (Cloudways)</option>
+                                    <option value="own_shared">Host on my own shared hosting (Hostinger/Namecheap)</option>
+                                </select>
+                            </div>
+
+                            @if ($this->intakeIsSelfHosted)
+                                <div class="rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800 dark:border-amber-900/50 dark:bg-amber-950/30 dark:text-amber-200">
+                                    @if ($intakeHostingChoice === 'own_vps')
+                                        Please purchase <strong>Cloudways' Laravel-optimized VPS hosting</strong> and share the login details below so our team can deploy your platform there.
+                                    @else
+                                        Please purchase a <strong>premium shared hosting plan from Hostinger or Namecheap</strong> and share the login details below so our team can deploy your platform there.
+                                    @endif
+                                </div>
+                                <div>
+                                    <label class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">Host / control panel URL</label>
+                                    <input type="text" wire:model="intakeHostingHost" class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-white/10 dark:bg-white/5 dark:text-slate-100">
+                                    @error('intakeHostingHost') <span class="text-xs text-red-500">{{ $message }}</span> @enderror
+                                </div>
+                                <div class="grid gap-3 sm:grid-cols-2">
+                                    <div>
+                                        <label class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">Username</label>
+                                        <input type="text" wire:model="intakeHostingUsername" class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-white/10 dark:bg-white/5 dark:text-slate-100">
+                                        @error('intakeHostingUsername') <span class="text-xs text-red-500">{{ $message }}</span> @enderror
+                                    </div>
+                                    <div>
+                                        <label class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">Password</label>
+                                        <input type="password" wire:model="intakeHostingPassword" class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-white/10 dark:bg-white/5 dark:text-slate-100">
+                                        @error('intakeHostingPassword') <span class="text-xs text-red-500">{{ $message }}</span> @enderror
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">Anything else about access (SSH key, 2FA, etc.)?</label>
+                                    <textarea wire:model="intakeHostingNotes" rows="2" class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-white/10 dark:bg-white/5 dark:text-slate-100"></textarea>
+                                </div>
+                                <label class="flex items-start gap-2 text-xs text-slate-500 dark:text-slate-400">
+                                    <input type="checkbox" wire:model="intakeHostingDisclaimerAcknowledged" class="mt-0.5 h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary">
+                                    Your login details are encrypted and stored securely — only authorized Supreme Ideas Agency staff can access them, solely to deploy your white-label platform.
+                                </label>
+                            @endif
+
+                            <div>
+                                <label class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">Anything else we should know?</label>
+                                <textarea wire:model="intakeAdditionalNotes" rows="2" class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-white/10 dark:bg-white/5 dark:text-slate-100"></textarea>
+                            </div>
+
+                            <button type="button" wire:click="submitIntake" wire:loading.attr="disabled" wire:target="submitIntake"
+                                class="w-full rounded-2xl bg-primary px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-primary/25 transition hover:bg-primary-dark disabled:opacity-60">
+                                Submit project details
+                            </button>
+                        </div>
+                    @else
+                        <h2 class="mb-1 font-semibold text-slate-900 dark:text-white">Project: {{ $this->intake->desired_brand_name }}</h2>
+                        @if ($this->intake->status === 'pending')
+                            <p class="text-sm text-slate-500 dark:text-slate-400">Submitted — our team is reviewing your project details.</p>
+                        @elseif ($this->intake->status === 'seen')
+                            <p class="text-sm text-slate-500 dark:text-slate-400">Reviewed — your deployment timeline will be set shortly.</p>
+                        @elseif ($this->intake->status === 'in_progress')
+                            @php $day = $this->deployDayOf; $pct = $this->deployProgress; @endphp
+                            <p class="mb-2 text-sm text-slate-600 dark:text-slate-300">Deployment in progress — Day {{ $day['day'] }} of {{ $day['of'] }}</p>
+                            <div class="h-2.5 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-white/10">
+                                <div class="h-full rounded-full bg-primary transition-all" style="width: {{ $pct }}%"></div>
+                            </div>
+                            <p class="mt-1 text-right text-xs text-slate-400">{{ $pct }}%</p>
+                        @elseif ($this->intake->status === 'completed')
+                            <div class="flex items-center gap-2 text-green-700 dark:text-green-300">
+                                <x-icon name="badge-check" class="h-5 w-5" />
+                                <p class="text-sm font-medium">Your white-label platform is live!</p>
+                            </div>
+                        @endif
+                    @endif
+                </div>
+            @endif
         @else
             {{-- Prompt 21-EXT §2.1 — swipeable plan carousel. Each card falls back
                  to a tier-tinted gradient (richer for Extended/Extended V2) until
@@ -168,8 +312,10 @@
                 <label class="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-200">Hosting preference</label>
                 <select wire:model="hostingPreference" class="mb-3 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-white/10 dark:bg-white/5 dark:text-slate-100">
                     <option value="supreme_ideas_server">Host on Supreme Ideas' server</option>
-                    <option value="own_server">Host on my own server</option>
+                    <option value="own_vps">Host on my own VPS (Cloudways)</option>
+                    <option value="own_shared">Host on my own shared hosting (Hostinger/Namecheap)</option>
                 </select>
+                <p class="mb-2 text-xs text-slate-400">This is just your leaning for now — you'll confirm the details (and, if self-hosting, share login access) in the project intake form once your license is active.</p>
                 <label class="flex items-start gap-2 text-xs text-slate-500 dark:text-slate-400">
                     <input type="checkbox" wire:model="disclaimerAcknowledged" class="mt-0.5 h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary">
                     I understand hosting responsibilities and support boundaries for my chosen option.

@@ -7,11 +7,15 @@ use App\Models\Merchant;
 use App\Models\User;
 use App\Models\WhiteLabelInstance;
 use App\Models\WhiteLabelLicensePlan;
+use App\Models\WhiteLabelProjectIntake;
 use App\Services\Updater\WhiteLabelLicenseService;
+use App\Services\Updater\WhiteLabelProjectIntakeService;
 use App\Services\Wallet\WalletService;
 use Database\Seeders\RoleSeeder;
 use Database\Seeders\WhiteLabelLicensePlanSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 use Tests\TestCase;
 
@@ -174,5 +178,138 @@ class MerchantWhiteLabelTest extends TestCase
 
         $this->assertSame(WhiteLabelInstance::TIER_EXTENDED, $instance->fresh()->tier);
         $this->assertSame('0.0000', (string) $merchant->owner->wallet->fresh()->usd_balance);
+    }
+
+    // --- Prompt 21-EXT2: project intake form ---
+
+    private function activeInstance(Merchant $merchant): WhiteLabelInstance
+    {
+        $instance = app(WhiteLabelLicenseService::class)->register([
+            'brand_name' => 'Biz', 'contact_email' => 'biz@test.co', 'merchant_id' => $merchant->id,
+            'acquisition_method' => WhiteLabelInstance::ACQUISITION_MERCHANT_SELF_SERVICE,
+            'requested_tier' => WhiteLabelInstance::TIER_NORMAL,
+        ]);
+
+        return app(WhiteLabelLicenseService::class)->issueLicense($instance, WhiteLabelInstance::TIER_NORMAL);
+    }
+
+    public function test_a_v2_merchant_can_submit_the_intake_form_for_managed_hosting(): void
+    {
+        $merchant = $this->merchant(Merchant::TIER_V2);
+        $this->activeInstance($merchant);
+
+        Livewire::actingAs($merchant->owner)
+            ->test(MerchantWhiteLabel::class)
+            ->set('intakeDesiredBrandName', 'ConnectNow')
+            ->set('intakeWhatsapp', '+2348012345678')
+            ->set('intakeLogoDesignReference', 'Something modern, teal and gold')
+            ->set('intakeHostingChoice', WhiteLabelInstance::HOSTING_SUPREME_IDEAS_SERVER)
+            ->call('submitIntake')
+            ->assertSet('intakeError', null);
+
+        $intake = WhiteLabelProjectIntake::first();
+        $this->assertNotNull($intake);
+        $this->assertSame('ConnectNow', $intake->desired_brand_name);
+        $this->assertNull($intake->hosting_host);
+    }
+
+    public function test_own_vps_choice_requires_credentials_and_disclaimer(): void
+    {
+        $merchant = $this->merchant(Merchant::TIER_V2);
+        $this->activeInstance($merchant);
+
+        Livewire::actingAs($merchant->owner)
+            ->test(MerchantWhiteLabel::class)
+            ->set('intakeDesiredBrandName', 'ConnectNow')
+            ->set('intakeWhatsapp', '+2348012345678')
+            ->set('intakeLogoDesignReference', 'Something modern, teal and gold')
+            ->set('intakeHostingChoice', WhiteLabelInstance::HOSTING_OWN_VPS)
+            ->set('intakeHostingHost', 'my-vps.cloudwaysapps.com')
+            ->set('intakeHostingUsername', 'root')
+            ->set('intakeHostingPassword', 'S3cret!')
+            ->call('submitIntake')
+            ->assertSet('intakeError', fn ($e) => $e !== null); // disclaimer not acknowledged yet
+
+        $this->assertNull(WhiteLabelProjectIntake::first());
+
+        Livewire::actingAs($merchant->owner)
+            ->test(MerchantWhiteLabel::class)
+            ->set('intakeDesiredBrandName', 'ConnectNow')
+            ->set('intakeWhatsapp', '+2348012345678')
+            ->set('intakeLogoDesignReference', 'Something modern, teal and gold')
+            ->set('intakeHostingChoice', WhiteLabelInstance::HOSTING_OWN_VPS)
+            ->set('intakeHostingHost', 'my-vps.cloudwaysapps.com')
+            ->set('intakeHostingUsername', 'root')
+            ->set('intakeHostingPassword', 'S3cret!')
+            ->set('intakeHostingDisclaimerAcknowledged', true)
+            ->call('submitIntake')
+            ->assertSet('intakeError', null);
+
+        $intake = WhiteLabelProjectIntake::first();
+        $this->assertNotNull($intake);
+        $this->assertSame('S3cret!', $intake->hosting_password);
+    }
+
+    public function test_intake_requires_either_a_logo_upload_or_a_design_reference(): void
+    {
+        $merchant = $this->merchant(Merchant::TIER_V2);
+        $this->activeInstance($merchant);
+
+        Livewire::actingAs($merchant->owner)
+            ->test(MerchantWhiteLabel::class)
+            ->set('intakeDesiredBrandName', 'ConnectNow')
+            ->set('intakeWhatsapp', '+2348012345678')
+            ->set('intakeHostingChoice', WhiteLabelInstance::HOSTING_SUPREME_IDEAS_SERVER)
+            ->call('submitIntake')
+            ->assertHasErrors(['intakeLogoDesignReference']);
+
+        $this->assertNull(WhiteLabelProjectIntake::first());
+    }
+
+    public function test_intake_stores_brand_colors_and_uploaded_logo_and_banner_reference(): void
+    {
+        Storage::fake('local');
+        $merchant = $this->merchant(Merchant::TIER_V2);
+        $this->activeInstance($merchant);
+
+        Livewire::actingAs($merchant->owner)
+            ->test(MerchantWhiteLabel::class)
+            ->set('intakeDesiredBrandName', 'ConnectNow')
+            ->set('intakeWhatsapp', '+2348012345678')
+            ->set('intakeBrandPrimaryColor', '#123456')
+            ->set('intakeBrandAccentColor', '#abcdef')
+            ->set('intakeLogoUpload', UploadedFile::fake()->image('logo.png', 500, 500))
+            ->set('intakeBannerReferenceUpload', UploadedFile::fake()->image('banner.jpg', 1680, 945))
+            ->set('intakeBannerDesignRequest', 'Bright, teal-and-gold, matching the Naara style')
+            ->set('intakeHostingChoice', WhiteLabelInstance::HOSTING_SUPREME_IDEAS_SERVER)
+            ->call('submitIntake')
+            ->assertSet('intakeError', null);
+
+        $intake = WhiteLabelProjectIntake::first();
+        $this->assertSame('#123456', $intake->brand_primary_color);
+        $this->assertSame('#abcdef', $intake->brand_accent_color);
+        $this->assertNotNull($intake->logo_url);
+        $this->assertNotNull($intake->banner_reference_url);
+        $this->assertSame('Bright, teal-and-gold, matching the Naara style', $intake->banner_design_request);
+    }
+
+    public function test_deploy_progress_renders_on_the_dashboard(): void
+    {
+        $merchant = $this->merchant(Merchant::TIER_V2);
+        $instance = $this->activeInstance($merchant);
+        $intakeService = app(WhiteLabelProjectIntakeService::class);
+        $intake = $intakeService->submit($instance, [
+            'desired_brand_name' => 'ConnectNow', 'whatsapp_number' => '+1',
+            'hosting_choice' => WhiteLabelInstance::HOSTING_SUPREME_IDEAS_SERVER,
+        ]);
+        $admin = \App\Models\User::factory()->create();
+        $intakeService->markSeen($intake, $admin->id);
+        $intakeService->setDeployTimeline($intake, 10);
+
+        Livewire::actingAs($merchant->owner)
+            ->test(MerchantWhiteLabel::class)
+            ->assertSet('deployProgress', 0)
+            ->assertSee('Day 1 of 10')
+            ->assertSee('Deployment in progress');
     }
 }

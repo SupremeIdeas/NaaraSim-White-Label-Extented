@@ -435,6 +435,9 @@ Route::middleware(['admin', 'throttle:admin'])
             Route::get('/system-health', SystemHealth::class)->name('system-health');
             // White-label distribution oversight (Updater Batch 4).
             Route::get('/white-label', App\Livewire\Admin\WhiteLabelRegistry::class)->name('white-label');
+            // Project-intake PDF export (Prompt 21-EXT2 §6) — Livewire can't
+            // stream a file download, so this is a real controller route.
+            Route::get('/white-label/intake/{intake}/pdf', App\Http\Controllers\Admin\WhiteLabelIntakePdfController::class)->name('white-label.intake.pdf');
             Route::get('/gateways', Gateways::class)->name('gateways');
             Route::get('/kyc', KycReview::class)->name('kyc');
             Route::get('/merchants', Merchants::class)->name('merchants');

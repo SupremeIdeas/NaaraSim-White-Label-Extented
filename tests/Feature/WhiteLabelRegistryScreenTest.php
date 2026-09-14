@@ -9,7 +9,10 @@ use App\Models\User;
 use App\Models\WhiteLabelApiLog;
 use App\Models\WhiteLabelInstance;
 use App\Models\WhiteLabelLicensePlan;
+use App\Models\WhiteLabelProjectIntake;
 use App\Services\Updater\PackagePublisher;
+use App\Services\Updater\WhiteLabelLicenseService;
+use App\Services\Updater\WhiteLabelProjectIntakeService;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
@@ -338,6 +341,88 @@ class WhiteLabelRegistryScreenTest extends TestCase
             ->assertSet('platformWithdrawError', null);
 
         $this->assertSame(500.0, app(\App\Services\Platform\PlatformEarningsService::class)->balance());
+    }
+
+    // --- Prompt 21-EXT2 §5/§6: project intake review ---
+
+    private function licensedInstanceWithIntake(): array
+    {
+        $instance = app(WhiteLabelLicenseService::class)->register(['brand_name' => 'Biz', 'contact_email' => 'b@b.test']);
+        $instance = app(WhiteLabelLicenseService::class)->issueLicense($instance, WhiteLabelInstance::TIER_NORMAL);
+        $intake = app(WhiteLabelProjectIntakeService::class)->submit($instance, [
+            'desired_brand_name' => 'ConnectNow', 'whatsapp_number' => '+1',
+            'brand_primary_color' => '#0A6E6E', 'brand_accent_color' => '#D4A017',
+            'logo_design_reference' => 'Modern, clean',
+            'hosting_choice' => WhiteLabelInstance::HOSTING_SUPREME_IDEAS_SERVER,
+        ]);
+
+        return [$instance, $intake];
+    }
+
+    public function test_admin_can_mark_an_intake_seen(): void
+    {
+        [, $intake] = $this->licensedInstanceWithIntake();
+
+        Livewire::actingAs($this->admin())
+            ->test(WhiteLabelRegistry::class)
+            ->call('markIntakeSeen', $intake->id);
+
+        $this->assertSame(WhiteLabelProjectIntake::STATUS_SEEN, $intake->fresh()->status);
+    }
+
+    public function test_admin_can_set_a_deploy_timeline_only_after_marking_seen(): void
+    {
+        [, $intake] = $this->licensedInstanceWithIntake();
+
+        Livewire::actingAs($this->admin())
+            ->test(WhiteLabelRegistry::class)
+            ->set('deployDaysInputs.'.$intake->id, '7')
+            ->call('setIntakeDeployTimeline', $intake->id);
+
+        $this->assertSame(WhiteLabelProjectIntake::STATUS_PENDING, $intake->fresh()->status, 'timeline refused before Seen — status unchanged');
+
+        app(WhiteLabelProjectIntakeService::class)->markSeen($intake, $this->admin()->id);
+
+        Livewire::actingAs($this->admin())
+            ->test(WhiteLabelRegistry::class)
+            ->set('deployDaysInputs.'.$intake->id, '7')
+            ->call('setIntakeDeployTimeline', $intake->id);
+
+        $this->assertSame(WhiteLabelProjectIntake::STATUS_IN_PROGRESS, $intake->fresh()->status);
+        $this->assertSame(7, $intake->fresh()->deploy_days);
+    }
+
+    public function test_admin_can_export_the_intake_as_a_pdf(): void
+    {
+        [, $intake] = $this->licensedInstanceWithIntake();
+
+        $response = $this->actingAs($this->admin())->get(route('admin.white-label.intake.pdf', $intake->id));
+
+        $response->assertOk();
+        $this->assertSame('application/pdf', $response->headers->get('Content-Type'));
+    }
+
+    public function test_a_non_panel_user_gets_a_plain_404_on_the_intake_pdf_route(): void
+    {
+        // The panel-wide EnsureAdmin middleware 404s anyone without ANY panel
+        // role before the controller's own super_admin/admin check ever runs
+        // — the panel stays invisible (blueprint Section 25).
+        [, $intake] = $this->licensedInstanceWithIntake();
+
+        $response = $this->actingAs(User::factory()->create())->get(route('admin.white-label.intake.pdf', $intake->id));
+
+        $response->assertNotFound();
+    }
+
+    public function test_a_staff_user_is_forbidden_from_the_intake_pdf(): void
+    {
+        [, $intake] = $this->licensedInstanceWithIntake();
+        $staff = User::factory()->create();
+        $staff->assignRole('staff');
+
+        $response = $this->actingAs($staff)->get(route('admin.white-label.intake.pdf', $intake->id));
+
+        $response->assertForbidden();
     }
 
     public function test_issue_token_directly_reveals_a_bearer_token_once(): void

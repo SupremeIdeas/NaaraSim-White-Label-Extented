@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Model;
 use Laravel\Sanctum\HasApiTokens;
 
@@ -72,10 +73,17 @@ class WhiteLabelInstance extends Model
 
     public const ACQUISITION_MERCHANT_SELF_SERVICE = 'merchant_self_service';
 
-    /** Prompt 21 §2.3 — the merchant's stated hosting choice at request time. */
+    /** Prompt 21 §2.3 / 21-EXT2 §1 — the merchant's hosting choice. `own_server`
+     *  (a single generic option) is superseded by two concrete paths, each with
+     *  its own recommended provider and credential-collection flow in the
+     *  post-purchase project intake form. */
     public const HOSTING_SUPREME_IDEAS_SERVER = 'supreme_ideas_server';
 
-    public const HOSTING_OWN_SERVER = 'own_server';
+    public const HOSTING_OWN_VPS = 'own_vps';
+
+    public const HOSTING_OWN_SHARED = 'own_shared';
+
+    public const HOSTING_CHOICES = [self::HOSTING_SUPREME_IDEAS_SERVER, self::HOSTING_OWN_VPS, self::HOSTING_OWN_SHARED];
 
     protected $fillable = [
         'brand_name',
@@ -198,5 +206,12 @@ class WhiteLabelInstance extends Model
     public function amountPaidTotal(): float
     {
         return round((float) $this->payments()->sum('amount_usd'), 2);
+    }
+
+    /** Prompt 21-EXT2 §2 — the current project-commencement brief, one per
+     *  instance (a resubmission overwrites the draft, it isn't versioned). */
+    public function intake(): HasOne
+    {
+        return $this->hasOne(WhiteLabelProjectIntake::class);
     }
 }

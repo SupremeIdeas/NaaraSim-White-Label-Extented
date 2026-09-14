@@ -9,11 +9,14 @@ use App\Models\Setting;
 use App\Models\WhiteLabelApiLog;
 use App\Models\WhiteLabelInstance;
 use App\Models\WhiteLabelLicensePlan;
+use App\Models\WhiteLabelProjectIntake;
 use App\Services\Payouts\PayoutException;
 use App\Services\Platform\PlatformEarningsService;
 use App\Services\Platform\PlatformWithdrawalService;
 use App\Services\Updater\PackagePublisher;
 use App\Services\Updater\WhiteLabelLicenseService;
+use App\Services\Updater\WhiteLabelProjectIntakeException;
+use App\Services\Updater\WhiteLabelProjectIntakeService;
 use App\Support\Auditor;
 use App\Support\MediaStorage;
 use Illuminate\Support\Facades\Auth;
@@ -54,6 +57,12 @@ class WhiteLabelRegistry extends Component
     // Prompt 21-EXT §3.1 — per-row price input for a pending self-service
     // request, pre-filled from its chosen plan the moment the row is opened.
     public array $priceInputs = [];
+
+    // Prompt 21-EXT2 §5 — per-intake deploy-timeline day input, and which
+    // instance's intake detail panel is currently expanded.
+    public array $deployDaysInputs = [];
+
+    public ?int $expandedIntakeInstanceId = null;
 
     // Prompt 21-EXT §1.4/§6.5 — plan create/edit form.
     public ?int $editingPlanId = null;
@@ -228,6 +237,63 @@ class WhiteLabelRegistry extends Component
         $licenses->priceForPayment($instance, $price, Auth::id());
         unset($this->priceInputs[$id]);
         $this->dispatch('nx-toast', type: 'success', message: 'Price set — '.$instance->brand_name.' can now pay to activate.');
+    }
+
+    // --- Prompt 21-EXT2 §5: project intake review ---
+
+    public function toggleIntakeDetail(int $instanceId): void
+    {
+        $this->expandedIntakeInstanceId = $this->expandedIntakeInstanceId === $instanceId ? null : $instanceId;
+    }
+
+    public function markIntakeSeen(int $intakeId, WhiteLabelProjectIntakeService $intakes): void
+    {
+        $this->guard();
+        $intake = WhiteLabelProjectIntake::find($intakeId);
+        if ($intake === null) {
+            return;
+        }
+
+        $intakes->markSeen($intake, Auth::id());
+        $this->dispatch('nx-toast', type: 'success', message: 'Marked as seen.');
+    }
+
+    public function setIntakeDeployTimeline(int $intakeId, WhiteLabelProjectIntakeService $intakes): void
+    {
+        $this->guard();
+        $intake = WhiteLabelProjectIntake::find($intakeId);
+        if ($intake === null) {
+            return;
+        }
+
+        $days = (int) ($this->deployDaysInputs[$intakeId] ?? 0);
+
+        try {
+            $intakes->setDeployTimeline($intake, $days);
+        } catch (WhiteLabelProjectIntakeException $e) {
+            $this->dispatch('nx-toast', type: 'error', message: $e->getMessage() === 'not_seen_yet'
+                ? 'Mark this intake as seen before setting a deploy timeline.'
+                : 'Enter a valid number of days.');
+
+            return;
+        }
+
+        unset($this->deployDaysInputs[$intakeId]);
+        $this->dispatch('nx-toast', type: 'success', message: 'Deploy timeline set — '.$days.' day(s), starting now.');
+    }
+
+    public function getIntakeProgressProperty(): \Closure
+    {
+        $service = app(WhiteLabelProjectIntakeService::class);
+
+        return fn (WhiteLabelProjectIntake $intake) => $service->progressPercent($intake);
+    }
+
+    public function getIntakeDayOfProperty(): \Closure
+    {
+        $service = app(WhiteLabelProjectIntakeService::class);
+
+        return fn (WhiteLabelProjectIntake $intake) => $service->dayOf($intake);
     }
 
     // --- Prompt 21-EXT §1.4/§6.5: plan catalog + resell-status management ---
@@ -566,7 +632,7 @@ class WhiteLabelRegistry extends Component
 
     public function getInstancesProperty()
     {
-        return WhiteLabelInstance::query()->with('licensePlan')->latest()->get();
+        return WhiteLabelInstance::query()->with(['licensePlan', 'intake'])->latest()->get();
     }
 
     public function getPackagesProperty()

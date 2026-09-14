@@ -6,10 +6,15 @@ use App\Exceptions\LicenseActivationException;
 use App\Models\Merchant;
 use App\Models\WhiteLabelInstance;
 use App\Models\WhiteLabelLicensePlan;
+use App\Models\WhiteLabelProjectIntake;
 use App\Services\Updater\WhiteLabelLicenseService;
+use App\Services\Updater\WhiteLabelProjectIntakeException;
+use App\Services\Updater\WhiteLabelProjectIntakeService;
+use App\Support\MediaStorage;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
+use Livewire\WithFileUploads;
 
 /**
  * Prompt 21-EXT §2/§3 — the merchant-facing self-service white-label license
@@ -27,11 +32,49 @@ use Livewire\Component;
 #[Layout('components.layouts.customer')]
 class MerchantWhiteLabel extends Component
 {
+    use WithFileUploads;
+
     public string $hostingPreference = WhiteLabelInstance::HOSTING_SUPREME_IDEAS_SERVER;
 
     public bool $disclaimerAcknowledged = false;
 
     public ?string $error = null;
+
+    // Prompt 21-EXT2 §2 — project intake form (post-purchase commencement brief).
+    public string $intakeDesiredBrandName = '';
+
+    public string $intakeWhatsapp = '';
+
+    // Brand identity — mirrors how Naara's own on-brand palette (Deep Teal +
+    // Warm Gold) drives every themed surface; the merchant picks the same
+    // two-tone pairing for their own white-label.
+    public string $intakeBrandPrimaryColor = '#0A6E6E';
+
+    public string $intakeBrandAccentColor = '#D4A017';
+
+    public $intakeLogoUpload = null;
+
+    public string $intakeLogoDesignReference = '';
+
+    public $intakeBannerReferenceUpload = null;
+
+    public string $intakeBannerDesignRequest = '';
+
+    public string $intakeHostingChoice = WhiteLabelInstance::HOSTING_SUPREME_IDEAS_SERVER;
+
+    public bool $intakeHostingDisclaimerAcknowledged = false;
+
+    public string $intakeHostingHost = '';
+
+    public string $intakeHostingUsername = '';
+
+    public string $intakeHostingPassword = '';
+
+    public string $intakeHostingNotes = '';
+
+    public string $intakeAdditionalNotes = '';
+
+    public ?string $intakeError = null;
 
     private function merchant(): ?Merchant
     {
@@ -185,6 +228,113 @@ class MerchantWhiteLabel extends Component
         }
 
         $this->dispatch('nx-toast', type: 'success', message: 'Upgraded to Extended — your fork unlocks on its next check-in.');
+    }
+
+    public function getIntakeProperty(): ?WhiteLabelProjectIntake
+    {
+        return $this->instance?->intake;
+    }
+
+    public function getIntakeIsSelfHostedProperty(): bool
+    {
+        return in_array($this->intakeHostingChoice, [
+            WhiteLabelInstance::HOSTING_OWN_VPS, WhiteLabelInstance::HOSTING_OWN_SHARED,
+        ], true);
+    }
+
+    public function getDeployProgressProperty(): ?int
+    {
+        $intake = $this->intake;
+        if ($intake === null) {
+            return null;
+        }
+
+        return app(WhiteLabelProjectIntakeService::class)->progressPercent($intake);
+    }
+
+    public function getDeployDayOfProperty(): ?array
+    {
+        $intake = $this->intake;
+        if ($intake === null) {
+            return null;
+        }
+
+        return app(WhiteLabelProjectIntakeService::class)->dayOf($intake);
+    }
+
+    /** Prompt 21-EXT2 §3 — file (or refile, before it's reviewed) the
+     *  project-commencement brief once the license is live. */
+    public function submitIntake(WhiteLabelProjectIntakeService $intakes): void
+    {
+        $this->intakeError = null;
+        $instance = $this->instance;
+        if ($instance === null || ! $instance->hasLiveLicense()) {
+            return;
+        }
+
+        $rules = [
+            'intakeDesiredBrandName' => ['required', 'string', 'max:120'],
+            'intakeWhatsapp' => ['required', 'string', 'max:32'],
+            'intakeBrandPrimaryColor' => ['required', 'regex:/^#[0-9A-Fa-f]{6}$/'],
+            'intakeBrandAccentColor' => ['required', 'regex:/^#[0-9A-Fa-f]{6}$/'],
+            'intakeLogoUpload' => ['nullable', 'image', 'max:2048'],
+            'intakeLogoDesignReference' => ['nullable', 'string', 'max:1000', 'required_without:intakeLogoUpload'],
+            'intakeBannerReferenceUpload' => ['nullable', 'image', 'max:2048'],
+            'intakeBannerDesignRequest' => ['nullable', 'string', 'max:2000'],
+            'intakeHostingChoice' => ['required', 'in:'.implode(',', WhiteLabelInstance::HOSTING_CHOICES)],
+            'intakeAdditionalNotes' => ['nullable', 'string', 'max:2000'],
+        ];
+        if ($this->intakeIsSelfHosted) {
+            $rules['intakeHostingHost'] = ['required', 'string', 'max:255'];
+            $rules['intakeHostingUsername'] = ['required', 'string', 'max:255'];
+            $rules['intakeHostingPassword'] = ['required', 'string', 'max:255'];
+            $rules['intakeHostingNotes'] = ['nullable', 'string', 'max:2000'];
+        }
+        $this->validate($rules, [
+            'intakeLogoDesignReference.required_without' => 'Upload a logo, or describe/link a design reference for our team to work from.',
+            'intakeBrandPrimaryColor.regex' => 'Use a hex colour like #0A6E6E.',
+            'intakeBrandAccentColor.regex' => 'Use a hex colour like #D4A017.',
+        ]);
+
+        if ($this->intakeIsSelfHosted && ! $this->intakeHostingDisclaimerAcknowledged) {
+            $this->intakeError = 'Please acknowledge the hosting-credential disclaimer.';
+
+            return;
+        }
+
+        $logoUrl = $this->intakeLogoUpload ? MediaStorage::storePublic($this->intakeLogoUpload, 'white-label-intake-logos') : null;
+        $bannerRefUrl = $this->intakeBannerReferenceUpload ? MediaStorage::storePublic($this->intakeBannerReferenceUpload, 'white-label-intake-banners') : null;
+
+        try {
+            $intakes->submit($instance, [
+                'desired_brand_name' => $this->intakeDesiredBrandName,
+                'whatsapp_number' => $this->intakeWhatsapp,
+                'brand_primary_color' => $this->intakeBrandPrimaryColor,
+                'brand_accent_color' => $this->intakeBrandAccentColor,
+                'logo_url' => $logoUrl,
+                'logo_design_reference' => $this->intakeLogoDesignReference ?: null,
+                'banner_reference_url' => $bannerRefUrl,
+                'banner_design_request' => $this->intakeBannerDesignRequest ?: null,
+                'hosting_choice' => $this->intakeHostingChoice,
+                'hosting_disclaimer_acknowledged' => $this->intakeHostingDisclaimerAcknowledged,
+                'hosting_host' => $this->intakeHostingHost ?: null,
+                'hosting_username' => $this->intakeHostingUsername ?: null,
+                'hosting_password' => $this->intakeHostingPassword ?: null,
+                'hosting_notes' => $this->intakeHostingNotes ?: null,
+                'additional_notes' => $this->intakeAdditionalNotes ?: null,
+            ]);
+        } catch (WhiteLabelProjectIntakeException) {
+            $this->intakeError = 'Your license needs to be active before you can submit this form.';
+
+            return;
+        }
+
+        $this->reset(
+            'intakeDesiredBrandName', 'intakeWhatsapp', 'intakeHostingDisclaimerAcknowledged',
+            'intakeLogoUpload', 'intakeLogoDesignReference', 'intakeBannerReferenceUpload', 'intakeBannerDesignRequest',
+            'intakeHostingHost', 'intakeHostingUsername', 'intakeHostingPassword', 'intakeHostingNotes', 'intakeAdditionalNotes',
+        );
+        $this->dispatch('nx-toast', type: 'success', message: 'Project details submitted — our team will review it shortly.');
     }
 
     public function render()
