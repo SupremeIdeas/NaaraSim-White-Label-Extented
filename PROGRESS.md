@@ -9,6 +9,31 @@
 
 ## DONE
 
+### ⭐ Floating "My Journey" launcher — 2026-09-14
+Owner request: a second floating, minimizable widget — same size and minimize
+behavior as the NaaraSim Wizard, positioned just in front of it — for fast,
+on-demand navigation to activity progress + rewards (route `journey`, which
+already exists in full — no precursor build needed). `App\Livewire\
+JourneyLauncher` mirrors Wizard's exact minimize-bubble pattern (same h-11
+w-11 bubble, same localStorage-persisted hidden toggle under its own key
+`nx_journey_hidden`), simplified to a pure navigation link (no expandable
+panel — the pill itself is the action) with a live glance badge showing the
+user's real NaaraCredits balance (`CreditService::balance()` — one cheap
+query, no invented aggregate; deliberately did NOT compute a goals-unlocked
+percentage for the badge, since that needs an expensive per-goal loop
+unsuitable for a widget rendered on every page). Positioned at the slot
+immediately above Wizard (`bottom-40`/`lg:bottom-24` — WhatsApp's old slot);
+WhatsApp bumped up one tier (`bottom-56`/`lg:bottom-40`) so none of the three
+floating actions (Wizard, Journey, WhatsApp) ever overlap. Hidden on
+`/support` (matches Wizard's own exclusion) and on `/journey` itself
+(pointless there). Marketing/guest layout intentionally NOT touched — Journey
+requires auth and that layout already has its own admin-configurable
+floating-nav system (`NavSlots`) which can add a Journey slot if wanted, no
+need for a hardcoded duplicate.
+- `tests/Feature/JourneyLauncherTest.php` (5) — renders on a normal page,
+  hidden on support/journey routes, links straight to `route('journey')`,
+  badge shows the real credits balance.
+
 ### 🧭 Admin-configurable bottom nav (main + Numbers section) — 2026-09-14
 Owner request: let an admin reorder or replace which items appear in the main
 bottom bar / More sheet, and in the Numbers section's own bottom bar, without
