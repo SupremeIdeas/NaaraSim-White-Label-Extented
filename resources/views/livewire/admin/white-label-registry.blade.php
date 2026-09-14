@@ -87,6 +87,14 @@
                                 <td class="py-2 pr-4">
                                     <span class="font-medium">{{ $i->brand_name }}</span>
                                     <span class="block text-xs text-slate-400">{{ $i->slug }}</span>
+                                    @if ($i->acquisition_method === \App\Models\WhiteLabelInstance::ACQUISITION_MERCHANT_SELF_SERVICE)
+                                        <span class="mt-1 inline-flex items-center gap-1 rounded-full bg-indigo-100 px-2 py-0.5 text-[11px] font-medium text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300">
+                                            Self-service{{ $i->licensePlan ? ' · '.$i->licensePlan->name : '' }}
+                                        </span>
+                                        @if ($i->price_usd)
+                                            <span class="block text-[11px] text-slate-400">Priced ${{ number_format((float) $i->price_usd, 2) }} · paid ${{ number_format($i->amountPaidTotal(), 2) }}</span>
+                                        @endif
+                                    @endif
                                 </td>
                                 <td class="py-2 pr-4">
                                     @php
@@ -130,7 +138,21 @@
                                 <td class="py-2 pr-4 text-slate-500 dark:text-slate-400">{{ $i->last_checked_in_at?->diffForHumans() ?? 'never' }}</td>
                                 <td class="py-2 pr-4">
                                     <div class="flex flex-wrap justify-end gap-1.5">
-                                        @if ($i->status === 'pending')
+                                        @if ($i->status === 'pending' && $i->acquisition_method === \App\Models\WhiteLabelInstance::ACQUISITION_MERCHANT_SELF_SERVICE)
+                                            {{-- Prompt 21-EXT §3.1 — a self-service request is PRICED, not directly
+                                                 issued: the merchant's own "pay to activate" charges the wallet and
+                                                 issues the license (payAndActivate). Admin only confirms the price. --}}
+                                            <div class="flex items-center gap-1">
+                                                <span class="text-slate-400">$</span>
+                                                <input type="number" step="0.01" min="0.01"
+                                                    wire:model="priceInputs.{{ $i->id }}"
+                                                    value="{{ $priceInputs[$i->id] ?? $i->price_usd ?? $i->licensePlan?->price_usd }}"
+                                                    class="w-24 rounded-lg border border-slate-200 px-2 py-1 text-xs dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100"
+                                                    placeholder="Price">
+                                                <button type="button" wire:click="priceInstance({{ $i->id }})" class="rounded-lg border border-green-300 px-2 py-1 text-xs font-medium text-green-700 hover:bg-green-50 dark:border-green-900/50 dark:text-green-300 dark:hover:bg-green-950/30">{{ $i->price_usd ? 'Update price' : 'Set price' }}</button>
+                                            </div>
+                                            <button type="button" wire:click="rejectInstance({{ $i->id }})" wire:confirm="Reject this registration request?" class="rounded-lg border border-red-200 px-2 py-1 text-xs font-medium text-red-600 hover:bg-red-50 dark:border-red-900/50 dark:text-red-300 dark:hover:bg-red-950/30">Reject</button>
+                                        @elseif ($i->status === 'pending')
                                             <button type="button" wire:click="approveInstance({{ $i->id }}, 'normal')" class="rounded-lg border border-green-300 px-2 py-1 text-xs font-medium text-green-700 hover:bg-green-50 dark:border-green-900/50 dark:text-green-300 dark:hover:bg-green-950/30">Approve · Normal</button>
                                             <button type="button" wire:click="approveInstance({{ $i->id }}, 'extended')" class="rounded-lg border border-green-300 px-2 py-1 text-xs font-medium text-green-700 hover:bg-green-50 dark:border-green-900/50 dark:text-green-300 dark:hover:bg-green-950/30">Approve · Extended</button>
                                             <button type="button" wire:click="rejectInstance({{ $i->id }})" wire:confirm="Reject this registration request?" class="rounded-lg border border-red-200 px-2 py-1 text-xs font-medium text-red-600 hover:bg-red-50 dark:border-red-900/50 dark:text-red-300 dark:hover:bg-red-950/30">Reject</button>
@@ -145,6 +167,12 @@
                                                 <button type="button" wire:click="revokeLicense({{ $i->id }})" wire:confirm="Permanently revoke this license? The key can never be used again." class="rounded-lg border border-red-200 px-2 py-1 text-xs font-medium text-red-600 hover:bg-red-50 dark:border-red-900/50 dark:text-red-300 dark:hover:bg-red-950/30">Revoke</button>
                                             @endunless
                                         @endif
+                                        @if ($i->intake)
+                                            <button type="button" wire:click="toggleIntakeDetail({{ $i->id }})"
+                                                class="rounded-lg border px-2 py-1 text-xs font-medium {{ $i->intake->status === 'pending' ? 'border-amber-300 text-amber-700 hover:bg-amber-50 dark:border-amber-900/50 dark:text-amber-300 dark:hover:bg-amber-950/30' : 'border-slate-200 text-slate-600 hover:bg-slate-50 dark:border-[#2D4060] dark:text-slate-300 dark:hover:bg-[#243352]' }}">
+                                                {{ $expandedIntakeInstanceId === $i->id ? 'Hide project' : 'Project ('.ucfirst(str_replace('_', ' ', $i->intake->status)).')' }}
+                                            </button>
+                                        @endif
                                         <button type="button" wire:click="selectInstance({{ $i->id }})"
                                             class="rounded-lg border border-slate-200 px-2 py-1 text-xs font-medium text-slate-600 hover:bg-slate-50 dark:border-[#2D4060] dark:text-slate-300 dark:hover:bg-[#243352]">
                                             {{ $selectedInstanceId === $i->id ? 'Hide log' : 'View log' }}
@@ -152,6 +180,68 @@
                                     </div>
                                 </td>
                             </tr>
+                            @if ($expandedIntakeInstanceId === $i->id && $i->intake)
+                                @php $intake = $i->intake; $progress = $intake ? ($this->intakeProgress)($intake) : null; $dayOf = $intake ? ($this->intakeDayOf)($intake) : null; @endphp
+                                <tr>
+                                    <td colspan="7" class="bg-slate-50 p-4 dark:bg-[#243352]">
+                                        <div class="grid gap-4 sm:grid-cols-2">
+                                            <div class="space-y-1 text-xs text-slate-600 dark:text-slate-300">
+                                                <p><span class="font-medium text-slate-800 dark:text-slate-100">Desired name:</span> {{ $intake->desired_brand_name }}</p>
+                                                <p><span class="font-medium text-slate-800 dark:text-slate-100">WhatsApp:</span> {{ $intake->whatsapp_number }}</p>
+                                                <p class="flex items-center gap-2">
+                                                    <span class="font-medium text-slate-800 dark:text-slate-100">Brand colours:</span>
+                                                    <span class="inline-block h-4 w-4 rounded-full border border-slate-300" style="background:{{ $intake->brand_primary_color }}"></span>
+                                                    <span class="inline-block h-4 w-4 rounded-full border border-slate-300" style="background:{{ $intake->brand_accent_color }}"></span>
+                                                    {{ $intake->brand_primary_color }} / {{ $intake->brand_accent_color }}
+                                                </p>
+                                                @if ($intake->logo_url)
+                                                    <p><span class="font-medium text-slate-800 dark:text-slate-100">Logo:</span> <a href="{{ $intake->logo_url }}" target="_blank" class="text-primary underline">View uploaded logo</a></p>
+                                                @elseif ($intake->logo_design_reference)
+                                                    <p><span class="font-medium text-slate-800 dark:text-slate-100">Logo design reference:</span> {{ $intake->logo_design_reference }}</p>
+                                                @endif
+                                                @if ($intake->banner_reference_url)
+                                                    <p><span class="font-medium text-slate-800 dark:text-slate-100">Banner reference:</span> <a href="{{ $intake->banner_reference_url }}" target="_blank" class="text-primary underline">View uploaded reference</a></p>
+                                                @endif
+                                                @if ($intake->banner_design_request)
+                                                    <p><span class="font-medium text-slate-800 dark:text-slate-100">Banner request:</span> {{ $intake->banner_design_request }}</p>
+                                                @endif
+                                                <p><span class="font-medium text-slate-800 dark:text-slate-100">Hosting:</span> {{ str_replace('_', ' ', ucfirst($intake->hosting_choice)) }}</p>
+                                                @if ($intake->isSelfHosted())
+                                                    <p><span class="font-medium text-slate-800 dark:text-slate-100">Host:</span> {{ $intake->hosting_host }}</p>
+                                                    <p><span class="font-medium text-slate-800 dark:text-slate-100">Username:</span> {{ $intake->hosting_username }}</p>
+                                                    <p><span class="font-medium text-slate-800 dark:text-slate-100">Password:</span> <span class="font-mono">{{ $intake->hosting_password }}</span></p>
+                                                    @if ($intake->hosting_notes)
+                                                        <p><span class="font-medium text-slate-800 dark:text-slate-100">Access notes:</span> {{ $intake->hosting_notes }}</p>
+                                                    @endif
+                                                @endif
+                                                @if ($intake->additional_notes)
+                                                    <p><span class="font-medium text-slate-800 dark:text-slate-100">Additional notes:</span> {{ $intake->additional_notes }}</p>
+                                                @endif
+                                            </div>
+                                            <div class="space-y-3">
+                                                @if ($intake->status === 'pending')
+                                                    <button type="button" wire:click="markIntakeSeen({{ $intake->id }})" class="rounded-lg border border-green-300 px-3 py-1.5 text-xs font-medium text-green-700 hover:bg-green-50 dark:border-green-900/50 dark:text-green-300 dark:hover:bg-green-950/30">Mark seen</button>
+                                                @elseif ($intake->status === 'seen')
+                                                    <div class="flex items-center gap-2">
+                                                        <input type="number" min="1" wire:model="deployDaysInputs.{{ $intake->id }}" placeholder="Days" class="w-24 rounded-lg border border-slate-200 px-2 py-1.5 text-xs dark:border-[#2D4060] dark:bg-[#1B2A45] dark:text-slate-100">
+                                                        <button type="button" wire:click="setIntakeDeployTimeline({{ $intake->id }})" class="rounded-lg border border-green-300 px-3 py-1.5 text-xs font-medium text-green-700 hover:bg-green-50 dark:border-green-900/50 dark:text-green-300 dark:hover:bg-green-950/30">Set deploy timeline</button>
+                                                    </div>
+                                                @elseif ($intake->status === 'in_progress')
+                                                    <p class="text-xs text-slate-500 dark:text-slate-400">Day {{ $dayOf['day'] }} of {{ $dayOf['of'] }} — {{ $progress }}%</p>
+                                                    <div class="h-2 w-full overflow-hidden rounded-full bg-slate-200 dark:bg-[#1B2A45]">
+                                                        <div class="h-full rounded-full bg-primary" style="width: {{ $progress }}%"></div>
+                                                    </div>
+                                                @elseif ($intake->status === 'completed')
+                                                    <p class="text-xs font-medium text-green-700 dark:text-green-300">Deployment complete.</p>
+                                                @endif
+                                                <a href="{{ route('admin.white-label.intake.pdf', $intake->id) }}" target="_blank" class="inline-flex items-center gap-1 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50 dark:border-[#2D4060] dark:text-slate-300 dark:hover:bg-[#243352]">
+                                                    <x-icon name="download" class="h-3.5 w-3.5" /> Export PDF
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endif
                             @if ($selectedInstanceId === $i->id)
                                 <tr>
                                     <td colspan="7" class="bg-slate-50 p-3 dark:bg-[#243352]">
@@ -183,6 +273,167 @@
             </div>
         @endif
     </div>
+
+    {{-- Prompt 21-EXT §1.4/§6.5 — license plan catalog + resell-status gating --}}
+    <div class="mb-6 rounded-2xl border border-slate-200 bg-white p-5 dark:border-[#2D4060] dark:bg-[#1B2A45]">
+        <h2 class="mb-3 text-lg font-semibold text-slate-900 dark:text-slate-100">License plans &amp; resell status</h2>
+
+        {{-- Resell-status toggles with live threshold counts --}}
+        <div class="mb-5 grid gap-3 sm:grid-cols-2">
+            @foreach ($this->resellStatus as $tier => $status)
+                <div class="rounded-xl border border-slate-200 p-3 dark:border-[#2D4060]">
+                    <div class="flex items-center justify-between">
+                        <p class="text-sm font-medium text-slate-700 dark:text-slate-200">{{ ucfirst($tier) }} resell</p>
+                        <button type="button" wire:click="toggleResell('{{ $tier }}')"
+                            class="rounded-full px-2.5 py-1 text-xs font-medium {{ $status['open'] ? 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300' : 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300' }}">
+                            {{ $status['open'] ? 'Open' : 'Closed' }}
+                        </button>
+                    </div>
+                    <p class="mt-1 text-xs text-slate-400">{{ $status['count'] }} / {{ $status['threshold'] }} self-service sales (auto-closes at threshold)</p>
+                </div>
+            @endforeach
+        </div>
+
+        {{-- Plan create/edit form --}}
+        <form wire:submit="savePlan" class="mb-5 grid gap-3 rounded-xl border border-slate-200 p-4 dark:border-[#2D4060] sm:grid-cols-2">
+            <div class="sm:col-span-2 flex items-center justify-between">
+                <p class="text-sm font-semibold text-slate-700 dark:text-slate-200">{{ $editingPlanId ? 'Edit plan' : 'New plan' }}</p>
+                @if ($editingPlanId)
+                    <button type="button" wire:click="newPlanForm" class="text-xs font-medium text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">Cancel edit</button>
+                @endif
+            </div>
+            <div>
+                <input type="text" wire:model="planName" placeholder="Name" class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100" />
+                @error('planName') <span class="text-xs text-red-500">{{ $message }}</span> @enderror
+            </div>
+            <div>
+                <input type="text" wire:model="planTagline" placeholder="Tagline" class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100" />
+                @error('planTagline') <span class="text-xs text-red-500">{{ $message }}</span> @enderror
+            </div>
+            <div class="sm:col-span-2">
+                <textarea wire:model="planDescription" rows="2" placeholder="Description" class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100"></textarea>
+                @error('planDescription') <span class="text-xs text-red-500">{{ $message }}</span> @enderror
+            </div>
+            <div>
+                <input type="number" step="0.01" min="0.01" wire:model="planPrice" placeholder="Price (USD)" class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100" />
+                @error('planPrice') <span class="text-xs text-red-500">{{ $message }}</span> @enderror
+            </div>
+            <div>
+                <input type="number" min="0" wire:model="planSortOrder" placeholder="Sort order" class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100" />
+            </div>
+            <div>
+                <select wire:model="planTier" class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                    @foreach ($this->tierOptions as $t)
+                        <option value="{{ $t }}">{{ ucfirst($t) }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div>
+                <select wire:model="planSupportLevel" class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                    <option value="standard">Standard support</option>
+                    <option value="priority">Priority support</option>
+                </select>
+            </div>
+            <div class="sm:col-span-2">
+                <textarea wire:model="planFeaturesText" rows="3" placeholder="One feature per line" class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100"></textarea>
+            </div>
+            <div class="sm:col-span-2">
+                <input type="file" wire:model="planCoverUpload" accept="image/webp,image/jpeg,image/png" class="block w-full text-xs text-slate-500 dark:text-slate-400" />
+                @error('planCoverUpload') <span class="text-xs text-red-500">{{ $message }}</span> @enderror
+                <div wire:loading wire:target="planCoverUpload" class="mt-1 text-xs text-slate-400">Uploading…</div>
+            </div>
+            <label class="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
+                <input type="checkbox" wire:model="planIsActive" class="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary dark:border-[#2D4060] dark:bg-[#243352]"> Active
+            </label>
+            <div class="flex justify-end">
+                <button type="submit" wire:loading.attr="disabled" wire:target="savePlan"
+                    class="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary-dark disabled:opacity-60">
+                    {{ $editingPlanId ? 'Update plan' : 'Create plan' }}
+                </button>
+            </div>
+        </form>
+
+        {{-- Plan list --}}
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm">
+                <thead class="text-xs uppercase text-slate-400 dark:text-slate-500">
+                    <tr>
+                        <th class="py-2 pr-4">Cover</th>
+                        <th class="py-2 pr-4">Plan</th>
+                        <th class="py-2 pr-4">Price</th>
+                        <th class="py-2 pr-4">Tier</th>
+                        <th class="py-2 pr-4">Support</th>
+                        <th class="py-2 pr-4">Active</th>
+                        <th class="py-2 pr-4"></th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 dark:divide-[#2D4060]">
+                    @foreach ($this->licensePlans as $plan)
+                        <tr class="text-slate-700 dark:text-slate-200">
+                            <td class="py-2 pr-4">
+                                @if ($plan->cover_image_url)
+                                    <img src="{{ $plan->cover_image_url }}" alt="" class="h-10 w-16 rounded-md object-cover">
+                                @else
+                                    <div class="flex h-10 w-16 items-center justify-center rounded-md bg-slate-100 text-slate-300 dark:bg-[#243352]"><x-icon name="image" class="h-4 w-4" /></div>
+                                @endif
+                            </td>
+                            <td class="py-2 pr-4 font-medium">{{ $plan->name }}<span class="block text-xs font-normal text-slate-400">{{ $plan->tagline }}</span></td>
+                            <td class="py-2 pr-4">${{ number_format((float) $plan->price_usd, 2) }}</td>
+                            <td class="py-2 pr-4">{{ ucfirst($plan->tier) }}</td>
+                            <td class="py-2 pr-4">{{ ucfirst($plan->support_level) }}</td>
+                            <td class="py-2 pr-4">
+                                <button type="button" wire:click="togglePlanActive({{ $plan->id }})" class="rounded-full px-2 py-0.5 text-xs font-medium {{ $plan->is_active ? 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300' : 'bg-slate-100 text-slate-600 dark:bg-[#243352] dark:text-slate-300' }}">
+                                    {{ $plan->is_active ? 'Active' : 'Inactive' }}
+                                </button>
+                            </td>
+                            <td class="py-2 pr-4">
+                                <button type="button" wire:click="editPlan({{ $plan->id }})" class="rounded-lg border border-slate-200 px-2 py-1 text-xs font-medium text-slate-600 hover:bg-slate-50 dark:border-[#2D4060] dark:text-slate-300 dark:hover:bg-[#243352]">Edit</button>
+                            </td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    {{-- Prompt 21-EXT §5.3/§5.5 — platform earnings wallet + withdrawal.
+         super_admin only: this bucket is deliberately kept separate from
+         general platform-profit reporting, so cashing it out is a stricter
+         action than the day-to-day oversight this whole screen otherwise
+         allows for "admin" too. --}}
+    @if ($this->isSuperAdmin)
+        <div class="mb-6 rounded-2xl border border-slate-200 bg-white p-5 dark:border-[#2D4060] dark:bg-[#1B2A45]">
+            <h2 class="mb-1 text-lg font-semibold text-slate-900 dark:text-slate-100">Platform earnings</h2>
+            <p class="mb-3 text-xs text-slate-500 dark:text-slate-400">White-label license sale proceeds — kept separate from general platform profit. Withdraw to your own verified payout account, same as any other cash-out.</p>
+
+            <div class="mb-4 rounded-xl border border-slate-200 p-3 dark:border-[#2D4060]">
+                <p class="text-xs text-slate-400">Available balance</p>
+                <p class="text-2xl font-bold text-slate-900 dark:text-white">${{ number_format($this->platformBalance, 2) }}</p>
+            </div>
+
+            @if ($platformWithdrawError)
+                <div class="mb-3 rounded-lg border border-red-200 bg-red-50 p-2 text-xs text-red-700 dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-300">{{ $platformWithdrawError }}</div>
+            @endif
+
+            @if ($this->platformAccounts->isEmpty())
+                <p class="text-xs text-slate-400">Add a verified payout account to your own profile before withdrawing.</p>
+            @else
+                <form wire:submit="withdrawPlatformEarnings" class="grid gap-3 sm:grid-cols-3">
+                    <select wire:model="platformAccountId" class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                        @foreach ($this->platformAccounts as $account)
+                            <option value="{{ $account->id }}">{{ $account->bank_name ?? $account->bank_code }} · {{ $account->account_name }}</option>
+                        @endforeach
+                    </select>
+                    <input type="number" step="0.01" min="0.01" wire:model="platformAmountUsd" placeholder="Amount (USD)" class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100" />
+                    @error('platformAmountUsd') <span class="text-xs text-red-500">{{ $message }}</span> @enderror
+                    <button type="submit" wire:loading.attr="disabled" wire:target="withdrawPlatformEarnings"
+                        class="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary-dark disabled:opacity-60">
+                        Withdraw
+                    </button>
+                </form>
+            @endif
+        </div>
+    @endif
 
     {{-- Feature locks by level (Batch 8) --}}
     <div class="mb-6 rounded-2xl border border-slate-200 bg-white p-5 dark:border-[#2D4060] dark:bg-[#1B2A45]">

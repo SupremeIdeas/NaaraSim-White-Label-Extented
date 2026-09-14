@@ -4136,7 +4136,113 @@ Rate limits (Section 19.2): `api` limiter 300/min auth · 60/min public (on `rou
 > (loyalty milestones, travel timeline, admin-defined achievements paying
 > NaaraCredits) that used to top this list are now DONE — see DONE above.
 
-### ▶ TOP OF NEXT — C1 owner decision, then the Business Suite (2026-09-14)
+### ▶ TOP OF NEXT — Prompt 21-EXT: Merchant V2 license tiers (2026-09-14, IN PROGRESS)
+Owner's explicit "very priority one" — build ahead of everything else below,
+including C1/Business Suite. Full spec: `docs/build-specs/PROMPT21-EXT-merchant-v2-license-tiers.md`
+(supersedes only Prompt 21 §4.1's "no fixed price list"). Owner confirmed
+sequencing: this fully first, THEN the preloader/brand-directory revisit and
+the dark/light toggle-switch preset picker (5 candidate Uiverse.io designs
+already captured in-session for that later batch), THEN back to C1/Business
+Suite below.
+
+**DONE (Batches 1-5, full suite green after each — 2197 tests, 6893 assertions
+on the final pass):**
+- `WhiteLabelLicensePlan` + `WhiteLabelLicensePayment` + `PlatformEarning`
+  models/migrations; seeded exactly 4 plans (Basic $1,500 / Medium $2,500 /
+  Extended $5,000 / Extended V2 $7,500 — V2 is priority-support only, same
+  `entitlement_level = full` as Extended).
+- `WhiteLabelInstance` extended with `merchant_id`/`license_plan_id`/
+  `acquisition_method`/`requested_tier`/`hosting_preference`/`price_usd`/
+  `amountPaidTotal()` (single source of truth, read everywhere balance math
+  is needed).
+- `WhiteLabelLicenseService`: new non-destructive `upgradeTier()` (proven by
+  test to never touch `license_key`/tokens — the whole reason it exists
+  instead of reusing the destructive `issueLicense()`), `priceForPayment()`
+  (admin sets price without issuing), `payAndActivate()` (first purchase —
+  wraps `issueLicense()` + payment ledger + `PlatformEarningsService::accrue()`
+  in one `WalletService::charge()`), `payBalanceAndUpgrade()` (independent
+  SECOND charge that upgrades normal→extended in place).
+- `PlatformEarningsService`/`PlatformEarningsException` — the global,
+  merchant-independent earnings ledger (mirrors `MerchantEarningsService`'s
+  atomic-apply shape). `accrue()` side is done; `hold()`/`release()` exist
+  but nothing calls them yet (that's the withdrawal side, still open below).
+- Resell-status gating (§6): `WhiteLabelLicensePlan::resellOpenForTier()`
+  reads two `Setting`-backed flags (default open); `register()` hard-rejects
+  a closed tier server-side; `checkResellAutoClose()` (private, called after
+  every successful `payAndActivate()`/`payBalanceAndUpgrade()`) auto-closes
+  normal at 200 self-service sales and both flags at 2000 extended sales,
+  counted live from `WhiteLabelInstance` rows — no shadow counter.
+- Admin: `Admin\WhiteLabelRegistry` gained `priceInstance()` + a per-row
+  price input/badge for a pending self-service request (a self-service
+  pending row no longer shows the direct Approve buttons — it's priced, then
+  the MERCHANT pays via their own dashboard, never admin-issued directly).
+- Merchant: new `App\Livewire\MerchantWhiteLabel` at `/merchant/white-label`
+  (linked from the merchant dashboard) — visible-but-locked for a non-V2
+  merchant (NOT a 404, unlike MerchantClients/MerchantInvoices — matches the
+  base Merchant-V2 gate's own established pattern). Batch 3 turned the plan
+  list into a real swipeable (CSS scroll-snap) carousel: tier-tinted gradient
+  fallback per card, cover image once set, a live comparison table (price/
+  support/full-unlock/balance-later, driven straight off `$this->plans` —
+  never a second hardcoded table), and the locked-tier badge reusing
+  `resellOpenForTier()`.
+- Plan cover art: the owner supplied 4 finished banners (one per tier,
+  matching the brand's existing marketing-banner style) generated from 4
+  ChatGPT prompts this session wrote to mirror that style with a
+  tier-distinct core message. Resized to 1280px width, converted to WebP
+  (quality 72, method 6 — 88-120 KB each, in line with the existing
+  `public/images/audiences/` convention), committed as
+  `public/images/white-label/plan-{basic,medium,extended,extended-v2}.webp`,
+  and wired into `WhiteLabelLicensePlanSeeder` via `cover_image_url =>
+  asset('images/white-label/...')` — admin can still override per plan from
+  the management tab below.
+- Batch 4 — platform earnings withdrawal: `PlatformWithdrawalService`
+  (mirrors `MerchantWithdrawalService` exactly — same `PayoutService`/
+  `PayoutThreshold` calls, same hold-then-create-request shape) lets any
+  `super_admin` cash out the global bucket to THEIR OWN verified payout
+  account; `ReturnPlatformEarnings` listener registered on `PayoutReversed`
+  in `AppServiceProvider` releases a failed transfer's hold back to the same
+  global bucket. Admin balance+withdraw UI lives on `Admin\WhiteLabelRegistry`
+  itself (super_admin-only section — stricter than the "admin" role the rest
+  of that screen allows), not a new route.
+- Batch 5 — admin plan-management tab (same `Admin\WhiteLabelRegistry`
+  screen, not a second one): create/edit a plan's name/tagline/description/
+  price/tier/support level/features/sort/active, cover-image upload via the
+  existing `MediaStorage::storePublic()` + `WithFileUploads` pattern (same
+  as `Admin\LinkPreviews`) — a plan's `key` is set once at creation and never
+  re-typed on edit, so renaming a plan can't orphan/duplicate the seeded
+  catalog. Resell-status toggles (`toggleResell()`) sit right next to live
+  threshold counts, reading the SAME `WhiteLabelLicensePlan::soldCountForTier()`
+  query the auto-close check itself uses (refactored out of
+  `WhiteLabelLicenseService::checkResellAutoClose()` so there's exactly one
+  place this count is computed, per the spec's own acceptance item).
+- Tests: `WhiteLabelLicensePlanTest`, `WhiteLabelLicenseSelfServiceTest`,
+  `PlatformEarningsServiceTest`, `WhiteLabelResellGateTest`,
+  `PlatformWithdrawalServiceTest`, `MerchantWhiteLabelTest`, plus admin-screen
+  additions — all green, full suite green throughout (2197 tests, 6893
+  assertions on the final pass).
+
+**Batch 6 — fork compatibility verified (2026-09-14):** confirmed both
+`NaaraSim-WhiteLabel` and `NaaraSim-White-Label-Extented` are byte-for-byte
+identical on every entitlement-relevant file, so one verdict covers both:
+`WhiteLabelInstance::TIERS`/`LEVELS` constants match master exactly (no
+local drift); `FeatureLocks`/`FeatureEntitlements` key everything off
+`entitlement_level`, never `tier` directly (`tier` only gates package-family
+eligibility in `PackageDistribution`); and `WhiteLabelUpdateClient::
+refreshEntitlement()` reads the entitlement endpoint using whatever token is
+already stored — it never checks for or expects a NEW token/key when
+`tier`/`entitlement_level` change. This is exactly what `upgradeTier()`
+relies on (it deliberately never rotates either). **No code changes needed
+in either fork for this pass** — Merchant V2 self-service licensing is
+entirely a master-side admin/merchant feature; forks only ever consume the
+same-shaped `tier`/`entitlement_level` strings they always have.
+
+**NEXT STEP (exact):** merge the draft PR on master (squash), restart the
+branch, then move to the two smaller queued items — the preloader/brand-
+directory revisit and the dark/light toggle-switch preset picker (5
+candidate Uiverse.io designs already captured in-session) — before returning
+to C1/Business Suite below.
+
+### ▶ NEXT (queued behind Prompt 21-EXT) — C1 owner decision, then the Business Suite (2026-09-14)
 **Prompt 12 (multi-provider failover for Naara Line) is now 100% shipped —
 §1 (Plivo) and §2/§3 (Vonage + Sinch) are both DONE, see the two DONE entries
 above.** §4 (Bandwidth) was explicitly deferred to Prompt 11 §5's US-focused

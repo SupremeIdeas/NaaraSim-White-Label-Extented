@@ -93,7 +93,30 @@ class PreloaderSettings
         'spokes' => ['label' => 'Spoke Spinner', 'category' => 'Rings', 'complexity' => 'Light', 'c' => 1, 'favorite' => true],
         'goo-dots' => ['label' => 'Liquid Dots', 'category' => 'Dots', 'complexity' => 'Medium', 'c' => 3, 'favorite' => true],
         'neon-rings' => ['label' => 'Neon Rings', 'category' => 'Rings', 'complexity' => 'Heavy', 'c' => 1, 'heavy' => true, 'favorite' => true],
+        'fintech-breath' => ['label' => 'Fintech Breath', 'category' => 'SVG', 'complexity' => 'Medium', 'c' => 1, 'favorite' => true],
+        'flying-files' => ['label' => 'Flying Files', 'category' => 'Sweep', 'complexity' => 'Medium', 'c' => 2, 'favorite' => true],
     ];
+
+    /**
+     * PRESETS filtered to what THIS deployment may pick from. The `favorite`
+     * (Supreme Ideas premium curated) subset is the original platform's alone
+     * — see docs/ui-component-library/premium-preloaders-MASTER-ONLY.md — so a
+     * white-label fork (byte-for-byte copy of this same code) never sees or
+     * can select them, even though their CSS/partials ship with the codebase
+     * like everything else. Single source of truth for the Studio picker AND
+     * its save-time validation, so the boundary can't be bypassed by a direct
+     * component call that skips the picker UI.
+     *
+     * @return array<string, array{label:string, category:string, complexity:string, c:int, heavy?:bool, allow_neutral?:bool, text?:bool, favorite?:bool}>
+     */
+    public static function availablePresets(): array
+    {
+        if (FeatureEntitlements::isMaster()) {
+            return self::PRESETS;
+        }
+
+        return array_filter(self::PRESETS, fn (array $preset) => empty($preset['favorite']));
+    }
 
     /** Hard safe default — matches today's behaviour when nothing is configured. */
     public static function safeDefault(): array

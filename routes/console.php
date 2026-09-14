@@ -123,3 +123,7 @@ Schedule::command('giftcards:reconcile-processing')->everyFifteenMinutes()->with
 // (05:30) and the merchant sweep (05:35), clear of every other slot in the
 // staggered window.
 Schedule::command('brand-subscriptions:bill')->dailyAt('05:45')->withoutOverlapping()->runInBackground();
+
+// Prompt 21-EXT2 §6: complete an in_progress white-label project intake once
+// its admin-set deploy timeline has elapsed, and email the merchant.
+Schedule::command('whitelabel:intake-deploy-check')->dailyAt('06:00')->withoutOverlapping();
