@@ -4,11 +4,13 @@ namespace App\Livewire;
 
 use App\Exceptions\EsimProviderException;
 use App\Exceptions\InsufficientBalanceException;
+use App\Exceptions\SpendCapExceededException;
 use App\Jobs\AlertAdminJob;
 use App\Jobs\EvaluateJourneyGoalsJob;
 use App\Jobs\ProcessReferralRewardJob;
 use App\Models\EsimOrder;
 use App\Models\EsimPlan;
+use App\Models\WalletGroupMember;
 use App\Notifications\OrderPlacedNotification;
 use App\Services\Credits\CreditService;
 use App\Services\Credits\InsufficientCreditsException;
@@ -16,6 +18,7 @@ use App\Services\eSIM\ProviderRouter;
 use App\Services\Merchants\MerchantEarningsService;
 use App\Services\Pricing\CouponEngine;
 use App\Services\Pricing\PricingEngine;
+use App\Services\Wallet\WalletGroupService;
 use App\Services\Wallet\WalletService;
 use App\Services\WhatsApp\WhatsAppAutopilot;
 use App\Support\CreditSettings;
@@ -67,6 +70,10 @@ class Checkout extends Component
 
     /** NaaraCredits redemption (loyalty). Margin-capped server-side. */
     public bool $useCredits = false;
+
+    /** Shared plan (Prompt 11 §3): pay from someone else's wallet instead of
+     *  your own, via an ACCEPTED WalletGroupMember row. Null = pay normally. */
+    public ?int $payFromGroupMemberId = null;
 
     public function mount(EsimPlan $plan): void
     {
@@ -135,7 +142,7 @@ class Checkout extends Component
         }
     }
 
-    public function purchase(WalletService $wallet, ProviderRouter $router, CouponEngine $coupons, CreditService $credits, PricingEngine $pricing, MerchantEarningsService $earnings): void
+    public function purchase(WalletService $wallet, ProviderRouter $router, CouponEngine $coupons, CreditService $credits, PricingEngine $pricing, MerchantEarningsService $earnings, WalletGroupService $groups): void
     {
         $user = auth()->user();
 
@@ -145,6 +152,25 @@ class Checkout extends Component
             $this->error = 'Please confirm your device supports eSIM before buying.';
 
             return;
+        }
+
+        // Shared plan (Prompt 11 §3): re-resolve server-side, never trust the
+        // property alone. EsimOrder.user_id stays the actual buyer either
+        // way — only the wallet that gets debited/refunded changes. A
+        // member row that's since been removed or was never accepted just
+        // falls back to the buyer's own wallet, same as picking nothing.
+        $groupMember = null;
+        $walletOwner = $user;
+        if ($this->payFromGroupMemberId !== null) {
+            $groupMember = WalletGroupMember::with('walletGroup')
+                ->where('user_id', $user->id)
+                ->find($this->payFromGroupMemberId);
+            if ($groupMember === null || ! $groupMember->isActive()) {
+                $this->error = 'That shared plan is no longer available. Choose another payment source.';
+
+                return;
+            }
+            $walletOwner = $groupMember->walletGroup->owner;
         }
 
         // Order rate limit: 10/min (blueprint Section 19.2).
@@ -235,18 +261,43 @@ class Checkout extends Component
             }
         }
 
+        // Shared-plan meta: spent_by_user_id rides WalletService's existing
+        // $meta array (Batch 1) — this is the ONLY thing that changes about
+        // how debit()/refund() are called; both methods' signatures are
+        // otherwise completely untouched.
+        $moneyMeta = $groupMember !== null ? ['spent_by_user_id' => $groupMember->user_id] : [];
+
         try {
-            $debit = $wallet->debit($user, $walletCharge, 'USD', [
+            if ($groupMember !== null) {
+                $groups->assertCanSpend($groupMember, $walletCharge, 'USD');
+            }
+            $debit = $wallet->debit($walletOwner, $walletCharge, 'USD', [
                 'reference' => $ref,
                 'description' => "eSIM: {$this->plan->name}",
+                ...$moneyMeta,
             ]);
         } catch (InsufficientBalanceException $e) {
             $this->refundCredits($credits, $user, $creditsSpent, $ref);
-            $this->error = 'Your wallet balance is too low. Please top up and try again.';
+            if ($groupMember !== null) {
+                $this->error = "That shared plan's wallet balance is too low right now. Please try another payment source.";
+                $this->dispatch('nx-toast', variant: 'hero', type: 'error',
+                    title: 'Payment failed',
+                    message: "That shared plan's wallet balance is too low — you were not charged.");
+            } else {
+                $this->error = 'Your wallet balance is too low. Please top up and try again.';
+                $this->dispatch('nx-toast', variant: 'hero', type: 'error',
+                    title: 'Payment failed',
+                    message: 'Your wallet balance is too low — you were not charged. Top up and try again.',
+                    cta: ['label' => 'Top up wallet', 'href' => route('wallet')]);
+            }
+
+            return;
+        } catch (SpendCapExceededException $e) {
+            $this->refundCredits($credits, $user, $creditsSpent, $ref);
+            $this->error = 'This purchase would exceed the spend cap set for you on that shared plan.';
             $this->dispatch('nx-toast', variant: 'hero', type: 'error',
                 title: 'Payment failed',
-                message: 'Your wallet balance is too low — you were not charged. Top up and try again.',
-                cta: ['label' => 'Top up wallet', 'href' => route('wallet')]);
+                message: 'This purchase would exceed your spend cap on that shared plan — you were not charged.');
 
             return;
         }
@@ -264,7 +315,7 @@ class Checkout extends Component
         }
 
         try {
-            $result = $router->orderPlan((string) $this->plan->id, $user, 'USD', $walletCharge);
+            $result = $router->orderPlan((string) $this->plan->id, $user, 'USD', $walletCharge, $walletOwner, $moneyMeta);
         } catch (EsimProviderException $e) {
             // ProviderRouter already refunded the wallet (the exact amount charged);
             // return the redeemed credits too.
@@ -300,9 +351,10 @@ class Checkout extends Component
         } catch (Throwable $e) {
             // Orphan-charge guard: charged + provider ordered, but we failed to
             // persist. Refund the money AND the redeemed credits, then alert.
-            $wallet->refund($user, $walletCharge, 'USD', [
+            $wallet->refund($walletOwner, $walletCharge, 'USD', [
                 'reference' => "refund:{$ref}",
                 'description' => 'eSIM order could not be saved',
+                ...$moneyMeta,
             ]);
             $this->refundCredits($credits, $user, $creditsSpent, $ref);
             AlertAdminJob::dispatch(
@@ -397,10 +449,18 @@ class Checkout extends Component
             );
         }
 
+        // Shared plan (Prompt 11 §3): only ACCEPTED memberships are offerable
+        // as a payment source — a pending invite can never spend.
+        $sharedPlans = WalletGroupMember::with('walletGroup.owner')
+            ->where('user_id', auth()->id())
+            ->whereNotNull('accepted_at')
+            ->get();
+
         return view('livewire.checkout', [
             'creditsEnabled' => CreditSettings::enabled(),
             'creditBalance' => $creditBalance,
             'creditQuote' => $creditQuote,
+            'sharedPlans' => $sharedPlans,
         ]);
     }
 }

@@ -55,11 +55,35 @@ public method signature.
   `resources/views/partials/icon-sprite.blade.php` — a real, silent bug
   (`notification-center.blade.php` renders the icon id directly, so a
   missing one is just blank). Added both as proper lucide-style symbols.
-- **Not yet done — Batch 3:** `Checkout.php` "pay from shared plan" option
-  (swap the debit/refund target from the buyer to
-  `$member->walletGroup->owner` via `chargeFromGroup()`/`refundToGroup()`,
-  everything else in the purchase flow — coupons/credits/merchant margin/
-  referral — untouched since none of it depends on wallet identity).
+- **Batch 3 (Checkout.php) — DONE, A1 fully shipped, Prompt 11 is 100%
+  complete.** Checkout's `purchase()` still uses `WalletService::debit()`/
+  `refund()` directly (not `WalletGroupService::chargeFromGroup()`'s closure
+  form — Checkout's flow has its own multi-step control flow: debit, THEN
+  order the provider, THEN persist the `EsimOrder`, with different refund
+  paths at each failure point, which doesn't fit a single closure). Instead
+  it resolves `$walletOwner` server-side from a re-validated, ACCEPTED
+  `WalletGroupMember` row, calls `WalletGroupService::assertCanSpend()`
+  before the debit, and passes `spent_by_user_id` through the exact same
+  `$meta` array Batch 1 wired up — so `debit()`/`refund()` needed no new
+  changes at all. `EsimOrder.user_id` always stays the real buyer.
+  **One real gap found and fixed while tracing the money path, not
+  guessed:** `ProviderRouter::orderPlan()` refunds on provider failure using
+  its own `$user` parameter — which Checkout always passed as the BUYER, so
+  a shared-plan failure would have refunded the wrong wallet (the buyer's,
+  which was never debited) while leaving the actual owner's wallet
+  incorrectly charged with no refund. Fixed by adding two optional trailing
+  parameters, `?User $refundTo = null` and `array $refundMeta = []` (both
+  default to the exact prior behaviour — checked both other callers,
+  `MerchantClientService` and `ProviderRouterTest`, use only positional args
+  and are unaffected). `$forLog`/`EsimOrder.user_id` stay the buyer
+  throughout; only the refund target and its `spent_by_user_id` attribution
+  change. 6 new tests (`CheckoutSharedPlanTest`): unaffected normal purchase,
+  owner's wallet debited not the buyer's, spend-cap block before any debit,
+  a pending (not-yet-accepted) invite rejected, a member row belonging to
+  someone else rejected, and — the case that caught the `orderPlan()` gap —
+  a provider failure refunding the OWNER's wallet, attributed to the buyer,
+  with the group's spend-cap ledger correctly netting back to zero. Full
+  suite: 2116 tests, 6694 assertions, green.
 
 ### 📧 Email system overhaul — 2026-09-14
 Owner request: fill real Mailable/Notification gaps, make the mail
@@ -3984,24 +4008,12 @@ Rate limits (Section 19.2): `api` limiter 300/min auth · 60/min public (on `rou
 > (loyalty milestones, travel timeline, admin-defined achievements paying
 > NaaraCredits) that used to top this list are now DONE — see DONE above.
 
-### ▶ TOP OF NEXT — A1 Batch 3: Checkout.php shared-plan spending (2026-09-14)
-Owner instruction: finish the email overhaul (DONE), then finish everything
-else pending before the Business Suite starts (master repo only). A1's
-Batch 1 (models/service, `WalletService` meta wiring) and Batch 2 (the
-"Shared" tab on Wallet.php) are DONE — see the DONE entry above. Left in A1:
-- **Batch 3 — let a member pay for an eSIM purchase from a shared plan
-  instead of their own wallet.** `Checkout.php`'s `purchase()` flow is
-  otherwise untouched (coupons/credits/merchant margin/referral all stay as
-  they are — none of it depends on which wallet gets debited). Add a
-  plan-picker only when the buyer actually has an ACCEPTED
-  `WalletGroupMember` row, and when chosen, swap the debit/refund target
-  from the buyer's own wallet to `WalletGroupService::chargeFromGroup()`/
-  `refundToGroup()` (which itself resolves to the owner's real `UserWallet`
-  and enforces the member's spend cap) — `EsimOrder.user_id` stays the
-  actual buyer either way. Once this ships (tests + full suite green), A1 is
-  fully closed and Prompt 11 is 100% shipped.
-
-Then, still before the Business Suite (owner's explicit order):
+### ▶ TOP OF NEXT — C1 owner decision, then Prompt 12, then the Business Suite (2026-09-14)
+Owner instruction: finish the email overhaul, then finish everything pending
+before the Business Suite starts (master repo only). **A1 (WalletGroup/
+WalletGroupMember, Prompt 11 §3) is now fully DONE — all 3 batches shipped,
+see the DONE entry above. Prompt 11 is 100% shipped.** Left before the
+Business Suite (owner's explicit order):
 - **C1 — OWNER DECISION NEEDED** (agency-credit branding policy — see the
   full options list further down this NEXT section). Not code-only; do not
   build any of the three options without the owner picking one.
