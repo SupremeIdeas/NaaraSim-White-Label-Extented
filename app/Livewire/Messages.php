@@ -51,11 +51,13 @@ class Messages extends Component
         $in = InboundMessage::where('user_id', $uid)->where('from_number', $this->active)
             ->get()->map(fn ($m) => (object) [
                 'direction' => 'in', 'body' => $m->body, 'attachment_url' => $m->attachment_url,
+                'is_voicemail' => $m->voicemail_path !== null,
                 'at' => $m->received_at ?? $m->created_at,
             ]);
         $out = OutboundMessage::where('user_id', $uid)->where('to_number', $this->active)
             ->get()->map(fn ($m) => (object) [
                 'direction' => 'out', 'body' => $m->body, 'attachment_url' => $m->attachment_url,
+                'is_voicemail' => false,
                 'at' => $m->created_at,
             ]);
 
