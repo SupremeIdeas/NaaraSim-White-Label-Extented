@@ -75,6 +75,22 @@ class NotificationCenterTest extends TestCase
         $this->assertNull($owner->notifications()->first()->read_at);
     }
 
+    /**
+     * Owner request: the bell's popup used to be a hand-rolled Alpine panel
+     * with a generic fade/scale transition that read as an abrupt "jump" on
+     * mobile instead of a proper slide-up. It now reuses the platform's ONE
+     * shared modal engine (S31) — same slide-up-from-the-bottom sheet every
+     * other dialog uses, still hands off to the full /notifications page.
+     */
+    public function test_the_bell_reuses_the_shared_modal_engine(): void
+    {
+        $user = User::factory()->create();
+
+        Livewire::actingAs($user)->test(NotificationCenter::class)
+            ->assertSeeHtml('x-on:open-modal.window')
+            ->assertSee('See all notifications');
+    }
+
     public function test_the_full_page_lists_and_filters(): void
     {
         $user = User::factory()->create();

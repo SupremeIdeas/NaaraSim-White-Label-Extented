@@ -1,9 +1,9 @@
-<div class="relative" x-data="{ open: false }" @keydown.escape.window="open = false">
+<div class="relative">
     {{-- Poll keeps the unread badge current without a websocket server. --}}
     <div wire:poll.30s class="hidden"></div>
 
     {{-- Bell --}}
-    <button type="button" @click="open = !open" aria-label="Notifications"
+    <button type="button" @click="$dispatch('open-modal', { name: 'notifications' })" aria-label="Notifications"
             class="relative flex h-10 w-10 items-center justify-center rounded-full text-slate-500 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-white/10">
         <x-icon name="bell" class="h-5 w-5" />
         @if ($unread > 0)
@@ -12,31 +12,22 @@
         @endif
     </button>
 
-    {{-- Mobile backdrop — the panel is a bottom sheet on phones (BUILD-3 §6.1);
-         sm+ keeps the right-anchored dropdown and needs no backdrop. --}}
-    <div x-show="open" x-cloak @click="open = false" x-transition.opacity
-         class="fixed inset-0 z-40 bg-black/30 sm:hidden"></div>
-
-    {{-- Panel: full-width bottom sheet on mobile (anchored to the viewport, so it
-         never overflows off the left edge of a narrow header), right-anchored
-         dropdown from sm up. --}}
-    <div x-show="open" x-cloak @click.outside="open = false" x-transition
-         class="fixed inset-x-0 bottom-0 z-50 max-h-[85vh] w-full overflow-hidden rounded-t-2xl border border-slate-200 bg-white shadow-xl dark:border-[var(--brand-card-border-dark)] dark:bg-[#1B2A44]
-                sm:absolute sm:inset-x-auto sm:bottom-auto sm:right-0 sm:mt-2 sm:w-80 sm:max-w-[92vw] sm:rounded-2xl">
-        {{-- Grab handle (mobile only). --}}
-        <div class="flex justify-center pt-2 sm:hidden"><span class="h-1 w-10 rounded-full bg-slate-300 dark:bg-white/20"></span></div>
-        <div class="flex items-center justify-between border-b border-slate-100 px-4 py-3 dark:border-white/10">
-            <p class="text-sm font-semibold text-slate-800 dark:text-slate-100">Notifications</p>
-            @if ($unread > 0)
+    {{-- The ONE modal engine (S31) — a proper slide-up-from-the-bottom sheet on
+         mobile (centered dialog on desktop), not the generic pop that used to
+         just fade/scale in. Same content as before, same "See all" hand-off
+         to the full /notifications page. --}}
+    <x-ui.modal name="notifications" title="Notifications" max-width="md">
+        @if ($unread > 0)
+            <div class="mb-2 flex items-center justify-end">
                 <button wire:click="markAllRead" class="text-xs font-medium text-primary hover:underline">Mark all read</button>
-            @endif
-        </div>
+            </div>
+        @endif
 
-        <div class="max-h-[60vh] overflow-y-auto">
+        <div class="-mx-6 max-h-[60vh] overflow-y-auto border-t border-slate-100 dark:border-white/10">
             @forelse ($recent as $note)
                 @php $d = $note->data; $isUnread = is_null($note->read_at); @endphp
                 <button type="button" wire:click="go('{{ $note->id }}')"
-                        class="flex w-full items-start gap-3 border-b border-slate-50 px-4 py-3 text-left transition hover:bg-slate-50 dark:border-white/5 dark:hover:bg-white/5 {{ $isUnread ? 'bg-primary/5 dark:bg-primary/10' : '' }}">
+                        class="flex w-full items-start gap-3 border-b border-slate-50 px-6 py-3 text-left transition hover:bg-slate-50 dark:border-white/5 dark:hover:bg-white/5 {{ $isUnread ? 'bg-primary/5 dark:bg-primary/10' : '' }}">
                     <span class="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary dark:bg-primary/20">
                         <x-icon :name="$d['icon'] ?? 'bell'" class="h-4 w-4" />
                     </span>
@@ -57,7 +48,7 @@
                     @endif
                 </button>
             @empty
-                <div class="flex flex-col items-center gap-2 px-4 py-10 text-center text-slate-400">
+                <div class="flex flex-col items-center gap-2 px-6 py-10 text-center text-slate-400">
                     <x-icon name="bell" class="h-8 w-8 opacity-40" />
                     <p class="text-sm">You’re all caught up.</p>
                 </div>
@@ -65,8 +56,8 @@
         </div>
 
         <a href="{{ route('notifications') }}" wire:navigate
-           class="block border-t border-slate-100 px-4 py-3 text-center text-xs font-medium text-primary hover:bg-slate-50 dark:border-white/10 dark:hover:bg-white/5">
+           class="-mx-6 -mb-6 mt-0 block border-t border-slate-100 px-6 py-3 text-center text-xs font-medium text-primary hover:bg-slate-50 dark:border-white/10 dark:hover:bg-white/5 sm:rounded-b-2xl">
             See all notifications
         </a>
-    </div>
+    </x-ui.modal>
 </div>
