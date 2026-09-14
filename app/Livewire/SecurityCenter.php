@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Actions\Fortify\UpdateUserPassword;
+use App\Notifications\TwoFactorNotification;
 use App\Support\Auditor;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -120,6 +121,7 @@ class SecurityCenter extends Component
         $this->code = '';
         $this->banner('Two-factor authentication is on.');
         Auditor::log('account.2fa_enabled');
+        Auth::user()->notify(new TwoFactorNotification(enabled: true));
     }
 
     public function disable2fa(DisableTwoFactorAuthentication $disable): void
@@ -128,6 +130,7 @@ class SecurityCenter extends Component
         $this->showing2faSetup = false;
         $this->banner('Two-factor authentication disabled.', 'error');
         Auditor::log('account.2fa_disabled');
+        Auth::user()->notify(new TwoFactorNotification(enabled: false));
     }
 
     public function regenerateRecoveryCodes(GenerateNewRecoveryCodes $generate): void

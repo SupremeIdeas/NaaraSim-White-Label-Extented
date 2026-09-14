@@ -7,6 +7,7 @@ use App\Events\CircuitOpened;
 use App\Events\HealthCheckCompleted;
 use App\Events\PayoutReversed;
 use App\Events\ProviderOutcomeRecorded;
+use App\Listeners\RecordLoginDevice;
 use App\Listeners\ReturnMerchantEarnings;
 use App\Listeners\ReturnPartnerEarnings;
 use App\Listeners\ReturnReferralEarnings;
@@ -104,6 +105,7 @@ use App\Support\SplashSettings;
 use App\Support\SupportAutopilot;
 use App\Support\SupportSettings;
 use App\Support\TaxRates;
+use Illuminate\Auth\Events\Login;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Console\Events\ScheduledTaskFinished;
 use Illuminate\Http\Request;
@@ -343,6 +345,10 @@ class AppServiceProvider extends ServiceProvider
             PayoutReversed::class,
             ReturnStaffEarnings::class,
         );
+
+        // Track every login's device fingerprint and alert on a genuinely new
+        // one (Sept-14 owner request — 2FA/device-login alerts).
+        Event::listen(Login::class, RecordLoginDevice::class);
 
         // HOTFIX §2: record every scheduled task's last successful run, so the
         // admin System Health panel can show whether the live cron is actually

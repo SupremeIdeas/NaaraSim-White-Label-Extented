@@ -9,6 +9,85 @@
 
 ## DONE
 
+### 📧 Email system overhaul — 2026-09-14
+Owner request: fill real Mailable/Notification gaps, make the mail
+template's hardcoded agency credit white-label-configurable, fix the
+reported Email Studio bugs. All wiring uses `->notify()` (queued) except
+where a row is about to be deleted, which uses `->notifyNow()` before the
+delete so a queued job never tries to resolve an already-gone model.
+
+- **Email Studio bugs, all three confirmed and fixed:**
+  1. `heading` was fully wired server-side (validated, saved, read back) but
+     had no `<input>` anywhere in the Email Studio blade — an admin could
+     never actually set it. Added the input; also wired `x-mail.layout`'s
+     `<title>` tag through `MailTemplates::heading()`, which nothing did
+     before (the override existed in the DB with zero effect on any real
+     email).
+  2. 5 of 6 editable templates' preview sample data was wrong, not the 4
+     originally suspected — `reset` (missing `expires`) was found by a new
+     test that loops over every template rather than trusting the old
+     count. `welcome`/`order-placed`/`refund` were missing `url`; `top-up`
+     had the wrong key (`balance` instead of the real `newBalance`) and was
+     missing `gateway`/`url`. Cross-checked every fix against the real
+     Notification classes' `->view()` calls, not guessed. Every editable
+     template now previews cleanly — a new test loops all 6 and asserts
+     none render the "Preview error" fallback.
+- **Agency credit made configurable, reusing the platform's own existing
+  mechanism instead of a second one:** `x-mail.layout` hardcoded "Supreme
+  Ideas Agency" as a bold header eyebrow, completely bypassing
+  `SiteChrome::footerCreditParts()` — the same phrasing system
+  (`product_of`/`made_with_love`/custom) already governing the web footer.
+  Moved the credit out of the header (a full sentence forced through
+  `text-transform:uppercase` read wrong there) and into the footer
+  copyright line, matching `<x-footer-credit>`'s own placement and
+  phrasing exactly — one admin setting now reaches both the site footer
+  and every transactional email. `SiteChrome::AGENCY_NAME` itself is
+  unchanged (still the one non-removable constant, per its own docblock) —
+  this is the SAME configurability the footer already has, not a new
+  policy decision, so it doesn't preempt Audit item C1 below.
+- **Six new Notification classes, filling gaps confirmed by a full research
+  pass (grep for `->notify(`/`Mail::`/`Notification::send` across each
+  service — genuinely none existed):**
+  - `KycResultNotification` — wired into all 4 places a `KycVerification`
+    can reach a final status (`KycService::submit()`'s sync path,
+    `applyWebhook()`, `approve()`, `reject()`) via one shared
+    `notifyOutcome()` helper that only fires on APPROVED/REJECTED/FAILED,
+    never PENDING.
+  - `AccountLifecycleNotification` — deactivated/reactivated/
+    deletion_requested/deletion_cancelled/erased, wired into every
+    `AccountService` transition (blueprint S26). The `erase()` case uses
+    `notifyNow()` before the transaction deletes the row — the UI already
+    promised these emails; none were ever sent.
+  - `SpamBlockReporterNotification` — the reporter whose report crossed the
+    auto-block threshold is told their report worked. Confirmed via the
+    research pass that the number's OWNER can't be notified at all today —
+    `SpamBlockedCaller` stores only the raw msisdn with no relation back to
+    a NaaraSim account.
+  - `PortOutRequestedNotification` — `MyLines::requestPortOut()`'s toast
+    already said "we'll email you" and never did; now it does.
+  - `StaffAccountNotification` — granted/scopes_updated/revoked/removed,
+    wired into `StaffService::createStaff()`/`promote()`/`syncScopes()`/
+    `revokeStaff()`/`deleteStaff()` (the last via `notifyNow()` before
+    deletion). Never carries a password or any credential.
+    `setActive()`/deactivate-reactivate already routes through
+    `AccountService` and is covered by `AccountLifecycleNotification`
+    above — no double notification needed there.
+  - `TwoFactorNotification` — wired into `SecurityCenter::confirm2fa()`/
+    `disable2fa()`, same shape as the existing `PasswordChangedNotification`
+    it was modelled on.
+  - `NewDeviceLoginNotification` — the one genuinely NET-NEW piece: no
+    device/login-history mechanism existed anywhere (confirmed — no
+    `Login`/`Authenticated` listener, and the `sessions` table only
+    reflects currently-live sessions, not durable history). Added a
+    `known_devices` table (`user_id`, sha256 fingerprint of
+    `ip.'|'.user_agent`, first/last seen) and `RecordLoginDevice`, a
+    listener on Laravel's `Login` event registered in
+    `AppServiceProvider::boot()` alongside the existing `Event::listen`
+    block. A user's very first-ever login records silently (nothing to
+    compare against yet); every device after that is checked, and a
+    genuinely new one alerts.
+- Full suite green: 2088 tests, 6625 assertions.
+
 ### 🔔 Notification popup → shared modal engine — 2026-09-14
 Owner request: stop the notification bell's popup "jumping" on mobile and
 reuse the platform's ONE sophisticated modal (S31) instead. Root cause found
@@ -3737,21 +3816,6 @@ DONE above, both synced to both forks). Still queued from the same request:
   engine entirely); `NotificationCenter`'s dropdown is already a partial
   bottom sheet on mobile. Confirm with the owner which literal popup they
   mean if ambiguous once work starts.
-- **Email system overhaul** — fill real Mailable/Notification gaps (KYC
-  result, GDPR account deactivation/deletion, spam-block notice, port-out
-  status, staff alerts, 2FA/device-login alerts — none exist today, confirmed
-  by grep), make the hardcoded "Supreme Ideas Agency" line in
-  `resources/components/mail/layout.blade.php:22` white-label-configurable
-  (route through `App\Support\BrandSettings`, not a new setting), and fix
-  the two confirmed Email Studio bugs: `heading` field exists in
-  `MailTemplateOverride`/`EmailStudio::$form` but has no input in the blade
-  (dead field), and 4 of 6 preview sample-data sets are missing fields the
-  real view expects (`welcome`/`order-placed`/`top-up`/`refund` — broken/blank
-  preview buttons, reproducible today). Note: this overlaps with Audit item
-  C1 below (the SAME hardcoded agency-name line) — do the branding-config
-  part of both together, but C1's actual policy question (keep it
-  non-removable / tier-gate it / master-only) still needs the owner's call
-  before the "make it configurable" code ships live gated by license tier.
 
 ### ▶ DONE — Live boot test results + B1/B3 fixes (2026-09-14, owner-supplied)
 Owner asked for the pipeline to actually be run, not just reasoned about —

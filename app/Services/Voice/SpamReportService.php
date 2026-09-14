@@ -6,6 +6,7 @@ use App\Models\Setting;
 use App\Models\SpamBlockedCaller;
 use App\Models\SpamReport;
 use App\Models\User;
+use App\Notifications\SpamBlockReporterNotification;
 use App\Support\Auditor;
 use Illuminate\Support\Carbon;
 
@@ -73,6 +74,7 @@ class SpamReportService
                 'blocked_at' => now(),
             ]);
             Auditor::log('spam.auto_blocked', 'SpamBlockedCaller', null, ['msisdn' => $msisdn, 'report_count' => $count]);
+            $reporter->notify(new SpamBlockReporterNotification($number));
         }
     }
 
