@@ -28,7 +28,9 @@ use App\Http\Controllers\Webhooks\SmsInboundWebhookController;
 use App\Http\Controllers\Webhooks\StripeConnectWebhookController;
 use App\Http\Controllers\Webhooks\TwilioDialerWebhookController;
 use App\Http\Controllers\Webhooks\TwilioDialStatusWebhookController;
+use App\Http\Controllers\Webhooks\TwilioRecordingWebhookController;
 use App\Http\Controllers\Webhooks\TwilioVoiceWebhookController;
+use App\Http\Controllers\VoicemailAudioController;
 use App\Http\Controllers\Webhooks\WhatsAppWebhookController;
 use App\Livewire\Account;
 use App\Livewire\Admin\AccountDeletions;
@@ -248,6 +250,8 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::get('/numbers/contacts', Contacts::class)->name('numbers.contacts');
         // Conversation inbox (Numbers overhaul §1) — inbound + outbound threads.
         Route::get('/numbers/messages', Messages::class)->name('numbers.messages');
+        // Voicemail audio (Prompt 11) — streamed from the private disk, owner-only.
+        Route::get('/numbers/voicemail/{message}', VoicemailAudioController::class)->name('numbers.voicemail-audio');
         // Port-in intake (Prompt 11) — bring an existing US/Canada number to Naara.
         // Honest multi-day carrier process, not instant provisioning.
         Route::get('/numbers/port-in', PortIn::class)->name('numbers.port-in');
@@ -490,6 +494,11 @@ Route::post('/webhooks/getatext', GetatextWebhookController::class)
 // TwiML that forwards the call to the user's configured target.
 Route::post('/webhooks/twilio/voice', TwilioVoiceWebhookController::class)
     ->name('webhooks.twilio.voice');
+
+// Voicemail recording webhook (Prompt 11): signature-verified, fires when a
+// <Record> started by the voice webhook above finishes.
+Route::post('/webhooks/twilio/recording', TwilioRecordingWebhookController::class)
+    ->name('webhooks.twilio.recording');
 
 // Twilio in-browser dialer webhooks (Live Voice — Part B): signature-verified.
 // `dial` returns the outbound <Dial> TwiML (with a funded timeLimit) for a

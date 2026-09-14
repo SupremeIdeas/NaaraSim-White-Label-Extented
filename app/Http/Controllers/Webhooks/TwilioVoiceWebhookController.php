@@ -58,8 +58,14 @@ class TwilioVoiceWebhookController extends Controller
         ]);
 
         // Preserve the original caller's number as caller ID so the user knows
-        // who's actually calling.
-        return $this->twiml($voice->forwardTwiml($rule->forward_to_number, $from ?: null, $rule->fallback_number));
+        // who's actually calling. Voicemail (Prompt 11): if neither the primary
+        // nor the fallback number answers, TwiML falls through to a recording.
+        return $this->twiml($voice->forwardTwiml(
+            $rule->forward_to_number,
+            $from ?: null,
+            $rule->fallback_number,
+            route('webhooks.twilio.recording'),
+        ));
     }
 
     private function twiml(string $xml, int $status = 200): Response

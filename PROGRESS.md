@@ -9,6 +9,59 @@
 
 ## DONE
 
+### 📼 Prompt 11: voicemail + transcription — 2026-09-14
+Audited first: `app/Services/AI` only has `AnthropicClient` — no STT there. The
+item's own premise was stale on the exact location, but the capability it
+meant genuinely exists: `App\Services\Support\Contracts\VoiceSynthesizer::
+transcribe()` (ElevenLabs speech-to-text, already implemented, already bound
+in the container) is real, working STT — just filed under `app/Services/
+Support`, not `app/Services/AI`. Reused it exactly as instructed. Also
+confirmed a real gap it fills: `TwilioVoiceWebhookController`'s forwarded-call
+TwiML had no fallback at all — an unanswered call on both the primary and
+fallback number simply ended silently, with no way to leave a message.
+- **TwiML**: `TwilioService::forwardTwiml()` (+ `VoiceProviderInterface`)
+  gains an optional `$voicemailActionUrl` — when given, a `<Say>` + `<Record
+  maxLength="120">` is appended after the dial attempt(s), so TwiML falls
+  through to record ONLY when neither number answers.
+  `TwilioVoiceWebhookController` now always passes the new recording webhook
+  route.
+- New signature-verified `webhooks/twilio/recording` route +
+  `TwilioRecordingWebhookController` (mirrors the voice webhook's
+  verify-then-resolve-rule-then-queue shape exactly) → dispatches
+  `RecordVoicemailJob`.
+- **`RecordVoicemailJob`** (idempotent on `voicemail:{RecordingSid}`):
+  downloads the recording via Twilio Basic Auth (recordings require
+  authenticated access), stores it on the PRIVATE disk (never local disk,
+  never a raw Twilio URL exposed to a browser — money/security rule
+  precedent, same as `RenderVoiceJob`'s TTS storage), creates the voicemail
+  as a plain **`InboundMessage`** row (reuses the existing Messages inbox —
+  literally zero new UI, exactly as the item specified) with a placeholder
+  body, notifies via a new `InboundVoicemailNotification` (mirrors
+  `InboundSmsNotification`), then dispatches transcription as a SEPARATE job
+  so the audio is playable immediately without waiting on STT.
+- **`TranscribeVoicemailJob`** (`tries=1` — never blind-retry a paid external
+  call, rule 7): reads the already-stored audio, calls
+  `VoiceSynthesizer::transcribe()`, updates the message body to the real
+  transcript or an honest "could not be transcribed automatically — tap play
+  to listen" placeholder (never a fabricated transcript). Refreshes the
+  Messages thread's preview text ONLY if this voicemail is still the
+  thread's most recent message — a newer SMS arriving mid-transcription is
+  never clobbered by a stale voicemail preview.
+- New owner-scoped `VoicemailAudioController` (`/numbers/voicemail/{message}`)
+  streams the private-disk audio — mirrors `SupportVoiceController` exactly,
+  but strictly owner-only (a voicemail is personal, unlike a shared support
+  ticket).
+- `Messages::timeline()` gained an `is_voicemail` flag so the existing
+  attachment renderer can tell an audio clip from an MMS image — the one
+  necessary, minimal blade change (an `<img>` tag can't play audio); still no
+  new screen, route, or navigation entry.
+- 11 new tests (`VoicemailTest`): TwiML fallback, webhook signature + rule
+  resolution (queues / rejects / no-ops correctly), job idempotency, storage
+  + InboundMessage creation, successful and failed transcription, the
+  newer-message race-safety guard, owner-only audio streaming, and the
+  inbox rendering `<audio>` not `<img>`. Full suite green locally. Tested
+  locally only.
+
 ### 🚩 Prompt 11: spam-report + auto-block (Dialer/Contacts) — 2026-09-14
 Audited the real surfaces first: `VoiceCall` is outbound-only (numbers the
 user chose to dial); the only real inbound-caller data (`CallEvent`, from the
@@ -3703,9 +3756,8 @@ is ready.
   scoped — a real product decision for the owner).
 - **Prompt 11 (Net-New Features) — mixed:**
   - Spam-report + auto-block (`Dialer`/`Contacts`): DONE, see DONE above.
-  - Sonnet-safe, no money-path (remaining): voicemail + transcription
-    (reuse whatever STT already exists under `app/Services/AI`, surface in
-    the existing Messages/NotificationCenter inbox — no separate UI).
+  - Voicemail + transcription: DONE, see DONE above (the "Sonnet-safe,
+    no money-path" bucket of Prompt 11 is now fully shipped).
   - Sonnet-safe but large, phase it: localization — Phase A infra + Phase B
     string extraction (Checkout/Verify-Rent/eSIM/Account first) can go now;
     Phase C/D actual French/Portuguese/Arabic translation needs a real

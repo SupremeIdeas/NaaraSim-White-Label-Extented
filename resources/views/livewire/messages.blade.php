@@ -69,7 +69,9 @@
                                 'bg-primary text-white' => $m->direction === 'out',
                                 'bg-slate-100 text-slate-800 dark:bg-white/10 dark:text-slate-100' => $m->direction === 'in',
                             ])>
-                                @if ($m->attachment_url)
+                                @if ($m->attachment_url && $m->is_voicemail)
+                                    <audio controls preload="none" class="mb-1 w-full max-w-[220px]" src="{{ $m->attachment_url }}"></audio>
+                                @elseif ($m->attachment_url)
                                     <img src="{{ $m->attachment_url }}" alt="attachment" class="mb-1 max-h-40 rounded-lg">
                                 @endif
                                 <p class="whitespace-pre-wrap break-words">{{ $m->body }}</p>
