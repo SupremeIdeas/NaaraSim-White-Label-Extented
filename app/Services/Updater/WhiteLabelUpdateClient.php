@@ -156,6 +156,7 @@ class WhiteLabelUpdateClient
         try {
             $response = $client->get("v1/white-label/{$segment}/{$packageId}/download", [
                 'current_version' => $this->currentVersion(),
+                'product' => config('updater.product_identifier'),
             ]);
         } catch (ConnectionException $e) {
             throw new \RuntimeException('Connection to the original platform was lost mid-download: '.$e->getMessage());
@@ -169,7 +170,7 @@ class WhiteLabelUpdateClient
         Storage::disk('local')->put($relative, $response->body());
         $absolute = Storage::disk('local')->path($relative);
 
-        $result = $this->verifier->verify($absolute);
+        $result = $this->verifier->verify($absolute, config('updater.product_identifier'));
         if (! $result->passed) {
             @unlink($absolute);
             throw new \RuntimeException('Downloaded package failed local verification: '.$result->reason);

@@ -236,7 +236,7 @@ class WhiteLabelDistributionApiTest extends TestCase
         $this->assertEqualsCanonicalizing([$normalPkg->package_id], collect($res->json('packages'))->pluck('package_id')->all());
 
         $this->withToken($this->token($this->makeInstance(tier: 'normal')))
-            ->getJson("/api/v1/white-label/updates/{$extendedPkg->package_id}/download?current_version={$current}")
+            ->getJson("/api/v1/white-label/updates/{$extendedPkg->package_id}/download?current_version={$current}&product=naarasim-whitelabel")
             ->assertStatus(403);
     }
 
@@ -248,7 +248,7 @@ class WhiteLabelDistributionApiTest extends TestCase
         $pkg = $this->publish(['version' => '2026.09.10-1']);
 
         $this->withToken($this->token($this->makeInstance()))
-            ->get("/api/v1/white-label/updates/{$pkg->package_id}/download?current_version=2026.09.05-1")
+            ->get("/api/v1/white-label/updates/{$pkg->package_id}/download?current_version=2026.09.05-1&product=naarasim-whitelabel")
             ->assertOk()
             ->assertHeader('content-disposition', 'attachment; filename=update-2026.09.10-1.naaraupdate');
     }
@@ -260,7 +260,24 @@ class WhiteLabelDistributionApiTest extends TestCase
 
         // Untiered instance holds the download scope but isn't tier-eligible.
         $this->withToken($this->token($this->makeInstance(tier: null)))
-            ->getJson("/api/v1/white-label/updates/{$tiered->package_id}/download?current_version=2026.09.05-1")
+            ->getJson("/api/v1/white-label/updates/{$tiered->package_id}/download?current_version=2026.09.05-1&product=naarasim-whitelabel")
+            ->assertForbidden();
+    }
+
+    /**
+     * Sept-14 audit B1: download() used to re-check only version/tier — never
+     * product — relying entirely on check()'s browse-time filter, which a
+     * client can simply bypass by requesting a known package_id directly. A
+     * fork that already discovered a package_id for a DIFFERENT product line
+     * must still be rejected here, not just kept off the browse list.
+     */
+    public function test_download_rejects_a_product_mismatch_even_when_otherwise_eligible(): void
+    {
+        $this->enable();
+        $pkg = $this->publish(['version' => '2026.09.10-1']); // built as naarasim-whitelabel (publish()'s default)
+
+        $this->withToken($this->token($this->makeInstance()))
+            ->getJson("/api/v1/white-label/updates/{$pkg->package_id}/download?current_version=2026.09.05-1&product=naarasim-core")
             ->assertForbidden();
     }
 
