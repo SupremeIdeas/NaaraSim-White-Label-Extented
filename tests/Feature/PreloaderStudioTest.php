@@ -242,4 +242,49 @@ class PreloaderStudioTest extends TestCase
             ->call('save')
             ->assertForbidden();
     }
+
+    /**
+     * Owner spot-check (2026-09-14): several presets declared more or fewer
+     * "Colour N" pickers than their compiled CSS actually reads, so editing a
+     * colour in the Studio silently did nothing (or a colour the CSS reads
+     * was never exposed to edit at all) — exactly the kind of "changes but
+     * nothing visibly happens" bug that reads as the preset having no real
+     * meaning. Locks every preset's declared `c` count to the highest
+     * --nx-pl-cN its own CSS block actually references, with no gaps, so a
+     * future preset edit can't silently reintroduce a dead or missing slot.
+     */
+    public function test_every_presets_declared_colour_count_matches_its_compiled_css(): void
+    {
+        $css = file_get_contents(resource_path('css/preloaders.css'));
+
+        preg_match_all('/\/\* (\d+) — ([^*]+)\*\//', $css, $markers, PREG_OFFSET_CAPTURE);
+        $this->assertNotEmpty($markers[0], 'preloaders.css numbered preset markers not found');
+
+        $order = [
+            'equalizer', 'wifi-rings', 'corner-beams', 'crystals', 'svg-rings', 'cube-pulse',
+            'dot-blast', 'dot-orbit-3d', 'simple-pulse', 'heart-square', 'dot-grid', 'sphere-wave',
+            'progress-text', 'worm-ring', 'letters', 'spokes', 'goo-dots', 'neon-rings',
+            'fintech-breath', 'flying-files',
+        ];
+        $this->assertSame($order, array_keys(PreloaderSettings::PRESETS), 'preset order/catalog drifted — update this test\'s $order to match');
+
+        $offsets = array_column($markers[0], 1);
+        foreach ($order as $i => $slug) {
+            $start = $offsets[$i] + strlen($markers[0][$i][0]);
+            $end = $offsets[$i + 1] ?? strlen($css);
+            $block = substr($css, $start, $end - $start);
+
+            preg_match_all('/nx-pl-c(\d)/', $block, $used);
+            $usedIndices = array_unique(array_map('intval', $used[1]));
+            sort($usedIndices);
+
+            $declared = PreloaderSettings::PRESETS[$slug]['c'];
+            $expected = $declared > 0 ? range(1, $declared) : [];
+
+            $this->assertSame(
+                $expected, $usedIndices,
+                "{$slug}: declared c={$declared} but its CSS block uses --nx-pl-c indices [".implode(',', $usedIndices)."]"
+            );
+        }
+    }
 }
