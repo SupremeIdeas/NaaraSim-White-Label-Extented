@@ -9,6 +9,58 @@
 
 ## DONE
 
+### 💳 A1 — WalletGroup/WalletGroupMember shared plan, Batch 1+2 — 2026-09-14
+Prompt 11 §3's last open item (audit's "Opus-recommended, needs extra
+scrutiny" flag — touches `WalletService`, a money-path god-node). Built with
+the explicit constraint of never changing any existing `WalletService`
+public method signature.
+
+- **Batch 1 (models + service + attribution wiring):** `WalletGroup` (an
+  owner's shared plan) / `WalletGroupMember` (an invited spender, optional
+  per-currency `spend_cap_usd`/`spend_cap_ngn`) — new migrations, plus a
+  purely-additive nullable `spent_by_user_id` column on `wallet_transactions`.
+  The key design decision: `WalletService::apply()`'s existing `$meta` array
+  already flows arbitrary extra keys through untouched — `spent_by_user_id`
+  rides that, so `debit()`/`credit()`/`refund()`/`charge()` etc. needed ZERO
+  signature changes. `WalletGroupService` (new) owns invite/accept/decline/
+  remove/updateCap, spend-cap enforcement (`SpendCapExceededException`,
+  mirrors `InsufficientBalanceException`'s shape), and `chargeFromGroup()`/
+  `refundToGroup()` — both of which always debit/credit the OWNER's real
+  `UserWallet` via `WalletService`'s unmodified methods, never a separate
+  per-member balance. Cap enforcement is an unbounded, all-time cumulative
+  total per currency — the prompt specifies no reset period, so none was
+  invented. `WalletGroupInvitedNotification` (mail/database/webpush) fires on
+  invite. 12 new tests (`WalletGroupTest`), all passing.
+- **Batch 2 (UI):** a 4th "Shared" tab on `Wallet.php`/`wallet.blade.php` —
+  invite-by-email form (optional USD/NGN caps), the owner's member list
+  (spent/cap, remove), and the current user's own received invites (accept/
+  decline) and joined plans (leave). 10 new component tests
+  (`WalletSharedPlanUiTest`).
+- **Real bug caught by the full suite, not the targeted tests:** `topUp()`
+  calls Livewire's argument-less `$this->validate()`, which validates EVERY
+  `#[Validate]`-attributed property on the component regardless of which
+  action is running. The new `inviteEmail` property was originally
+  `#[Validate('required|email')]` and defaults to blank — so `topUp()` (and
+  any other action) started silently failing every time, with the top-up
+  flow never actually calling the gateway. Fixed by removing the class-level
+  attribute from `inviteEmail`/`inviteCapUsd`/`inviteCapNgn` and validating
+  them explicitly and only inside `inviteToSharedPlan()`. Caught because this
+  batch was tested against the FULL suite before shipping, not just the new
+  WalletGroup tests — `TopUpPendingStateTest`/`CustomerUiTest`/
+  `DepositLocalCurrencyTest`/`WalletGatewayCurrencyTest` all confirmed green
+  again after the fix. Full suite: 2110 tests, 6671 assertions, green.
+- **Also fixed in this batch (proactive icon-sprite audit):** two icons used
+  by earlier-shipped email-overhaul notifications (`shield-alert`,
+  `arrow-right-left`) were never actually added to
+  `resources/views/partials/icon-sprite.blade.php` — a real, silent bug
+  (`notification-center.blade.php` renders the icon id directly, so a
+  missing one is just blank). Added both as proper lucide-style symbols.
+- **Not yet done — Batch 3:** `Checkout.php` "pay from shared plan" option
+  (swap the debit/refund target from the buyer to
+  `$member->walletGroup->owner` via `chargeFromGroup()`/`refundToGroup()`,
+  everything else in the purchase flow — coupons/credits/merchant margin/
+  referral — untouched since none of it depends on wallet identity).
+
 ### 📧 Email system overhaul — 2026-09-14
 Owner request: fill real Mailable/Notification gaps, make the mail
 template's hardcoded agency credit white-label-configurable, fix the
@@ -3932,7 +3984,35 @@ Rate limits (Section 19.2): `api` limiter 300/min auth · 60/min public (on `rou
 > (loyalty milestones, travel timeline, admin-defined achievements paying
 > NaaraCredits) that used to top this list are now DONE — see DONE above.
 
-### ▶ TOP OF NEXT — Owner's in-flight multi-feature request (2026-09-14), continuing
+### ▶ TOP OF NEXT — A1 Batch 3: Checkout.php shared-plan spending (2026-09-14)
+Owner instruction: finish the email overhaul (DONE), then finish everything
+else pending before the Business Suite starts (master repo only). A1's
+Batch 1 (models/service, `WalletService` meta wiring) and Batch 2 (the
+"Shared" tab on Wallet.php) are DONE — see the DONE entry above. Left in A1:
+- **Batch 3 — let a member pay for an eSIM purchase from a shared plan
+  instead of their own wallet.** `Checkout.php`'s `purchase()` flow is
+  otherwise untouched (coupons/credits/merchant margin/referral all stay as
+  they are — none of it depends on which wallet gets debited). Add a
+  plan-picker only when the buyer actually has an ACCEPTED
+  `WalletGroupMember` row, and when chosen, swap the debit/refund target
+  from the buyer's own wallet to `WalletGroupService::chargeFromGroup()`/
+  `refundToGroup()` (which itself resolves to the owner's real `UserWallet`
+  and enforces the member's spend cap) — `EsimOrder.user_id` stays the
+  actual buyer either way. Once this ships (tests + full suite green), A1 is
+  fully closed and Prompt 11 is 100% shipped.
+
+Then, still before the Business Suite (owner's explicit order):
+- **C1 — OWNER DECISION NEEDED** (agency-credit branding policy — see the
+  full options list further down this NEXT section). Not code-only; do not
+  build any of the three options without the owner picking one.
+- **Prompt 12 — multi-provider failover for Naara Line**, owner's own
+  framing: "save it as a dedicated pass," not to be interleaved with other
+  work (full scope further down this NEXT section).
+- Only once ALL of the above is done: **QUEUED — Naara Business Suite,
+  Prompts 13–19, MASTER REPO ONLY** (full scope further down this NEXT
+  section) — never distributed to either white-label fork.
+
+### ▶ Owner's in-flight multi-feature request (2026-09-14), continuing
 Localization Phase A+B and the admin-configurable bottom nav are DONE (see
 DONE above, both synced to both forks). Still queued from the same request:
 - **Floating "My Journey" widget** — a second floating, minimizable widget
