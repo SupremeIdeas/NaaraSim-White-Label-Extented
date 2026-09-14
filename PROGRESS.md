@@ -9,6 +9,44 @@
 
 ## DONE
 
+### 🚩 Prompt 11: spam-report + auto-block (Dialer/Contacts) — 2026-09-14
+Audited the real surfaces first: `VoiceCall` is outbound-only (numbers the
+user chose to dial); the only real inbound-caller data (`CallEvent`, from the
+Twilio voice webhook) has zero existing UI anywhere, so building a new
+call-history screen for it would be scope creep beyond what the item names.
+The item explicitly names Dialer/Contacts as the surfaces, so the honest,
+buildable feature is: report a number as spam from either surface, one
+platform-wide count, auto-block once enough DISTINCT users confirm it — and
+tie the block to the Dialer's real money risk (the per-minute international
+dialer is a genuine target for expensive scam/premium-rate numbers).
+- New `spam_reports` (msisdn, reporter_user_id, reason, source; unique per
+  reporter+number so double-reporting never inflates the count — the
+  threshold is genuinely distinct users) and `spam_blocked_callers`
+  (msisdn, report_count_at_block, source admin|auto, blocked_at) tables.
+- `App\Services\Voice\SpamReportService`: `report()` (idempotent per
+  reporter, auto-blocks on crossing the configurable
+  `spam.report_threshold`/`spam.report_window_days` Settings, default 3
+  distinct reporters / 30 days), `isBlocked()`, `reportCount()`, plus
+  `blockDirectly()`/`unblock()` for admin correction of false positives.
+  Every action audit-logged.
+- **Dialer**: `prepare()` refuses a blocked destination with an honest
+  message before even quoting (no wasted step); `VoiceDialerService::begin()`
+  re-checks and refuses BEFORE any wallet hold (defence in depth, same
+  pattern as the recycled-number pre-check). New `reportSpam()` action on a
+  recent-call row.
+- **Contacts**: new `reportSpam()` action per contact row (owner-scoped) —
+  feeds the SAME platform-wide count as a Dialer report, since both key on
+  the phone number, not the surface.
+- `spam:block`/`spam:block --unblock` artisan command — the ops control
+  surface, mirroring Batch A's `numbers:block` precedent (no dedicated admin
+  screen exists for per-number actions yet, so a CLI command stays
+  consistent with that established pattern rather than inventing a new UI).
+- 7 new tests (`SpamReportTest`): no double-count inflation, threshold
+  crossing auto-blocks, blocked number refused before any wallet hold, the
+  Dialer's own pre-check, reporting from each surface (owner-scoped for
+  Contacts), admin block/unblock round-trip. Full suite green locally.
+  Tested locally only.
+
 ### 🔎 Prompt 11 Batch D: portability eligibility probe + clearer UX — 2026-09-13
 Owner request: make the porting features clearly tell a new user what they're
 doing, check whether they're eligible with a real PROVIDER PROBE, show an
@@ -3664,8 +3702,8 @@ is ready.
   disclosure (WhatsApp: audited only, two-way support intentionally NOT
   scoped — a real product decision for the owner).
 - **Prompt 11 (Net-New Features) — mixed:**
-  - Sonnet-safe, no money-path: spam-report + auto-block (`Dialer`/
-    `Contacts`, configurable threshold/window), voicemail + transcription
+  - Spam-report + auto-block (`Dialer`/`Contacts`): DONE, see DONE above.
+  - Sonnet-safe, no money-path (remaining): voicemail + transcription
     (reuse whatever STT already exists under `app/Services/AI`, surface in
     the existing Messages/NotificationCenter inbox — no separate UI).
   - Sonnet-safe but large, phase it: localization — Phase A infra + Phase B

@@ -36,6 +36,7 @@ class VoiceDialerService
     public function __construct(
         private readonly PricingEngine $pricing,
         private readonly WalletService $wallet,
+        private readonly SpamReportService $spam = new SpamReportService,
     ) {
     }
 
@@ -84,6 +85,12 @@ class VoiceDialerService
         $destination = trim($destination);
         if (! preg_match('/^\+[1-9]\d{6,14}$/', $destination)) {
             throw new SmsException('Enter a valid number in international format, e.g. +2348012345678.');
+        }
+
+        // Spam-report auto-block (Prompt 11): refuse BEFORE any wallet hold —
+        // defence in depth behind the Dialer's own pre-check in prepare().
+        if ($this->spam->isBlocked($destination)) {
+            throw new SmsException('This number has been reported as spam by multiple users and can’t be dialed.');
         }
 
         $cost = $this->voice()->voiceRate($destination);

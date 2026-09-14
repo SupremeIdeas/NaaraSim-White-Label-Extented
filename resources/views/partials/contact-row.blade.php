@@ -44,6 +44,13 @@
                     <x-icon name="message-circle" class="h-4 w-4" />
                 </button>
             @endif
+            {{-- Spam-report + auto-block (Prompt 11). --}}
+            <button type="button" wire:click="reportSpam({{ $c->id }})"
+                    wire:confirm="Report {{ $c->name }}'s number ({{ $c->phone_number }}) as spam?"
+                    aria-label="Report {{ $c->name }} as spam"
+                    class="flex h-9 w-9 items-center justify-center rounded-full text-slate-300 transition hover:bg-red-50 hover:text-red-500 dark:text-slate-600 dark:hover:bg-red-950/40 dark:hover:text-red-400">
+                <x-icon name="alert-triangle" class="h-4 w-4" />
+            </button>
         </div>
     </div>
 </div>

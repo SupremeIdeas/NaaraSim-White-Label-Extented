@@ -216,18 +216,27 @@
             <h2 class="mb-2 text-sm font-semibold text-slate-700 dark:text-slate-200">Recent calls</h2>
             <div class="divide-y divide-slate-100 overflow-hidden rounded-2xl border border-slate-200 bg-white dark:divide-[#243352] dark:border-[var(--brand-card-border-dark)] dark:bg-[var(--brand-card-dark)]">
                 @foreach ($recent as $call)
-                    <div class="flex items-center justify-between px-4 py-3 text-sm" wire:key="call-{{ $call->id }}">
-                        <div class="flex items-center gap-2">
-                            <x-icon name="phone" class="h-4 w-4 text-slate-400" />
-                            <span class="font-medium text-slate-800 dark:text-slate-100">{{ $call->destination }}</span>
+                    <div class="flex items-center justify-between gap-2 px-4 py-3 text-sm" wire:key="call-{{ $call->id }}">
+                        <div class="flex min-w-0 items-center gap-2">
+                            <x-icon name="phone" class="h-4 w-4 shrink-0 text-slate-400" />
+                            <span class="truncate font-medium text-slate-800 dark:text-slate-100">{{ $call->destination }}</span>
                         </div>
-                        <div class="text-right">
-                            @if ($call->status === 'completed' && (int) $call->minutes_billed > 0)
-                                <span class="font-semibold text-slate-900 dark:text-slate-100">${{ number_format((float) $call->amount_charged, 2) }}</span>
-                                <span class="text-xs text-slate-400"> · {{ $call->minutes_billed }} min</span>
-                            @else
-                                <span class="text-xs text-slate-400">No answer — refunded</span>
-                            @endif
+                        <div class="flex shrink-0 items-center gap-2">
+                            <div class="text-right">
+                                @if ($call->status === 'completed' && (int) $call->minutes_billed > 0)
+                                    <span class="font-semibold text-slate-900 dark:text-slate-100">${{ number_format((float) $call->amount_charged, 2) }}</span>
+                                    <span class="text-xs text-slate-400"> · {{ $call->minutes_billed }} min</span>
+                                @else
+                                    <span class="text-xs text-slate-400">No answer — refunded</span>
+                                @endif
+                            </div>
+                            {{-- Spam-report + auto-block (Prompt 11). --}}
+                            <button type="button" wire:click="reportSpam({{ $call->id }})"
+                                    wire:confirm="Report {{ $call->destination }} as spam?"
+                                    aria-label="Report {{ $call->destination }} as spam"
+                                    class="flex h-7 w-7 items-center justify-center rounded-full text-slate-300 transition hover:bg-red-50 hover:text-red-500 dark:text-slate-600 dark:hover:bg-red-950/40 dark:hover:text-red-400">
+                                <x-icon name="alert-triangle" class="h-3.5 w-3.5" />
+                            </button>
                         </div>
                     </div>
                 @endforeach
