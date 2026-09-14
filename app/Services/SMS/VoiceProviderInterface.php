@@ -29,8 +29,10 @@ interface VoiceProviderInterface
     /**
      * Build the TwiML that dials the forward target, preserving the original
      * caller ID and optionally chaining to a fallback on no-answer/busy.
+     * $voicemailActionUrl (Prompt 11): when given, falls through to a
+     * <Record> at that action URL if neither number answers.
      */
-    public function forwardTwiml(string $to, ?string $callerId = null, ?string $fallback = null): string;
+    public function forwardTwiml(string $to, ?string $callerId = null, ?string $fallback = null, ?string $voicemailActionUrl = null): string;
 
     /**
      * Initiate an outbound call bridge between two numbers (used by the dialer /
