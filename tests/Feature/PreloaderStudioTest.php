@@ -203,4 +203,43 @@ class PreloaderStudioTest extends TestCase
             ->call('save')
             ->assertHasErrors('loadingText');
     }
+
+    /**
+     * Premium (Supreme Ideas curated "favorite") presets are the original
+     * platform's alone — docs/ui-component-library/premium-preloaders-MASTER-ONLY.md.
+     * A white-label fork is a byte-for-byte copy of this same code, so the
+     * boundary must hold even against a direct component call that skips the
+     * picker UI where the preset is already hidden.
+     */
+    public function test_master_platform_can_select_and_save_a_premium_preset(): void
+    {
+        config()->set('updater.product_identifier', 'naarasim-core');
+
+        $this->assertArrayHasKey('neon-rings', PreloaderSettings::availablePresets());
+
+        Livewire::actingAs($this->admin())->test(PreloaderStudio::class)
+            ->call('selectPreset', 'neon-rings')
+            ->assertSet('preset', 'neon-rings')
+            ->call('save')
+            ->assertHasNoErrors();
+
+        $this->assertSame('neon-rings', PreloaderSettings::forPageType('default')['preset']);
+    }
+
+    public function test_a_white_label_fork_cannot_select_or_save_a_premium_preset(): void
+    {
+        config()->set('updater.product_identifier', 'naarasim-whitelabel');
+
+        $this->assertArrayNotHasKey('neon-rings', PreloaderSettings::availablePresets());
+
+        Livewire::actingAs($this->admin())->test(PreloaderStudio::class)
+            ->call('selectPreset', 'neon-rings')
+            ->assertSet('preset', 'simple-pulse'); // unchanged — the click was ignored
+
+        // Even a direct call bypassing the picker's own hidden state is refused.
+        Livewire::actingAs($this->admin())->test(PreloaderStudio::class)
+            ->set('preset', 'neon-rings')
+            ->call('save')
+            ->assertForbidden();
+    }
 }

@@ -178,6 +178,18 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasOne(Merchant::class, 'owner_user_id');
     }
 
+    /** Shared-wallet plans this user OWNS (Prompt 11 §3) — others spend from THIS user's wallet. */
+    public function ownedWalletGroups(): HasMany
+    {
+        return $this->hasMany(WalletGroup::class, 'owner_user_id');
+    }
+
+    /** This user's own memberships in others' shared-wallet plans, pending or accepted. */
+    public function walletGroupMemberships(): HasMany
+    {
+        return $this->hasMany(WalletGroupMember::class);
+    }
+
     public function partnerAccount(): HasOne
     {
         return $this->hasOne(Partner::class, 'owner_user_id');

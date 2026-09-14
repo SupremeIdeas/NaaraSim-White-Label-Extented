@@ -60,6 +60,8 @@ class SchedulerHealth
         // (28-31 days) never falsely flags it overdue between runs.
         'staff:compensation-close' => ['Staff compensation monthly close', 2678400],
         'brand-subscriptions:bill' => ['Brand Directory subscription billing', 86400],
+        // Prompt 21-EXT2 §6 — completes elapsed white-label deploy timelines.
+        'whitelabel:intake-deploy-check' => ['White-label deploy timeline check', 86400],
     ];
 
     /** Record a task's completion. Accepts the raw scheduler command string. */

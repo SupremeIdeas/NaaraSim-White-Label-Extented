@@ -204,6 +204,25 @@
                 </label>
             </div>
 
+            {{-- Shared plan (Prompt 11 §3): only shown when the buyer has at
+                 least one ACCEPTED shared-plan membership. Defaults to their
+                 own wallet — this never changes existing checkout behaviour
+                 for anyone without a shared plan. --}}
+            @if ($sharedPlans->isNotEmpty())
+                <div class="mt-4">
+                    <label class="mb-1.5 block text-xs font-medium text-slate-500 dark:text-slate-400">{{ __('checkout.pay_from_heading') }}</label>
+                    <select wire:model.live="payFromGroupMemberId"
+                            class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-900 focus:border-primary focus:ring-2 focus:ring-primary/40 dark:border-[var(--brand-card-border-dark)] dark:bg-[#243352] dark:text-slate-100">
+                        <option value="">{{ __('checkout.pay_from_own_wallet') }}</option>
+                        @foreach ($sharedPlans as $plan_member)
+                            <option value="{{ $plan_member->id }}">
+                                {{ __('checkout.pay_from_shared_plan', ['name' => $plan_member->walletGroup->owner->name ?? 'A NaaraSim user']) }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+            @endif
+
             <button type="button" wire:click="purchase" wire:loading.attr="disabled" wire:target="purchase"
                     @disabled(! $deviceConfirmed)
                     class="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-br from-primary via-primary-dark to-navy px-4 py-3.5 font-bold text-white shadow-lg shadow-primary/25 transition hover:-translate-y-0.5 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-primary/50 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0">

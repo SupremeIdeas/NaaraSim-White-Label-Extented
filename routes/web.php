@@ -130,6 +130,7 @@ use App\Livewire\MerchantDashboard;
 use App\Livewire\MerchantEarnings;
 use App\Livewire\MerchantInvoices;
 use App\Livewire\MerchantJoin;
+use App\Livewire\MerchantWhiteLabel;
 use App\Livewire\Messages;
 use App\Livewire\MyLines;
 use App\Livewire\PortIn;
@@ -298,6 +299,9 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::get('/merchant/clients', MerchantClients::class)->name('merchant.clients');
         // Merchant V2 — invoice dashboard (404s for a non-V2 merchant).
         Route::get('/merchant/invoices', MerchantInvoices::class)->name('merchant.invoices');
+        // Prompt 21-EXT — self-service white-label license (visible-but-locked
+        // for a non-V2 merchant, same pattern as the Merchant-V2 gate itself).
+        Route::get('/merchant/white-label', MerchantWhiteLabel::class)->name('merchant.white-label');
 
         // eSIM activation QR (SVG), generated from the LPA string. Owner- or
         // assigning-merchant-scoped inside the controller.
@@ -431,6 +435,9 @@ Route::middleware(['admin', 'throttle:admin'])
             Route::get('/system-health', SystemHealth::class)->name('system-health');
             // White-label distribution oversight (Updater Batch 4).
             Route::get('/white-label', App\Livewire\Admin\WhiteLabelRegistry::class)->name('white-label');
+            // Project-intake PDF export (Prompt 21-EXT2 §6) — Livewire can't
+            // stream a file download, so this is a real controller route.
+            Route::get('/white-label/intake/{intake}/pdf', App\Http\Controllers\Admin\WhiteLabelIntakePdfController::class)->name('white-label.intake.pdf');
             Route::get('/gateways', Gateways::class)->name('gateways');
             Route::get('/kyc', KycReview::class)->name('kyc');
             Route::get('/merchants', Merchants::class)->name('merchants');

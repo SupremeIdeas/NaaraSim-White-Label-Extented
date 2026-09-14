@@ -15,6 +15,10 @@ namespace App\Support;
  *
  * This is the keystone the Wizard + reorganised dashboard build on. It is pure,
  * cached-free data + logic; it touches no money path.
+ *
+ * Prompt 12 — adding a provider to `naara_line`'s lane here also requires
+ * adding it to: `PermanentNumberRouter::$lane`, `ProviderHealth::PROVIDERS`,
+ * `SmsInboundWebhookController::PROVIDERS`.
  */
 class ProviderModels
 {
@@ -63,7 +67,10 @@ class ProviderModels
             'tagline' => 'Permanent number + voice',
             'icon' => 'phone',
             'caps' => ['permanent', 'voice', 'number_search'],
-            'lane' => ['twilio', 'telnyx'],
+            // Prompt 12: Vonage/Sinch join as voice+SMS/SMS-only failover
+            // respectively; Plivo is SMS/number-only (no African inbound
+            // voice) — same order as PermanentNumberRouter::$lane.
+            'lane' => ['twilio', 'telnyx', 'vonage', 'sinch', 'plivo'],
             // Provisioning + monthly billing are now wired (PermanentNumberRouter +
             // virtual:renew). Availability is key-driven: live once Twilio or Telnyx
             // is configured, else needs_key.
@@ -86,6 +93,9 @@ class ProviderModels
         'virtsms' => 'virtsms_api_key',
         'twilio' => 'twilio_account_sid',
         'telnyx' => 'telnyx_api_key',
+        'plivo' => 'plivo_auth_id',
+        'vonage' => 'vonage_api_key',
+        'sinch' => 'sinch_client_id',
     ];
 
     /** Number type (NumberRequest) => Model key. */

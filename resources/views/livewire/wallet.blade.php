@@ -112,6 +112,9 @@
         <button type="button" @click="tab = 'spending'"
                 :class="tab === 'spending' ? 'bg-white text-primary shadow-sm dark:bg-[var(--brand-card-dark)]' : 'text-slate-500 dark:text-slate-400'"
                 class="flex-1 rounded-full px-3 py-2 text-sm font-semibold transition">Spending</button>
+        <button type="button" @click="tab = 'shared'"
+                :class="tab === 'shared' ? 'bg-white text-primary shadow-sm dark:bg-[var(--brand-card-dark)]' : 'text-slate-500 dark:text-slate-400'"
+                class="flex-1 rounded-full px-3 py-2 text-sm font-semibold transition">Shared</button>
     </div>
 
     {{-- ============================== TOP UP ============================== --}}
@@ -348,6 +351,159 @@
             @empty
                 <div class="rounded-xl border border-dashed border-slate-300 p-8 text-center text-sm text-slate-400 dark:border-[var(--brand-card-border-dark)] dark:text-slate-500">No transactions yet.</div>
             @endforelse
+        </div>
+    </div>
+
+    {{-- ============================== SHARED PLAN ============================ --}}
+    {{-- Prompt 11 §3: a shared wallet plan. Every charge here still debits the
+         OWNER's real UserWallet through WalletService's unmodified public
+         methods — a member never has a separate balance, only an optional
+         spend cap tracked against the owner's own transaction history. --}}
+    <div x-show="tab === 'shared'" x-cloak class="mt-5 space-y-5">
+        @if ($pendingInvites->isNotEmpty())
+            <div class="rounded-2xl border border-primary/20 bg-primary/5 p-5 dark:border-primary/20 dark:bg-primary/10">
+                <h2 class="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-900 dark:text-slate-100">
+                    <x-icon name="mail" class="h-4 w-4 text-primary" /> Invites waiting for you
+                </h2>
+                <div class="space-y-2">
+                    @foreach ($pendingInvites as $invite)
+                        <div wire:key="invite-{{ $invite->id }}" class="flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white p-3.5 dark:border-[var(--brand-card-border-dark)] dark:bg-[var(--brand-card-dark)]">
+                            <div class="min-w-0">
+                                <p class="truncate text-sm font-semibold text-slate-900 dark:text-slate-100">{{ $invite->walletGroup->owner->name ?? 'A NaaraSim user' }}</p>
+                                <p class="text-xs text-slate-400 dark:text-slate-500">
+                                    @if ($invite->spend_cap_usd || $invite->spend_cap_ngn)
+                                        Cap:
+                                        @if ($invite->spend_cap_usd) ${{ number_format((float) $invite->spend_cap_usd, 2) }} @endif
+                                        @if ($invite->spend_cap_ngn) NGN {{ number_format((float) $invite->spend_cap_ngn, 2) }} @endif
+                                    @else
+                                        No spend cap
+                                    @endif
+                                </p>
+                            </div>
+                            <div class="flex shrink-0 items-center gap-2">
+                                <button type="button" wire:click="acceptSharedPlanInvite({{ $invite->id }})" wire:loading.attr="disabled" wire:target="acceptSharedPlanInvite({{ $invite->id }})"
+                                        class="flex items-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-primary-dark disabled:opacity-60">
+                                    <x-icon name="check" class="h-3.5 w-3.5" /> Accept
+                                </button>
+                                <button type="button" wire:click="leaveSharedPlan({{ $invite->id }})" wire:loading.attr="disabled" wire:target="leaveSharedPlan({{ $invite->id }})"
+                                        class="flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-500 transition-colors hover:bg-slate-50 disabled:opacity-60 dark:border-[var(--brand-card-border-dark)] dark:text-slate-400 dark:hover:bg-[var(--brand-card-hover-dark)]">
+                                    <x-icon name="x" class="h-3.5 w-3.5" /> Decline
+                                </button>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        @endif
+
+        @if ($joinedPlans->isNotEmpty())
+            <div class="rounded-2xl border border-slate-200 bg-white p-5 dark:border-[var(--brand-card-border-dark)] dark:bg-[var(--brand-card-dark)]">
+                <h2 class="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-900 dark:text-slate-100">
+                    <x-icon name="arrow-right-left" class="h-4 w-4 text-primary" /> Plans you've joined
+                </h2>
+                <div class="space-y-2">
+                    @foreach ($joinedPlans as $plan)
+                        <div wire:key="joined-{{ $plan->id }}" class="flex items-center justify-between gap-3 rounded-xl border border-slate-200 p-3.5 dark:border-[var(--brand-card-border-dark)]">
+                            <div class="min-w-0">
+                                <p class="truncate text-sm font-semibold text-slate-900 dark:text-slate-100">{{ $plan->walletGroup->owner->name ?? 'A NaaraSim user' }}'s plan</p>
+                                <p class="text-xs text-slate-400 dark:text-slate-500">
+                                    @if ($plan->spend_cap_usd || $plan->spend_cap_ngn)
+                                        Cap:
+                                        @if ($plan->spend_cap_usd) ${{ number_format((float) $plan->spend_cap_usd, 2) }} @endif
+                                        @if ($plan->spend_cap_ngn) NGN {{ number_format((float) $plan->spend_cap_ngn, 2) }} @endif
+                                    @else
+                                        No spend cap
+                                    @endif
+                                </p>
+                            </div>
+                            <button type="button" wire:click="leaveSharedPlan({{ $plan->id }})" wire:loading.attr="disabled" wire:target="leaveSharedPlan({{ $plan->id }})"
+                                    class="flex shrink-0 items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-500 transition-colors hover:bg-slate-50 disabled:opacity-60 dark:border-[var(--brand-card-border-dark)] dark:text-slate-400 dark:hover:bg-[var(--brand-card-hover-dark)]">
+                                <x-icon name="x" class="h-3.5 w-3.5" /> Leave
+                            </button>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        @endif
+
+        <div class="rounded-2xl border border-slate-200 bg-white p-5 dark:border-[var(--brand-card-border-dark)] dark:bg-[var(--brand-card-dark)]">
+            <div class="mb-4 flex items-center gap-3">
+                <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary dark:bg-primary/20">
+                    <x-icon name="users" class="h-5 w-5" />
+                </span>
+                <span>
+                    <span class="block text-base font-semibold text-slate-900 dark:text-slate-100">Your shared plan</span>
+                    <span class="block text-xs text-slate-500 dark:text-slate-400">Invite someone to spend from your wallet, up to a cap you set</span>
+                </span>
+            </div>
+
+            @if ($inviteError)
+                <div class="mb-3 flex items-start gap-2 rounded-lg bg-red-50 p-3 text-sm text-red-700 dark:bg-red-950/40 dark:text-red-300">
+                    <x-icon name="x" class="mt-0.5 h-4 w-4 shrink-0" /> <span>{{ $inviteError }}</span>
+                </div>
+            @endif
+
+            <form wire:submit="inviteToSharedPlan" class="space-y-3">
+                <div>
+                    <label class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">Their NaaraSim email</label>
+                    <input type="email" wire:model="inviteEmail" placeholder="name@example.com"
+                           class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-primary focus:ring-2 focus:ring-primary/40 dark:border-[var(--brand-card-border-dark)] dark:bg-[var(--brand-card-dark)] dark:text-slate-100">
+                    @error('inviteEmail') <span class="mt-1 block text-xs text-red-600 dark:text-red-400">{{ $message }}</span> @enderror
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">USD cap (optional)</label>
+                        <input type="number" step="0.01" min="0.01" wire:model="inviteCapUsd" placeholder="No limit"
+                               class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-primary focus:ring-2 focus:ring-primary/40 dark:border-[var(--brand-card-border-dark)] dark:bg-[var(--brand-card-dark)] dark:text-slate-100">
+                        @error('inviteCapUsd') <span class="mt-1 block text-xs text-red-600 dark:text-red-400">{{ $message }}</span> @enderror
+                    </div>
+                    <div>
+                        <label class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">NGN cap (optional)</label>
+                        <input type="number" step="0.01" min="0.01" wire:model="inviteCapNgn" placeholder="No limit"
+                               class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-primary focus:ring-2 focus:ring-primary/40 dark:border-[var(--brand-card-border-dark)] dark:bg-[var(--brand-card-dark)] dark:text-slate-100">
+                        @error('inviteCapNgn') <span class="mt-1 block text-xs text-red-600 dark:text-red-400">{{ $message }}</span> @enderror
+                    </div>
+                </div>
+                <button type="submit" wire:loading.attr="disabled" wire:target="inviteToSharedPlan"
+                        class="flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-primary-dark disabled:opacity-60">
+                    <span wire:loading.remove wire:target="inviteToSharedPlan" class="inline-flex items-center gap-2"><x-icon name="users" class="h-4 w-4" /> Send invite</span>
+                    <span wire:loading wire:target="inviteToSharedPlan" class="inline-flex items-center gap-2"><x-ui.spinner class="h-4 w-4" /> Sending…</span>
+                </button>
+            </form>
+
+            @if ($ownGroup && $ownGroup->members->isNotEmpty())
+                <div class="mt-5 space-y-2 border-t border-slate-100 pt-4 dark:border-[var(--brand-card-border-dark)]">
+                    @foreach ($ownGroup->members as $member)
+                        <div wire:key="member-{{ $member->id }}" class="flex items-center justify-between gap-3 rounded-xl border border-slate-200 p-3.5 dark:border-[var(--brand-card-border-dark)]">
+                            <div class="min-w-0">
+                                <p class="flex items-center gap-1.5 truncate text-sm font-semibold text-slate-900 dark:text-slate-100">
+                                    {{ $member->user->name ?? $member->user->email ?? 'Member' }}
+                                    @if (! $member->isActive())
+                                        <span class="flex items-center gap-1 rounded-full bg-amber-100 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-amber-700 dark:bg-amber-500/20 dark:text-amber-300">
+                                            <x-icon name="clock" class="h-2.5 w-2.5" /> Pending
+                                        </span>
+                                    @endif
+                                </p>
+                                <p class="text-xs text-slate-400 dark:text-slate-500">
+                                    @if ($member->spend_cap_usd)
+                                        ${{ number_format((float) $memberSpendUsd[$member->id], 2) }} / ${{ number_format((float) $member->spend_cap_usd, 2) }} spent
+                                    @endif
+                                    @if ($member->spend_cap_ngn)
+                                        {{ $member->spend_cap_usd ? ' · ' : '' }}NGN {{ number_format((float) $memberSpendNgn[$member->id], 2) }} / {{ number_format((float) $member->spend_cap_ngn, 2) }} spent
+                                    @endif
+                                    @if (! $member->spend_cap_usd && ! $member->spend_cap_ngn)
+                                        No spend cap
+                                    @endif
+                                </p>
+                            </div>
+                            <button type="button" wire:click="removeSharedPlanMember({{ $member->id }})" wire:loading.attr="disabled" wire:target="removeSharedPlanMember({{ $member->id }})"
+                                    class="flex shrink-0 items-center gap-1.5 rounded-lg border border-red-200 px-3 py-1.5 text-xs font-semibold text-red-600 transition-colors hover:bg-red-50 disabled:opacity-60 dark:border-red-900/50 dark:text-red-400 dark:hover:bg-red-950/30">
+                                <x-icon name="trash" class="h-3.5 w-3.5" /> Remove
+                            </button>
+                        </div>
+                    @endforeach
+                </div>
+            @endif
         </div>
     </div>
 </div>

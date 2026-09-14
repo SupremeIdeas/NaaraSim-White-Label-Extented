@@ -236,6 +236,29 @@
   background: rgb(var(--nx-pl-c1, var(--brand-accent))); box-shadow: 0 0 12px rgb(var(--nx-pl-c1, var(--brand-accent))), 0 0 32px rgb(var(--nx-pl-c1, var(--brand-accent))), 0 0 60px rgb(var(--nx-pl-c1, var(--brand-accent))); }
 @keyframes nx-neon { 0%{transform:rotate(0);filter:hue-rotate(0)} 100%{transform:rotate(360deg);filter:hue-rotate(90deg)} }
 
+/* 19 — Fintech breathing SVG (csemszepp). Supreme Ideas favorite. MASTER ONLY. */
+.nx-pl--fintech-breath { width: 140px; height: 140px; }
+.nx-pl--fintech-breath .nx-fintech { width: 100%; height: 100%; overflow: visible; }
+.nx-pl--fintech-breath .nx-fintech-ci1 { fill: rgb(var(--nx-pl-c1, var(--brand-accent))); animation: nx-fintech-big calc(3s / var(--nx-pl-speed)) infinite -1.5s; transform-box: fill-box; transform-origin: 50% 50%; }
+.nx-pl--fintech-breath .nx-fintech-ciw { transform-box: fill-box; transform-origin: 50% 50%; animation: nx-fintech-breath calc(3s / var(--nx-pl-speed)) infinite; }
+.nx-pl--fintech-breath .nx-fintech-ci2 { fill: rgb(var(--nx-pl-c1, var(--brand-accent))); animation: nx-fintech-big2 calc(3s / var(--nx-pl-speed)) infinite; transform-box: fill-box; transform-origin: 50% 50%; }
+.nx-pl--fintech-breath .nx-fintech-points { animation: nx-fintech-rot calc(3s / var(--nx-pl-speed)) infinite; transform-box: fill-box; transform-origin: 50% 50%; }
+@keyframes nx-fintech-rot { 0%{transform:rotate(0)} 30%{transform:rotate(360deg)} 50%{transform:rotate(360deg)} 80%{transform:rotate(0)} 100%{transform:rotate(0)} }
+@keyframes nx-fintech-big { 0%{transform:scale(1) translateX(0)} 30%{transform:scale(1) translateX(0)} 50%{transform:scale(10) translateX(-4.5px)} 80%{transform:scale(10) translateX(-4.5px)} 100%{transform:scale(1) translateX(0)} }
+@keyframes nx-fintech-big2 { 0%{transform:scale(1) translateX(0)} 30%{transform:scale(1) translateX(0)} 50%{transform:scale(10) translateX(4.5px)} 80%{transform:scale(10) translateX(4.5px)} 100%{transform:scale(1) translateX(0)} }
+@keyframes nx-fintech-breath { 15%{transform:scale(1)} 40%{transform:scale(1.1)} 65%{transform:scale(1)} 90%{transform:scale(1.1)} }
+
+/* 20 — Flying files (nawinasokan). Supreme Ideas favorite. MASTER ONLY. */
+.nx-pl--flying-files { width: 220px; height: 100px; }
+.nx-pl--flying-files .nx-flying-con { position: relative; width: 100%; height: 100px; overflow: hidden; }
+.nx-pl--flying-files .nx-pfile { position: absolute; bottom: 25px; width: 40px; height: 50px;
+  background: linear-gradient(90deg, rgb(var(--nx-pl-c1, var(--brand-accent))), rgb(var(--nx-pl-c2, var(--brand-primary))));
+  border-radius: 4px; transform-origin: center; animation: nx-fly-right calc(3s / var(--nx-pl-speed)) ease-in-out infinite; opacity: 0;
+  animation-delay: calc(var(--i) * 0.6s); }
+.nx-pl--flying-files .nx-pfile::before { content:""; position:absolute; top:6px; left:6px; width:28px; height:4px; background:#fff; border-radius:2px; }
+.nx-pl--flying-files .nx-pfile::after  { content:""; position:absolute; top:13px; left:6px; width:18px; height:4px; background:#fff; border-radius:2px; }
+@keyframes nx-fly-right { 0%{left:-10%;transform:scale(0);opacity:0} 50%{left:45%;transform:scale(1.2);opacity:1} 100%{left:100%;transform:scale(0);opacity:0} }
+
 /* ---- Accessibility: one rule covers every preset by construction. ---- */
 @media (prefers-reduced-motion: reduce) {
   .nx-pl *, .nx-pl *::before, .nx-pl *::after,

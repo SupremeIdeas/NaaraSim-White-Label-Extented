@@ -310,6 +310,11 @@ class WalletService
 
                 return WalletTransaction::create([
                     'user_id' => $user->id,
+                    // Prompt 11 §3 (shared-wallet plans): set only via meta, by
+                    // WalletGroupService — a purely additive optional key, no
+                    // signature change to any public method here. Null for
+                    // every ordinary, non-group transaction.
+                    'spent_by_user_id' => $meta['spent_by_user_id'] ?? null,
                     'type' => $type,
                     'amount' => $amount,
                     'currency' => $currency,

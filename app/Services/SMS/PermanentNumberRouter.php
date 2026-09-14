@@ -17,8 +17,8 @@ use Illuminate\Support\Facades\Log;
 use Throwable;
 
 /**
- * Permanent-number provisioning (Naara Line) — Twilio → Telnyx lane, billed
- * monthly. Money-safety mirrors the eSIM Checkout:
+ * Permanent-number provisioning (Naara Line) — Twilio → Telnyx → Vonage →
+ * Sinch → Plivo lane, billed monthly. Money-safety mirrors the eSIM Checkout:
  *   - the FIRST month's retail is debited before we provision; if provisioning
  *     fails the wallet is refunded and the next provider tried,
  *   - if the number is provisioned but the record can't be saved, the number is
@@ -27,11 +27,25 @@ use Throwable;
  *     skipped if it can't be sold at cost + minimum profit,
  *   - the provider is never exposed; the user sees only the Model (Naara Line).
  * Recurring monthly charges are handled by RenewVirtualNumbersJob.
+ *
+ * Prompt 12 — adding a provider to $lane also requires adding it to:
+ * `ProviderModels::MODELS['naara_line']['lane']` (+ `PROVIDER_KEY_FIELD`),
+ * `ProviderHealth::PROVIDERS`, `SmsInboundWebhookController::PROVIDERS`.
  */
 class PermanentNumberRouter
 {
-    /** @var list<string> */
-    protected array $lane = ['twilio', 'telnyx'];
+    /**
+     * Ordered strongest-capability-first: Twilio/Telnyx are the confirmed
+     * voice+SMS pair; Vonage next (confirmed Nigeria voice restrictions/
+     * features page with real operational content — see VonageService's
+     * docblock); Sinch after that (broad but unverified African voice
+     * coverage in this environment — treated conservatively); Plivo last
+     * (confirmed SMS/number-only — no African inbound voice, see
+     * PlivoService::realCapabilities()).
+     *
+     * @var list<string>
+     */
+    protected array $lane = ['twilio', 'telnyx', 'vonage', 'sinch', 'plivo'];
 
     public function __construct(
         private readonly WalletService $wallet,
@@ -124,13 +138,14 @@ class PermanentNumberRouter
         if ($digits === '') {
             return $native;
         }
-        if ($provider === 'telnyx') {
-            // Telnyx honours the position natively.
+        if ($provider === 'telnyx' || $provider === 'vonage') {
+            // Telnyx/Vonage both honour the position natively.
             return $native + ($position === 'ends' ? ['ends_with' => $digits] : ['contains' => $digits]);
         }
 
         // Twilio's Contains does a pattern/substring match; we post-filter for
         // the exact position, so passing the digits as `contains` is enough.
+        // Sinch/Plivo are treated the same way for the same reason.
         return $native + ['contains' => $digits];
     }
 

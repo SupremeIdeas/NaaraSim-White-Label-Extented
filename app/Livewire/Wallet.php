@@ -4,11 +4,15 @@ namespace App\Livewire;
 
 use App\Models\PayoutAccount;
 use App\Models\TopUpIntent;
+use App\Models\User;
 use App\Models\UserWallet;
+use App\Models\WalletGroup;
+use App\Models\WalletGroupMember;
 use App\Models\WalletTransaction;
 use App\Services\Payouts\PayoutThreshold;
 use App\Services\Payouts\WithdrawalService;
 use App\Services\Pricing\CurrencyService;
+use App\Services\Wallet\WalletGroupService;
 use App\Support\GatewayCurrencyMatrix;
 use App\Support\LocaleCurrency;
 use App\Support\MobileMoneyRails;
@@ -77,6 +81,22 @@ class Wallet extends Component
     /** Stop polling/showing the banner after this long even if never resolved
      *  (well past the worst-case drain lag) — never poll forever. */
     private const PENDING_TOPUP_TIMEOUT_SECONDS = 600;
+
+    // -- Shared plan (Prompt 11 §3) -----------------------------------------
+
+    /** Deliberately NOT #[Validate]-attributed: topUp() (and any other action
+     *  here) calls Livewire's argument-less $this->validate(), which checks
+     *  EVERY #[Validate] property on the component regardless of which action
+     *  is running — an attribute-level 'required' on a field that's normally
+     *  blank would silently fail every other action. Validated explicitly,
+     *  scoped to inviteToSharedPlan() only, instead. */
+    public string $inviteEmail = '';
+
+    public string $inviteCapUsd = '';
+
+    public string $inviteCapNgn = '';
+
+    public ?string $inviteError = null;
 
     public function mount(): void
     {
@@ -317,7 +337,78 @@ class Wallet extends Component
         return redirect()->away($result['redirect_url']);
     }
 
-    public function render(WithdrawalService $withdrawals, PayoutThreshold $threshold)
+    // -- Shared plan (Prompt 11 §3) -----------------------------------------
+
+    /** Invite an existing NaaraSim user by email to spend from this user's
+     *  wallet, up to the caps entered (blank = uncapped for that currency). */
+    public function inviteToSharedPlan(WalletGroupService $groups): void
+    {
+        $this->validate([
+            'inviteEmail' => 'required|email',
+            'inviteCapUsd' => 'nullable|numeric|min:0.01',
+            'inviteCapNgn' => 'nullable|numeric|min:0.01',
+        ]);
+        $this->inviteError = null;
+
+        $invitee = User::where('email', $this->inviteEmail)->first();
+        if ($invitee === null) {
+            $this->inviteError = 'No NaaraSim account uses that email address.';
+
+            return;
+        }
+
+        try {
+            $groups->invite(
+                auth()->user(),
+                $invitee,
+                $this->inviteCapUsd !== '' ? (float) $this->inviteCapUsd : null,
+                $this->inviteCapNgn !== '' ? (float) $this->inviteCapNgn : null,
+            );
+        } catch (\InvalidArgumentException $e) {
+            $this->inviteError = $e->getMessage();
+
+            return;
+        }
+
+        $this->reset('inviteEmail', 'inviteCapUsd', 'inviteCapNgn');
+        $this->dispatch('nx-toast', type: 'success', message: 'Invite sent — they\'ll see it on their wallet page.');
+    }
+
+    /** The signed-in user accepts an invite someone else sent them. */
+    public function acceptSharedPlanInvite(WalletGroupService $groups, int $memberId): void
+    {
+        $member = WalletGroupMember::where('user_id', auth()->id())->find($memberId);
+        if ($member === null) {
+            return;
+        }
+        $groups->accept($member);
+        $this->dispatch('nx-toast', type: 'success', message: 'You can now spend from this shared plan.');
+    }
+
+    /** The signed-in user declines an invite, or removes themselves from a
+     *  plan they'd already accepted. */
+    public function leaveSharedPlan(WalletGroupService $groups, int $memberId): void
+    {
+        $member = WalletGroupMember::where('user_id', auth()->id())->find($memberId);
+        if ($member === null) {
+            return;
+        }
+        $groups->decline($member);
+        $this->dispatch('nx-toast', type: 'success', message: 'Done.');
+    }
+
+    /** The owner removes someone from their own shared plan. */
+    public function removeSharedPlanMember(WalletGroupService $groups, int $memberId): void
+    {
+        $member = WalletGroupMember::with('walletGroup')->find($memberId);
+        if ($member === null || $member->walletGroup->owner_user_id !== auth()->id()) {
+            return;
+        }
+        $groups->remove(auth()->user(), $member);
+        $this->dispatch('nx-toast', type: 'success', message: 'Removed from your shared plan.');
+    }
+
+    public function render(WithdrawalService $withdrawals, PayoutThreshold $threshold, WalletGroupService $groups)
     {
         $user = auth()->user();
         $wallet = $user->wallet ?? new UserWallet(['ngn_balance' => 0, 'usd_balance' => 0]);
@@ -364,9 +455,30 @@ class Wallet extends Component
 
         $fx = app(CurrencyService::class);
 
+        // Shared plan (Prompt 11 §3): the group this user OWNS (if any — never
+        // auto-created just by viewing the page) with its invited/active
+        // members, plus every membership this user holds in someone ELSE's
+        // group (split into invites awaiting a response and plans already
+        // joined). A user can be both an owner and a member of other plans.
+        $ownGroup = WalletGroup::where('owner_user_id', $user->id)
+            ->with('members.user')
+            ->first();
+        $memberSpendUsd = $ownGroup
+            ? $ownGroup->members->mapWithKeys(fn ($m) => [$m->id => $groups->totalSpent($m, 'USD')])
+            : collect();
+        $memberSpendNgn = $ownGroup
+            ? $ownGroup->members->mapWithKeys(fn ($m) => [$m->id => $groups->totalSpent($m, 'NGN')])
+            : collect();
+        $myMemberships = WalletGroupMember::with('walletGroup.owner')
+            ->where('user_id', $user->id)
+            ->get();
+        $pendingInvites = $myMemberships->whereNull('accepted_at');
+        $joinedPlans = $myMemberships->whereNotNull('accepted_at');
+
         return view('livewire.wallet', compact(
             'wallet', 'transactions', 'spentUsd', 'topupUsd', 'topupNgn', 'sparkline',
-            'requiresKyc', 'canWithdraw', 'payoutAccount', 'withdrawableUsd'
+            'requiresKyc', 'canWithdraw', 'payoutAccount', 'withdrawableUsd',
+            'ownGroup', 'pendingInvites', 'joinedPlans', 'memberSpendUsd', 'memberSpendNgn'
         ) + [
             'hasSpendData' => $daily->sum() > 0,
             // Part B §3.6: only gateways that accept the CURRENTLY selected

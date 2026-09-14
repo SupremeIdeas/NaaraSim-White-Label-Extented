@@ -43,7 +43,9 @@
                 <x-icon name="badge-check" class="mx-auto mb-1 h-7 w-7 text-green-600 dark:text-green-300" />
                 <p class="font-bold text-slate-900 dark:text-white">{{ __('numbers.line.active_title') }}</p>
                 <p class="mt-0.5 select-all font-mono text-lg font-bold text-primary dark:text-teal-300">{{ $lineDone }}</p>
-                <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">{{ __('numbers.line.active_hint') }}</p>
+                <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                    {{ $lineVoiceCapable ? __('numbers.line.active_hint') : __('numbers.line.active_hint_sms_only') }}
+                </p>
             </div>
         @endif
 
