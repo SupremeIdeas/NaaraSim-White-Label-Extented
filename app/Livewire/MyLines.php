@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use App\Jobs\AlertAdminJob;
 use App\Models\VirtualNumber;
+use App\Notifications\PortOutRequestedNotification;
 use App\Services\Analytics\ConnectivityAnalyticsService;
 use App\Support\Auditor;
 use App\Support\ConnectivityHub;
@@ -90,6 +91,8 @@ class MyLines extends Component
             context: ['user_id' => auth()->id(), 'virtual_number_id' => $line->id, 'phone_number' => $line->phone_number],
             severity: 'info',
         );
+
+        auth()->user()->notify(new PortOutRequestedNotification($line->phone_number));
 
         $this->dispatch('nx-toast', type: 'success',
             message: 'Port-out requested — we\'ll email you everything your new carrier needs. We won\'t block the transfer.');

@@ -5,12 +5,14 @@
 @props(['heading' => null, 'accent' => null, 'templateKey' => 'global'])
 @php($appName = config('app.name', 'NaaraSim'))
 @php($accentColor = $accent ?: \App\Support\MailTemplates::accent($templateKey))
+@php($resolvedHeading = \App\Support\MailTemplates::heading($templateKey, $heading))
+@php($creditParts = \App\Support\SiteChrome::footerCreditParts())
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ $heading ?? $appName }}</title>
+    <title>{{ $resolvedHeading ?? $appName }}</title>
 </head>
 <body style="margin:0;padding:0;background-color:#f1f5f9;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f1f5f9;padding:24px 0;">
@@ -19,8 +21,7 @@
                 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background-color:#ffffff;border-radius:16px;overflow:hidden;border:1px solid #e2e8f0;">
                     <tr>
                         <td style="background-color:{{ $accentColor }};padding:24px 32px;">
-                            <p style="margin:0;color:#D4A017;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;">Supreme Ideas Agency</p>
-                            <p style="margin:4px 0 0;color:#ffffff;font-size:22px;font-weight:700;">{{ $appName }}</p>
+                            <p style="margin:0;color:#ffffff;font-size:22px;font-weight:700;">{{ $appName }}</p>
                         </td>
                     </tr>
                     <tr>
@@ -38,7 +39,7 @@
                         </td>
                     </tr>
                 </table>
-                <p style="margin:16px 0 0;color:#94a3b8;font-size:11px;">&copy; {{ date('Y') }} {{ $appName }}. All rights reserved.</p>
+                <p style="margin:16px 0 0;color:#94a3b8;font-size:11px;">&copy; {{ date('Y') }} {{ $appName }}. {{ $creditParts['prefix'] }}<a href="{{ \App\Support\SiteChrome::AGENCY_URL }}" style="color:#94a3b8;">{{ \App\Support\SiteChrome::AGENCY_NAME }}</a>{{ $creditParts['suffix'] }} All rights reserved.</p>
             </td>
         </tr>
     </table>

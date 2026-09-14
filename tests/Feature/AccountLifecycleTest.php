@@ -8,10 +8,12 @@ use App\Livewire\Admin\AccountDeletions;
 use App\Models\EsimOrder;
 use App\Models\Referral;
 use App\Models\User;
+use App\Notifications\AccountLifecycleNotification;
 use App\Support\MediaStorage;
 use App\Support\UserDataExporter;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
@@ -37,6 +39,7 @@ class AccountLifecycleTest extends TestCase
 
     public function test_a_user_can_pause_and_resume_their_account(): void
     {
+        Notification::fake();
         $user = $this->user();
 
         Livewire::actingAs($user)->test(Account::class)->call('deactivate');
@@ -44,6 +47,7 @@ class AccountLifecycleTest extends TestCase
         $this->assertFalse($user->is_active);
         $this->assertNotNull($user->deactivated_at);
         $this->assertDatabaseHas('audit_logs', ['action' => 'account.deactivated']);
+        Notification::assertSentTo($user, AccountLifecycleNotification::class, fn ($n) => $n->action === AccountLifecycleNotification::DEACTIVATED);
 
         // Paused: other customer routes bounce to the account page…
         $this->actingAs($user)->get('/dashboard')->assertRedirect(route('account'));
@@ -56,6 +60,7 @@ class AccountLifecycleTest extends TestCase
         $this->assertNull($user->deactivated_at);
         $this->actingAs($user)->get('/dashboard')->assertOk();
         $this->assertDatabaseHas('audit_logs', ['action' => 'account.reactivated']);
+        Notification::assertSentTo($user, AccountLifecycleNotification::class, fn ($n) => $n->action === AccountLifecycleNotification::REACTIVATED);
     }
 
     public function test_requesting_an_export_queues_the_job(): void
@@ -128,6 +133,7 @@ class AccountLifecycleTest extends TestCase
 
     public function test_a_super_admin_approves_a_deletion_and_the_account_is_erased(): void
     {
+        Notification::fake();
         $user = $this->user();
         $order = EsimOrder::create([
             'user_id' => $user->id, 'provider' => 'esimgo', 'provider_order_ref' => 'REF-2',
@@ -139,6 +145,7 @@ class AccountLifecycleTest extends TestCase
         $user->refresh();
         $this->assertTrue($user->hasPendingDeletion());
         $this->assertDatabaseHas('audit_logs', ['action' => 'account.deletion_requested']);
+        Notification::assertSentTo($user, AccountLifecycleNotification::class, fn ($n) => $n->action === AccountLifecycleNotification::DELETION_REQUESTED);
 
         // Super admin approves via the admin queue -> erased.
         $super = User::factory()->create();
@@ -153,6 +160,23 @@ class AccountLifecycleTest extends TestCase
         $this->assertDatabaseHas('audit_logs', ['action' => 'account.deletion_approved']);
         // Erasure tombstone survives the user row.
         $this->assertDatabaseHas('audit_logs', ['action' => 'account.erased']);
+        // Sent BEFORE the row was deleted (notifyNow — a queued send couldn't
+        // resolve a model that no longer exists by the time a worker ran it).
+        Notification::assertSentTo($user, AccountLifecycleNotification::class, fn ($n) => $n->action === AccountLifecycleNotification::ERASED);
+    }
+
+    public function test_a_user_can_cancel_a_pending_deletion_request(): void
+    {
+        Notification::fake();
+        $user = $this->user();
+
+        Livewire::actingAs($user)->test(Account::class)->call('requestDeletion');
+        Livewire::actingAs($user)->test(Account::class)->call('cancelDeletion');
+
+        $user->refresh();
+        $this->assertFalse($user->hasPendingDeletion());
+        $this->assertDatabaseHas('audit_logs', ['action' => 'account.deletion_cancelled']);
+        Notification::assertSentTo($user, AccountLifecycleNotification::class, fn ($n) => $n->action === AccountLifecycleNotification::DELETION_CANCELLED);
     }
 
     public function test_a_non_super_admin_cannot_approve_a_deletion(): void

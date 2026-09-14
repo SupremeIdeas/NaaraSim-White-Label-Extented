@@ -34,6 +34,10 @@
                         <input type="text" wire:model.live.debounce.400ms="form.subject" placeholder="{{ $templates[$key]['subject'] ?? '' }}" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm dark:border-white/10 dark:bg-[#0D1B2A] dark:text-white">
                         @error('form.subject') <span class="text-xs text-red-500">{{ $message }}</span> @enderror
                     </label>
+                    <label class="block"><span class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-400">Heading (the email's page title, shown in some inboxes)</span>
+                        <input type="text" wire:model.live.debounce.400ms="form.heading" placeholder="{{ $templates[$key]['heading'] ?? '' }}" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm dark:border-white/10 dark:bg-[#0D1B2A] dark:text-white">
+                        @error('form.heading') <span class="text-xs text-red-500">{{ $message }}</span> @enderror
+                    </label>
                     <label class="block"><span class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-400">Intro line (added above the body)</span>
                         <textarea rows="3" wire:model.live.debounce.400ms="form.intro" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm dark:border-white/10 dark:bg-[#0D1B2A] dark:text-white"></textarea>
                         @error('form.intro') <span class="text-xs text-red-500">{{ $message }}</span> @enderror

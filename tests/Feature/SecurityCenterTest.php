@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Livewire\SecurityCenter;
 use App\Models\User;
 use App\Notifications\PasswordChangedNotification;
+use App\Notifications\TwoFactorNotification;
 use App\Notifications\VerifyEmailNotification;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -79,6 +80,7 @@ class SecurityCenterTest extends TestCase
 
     public function test_user_can_enable_and_confirm_two_factor(): void
     {
+        Notification::fake();
         $user = User::factory()->create();
 
         $component = Livewire::actingAs($user)->test(SecurityCenter::class)
@@ -90,6 +92,23 @@ class SecurityCenterTest extends TestCase
 
         $component->set('code', $code)->call('confirm2fa')->assertHasNoErrors();
         $this->assertNotNull($user->fresh()->two_factor_confirmed_at);
+        Notification::assertSentTo($user, TwoFactorNotification::class, fn ($n) => $n->enabled === true);
+    }
+
+    public function test_user_can_disable_two_factor(): void
+    {
+        Notification::fake();
+        $user = User::factory()->create();
+
+        $component = Livewire::actingAs($user)->test(SecurityCenter::class)->call('enable2fa');
+        $secret = decrypt($user->fresh()->two_factor_secret);
+        $code = app(\PragmaRX\Google2FA\Google2FA::class)->getCurrentOtp($secret);
+        $component->set('code', $code)->call('confirm2fa');
+
+        Livewire::actingAs($user)->test(SecurityCenter::class)->call('disable2fa');
+
+        $this->assertNull($user->fresh()->two_factor_confirmed_at);
+        Notification::assertSentTo($user, TwoFactorNotification::class, fn ($n) => $n->enabled === false);
     }
 
     public function test_user_can_unlink_google(): void

@@ -4,10 +4,12 @@ namespace Tests\Feature;
 
 use App\Livewire\Admin\Staff;
 use App\Models\User;
+use App\Notifications\StaffAccountNotification;
 use App\Services\Staff\StaffService;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Notification;
 use Livewire\Livewire;
 use Tests\TestCase;
 
@@ -62,6 +64,7 @@ class AdminStaffManagementTest extends TestCase
 
     public function test_super_admin_can_deactivate_and_delete_staff(): void
     {
+        Notification::fake();
         $staff = $this->staffMember();
 
         Livewire::actingAs($this->superAdmin())->test(Staff::class)
@@ -71,6 +74,8 @@ class AdminStaffManagementTest extends TestCase
         Livewire::actingAs($this->superAdmin())->test(Staff::class)
             ->call('deleteStaff', $staff->id);
         $this->assertNull(User::find($staff->id));
+        // Sent synchronously (notifyNow) before the row was deleted.
+        Notification::assertSentTo($staff, StaffAccountNotification::class, fn ($n) => $n->action === StaffAccountNotification::REMOVED);
     }
 
     public function test_staff_service_refuses_to_manage_an_admin(): void

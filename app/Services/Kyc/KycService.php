@@ -4,6 +4,7 @@ namespace App\Services\Kyc;
 
 use App\Models\KycVerification;
 use App\Models\User;
+use App\Notifications\KycResultNotification;
 use App\Support\Auditor;
 use App\Support\KycSettings;
 use Illuminate\Support\Facades\DB;
@@ -120,6 +121,8 @@ class KycService
                 'level' => $level, 'provider' => $provider->name(), 'status' => $verification->status,
             ]);
 
+            $this->notifyOutcome($verification);
+
             return $verification;
         });
     }
@@ -140,6 +143,8 @@ class KycService
         ])->save();
         Auditor::log('kyc.decided', 'KycVerification', $verification->id, ['status' => $event->status, 'via' => 'webhook']);
 
+        $this->notifyOutcome($verification);
+
         return $verification;
     }
 
@@ -155,6 +160,7 @@ class KycService
                 'reviewed_at' => now(),
             ])->save();
             Auditor::log('kyc.approved', 'KycVerification', $verification->id, ['by' => $reviewer->id]);
+            $this->notifyOutcome($verification);
         }
 
         return $verification;
@@ -173,8 +179,19 @@ class KycService
                 'reviewed_at' => now(),
             ])->save();
             Auditor::log('kyc.rejected', 'KycVerification', $verification->id, ['by' => $reviewer->id, 'reason' => $reason]);
+            $this->notifyOutcome($verification);
         }
 
         return $verification;
+    }
+
+    /** Tell the user once a verification reaches a final decision (never for PENDING). */
+    private function notifyOutcome(KycVerification $verification): void
+    {
+        if (! in_array($verification->status, [KycVerification::APPROVED, KycVerification::REJECTED, KycVerification::FAILED], true)) {
+            return;
+        }
+
+        $verification->user?->notify(new KycResultNotification($verification->status, $verification->level, $verification->reason));
     }
 }
