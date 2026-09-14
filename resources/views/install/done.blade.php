@@ -15,7 +15,10 @@
 
             <div class="mt-6 rounded-xl border border-slate-200 bg-slate-50 p-5 text-left dark:border-[#2D4060] dark:bg-[#243352]">
                 <p class="mb-2 text-sm font-semibold text-slate-700 dark:text-slate-200">Default login credentials:</p>
-                <p class="text-sm text-slate-600 dark:text-slate-300">Email:
+                <p class="text-sm text-slate-600 dark:text-slate-300">Admin panel:
+                    <span class="rounded bg-red-50 px-2 py-0.5 font-mono text-red-600 dark:bg-red-950/40 dark:text-red-300">/{{ $adminPath }}</span>
+                </p>
+                <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">Email:
                     <span class="rounded bg-red-50 px-2 py-0.5 font-mono text-red-600 dark:bg-red-950/40 dark:text-red-300">{{ $email }}</span>
                 </p>
                 <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">Password:
@@ -23,7 +26,8 @@
                 </p>
                 <p class="mt-3 flex items-start gap-1.5 text-xs text-amber-700 dark:text-amber-300">
                     <x-icon name="shield-check" class="mt-0.5 h-3.5 w-3.5 shrink-0" />
-                    For security, change this password immediately after your first login.
+                    For security, change this password immediately after your first login — bookmark the
+                    admin panel path above first, or you'll lose track of where it lives.
                 </p>
             </div>
 
@@ -32,7 +36,7 @@
                 <x-cron-setup :hosting="$hosting ?? 'auto'" />
             </div>
 
-            <a href="/login"
+            <a href="{{ $adminLoginUrl }}"
                class="mt-6 flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-3 font-semibold text-white hover:bg-primary-dark">
                 Go to admin login <x-icon name="chevron-right" class="h-4 w-4" />
             </a>
