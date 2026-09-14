@@ -70,6 +70,31 @@ class UpdatePackageFormatTest extends TestCase
         $this->assertSame('code_and_migrations', $result->manifest->packageType);
     }
 
+    /**
+     * Sept-14 audit B1: the actual local trust gate (this method, called by
+     * UpdateApplier before anything is written to disk) never checked the
+     * package's product line against the receiving instance's own — the only
+     * product filtering anywhere was the distribution browse endpoint's
+     * client-reported convenience filter. A package genuinely built for one
+     * product line must be rejected outright when verified as/for a different
+     * one, and still pass when no expectation is given (build-time
+     * self-verification) or the expectation matches.
+     */
+    public function test_verify_rejects_a_product_mismatch_when_an_expected_product_is_given(): void
+    {
+        $path = $this->buildSamplePackage(); // built as 'naarasim-core' (setUp's config default)
+
+        $mismatched = app(PackageVerifier::class)->verify($path, 'naarasim-whitelabel');
+        $this->assertFalse($mismatched->passed);
+        $this->assertStringContainsString('Product mismatch', $mismatched->reason);
+
+        $matched = app(PackageVerifier::class)->verify($path, 'naarasim-core');
+        $this->assertTrue($matched->passed, $matched->reason);
+
+        $noExpectation = app(PackageVerifier::class)->verify($path);
+        $this->assertTrue($noExpectation->passed, $noExpectation->reason);
+    }
+
     public function test_a_corrupted_payload_file_fails_checksum(): void
     {
         $path = $this->buildSamplePackage();

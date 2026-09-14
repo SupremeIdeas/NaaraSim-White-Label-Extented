@@ -272,6 +272,15 @@ class ThemeInstaller
                     throw new \RuntimeException("hero_assets entry for '{$surface}' is invalid.");
                 }
 
+                // $surface is a theme.json object key from the uploaded package —
+                // it becomes part of the destination storage path below, so it
+                // needs the same traversal bar the zip entry names already pass
+                // in PackageVerifier::firstUnsafeEntry() (Sept-14 audit B3: this
+                // key was the one thing in the whole write path never checked).
+                if (preg_match('/^[a-z][a-z0-9_]{0,39}$/', $surface) !== 1) {
+                    throw new \RuntimeException("hero_assets key '{$surface}' is invalid — expected lowercase letters, digits and underscores, starting with a letter.");
+                }
+
                 $bytes = $zip->getFromName(PackageVerifier::PAYLOAD_PREFIX.$ref);
                 if ($bytes === false) {
                     throw new \RuntimeException("hero_assets.{$surface} references '{$ref}', which isn't in the package.");

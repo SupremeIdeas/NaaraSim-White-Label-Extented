@@ -27,13 +27,16 @@ class PackageDistributionTierTest extends TestCase
             'version' => '2026.09.10-1',
             'min_compatible_version' => '2026.09.01-1',
             'tier_requirement' => $packageTierRequirement,
+            'product' => 'naarasim-core',
             'is_published' => true,
         ]);
         // is_published is only assignable via the cast when persisted; force it on
         // the in-memory instance so isEligible()'s published gate passes.
         $package->is_published = true;
 
-        return app(PackageDistribution::class)->isEligible($package, $instance, '2026.09.05-1');
+        // Same product on both sides here — this test is exclusively about the
+        // tier matrix, product-line matching has its own test elsewhere.
+        return app(PackageDistribution::class)->isEligible($package, $instance, '2026.09.05-1', 'naarasim-core');
     }
 
     /** @return array<string, array{?string, ?string, bool}> */

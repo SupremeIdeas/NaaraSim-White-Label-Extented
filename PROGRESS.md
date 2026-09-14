@@ -3753,27 +3753,79 @@ DONE above, both synced to both forks). Still queued from the same request:
   non-removable / tier-gate it / master-only) still needs the owner's call
   before the "make it configurable" code ships live gated by license tier.
 
-### ▶ NEXT — Consolidated audit patch list (2026-09-14, owner-supplied)
-Gathered from the Sept-14 master + fork + capstone audit passes. Ordered by
-the audit's own severity grouping (security first):
-- **B1 (security, fix now not eventually):** update packages never actually
-  check product line at the trust gate. `config/updater.php`'s own comment
-  claims a `naarasim-core` package can't be silently applied to a
-  white-label fork, but `PackageVerifier::verify()` (called by both master's
-  publish flow and the fork's `WhiteLabelUpdateClient`) never compares
-  `$manifest->product` against the receiving instance's `product_identifier`
-  — the only product filtering that exists is a client-self-reported
-  convenience filter on the browse endpoint, not a check at the actual trust
-  gate. Fix inside `PackageVerifier::verify()` itself.
-- **B2 (unverified, check before a real reseller onboards):**
-  `WhiteLabelLicenseController`/`WhiteLabelLicenseService`'s license-key-to-
-  Sanctum-token exchange has never been read for brute-force/rate-limit
-  protection. Not confirmed broken — confirmed unchecked.
-- **B3 (unverified, same category as B2):** `ThemeInstaller`'s file-writing
-  pipeline has never been checked against the same path-traversal bar
-  `PackageVerifier` already passes (rejects `../`, absolute paths, backslash
-  tricks) — a second file-writing pipeline for a different package family
-  that was never read against that standard.
+### ▶ DONE — Live boot test results + B1/B3 fixes (2026-09-14, owner-supplied)
+Owner asked for the pipeline to actually be run, not just reasoned about —
+real sqlite db (not phpunit's `:memory:`), real `update:package`/license
+services, no mocking. Findings and fixes, most severe first:
+
+- **B1 was WORSE than the audit framing — live-confirmed, then fixed.** Built
+  and published a real demo fix package on master via `update:package
+  --publish`: landed in `distributed_packages` tagged `product=naarasim-core`
+  (there was no `--product` flag anywhere in `UpdatePackageCommand`, so every
+  package ever built on master could only ever be tagged with master's OWN
+  `config('updater.product_identifier')`). Then called
+  `PackageDistribution::availableFor()` with a fork instance filtering
+  `product=naarasim-whitelabel` (both forks' real `.env` value) — **zero
+  rows, always, for any package ever built.** Not a theoretical gap: no code
+  fix or theme has ever been deliverable to any fork, full stop, and the
+  identical `->where('product', $product)` filter means themes were equally
+  broken. Separately, confirmed the audit's original claim too:
+  `PackageDistribution::isEligible()` (the download endpoint's re-
+  authorisation, "never trust that a client only asks for what check
+  showed it") never checked product at all — a client that already knew a
+  package_id could download a wrong-product package outright, bypassing the
+  browse filter entirely.
+  **Fixed, all four layers:** `update:package --product=<value>` override
+  (defaults to this instance's own config, so existing calls are unaffected);
+  `PackageVerifier::verify()` gained an optional `$expectedProduct` param,
+  checked against the manifest — `UpdateApplier` now passes this instance's
+  own `product_identifier` before ever writing a package to disk (the actual
+  local trust gate, not just a browse-time filter); `PackageDistribution::
+  isEligible()` now takes and checks `$product` (both its caller in
+  `availableFor()` and the `download()` controller, which now validates and
+  passes `product` same as `check()` already did); the fork-only
+  `WhiteLabelUpdateClient` (exists only in the two white-label repos, not
+  master) now sends `product` on its download call and passes its own
+  product to the local post-download `verify()` call too. New tests: a
+  `PackageVerifier` product-mismatch test, a download-endpoint product-
+  mismatch test (rejected even when version/tier are otherwise fine), full
+  suite green (see below).
+- **B3 confirmed and fixed, small:** `ThemeInstaller::copyAssets()` builds
+  its destination write path as `themes/{slug}/{surface}.{ext}` — `{slug}`
+  was already validated, and `{ref}` (the zip entry it reads from) already
+  passes `PackageVerifier::firstUnsafeEntry()`'s traversal check, but
+  `{surface}` (a `hero_assets` JSON object KEY straight from the uploaded
+  theme.json) was never validated at all. Fixed: `{surface}` must match
+  `^[a-z][a-z0-9_]{0,39}$` or the whole install is rejected before anything
+  is written, matching every other reject-don't-silently-drop validation in
+  this class. New test: a `../../evil` surface key is rejected, nothing
+  written.
+- **B2 checked, found fine — no code change.** `activate` (the license-key→
+  Sanctum-token exchange) sits behind the same `throttle:api` limiter as
+  every other endpoint here: 300/min for an authenticated user, **60/min per
+  IP** for this one (it's pre-auth by design — you're exchanging a key FOR a
+  token). Combined with `generateUniqueKey()`'s high-entropy `NAARA-XXXX-
+  XXXX-XXXX` format, brute-forcing a real key at 60 attempts/minute is not a
+  practical concern. Rate-limiting exists; nothing to fix.
+- **License + entitlement pipeline: live-tested end to end, works correctly.**
+  On the same real db: `register()` → pending instance → `issueLicense(tier:
+  'normal')` → real key issued, `entitlement_level` correctly defaults to
+  `'basic'` (Batch 8's "Normal locked-down until paid") → `activateWithKey()`
+  → real Sanctum token minted, `last_four` recorded →
+  `FeatureLocks::entitlementFor('basic')` correctly returned all four locks
+  (`gift_cards`, `esim_voice`, `preloader_customization`, `brand_hunt`) →
+  admin ran `setEntitlementLevel(instance, 'full')` (the real "mark this fork
+  as paid" action) → `entitlementFor('full')` correctly returned zero locks.
+  This system is sound and independent of the B1 distribution bug above (it
+  never touches `PackageDistribution`/product matching at all — entitlement
+  is looked up directly off the instance's own `entitlement_level` column).
+- **Full suite green after the B1/B3 fixes:** targeted run (76 tests, 187
+  assertions) then full `vendor/bin/phpunit` — see DONE entry's own commit
+  for the exact count.
+
+### ▶ NEXT — Remaining consolidated audit patch list (2026-09-14, owner-supplied)
+Gathered from the Sept-14 master + fork + capstone audit passes. B1/B2/B3
+above are now closed (fixed or checked-and-fine, live-tested). What's left:
 - **A1 — Prompt 11 §3 `WalletGroup`/`WalletGroupMember` still doesn't exist.**
   Confirmed absent from the Sept-14 master. Same item already flagged below
   as "Opus-recommended, needs extra scrutiny" (touches `WalletService`) —

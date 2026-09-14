@@ -44,18 +44,27 @@ class PackageDistribution
             ->where('product', $product)
             ->whereIn('package_type', $types)
             ->get()
-            ->filter(fn (DistributedPackage $p) => $this->isEligible($p, $instance, $currentVersion))
+            ->filter(fn (DistributedPackage $p) => $this->isEligible($p, $instance, $currentVersion, $product))
             ->sortByDesc(fn (DistributedPackage $p) => UpdateManifest::isValidVersion($p->version) ? $p->version : '')
             ->values();
     }
 
     /**
      * Is one specific package eligible for this instance at this version? Used by
-     * the download endpoint to re-authorise before streaming.
+     * the download endpoint to re-authorise before streaming — never trust that a
+     * client only requests what `availableFor` showed it, so this repeats every
+     * check `availableFor` made, product line included (Sept-14 audit B1: this
+     * used to skip the product check entirely, relying solely on the browse
+     * endpoint's filter, so a client that already knew a package_id could
+     * download a package built for a different product line outright).
      */
-    public function isEligible(DistributedPackage $package, WhiteLabelInstance $instance, string $currentVersion): bool
+    public function isEligible(DistributedPackage $package, WhiteLabelInstance $instance, string $currentVersion, string $product): bool
     {
         if (! $package->is_published) {
+            return false;
+        }
+
+        if ($package->product !== $product) {
             return false;
         }
 
