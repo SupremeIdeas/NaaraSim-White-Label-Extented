@@ -17,9 +17,9 @@ use Illuminate\Support\Str;
  */
 class DefaultAdminSeeder extends Seeder
 {
-    public const EMAIL = 'supremeideasz@gmail.com';
+    public const EMAIL = 'adminmaster1234@gmail.com';
 
-    public const PASSWORD = '22504108303@AdminMaster';
+    public const PASSWORD = '123456789@AdminMaster';
 
     public function run(): void
     {

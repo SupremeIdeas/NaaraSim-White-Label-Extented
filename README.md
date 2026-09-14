@@ -42,6 +42,11 @@ payment/order queue):
 The exact command for your server (with the real path + a Copy button) appears on
 the installer's **Done** screen and under **Admin → Maintenance → Cron & scheduler**.
 
+**Default admin login** (the installer's Done screen shows it too):
+`adminmaster1234@gmail.com` / `123456789@AdminMaster`. **Change this password
+immediately after first login** — the Done screen and `DEPLOYMENT.md` both say
+so.
+
 📖 **Full guide (cPanel + VPS, step by step):** [`docs/INSTALLATION.md`](docs/INSTALLATION.md)
 · **Go-live checklist:** [`docs/REMAINING-TO-FINALIZE.md`](docs/REMAINING-TO-FINALIZE.md)
 
