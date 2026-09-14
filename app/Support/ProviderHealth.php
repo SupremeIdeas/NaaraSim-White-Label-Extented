@@ -18,6 +18,10 @@ use Illuminate\Support\Facades\Cache;
  *
  * Results are cached under the same key the admin dashboard already reads, so
  * the existing "Provider wallets" widget keeps working and simply shows more.
+ *
+ * Prompt 12 — adding a provider to PROVIDERS below also requires adding it
+ * to: `PermanentNumberRouter::$lane`, `ProviderModels::MODELS[...]['lane']`
+ * (+ `PROVIDER_KEY_FIELD`), `SmsInboundWebhookController::PROVIDERS`.
  */
 class ProviderHealth
 {
@@ -47,6 +51,7 @@ class ProviderHealth
         // Permanent/voice — no prepaid wallet balance to read; reachability only.
         'twilio' => ['number.twilio', null, 'number'],
         'telnyx' => ['number.telnyx', null, 'number'],
+        'plivo' => ['number.plivo', null, 'number'],
     ];
 
     /**

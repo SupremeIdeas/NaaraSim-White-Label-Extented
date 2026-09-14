@@ -229,6 +229,10 @@ class GetNumber extends Component
 
     public ?string $lineDone = null;
 
+    /** Prompt 12: whether the just-provisioned line actually supports voice —
+     *  read from the real capability data provision() returns, never assumed. */
+    public bool $lineVoiceCapable = true;
+
     public function searchLine(PermanentNumberRouter $router): void
     {
         $this->error = null;
@@ -295,10 +299,16 @@ class GetNumber extends Component
         }
 
         $this->lineDone = $vnum->phone_number ?? $number;
+        // Prompt 12: some lane providers (e.g. Plivo, in regions with no inbound
+        // voice) can only deliver SMS — never let the UI silently imply calling
+        // works when it doesn't (the exact failure mode this fix exists to close).
+        $this->lineVoiceCapable = (bool) ($vnum->capabilities['voice'] ?? true);
         $this->lineNumbers = [];
         Mailer::notify($user, new OrderPlacedNotification('number', 'Naara Line', (float) $vnum->monthly_retail, 'USD'));
         $this->dispatch('nx-toast', variant: 'hero', type: 'success', title: 'Naara Line active',
-            message: 'Your permanent number is ready — set up call forwarding or the dialer from your dashboard.',
+            message: $this->lineVoiceCapable
+                ? 'Your permanent number is ready — set up call forwarding or the dialer from your dashboard.'
+                : 'Your permanent number is ready for SMS. Voice calls aren’t available on this number.',
             cta: ['label' => 'View my numbers', 'href' => route('dashboard')]);
     }
 

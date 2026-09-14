@@ -76,7 +76,10 @@ class ProviderRegistryTest extends TestCase
         $this->assertTrue($row->enabled);
 
         // Every provider across the three stacks got a row (shared registry).
-        $this->assertSame(13, ProviderRegistry::count());
+        // Derived, not hardcoded — ProviderHealth::PROVIDERS legitimately grows
+        // as new providers are wired in (e.g. Prompt 12's Plivo/Vonage/Sinch).
+        $providersCount = (new \ReflectionClass(ProviderHealth::class))->getConstant('PROVIDERS');
+        $this->assertSame(count($providersCount), ProviderRegistry::count());
     }
 
     public function test_snapshot_is_cached_and_flushable(): void

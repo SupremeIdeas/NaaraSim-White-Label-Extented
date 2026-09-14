@@ -53,8 +53,31 @@ class PlivoService implements NumberProviderInterface
         return [
             'number' => $number,
             'provider_ref' => (string) data_get($json, 'numbers.0.number', $number),
-            'capabilities' => ['sms' => true, 'voice' => true],
+            'capabilities' => $this->realCapabilities($number),
         ];
+    }
+
+    /**
+     * Plivo's own "buy a number" response carries no capability data (only
+     * api_id/message/numbers[]/status) — the real voice_enabled/sms_enabled
+     * flags live on the AccountPhoneNumber object, fetched via a follow-up
+     * GET right after purchase. Plivo's own published coverage has no African
+     * inbound voice, so a failed/ambiguous lookup defaults to voice=false —
+     * never claim a capability we can't confirm the number actually has
+     * (the exact failure mode this fix exists to close).
+     */
+    private function realCapabilities(string $number): array
+    {
+        try {
+            $json = $this->client()->get("/Number/{$number}/")->json();
+
+            return [
+                'sms' => (bool) data_get($json, 'sms_enabled', true),
+                'voice' => (bool) data_get($json, 'voice_enabled', false),
+            ];
+        } catch (\Throwable) {
+            return ['sms' => true, 'voice' => false];
+        }
     }
 
     public function sendSms(string $from, string $to, string $body, ?string $mediaUrl = null): array
