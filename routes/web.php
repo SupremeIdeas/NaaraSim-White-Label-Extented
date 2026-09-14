@@ -69,6 +69,7 @@ use App\Livewire\Admin\Maintenance;
 use App\Livewire\Admin\Updater;
 use App\Livewire\Admin\MarketingCopyStudio;
 use App\Livewire\Admin\Merchants;
+use App\Livewire\Admin\NavSettings;
 use App\Livewire\Admin\NavSlots;
 use App\Livewire\Admin\Nci\HealthMonitor;
 use App\Livewire\Admin\Nci\ProviderDetail;
@@ -407,6 +408,7 @@ Route::middleware(['admin', 'throttle:admin'])
             Route::get('/incidents', Incidents::class)->name('incidents');
             Route::get('/notices', Alerts::class)->name('notices');
             Route::get('/nav', NavSlots::class)->name('nav');
+            Route::get('/bottom-nav', NavSettings::class)->name('bottom-nav');
             Route::get('/guides', Guides::class)->name('guides');
             Route::get('/service-icons', ServiceIconsPage::class)->name('service-icons');
             Route::get('/banners', Banners::class)->name('banners');

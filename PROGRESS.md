@@ -9,6 +9,58 @@
 
 ## DONE
 
+### 🧭 Admin-configurable bottom nav (main + Numbers section) — 2026-09-14
+Owner request: let an admin reorder or replace which items appear in the main
+bottom bar / More sheet, and in the Numbers section's own bottom bar, without
+a deploy. Found (and reused rather than duplicated) `Admin\NavSlots` — an
+existing, unrelated "floating navigation pill" admin screen with full
+reassign-any-slot freedom; the actual fixed bottom tab bars (main + Numbers)
+were still 100% hardcoded PHP arrays, confirming this was real, non-duplicate
+scope.
+- **`App\Support\BottomNav::eligibleMainItems()`** is a verbatim,
+  behavior-preserving port of customer.blade.php's former inline `@php`
+  block — every conditional (naara_gift, Twilio-active, developer API,
+  merchant V2/partner/admin unshifts, brand-hunt lock, app-export, Home
+  unshift-last) reproduced unchanged. `resolveMain()` layers an optional
+  `NavItemOverride` (new table: `nav`, `item_key`, `position`, `is_active`)
+  on top: with no override configured (fresh install, or before an admin
+  ever visits the new screen) it returns the exact original primary/more
+  split — zero behavior change by default. Once configured, admin's order
+  is applied, hidden items dropped, and any NEW item added to the codebase
+  later that the admin hasn't configured yet still appends automatically
+  rather than silently vanishing.
+- Caught and fixed during testing: the first cut queried overrides with
+  `where('is_active', true)`, which silently discarded hidden rows from the
+  query entirely — so a "hidden" item fell into the "unmentioned, append at
+  the end" fallback and reappeared, defeating the hide feature. Fixed by
+  fetching ALL rows (active + inactive) and only excluding is_active=false
+  ones from the final list, while still treating them as "mentioned" (not
+  eligible for the "new item" auto-append fallback).
+- **Numbers section nav**: same override mechanism, always exactly 4 slots
+  (the template renders fixed positions 0-3 either side of the centre "My
+  Lines" button — confirmed by reading the actual grid markup, not assumed).
+  Added a 5th real catalog option, Port In (`numbers.port-in`, an existing
+  but previously nav-unlinked route from Batch C), so "replace" has genuine
+  meaning — default order (Contacts/Forwarding/Dialer/Messages) unchanged. A
+  last-resort full-catalog fill guarantees exactly 4 even if an admin hides
+  several defaults without configuring enough replacements.
+- **Admin screen**: `Admin\NavSettings` (`/adminmaster/bottom-nav`, sidebar
+  entry next to the existing "Floating nav"), two drag-reorder lists
+  (mirrors `Admin\PageBuilder`'s exact Alpine drag pattern) with a visual
+  divider after row 4 marking bar-vs-more / shown-vs-not, and a toggle
+  switch per row. "Replace" = drag a lower item above the divider, which
+  naturally bumps the previous occupant down — no separate replace UI
+  needed. Icons verified present in `icon-sprite.blade.php` before use
+  (`smartphone` for Port In) per the theme-integrity rule.
+- Tests: `tests/Feature/BottomNavTest.php` (12) — default fidelity for a
+  plain user/guest/V2-merchant/admin, override reorder, hide-promotes-next
+  ("replace"), an override can never expose an ineligible item even if
+  explicitly listed, an unrecognized future key is dropped gracefully,
+  Numbers reorder/swap/always-exactly-4. `tests/Feature/
+  BottomNavSettingsTest.php` (6) — 403 for non-admins, reorder/toggle/reset
+  persistence, main and Numbers overrides are independent of each other.
+  Full suite green after the fix.
+
 ### 🌍 Prompt 11: localization Phase A+B — 2026-09-14
 Audited first: zero i18n infra existed (`grep` for `__()`/`@lang()`/`trans()`
 across all 444 blade files: 0 hits; no `lang/` directory; no i18n package in
