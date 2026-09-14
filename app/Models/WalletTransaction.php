@@ -9,6 +9,7 @@ class WalletTransaction extends Model
 {
     protected $fillable = [
         'user_id',
+        'spent_by_user_id',
         'type',
         'amount',
         'currency',
@@ -34,5 +35,12 @@ class WalletTransaction extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /** Prompt 11 §3: who actually spent, when this was a group-plan purchase
+     *  debited from the group owner's wallet (`user_id`) — null otherwise. */
+    public function spentBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'spent_by_user_id');
     }
 }
