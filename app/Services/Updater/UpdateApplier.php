@@ -82,7 +82,11 @@ class UpdateApplier
     private function runPipeline(string $packagePath, ?int $initiatedByUserId): PlatformUpdateAttempt
     {
         // --- Step 1: verify (reuse Batch 1) ---
-        $result = $this->verifier->verify($packagePath);
+        // Pass this instance's own product line so a package built for a
+        // different one (e.g. a master-tagged package on a white-label fork)
+        // is rejected here even if it somehow got this far — the actual local
+        // trust gate, not just the distribution browse filter (Sept-14 audit B1).
+        $result = $this->verifier->verify($packagePath, config('updater.product_identifier'));
         if (! $result->passed) {
             Auditor::log('update.rejected', null, null, ['reason' => $result->reason]);
             throw new \RuntimeException('Package rejected: '.$result->reason);

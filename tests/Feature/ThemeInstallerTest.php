@@ -285,6 +285,32 @@ class ThemeInstallerTest extends TestCase
         Storage::disk('public')->assertDirectoryEmpty('themes/broken-assets-theme');
     }
 
+    /**
+     * Sept-14 audit B3: hero_assets is a map keyed by "surface" (e.g. 'dashboard'),
+     * and that key becomes part of the destination storage path
+     * (themes/{slug}/{surface}.{ext}) — but unlike the zip entry name it's read
+     * from (which already passes PackageVerifier::firstUnsafeEntry()'s traversal
+     * check), the surface key itself was never validated. A theme.json crafted
+     * with a path-traversal surface key must be rejected before anything is
+     * written, exactly like every other malformed-shape rejection here.
+     */
+    public function test_a_path_traversal_hero_asset_surface_key_is_rejected(): void
+    {
+        Storage::fake('public');
+
+        $pkg = $this->buildThemePackage(['hero_assets' => ['../../evil' => 'assets/hero-dashboard.webp']]);
+
+        try {
+            app(ThemeInstaller::class)->install($pkg, null);
+            $this->fail('expected a RuntimeException');
+        } catch (\RuntimeException $e) {
+            $this->assertStringContainsString('hero_assets key', $e->getMessage());
+        }
+
+        $this->assertNull(ThemePresetModel::where('slug', 'naara-line-persona')->first());
+        Storage::disk('public')->assertDirectoryEmpty('themes');
+    }
+
     // --- Livewire screen ---
 
     private function superAdmin(): User

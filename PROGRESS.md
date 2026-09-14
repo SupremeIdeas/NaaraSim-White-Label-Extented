@@ -3884,27 +3884,79 @@ DONE above, both synced to both forks). Still queued from the same request:
   non-removable / tier-gate it / master-only) still needs the owner's call
   before the "make it configurable" code ships live gated by license tier.
 
-### ▶ NEXT — Consolidated audit patch list (2026-09-14, owner-supplied)
-Gathered from the Sept-14 master + fork + capstone audit passes. Ordered by
-the audit's own severity grouping (security first):
-- **B1 (security, fix now not eventually):** update packages never actually
-  check product line at the trust gate. `config/updater.php`'s own comment
-  claims a `naarasim-core` package can't be silently applied to a
-  white-label fork, but `PackageVerifier::verify()` (called by both master's
-  publish flow and the fork's `WhiteLabelUpdateClient`) never compares
-  `$manifest->product` against the receiving instance's `product_identifier`
-  — the only product filtering that exists is a client-self-reported
-  convenience filter on the browse endpoint, not a check at the actual trust
-  gate. Fix inside `PackageVerifier::verify()` itself.
-- **B2 (unverified, check before a real reseller onboards):**
-  `WhiteLabelLicenseController`/`WhiteLabelLicenseService`'s license-key-to-
-  Sanctum-token exchange has never been read for brute-force/rate-limit
-  protection. Not confirmed broken — confirmed unchecked.
-- **B3 (unverified, same category as B2):** `ThemeInstaller`'s file-writing
-  pipeline has never been checked against the same path-traversal bar
-  `PackageVerifier` already passes (rejects `../`, absolute paths, backslash
-  tricks) — a second file-writing pipeline for a different package family
-  that was never read against that standard.
+### ▶ DONE — Live boot test results + B1/B3 fixes (2026-09-14, owner-supplied)
+Owner asked for the pipeline to actually be run, not just reasoned about —
+real sqlite db (not phpunit's `:memory:`), real `update:package`/license
+services, no mocking. Findings and fixes, most severe first:
+
+- **B1 was WORSE than the audit framing — live-confirmed, then fixed.** Built
+  and published a real demo fix package on master via `update:package
+  --publish`: landed in `distributed_packages` tagged `product=naarasim-core`
+  (there was no `--product` flag anywhere in `UpdatePackageCommand`, so every
+  package ever built on master could only ever be tagged with master's OWN
+  `config('updater.product_identifier')`). Then called
+  `PackageDistribution::availableFor()` with a fork instance filtering
+  `product=naarasim-whitelabel` (both forks' real `.env` value) — **zero
+  rows, always, for any package ever built.** Not a theoretical gap: no code
+  fix or theme has ever been deliverable to any fork, full stop, and the
+  identical `->where('product', $product)` filter means themes were equally
+  broken. Separately, confirmed the audit's original claim too:
+  `PackageDistribution::isEligible()` (the download endpoint's re-
+  authorisation, "never trust that a client only asks for what check
+  showed it") never checked product at all — a client that already knew a
+  package_id could download a wrong-product package outright, bypassing the
+  browse filter entirely.
+  **Fixed, all four layers:** `update:package --product=<value>` override
+  (defaults to this instance's own config, so existing calls are unaffected);
+  `PackageVerifier::verify()` gained an optional `$expectedProduct` param,
+  checked against the manifest — `UpdateApplier` now passes this instance's
+  own `product_identifier` before ever writing a package to disk (the actual
+  local trust gate, not just a browse-time filter); `PackageDistribution::
+  isEligible()` now takes and checks `$product` (both its caller in
+  `availableFor()` and the `download()` controller, which now validates and
+  passes `product` same as `check()` already did); the fork-only
+  `WhiteLabelUpdateClient` (exists only in the two white-label repos, not
+  master) now sends `product` on its download call and passes its own
+  product to the local post-download `verify()` call too. New tests: a
+  `PackageVerifier` product-mismatch test, a download-endpoint product-
+  mismatch test (rejected even when version/tier are otherwise fine), full
+  suite green (see below).
+- **B3 confirmed and fixed, small:** `ThemeInstaller::copyAssets()` builds
+  its destination write path as `themes/{slug}/{surface}.{ext}` — `{slug}`
+  was already validated, and `{ref}` (the zip entry it reads from) already
+  passes `PackageVerifier::firstUnsafeEntry()`'s traversal check, but
+  `{surface}` (a `hero_assets` JSON object KEY straight from the uploaded
+  theme.json) was never validated at all. Fixed: `{surface}` must match
+  `^[a-z][a-z0-9_]{0,39}$` or the whole install is rejected before anything
+  is written, matching every other reject-don't-silently-drop validation in
+  this class. New test: a `../../evil` surface key is rejected, nothing
+  written.
+- **B2 checked, found fine — no code change.** `activate` (the license-key→
+  Sanctum-token exchange) sits behind the same `throttle:api` limiter as
+  every other endpoint here: 300/min for an authenticated user, **60/min per
+  IP** for this one (it's pre-auth by design — you're exchanging a key FOR a
+  token). Combined with `generateUniqueKey()`'s high-entropy `NAARA-XXXX-
+  XXXX-XXXX` format, brute-forcing a real key at 60 attempts/minute is not a
+  practical concern. Rate-limiting exists; nothing to fix.
+- **License + entitlement pipeline: live-tested end to end, works correctly.**
+  On the same real db: `register()` → pending instance → `issueLicense(tier:
+  'normal')` → real key issued, `entitlement_level` correctly defaults to
+  `'basic'` (Batch 8's "Normal locked-down until paid") → `activateWithKey()`
+  → real Sanctum token minted, `last_four` recorded →
+  `FeatureLocks::entitlementFor('basic')` correctly returned all four locks
+  (`gift_cards`, `esim_voice`, `preloader_customization`, `brand_hunt`) →
+  admin ran `setEntitlementLevel(instance, 'full')` (the real "mark this fork
+  as paid" action) → `entitlementFor('full')` correctly returned zero locks.
+  This system is sound and independent of the B1 distribution bug above (it
+  never touches `PackageDistribution`/product matching at all — entitlement
+  is looked up directly off the instance's own `entitlement_level` column).
+- **Full suite green after the B1/B3 fixes:** targeted run (76 tests, 187
+  assertions) then full `vendor/bin/phpunit` — see DONE entry's own commit
+  for the exact count.
+
+### ▶ NEXT — Remaining consolidated audit patch list (2026-09-14, owner-supplied)
+Gathered from the Sept-14 master + fork + capstone audit passes. B1/B2/B3
+above are now closed (fixed or checked-and-fine, live-tested). What's left:
 - **A1 — Prompt 11 §3 `WalletGroup`/`WalletGroupMember` still doesn't exist.**
   Confirmed absent from the Sept-14 master. Same item already flagged below
   as "Opus-recommended, needs extra scrutiny" (touches `WalletService`) —
@@ -3954,6 +4006,89 @@ build Bandwidth (better fit for Prompt 11 §5's US-focused porting, revisit
 if a dedicated US-number line happens) or MessageBird/Bird (vendor financial-
 stability risk) in this pass. `CircuitBreaker`/`CandidateOrdering` are
 already shared infra — no new routing logic needed for any new provider.
+
+### ▶ TOP OF NEXT — Live boot test: updater + theme install + license + entitlement unlock (owner-supplied, 2026-09-14)
+**Owner's explicit next step, before any Business Suite work starts.** Boot
+master and both white-label forks in parallel and run the distribution
+pipeline end to end, for real, rather than continuing to reason about it on
+paper (this is also the fastest way to confirm or refute the B1 pipeline gap
+flagged above — `WhiteLabelUpdateClient` sending the fork's own
+`NAARA_UPDATE_PRODUCT` as the filter while `PackageBuilder` always tags with
+master's `product_identifier`):
+1. On master (`/adminmaster`): create one small demo theme, one small demo
+   fix, and one small demo update; upload/build each through the real
+   Updater/Theme-installer admin UI; confirm each installs on master itself
+   first (upload zip → install → verify it actually applied).
+2. Publish all three for white-label distribution.
+3. Log into each white-label fork's own `/adminmaster` and fetch/download the
+   published update — confirm the cross-update actually lands (not just that
+   the endpoint returns 200). This is the step that empirically tests the B1
+   concern above.
+4. In the same pass, test license-key verification end to end (issue a key on
+   master, redeem it on a fork, confirm the exchange returns valid and a real
+   Sanctum token is issued).
+5. Confirm the Normal WhiteLabel tier's locked Pro features actually unlock
+   after master performs whatever admin action is supposed to grant that
+   (entitlement bump / license activation) — walk the real unlock path, not
+   just the code path.
+Report findings (what worked, what didn't, and B1's real status) before
+starting anything below this.
+
+### ▶ QUEUED — Naara Business Suite, Prompts 13–19 (owner-supplied, 2026-09-14, MASTER REPO ONLY)
+**Owner's own framing: build this only after the live boot test above is
+done — "then after that, we will come to build this layer... this is the
+feature that we can't publish for them to download in their platform unless
+they request it."** This entire suite is master-only — never distributed to
+white-label forks by default; a fork gets it only if/when specifically
+granted (the licensing/entitlement mechanism for that grant is itself part of
+this work, not decided yet). Full specs are the 7 uploaded blueprint files,
+kept alongside this file. Hard sequencing (each depends on the last unless
+noted):
+- **Prompt 13 — Organizations & seats.** Foundation for everything below.
+  Explicitly does NOT create a new `Organization` table — generalizes the
+  existing `WalletGroup`/`WalletGroupMember` (adds `kind` family/business,
+  `business_email`, seat `role`/`status`) and layers `spatie/laravel-
+  permission` team-scoped roles (owner/admin/agent/viewer) on top, reusing
+  Prompt 11 §3's invite flow and unmodified `WalletService` signatures.
+  **Hard blocker: Prompt 11 §3 (`WalletGroup`/`WalletGroupMember`, task A1
+  above) must ship first** — Prompt 13 has nothing to extend otherwise.
+- **Prompt 14 — Business phone core** (depends on 13): IVR/call-flow builder,
+  call queues, ring groups, business-hours schedules. Explicitly scoped to
+  Twilio-provisioned numbers only (Telnyx has no `VoiceProviderInterface`
+  implementation) and additive — never touches the existing single-target
+  `CallForwardingRule` path individual users are on today.
+- **Prompt 15 — Recording & conversation intelligence** (depends on 13; 14
+  not hard-required but far more useful once it exists): call recording,
+  transcription, sentiment/talk-ratio/keyword summaries. Reuses
+  `VoiceDialerService`'s funded-block billing pattern for recording/
+  transcription minutes — no second billing path.
+- **Prompt 16 — Omnichannel inbox** (no hard dependency, can ship
+  independently): adds a `channel` dimension (sms/whatsapp/telegram/
+  instagram/email) to the *existing* `MessageThread`/`InboundMessage`/
+  `OutboundMessage` inbox rather than building a parallel one; widens
+  `message_threads`' unique constraint to `(user_id, channel,
+  counterpart_number)`; wires the WhatsApp/Telegram/Instagram webhooks that
+  today silently discard inbound messages.
+- **Prompt 17 — AI voice agent** (depends on BOTH 14 and 15 — do not start
+  before both land): Twilio ConversationRelay-based voice agent; Naara must
+  build and run the STT/TTS WebSocket application server itself — flagged in
+  its own spec as genuinely new application engineering, not a config flag.
+- **Prompt 18 — CRM & integration marketplace** (loosely depends on 13):
+  extends `ApiClient::SCOPES` with read-only `contacts:read`/`calls:read`/
+  `messages:read`/`webhook:subscribe`; reuses the existing scoped-API-key +
+  prepaid-balance system (`ApiClientService`/`ApiWalletService`) and
+  `DeveloperPortal.php` — no second API-key or billing system. Write scopes
+  deliberately deferred to a later pass.
+- **Prompt 19 — Native mobile softphone** (depends on 14; NOT a Claude-Code
+  Laravel task): flagged in its own spec as native iOS/Android engineering
+  (CallKit/ConnectionService, VoIP push) needed only for business ring-group
+  calling — the consumer eSIM/OTP experience stays on the existing
+  `AppStudio` webview wrapper. Scope/staff/timeline this separately from
+  13–18; do not fold its estimate into the rest of the suite.
+Two of the zip's files (`NAARA-PROMPT-10-SURFACE-TRUST-Sept9.md`,
+`NAARA-PROMPT-11-CLOSE-GAPS-Sept9.md`) are earlier prompts already shipped/
+tracked elsewhere in this file — not part of this suite, included in the
+upload by accident per the owner, ignored here.
 
 ### ▶ TOP OF NEXT — Theme/Branding/Reseller-API blueprint, remaining sections
 Owner's 5-doc set (2026-09-13): theme integrity §1–§3 + Master-Only

@@ -26,6 +26,7 @@ class UpdatePackageCommand extends Command
         {--changelog= : Human-readable changelog line}
         {--by= : Who built this (email); defaults to git user.email}
         {--tier= : Tier requirement key (default: none — a core update)}
+        {--product= : Product line this package is built FOR (default: this instance's own config(\'updater.product_identifier\')). Master builds naarasim-core packages for itself by default — pass e.g. --product=naarasim-whitelabel to build a package intended for a white-label fork instead of for master itself.}
         {--requires-composer : Flag that applying needs composer install}
         {--requires-npm : Flag that applying needs an npm build}
         {--publish : After building, register + publish it to the distribution API (Batch 4)}
@@ -64,7 +65,8 @@ class UpdatePackageCommand extends Command
         $this->line('  Diff against ref:  '.$ref);
         $this->line('  Content files:     '.count($files)." (of which {$migrationCount} migrations)");
         $this->line('  Deletions:         '.count($deletions));
-        $this->line('  Product:           '.config('updater.product_identifier'));
+        $product = $this->option('product') ?: config('updater.product_identifier');
+        $this->line('  Product:           '.$product);
         $this->line('  Distribution:      '.($this->option('master-only') ? 'MASTER-ONLY (can never be published to white label)' : 'distributable'));
 
         if ($this->option('dry-run')) {
@@ -83,6 +85,7 @@ class UpdatePackageCommand extends Command
             'files' => $files,
             'deletions' => $deletions,
             'private_key' => $privateKey,
+            'product' => $product,
             'package_type' => $this->option('type') ?: null,
             'min_compatible_version' => $this->option('min-compatible') ?: null,
             'changelog' => $this->option('changelog') ?: '',
@@ -98,7 +101,7 @@ class UpdatePackageCommand extends Command
 
         // Immediately verify what we just built, so the command can never hand
         // back a package that wouldn't pass the very check applying it will run.
-        $result = $verifier->verify($path);
+        $result = $verifier->verify($path, $product);
         if (! $result->passed) {
             $this->error('Built package failed self-verification: '.$result->reason);
 

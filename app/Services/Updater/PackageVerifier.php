@@ -35,7 +35,19 @@ class PackageVerifier
     /** In-package prefix under which every checksummed content file lives. */
     public const PAYLOAD_PREFIX = 'payload/';
 
-    public function verify(string $packagePath): VerificationResult
+    /**
+     * @param  string|null  $expectedProduct  When given, the package is rejected
+     *   unless its manifest's product line matches exactly. This is the actual
+     *   trust-gate product check (Sept-14 audit B1) — the distribution browse
+     *   endpoint's own product filter is a client-reported convenience only, and
+     *   the download endpoint's re-authorisation never touched product at all,
+     *   so this was the one place in the whole pipeline nothing ever verified it.
+     *   Callers that apply a package to a live instance (UpdateApplier) always
+     *   pass the instance's own config('updater.product_identifier'); a bare
+     *   self-verification right after building intentionally passes null or the
+     *   same product it just built, since there's nothing to protect against yet.
+     */
+    public function verify(string $packagePath, ?string $expectedProduct = null): VerificationResult
     {
         if (! is_file($packagePath) || ! is_readable($packagePath)) {
             return VerificationResult::fail("Package not found or unreadable: {$packagePath}");
@@ -86,6 +98,12 @@ class PackageVerifier
             }
             if (! UpdateManifest::isValidVersion($manifest->minCompatibleVersion)) {
                 return VerificationResult::fail("Invalid min_compatible_version '{$manifest->minCompatibleVersion}' (expected YYYY.MM.DD-N).");
+            }
+
+            if ($expectedProduct !== null && $manifest->product !== $expectedProduct) {
+                return VerificationResult::fail(
+                    "Product mismatch: this package is built for '{$manifest->product}', this instance is '{$expectedProduct}'."
+                );
             }
 
             // --- Per-file checksum check ---

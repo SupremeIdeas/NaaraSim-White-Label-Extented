@@ -82,8 +82,12 @@ trait DistributesPackages
             return response()->json(['message' => 'Package not found.'], 404);
         }
 
+        $validated = $request->validate([
+            'product' => ['required', 'string', 'max:100'],
+        ]);
+
         $currentVersion = (string) $request->query('current_version', $instance->current_platform_version ?? '');
-        if (! $distribution->isEligible($row, $instance, $currentVersion)) {
+        if (! $distribution->isEligible($row, $instance, $currentVersion, $validated['product'])) {
             return response()->json(['message' => 'This instance is not eligible for that package.'], 403);
         }
 
