@@ -92,7 +92,12 @@ class InstallerTest extends TestCase
         $response->assertOk()
             ->assertSee('Installation Completed')
             ->assertSee(DefaultAdminSeeder::EMAIL, false)
-            ->assertSee(DefaultAdminSeeder::PASSWORD, false);
+            ->assertSee(DefaultAdminSeeder::PASSWORD, false)
+            ->assertSee('/'.config('admin.path'), false);
+
+        // The "Go to admin login" button must point at the REAL admin login,
+        // never the customer-facing /login.
+        $response->assertSee(route('admin.login'), false);
 
         $admin = User::where('email', DefaultAdminSeeder::EMAIL)->firstOrFail();
         $this->assertTrue($admin->hasRole('super_admin'));
