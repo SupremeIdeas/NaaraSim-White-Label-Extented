@@ -75,7 +75,7 @@ class PreloaderSettings
      */
     public const PRESETS = [
         'equalizer' => ['label' => 'Equalizer Bars', 'category' => 'Bars', 'complexity' => 'Light', 'c' => 1],
-        'wifi-rings' => ['label' => 'Signal Rings', 'category' => 'Rings', 'complexity' => 'Light', 'c' => 3, 'text' => true],
+        'wifi-rings' => ['label' => 'Signal Rings', 'category' => 'Rings', 'complexity' => 'Light', 'c' => 2, 'text' => true],
         'corner-beams' => ['label' => 'Corner Beams', 'category' => 'Sweep', 'complexity' => 'Light', 'c' => 1],
         'crystals' => ['label' => 'Crystal Prisms', 'category' => '3D', 'complexity' => 'Medium', 'c' => 2],
         'svg-rings' => ['label' => 'Orbit Rings', 'category' => 'Rings', 'complexity' => 'Medium', 'c' => 4],
@@ -85,9 +85,9 @@ class PreloaderSettings
         'simple-pulse' => ['label' => 'Simple Pulse', 'category' => 'Dots', 'complexity' => 'Trivial', 'c' => 1],
         'heart-square' => ['label' => 'Heartbeat', 'category' => 'Morph', 'complexity' => 'Medium', 'c' => 1],
         'dot-grid' => ['label' => 'Dot Grid', 'category' => 'Dots', 'complexity' => 'Light', 'c' => 1],
-        'sphere-wave' => ['label' => 'Sphere Wave', 'category' => 'SVG', 'complexity' => 'Heavy', 'c' => 5, 'heavy' => true],
+        'sphere-wave' => ['label' => 'Sphere Wave', 'category' => 'SVG', 'complexity' => 'Heavy', 'c' => 3, 'heavy' => true],
         'progress-text' => ['label' => 'Progress Text', 'category' => 'Text', 'complexity' => 'Light', 'c' => 1, 'text' => true],
-        'worm-ring' => ['label' => 'Worm Ring', 'category' => 'Rings', 'complexity' => 'Medium', 'c' => 2],
+        'worm-ring' => ['label' => 'Worm Ring', 'category' => 'Rings', 'complexity' => 'Medium', 'c' => 1],
         // Supreme Ideas curated favorites.
         'letters' => ['label' => 'Generating Letters', 'category' => 'Text', 'complexity' => 'Medium', 'c' => 1, 'text' => true, 'favorite' => true],
         'spokes' => ['label' => 'Spoke Spinner', 'category' => 'Rings', 'complexity' => 'Light', 'c' => 1, 'favorite' => true],
