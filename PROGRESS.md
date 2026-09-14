@@ -9,6 +9,34 @@
 
 ## DONE
 
+### 🔔 Notification popup → shared modal engine — 2026-09-14
+Owner request: stop the notification bell's popup "jumping" on mobile and
+reuse the platform's ONE sophisticated modal (S31) instead. Root cause found
+by reading the actual markup, not assumed: the bell's panel was ALREADY
+correctly positioned as a bottom sheet on mobile (`fixed inset-x-0 bottom-0`)
+— the "jump" was that it opened with Alpine's generic default `x-transition`
+(an abrupt fade/scale), not a proper slide-up, unlike `<x-ui.modal>`'s
+`translate-y-6 opacity-0` → `translate-y-0 opacity-100` entrance. Rebuilt
+`notification-center.blade.php` on `<x-ui.modal name="notifications">`
+(the pure-Alpine `open-modal` window-event flavor, for an instant bell-tap
+open with no Livewire round-trip) — same content, same hand-off to the full
+`/notifications` page, now with the shared engine's slide-up transition,
+focus trap, ESC/backdrop close, and ARIA for free. Also removed `public bool
+$open` from `NotificationCenter` — a leftover property the old hand-rolled
+view never actually read (it kept its own local Alpine `open` var instead),
+now genuinely dead once the shared engine owns the open/close state.
+Confirmed the real remaining anti-pattern (bypasses the shared engine
+entirely, hand-rolled `fixed inset-0 flex items-center justify-center`) is
+`AlertPopup` — the admin-composed login-notice/announcement popup, a
+different feature from "new notification arrived," left untouched as
+out-of-scope for this specific request; flagged here as a documented
+follow-up rather than silently skipped.
+- `tests/Feature/NotificationCenterTest.php` gained a test locking in the
+  shared-engine markup (the modal's `open-modal.window` listener + the "See
+  all notifications" hand-off); all 4 pre-existing behavioral tests
+  (unread badge, mark-all-read, go/redirect, cross-user isolation)
+  untouched and still green.
+
 ### ⭐ Floating "My Journey" launcher — 2026-09-14
 Owner request: a second floating, minimizable widget — same size and minimize
 behavior as the NaaraSim Wizard, positioned just in front of it — for fast,

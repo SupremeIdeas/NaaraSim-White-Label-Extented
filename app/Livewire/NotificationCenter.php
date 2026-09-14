@@ -21,8 +21,6 @@ class NotificationCenter extends Component
     /** How many rows the dropdown shows (the full history lives on /notifications). */
     private const PREVIEW = 8;
 
-    public bool $open = false;
-
     public function unreadCount(): int
     {
         return Auth::user()?->unreadNotifications()->count() ?? 0;
