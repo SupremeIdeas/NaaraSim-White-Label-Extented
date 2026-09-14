@@ -9,6 +9,52 @@
 
 ## DONE
 
+### 🌍 Prompt 11: localization Phase A+B — 2026-09-14
+Audited first: zero i18n infra existed (`grep` for `__()`/`@lang()`/`trans()`
+across all 444 blade files: 0 hits; no `lang/` directory; no i18n package in
+composer.json). Multi-currency (`LocaleCurrency`, `CurrencyService`) was
+already fully built and reused as the shape to mirror. Also found
+`users.language` (string, nullable) already existed in the schema and
+`$fillable` from a 2026-07-21 migration but was **completely dead** — no
+reads, no UI, no business logic anywhere referenced it. Reused it instead of
+adding a redundant `locale` column.
+- **Phase A infra**: `App\Support\Locale` (mirrors `LocaleCurrency` exactly)
+  resolves session → `users.language` → country-code guess → `config('app.
+  locale')`. `SUPPORTED` lists the full roadmap (en/fr/pt/ar/sw/ha) each with
+  an `available` flag — **only `en` is `available` today**; the others exist
+  so a country-code guess and the switcher UI have somewhere to point once
+  Phase C/D ships real, reviewed translations (Arabic also needs RTL
+  verification — flagged, not assumed). `resolve()`/`choose()` never let an
+  unavailable locale leak through, even from a tampered session or DB value —
+  no machine-guessed or half-finished copy is ever served. New
+  `App\Http\Middleware\SetLocale` (registered in `bootstrap/app.php`) calls
+  `App::setLocale()` on every request and shares `$htmlDir` for future RTL
+  layouts. Profile page gained a Language selector next to the existing
+  currency one, showing unavailable locales as disabled "(coming soon)"
+  options rather than hiding the roadmap.
+- **Phase B string extraction** — scoped to the item's own named areas:
+  Checkout (`checkout.blade.php` + `lang/en/checkout.php`), Verify-Rent
+  (`get-number.blade.php`, `numbers-modals.blade.php`, and all three step
+  partials `numbers-modal/{verify,rent,line}.blade.php` + `lang/en/
+  numbers.php`), eSIM (`catalogue.blade.php`'s own copy — its `detail`/
+  `country`/`region`/front-screen text — + `lang/en/esim.php`), and Account
+  (`account.blade.php` + `profile.blade.php` + `lang/en/account.php`). Deferred,
+  not silently skipped: catalogue's own sub-partials (`_plan-list`,
+  `_country-row`, `_region-row`, `_popular-destinations`, `_feature-strip`,
+  `partials/esim-hero`, `livewire/partials/esim/head`) and the Numbers
+  hero/bento partials (`partials/numbers-hero.blade.php`, `numbers-bento.
+  blade.php`) — the latter two turned out to hold almost no hardcoded copy at
+  all (their text comes from admin-configurable `NumbersHeroContent`/
+  `NumbersBento` PHP classes, a different kind of content than static UI
+  chrome) so extracting them is a distinct follow-up, not this pass's job.
+- New `tests/Feature/LocaleTest.php` (12 tests): resolution priority chain,
+  the "never leak an unavailable locale" guarantee under session/DB
+  tampering, `choose()` persistence + downgrade, the middleware applying the
+  resolved locale, and the Profile page's language field (accepts `en`,
+  rejects `fr` as not-yet-shipped).
+- Full suite green after extraction (ran the 149 pre-existing tests across
+  every touched view first, then the full suite).
+
 ### 📼 Prompt 11: voicemail + transcription — 2026-09-14
 Audited first: `app/Services/AI` only has `AnthropicClient` — no STT there. The
 item's own premise was stale on the exact location, but the capability it
@@ -3627,11 +3673,14 @@ is ready.
   - Spam-report + auto-block (`Dialer`/`Contacts`): DONE, see DONE above.
   - Voicemail + transcription: DONE, see DONE above (the "Sonnet-safe,
     no money-path" bucket of Prompt 11 is now fully shipped).
-  - Sonnet-safe but large, phase it: localization — Phase A infra + Phase B
-    string extraction (Checkout/Verify-Rent/eSIM/Account first) can go now;
-    Phase C/D actual French/Portuguese/Arabic translation needs a real
-    reviewer for tone/terminology, and Arabic needs RTL verification, not
-    assumption. Ship Phase A+B as its own unit before any language.
+  - Localization Phase A (infra) + Phase B (Checkout/Verify-Rent/eSIM/Account
+    string extraction): DONE, see DONE above. Follow-up not yet scoped:
+    extract catalogue's own sub-partials (`_plan-list`, `_country-row`,
+    `_region-row`, `_popular-destinations`, `_feature-strip`, `esim-hero`,
+    `livewire/partials/esim/head`), then the rest of the platform beyond
+    these four named areas. Phase C/D (actual French/Portuguese/Arabic
+    translation) needs a real reviewer for tone/terminology — Arabic also
+    needs RTL verification — not to be attempted without one.
   - **Opus-recommended (owner flagged as needing extra scrutiny):** shared
     wallet/family-plan — touches `WalletService`, a CLAUDE.md money-path
     god-node; scope the smallest version (a shared eSIM data allowance) and

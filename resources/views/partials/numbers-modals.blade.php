@@ -22,10 +22,10 @@
                         <x-icon :name="['verify' => 'shield-check', 'rent' => 'hash', 'line' => 'phone'][$modal] ?? 'phone'" class="h-4 w-4" gradient />
                     </span>
                     <h2 class="text-base font-bold text-slate-900 dark:text-white">
-                        {{ ['verify' => 'Naara Verify', 'rent' => 'Naara Rent', 'line' => 'Naara Line'][$modal] ?? 'Numbers' }}
+                        {{ __('numbers.modal_title')[$modal] ?? __('numbers.modal_title.default') }}
                     </h2>
                 </div>
-                <button type="button" wire:click="closeModal" aria-label="Back to Numbers"
+                <button type="button" wire:click="closeModal" aria-label="{{ __('numbers.back_to_numbers') }}"
                         class="flex h-8 w-8 items-center justify-center rounded-full text-slate-400 hover:bg-slate-100 dark:hover:bg-white/10">
                     {{-- No dedicated back-arrow icon in the sprite — the existing
                          chevron-right, rotated, reads identically. --}}
@@ -57,10 +57,10 @@
                             <x-icon :name="['verify' => 'shield-check', 'rent' => 'hash', 'line' => 'phone'][$modal] ?? 'phone'" class="h-4 w-4" gradient />
                         </span>
                         <h2 class="text-base font-bold text-slate-900 dark:text-white">
-                            {{ ['verify' => 'Naara Verify', 'rent' => 'Naara Rent', 'line' => 'Naara Line'][$modal] ?? 'Numbers' }}
+                            {{ __('numbers.modal_title')[$modal] ?? __('numbers.modal_title.default') }}
                         </h2>
                     </div>
-                    <button type="button" wire:click="closeModal" aria-label="Close"
+                    <button type="button" wire:click="closeModal" aria-label="{{ __('numbers.close') }}"
                             class="flex h-8 w-8 items-center justify-center rounded-full text-slate-400 hover:bg-slate-100 dark:hover:bg-white/10">
                         <x-icon name="x" class="h-5 w-5" />
                     </button>

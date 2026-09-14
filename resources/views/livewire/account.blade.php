@@ -1,6 +1,6 @@
 <div class="mx-auto max-w-2xl">
-    <h1 class="mb-1 text-2xl font-bold text-slate-900 dark:text-slate-100">Account &amp; privacy</h1>
-    <p class="mb-6 text-sm text-slate-500 dark:text-slate-400">Manage your account status, download your data, or ask us to delete your account.</p>
+    <h1 class="mb-1 text-2xl font-bold text-slate-900 dark:text-slate-100">{{ __('account.title') }}</h1>
+    <p class="mb-6 text-sm text-slate-500 dark:text-slate-400">{{ __('account.subtitle') }}</p>
 
     {{-- Promo banner zone (Module 31, "account" placement). --}}
     <x-banner-zone placement="account" class="mb-6" />
@@ -25,11 +25,11 @@
                 <h2 class="flex items-center gap-2 text-sm font-semibold" :class="dark ? 'text-white' : 'text-slate-800'">
                     <x-icon name="sun" class="h-4 w-4" x-show="!dark" />
                     <x-icon name="moon" class="h-4 w-4" x-show="dark" x-cloak />
-                    Appearance
+                    {{ __('account.appearance') }}
                 </h2>
                 <p class="mt-1 text-xs" :class="dark ? 'text-slate-300' : 'text-slate-600'">
-                    <span x-show="!dark">Bright and clear — tap the switch for night mode.</span>
-                    <span x-show="dark" x-cloak>Easy on the eyes — tap the switch for daylight.</span>
+                    <span x-show="!dark">{{ __('account.appearance_bright') }}</span>
+                    <span x-show="dark" x-cloak>{{ __('account.appearance_dark') }}</span>
                 </p>
             </div>
             <button type="button" role="switch" :aria-checked="dark.toString()" aria-label="Toggle dark mode"
@@ -53,11 +53,11 @@
         <div class="flex items-center justify-between gap-4">
             <div>
                 <h2 class="flex items-center gap-2 text-sm font-semibold text-slate-800 dark:text-slate-100">
-                    <x-icon name="grid" class="h-4 w-4" gradient /> Bottom menu style
+                    <x-icon name="grid" class="h-4 w-4" gradient /> {{ __('account.nav_style') }}
                 </h2>
                 <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                    <span x-show="floating">Floating — a rounded bar lifted off the edge.</span>
-                    <span x-show="!floating" x-cloak>Docked — flush to the bottom of the screen.</span>
+                    <span x-show="floating">{{ __('account.nav_style_floating') }}</span>
+                    <span x-show="!floating" x-cloak>{{ __('account.nav_style_docked') }}</span>
                 </p>
             </div>
             <button type="button" role="switch" :aria-checked="floating.toString()" aria-label="Toggle bottom menu style"
@@ -70,7 +70,7 @@
                       :class="floating ? 'translate-x-5' : 'translate-x-0.5'"></span>
             </button>
         </div>
-        <p class="mt-2 text-[11px] text-slate-400">Tip: you can also tap the little handle at the top of the bottom bar to switch anytime.</p>
+        <p class="mt-2 text-[11px] text-slate-400">{{ __('account.nav_style_tip') }}</p>
     </section>
 
     @if ($status)
@@ -88,22 +88,22 @@
     {{-- Account status: pause / resume --}}
     <section class="mb-5 rounded-2xl border border-slate-200 nx-glass-tile p-6 dark:border-[var(--brand-card-border-dark)]">
         <h2 class="flex items-center gap-2 text-sm font-semibold text-slate-800 dark:text-slate-100">
-            <x-icon name="pause" class="h-4 w-4 text-primary" /> Account status
+            <x-icon name="pause" class="h-4 w-4 text-primary" /> {{ __('account.status_heading') }}
         </h2>
         @if ($user->isDeactivated())
-            <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">Your account is <span class="font-semibold text-amber-600 dark:text-amber-400">paused</span>. Reactivate to buy eSIMs and numbers again.</p>
+            <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">{!! __('account.status_paused', ['paused' => '<span class="font-semibold text-amber-600 dark:text-amber-400">'.__('account.paused').'</span>']) !!}</p>
             <button type="button" wire:click="reactivate" wire:loading.attr="disabled" wire:target="reactivate"
                     class="mt-4 inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white hover:bg-primary-dark disabled:opacity-60">
-                <span wire:loading.remove wire:target="reactivate" class="inline-flex items-center gap-2"><x-icon name="badge-check" class="h-4 w-4" /> Reactivate my account</span>
-                <span wire:loading wire:target="reactivate" class="inline-flex items-center gap-2"><x-ui.spinner class="h-4 w-4" /> Reactivating…</span>
+                <span wire:loading.remove wire:target="reactivate" class="inline-flex items-center gap-2"><x-icon name="badge-check" class="h-4 w-4" /> {{ __('account.reactivate') }}</span>
+                <span wire:loading wire:target="reactivate" class="inline-flex items-center gap-2"><x-ui.spinner class="h-4 w-4" /> {{ __('account.reactivating') }}</span>
             </button>
         @else
-            <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">Your account is <span class="font-semibold text-green-600 dark:text-green-400">active</span>. Pausing hides your account and stops new purchases — nothing is deleted, and you can resume any time.</p>
+            <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">{!! __('account.status_active', ['active' => '<span class="font-semibold text-green-600 dark:text-green-400">'.__('account.active').'</span>']) !!}</p>
             <button type="button" wire:click="deactivate" wire:loading.attr="disabled" wire:target="deactivate"
-                    wire:confirm="Pause your account? You can reactivate any time by logging back in."
+                    wire:confirm="{{ __('account.pause_confirm') }}"
                     class="mt-4 inline-flex items-center gap-2 rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-60 dark:border-[var(--brand-card-border-dark)] dark:text-slate-200 dark:hover:bg-[#243352]">
-                <span wire:loading.remove wire:target="deactivate" class="inline-flex items-center gap-2"><x-icon name="pause" class="h-4 w-4" /> Pause my account</span>
-                <span wire:loading wire:target="deactivate" class="inline-flex items-center gap-2"><x-ui.spinner class="h-4 w-4" /> Pausing…</span>
+                <span wire:loading.remove wire:target="deactivate" class="inline-flex items-center gap-2"><x-icon name="pause" class="h-4 w-4" /> {{ __('account.pause_account') }}</span>
+                <span wire:loading wire:target="deactivate" class="inline-flex items-center gap-2"><x-ui.spinner class="h-4 w-4" /> {{ __('account.pausing') }}</span>
             </button>
         @endif
     </section>
@@ -111,21 +111,21 @@
     {{-- Data export --}}
     <section class="mb-5 rounded-2xl border border-slate-200 nx-glass-tile p-6 dark:border-[var(--brand-card-border-dark)]">
         <h2 class="flex items-center gap-2 text-sm font-semibold text-slate-800 dark:text-slate-100">
-            <x-icon name="download" class="h-4 w-4 text-primary" /> Download your data
+            <x-icon name="download" class="h-4 w-4 text-primary" /> {{ __('account.export_heading') }}
         </h2>
-        <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">Get a copy of the personal data we hold about you (profile, wallet, orders and numbers). We prepare it in the background.</p>
+        <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">{{ __('account.export_body') }}</p>
 
         <div class="mt-4 flex flex-wrap items-center gap-3">
             <button type="button" wire:click="requestExport" wire:loading.attr="disabled" wire:target="requestExport"
                     class="inline-flex items-center gap-2 rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-60 dark:border-[var(--brand-card-border-dark)] dark:text-slate-200 dark:hover:bg-[#243352]">
-                <span wire:loading.remove wire:target="requestExport" class="inline-flex items-center gap-2"><x-icon name="refresh" class="h-4 w-4" /> Prepare my export</span>
-                <span wire:loading wire:target="requestExport" class="inline-flex items-center gap-2"><x-ui.spinner class="h-4 w-4" /> Requesting…</span>
+                <span wire:loading.remove wire:target="requestExport" class="inline-flex items-center gap-2"><x-icon name="refresh" class="h-4 w-4" /> {{ __('account.prepare_export') }}</span>
+                <span wire:loading wire:target="requestExport" class="inline-flex items-center gap-2"><x-ui.spinner class="h-4 w-4" /> {{ __('account.requesting') }}</span>
             </button>
 
             @if ($user->data_export_ready_at)
                 <a href="{{ route('account.export.download') }}"
                    class="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white hover:bg-primary-dark">
-                    <x-icon name="download" class="h-4 w-4" /> Download ({{ $user->data_export_ready_at->diffForHumans() }})
+                    <x-icon name="download" class="h-4 w-4" /> {{ __('account.download_ready', ['when' => $user->data_export_ready_at->diffForHumans()]) }}
                 </a>
             @endif
         </div>
@@ -134,20 +134,20 @@
     {{-- Deletion --}}
     <section class="rounded-2xl border border-red-200 nx-glass-tile p-6 dark:border-red-900/50">
         <h2 class="flex items-center gap-2 text-sm font-semibold text-red-700 dark:text-red-400">
-            <x-icon name="trash" class="h-4 w-4" /> Delete my account
+            <x-icon name="trash" class="h-4 w-4" /> {{ __('account.delete_heading') }}
         </h2>
         @if ($user->hasPendingDeletion())
-            <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">Your deletion request is <span class="font-semibold text-red-600 dark:text-red-400">awaiting review</span>. A super admin must approve it before anything is erased. You can still cancel.</p>
+            <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">{!! __('account.deletion_pending', ['status' => '<span class="font-semibold text-red-600 dark:text-red-400">'.__('account.awaiting_review').'</span>']) !!}</p>
             <button type="button" wire:click="cancelDeletion" wire:loading.attr="disabled" wire:target="cancelDeletion"
                     class="mt-4 inline-flex items-center gap-2 rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-60 dark:border-[var(--brand-card-border-dark)] dark:text-slate-200 dark:hover:bg-[#243352]">
-                <x-icon name="x" class="h-4 w-4" /> Cancel deletion request
+                <x-icon name="x" class="h-4 w-4" /> {{ __('account.cancel_deletion') }}
             </button>
         @else
-            <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">This asks us to permanently delete your account and personal data. Deletion is reviewed and approved by a super admin — it is not immediate, and it cannot be undone once approved.</p>
+            <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">{{ __('account.delete_body') }}</p>
             <button type="button" wire:click="requestDeletion" wire:loading.attr="disabled" wire:target="requestDeletion"
-                    wire:confirm="Request account deletion? A super admin will review it before anything is erased."
+                    wire:confirm="{{ __('account.deletion_confirm') }}"
                     class="mt-4 inline-flex items-center gap-2 rounded-lg border border-red-300 px-4 py-2.5 text-sm font-medium text-red-700 hover:bg-red-50 disabled:opacity-60 dark:border-red-900/60 dark:text-red-400 dark:hover:bg-red-950/40">
-                <x-icon name="trash" class="h-4 w-4" /> Request account deletion
+                <x-icon name="trash" class="h-4 w-4" /> {{ __('account.request_deletion') }}
             </button>
         @endif
     </section>
