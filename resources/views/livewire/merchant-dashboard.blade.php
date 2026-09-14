@@ -77,6 +77,14 @@
         </div>
     @endif
 
+    {{-- Prompt 21-EXT — self-service white-label license (visible to every
+         merchant; the page itself shows the visible-but-locked state for a
+         non-V2 merchant). --}}
+    <a href="{{ route('merchant.white-label') }}" wire:navigate class="mt-6 flex items-center gap-3 rounded-2xl border border-slate-200 bg-white p-4 transition hover:border-primary/40 dark:border-[var(--brand-card-border-dark)] dark:bg-[var(--brand-card-dark)]">
+        <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary dark:bg-primary/20 dark:text-teal-300"><x-icon name="layers" class="h-5 w-5" /></span>
+        <div><p class="font-semibold text-slate-900 dark:text-white">White-label license</p><p class="text-xs text-slate-400">Run NaaraSim under your own brand</p></div>
+    </a>
+
     {{-- Invite link --}}
     <div class="mt-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-[var(--brand-card-border-dark)] dark:bg-[var(--brand-card-dark)]"
          x-data="{ copied: false, copy() { navigator.clipboard.writeText('{{ $inviteUrl }}').then(() => { this.copied = true; setTimeout(() => this.copied = false, 1500); }); } }">

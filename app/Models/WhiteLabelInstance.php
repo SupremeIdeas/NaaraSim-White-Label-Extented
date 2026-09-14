@@ -65,14 +65,34 @@ class WhiteLabelInstance extends Model
      *  not which endpoints can be reached. */
     public const SCOPES = ['updates.check', 'updates.download', 'themes.check', 'themes.download'];
 
+    /** Prompt 21 §2.1 — how this instance came to exist. Every pre-existing
+     *  row defaults to admin_provisioned via the adding migration, so the
+     *  current admin-driven flow's data is never reinterpreted. */
+    public const ACQUISITION_ADMIN_PROVISIONED = 'admin_provisioned';
+
+    public const ACQUISITION_MERCHANT_SELF_SERVICE = 'merchant_self_service';
+
+    /** Prompt 21 §2.3 — the merchant's stated hosting choice at request time. */
+    public const HOSTING_SUPREME_IDEAS_SERVER = 'supreme_ideas_server';
+
+    public const HOSTING_OWN_SERVER = 'own_server';
+
     protected $fillable = [
         'brand_name',
         'slug',
         'contact_email',
         'owner_user_id',
+        'merchant_id',
+        'license_plan_id',
         'status',
+        'acquisition_method',
         'tier',
+        'requested_tier',
         'entitlement_level',
+        'hosting_preference',
+        'hosting_disclaimer_acknowledged_at',
+        'price_usd',
+        'payment_reference',
         'license_key',
         'api_token_last_four',
         'license_issued_at',
@@ -95,6 +115,8 @@ class WhiteLabelInstance extends Model
             'reviewed_at' => 'datetime',
             'license_issued_at' => 'datetime',
             'license_revoked_at' => 'datetime',
+            'hosting_disclaimer_acknowledged_at' => 'datetime',
+            'price_usd' => 'decimal:2',
         ];
     }
 
@@ -151,5 +173,30 @@ class WhiteLabelInstance extends Model
     public function apiLogs(): HasMany
     {
         return $this->hasMany(WhiteLabelApiLog::class);
+    }
+
+    public function merchant(): BelongsTo
+    {
+        return $this->belongsTo(Merchant::class);
+    }
+
+    public function licensePlan(): BelongsTo
+    {
+        return $this->belongsTo(WhiteLabelLicensePlan::class, 'license_plan_id');
+    }
+
+    public function payments(): HasMany
+    {
+        return $this->hasMany(WhiteLabelLicensePayment::class, 'white_label_instance_id');
+    }
+
+    /** Prompt 21-EXT §4 — the single source of truth for how much has
+     *  actually been paid toward this instance's license, summed from its
+     *  own payment ledger rather than re-derived from price_usd (which is
+     *  only ever what was CHARGED for the initial purchase, not a running
+     *  total once a balance-completion payment follows it). */
+    public function amountPaidTotal(): float
+    {
+        return round((float) $this->payments()->sum('amount_usd'), 2);
     }
 }
