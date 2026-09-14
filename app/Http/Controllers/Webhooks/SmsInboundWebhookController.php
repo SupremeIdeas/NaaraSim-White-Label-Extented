@@ -24,7 +24,7 @@ use Illuminate\Http\Request;
  */
 class SmsInboundWebhookController extends Controller
 {
-    private const PROVIDERS = ['twilio', 'telnyx', 'fivesim', 'herosms', 'getatext', 'plivo'];
+    private const PROVIDERS = ['twilio', 'telnyx', 'fivesim', 'herosms', 'getatext', 'plivo', 'vonage', 'sinch'];
 
     public function __invoke(Request $request, string $provider): JsonResponse
     {
@@ -43,7 +43,7 @@ class SmsInboundWebhookController extends Controller
         $from = $this->firstOf($request, ['from', 'From', 'from_number', 'sender', 'msisdn']);
         $body = $this->firstOf($request, ['body', 'Body', 'text', 'message', 'content']);
         $media = $this->firstOf($request, ['media', 'MediaUrl0', 'attachment_url', 'media_url']);
-        $ref = $this->firstOf($request, ['message_id', 'MessageSid', 'sms_id', 'id', 'provider_ref']);
+        $ref = $this->firstOf($request, ['message_id', 'MessageSid', 'sms_id', 'id', 'provider_ref', 'messageId']);
 
         // Resolve the receiving Naara Line → its owner. An unmatched number is a
         // 200 no-op (never a retry storm) — it just isn't ours.
