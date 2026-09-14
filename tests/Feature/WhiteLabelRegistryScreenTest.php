@@ -392,6 +392,30 @@ class WhiteLabelRegistryScreenTest extends TestCase
         $this->assertSame(7, $intake->fresh()->deploy_days);
     }
 
+    /**
+     * Regression: the expanded detail row is the only place the admin panel
+     * reads the deploy progress/day-of-total via a closure-returning computed
+     * property (Livewire computed properties can't take params directly, so
+     * getIntakeProgressProperty()/getIntakeDayOfProperty() return closures the
+     * blade must invoke). A live-browser walkthrough caught that the blade
+     * was reading `$this->intakeProgress`/`$this->intakeDayOf` as plain
+     * values instead of calling them — this test renders that exact branch
+     * so it can never regress silently again.
+     */
+    public function test_the_expanded_detail_row_renders_the_deploy_progress_bar(): void
+    {
+        [$instance, $intake] = $this->licensedInstanceWithIntake();
+        app(WhiteLabelProjectIntakeService::class)->markSeen($intake, $this->admin()->id);
+        app(WhiteLabelProjectIntakeService::class)->setDeployTimeline($intake, 10);
+
+        Livewire::actingAs($this->admin())
+            ->test(WhiteLabelRegistry::class)
+            ->call('toggleIntakeDetail', $instance->id)
+            ->assertOk()
+            ->assertSee('Day 1 of 10')
+            ->assertSee('0%');
+    }
+
     public function test_admin_can_export_the_intake_as_a_pdf(): void
     {
         [, $intake] = $this->licensedInstanceWithIntake();

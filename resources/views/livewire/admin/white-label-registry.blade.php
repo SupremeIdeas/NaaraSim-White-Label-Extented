@@ -181,7 +181,7 @@
                                 </td>
                             </tr>
                             @if ($expandedIntakeInstanceId === $i->id && $i->intake)
-                                @php $intake = $i->intake; $progress = $this->intakeProgress; $dayOf = $this->intakeDayOf; @endphp
+                                @php $intake = $i->intake; $progress = $intake ? ($this->intakeProgress)($intake) : null; $dayOf = $intake ? ($this->intakeDayOf)($intake) : null; @endphp
                                 <tr>
                                     <td colspan="7" class="bg-slate-50 p-4 dark:bg-[#243352]">
                                         <div class="grid gap-4 sm:grid-cols-2">
