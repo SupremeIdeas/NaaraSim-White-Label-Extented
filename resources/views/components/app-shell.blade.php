@@ -27,13 +27,9 @@
         ? \App\Models\MessageThread::totalUnread(auth()->id()) : 0;
     $numbersWalletUsd = ($inNumbers && auth()->check())
         ? (float) (auth()->user()->wallet->usd_balance ?? 0) : 0.0;
-    // 2 left + 2 right around the untouched centre "More".
-    $numbersNav = [
-        ['route' => 'numbers.contacts', 'label' => 'Contacts', 'icon' => 'users'],
-        ['route' => 'numbers.forwarding', 'label' => 'Forwarding', 'icon' => 'phone-forwarded'],
-        ['route' => 'numbers.dialer', 'label' => 'Dialer', 'icon' => 'phone'],
-        ['route' => 'numbers.messages', 'label' => 'Messages', 'icon' => 'message-circle', 'badge' => $numbersUnread],
-    ];
+    // 2 left + 2 right around the untouched centre "More". Admin-reorderable
+    // via App\Support\BottomNav / Admin\NavSettings — always exactly 4 items.
+    $numbersNav = \App\Support\BottomNav::resolveNumbers($numbersUnread);
 @endphp
 
 <div x-data="{
