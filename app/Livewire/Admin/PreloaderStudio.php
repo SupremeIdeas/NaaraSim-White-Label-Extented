@@ -99,7 +99,10 @@ class PreloaderStudio extends Component
 
     public function selectPreset(string $slug): void
     {
-        if (isset(PreloaderSettings::PRESETS[$slug]) || in_array($slug, PreloaderSettings::LEGACY_STYLES, true)) {
+        // availablePresets() (not the raw PRESETS catalog) so a fork can't
+        // select a master-only premium preset via a direct component call
+        // that skips the picker UI where it's already hidden.
+        if (isset(PreloaderSettings::availablePresets()[$slug]) || in_array($slug, PreloaderSettings::LEGACY_STYLES, true)) {
             $this->preset = $slug;
             $this->saved = null;
         }
@@ -118,6 +121,13 @@ class PreloaderStudio extends Component
             'bgColor' => 'nullable|regex:/^#?[0-9a-fA-F]{3,6}$/',
             'colors.*' => 'nullable|regex:/^#?[0-9a-fA-F]{3,6}$/',
         ]);
+
+        // Same allow-list as selectPreset() — belt-and-suspenders against a
+        // fork saving a master-only premium preset by any other path.
+        abort_unless(
+            isset(PreloaderSettings::availablePresets()[$this->preset]) || in_array($this->preset, PreloaderSettings::LEGACY_STYLES, true),
+            403,
+        );
 
         // Non-default types can inherit from default (everything else disabled).
         if ($this->type !== 'default' && $this->inherit) {
@@ -183,7 +193,7 @@ class PreloaderStudio extends Component
     {
         return view('livewire.admin.preloader-studio', [
             'pageTypes' => PreloaderSettings::pageTypes(),
-            'presets' => PreloaderSettings::PRESETS,
+            'presets' => PreloaderSettings::availablePresets(),
             'legacyStyles' => PreloaderSettings::LEGACY_STYLES,
             'selectedMeta' => PreloaderSettings::PRESETS[$this->preset] ?? null,
         ]);
