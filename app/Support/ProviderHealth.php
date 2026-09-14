@@ -52,6 +52,8 @@ class ProviderHealth
         'twilio' => ['number.twilio', null, 'number'],
         'telnyx' => ['number.telnyx', null, 'number'],
         'plivo' => ['number.plivo', null, 'number'],
+        'vonage' => ['number.vonage', null, 'number'],
+        'sinch' => ['number.sinch', null, 'number'],
     ];
 
     /**

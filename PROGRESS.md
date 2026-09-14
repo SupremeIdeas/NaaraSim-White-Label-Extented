@@ -9,6 +9,76 @@
 
 ## DONE
 
+### 📞 Prompt 12 §2/§3 — Vonage + Sinch built and wired into the lane — 2026-09-14
+Same dedicated pass as §1 (Plivo, DONE below). New `VonageService`/
+`SinchService`, both `NumberProviderInterface` only (search/buy/sms/cost/
+release/monthly) — `VoiceProviderInterface` deliberately NOT implemented for
+either, for a confirmed, documented reason: that interface is Twilio-only
+throughout this codebase today (`VoiceDialerService` and every Twilio
+webhook controller hardcode `voice.twilio`; even Telnyx, the existing
+permanent/voice BACKUP, doesn't implement it — a real, pre-existing
+architectural boundary this pass didn't touch), and a genuine Vonage
+NCCO / Sinch Voice-API call-flow equivalent is separate, larger work with
+zero current caller and no sandbox access in this environment to verify it
+against.
+
+- **Built against real, live-verified API shapes, not guessed** (fetched
+  Vonage's and Sinch's own developer docs directly): Vonage's legacy REST
+  API (`rest.nexmo.com` — `/number/search`, `/number/buy`, `/number/cancel`,
+  `/sms/json`, Basic auth); Sinch's Numbers API v1
+  (`numbers.api.sinch.com/v1/projects/{projectId}` — `/availableNumbers`,
+  `/availableNumbers/{number}:rent`, `/activeNumbers/{number}:release`,
+  project-scoped Basic auth) plus its SEPARATE legacy XMS SMS API
+  (`{region}.sms.api.sinch.com/xms/v1/{servicePlanId}/batches`, Bearer
+  token) — Sinch genuinely splits credentials across two sub-products with
+  different auth schemes; the config keys mirror that (`client_id`/
+  `client_secret`/`project_id` for Numbers, a separate `api_token`/
+  `service_plan_id` for SMS).
+- **Capability claims read the provider's own live response, never a
+  static map** (same discipline as the Plivo fix): Vonage's `buyNumber()`
+  re-queries `/number/search` for the just-bought number's real `features`
+  array; Sinch's `:rent` response's own `capability` array decides the
+  claim directly. Both default `voice: false` on any failure — the ordering
+  itself (see below) is what documents the honest confidence level, not a
+  hardcoded per-country table that could go stale.
+- **Lane ordering, per the spec's own reasoning:** `twilio → telnyx →
+  vonage → sinch → plivo`. Vonage ahead of Sinch because Vonage's own
+  "Nigeria Voice Features and Restrictions" page was confirmed (via live
+  fetch) to carry real operational content — Caller ID guidelines,
+  international-reach detail — not a "not supported" placeholder, the
+  strongest signal available in this environment that Nigeria voice is
+  genuinely live. Sinch's own African coverage detail sits behind an
+  interactive tool this environment's fetch access couldn't reach, so it's
+  treated exactly as conservatively as Plivo (SMS/number-only) until a
+  human with real dashboard access confirms otherwise.
+  `PermanentNumberRouter::providerOptions()` also gained Vonage's native
+  `search_pattern` (0/1/2) position matching, same treatment as Telnyx.
+- **Wired into all five places** (the spec's four lists + `ProviderStatus`,
+  which the four-list spec doesn't name but the Active/Coming-Soon admin
+  screen and `ProviderHealth`'s own gate depend on): `PermanentNumberRouter
+  ::$lane`, `ProviderModels` (lane + `PROVIDER_KEY_FIELD`),
+  `ProviderHealth::PROVIDERS`, `SmsInboundWebhookController::PROVIDERS`
+  (plus `messageId` added to its ref-field candidates for Vonage's inbound
+  payload shape), `ProviderStatus::REQUIRED`. Container bindings
+  (`number.vonage`, `number.sinch`), `ProviderKeys.php` admin fields (11 new
+  — Vonage's 3, Sinch's 6, both providers' webhook tokens), and
+  `.env.example` entries all follow the exact established pattern.
+- **§6 is now fully closed** — the cross-reference comments added atop all
+  four files during the Plivo batch already cover this addition; nothing
+  further needed.
+- New tests: `VonageServiceTest` (5), `SinchServiceTest` (5) — both against
+  the real, verified API response shapes, confirming capabilities are never
+  claimed beyond what the response actually confirms. `PermanentNumber
+  FailoverLaneTest` extended with a data-provider covering all three new
+  providers across the five wiring points, plus an end-to-end test proving
+  Vonage is actually tried before Plivo when both are configured (not just
+  that each is independently reachable). Full suite: 2144 tests, 6743
+  assertions, green.
+- **Prompt 12 is now fully shipped.** §4 (Bandwidth) and §5 (MessageBird/
+  Bird) were explicitly never built, per the spec's own reasoning — recorded
+  in the earlier NEXT entry so a future reviewer doesn't reintroduce them
+  without knowing why they were skipped.
+
 ### 📞 Prompt 12 §1 — Plivo finished + wired into the failover lane — 2026-09-14
 Owner's "dedicated pass" instruction — not interleaved with other work.
 Confirmed finding from the Sept-14 audit: `PlivoService` was fully coded,
@@ -4066,44 +4136,15 @@ Rate limits (Section 19.2): `api` limiter 300/min auth · 60/min public (on `rou
 > (loyalty milestones, travel timeline, admin-defined achievements paying
 > NaaraCredits) that used to top this list are now DONE — see DONE above.
 
-### ▶ TOP OF NEXT — Prompt 12 §2/§3: Vonage + Sinch (2026-09-14)
-Owner explicitly chose "start Prompt 12 now, leave C1 open" when asked.
-**A1 (WalletGroup/WalletGroupMember, Prompt 11 §3) is fully DONE — Prompt 11
-is 100% shipped, see the DONE entry above.** Prompt 12 §1 (Plivo finished +
-wired into all four lists) is DONE — see the DONE entry above. Still in this
-dedicated pass:
-- **§2/§3 — build `VonageService` and `SinchService`** implementing
-  `NumberProviderInterface` only (search/buy/sms/cost/release/monthly) —
-  same shape as `PlivoService`/`TwilioService`. `VoiceProviderInterface` is
-  explicitly NOT implemented for either, for a confirmed, documented reason
-  (see the Plivo DONE entry): that interface is Twilio-only throughout the
-  actual codebase today (`VoiceDialerService` and every Twilio webhook
-  controller hardcode `voice.twilio`; even Telnyx, the existing permanent/
-  voice BACKUP, doesn't implement it) — building a genuine Vonage NCCO /
-  Sinch Voice-API call-flow equivalent has zero current caller and is
-  separate, larger, unverified work with no sandbox access in this
-  environment to test against. Wire both into all four lists (§1's own list,
-  `PermanentNumberRouter::$lane`, `ProviderModels`, `ProviderHealth`,
-  `SmsInboundWebhookController`), positioned ahead of Plivo per the spec
-  (Vonage first — confirmed Nigeria voice restrictions/features page exists
-  with real operational content, i.e. genuinely supported, not just listed;
-  Sinch second — broad but its Africa-specific voice coverage couldn't be
-  confirmed via live fetch in this environment, so treated as SMS/number-only
-  for now same as Plivo, not assumed voice-capable). Config keys + admin
-  `ProviderKeys.php` entries + container bindings follow the exact
-  established pattern.
-- **§4 (Bandwidth) — do NOT build.** Deferred to Prompt 11 §5's US-focused
-  porting work per the spec's own reasoning (stronger US/Canada fit, thinner
-  unconfirmed African coverage). No code.
-- **§5 (MessageBird/Bird) — explicitly excluded.** Vendor financial-
-  stability risk (repeated layoff rounds, reported distress) for
-  infrastructure a paying customer's active number depends on. No code;
-  reasoning recorded here so a future reviewer doesn't reintroduce it
-  without knowing why it was skipped.
-- **§6 — DONE as of the Plivo batch** (cross-reference comments on all four
-  files, see the DONE entry above) — nothing left to do here once §2/§3 land.
-
-Then, still before the Business Suite (owner's explicit order):
+### ▶ TOP OF NEXT — C1 owner decision, then the Business Suite (2026-09-14)
+**Prompt 12 (multi-provider failover for Naara Line) is now 100% shipped —
+§1 (Plivo) and §2/§3 (Vonage + Sinch) are both DONE, see the two DONE entries
+above.** §4 (Bandwidth) was explicitly deferred to Prompt 11 §5's US-focused
+porting work, and §5 (MessageBird/Bird) was explicitly excluded for vendor
+financial-stability risk — both are reasoning-recorded, no-code decisions,
+not gaps. §6 (cross-reference comments) landed with §1. **A1 (WalletGroup/
+WalletGroupMember, Prompt 11 §3) is also fully DONE — Prompt 11 is 100%
+shipped.** Left before the Business Suite (owner's explicit order):
 - **C1 — OWNER DECISION NEEDED**, left open at the owner's own choice
   (agency-credit branding policy — see the full options list further down
   this NEXT section). Not code-only; do not build any of the three options

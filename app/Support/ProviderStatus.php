@@ -32,6 +32,8 @@ class ProviderStatus
         'onlinesim' => ['services.onlinesim.api_key'],
         'plivo' => ['services.plivo.auth_id', 'services.plivo.auth_token'],
         'sonetel' => ['services.sonetel.api_key'],
+        'vonage' => ['services.vonage.api_key', 'services.vonage.api_secret'],
+        'sinch' => ['services.sinch.client_id', 'services.sinch.client_secret', 'services.sinch.project_id'],
         'bitrefill' => ['services.bitrefill.api_id', 'services.bitrefill.api_secret'],
         'tillo' => ['services.tillo.api_key', 'services.tillo.secret'],
         'whatsapp' => ['services.whatsapp.phone_number_id', 'services.whatsapp.access_token'],

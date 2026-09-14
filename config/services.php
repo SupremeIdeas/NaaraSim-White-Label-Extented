@@ -379,6 +379,29 @@ return [
         'base_url' => env('PLIVO_BASE_URL', 'https://api.plivo.com/v1'),
         'webhook_token' => env('PLIVO_WEBHOOK_TOKEN'), // shared secret for /webhooks/sms-inbound/plivo
     ],
+    // Prompt 12 §2 — Vonage (Numbers + SMS API, legacy Nexmo REST). Nigeria
+    // voice restrictions/features page confirmed to exist with real
+    // operational content (Caller ID guidelines, international reach) — see
+    // PROGRESS.md for the verification trail.
+    'vonage' => [
+        'api_key' => env('VONAGE_API_KEY'),
+        'api_secret' => env('VONAGE_API_SECRET'),
+        'base_url' => env('VONAGE_BASE_URL', 'https://rest.nexmo.com'),
+        'webhook_token' => env('VONAGE_WEBHOOK_TOKEN'), // shared secret for /webhooks/sms-inbound/vonage
+    ],
+    // Prompt 12 §3 — Sinch (Numbers API v1 + SMS/XMS API — two separate
+    // sub-products, each with its own credential type; project_id/
+    // service_plan_id come from the Sinch dashboard, not the client key pair).
+    'sinch' => [
+        'client_id' => env('SINCH_CLIENT_ID'),
+        'client_secret' => env('SINCH_CLIENT_SECRET'),
+        'project_id' => env('SINCH_PROJECT_ID'),
+        'api_token' => env('SINCH_API_TOKEN'),
+        'service_plan_id' => env('SINCH_SERVICE_PLAN_ID'),
+        'numbers_base_url' => env('SINCH_NUMBERS_BASE_URL', 'https://numbers.api.sinch.com/v1'),
+        'sms_base_url' => env('SINCH_SMS_BASE_URL', 'https://us.sms.api.sinch.com/xms/v1'),
+        'webhook_token' => env('SINCH_WEBHOOK_TOKEN'), // shared secret for /webhooks/sms-inbound/sinch
+    ],
     'bitrefill' => [
         'api_id' => env('BITREFILL_API_ID'),
         'api_secret' => env('BITREFILL_API_SECRET'),

@@ -61,8 +61,10 @@ use App\Services\Push\WebPushSender;
 use App\Services\SMS\FiveSimService;
 use App\Services\SMS\GetatextService;
 use App\Services\SMS\HeroSmsService;
+use App\Services\SMS\Numbers\SinchService;
 use App\Services\SMS\Numbers\TelnyxService;
 use App\Services\SMS\Numbers\TwilioService;
+use App\Services\SMS\Numbers\VonageService;
 use App\Services\SMS\OnlineSimService;
 use App\Services\SMS\PlivoService;
 use App\Services\SMS\SmsPoolService;
@@ -172,6 +174,9 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton('number.onlinesim', OnlineSimService::class);
         $this->app->singleton('number.plivo', PlivoService::class);
         $this->app->singleton('number.sonetel', SonetelService::class); // placeholder tier
+        // Prompt 12 §2/§3 — Vonage/Sinch join the naara_line failover lane.
+        $this->app->singleton('number.vonage', VonageService::class);
+        $this->app->singleton('number.sinch', SinchService::class);
 
         // Web-push sender (self-hosted VAPID) — swapped for a fake in tests.
         $this->app->bind(WebPushSender::class, MinishlinkPushSender::class);
