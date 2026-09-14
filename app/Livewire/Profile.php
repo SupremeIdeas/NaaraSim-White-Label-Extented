@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Services\Pricing\CurrencyService;
+use App\Support\Locale;
 use App\Support\LocaleCurrency;
 use App\Support\MediaStorage;
 use Illuminate\Support\Facades\Auth;
@@ -43,6 +44,8 @@ class Profile extends Component
 
     public string $displayCurrency = 'USD';
 
+    public string $language = 'en';
+
     public $avatar = null; // new upload
 
     public function mount(): void
@@ -59,6 +62,7 @@ class Profile extends Component
         $this->countryCode = (string) $u->country_code;
         $this->dateOfBirth = $u->date_of_birth?->format('Y-m-d') ?? '';
         $this->displayCurrency = LocaleCurrency::resolve($u);
+        $this->language = Locale::resolve($u);
     }
 
     protected function rules(): array
@@ -75,6 +79,7 @@ class Profile extends Component
             'countryCode' => ['nullable', 'string', 'size:2'],
             'dateOfBirth' => ['nullable', 'date', 'before:today'],
             'displayCurrency' => ['required', 'string', 'in:'.implode(',', array_keys(CurrencyService::SUPPORTED))],
+            'language' => ['required', 'string', 'in:'.implode(',', array_keys(Locale::available()))],
             'avatar' => ['nullable', 'image', 'max:2048'],
         ];
     }
@@ -107,9 +112,10 @@ class Profile extends Component
 
         $u->forceFill($data)->save();
         LocaleCurrency::choose($u, $this->displayCurrency);
+        Locale::choose($u, $this->language);
         $this->reset('avatar');
 
-        $this->dispatch('nx-toast', type: 'success', message: 'Profile saved.');
+        $this->dispatch('nx-toast', type: 'success', message: __('account.profile_saved'));
     }
 
     public function render()
@@ -117,6 +123,7 @@ class Profile extends Component
         return view('livewire.profile', [
             'user' => Auth::user()->fresh(),
             'currencyOptions' => CurrencyService::SUPPORTED,
+            'languageOptions' => Locale::options(),
         ]);
     }
 }

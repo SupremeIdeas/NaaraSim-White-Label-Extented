@@ -28,6 +28,12 @@ return Application::configure(basePath: dirname(__DIR__))
             \App\Http\Middleware\RedirectIfNotInstalled::class,
         ]);
 
+        // Localization Phase A: resolve + apply the request's locale before
+        // anything renders (session/user/country -> config('app.locale')).
+        $middleware->web(append: [
+            \App\Http\Middleware\SetLocale::class,
+        ]);
+
         // Provider webhooks carry no CSRF token; verification is per-provider
         // (HMAC/shared-secret) inside each handler.
         $middleware->validateCsrfTokens(except: [
