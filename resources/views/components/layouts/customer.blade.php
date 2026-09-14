@@ -43,15 +43,25 @@
     <x-convai-widget context="customer" />
 
     {{-- Live-help: WhatsApp support (blueprint Section 32). Stacked above the
-         NaaraSim Wizard launcher so the two floating actions never overlap.
+         My Journey launcher and the NaaraSim Wizard launcher below it, so none
+         of the three floating actions ever overlap.
          Hidden while the Convai widget is active, to avoid two support launchers. --}}
     @if (\App\Support\Niche\SupportLinks::hasWhatsapp() && ! \App\Support\ConvaiWidget::shownOn('customer'))
         <a href="{{ \App\Support\Niche\SupportLinks::whatsappUrl() }}" target="_blank" rel="noopener"
            aria-label="Chat with support on WhatsApp"
-           class="fixed bottom-40 right-4 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-white shadow-lg shadow-primary/30 transition hover:bg-primary-dark lg:bottom-24">
+           class="fixed bottom-56 right-4 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-white shadow-lg shadow-primary/30 transition hover:bg-primary-dark lg:bottom-40">
             <x-icon name="message-circle" class="h-6 w-6" />
         </a>
     @endif
+
+    {{-- Floating "My Journey" launcher (owner request) — same size + minimize
+         behavior as the Wizard, sat just in front of it (the slot it takes is
+         directly above Wizard's own), for fast on-demand access to activity
+         progress + rewards. Hidden on /journey itself (pointless there) and on
+         support, matching the Wizard's own exclusions. --}}
+    @unless (request()->routeIs('support') || request()->routeIs('journey'))
+        @livewire('journey-launcher')
+    @endunless
 
     {{-- NaaraSim Wizard — guided, buttons-only purchase widget (roadmap §3/§11).
          Only rendered for verified end-users (this layout is behind auth).

@@ -9,6 +9,31 @@
 
 ## DONE
 
+### ⭐ Floating "My Journey" launcher — 2026-09-14
+Owner request: a second floating, minimizable widget — same size and minimize
+behavior as the NaaraSim Wizard, positioned just in front of it — for fast,
+on-demand navigation to activity progress + rewards (route `journey`, which
+already exists in full — no precursor build needed). `App\Livewire\
+JourneyLauncher` mirrors Wizard's exact minimize-bubble pattern (same h-11
+w-11 bubble, same localStorage-persisted hidden toggle under its own key
+`nx_journey_hidden`), simplified to a pure navigation link (no expandable
+panel — the pill itself is the action) with a live glance badge showing the
+user's real NaaraCredits balance (`CreditService::balance()` — one cheap
+query, no invented aggregate; deliberately did NOT compute a goals-unlocked
+percentage for the badge, since that needs an expensive per-goal loop
+unsuitable for a widget rendered on every page). Positioned at the slot
+immediately above Wizard (`bottom-40`/`lg:bottom-24` — WhatsApp's old slot);
+WhatsApp bumped up one tier (`bottom-56`/`lg:bottom-40`) so none of the three
+floating actions (Wizard, Journey, WhatsApp) ever overlap. Hidden on
+`/support` (matches Wizard's own exclusion) and on `/journey` itself
+(pointless there). Marketing/guest layout intentionally NOT touched — Journey
+requires auth and that layout already has its own admin-configurable
+floating-nav system (`NavSlots`) which can add a Journey slot if wanted, no
+need for a hardcoded duplicate.
+- `tests/Feature/JourneyLauncherTest.php` (5) — renders on a normal page,
+  hidden on support/journey routes, links straight to `route('journey')`,
+  badge shows the real credits balance.
+
 ### 🧭 Admin-configurable bottom nav (main + Numbers section) — 2026-09-14
 Owner request: let an admin reorder or replace which items appear in the main
 bottom bar / More sheet, and in the Numbers section's own bottom bar, without
@@ -3799,6 +3824,108 @@ Rate limits (Section 19.2): `api` limiter 300/min auth · 60/min public (on `rou
 > The Merchant V2 Invoice Dashboard and the My Journey / Journey Goals arc
 > (loyalty milestones, travel timeline, admin-defined achievements paying
 > NaaraCredits) that used to top this list are now DONE — see DONE above.
+
+### ▶ TOP OF NEXT — Owner's in-flight multi-feature request (2026-09-14), continuing
+Localization Phase A+B and the admin-configurable bottom nav are DONE (see
+DONE above, both synced to both forks). Still queued from the same request:
+- **Floating "My Journey" widget** — a second floating, minimizable widget
+  (Wizard-helper twin) that fast-navigates to the existing `journey` route
+  (loyalty milestones + travel/eSIM history — no precursor build needed, the
+  page already exists). In progress.
+- **Notification popup → shared modal engine** — replace the top-jumping
+  generic popup with `<x-ui.modal>` (S31's "ONE modal engine," already
+  bottom-sheet-on-mobile/centered-on-desktop), preserving the link to the
+  full `/notifications` page. Research done: the real anti-pattern is
+  `AlertPopup` (centered `fixed inset-0`, hand-rolled, bypasses the shared
+  engine entirely); `NotificationCenter`'s dropdown is already a partial
+  bottom sheet on mobile. Confirm with the owner which literal popup they
+  mean if ambiguous once work starts.
+- **Email system overhaul** — fill real Mailable/Notification gaps (KYC
+  result, GDPR account deactivation/deletion, spam-block notice, port-out
+  status, staff alerts, 2FA/device-login alerts — none exist today, confirmed
+  by grep), make the hardcoded "Supreme Ideas Agency" line in
+  `resources/components/mail/layout.blade.php:22` white-label-configurable
+  (route through `App\Support\BrandSettings`, not a new setting), and fix
+  the two confirmed Email Studio bugs: `heading` field exists in
+  `MailTemplateOverride`/`EmailStudio::$form` but has no input in the blade
+  (dead field), and 4 of 6 preview sample-data sets are missing fields the
+  real view expects (`welcome`/`order-placed`/`top-up`/`refund` — broken/blank
+  preview buttons, reproducible today). Note: this overlaps with Audit item
+  C1 below (the SAME hardcoded agency-name line) — do the branding-config
+  part of both together, but C1's actual policy question (keep it
+  non-removable / tier-gate it / master-only) still needs the owner's call
+  before the "make it configurable" code ships live gated by license tier.
+
+### ▶ NEXT — Consolidated audit patch list (2026-09-14, owner-supplied)
+Gathered from the Sept-14 master + fork + capstone audit passes. Ordered by
+the audit's own severity grouping (security first):
+- **B1 (security, fix now not eventually):** update packages never actually
+  check product line at the trust gate. `config/updater.php`'s own comment
+  claims a `naarasim-core` package can't be silently applied to a
+  white-label fork, but `PackageVerifier::verify()` (called by both master's
+  publish flow and the fork's `WhiteLabelUpdateClient`) never compares
+  `$manifest->product` against the receiving instance's `product_identifier`
+  — the only product filtering that exists is a client-self-reported
+  convenience filter on the browse endpoint, not a check at the actual trust
+  gate. Fix inside `PackageVerifier::verify()` itself.
+- **B2 (unverified, check before a real reseller onboards):**
+  `WhiteLabelLicenseController`/`WhiteLabelLicenseService`'s license-key-to-
+  Sanctum-token exchange has never been read for brute-force/rate-limit
+  protection. Not confirmed broken — confirmed unchecked.
+- **B3 (unverified, same category as B2):** `ThemeInstaller`'s file-writing
+  pipeline has never been checked against the same path-traversal bar
+  `PackageVerifier` already passes (rejects `../`, absolute paths, backslash
+  tricks) — a second file-writing pipeline for a different package family
+  that was never read against that standard.
+- **A1 — Prompt 11 §3 `WalletGroup`/`WalletGroupMember` still doesn't exist.**
+  Confirmed absent from the Sept-14 master. Same item already flagged below
+  as "Opus-recommended, needs extra scrutiny" (touches `WalletService`) —
+  this audit just confirms it's the one piece of Prompt 11 still open, not a
+  new item.
+- **D1 — DONE as of this session's bottom-nav sync** (see DONE above): the
+  audit caught `BottomNav`/`NavSettings` on master but absent from the fork
+  as a timing gap; both forks now have it.
+- **D2 (process, no code):** turn "diff this fork against current master"
+  into a lightweight recurring check rather than a one-off audit. Worth
+  doing once the above is clear, not urgent.
+- **C1 — OWNER DECISION NEEDED, not code-only:** every fork permanently,
+  non-removably credits Supreme Ideas Agency (`SiteChrome::AGENCY_NAME`/
+  `AGENCY_URL`, hardcoded constants, "never removable... regardless of
+  phrasing" per its own docblock) on every page of every tier, including
+  the fully-unlocked Extended tier. Three options, owner's call: keep it
+  everywhere/always (document as deliberate), make it tier-gated/removable
+  on paid tiers (small code change, entitlement-checked instead of a
+  constant), or strip it from forks entirely and keep it only on master's
+  own marketing site. Do not build any of the three without the owner
+  picking one.
+- **E (tracked, no action needed beyond awareness):** localization Phase C/D
+  (fr/pt/ar) partial by design; SOC2/HIPAA/ISO27001 not started; Vonage/Sinch
+  African voice coverage needs per-country confirmation before promising a
+  customer (relevant to Prompt 12 below); native mobile softphone unstaffed.
+- **F1/F2 (standing process rules, no code):** any shared component reused
+  in a new distribution context (new country/reseller/tier) gets a
+  deliberate re-check against that context's real constraints, never an
+  assumption it "already works elsewhere" — apply the same
+  verify-against-live-docs discipline this project has been using
+  (Plivo/Telnyx/Paystack/Twilio capability gaps) to every future provider
+  integration, across all platforms, not just this one.
+
+### ▶ QUEUED — Prompt 12: Multi-Provider Failover Lane for Naara Line (owner-supplied, 2026-09-14)
+**Owner's own framing: "save it as a dedicated pass" — do NOT interleave
+with other work; run this as its own dedicated session/pass, not started
+yet.** Full spec is the uploaded blueprint (kept alongside this file); short
+version: fix `PlivoService::buyNumber()`'s hardcoded `'voice' => true` (must
+become a real per-country capability lookup — Plivo has no African inbound
+voice), wire Plivo into all four lane/allow lists it's currently missing
+from (`PermanentNumberRouter::$lane`, `ProviderModels`, `ProviderHealth::
+PROVIDERS`, `SmsInboundWebhookController::PROVIDERS`) as SMS/number-only,
+last-priority; build `VonageService` (strongest new-vendor candidate for
+Nigeria) and `SinchService` implementing `NumberProviderInterface`, voice
+only where each vendor's own per-country docs confirm it; explicitly do NOT
+build Bandwidth (better fit for Prompt 11 §5's US-focused porting, revisit
+if a dedicated US-number line happens) or MessageBird/Bird (vendor financial-
+stability risk) in this pass. `CircuitBreaker`/`CandidateOrdering` are
+already shared infra — no new routing logic needed for any new provider.
 
 ### ▶ TOP OF NEXT — Theme/Branding/Reseller-API blueprint, remaining sections
 Owner's 5-doc set (2026-09-13): theme integrity §1–§3 + Master-Only
