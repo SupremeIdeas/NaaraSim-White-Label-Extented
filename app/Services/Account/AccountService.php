@@ -4,6 +4,7 @@ namespace App\Services\Account;
 
 use App\Jobs\ExportUserDataJob;
 use App\Models\User;
+use App\Notifications\AccountLifecycleNotification;
 use App\Support\Auditor;
 use Illuminate\Support\Facades\DB;
 
@@ -24,12 +25,14 @@ class AccountService
     {
         $user->forceFill(['is_active' => false, 'deactivated_at' => now()])->save();
         Auditor::log('account.deactivated', 'User', $user->id);
+        $user->notify(new AccountLifecycleNotification(AccountLifecycleNotification::DEACTIVATED));
     }
 
     public function reactivate(User $user): void
     {
         $user->forceFill(['is_active' => true, 'deactivated_at' => null])->save();
         Auditor::log('account.reactivated', 'User', $user->id);
+        $user->notify(new AccountLifecycleNotification(AccountLifecycleNotification::REACTIVATED));
     }
 
     /** Queue the personal-data export (Section 26.2). */
@@ -48,6 +51,7 @@ class AccountService
 
         $user->forceFill(['deletion_requested_at' => now()])->save();
         Auditor::log('account.deletion_requested', 'User', $user->id);
+        $user->notify(new AccountLifecycleNotification(AccountLifecycleNotification::DELETION_REQUESTED));
     }
 
     /** Withdraw a not-yet-approved deletion request. */
@@ -55,6 +59,7 @@ class AccountService
     {
         $user->forceFill(['deletion_requested_at' => null])->save();
         Auditor::log('account.deletion_cancelled', 'User', $user->id);
+        $user->notify(new AccountLifecycleNotification(AccountLifecycleNotification::DELETION_CANCELLED));
     }
 
     /**
@@ -92,6 +97,11 @@ class AccountService
             'email_sha256' => hash('sha256', (string) $user->email),
             'note' => 'GDPR erasure tombstone — re-apply on any backup restore.',
         ]);
+
+        // Sent synchronously (never queued) and before the row is deleted — a
+        // queued notification serializes the model by id and would fail to
+        // resolve it once this transaction removes the row.
+        $user->notifyNow(new AccountLifecycleNotification(AccountLifecycleNotification::ERASED));
 
         DB::transaction(function () use ($user) {
             $user->walletTransactions()->delete();

@@ -7,7 +7,9 @@ use App\Models\EsimOrder;
 use App\Models\EsimPlan;
 use App\Models\User;
 use App\Models\VirtualNumber;
+use App\Notifications\PortOutRequestedNotification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Notification;
 use Livewire\Livewire;
 use Tests\TestCase;
 
@@ -153,6 +155,7 @@ class MyLinesTest extends TestCase
 
     public function test_requesting_a_port_out_records_it_and_is_owner_scoped(): void
     {
+        Notification::fake();
         $owner = $this->verified();
         $stranger = $this->verified();
         $vn = $this->line($owner);
@@ -160,9 +163,11 @@ class MyLinesTest extends TestCase
         // A stranger cannot flag another user's line.
         Livewire::actingAs($stranger)->test(MyLines::class)->call('requestPortOut', $vn->id);
         $this->assertNull($vn->refresh()->port_out_requested_at);
+        Notification::assertNothingSentTo($stranger);
 
         Livewire::actingAs($owner)->test(MyLines::class)->call('requestPortOut', $vn->id);
         $this->assertNotNull($vn->refresh()->port_out_requested_at);
+        Notification::assertSentTo($owner, PortOutRequestedNotification::class, fn ($n) => $n->phoneNumber === $vn->phone_number);
     }
 
     public function test_a_non_us_canada_line_cannot_be_ported_out(): void

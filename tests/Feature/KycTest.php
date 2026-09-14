@@ -7,11 +7,13 @@ use App\Livewire\IdentityVerification;
 use App\Models\KycVerification;
 use App\Models\Setting;
 use App\Models\User;
+use App\Notifications\KycResultNotification;
 use App\Services\Kyc\KycService;
 use App\Support\KycSettings;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Notification;
 use Livewire\Livewire;
 use Tests\TestCase;
 
@@ -141,6 +143,30 @@ class KycTest extends TestCase
             ->call('approve', $v->id);
 
         $this->assertTrue($this->kyc()->hasLevel($user->fresh(), 2));
+    }
+
+    public function test_the_user_is_notified_on_approval_and_rejection(): void
+    {
+        Notification::fake();
+        $user = User::factory()->create();
+        $v = $this->kyc()->submit($user, KycVerification::L2, ['id_number' => '1']);
+
+        $this->kyc()->approve($v, $this->admin());
+        Notification::assertSentTo($user, KycResultNotification::class, fn ($n) => $n->status === KycVerification::APPROVED);
+
+        $user2 = User::factory()->create();
+        $v2 = $this->kyc()->submit($user2, KycVerification::L2, ['id_number' => '2']);
+        $this->kyc()->reject($v2, $this->admin(), 'Document unreadable');
+        Notification::assertSentTo($user2, KycResultNotification::class, fn ($n) => $n->status === KycVerification::REJECTED && $n->reason === 'Document unreadable');
+    }
+
+    public function test_a_pending_verification_never_notifies(): void
+    {
+        Notification::fake();
+        $user = User::factory()->create();
+        $this->kyc()->submit($user, KycVerification::L2, ['id_number' => '1']);
+
+        Notification::assertNothingSentTo($user);
     }
 
     public function test_admin_can_switch_the_active_provider(): void

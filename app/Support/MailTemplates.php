@@ -50,27 +50,27 @@ class MailTemplates
             'welcome' => [
                 'label' => 'Welcome', 'view' => 'emails.welcome',
                 'subject' => 'Welcome to '.$app, 'heading' => 'Welcome to '.$app,
-                'sample' => ['name' => 'Ada'],
+                'sample' => ['name' => 'Ada', 'url' => 'https://example.com/dashboard'],
             ],
             'reset' => [
                 'label' => 'Password reset', 'view' => 'emails.reset',
                 'subject' => 'Reset your password', 'heading' => 'Reset your password',
-                'sample' => ['name' => 'Ada', 'url' => 'https://example.com/reset/demo'],
+                'sample' => ['name' => 'Ada', 'url' => 'https://example.com/reset/demo', 'expires' => 60],
             ],
             'order-placed' => [
                 'label' => 'Order confirmation', 'view' => 'emails.order-placed',
                 'subject' => 'Your order is confirmed', 'heading' => 'Order confirmed',
-                'sample' => ['name' => 'Ada', 'product' => 'esim', 'itemName' => 'Nigeria 5GB / 30 days', 'amount' => 12.50, 'currency' => 'USD'],
+                'sample' => ['name' => 'Ada', 'product' => 'esim', 'itemName' => 'Nigeria 5GB / 30 days', 'amount' => 12.50, 'currency' => 'USD', 'url' => 'https://example.com/dashboard'],
             ],
             'top-up' => [
                 'label' => 'Wallet top-up', 'view' => 'emails.top-up',
                 'subject' => 'Your wallet has been topped up', 'heading' => 'Wallet topped up',
-                'sample' => ['name' => 'Ada', 'amount' => 20.00, 'currency' => 'USD', 'balance' => 32.50],
+                'sample' => ['name' => 'Ada', 'amount' => 20.00, 'currency' => 'USD', 'newBalance' => 32.50, 'gateway' => 'Paystack', 'url' => 'https://example.com/wallet'],
             ],
             'refund' => [
                 'label' => 'Refund', 'view' => 'emails.refund',
                 'subject' => 'Your refund has been processed', 'heading' => 'Refund processed',
-                'sample' => ['name' => 'Ada', 'amount' => 5.00, 'currency' => 'USD', 'reason' => 'Order could not be fulfilled'],
+                'sample' => ['name' => 'Ada', 'amount' => 5.00, 'currency' => 'USD', 'reason' => 'Order could not be fulfilled', 'url' => 'https://example.com/wallet'],
             ],
         ];
     }

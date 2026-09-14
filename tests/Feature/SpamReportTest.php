@@ -6,12 +6,14 @@ use App\Livewire\Contacts;
 use App\Livewire\Dialer;
 use App\Models\Contact;
 use App\Models\User;
+use App\Notifications\SpamBlockReporterNotification;
 use App\Services\Voice\SpamReportService;
 use App\Services\Voice\VoiceDialerService;
 use App\Services\Wallet\WalletService;
 use Database\Seeders\PricingSettingsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Notification;
 use Livewire\Livewire;
 use Tests\Support\FakeVoiceProvider;
 use Tests\TestCase;
@@ -55,6 +57,7 @@ class SpamReportTest extends TestCase
 
     public function test_crossing_the_threshold_auto_blocks_the_number(): void
     {
+        Notification::fake();
         \App\Models\Setting::setValue('spam.report_threshold', 3);
         $spam = app(SpamReportService::class);
         $number = '+15550001234';
@@ -65,10 +68,15 @@ class SpamReportTest extends TestCase
         $spam->report($number, $this->fundedUser(), 'contacts');
         $this->assertFalse($spam->isBlocked($number));
 
-        $spam->report($number, $this->fundedUser(), 'dialer');
+        $lastReporter = $this->fundedUser();
+        $spam->report($number, $lastReporter, 'dialer');
         $this->assertTrue($spam->isBlocked($number));
 
         $this->assertDatabaseHas('spam_blocked_callers', ['msisdn' => '15550001234', 'source' => 'auto']);
+        // Only the reporter whose report actually crossed the threshold is
+        // notified — the number's owner can't be, since SpamBlockedCaller
+        // has no relation back to a NaaraSim account.
+        Notification::assertSentTo($lastReporter, SpamBlockReporterNotification::class);
     }
 
     public function test_a_blocked_number_is_refused_before_any_wallet_hold(): void

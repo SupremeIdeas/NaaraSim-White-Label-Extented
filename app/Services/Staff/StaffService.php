@@ -3,6 +3,7 @@
 namespace App\Services\Staff;
 
 use App\Models\User;
+use App\Notifications\StaffAccountNotification;
 use App\Support\Auditor;
 use App\Support\StaffScopes;
 use Illuminate\Support\Facades\DB;
@@ -61,6 +62,7 @@ class StaffService
             $staff->syncPermissions($grantable);
 
             Auditor::log('staff.created', 'User', $staff->id, ['scopes' => $grantable]);
+            $staff->notify(new StaffAccountNotification(StaffAccountNotification::GRANTED, $grantable));
 
             return $staff;
         });
@@ -89,6 +91,7 @@ class StaffService
         $user->syncPermissions($grantable);
 
         Auditor::log('staff.promoted', 'User', $user->id, ['scopes' => $grantable]);
+        $user->notify(new StaffAccountNotification(StaffAccountNotification::GRANTED, $grantable));
     }
 
     /**
@@ -105,6 +108,7 @@ class StaffService
 
         $staff->syncPermissions($grantable);
         Auditor::log('staff.scopes_updated', 'User', $staff->id, ['scopes' => $grantable]);
+        $staff->notify(new StaffAccountNotification(StaffAccountNotification::SCOPES_UPDATED, $grantable));
     }
 
     /** Revoke staff access (role + scopes). Does NOT delete the user account. */
@@ -119,6 +123,7 @@ class StaffService
         $staff->assignRole('user');
 
         Auditor::log('staff.revoked', 'User', $staff->id);
+        $staff->notify(new StaffAccountNotification(StaffAccountNotification::REVOKED));
     }
 
     /**
@@ -172,6 +177,9 @@ class StaffService
         abort_if($staff->id === $actor->id, 403, 'You cannot delete your own account here.');
 
         Auditor::log('staff.deleted', 'User', $staff->id, ['email' => $staff->email]);
+        // Sent synchronously and before the row is deleted, same reasoning as
+        // AccountService::erase() — a queued job can't resolve a deleted model.
+        $staff->notifyNow(new StaffAccountNotification(StaffAccountNotification::REMOVED));
         $staff->delete();
     }
 

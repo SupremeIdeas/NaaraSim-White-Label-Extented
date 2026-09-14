@@ -6,10 +6,12 @@ use App\Livewire\Admin\AccountDeletions;
 use App\Livewire\Admin\Dashboard;
 use App\Livewire\Admin\Staff as StaffPanel;
 use App\Models\User;
+use App\Notifications\StaffAccountNotification;
 use App\Services\Staff\StaffService;
 use App\Support\StaffScopes;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Notification;
 use Livewire\Livewire;
 use Tests\TestCase;
 
@@ -41,6 +43,7 @@ class StaffAccessTest extends TestCase
 
     public function test_a_super_admin_can_create_staff_with_scopes(): void
     {
+        Notification::fake();
         $super = $this->withRole('super_admin');
 
         Livewire::actingAs($super)->test(StaffPanel::class)
@@ -57,6 +60,7 @@ class StaffAccessTest extends TestCase
         $this->assertTrue($staff->hasPermissionTo('tickets.manage'));
         $this->assertFalse($staff->hasPermissionTo('refunds.process'));
         $this->assertDatabaseHas('audit_logs', ['action' => 'staff.created']);
+        Notification::assertSentTo($staff, StaffAccountNotification::class, fn ($n) => $n->action === StaffAccountNotification::GRANTED);
     }
 
     public function test_staff_enter_the_panel_but_not_admin_config_or_staff_management(): void
@@ -151,6 +155,7 @@ class StaffAccessTest extends TestCase
 
     public function test_a_super_admin_promotes_an_existing_active_user_to_staff(): void
     {
+        Notification::fake();
         $super = $this->withRole('super_admin');
 
         $customer = User::factory()->create(['is_active' => true]);
@@ -165,6 +170,7 @@ class StaffAccessTest extends TestCase
         // …but keeps the `user` role, so they still enjoy the end-user app.
         $this->assertTrue($customer->hasRole('user'));
         $this->assertDatabaseHas('audit_logs', ['action' => 'staff.promoted']);
+        Notification::assertSentTo($customer, StaffAccountNotification::class, fn ($n) => $n->action === StaffAccountNotification::GRANTED);
     }
 
     public function test_a_staff_member_can_still_use_the_end_user_app(): void
@@ -215,6 +221,7 @@ class StaffAccessTest extends TestCase
 
     public function test_revoking_staff_keeps_the_account_but_strips_role_and_scopes(): void
     {
+        Notification::fake();
         $service = new StaffService;
         $super = $this->withRole('super_admin');
         $staff = $this->withRole('staff', ['kyc.review']);
@@ -226,5 +233,6 @@ class StaffAccessTest extends TestCase
         $this->assertFalse($staff->hasRole('staff'));
         $this->assertFalse($staff->hasPermissionTo('kyc.review'));
         $this->assertDatabaseHas('audit_logs', ['action' => 'staff.revoked']);
+        Notification::assertSentTo($staff, StaffAccountNotification::class, fn ($n) => $n->action === StaffAccountNotification::REVOKED);
     }
 }
