@@ -121,14 +121,23 @@ class BrandHunt extends Component
         }
         $brands = $brandQuery->get();
 
+        // A real directory, not a flat scroll: the admin-featured band stands
+        // apart, and everything else groups by category (BUILD-9 §8.1) —
+        // preserving directoryOrder()'s priority sort within each group.
+        $featured = $brands->where('is_featured', true)->values();
+        $rest = $brands->where('is_featured', false);
+        $byCategory = $rest->groupBy(fn ($b) => $b->category ?: 'Other');
+
         return view('livewire.brand-hunt', [
             'platformHandles' => SocialFollowHandle::active()->ordered()->get(),
-            'brands' => $brands,
+            'featuredBrands' => $featured,
+            'brandsByCategory' => $byCategory,
             // Categories that actually have listed brands, for the filter bar.
             'categories' => BrandPartner::listed()->whereNotNull('category')->distinct()->orderBy('category')->pluck('category'),
             'claimedHandles' => $svc->claimedHandleIds($user),
             'claimedBrandHandles' => $svc->claimedBrandHandleIds($user),
             'dailyRemaining' => \App\Support\DailyCreditCap::remaining($user),
+            'totalBrandCount' => $brands->count(),
         ]);
     }
 }
