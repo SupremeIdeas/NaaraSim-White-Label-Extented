@@ -50,11 +50,17 @@ class DojahKycProvider implements KycProviderInterface
     public function verifyWebhook(Request $request): bool
     {
         $signature = $request->header('x-dojah-signature');
-        if (! is_string($signature)) {
+        $secret = (string) config('services.dojah.api_key');
+
+        // Pentest finding (2026-09-16): an empty API key must never validate —
+        // hash_hmac(..., '') is computable by anyone, so without this guard an
+        // unconfigured Dojah could have a forged webhook approve a user's own
+        // KYC verification without ever submitting a real document.
+        if (! is_string($signature) || $secret === '') {
             return false;
         }
 
-        $expected = hash_hmac('sha256', $request->getContent(), (string) config('services.dojah.api_key'));
+        $expected = hash_hmac('sha256', $request->getContent(), $secret);
 
         return hash_equals($expected, $signature);
     }

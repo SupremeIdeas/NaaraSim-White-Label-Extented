@@ -141,7 +141,14 @@ class AppBuilder extends Component
     public function fetchOfflineUrl(): void
     {
         abort_unless(Auth::user()?->hasAnyRole(['super_admin', 'admin']), 403);
-        $this->validate(['offlineUrl' => 'required|url|max:500']);
+        // Pentest finding (2026-09-16): this was the one place in the codebase
+        // that fetched an admin-supplied URL with no SSRF check at all, despite
+        // App\Rules\PublicUrl / App\Support\Security\SsrfGuard existing
+        // specifically for this ("any time the server fetches a URL that could
+        // be influenced by user input") — an admin could point it at a cloud
+        // metadata endpoint or an internal service and have the response body
+        // stored + shipped as the app's offline page.
+        $this->validate(['offlineUrl' => ['required', 'url', 'max:500', new \App\Rules\PublicUrl]]);
         try {
             $res = Http::timeout(10)->get($this->offlineUrl);
             abort_unless($res->ok(), 422);

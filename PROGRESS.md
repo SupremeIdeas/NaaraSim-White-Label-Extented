@@ -9,6 +9,20 @@
 
 ## DONE
 
+### 🛡️ Adversarial security pentest — 4 confirmed findings patched — 2026-09-16
+Synced from master. 4 confirmed, exploitable findings patched: 3 webhook
+signature verifiers (`PaystackPayoutGateway`, `DojahKycProvider`,
+`SmileIdKycProvider::verifyWebhook()`) computed `hash_hmac()` against a
+blank provider secret without checking it was non-empty first —
+`hash_hmac($algo, $body, '')` is publicly computable, so an unconfigured
+provider would accept a forged webhook (a fake payout outcome, or a fake
+KYC approval bypassing identity verification). Plus an SSRF gap in
+`AppBuilder::fetchOfflineUrl()`, the one place that fetched an admin-supplied
+URL with no `SsrfGuard` check. All 4 fixed; also verified solid with no
+changes needed: wallet atomicity, IDOR (7 domains spot-checked), file
+uploads, mass assignment, raw SQL parameterization, and admin secret
+masking. Full suite green.
+
 ### 📱 App Export — real Android/iOS CI split, Capacitor scaffolding gap, is_ios_build compliance flag — 2026-09-16
 Synced from master. Android and iOS now use genuinely different CI (GitHub
 Actions `repository_dispatch` for Android, Codemagic/generic webhook for

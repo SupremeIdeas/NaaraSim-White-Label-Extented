@@ -77,11 +77,19 @@ class PaystackPayoutGateway implements PayoutGatewayInterface
     public function verifyWebhook(Request $request): bool
     {
         $signature = $request->header('x-paystack-signature');
-        if (! is_string($signature)) {
+        $secret = (string) config('services.paystack.secret_key');
+
+        // Pentest finding (2026-09-16): an empty secret must never validate —
+        // hash_hmac(..., '') is computable by anyone, so without this guard an
+        // unconfigured Paystack could have a forged "paid"/"failed" payout
+        // webhook accepted, either masking a real transfer failure or
+        // triggering a refund on a payout that never actually failed. Mirrors
+        // the same guard PaystackGateway (payments side) already has.
+        if (! is_string($signature) || $secret === '') {
             return false;
         }
 
-        $expected = hash_hmac('sha512', $request->getContent(), (string) config('services.paystack.secret_key'));
+        $expected = hash_hmac('sha512', $request->getContent(), $secret);
 
         return hash_equals($expected, $signature);
     }
