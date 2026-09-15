@@ -20,6 +20,14 @@ use Illuminate\Support\Facades\Cache;
  * a real checkbox drives an Alpine `dark` boolean, which is persisted to
  * localStorage, toggles `.dark` on <html>, and dispatches `theme-changed`.
  * Only the markup/CSS differs per preset.
+ *
+ * Owner request (2026-09-15) — 2 of the 5 presets (Eclipse Orb, Day/Night
+ * Dial) are master-only, the same `master_only`/availablePresets() pattern
+ * Preloader Studio already uses for its "favorite" presets: the code and
+ * CSS ship identically to every white-label fork (byte-for-byte, per this
+ * codebase's whole distribution model), but availablePresets() is what the
+ * Studio picker and save() actually enforce against, so a fork simply never
+ * sees or can select the two master-exclusive styles.
  */
 class ThemeToggleSettings
 {
@@ -30,15 +38,31 @@ class ThemeToggleSettings
     public const DEFAULT = 'sun-moon';
 
     /**
-     * @var array<string, array{label:string, category:string}>
+     * @var array<string, array{label:string, category:string, master_only?:bool}>
      */
     public const PRESETS = [
         'sun-moon' => ['label' => 'Sun & Moon', 'category' => 'Classic'],
-        'eclipse-orb' => ['label' => 'Eclipse Orb', 'category' => '3D'],
-        'day-night-dial' => ['label' => 'Day/Night Dial', 'category' => 'Realistic'],
+        'eclipse-orb' => ['label' => 'Eclipse Orb', 'category' => '3D', 'master_only' => true],
+        'day-night-dial' => ['label' => 'Day/Night Dial', 'category' => 'Realistic', 'master_only' => true],
         'aurora-pill' => ['label' => 'Aurora Pill', 'category' => 'Minimal'],
         'horizon-track' => ['label' => 'Horizon Track', 'category' => 'Minimal'],
     ];
+
+    /**
+     * PRESETS filtered to what THIS deployment may pick from — the master
+     * platform gets all 5; a white-label fork gets the 3 that aren't
+     * `master_only`. Mirrors PreloaderSettings::availablePresets() exactly.
+     *
+     * @return array<string, array{label:string, category:string, master_only?:bool}>
+     */
+    public static function availablePresets(): array
+    {
+        if (FeatureEntitlements::isMaster()) {
+            return self::PRESETS;
+        }
+
+        return array_filter(self::PRESETS, fn (array $preset) => empty($preset['master_only']));
+    }
 
     /** The style slug currently in effect (Setting-backed, cached, safe default). */
     public static function current(): string
@@ -56,7 +80,7 @@ class ThemeToggleSettings
 
     public static function save(string $slug): void
     {
-        $slug = isset(self::PRESETS[$slug]) ? $slug : self::DEFAULT;
+        $slug = isset(self::availablePresets()[$slug]) ? $slug : self::DEFAULT;
         Setting::setValue(self::KEY, $slug, 'branding', 'Theme toggle switch style');
         self::flush();
     }

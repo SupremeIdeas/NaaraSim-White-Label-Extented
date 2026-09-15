@@ -39,7 +39,69 @@ class ThemeToggleStudioTest extends TestCase
 
     public function test_admin_can_select_and_save_each_preset(): void
     {
+        config()->set('updater.product_identifier', 'naarasim-core');
+
         foreach (array_keys(ThemeToggleSettings::PRESETS) as $slug) {
+            Livewire::actingAs($this->admin())->test(ThemeToggleStudio::class)
+                ->call('selectStyle', $slug)
+                ->assertSet('style', $slug)
+                ->call('save')
+                ->assertSet('saved', $slug);
+
+            $this->assertSame($slug, ThemeToggleSettings::current());
+        }
+    }
+
+    /**
+     * Owner request (2026-09-15) — Eclipse Orb and Day/Night Dial are
+     * master-only; a white-label fork is a byte-for-byte copy of this same
+     * code, so the boundary must hold even against a direct component call
+     * that skips the (already-filtered) picker UI.
+     */
+    public function test_master_platform_sees_and_can_select_all_five_presets(): void
+    {
+        config()->set('updater.product_identifier', 'naarasim-core');
+
+        $this->assertCount(5, ThemeToggleSettings::availablePresets());
+        $this->assertArrayHasKey('eclipse-orb', ThemeToggleSettings::availablePresets());
+        $this->assertArrayHasKey('day-night-dial', ThemeToggleSettings::availablePresets());
+    }
+
+    public function test_a_white_label_fork_only_sees_three_presets(): void
+    {
+        config()->set('updater.product_identifier', 'naarasim-whitelabel');
+
+        $available = ThemeToggleSettings::availablePresets();
+        $this->assertCount(3, $available);
+        $this->assertArrayHasKey('sun-moon', $available);
+        $this->assertArrayHasKey('aurora-pill', $available);
+        $this->assertArrayHasKey('horizon-track', $available);
+        $this->assertArrayNotHasKey('eclipse-orb', $available);
+        $this->assertArrayNotHasKey('day-night-dial', $available);
+    }
+
+    public function test_a_white_label_fork_cannot_select_or_save_a_master_only_preset(): void
+    {
+        config()->set('updater.product_identifier', 'naarasim-whitelabel');
+
+        Livewire::actingAs($this->admin())->test(ThemeToggleStudio::class)
+            ->call('selectStyle', 'eclipse-orb')
+            ->assertSet('style', 'sun-moon'); // unchanged — the click was ignored
+
+        // Even a direct call bypassing the picker's own hidden state is refused.
+        Livewire::actingAs($this->admin())->test(ThemeToggleStudio::class)
+            ->set('style', 'day-night-dial')
+            ->call('save')
+            ->assertForbidden();
+
+        $this->assertSame('sun-moon', ThemeToggleSettings::current());
+    }
+
+    public function test_a_white_label_fork_can_still_select_and_save_its_three_available_presets(): void
+    {
+        config()->set('updater.product_identifier', 'naarasim-whitelabel');
+
+        foreach (['sun-moon', 'aurora-pill', 'horizon-track'] as $slug) {
             Livewire::actingAs($this->admin())->test(ThemeToggleStudio::class)
                 ->call('selectStyle', $slug)
                 ->assertSet('style', $slug)

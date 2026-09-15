@@ -29,7 +29,7 @@ class ThemeToggleStudio extends Component
 
     public function selectStyle(string $slug): void
     {
-        if (isset(ThemeToggleSettings::PRESETS[$slug])) {
+        if (isset(ThemeToggleSettings::availablePresets()[$slug])) {
             $this->style = $slug;
             $this->saved = null;
         }
@@ -38,7 +38,7 @@ class ThemeToggleStudio extends Component
     public function save(): void
     {
         abort_unless(Auth::user()?->hasAnyRole(['super_admin', 'admin']), 403);
-        abort_unless(isset(ThemeToggleSettings::PRESETS[$this->style]), 403);
+        abort_unless(isset(ThemeToggleSettings::availablePresets()[$this->style]), 403);
 
         ThemeToggleSettings::save($this->style);
 
@@ -50,7 +50,7 @@ class ThemeToggleStudio extends Component
     public function render()
     {
         return view('livewire.admin.theme-toggle-studio', [
-            'presets' => ThemeToggleSettings::PRESETS,
+            'presets' => ThemeToggleSettings::availablePresets(),
         ]);
     }
 }
