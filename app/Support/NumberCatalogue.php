@@ -32,11 +32,16 @@ class NumberCatalogue
     /** Per-provider slug => provider country id, live-discovered (owner audit, 2026-09-15). */
     private const PROVIDER_MAP_KEY_PREFIX = 'numbers.catalogue.provider_map.';
 
+    /** Per-provider slug => provider SERVICE id, live-discovered (owner audit, 2026-09-15). */
+    private const PROVIDER_SERVICE_MAP_KEY_PREFIX = 'numbers.catalogue.provider_service_map.';
+
     private const CACHE_COUNTRIES = 'numbers.catalogue.countries.resolved';
 
     private const CACHE_SERVICES = 'numbers.catalogue.services.resolved';
 
     private const CACHE_PROVIDER_MAP_PREFIX = 'numbers.catalogue.provider_map.resolved.';
+
+    private const CACHE_PROVIDER_SERVICE_MAP_PREFIX = 'numbers.catalogue.provider_service_map.resolved.';
 
     /**
      * Every country, slug => label. Merges the static base with the synced
@@ -159,6 +164,49 @@ class NumberCatalogue
             "Live-discovered country map for {$provider}.",
         );
         Cache::forget(self::CACHE_PROVIDER_MAP_PREFIX.$provider);
+    }
+
+    /**
+     * A provider's live-discovered SERVICE map — OUR slug => THEIR service id
+     * (SMSPool's numeric service IDs; OnlineSIM already uses slug-compatible
+     * codes so it has little use for this, but the mechanism is provider-
+     * agnostic). Same discipline as providerCountryMap(): sourced from the
+     * provider's own API by name-matching, never guessed.
+     *
+     * @return array<string, string>
+     */
+    public static function providerServiceMap(string $provider): array
+    {
+        try {
+            return Cache::rememberForever(self::CACHE_PROVIDER_SERVICE_MAP_PREFIX.$provider, function () use ($provider) {
+                $map = Setting::getValue(self::PROVIDER_SERVICE_MAP_KEY_PREFIX.$provider, []);
+
+                return is_array($map) ? $map : [];
+            });
+        } catch (\Throwable) {
+            return [];
+        }
+    }
+
+    /**
+     * Persist a provider's discovered service map, merged over whatever is
+     * already stored (never shrinks). Empty input is a safe no-op.
+     *
+     * @param  array<string, string>  $map
+     */
+    public static function storeProviderServiceMap(string $provider, array $map): void
+    {
+        if ($map === []) {
+            return;
+        }
+        $existing = Setting::getValue(self::PROVIDER_SERVICE_MAP_KEY_PREFIX.$provider, []);
+        Setting::setValue(
+            self::PROVIDER_SERVICE_MAP_KEY_PREFIX.$provider,
+            array_merge(is_array($existing) ? $existing : [], $map),
+            'numbers',
+            "Live-discovered service map for {$provider}.",
+        );
+        Cache::forget(self::CACHE_PROVIDER_SERVICE_MAP_PREFIX.$provider);
     }
 
     /**

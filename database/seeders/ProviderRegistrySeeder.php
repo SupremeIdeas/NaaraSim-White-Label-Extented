@@ -37,9 +37,14 @@ class ProviderRegistrySeeder extends Seeder
         'fivesim' => ['self_service', 'https://5sim.net/', null],
         'herosms' => ['self_service', null, null],
         'virtsms' => ['self_service', null, null],
+        // Owner audit (2026-09-15) — URLs confirmed live during API verification.
+        'smspool' => ['self_service', 'https://www.smspool.net/', 'https://www.smspool.net/article/smspool-api-order-view-and-cancel-numbers-9883b6969fad'],
+        'onlinesim' => ['self_service', 'https://onlinesim.io/', null],
         // Permanent / voice stack
         'twilio' => ['individual_kyc', 'https://console.twilio.com/', 'https://www.twilio.com/docs'],
         'telnyx' => ['individual_kyc', 'https://portal.telnyx.com/', 'https://developers.telnyx.com/'],
+        // Owner audit (2026-09-15) — OAuth2 account (not a self-service key panel).
+        'sonetel' => ['individual_kyc', 'https://www.sonetel.com/', 'https://github.com/Sonetel/sonetel-api-docs'],
     ];
 
     public function run(): void

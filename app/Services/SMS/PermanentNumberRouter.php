@@ -39,13 +39,17 @@ class PermanentNumberRouter
      * voice+SMS pair; Vonage next (confirmed Nigeria voice restrictions/
      * features page with real operational content — see VonageService's
      * docblock); Sinch after that (broad but unverified African voice
-     * coverage in this environment — treated conservatively); Plivo last
+     * coverage in this environment — treated conservatively); Plivo next
      * (confirmed SMS/number-only — no African inbound voice, see
-     * PlivoService::realCapabilities()).
+     * PlivoService::realCapabilities()); Sonetel last (owner audit,
+     * 2026-09-15 — the opposite gap: voice + inbound-SMS-routing only, no
+     * outbound SMS send API at all, see SonetelService::sendSms()) — the
+     * existing VirtualNumber.capabilities gate (SendMessage/MessageSender)
+     * already handles a narrow-capability provider safely, same as Plivo.
      *
      * @var list<string>
      */
-    protected array $lane = ['twilio', 'telnyx', 'vonage', 'sinch', 'plivo'];
+    protected array $lane = ['twilio', 'telnyx', 'vonage', 'sinch', 'plivo', 'sonetel'];
 
     public function __construct(
         private readonly WalletService $wallet,

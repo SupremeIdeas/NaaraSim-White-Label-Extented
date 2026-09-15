@@ -75,7 +75,12 @@ class ProviderKeys
                     'plivo_auth_id' => ['label' => 'Plivo — Auth ID', 'config' => 'services.plivo.auth_id', 'env' => 'PLIVO_AUTH_ID', 'secret' => false, 'hint' => 'console.plivo.com → Account. Permanent numbers + SMS (no African voice).'],
                     'plivo_auth_token' => ['label' => 'Plivo — Auth Token', 'config' => 'services.plivo.auth_token', 'env' => 'PLIVO_AUTH_TOKEN', 'secret' => true, 'hint' => 'Same page — the Auth Token.'],
                     'plivo_webhook_token' => ['label' => 'Plivo — Inbound Webhook Token', 'config' => 'services.plivo.webhook_token', 'env' => 'PLIVO_WEBHOOK_TOKEN', 'secret' => true, 'hint' => 'Any random string you also set as ?token= on the Plivo inbound-SMS webhook URL.'],
-                    'sonetel_api_key' => ['label' => 'Sonetel — API Key', 'config' => 'services.sonetel.api_key', 'env' => 'SONETEL_API_KEY', 'secret' => true, 'hint' => 'sonetel.com → Settings → API. Permanent numbers + voice.'],
+                    // Sonetel is OAuth2 password-grant (owner audit, 2026-09-15) —
+                    // no static API key exists; these are the account's own login
+                    // plus the account ID its numbers endpoints are scoped to.
+                    'sonetel_username' => ['label' => 'Sonetel — Account Email', 'config' => 'services.sonetel.username', 'env' => 'SONETEL_USERNAME', 'secret' => false, 'hint' => 'The Sonetel account login email. Permanent numbers + voice (no outbound SMS).'],
+                    'sonetel_password' => ['label' => 'Sonetel — Account Password', 'config' => 'services.sonetel.password', 'env' => 'SONETEL_PASSWORD', 'secret' => true, 'hint' => 'The Sonetel account password — exchanged for a bearer token, never sent again after that.'],
+                    'sonetel_account_id' => ['label' => 'Sonetel — Account ID', 'config' => 'services.sonetel.account_id', 'env' => 'SONETEL_ACCOUNT_ID', 'secret' => false, 'hint' => 'sonetel.com dashboard → Account — the ID that scopes phonenumbersubscription calls.'],
                     'vonage_api_key' => ['label' => 'Vonage — API Key', 'config' => 'services.vonage.api_key', 'env' => 'VONAGE_API_KEY', 'secret' => false, 'hint' => 'dashboard.nexmo.com → API keys. Permanent numbers + voice/SMS.'],
                     'vonage_api_secret' => ['label' => 'Vonage — API Secret', 'config' => 'services.vonage.api_secret', 'env' => 'VONAGE_API_SECRET', 'secret' => true, 'hint' => 'Same page — the API Secret.'],
                     'vonage_webhook_token' => ['label' => 'Vonage — Inbound Webhook Token', 'config' => 'services.vonage.webhook_token', 'env' => 'VONAGE_WEBHOOK_TOKEN', 'secret' => true, 'hint' => 'Any random string you also set as ?token= on the Vonage inbound-SMS webhook URL.'],

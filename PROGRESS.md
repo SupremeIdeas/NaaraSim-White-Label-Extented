@@ -9,6 +9,28 @@
 
 ## DONE
 
+### 🔌 SMSPool/OnlineSIM/Sonetel — verified against real API docs + wired into failover — 2026-09-15
+Synced from master. Owner's explicit follow-up: "don't just focus on
+HeroSMS" — verified the other 3 orphaned Numbers/Verify/Rent providers
+(live-key-capable, container-bound, but zero routing/health wiring)
+against their real API docs before writing any fix. Found 2 real,
+live money-safety bugs and 1 wrong auth model: (1) SMSPool + OnlineSIM's
+`check()` returned raw provider strings instead of the shared `OtpStatus`
+vocabulary `PollSmsOtpJob` reads — a delivered code was never recognised
+and the order silently ran out the 15-minute window and auto-refunded
+anyway; fixed by mapping onto `OtpStatus` like every other provider. (2)
+OnlineSIM's `country` needs the provider's own numeric ID (confirmed live)
+— `resolveCountry()` now requires a live-discovered mapping (new
+`syncCatalogue()`, same pattern as HeroSMS) and fails safe as out-of-stock
+rather than guessing. (3) Sonetel's auth was a wrong guess wholesale — it's
+OAuth2 password-grant, not a static key; rewritten with real endpoint
+paths, confirmed against Sonetel's own public api-docs repo. Wired all
+three into `SmsNumberRouter`/`PermanentNumberRouter` lanes,
+`ProviderModels`, `ProviderHealth`, `ProviderRegistrySeeder`, and
+`StatusPage` (also fixed vonage/sinch/plivo missing from the public status
+page's Naara Line component). 27 new tests + updated lane/schema
+assertions. Full suite green.
+
 ### 🏷️ White-label brand-rename wiring for Naara Verify/Rent/Line — 2026-09-15
 Synced from master. `BrandSettings::rebrand()` existed and worked, but
 `ProviderModels::brandize()` was its ONLY production call site — every
@@ -4241,10 +4263,11 @@ gaps in order:
    already touched stays a separate, larger follow-up — flag to the
    owner rather than silently expanding scope.
 
-3 orphaned providers with live keys but no routing lane (SMSPool,
-OnlineSIM, Sonetel) and the missing `virtsms` entry in
-`SmsInboundWebhookController::PROVIDERS` are smaller follow-ups once the
-above ships — flag to the owner rather than silently deciding.
+✅ DONE (2026-09-15, owner-requested follow-up) — SMSPool/OnlineSIM/Sonetel
+verified against their real API docs and wired into every routing/health
+list (see DONE above). The missing `virtsms` entry in
+`SmsInboundWebhookController::PROVIDERS` is a smaller, separate follow-up
+still open — flag to the owner rather than silently deciding.
 
 > The Merchant V2 Invoice Dashboard and the My Journey / Journey Goals arc
 > (loyalty milestones, travel timeline, admin-defined achievements paying

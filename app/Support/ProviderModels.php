@@ -51,7 +51,10 @@ class ProviderModels
             'tagline' => 'OTP & verification codes',
             'icon' => 'shield-check',
             'caps' => ['otp'],
-            'lane' => ['getatext', 'fivesim', 'herosms', 'virtsms'],
+            // Owner audit (2026-09-15): SMSPool/OnlineSIM append as lower-
+            // priority fallback capacity behind HeroSMS/VirtSMS — same order
+            // as SmsNumberRouter::laneFor().
+            'lane' => ['getatext', 'fivesim', 'herosms', 'virtsms', 'smspool', 'onlinesim'],
             'coming_soon' => false,
         ],
         'naara_rent' => [
@@ -59,7 +62,7 @@ class ProviderModels
             'tagline' => 'Short-term rental numbers',
             'icon' => 'hash',
             'caps' => ['rental'],
-            'lane' => ['getatext', 'fivesim', 'herosms', 'virtsms'],
+            'lane' => ['getatext', 'fivesim', 'herosms', 'virtsms', 'smspool', 'onlinesim'],
             'coming_soon' => false,
         ],
         'naara_line' => [
@@ -69,8 +72,10 @@ class ProviderModels
             'caps' => ['permanent', 'voice', 'number_search'],
             // Prompt 12: Vonage/Sinch join as voice+SMS/SMS-only failover
             // respectively; Plivo is SMS/number-only (no African inbound
-            // voice) — same order as PermanentNumberRouter::$lane.
-            'lane' => ['twilio', 'telnyx', 'vonage', 'sinch', 'plivo'],
+            // voice); Sonetel (owner audit, 2026-09-15) is voice + inbound-
+            // SMS-routing only, no outbound send — same order as
+            // PermanentNumberRouter::$lane.
+            'lane' => ['twilio', 'telnyx', 'vonage', 'sinch', 'plivo', 'sonetel'],
             // Provisioning + monthly billing are now wired (PermanentNumberRouter +
             // virtual:renew). Availability is key-driven: live once Twilio or Telnyx
             // is configured, else needs_key.
@@ -91,11 +96,14 @@ class ProviderModels
         'fivesim' => 'fivesim_api_key',
         'herosms' => 'herosms_api_key',
         'virtsms' => 'virtsms_api_key',
+        'smspool' => 'smspool_api_key',
+        'onlinesim' => 'onlinesim_api_key',
         'twilio' => 'twilio_account_sid',
         'telnyx' => 'telnyx_api_key',
         'plivo' => 'plivo_auth_id',
         'vonage' => 'vonage_api_key',
         'sinch' => 'sinch_client_id',
+        'sonetel' => 'sonetel_username',
     ];
 
     /** Number type (NumberRequest) => Model key. */

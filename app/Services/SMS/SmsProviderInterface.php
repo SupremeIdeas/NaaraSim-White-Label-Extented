@@ -3,10 +3,13 @@
 namespace App\Services\SMS;
 
 /**
- * Contract for OTP / rental number providers (Getatext, 5sim, HeroSMS/VirtSMS).
- * Each provider normalises its own responses to the shapes below so the
- * SmsNumberRouter and OTP jobs never depend on a concrete provider.
- * Bound in the container as number.getatext / number.fivesim / number.herosms / number.virtsms.
+ * Contract for OTP / rental number providers (Getatext, 5sim, HeroSMS/VirtSMS,
+ * SMSPool, OnlineSIM). Each provider normalises its own responses to the
+ * shapes below — critically, `check()`'s `status` MUST use the shared
+ * OtpStatus vocabulary (PollSmsOtpJob only ever matches OtpStatus::RECEIVED)
+ * — so the SmsNumberRouter and OTP jobs never depend on a concrete provider.
+ * Bound in the container as number.getatext / number.fivesim / number.herosms /
+ * number.virtsms / number.smspool / number.onlinesim.
  */
 interface SmsProviderInterface
 {
