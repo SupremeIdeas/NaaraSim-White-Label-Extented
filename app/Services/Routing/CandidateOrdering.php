@@ -19,6 +19,13 @@ use App\Models\ProviderRegistry;
  *    is empty/unavailable — so a registry problem can never break routing.
  *
  * BUILD-16 extends the sort here to also weigh nci_score, from the same snapshot.
+ *
+ * Owner request (2026-09-15) — a provider an admin has manually PAUSED
+ * (`paused_at` non-null, ProviderDetail::pause()) is excluded the same way an
+ * OPEN circuit is: dropped from candidates entirely, never just deprioritised.
+ * Unlike an open circuit, a pause never self-heals and is never bypassed by
+ * the total-outage last-resort fallback — only an explicit admin resume lifts
+ * it, so "pause everything down" can never quietly resume itself.
  */
 class CandidateOrdering
 {
@@ -46,6 +53,13 @@ class CandidateOrdering
 
             // Exclude a provider whose circuit is OPEN outright.
             if ($row !== null && ($row['circuit_breaker_state'] ?? 'closed') === CircuitBreaker::OPEN) {
+                continue;
+            }
+
+            // Exclude a manually PAUSED provider outright — unlike an open
+            // circuit this never self-heals, so it must never even compete
+            // for placement (own request, 2026-09-15).
+            if ($row !== null && ($row['paused_at'] ?? null) !== null) {
                 continue;
             }
 

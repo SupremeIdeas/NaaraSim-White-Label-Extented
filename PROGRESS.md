@@ -9,6 +9,22 @@
 
 ## DONE
 
+### 🌙 Provider pause/sleep + API-key clearing — 2026-09-15
+Synced from master: a durable way for admin to put a struggling provider
+to sleep — new `provider_registry.paused_at` column, checked by
+`CircuitBreaker::allows()` (the one gate every router already calls, so
+SMS/permanent/eSIM are all covered with no per-router changes), by
+`lastResortAmong()`'s total-outage bypass, and by `CandidateOrdering`.
+Unlike an open circuit, a pause never self-heals — only an explicit
+Resume lifts it. `ProviderHealth::checkAll()` skips a paused provider's
+probe entirely, so the down/low-balance alert emails stop for anything
+intentionally paused, directly addressing the alert-volume complaint.
+Pause/Resume buttons + optional reason on the NCI Provider Detail page,
+a "Paused" badge there and on the Provider Registry hub. Super-admin-only
+"Clear API keys" wipes a provider's stored credentials so it reverts to
+Coming Soon — `ProviderStatus::isActive()` and every existing gate react
+automatically. Full suite green, `npm run build` clean.
+
 ### 🌓 Theme Toggle Studio — 2 of 5 presets gated master-only — 2026-09-15
 Synced from master: forks now only get 3 of the 5 toggle presets (Sun &
 Moon, Aurora Pill, Horizon Track) — Eclipse Orb and Day/Night Dial are
@@ -4166,6 +4182,42 @@ Rate limits (Section 19.2): `api` limiter 300/min auth · 60/min public (on `rou
 ---
 
 ## NEXT  (build strictly top to bottom)
+
+### ▶ TOP OF NEXT — Naara Verify/Rent audit gaps + white-label brand-rename gaps (2026-09-15)
+Synced from master: owner audit of Naara Verify (OTP/SMS) + Naara Rent
+(short-term rentals) catalogue sync and provider coverage, plus the
+white-label brand-rename ask (a fork's brand-word setting should
+consistently replace "Naara" across BOTH the user dashboard and marketing
+pages — this is the direct one relevant to THIS repo). The provider
+pause/sleep + key-clearing feature above is DONE. Remaining gaps found,
+ordered by severity — build top to bottom:
+
+1. **HeroSMS/VirtSMS have empty country/service maps** (`config/services.php`
+   `country_map`/`service_map` — both `[]`) — the "global backup lane" cannot
+   serve a single real request today; every fallthrough call hard-fails.
+2. **Key-gate FiveSimService/GetatextService** the way `HeroSmsService::
+   guardConfigured()` already does — an unconfigured provider today makes a
+   real API call whose failure gets recorded as a genuine circuit-breaker
+   failure, a false "provider down" alert.
+3. **Real multi-provider Numbers/Verify/Rent catalogue sync** mirroring the
+   eSIM pattern (`app/Services/eSIM/CatalogueSyncService.php`): today only
+   5sim can pull a live catalogue; needs to be a queued job with retries,
+   `SyncStatus::record()` observability, and an admin trigger button.
+4. **Wire `BrandSettings::rebrand()` into the hardcoded "Naara Verify" /
+   "Naara Rent" copy** — this is the direct fix for the white-label
+   brand-rename gap: `ProviderModels::brandize()` is the ONLY production
+   call site for the rebrand mechanism today; `lang/en/numbers.php`,
+   `app/Support/NumbersBento.php`, `app/Support/ProductLineSettings.php`,
+   `app/Support/SectionLibrary.php`, and several raw blade strings
+   (`call-forwarding.blade.php`, `send-message.blade.php`,
+   `messages.blade.php`, `my-connectivity.blade.php`) all hardcode the
+   literal word "Naara" with no rename path. "NaaraCredits" and "Naara
+   Gift" are the worst offenders (100% hardcoded; Naara Gift isn't even in
+   `ProviderModels::MODELS`) — lower priority than Verify/Rent, same fix.
+3 orphaned providers with live keys but no routing lane (SMSPool,
+OnlineSIM, Sonetel) and the missing `virtsms` entry in
+`SmsInboundWebhookController::PROVIDERS` are smaller follow-ups once the
+above four ship — flag to the owner rather than silently deciding.
 
 > The Merchant V2 Invoice Dashboard and the My Journey / Journey Goals arc
 > (loyalty milestones, travel timeline, admin-defined achievements paying

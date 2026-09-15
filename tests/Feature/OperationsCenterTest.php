@@ -73,6 +73,67 @@ class OperationsCenterTest extends TestCase
         $this->assertSame(CircuitBreaker::OPEN, ProviderRegistry::where('provider_key', 'esimgo')->value('circuit_breaker_state'));
     }
 
+    // --- Owner request (2026-09-15): provider pause/sleep + key clearing ---
+
+    public function test_admin_can_pause_and_resume_a_provider(): void
+    {
+        Livewire::actingAs($this->admin())->test(ProviderDetail::class, ['provider' => 'esimgo'])
+            ->set('pauseReason', 'planned maintenance')
+            ->call('pause')
+            ->assertDispatched('nx-toast');
+
+        $row = ProviderRegistry::where('provider_key', 'esimgo')->firstOrFail();
+        $this->assertNotNull($row->paused_at);
+        $this->assertTrue($row->isPaused());
+
+        Livewire::actingAs($this->admin())->test(ProviderDetail::class, ['provider' => 'esimgo'])
+            ->call('resume')
+            ->assertDispatched('nx-toast');
+
+        $this->assertNull($row->fresh()->paused_at);
+    }
+
+    public function test_a_paused_provider_is_excluded_from_live_routing_immediately(): void
+    {
+        ProviderRegistry::updateOrCreate(['provider_key' => 'zendit'], ['stack' => 'esim', 'circuit_breaker_state' => 'closed']);
+        ProviderRegistry::flushSnapshot();
+        $this->assertTrue(app(CircuitBreaker::class)->allows('zendit'));
+
+        Livewire::actingAs($this->admin())->test(ProviderDetail::class, ['provider' => 'zendit'])->call('pause');
+
+        $this->assertFalse(app(CircuitBreaker::class)->allows('zendit'));
+    }
+
+    public function test_super_admin_can_clear_a_providers_keys_reverting_it_to_coming_soon(): void
+    {
+        // Set the key the same way the admin form does (ProviderKeys::save()
+        // applies it to config() too) — never force config() directly, since
+        // that bypasses the exact "blank in .env, admin-saved on top" layering
+        // this feature depends on.
+        \App\Support\ProviderKeys::save(['fivesim_api_key' => 'a-real-key']);
+        $this->assertTrue(\App\Support\ProviderStatus::isActive('fivesim'));
+
+        $superAdmin = User::factory()->create(['is_active' => true, 'email_verified_at' => now()]);
+        $superAdmin->assignRole('super_admin');
+
+        Livewire::actingAs($superAdmin)->test(ProviderDetail::class, ['provider' => 'fivesim'])
+            ->call('clearKeys')
+            ->assertDispatched('nx-toast');
+
+        $this->assertFalse(\App\Support\ProviderStatus::isActive('fivesim'));
+        // fivesim was the only configured provider in naara_verify's lane, so
+        // the whole Model reverts to needs_key — the same "Coming Soon" gate
+        // every purchase surface already reads.
+        $this->assertSame('needs_key', \App\Support\ProviderModels::status('naara_verify'));
+    }
+
+    public function test_a_plain_admin_cannot_clear_provider_keys(): void
+    {
+        Livewire::actingAs($this->admin())->test(ProviderDetail::class, ['provider' => 'fivesim'])
+            ->call('clearKeys')
+            ->assertForbidden();
+    }
+
     public function test_routing_console_simulates_order_and_sets_a_preference(): void
     {
         Livewire::actingAs($this->admin())->test(RoutingConsole::class)

@@ -113,4 +113,57 @@ class CircuitBreakerTest extends TestCase
 
         $this->assertSame(['esimgo', 'airalo', 'quibity'], $ordered); // unchanged
     }
+
+    // --- Owner request (2026-09-15): durable provider pause/sleep ---
+
+    public function test_a_paused_provider_is_refused_by_allows_even_with_a_closed_circuit(): void
+    {
+        ProviderRegistry::create(['provider_key' => 'getatext', 'stack' => 'number', 'circuit_breaker_state' => 'closed', 'paused_at' => now()]);
+
+        $this->assertFalse($this->breaker()->allows('getatext'));
+    }
+
+    public function test_a_resumed_provider_is_allowed_again(): void
+    {
+        $row = ProviderRegistry::create(['provider_key' => 'getatext', 'stack' => 'number', 'circuit_breaker_state' => 'closed', 'paused_at' => now()]);
+        $this->assertFalse($this->breaker()->allows('getatext'));
+
+        $row->forceFill(['paused_at' => null])->save();
+        $this->assertTrue($this->breaker()->allows('getatext'));
+    }
+
+    public function test_ordering_excludes_a_paused_provider_the_same_way_as_an_open_circuit(): void
+    {
+        ProviderRegistry::create(['provider_key' => 'fivesim', 'stack' => 'number', 'circuit_breaker_state' => 'closed', 'paused_at' => now()]);
+        ProviderRegistry::create(['provider_key' => 'herosms', 'stack' => 'number', 'circuit_breaker_state' => 'closed', 'latency_ms' => 200]);
+        ProviderRegistry::flushSnapshot();
+
+        $ordered = app(CandidateOrdering::class)->order(['fivesim', 'herosms'], 'sms');
+
+        $this->assertSame(['herosms'], $ordered);
+    }
+
+    public function test_last_resort_never_selects_a_paused_provider_during_a_total_outage(): void
+    {
+        Setting::setValue('routing.cb.cooldown_minutes', 999, 'routing'); // never elapses on its own
+        $cb = $this->breaker();
+        $this->induceFail($cb, 'herosms', 5); // opens
+        $this->induceFail($cb, 'virtsms', 5); // opens
+
+        // Both candidates are OPEN — normally lastResortAmong would pick one.
+        // Pause herosms so it can never be chosen even during a total outage.
+        ProviderRegistry::where('provider_key', 'herosms')->update(['paused_at' => now()]);
+
+        $this->assertSame('virtsms', $cb->lastResortAmong(['herosms', 'virtsms']));
+    }
+
+    public function test_last_resort_returns_null_when_every_open_candidate_is_paused(): void
+    {
+        Setting::setValue('routing.cb.cooldown_minutes', 999, 'routing');
+        $cb = $this->breaker();
+        $this->induceFail($cb, 'herosms', 5);
+        ProviderRegistry::where('provider_key', 'herosms')->update(['paused_at' => now()]);
+
+        $this->assertNull($cb->lastResortAmong(['herosms']));
+    }
 }

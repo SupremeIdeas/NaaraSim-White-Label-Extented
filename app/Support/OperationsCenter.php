@@ -96,6 +96,7 @@ class OperationsCenter
             'nci_confidence' => $r->nci_confidence,
             'nci_risk_rating' => $r->nci_risk_rating,
             'enabled' => (bool) $r->enabled,
+            'paused_at' => $r->paused_at,
             'dashboard_login_url' => $r->dashboard_login_url,
             'balance' => $r->balance,
         ];
