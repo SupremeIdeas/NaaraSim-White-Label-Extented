@@ -48,6 +48,16 @@ class AppExport
     public static function defaults(): array
     {
         return [
+            // Master kill-switch for the whole App Export layer (owner request,
+            // 2026-09-16): when off, the admin App Builder screen 404s (never a
+            // bare 403 — a closed feature should look like it doesn't exist,
+            // matching the FeatureFlags/FeatureLocks house convention), the
+            // public /download page 404s regardless of download_enabled, and a
+            // build can't be triggered even via a direct BuildDispatcher call.
+            // Defaults ON so an already-configured install's App Export keeps
+            // working exactly as before — this is an OFF switch to close it,
+            // not an opt-in gate.
+            'app_export_enabled' => true,
             'download_enabled' => false,      // public /download page live
             'app_name' => config('app.name', 'NaaraSim'),
             'short_name' => 'NaaraSim',
@@ -121,6 +131,12 @@ class AppExport
     public static function get(string $key, mixed $default = null): mixed
     {
         return self::all()[$key] ?? $default;
+    }
+
+    /** The master App Export kill-switch (owner request, 2026-09-16). */
+    public static function enabled(): bool
+    {
+        return (bool) self::get('app_export_enabled', true);
     }
 
     /**

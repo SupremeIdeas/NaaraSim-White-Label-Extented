@@ -8,6 +8,29 @@
         </p>
     </div>
 
+    {{-- ===== App Export master switch (owner request, 2026-09-16) ========= --}}
+    <div class="mb-6 flex items-center justify-between gap-4 rounded-2xl border p-5 {{ ($form['app_export_enabled'] ?? true) ? 'border-slate-200/70 bg-white dark:border-white/10 dark:bg-slate-900/60' : 'border-red-200 bg-red-50 dark:border-red-500/20 dark:bg-red-500/10' }}">
+        <div>
+            <h2 class="flex items-center gap-2 text-sm font-semibold text-slate-700 dark:text-slate-200">
+                <x-icon name="{{ ($form['app_export_enabled'] ?? true) ? 'shield-check' : 'x' }}" class="h-4 w-4 {{ ($form['app_export_enabled'] ?? true) ? 'text-emerald-500' : 'text-red-500' }}" />
+                App Export layer
+            </h2>
+            <p class="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
+                @if ($form['app_export_enabled'] ?? true)
+                    On — builds can be generated and the public <code>/download</code> page is reachable.
+                @else
+                    Closed — no new Android/iOS build can be generated, and <code>/download</code> returns a plain 404.
+                    Settings below stay editable so you can switch it back on any time.
+                @endif
+            </p>
+        </div>
+        <button type="button" wire:click="toggleAppExportEnabled" wire:loading.attr="disabled" wire:target="toggleAppExportEnabled"
+                role="switch" :aria-checked="'{{ ($form['app_export_enabled'] ?? true) ? 'true' : 'false' }}'"
+                class="relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition {{ ($form['app_export_enabled'] ?? true) ? 'bg-primary' : 'bg-slate-300 dark:bg-[#2D4060]' }}">
+            <span class="inline-block h-5 w-5 transform rounded-full bg-white shadow transition {{ ($form['app_export_enabled'] ?? true) ? 'translate-x-5' : 'translate-x-0.5' }}"></span>
+        </button>
+    </div>
+
     {{-- ===== Publish-readiness checklist ================================= --}}
     <div class="mb-6 rounded-2xl border border-slate-200/70 bg-white p-5 dark:border-white/10 dark:bg-slate-900/60">
         <div class="mb-3 flex items-center justify-between">

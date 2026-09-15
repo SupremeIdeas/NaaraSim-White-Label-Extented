@@ -9,6 +9,14 @@
 
 ## DONE
 
+### 🔌 App Export master kill-switch — 2026-09-16
+Synced from master. New `AppExport::app_export_enabled` Setting (default
+`true`) gating the public `/download` page, `BuildDispatcher::create()`,
+and `AppBuilder::generateBuild()`. Deliberately kept out of `AppBuilder::
+booted()` so the switch stays reachable on the same screen it lives on —
+closing the layer never needs a database edit to reopen it. Pill-switch
+toggle matching the existing `Admin\Features` on/off pattern.
+
 ### 🛡️ Adversarial security pentest — 4 confirmed findings patched — 2026-09-16
 Synced from master. 4 confirmed, exploitable findings patched: 3 webhook
 signature verifiers (`PaystackPayoutGateway`, `DojahKycProvider`,

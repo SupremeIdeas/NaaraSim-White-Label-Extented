@@ -15,6 +15,7 @@ class DownloadAppController extends Controller
 {
     public function __invoke()
     {
+        abort_unless(AppExport::enabled(), 404);
         abort_unless(AppExport::get('download_enabled'), 404);
 
         $pageUrl = route('download');
