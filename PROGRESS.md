@@ -9,6 +9,13 @@
 
 ## DONE
 
+### 🌓 Theme Toggle Studio — 2 of 5 presets gated master-only — 2026-09-15
+Synced from master: forks now only get 3 of the 5 toggle presets (Sun &
+Moon, Aurora Pill, Horizon Track) — Eclipse Orb and Day/Night Dial are
+master-exclusive, via a new `ThemeToggleSettings::availablePresets()`
+enforced the same way Preloader Studio already gates its "favorite"
+presets.
+
 ### 🎨 Merchant V2 custom-theme add-on billing — 2026-09-15
 Synced from master: at white-label license purchase time, a merchant can
 optionally add a custom-theme design request to their order — Basic $1200,
