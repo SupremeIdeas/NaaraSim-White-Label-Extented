@@ -203,6 +203,93 @@ class AppExportTest extends TestCase
             ->assertCount('form.onboarding_slides', 1);
     }
 
+    // --- App Export audit (2026-09-15): §1.5/§3.5 iOS credential gap ---
+
+    public function test_ios_credentials_are_stored_encrypted_independently_of_the_android_keystore(): void
+    {
+        $this->assertFalse(AppExport::hasCredential('ios_cert'));
+        $this->assertFalse(AppExport::hasCredential('ios_provisioning_profile'));
+
+        AppExport::storeCredential('ios_cert', base64_encode('CERTBYTES'), 'dist.p12');
+        AppExport::storeCredential('ios_provisioning_profile', base64_encode('PROFILEBYTES'), 'profile.mobileprovision');
+
+        $this->assertTrue(AppExport::hasCredential('ios_cert'));
+        $this->assertTrue(AppExport::hasCredential('ios_provisioning_profile'));
+        $this->assertSame('dist.p12', AppExport::credentialMeta('ios_cert')['filename']);
+        // Uploading iOS credentials must NOT touch the unrelated Android backup flag.
+        AppExport::save(['keystore_backed_up' => true]);
+        AppExport::storeCredential('ios_cert', base64_encode('NEWCERT'), 'dist2.p12');
+        $this->assertTrue((bool) AppExport::get('keystore_backed_up'));
+    }
+
+    public function test_checklist_ios_signing_item_accepts_either_uploaded_credentials_or_the_provider_flag(): void
+    {
+        $iosItem = fn () => collect(AppExport::publishChecklist()['iOS'])->firstWhere('label', 'iOS signing (stored here or on the CI provider)');
+        $this->assertFalse($iosItem()['ok']);
+
+        AppExport::save(['ios_signing_on_provider' => true]);
+        $this->assertTrue($iosItem()['ok']);
+
+        AppExport::save(['ios_signing_on_provider' => false]);
+        $this->assertFalse($iosItem()['ok']);
+
+        AppExport::storeCredential('ios_cert', base64_encode('C'), 'c.p12');
+        AppExport::storeCredential('ios_provisioning_profile', base64_encode('P'), 'p.mobileprovision');
+        $this->assertTrue($iosItem()['ok']);
+    }
+
+    public function test_checklist_flags_a_missing_ci_provider(): void
+    {
+        AppExport::save(['ci_provider' => 'generic', 'ci_webhook_url' => '']);
+        $item = fn () => collect(AppExport::publishChecklist()['Shared'])->firstWhere('label', 'CI/build provider configured');
+        $this->assertFalse($item()['ok']);
+
+        AppExport::save(['ci_webhook_url' => 'https://ci.example.test/trigger']);
+        $this->assertTrue($item()['ok']);
+    }
+
+    public function test_admin_can_upload_ios_credentials_and_toggle_provider_managed_signing(): void
+    {
+        Livewire::actingAs($this->admin())->test(AppBuilder::class)
+            ->set('iosCert', \Illuminate\Http\UploadedFile::fake()->create('dist.p12', 10))
+            ->call('uploadIosCert')
+            ->assertHasNoErrors();
+        $this->assertTrue(AppExport::hasCredential('ios_cert'));
+
+        Livewire::actingAs($this->admin())->test(AppBuilder::class)
+            ->set('iosProvisioningProfile', \Illuminate\Http\UploadedFile::fake()->create('p.mobileprovision', 10))
+            ->call('uploadIosProvisioningProfile')
+            ->assertHasNoErrors();
+        $this->assertTrue(AppExport::hasCredential('ios_provisioning_profile'));
+
+        Livewire::actingAs($this->admin())->test(AppBuilder::class)
+            ->call('toggleIosSigningOnProvider');
+        $this->assertTrue((bool) AppExport::get('ios_signing_on_provider'));
+    }
+
+    // --- App Export audit (2026-09-15): §3.3/§3.4 live status + auto-download ---
+
+    public function test_poll_builds_dispatches_ready_event_only_once_on_the_transition(): void
+    {
+        $build = AppBuild::create([
+            'platform' => 'android', 'artifact_type' => 'apk', 'version' => '1.0.0',
+            'build_number' => 1, 'status' => AppBuild::STATUS_BUILDING,
+        ]);
+
+        $component = Livewire::actingAs($this->admin())->test(AppBuilder::class);
+
+        // Still building — no event.
+        $component->call('pollBuilds')->assertNotDispatched('appbuild-ready');
+
+        // Now ready — the transition fires exactly once.
+        $build->update(['status' => AppBuild::STATUS_READY, 'artifact_url' => 'https://cdn/app.apk']);
+        $component->call('pollBuilds')->assertDispatched('appbuild-ready');
+
+        // A second poll with no NEW transition must not re-fire (would
+        // silently re-trigger the browser download on every 3s tick).
+        $component->call('pollBuilds')->assertNotDispatched('appbuild-ready');
+    }
+
     public function test_store_cannot_be_marked_live_without_a_url(): void
     {
         Livewire::actingAs($this->admin())->test(AppBuilder::class)

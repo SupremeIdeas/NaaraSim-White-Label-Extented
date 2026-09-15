@@ -119,6 +119,12 @@ class ProviderKeys
                     'github_maintenance_token' => ['label' => 'GitHub — Maintenance Token', 'config' => 'services.github_maintenance.token', 'env' => 'GITHUB_MAINTENANCE_TOKEN', 'secret' => true, 'hint' => 'Fine-grained PAT scoped to THIS repo only (opens CI-gated PRs).'],
                 ],
             ],
+            'appexport' => [
+                'label' => 'App Export — CI / cloud build',
+                'fields' => [
+                    'codemagic_api_token' => ['label' => 'Codemagic — API Token', 'config' => 'services.appexport.codemagic_api_token', 'env' => 'CODEMAGIC_API_TOKEN', 'secret' => true, 'hint' => 'codemagic.io → Teams → Personal Access Tokens. Only needed if App Builder\'s CI provider is set to "Codemagic". Sent as the x-auth-token header when triggering a build.'],
+                ],
+            ],
             'social' => [
                 'label' => 'Social login',
                 'fields' => [

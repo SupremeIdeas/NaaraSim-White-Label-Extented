@@ -36,6 +36,11 @@ class AppBuilder extends Component
     public $splash = null;
     public $icon = null;
     public $keystore = null;
+    public $iosCert = null;
+    public $iosProvisioningProfile = null;
+
+    /** id => last-seen status, used by pollBuilds() to detect a queued/building -> ready transition. */
+    public array $lastBuildStatuses = [];
 
     /* -------- App Studio (native config surface, NAARA-BUILD-21) ---------- */
     public array $studio = [];
@@ -67,6 +72,7 @@ class AppBuilder extends Component
         }
 
         $this->loadStudio();
+        $this->lastBuildStatuses = AppBuild::query()->pluck('status', 'id')->all();
     }
 
     private function loadStudio(): void
@@ -212,7 +218,13 @@ class AppBuilder extends Component
             'form.android_store_url' => 'nullable|url|max:300',
             'form.ios_store_live' => 'boolean',
             'form.ios_store_url' => 'nullable|url|max:300',
+            'form.ci_provider' => 'required|in:generic,codemagic',
             'form.ci_webhook_url' => 'nullable|url|max:300',
+            'form.codemagic_app_id' => 'nullable|string|max:100',
+            'form.codemagic_android_workflow_id' => 'nullable|string|max:100',
+            'form.codemagic_ios_workflow_id' => 'nullable|string|max:100',
+            'form.codemagic_branch' => 'nullable|string|max:190',
+            'form.ios_signing_on_provider' => 'boolean',
             'form.privacy_policy_url' => 'nullable|url|max:300',
             'form.support_email' => 'nullable|email|max:190',
             'form.support_url' => 'nullable|url|max:300',
@@ -321,11 +333,82 @@ class AppBuilder extends Component
         Auditor::log('appexport.keystore_backup_ack');
     }
 
+    /**
+     * §3.5 of the App Export audit — the iOS-credential-storage gap. Mirrors
+     * uploadKeystore() exactly: the file is base64'd into the same encrypted
+     * `appexport.secure` Setting row, just under its own slot. Whether your CI
+     * provider's API can actually consume a pushed cert/profile (vs. requiring
+     * dashboard upload, common for App Store Connect API keys specifically) is
+     * provider-specific — storing it here at least means the gap is never
+     * silent, and it's ready to wire into the trigger payload if it does.
+     */
+    public function uploadIosCert(): void
+    {
+        abort_unless(Auth::user()?->hasAnyRole(['super_admin', 'admin']), 403);
+        $this->validate(['iosCert' => 'required|file|max:2000']);
+
+        $base64 = base64_encode(file_get_contents($this->iosCert->getRealPath()));
+        AppExport::storeCredential('ios_cert', $base64, $this->iosCert->getClientOriginalName());
+        $this->iosCert = null;
+        Auditor::log('appexport.ios_cert_uploaded');
+        $this->dispatch('nx-toast', type: 'success', message: 'iOS distribution certificate stored (encrypted).');
+    }
+
+    public function uploadIosProvisioningProfile(): void
+    {
+        abort_unless(Auth::user()?->hasAnyRole(['super_admin', 'admin']), 403);
+        $this->validate(['iosProvisioningProfile' => 'required|file|max:2000']);
+
+        $base64 = base64_encode(file_get_contents($this->iosProvisioningProfile->getRealPath()));
+        AppExport::storeCredential('ios_provisioning_profile', $base64, $this->iosProvisioningProfile->getClientOriginalName());
+        $this->iosProvisioningProfile = null;
+        Auditor::log('appexport.ios_provisioning_profile_uploaded');
+        $this->dispatch('nx-toast', type: 'success', message: 'iOS provisioning profile stored (encrypted).');
+    }
+
+    public function toggleIosSigningOnProvider(): void
+    {
+        abort_unless(Auth::user()?->hasAnyRole(['super_admin', 'admin']), 403);
+        $value = ! (bool) ($this->form['ios_signing_on_provider'] ?? false);
+        AppExport::save(['ios_signing_on_provider' => $value]);
+        $this->form['ios_signing_on_provider'] = $value;
+        Auditor::log('appexport.ios_signing_on_provider_toggled', null, null, ['value' => $value]);
+    }
+
     public function generateBuild(string $platform, string $artifactType): void
     {
         abort_unless(Auth::user()?->hasAnyRole(['super_admin', 'admin']), 403);
         app(BuildDispatcher::class)->create($platform, $artifactType, Auth::user());
         $this->dispatch('nx-toast', type: 'success', message: ucfirst($platform).' build queued.');
+    }
+
+    /**
+     * Live status (App Export audit §3.3/§3.4) — bound to wire:poll on the
+     * build-history card, only while a non-terminal build exists (see
+     * `hasActiveBuild` in render()), so this never polls forever. Detects a
+     * queued/building -> ready TRANSITION (never "is ready" on every tick,
+     * which would silently re-trigger the download on each poll) and fires a
+     * one-shot browser event the view uses to auto-download the artifact.
+     */
+    public function pollBuilds(): void
+    {
+        $current = AppBuild::query()->pluck('status', 'id');
+
+        foreach ($current as $id => $status) {
+            $previous = $this->lastBuildStatuses[$id] ?? null;
+            if ($status === AppBuild::STATUS_READY && $previous !== AppBuild::STATUS_READY) {
+                $build = AppBuild::find($id);
+                if ($build && $build->artifact_url) {
+                    $this->dispatch(
+                        'appbuild-ready',
+                        url: $build->artifact_url,
+                        label: strtoupper($build->platform).' '.strtoupper($build->artifact_type).' v'.$build->version,
+                    );
+                }
+            }
+        }
+
+        $this->lastBuildStatuses = $current->all();
     }
 
     public function render()
@@ -336,12 +419,20 @@ class AppBuilder extends Component
             ? $this->studio['offline_html']
             : AppStudio::defaultOfflineHtml();
 
+        $builds = AppBuild::latest('id')->paginate(8);
+
         return view('livewire.admin.app-builder', [
             'placementLabels' => AppExport::PLACEMENTS,
             'preloaders' => AppExport::PRELOADERS,
             'hasKeystore' => AppExport::hasCredential('android_keystore'),
             'keystoreMeta' => AppExport::credentialMeta('android_keystore'),
-            'builds' => AppBuild::latest('id')->paginate(8),
+            'hasIosCert' => AppExport::hasCredential('ios_cert'),
+            'iosCertMeta' => AppExport::credentialMeta('ios_cert'),
+            'hasIosProvisioningProfile' => AppExport::hasCredential('ios_provisioning_profile'),
+            'iosProvisioningProfileMeta' => AppExport::credentialMeta('ios_provisioning_profile'),
+            'builds' => $builds,
+            'hasActiveBuild' => $builds->getCollection()->contains(fn (AppBuild $b) => ! $b->isTerminal()),
+            'ciConfigured' => AppExport::ciConfigured(),
             'checklist' => AppExport::publishChecklist(),
             'score' => AppExport::readinessScore(),
             // App Studio (NAARA-BUILD-21)

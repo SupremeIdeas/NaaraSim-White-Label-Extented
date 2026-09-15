@@ -143,6 +143,48 @@
         @error('keystore') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
     </div>
 
+    {{-- ===== iOS signing (App Export audit §1.5/§3.5) ====================== --}}
+    <div class="mb-6 rounded-2xl border border-slate-200/70 bg-white p-5 dark:border-white/10 dark:bg-slate-900/60">
+        <h2 class="mb-1 text-sm font-semibold text-slate-700 dark:text-slate-200">iOS signing</h2>
+        <p class="mb-3 text-xs text-slate-500 dark:text-slate-400">
+            Stored encrypted at rest, same as the Android keystore above. Some CI providers (notably an App Store
+            Connect API key) only accept these on their own dashboard rather than via API — if that's your provider,
+            configure it there and check the box below instead of uploading here.
+        </p>
+
+        <div class="mb-3 grid gap-3 sm:grid-cols-2">
+            <div>
+                <div class="mb-2 flex items-center gap-2 text-xs {{ $hasIosCert ? 'text-emerald-700 dark:text-emerald-300' : 'text-slate-500 dark:text-slate-400' }}">
+                    <x-icon name="{{ $hasIosCert ? 'shield-check' : 'x' }}" class="h-3.5 w-3.5" />
+                    {{ $hasIosCert ? 'Certificate on file'.(! empty($iosCertMeta['filename']) ? ' · '.$iosCertMeta['filename'] : '') : 'No distribution certificate stored' }}
+                </div>
+                <div class="flex items-center gap-2">
+                    <input type="file" wire:model="iosCert" class="block w-full text-xs text-slate-500 file:mr-2 file:rounded-full file:border-0 file:bg-primary/10 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-primary dark:text-slate-400">
+                    <button type="button" wire:click="uploadIosCert" wire:loading.attr="disabled" wire:target="iosCert,uploadIosCert"
+                        class="shrink-0 rounded-full bg-primary/10 px-3 py-1.5 text-xs font-semibold text-primary hover:bg-primary/20 dark:text-teal-300">Upload</button>
+                </div>
+                @error('iosCert') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+            </div>
+            <div>
+                <div class="mb-2 flex items-center gap-2 text-xs {{ $hasIosProvisioningProfile ? 'text-emerald-700 dark:text-emerald-300' : 'text-slate-500 dark:text-slate-400' }}">
+                    <x-icon name="{{ $hasIosProvisioningProfile ? 'shield-check' : 'x' }}" class="h-3.5 w-3.5" />
+                    {{ $hasIosProvisioningProfile ? 'Provisioning profile on file'.(! empty($iosProvisioningProfileMeta['filename']) ? ' · '.$iosProvisioningProfileMeta['filename'] : '') : 'No provisioning profile stored' }}
+                </div>
+                <div class="flex items-center gap-2">
+                    <input type="file" wire:model="iosProvisioningProfile" class="block w-full text-xs text-slate-500 file:mr-2 file:rounded-full file:border-0 file:bg-primary/10 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-primary dark:text-slate-400">
+                    <button type="button" wire:click="uploadIosProvisioningProfile" wire:loading.attr="disabled" wire:target="iosProvisioningProfile,uploadIosProvisioningProfile"
+                        class="shrink-0 rounded-full bg-primary/10 px-3 py-1.5 text-xs font-semibold text-primary hover:bg-primary/20 dark:text-teal-300">Upload</button>
+                </div>
+                @error('iosProvisioningProfile') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+            </div>
+        </div>
+
+        <label class="flex items-center gap-3 text-sm text-slate-700 dark:text-slate-200">
+            <input type="checkbox" wire:click="toggleIosSigningOnProvider" @checked($form['ios_signing_on_provider'] ?? false) class="rounded border-slate-300 text-primary focus:ring-primary">
+            iOS signing is configured directly on my CI provider's dashboard instead
+        </label>
+    </div>
+
     {{-- ===== Store & download ============================================= --}}
     <div class="mb-6 rounded-2xl border border-slate-200/70 bg-white p-5 dark:border-white/10 dark:bg-slate-900/60">
         <h2 class="mb-4 text-sm font-semibold text-slate-700 dark:text-slate-200">Store &amp; download page</h2>
@@ -168,9 +210,47 @@
                 @error('form.ios_store_url') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
             </div>
         </div>
-        <div class="mt-4">
-            <label class="mb-1 block text-xs font-semibold text-slate-500 dark:text-slate-400">CI / cloud-build webhook URL (optional)</label>
-            <input type="url" wire:model="form.ci_webhook_url" placeholder="https://…  (blank = self-hosted runner)" class="{{ $inp }}">
+        <div class="mt-4 rounded-xl bg-slate-50 p-4 dark:bg-white/5">
+            <div class="mb-3 flex items-center justify-between">
+                <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400">CI / cloud-build provider</label>
+                <span class="flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold {{ $ciConfigured ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300' : 'bg-red-100 text-red-700 dark:bg-red-500/15 dark:text-red-300' }}">
+                    <x-icon name="{{ $ciConfigured ? 'shield-check' : 'x' }}" class="h-3 w-3" />
+                    {{ $ciConfigured ? 'Configured' : 'Not configured — builds will fail immediately' }}
+                </span>
+            </div>
+
+            <select wire:model.live="form.ci_provider" class="{{ $inp }} mb-3">
+                <option value="generic">Generic / custom webhook</option>
+                <option value="codemagic">Codemagic</option>
+            </select>
+
+            @if (($form['ci_provider'] ?? 'generic') === 'codemagic')
+                <p class="mb-3 text-xs text-slate-500 dark:text-slate-400">
+                    Set the Codemagic API token under Admin → API Keys → App Export. App id and workflow ids come
+                    from your Codemagic app's settings page.
+                </p>
+                <div class="grid gap-3 sm:grid-cols-2">
+                    <div>
+                        <label class="mb-1 block text-xs font-semibold text-slate-500 dark:text-slate-400">App ID</label>
+                        <input type="text" wire:model="form.codemagic_app_id" placeholder="60xxxxxxxxxxxxxxxxxxxxxx" class="{{ $inp }}">
+                    </div>
+                    <div>
+                        <label class="mb-1 block text-xs font-semibold text-slate-500 dark:text-slate-400">Branch</label>
+                        <input type="text" wire:model="form.codemagic_branch" placeholder="main" class="{{ $inp }}">
+                    </div>
+                    <div>
+                        <label class="mb-1 block text-xs font-semibold text-slate-500 dark:text-slate-400">Android workflow ID</label>
+                        <input type="text" wire:model="form.codemagic_android_workflow_id" class="{{ $inp }}">
+                    </div>
+                    <div>
+                        <label class="mb-1 block text-xs font-semibold text-slate-500 dark:text-slate-400">iOS workflow ID</label>
+                        <input type="text" wire:model="form.codemagic_ios_workflow_id" class="{{ $inp }}">
+                    </div>
+                </div>
+            @else
+                <label class="mb-1 block text-xs font-semibold text-slate-500 dark:text-slate-400">CI / cloud-build webhook URL</label>
+                <input type="url" wire:model="form.ci_webhook_url" placeholder="https://your-ci-provider.example/webhook" class="{{ $inp }}">
+            @endif
         </div>
     </div>
 
@@ -293,7 +373,27 @@
     </div>
 
     {{-- ===== Build history ================================================ --}}
-    <div class="rounded-2xl border border-slate-200/70 bg-white p-5 dark:border-white/10 dark:bg-slate-900/60">
+    {{-- Live status (App Export audit §3.3): polls ONLY while a build is
+         queued/building, so Queued -> Building -> Ready/Failed updates without
+         a manual refresh, and a genuinely stuck build (status never changes)
+         reads visibly differently from one that's just slow. --}}
+    <div class="rounded-2xl border border-slate-200/70 bg-white p-5 dark:border-white/10 dark:bg-slate-900/60"
+         x-data
+         x-on:appbuild-ready.window="
+            $dispatch('nx-toast', { type: 'success', message: $event.detail.label + ' is ready — downloading…' });
+            const a = document.createElement('a');
+            a.href = $event.detail.url;
+            // Force a download rather than an in-page navigation — without this,
+            // a same-origin URL the browser can render inline (confirmed live:
+            // an .ico/.png artifact URL) navigates the whole admin page away
+            // instead of downloading, exactly the opposite of the intent here.
+            a.download = $event.detail.label.replace(/\s+/g, '-') + '.' + $event.detail.url.split('.').pop().split(/[?#]/)[0];
+            a.rel = 'noopener';
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+         "
+         @if ($hasActiveBuild) wire:poll.3s="pollBuilds" @endif>
         <h2 class="mb-4 text-sm font-semibold text-slate-700 dark:text-slate-200">Build history</h2>
         @forelse ($builds as $b)
             <div class="mb-2 rounded-xl border border-slate-200/70 p-3 dark:border-white/10">
