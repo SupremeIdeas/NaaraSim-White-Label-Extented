@@ -36,10 +36,25 @@
                 @if ($this->instance->status === 'pending' && $this->instance->price_usd === null)
                     <p class="text-sm text-slate-500 dark:text-slate-400">Your request is being reviewed. An admin will confirm your price shortly.</p>
                 @elseif ($this->instance->status === 'pending' && $this->instance->price_usd !== null)
-                    <p class="mb-3 text-sm text-slate-600 dark:text-slate-300">Price confirmed: <span class="font-semibold text-slate-900 dark:text-white">${{ number_format((float) $this->instance->price_usd, 2) }}</span></p>
+                    <div class="mb-3 space-y-1 text-sm text-slate-600 dark:text-slate-300">
+                        <div class="flex items-center justify-between">
+                            <span>License price</span>
+                            <span class="font-semibold text-slate-900 dark:text-white">${{ number_format((float) $this->instance->price_usd, 2) }}</span>
+                        </div>
+                        @if ($this->instance->hasThemeAddon())
+                            <div class="flex items-center justify-between">
+                                <span>{{ \App\Support\ThemeAddonCatalog::labelFor($this->instance->theme_addon) }}</span>
+                                <span class="font-semibold text-slate-900 dark:text-white">${{ number_format((float) $this->instance->theme_addon_price_usd, 2) }}</span>
+                            </div>
+                        @endif
+                        <div class="flex items-center justify-between border-t border-slate-200 pt-1 font-semibold text-slate-900 dark:border-white/10 dark:text-white">
+                            <span>Total due</span>
+                            <span>${{ number_format((float) $this->totalDue, 2) }}</span>
+                        </div>
+                    </div>
                     <button type="button" wire:click="payNow" wire:loading.attr="disabled" wire:target="payNow"
                         class="w-full rounded-2xl bg-primary px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-primary/25 transition hover:bg-primary-dark disabled:opacity-60">
-                        <span wire:loading.remove wire:target="payNow">Pay ${{ number_format((float) $this->instance->price_usd, 2) }} to activate</span>
+                        <span wire:loading.remove wire:target="payNow">Pay ${{ number_format((float) $this->totalDue, 2) }} to activate</span>
                         <span wire:loading wire:target="payNow">Processing…</span>
                     </button>
                 @elseif ($this->instance->status === 'active')
@@ -204,6 +219,26 @@
                 </div>
             @endif
         @else
+            {{-- Owner request (2026-09-15) — optional custom-theme request
+                 add-on, billed together with whichever plan is requested
+                 below. Defaults to "No custom theme" so a merchant who just
+                 wants a normal setup checks out with no extra cost. --}}
+            <div class="mb-4 rounded-2xl border border-slate-200 nx-glass-tile p-4 dark:border-white/10">
+                <label class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">Custom theme request <span class="font-normal text-slate-400">(optional)</span></label>
+                <p class="mb-3 text-xs text-slate-400">Want your white-label platform's look designed for you instead of the standard setup? Pick a tier below — it's added to your bill when you request a plan. Skip it and you're billed normally, no extra cost.</p>
+                <div class="space-y-2">
+                    @foreach ($this->themeAddonOptions as $key => $addon)
+                        <label class="flex cursor-pointer items-center justify-between gap-3 rounded-xl border p-3 text-sm transition {{ $themeAddon === $key ? 'border-primary bg-primary/5' : 'border-slate-200 dark:border-white/10' }}">
+                            <span class="flex items-center gap-2">
+                                <input type="radio" wire:model="themeAddon" value="{{ $key }}" class="h-4 w-4 border-slate-300 text-primary focus:ring-primary">
+                                <span class="text-slate-700 dark:text-slate-200">{{ $addon['label'] }}</span>
+                            </span>
+                            <span class="font-semibold text-slate-900 dark:text-white">{{ $addon['price'] > 0 ? '$'.number_format($addon['price'], 0) : '$0' }}</span>
+                        </label>
+                    @endforeach
+                </div>
+            </div>
+
             {{-- Prompt 21-EXT §2.1 — swipeable plan carousel. Each card falls back
                  to a tier-tinted gradient (richer for Extended/Extended V2) until
                  an admin uploads real cover art, so nothing ships as a bare box. --}}

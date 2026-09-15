@@ -11,6 +11,7 @@ use App\Services\Updater\WhiteLabelLicenseService;
 use App\Services\Updater\WhiteLabelProjectIntakeException;
 use App\Services\Updater\WhiteLabelProjectIntakeService;
 use App\Support\MediaStorage;
+use App\Support\ThemeAddonCatalog;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
@@ -37,6 +38,11 @@ class MerchantWhiteLabel extends Component
     public string $hostingPreference = WhiteLabelInstance::HOSTING_SUPREME_IDEAS_SERVER;
 
     public bool $disclaimerAcknowledged = false;
+
+    /** Owner request (2026-09-15) — optional custom-theme request add-on,
+     *  billed together with the license. Defaults to None so a merchant who
+     *  just wants a normal setup checks out with no extra cost. */
+    public string $themeAddon = ThemeAddonCatalog::NONE;
 
     public ?string $error = null;
 
@@ -98,6 +104,12 @@ class MerchantWhiteLabel extends Component
         return WhiteLabelLicensePlan::where('is_active', true)->orderBy('sort_order')->get();
     }
 
+    /** @return array<string, array{label:string, price:float}> */
+    public function getThemeAddonOptionsProperty(): array
+    {
+        return ThemeAddonCatalog::options();
+    }
+
     public function getInstanceProperty(): ?WhiteLabelInstance
     {
         $merchant = $this->merchant();
@@ -128,6 +140,13 @@ class MerchantWhiteLabel extends Component
         }
 
         return max(0.0, round((float) $extended->price_usd - $instance->amountPaidTotal(), 2));
+    }
+
+    /** The full amount payNow() will charge — the confirmed license price
+     *  plus whatever theme add-on was requested alongside it, if any. */
+    public function getTotalDueProperty(): ?float
+    {
+        return $this->instance?->totalDueUsd();
     }
 
     /** Prompt 21-EXT §2.4 — submit a request against a chosen plan card. */
@@ -170,6 +189,7 @@ class MerchantWhiteLabel extends Component
                 'requested_tier' => $plan->tier,
                 'hosting_preference' => $this->hostingPreference,
                 'hosting_disclaimer_acknowledged' => true,
+                'theme_addon' => $this->themeAddon,
             ]);
         } catch (\RuntimeException) {
             $this->error = 'This license tier is temporarily closed for new requests — check back later.';

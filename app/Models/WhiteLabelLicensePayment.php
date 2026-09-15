@@ -17,6 +17,8 @@ class WhiteLabelLicensePayment extends Model
 
     public const KIND_BALANCE_COMPLETION = 'balance_completion';
 
+    public const KIND_THEME_ADDON = 'theme_addon';
+
     protected $fillable = [
         'white_label_instance_id', 'amount_usd', 'kind', 'payment_reference',
     ];
