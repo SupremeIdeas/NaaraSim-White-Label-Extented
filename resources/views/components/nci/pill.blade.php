@@ -4,7 +4,7 @@
     // Semantic colour by state — scannable at a glance (BUILD-17 §3). Green =
     // healthy, amber = watch, red = problem, slate = inert/unknown.
     $map = match ($kind) {
-        'status' => ['ok' => 'green', 'low' => 'amber', 'down' => 'red', 'configured' => 'slate', 'coming_soon' => 'slate'],
+        'status' => ['ok' => 'green', 'low' => 'amber', 'down' => 'red', 'configured' => 'slate', 'coming_soon' => 'slate', 'paused' => 'slate'],
         'circuit' => ['closed' => 'green', 'half_open' => 'amber', 'open' => 'red'],
         'risk' => ['low' => 'green', 'medium' => 'amber', 'high' => 'red'],
         default => [],

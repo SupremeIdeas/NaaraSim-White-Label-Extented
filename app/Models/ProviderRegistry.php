@@ -33,10 +33,18 @@ class ProviderRegistry extends Model
             'nci_confidence' => 'float',
             'nci_computed_at' => 'datetime',
             'enabled' => 'boolean',
+            'paused_at' => 'datetime',
             'last_checked_at' => 'datetime',
             'last_success_at' => 'datetime',
             'last_failure_at' => 'datetime',
         ];
+    }
+
+    /** A durable admin pause (2026-09-15) — never self-heals, unlike a circuit
+     *  breaker's cooldown; only an explicit resume lifts it. */
+    public function isPaused(): bool
+    {
+        return $this->paused_at !== null;
     }
 
     /**

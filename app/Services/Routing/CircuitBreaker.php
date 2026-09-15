@@ -60,6 +60,18 @@ class CircuitBreaker
     /** Can this provider be attempted right now? Handles the OPEN→HALF_OPEN cooldown. */
     public function allows(string $providerKey): bool
     {
+        // Owner request (2026-09-15) — a manually PAUSED provider is refused
+        // unconditionally, same real-time (uncached) read as the circuit state
+        // below, and BEFORE the circuit check so pause can never be mistaken
+        // for (or cleared by) a circuit reset. This is the one real gate every
+        // router's per-provider attempt already calls, so folding pause in
+        // here — rather than only at CandidateOrdering's ordering step — means
+        // a paused provider is refused even if it reaches this call some other
+        // way (e.g. CandidateOrdering's own "don't empty the lane" fallback).
+        if ($this->isPaused($providerKey)) {
+            return false;
+        }
+
         $state = $this->stateOf($providerKey);
         if ($state !== self::OPEN) {
             return true; // CLOSED, HALF_OPEN, or unknown → attempt normally
@@ -203,6 +215,11 @@ class CircuitBreaker
         return $state ?: self::CLOSED;
     }
 
+    private function isPaused(string $providerKey): bool
+    {
+        return ProviderRegistry::where('provider_key', $providerKey)->whereNotNull('paused_at')->exists();
+    }
+
     private function setState(string $providerKey, string $state): void
     {
         $previous = $this->stateOf($providerKey);
@@ -268,9 +285,24 @@ class CircuitBreaker
      * failing longest ago → most likely to have recovered) so the customer still
      * gets one real attempt instead of an immediate hard failure. Returns null if
      * any candidate is actually attemptable (then there is no outage).
+     *
+     * Owner request (2026-09-15) — a manually PAUSED provider is removed from
+     * `$candidates` up front and never eligible as the last resort: a pause
+     * exists specifically so an admin can take a provider fully out of
+     * rotation, and the whole point of this method is to bypass the normal
+     * safety net (open circuits) during a total outage — it must not also
+     * bypass an admin's explicit pause.
      */
     public function lastResortAmong(array $candidates): ?string
     {
+        if ($candidates !== []) {
+            $paused = ProviderRegistry::whereIn('provider_key', $candidates)
+                ->whereNotNull('paused_at')->pluck('provider_key')->all();
+            if ($paused !== []) {
+                $candidates = array_values(array_diff($candidates, $paused));
+            }
+        }
+
         if ($candidates === []) {
             return null;
         }

@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Jobs\AlertAdminJob;
+use App\Models\ProviderRegistry;
 use App\Models\Setting;
 use App\Support\ProviderHealth;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -79,6 +80,32 @@ class ProviderHealthTest extends TestCase
 
         $this->assertSame('configured', $health['twilio']['status']);
         $this->assertNull($health['twilio']['balance']);
+    }
+
+    // --- Owner request (2026-09-15): pausing quiets probing + alerting ---
+
+    public function test_a_paused_provider_is_skipped_without_a_live_probe_or_error(): void
+    {
+        config(['services.quibity.api_key' => 'k']);
+        ProviderRegistry::create(['provider_key' => 'quibity', 'stack' => 'esim', 'paused_at' => now()]);
+        // If probe() ran, this would throw and flip status to 'down'.
+        $this->app->instance('esim.quibity', $this->fakeEsim(null, throw: true));
+
+        $health = app(ProviderHealth::class)->checkAll();
+
+        $this->assertSame('paused', $health['quibity']['status']);
+        $this->assertArrayNotHasKey('error', $health['quibity']);
+    }
+
+    public function test_the_command_never_alerts_for_a_paused_provider(): void
+    {
+        config(['services.esimgo.api_key' => 'k']);
+        ProviderRegistry::create(['provider_key' => 'esimgo', 'stack' => 'esim', 'paused_at' => now()]);
+        $this->app->instance('esim.esimgo', $this->fakeEsim(null, throw: true)); // would be "down" if not paused
+
+        $this->artisan('providers:health-check')->assertSuccessful();
+
+        $this->assertDatabaseMissing('error_logs', ['code' => 'ESIMGO_provider_down']);
     }
 
     public function test_the_command_alerts_on_down_and_low(): void

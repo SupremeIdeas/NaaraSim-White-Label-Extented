@@ -68,8 +68,19 @@ class ProviderHealth
     {
         $previous = $this->cached();
         $health = [];
+        // Owner request (2026-09-15) — one query for every paused provider so
+        // probe() never fires a live call (or an alert) for something an admin
+        // deliberately took out of rotation.
+        $paused = \App\Models\ProviderRegistry::whereNotNull('paused_at')->pluck('provider_key')->all();
 
         foreach (self::PROVIDERS as $provider => [$binding, $alertKey, $stack]) {
+            if (in_array($provider, $paused, true)) {
+                $health[$provider] = ['status' => 'paused', 'stack' => $stack, 'balance' => null,
+                    'checked_at' => now()->toDateTimeString(),
+                    'last_success_at' => $previous[$provider]['last_success_at'] ?? null];
+
+                continue;
+            }
             $health[$provider] = $this->probe($provider, $binding, $alertKey, $stack, $previous[$provider] ?? []);
         }
 
