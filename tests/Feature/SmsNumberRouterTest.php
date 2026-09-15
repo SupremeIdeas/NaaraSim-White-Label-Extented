@@ -42,10 +42,10 @@ class SmsNumberRouterTest extends TestCase
     {
         $router = app(SmsNumberRouter::class);
 
-        $this->assertSame(['getatext', 'fivesim', 'herosms', 'virtsms'], $router->laneFor('US', 'otp'));
-        $this->assertSame(['fivesim', 'herosms', 'virtsms'], $router->laneFor('nigeria', 'otp'));
-        $this->assertSame(['getatext', 'fivesim', 'herosms', 'virtsms'], $router->laneFor('usa', 'rental'));
-        $this->assertSame(['fivesim', 'herosms', 'virtsms'], $router->laneFor('ghana', 'rental'));
+        $this->assertSame(['getatext', 'fivesim', 'herosms', 'virtsms', 'smspool', 'onlinesim'], $router->laneFor('US', 'otp'));
+        $this->assertSame(['fivesim', 'herosms', 'virtsms', 'smspool', 'onlinesim'], $router->laneFor('nigeria', 'otp'));
+        $this->assertSame(['getatext', 'fivesim', 'herosms', 'virtsms', 'smspool', 'onlinesim'], $router->laneFor('usa', 'rental'));
+        $this->assertSame(['fivesim', 'herosms', 'virtsms', 'smspool', 'onlinesim'], $router->laneFor('ghana', 'rental'));
         $this->assertSame(['twilio', 'telnyx'], $router->laneFor('US', 'permanent'));
     }
 

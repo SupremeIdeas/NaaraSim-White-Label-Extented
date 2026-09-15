@@ -48,12 +48,19 @@ class ProviderHealth
         'fivesim' => ['number.fivesim', 'pricing.low_balance_alert.fivesim', 'number'],
         'herosms' => ['number.herosms', 'pricing.low_balance_alert.herosms', 'number'],
         'virtsms' => ['number.virtsms', 'pricing.low_balance_alert.virtsms', 'number'],
+        // Owner audit (2026-09-15) — SMSPool/OnlineSIM were live-key-capable
+        // but had zero health monitoring; both implement balance().
+        'smspool' => ['number.smspool', 'pricing.low_balance_alert.smspool', 'number'],
+        'onlinesim' => ['number.onlinesim', 'pricing.low_balance_alert.onlinesim', 'number'],
         // Permanent/voice — no prepaid wallet balance to read; reachability only.
         'twilio' => ['number.twilio', null, 'number'],
         'telnyx' => ['number.telnyx', null, 'number'],
         'plivo' => ['number.plivo', null, 'number'],
         'vonage' => ['number.vonage', null, 'number'],
         'sinch' => ['number.sinch', null, 'number'],
+        // Sonetel (owner audit, 2026-09-15) has no prepaid-balance concept
+        // (OAuth account, not a wallet) — reachability only, same as Twilio/Telnyx.
+        'sonetel' => ['number.sonetel', null, 'number'],
     ];
 
     /**

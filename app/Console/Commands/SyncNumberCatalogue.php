@@ -13,12 +13,14 @@ use Illuminate\Console\Command;
  * is skipped, and the stored catalogue is only ever extended, never shrunk.
  *
  * Primary source is 5sim (global, 180+ countries, slug-based — matching the buy
- * flow). HeroSMS/VirtSMS (owner audit, 2026-09-15) additionally contribute their
- * live-discovered country ID map (HeroSmsService::syncCatalogue(), name-matched
- * against this same catalogue — see NumberCatalogue::providerCountryMap()),
- * which is what actually lets those two providers route correctly; this was the
- * "claims to sync from HeroSMS" half that was never wired up. Scheduled weekly;
- * run on demand after adding keys.
+ * flow). HeroSMS/VirtSMS/SMSPool/OnlineSIM (owner audit, 2026-09-15) additionally
+ * contribute their live-discovered country ID maps (each provider's own
+ * syncCatalogue(), name-matched against this same catalogue — see
+ * NumberCatalogue::providerCountryMap()/providerServiceMap()), which is what
+ * actually lets those providers route correctly instead of guessing a raw slug
+ * against an API that expects the provider's own numeric ID; this was the
+ * "claims to sync from the provider" half that was never wired up. Scheduled
+ * weekly; run on demand after adding keys.
  */
 class SyncNumberCatalogue extends Command
 {
@@ -72,6 +74,43 @@ class SyncNumberCatalogue extends Command
                 ));
             } catch (\Throwable $e) {
                 $this->warn("{$provider} catalogue sync failed: ".$e->getMessage());
+            }
+        }
+
+        // SMSPool's retrieve_all endpoints need no key — sync it unconditionally
+        // so the country/service id map is fresh even before Frank onboards it.
+        try {
+            /** @var \App\Services\SMS\SmsPoolService $smsPool */
+            $smsPool = app('number.smspool');
+            $result = $smsPool->syncCatalogue();
+            NumberCatalogue::storeSynced($result['countries'], []);
+            NumberCatalogue::storeProviderCountryMap('smspool', $result['country_map']);
+            NumberCatalogue::storeProviderServiceMap('smspool', $result['service_map']);
+            $countries = array_merge($countries, $result['countries']);
+            $this->info(sprintf(
+                'Smspool: matched %d countries + %d services to its live id tables (+%d new to the catalogue).',
+                count($result['country_map']), count($result['service_map']), count($result['countries']),
+            ));
+        } catch (\Throwable $e) {
+            $this->warn('smspool catalogue sync failed: '.$e->getMessage());
+        }
+
+        if (empty(config('services.onlinesim.api_key'))) {
+            $this->line('onlinesim not configured — skipping its country map sync.');
+        } else {
+            try {
+                /** @var \App\Services\SMS\OnlineSimService $onlineSim */
+                $onlineSim = app('number.onlinesim');
+                $result = $onlineSim->syncCatalogue();
+                NumberCatalogue::storeSynced($result['countries'], []);
+                NumberCatalogue::storeProviderCountryMap('onlinesim', $result['country_map']);
+                $countries = array_merge($countries, $result['countries']);
+                $this->info(sprintf(
+                    'Onlinesim: matched %d countries to its live id table (+%d new to the catalogue).',
+                    count($result['country_map']), count($result['countries']),
+                ));
+            } catch (\Throwable $e) {
+                $this->warn('onlinesim catalogue sync failed: '.$e->getMessage());
             }
         }
 

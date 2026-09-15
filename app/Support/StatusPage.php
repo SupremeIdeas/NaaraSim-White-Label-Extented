@@ -18,8 +18,8 @@ class StatusPage
     private const COMPONENTS = [
         'data' => ['label' => 'eSIM Data network', 'providers' => ['esimgo', 'airalo', 'quibity', 'zendit']],
         'connect' => ['label' => 'Naara Connect (Full eSIM)', 'providers' => ['zendit', 'oneglobal', 'montymobile', 'gigs']],
-        'numbers' => ['label' => 'Numbers — Verify & Rent', 'providers' => ['fivesim', 'getatext', 'herosms', 'virtsms']],
-        'line' => ['label' => 'Naara Line (voice + SMS)', 'providers' => ['twilio', 'telnyx']],
+        'numbers' => ['label' => 'Numbers — Verify & Rent', 'providers' => ['fivesim', 'getatext', 'herosms', 'virtsms', 'smspool', 'onlinesim']],
+        'line' => ['label' => 'Naara Line (voice + SMS)', 'providers' => ['twilio', 'telnyx', 'vonage', 'sinch', 'plivo', 'sonetel']],
         'payments' => ['label' => 'Payments & Wallet', 'providers' => ['paystack', 'flutterwave', 'stripe']],
         'api' => ['label' => 'Developer API', 'providers' => []],
         'core' => ['label' => 'Core platform', 'providers' => []],

@@ -364,13 +364,17 @@ class SmsNumberRouter
     {
         $isUs = in_array(strtolower($country), ['usa', 'us'], true);
 
+        // Owner audit (2026-09-15) — SMSPool/OnlineSIM append as lower-priority
+        // fallback capacity behind the established HeroSMS/VirtSMS backup pair,
+        // same lane for every country (both are global-coverage, self-service
+        // tier providers, not a US/non-US split like Getatext).
         return match ($type) {
             NumberRequest::TYPE_OTP => $isUs
-                ? ['getatext', 'fivesim', 'herosms', 'virtsms']
-                : ['fivesim', 'herosms', 'virtsms'],
+                ? ['getatext', 'fivesim', 'herosms', 'virtsms', 'smspool', 'onlinesim']
+                : ['fivesim', 'herosms', 'virtsms', 'smspool', 'onlinesim'],
             NumberRequest::TYPE_RENTAL => $isUs
-                ? ['getatext', 'fivesim', 'herosms', 'virtsms']
-                : ['fivesim', 'herosms', 'virtsms'],
+                ? ['getatext', 'fivesim', 'herosms', 'virtsms', 'smspool', 'onlinesim']
+                : ['fivesim', 'herosms', 'virtsms', 'smspool', 'onlinesim'],
             NumberRequest::TYPE_PERMANENT => ['twilio', 'telnyx'],
             default => throw new SmsException("Unknown number type [{$type}]."),
         };

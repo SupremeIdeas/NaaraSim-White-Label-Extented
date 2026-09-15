@@ -453,9 +453,15 @@ return [
         'api_key' => env('UBIGI_API_KEY'),
         'base_url' => env('UBIGI_BASE_URL', 'https://api.ubigi.me/v1'),
     ],
+    // Owner audit (2026-09-15): Sonetel is OAuth2 password-grant, not a static
+    // API key — verified against Sonetel's own public api-docs repo. username/
+    // password are the account login; account_id scopes the numbers endpoints.
     'sonetel' => [
-        'api_key' => env('SONETEL_API_KEY'),
+        'username' => env('SONETEL_USERNAME'),
+        'password' => env('SONETEL_PASSWORD'),
+        'account_id' => env('SONETEL_ACCOUNT_ID'),
         'base_url' => env('SONETEL_BASE_URL', 'https://public-api.sonetel.com'),
+        'auth_url' => env('SONETEL_AUTH_URL', 'https://api.sonetel.com/SonetelAuth/oauth/token'),
     ],
 
 ];

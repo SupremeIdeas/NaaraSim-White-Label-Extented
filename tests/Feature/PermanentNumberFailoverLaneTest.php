@@ -37,13 +37,13 @@ class PermanentNumberFailoverLaneTest extends TestCase
         $lane->setAccessible(true);
         $value = $lane->getValue($router);
 
-        $this->assertSame(['twilio', 'telnyx', 'vonage', 'sinch', 'plivo'], $value);
+        $this->assertSame(['twilio', 'telnyx', 'vonage', 'sinch', 'plivo', 'sonetel'], $value);
     }
 
     public function test_the_naara_line_model_lane_matches_the_router_lane_exactly(): void
     {
         $model = ProviderModels::find('naara_line');
-        $this->assertSame(['twilio', 'telnyx', 'vonage', 'sinch', 'plivo'], $model['lane']);
+        $this->assertSame(['twilio', 'telnyx', 'vonage', 'sinch', 'plivo', 'sonetel'], $model['lane']);
     }
 
     /** @return array<string, array{0:string, 1:array<string,string>}> */
@@ -161,5 +161,64 @@ class PermanentNumberFailoverLaneTest extends TestCase
         $result = app(\App\Services\SMS\PermanentNumberRouter::class)->search('nigeria');
 
         $this->assertSame('vonage', $result['provider']);
+    }
+
+    // --- Owner audit (2026-09-15): Sonetel wiring — its own OAuth2 credential
+    // set (not a single static key like Plivo/Vonage/Sinch) and no inbound-SMS
+    // webhook, so it needs its own tests rather than the shared data provider.
+
+    public function test_sonetel_goes_configured_once_its_credentials_are_set(): void
+    {
+        config(['services.sonetel.username' => null, 'services.sonetel.password' => null, 'services.sonetel.account_id' => null]);
+        \App\Support\ProviderKeys::flush();
+        $this->assertFalse(ProviderModels::providerConfigured('sonetel'));
+
+        config([
+            'services.sonetel.username' => 'owner@example.com',
+            'services.sonetel.password' => 'secret',
+            'services.sonetel.account_id' => 'acc-1',
+        ]);
+        \App\Support\ProviderKeys::flush();
+        $this->assertTrue(ProviderModels::providerConfigured('sonetel'));
+    }
+
+    public function test_sonetel_is_in_the_provider_health_check_list(): void
+    {
+        config([
+            'services.sonetel.username' => 'owner@example.com',
+            'services.sonetel.password' => 'secret',
+            'services.sonetel.account_id' => 'acc-1',
+        ]);
+
+        $health = app(ProviderHealth::class)->checkAll();
+
+        $this->assertArrayHasKey('sonetel', $health);
+        // No prepaid-wallet concept (OAuth account) — same as Twilio/Telnyx.
+        $this->assertSame('configured', $health['sonetel']['status']);
+    }
+
+    public function test_a_search_reaches_sonetel_when_it_is_the_only_configured_provider(): void
+    {
+        config([
+            'services.twilio.account_sid' => null, 'services.twilio.auth_token' => null,
+            'services.telnyx.api_key' => null,
+            'services.vonage.api_key' => null, 'services.vonage.api_secret' => null,
+            'services.sinch.client_id' => null, 'services.sinch.client_secret' => null, 'services.sinch.project_id' => null,
+            'services.plivo.auth_id' => null, 'services.plivo.auth_token' => null,
+            'services.sonetel.username' => 'owner@example.com',
+            'services.sonetel.password' => 'secret',
+            'services.sonetel.account_id' => 'acc-1',
+        ]);
+        \App\Support\ProviderKeys::flush();
+
+        $fake = new FakePermanentProvider(cost: 0.30, results: [
+            ['number' => '+2348000000009', 'locality' => 'Lagos'],
+        ]);
+        $this->app->instance('number.sonetel', $fake);
+
+        $result = app(\App\Services\SMS\PermanentNumberRouter::class)->search('nigeria');
+
+        $this->assertSame('sonetel', $result['provider']);
+        $this->assertCount(1, $result['numbers']);
     }
 }

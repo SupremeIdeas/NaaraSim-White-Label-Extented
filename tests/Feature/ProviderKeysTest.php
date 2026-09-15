@@ -172,7 +172,7 @@ class ProviderKeysTest extends TestCase
             'smspool' => ['smspool_api_key' => 'sp-live'],
             'onlinesim' => ['onlinesim_api_key' => 'os-live'],
             'plivo' => ['plivo_auth_id' => 'pl-id', 'plivo_auth_token' => 'pl-tok'],
-            'sonetel' => ['sonetel_api_key' => 'so-live'],
+            'sonetel' => ['sonetel_username' => 'so@example.com', 'sonetel_password' => 'so-pass', 'sonetel_account_id' => 'acc-123'],
             'bitrefill' => ['bitrefill_api_id' => 'br-id', 'bitrefill_api_secret' => 'br-sec'],
             'tillo' => ['tillo_api_key' => 'ti-key', 'tillo_secret' => 'ti-sec'],
         ];
