@@ -19,8 +19,11 @@ class SectionsHeaderTest extends TestCase
     {
         $html = Blade::render('<x-theme-toggle />');
 
-        // The new switch markup…
-        $this->assertStringContainsString('nx-switch', $html);
+        // The new switch markup… (Theme Toggle Studio: renamed off the shared
+        // .nx-switch class into its own .nx-theme-toggle namespace so the
+        // theme-toggle's sizing no longer collides with the generic admin
+        // switch component that also used to use .nx-switch).
+        $this->assertStringContainsString('nx-theme-toggle', $html);
         $this->assertStringContainsString('sun-moon', $html);
         // …but NOT the blueprint's global IDs (they would be invalid rendered twice).
         $this->assertStringNotContainsString('id="input"', $html);
@@ -57,7 +60,7 @@ class SectionsHeaderTest extends TestCase
 
         // Order within the mobile header slot: bell (nc-mobile) → toggle → menu.
         $this->assertTrue(
-            strpos($html, 'nc-mobile') < strpos($html, 'nx-switch'),
+            strpos($html, 'nc-mobile') < strpos($html, 'nx-theme-toggle'),
             'Notification bell should come before the theme toggle.',
         );
     }

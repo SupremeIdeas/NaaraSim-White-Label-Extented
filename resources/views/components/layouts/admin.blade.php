@@ -79,6 +79,7 @@
         $more[] = ['route' => 'admin.chrome', 'label' => 'Auth & footer', 'icon' => 'image'];
         $more[] = ['route' => 'admin.appearance', 'label' => 'Splash', 'icon' => 'zap'];
         $more[] = ['route' => 'admin.preloader-studio', 'label' => 'Preloader Studio', 'icon' => 'refresh'];
+        $more[] = ['route' => 'admin.theme-toggle-studio', 'label' => 'Theme Toggle', 'icon' => 'sun'];
         $more[] = ['route' => 'admin.welcome-settings', 'label' => 'Welcome animation', 'icon' => 'zap'];
         $more[] = ['route' => 'admin.theme', 'label' => 'Theme', 'icon' => 'star'];
         $more[] = ['route' => 'admin.dashboard-theme', 'label' => 'Dashboard theme', 'icon' => 'image'];
