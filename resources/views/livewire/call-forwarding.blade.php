@@ -1,8 +1,7 @@
 <div class="mx-auto max-w-2xl">
     <h1 class="text-2xl font-bold text-slate-900 dark:text-slate-100">Call forwarding</h1>
     <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
-        Send calls to your permanent NaaraSim number straight to your real phone —
-        anywhere in the world. Give out one number, answer it on the phone in your pocket.
+        {{ \App\Support\BrandSettings::rebrand('Send calls to your permanent NaaraSim number straight to your real phone — anywhere in the world. Give out one number, answer it on the phone in your pocket.') }}
     </p>
 
     @if ($numbers->isEmpty())
@@ -10,13 +9,13 @@
             <span class="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 text-primary dark:bg-primary/20 dark:text-teal-300">
                 <x-icon name="phone-forwarded" class="h-8 w-8" />
             </span>
-            <h2 class="mt-4 text-lg font-bold text-slate-900 dark:text-white">Forwarding needs a Naara Line</h2>
+            <h2 class="mt-4 text-lg font-bold text-slate-900 dark:text-white">{{ \App\Support\BrandSettings::rebrand('Forwarding needs a Naara Line') }}</h2>
             <p class="mt-1 max-w-sm text-sm text-slate-500 dark:text-slate-400">
                 Get a permanent voice number, then send its calls to the phone in your pocket — anywhere in the world.
             </p>
             <a href="{{ route('numbers', ['modal' => 'line']) }}" wire:navigate
                class="mt-5 inline-flex items-center gap-2 rounded-2xl bg-primary px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-primary/25 transition hover:bg-primary-dark">
-                <x-icon name="plus" class="h-4 w-4" /> Get a Naara Line
+                <x-icon name="plus" class="h-4 w-4" /> {{ \App\Support\BrandSettings::rebrand('Get a Naara Line') }}
             </a>
         </div>
     @else

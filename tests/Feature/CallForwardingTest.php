@@ -101,6 +101,18 @@ class CallForwardingTest extends TestCase
         Livewire::actingAs(User::factory()->create())->test(CallForwarding::class)->assertStatus(404);
     }
 
+    // --- Owner audit (2026-09-15): brand-word wiring ---
+
+    public function test_the_empty_state_copy_is_rebranded(): void
+    {
+        \App\Models\Setting::setValue('brand.word', 'Acme', 'brand');
+        \App\Support\BrandSettings::flush();
+
+        Livewire::actingAs(User::factory()->create())->test(CallForwarding::class)
+            ->assertSee('Acme Line')
+            ->assertDontSee('Naara Line');
+    }
+
     public function test_a_user_can_set_forwarding_and_the_voice_url_is_synced(): void
     {
         Queue::fake();

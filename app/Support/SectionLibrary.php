@@ -56,8 +56,8 @@ class SectionLibrary
                     'layout' => 'rhythm',   // rhythm | uniform | featured
                     'cards' => [
                         ['image' => '', 'icon' => 'signal', 'title' => 'eSIM Data Plans', 'body' => 'Local data in 190+ countries.', 'cta_label' => 'Browse plans', 'cta_target' => '', 'badge' => ''],
-                        ['image' => '', 'icon' => 'phone', 'title' => 'Naara Line', 'body' => 'A real second number, voice + SMS.', 'cta_label' => 'Get a number', 'cta_target' => '', 'badge' => ''],
-                        ['image' => '', 'icon' => 'shield', 'title' => 'Naara Verify', 'body' => 'Disposable numbers for OTP.', 'cta_label' => 'Verify', 'cta_target' => '', 'badge' => ''],
+                        ['image' => '', 'icon' => 'phone', 'title' => BrandSettings::rebrand('Naara Line'), 'body' => 'A real second number, voice + SMS.', 'cta_label' => 'Get a number', 'cta_target' => '', 'badge' => ''],
+                        ['image' => '', 'icon' => 'shield', 'title' => BrandSettings::rebrand('Naara Verify'), 'body' => 'Disposable numbers for OTP.', 'cta_label' => 'Verify', 'cta_target' => '', 'badge' => ''],
                     ],
                 ],
             ],

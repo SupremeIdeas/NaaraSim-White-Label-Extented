@@ -29,6 +29,18 @@ class MessagesInboxTest extends TestCase
         ]);
     }
 
+    // --- Owner audit (2026-09-15): brand-word wiring ---
+
+    public function test_the_empty_conversations_copy_is_rebranded(): void
+    {
+        \App\Models\Setting::setValue('brand.word', 'Acme', 'brand');
+        \App\Support\BrandSettings::flush();
+
+        Livewire::actingAs(User::factory()->create())->test(Messages::class)
+            ->assertSee('Acme Lines')
+            ->assertDontSee('Naara Lines');
+    }
+
     public function test_inbound_webhook_rejects_a_bad_token(): void
     {
         config(['services.twilio.webhook_token' => 'secret']);

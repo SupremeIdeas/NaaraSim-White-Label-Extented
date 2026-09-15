@@ -36,7 +36,7 @@ class ProductLineSettings
             [
                 'slug' => 'naara-data', 'icon' => 'globe', 'hero_image' => '', 'is_draft' => false,
                 'eyebrow' => 'Data & connectivity',
-                'title' => 'Naara Data',
+                'title' => BrandSettings::rebrand('Naara Data'),
                 'summary' => 'Local data in 190+ countries, installed on your phone before you fly. No SIM cards, no airport counters, no roaming shocks — you land connected.',
                 'cta_label' => 'Browse eSIM plans', 'cta_route' => 'catalogue',
                 'modal_gallery' => [],
@@ -49,20 +49,20 @@ class ProductLineSettings
             [
                 'slug' => 'naara-connect', 'icon' => 'signal', 'hero_image' => '', 'is_draft' => false,
                 'eyebrow' => 'One eSIM, one number, everything included',
-                'title' => 'Naara Connect',
+                'title' => BrandSettings::rebrand('Naara Connect'),
                 'summary' => 'Calls, texts, and data on a single eSIM — with a real number attached. No juggling a data-only plan and a separate number app.',
-                'cta_label' => 'Explore Naara Connect', 'cta_route' => 'catalogue',
+                'cta_label' => BrandSettings::rebrand('Explore Naara Connect'), 'cta_route' => 'catalogue',
                 'modal_gallery' => [],
                 'modal_blocks' => [
                     ['heading' => 'The old ritual', 'text' => 'Two apps for one trip — a data plan in one place, a number to actually be reachable in another.'],
                     ['heading' => 'What happens now', 'text' => 'One eSIM carries your calls, texts and data, with a real number attached. One thing to manage, not two.'],
-                    ['heading' => 'How it differs', 'text' => 'Naara Data is data-only; Naara Line is a number without bundled data. Connect is the all-in-one for frequent travellers who want a single thing to manage.'],
+                    ['heading' => 'How it differs', 'text' => BrandSettings::rebrand('Naara Data is data-only; Naara Line is a number without bundled data. Connect is the all-in-one for frequent travellers who want a single thing to manage.')],
                 ],
             ],
             [
                 'slug' => 'naara-verify', 'icon' => 'hash', 'hero_image' => '', 'is_draft' => false,
                 'eyebrow' => 'Verification',
-                'title' => 'Naara Verify',
+                'title' => BrandSettings::rebrand('Naara Verify'),
                 'summary' => 'One-time codes for WhatsApp, Google, Facebook, Telegram and hundreds more services — delivered in seconds, refunded automatically if no code arrives.',
                 'cta_label' => 'Get a verification number', 'cta_route' => 'numbers',
                 'modal_gallery' => [],
@@ -75,7 +75,7 @@ class ProductLineSettings
             [
                 'slug' => 'naara-rent', 'icon' => 'refresh', 'hero_image' => '', 'is_draft' => false,
                 'eyebrow' => 'A number for exactly as long as you need it',
-                'title' => 'Naara Rent',
+                'title' => BrandSettings::rebrand('Naara Rent'),
                 'summary' => 'Rent a number for a trip, a project, or a verification window that needs to outlast a single code — then let it go. No monthly commitment.',
                 'cta_label' => 'Rent a number', 'cta_route' => 'numbers',
                 'modal_gallery' => [],
@@ -91,9 +91,9 @@ class ProductLineSettings
             [
                 'slug' => 'naara-line', 'icon' => 'phone', 'hero_image' => '', 'is_draft' => false,
                 'eyebrow' => 'Your permanent second line',
-                'title' => 'Naara Line',
+                'title' => BrandSettings::rebrand('Naara Line'),
                 'summary' => 'A permanent second line for calls and SMS that lives in the cloud. Perfect for business, travel, or keeping your personal number private.',
-                'cta_label' => 'Explore Naara Line', 'cta_route' => 'numbers',
+                'cta_label' => BrandSettings::rebrand('Explore Naara Line'), 'cta_route' => 'numbers',
                 'modal_gallery' => [],
                 'modal_blocks' => [
                     ['heading' => 'The old ritual', 'text' => 'One number for work, one for home, one you gave a stranger once — and no clean way to keep them apart.'],
@@ -104,14 +104,14 @@ class ProductLineSettings
             [
                 'slug' => 'naara-gift', 'icon' => 'gift', 'hero_image' => '', 'is_draft' => false,
                 'eyebrow' => 'Show up from anywhere',
-                'title' => 'Naara Gift',
+                'title' => BrandSettings::rebrand('Naara Gift'),
                 'summary' => 'Send digital gift cards for 1,000+ brands — shopping, airtime, streaming and games — to anyone, anywhere, delivered instantly by email or WhatsApp.',
-                'cta_label' => 'Browse Naara Gift', 'cta_route' => 'gift-cards',
+                'cta_label' => BrandSettings::rebrand('Browse Naara Gift'), 'cta_route' => 'gift-cards',
                 'modal_gallery' => [],
                 'modal_blocks' => [
                     ['heading' => 'The old ritual', 'text' => 'Being far from home on the days that matter, with no easy way to actually show up.'],
                     ['heading' => 'What happens now', 'text' => 'Send a digital gift card for 1,000+ brands — shopping, airtime, streaming, games — delivered instantly by email or WhatsApp.'],
-                    ['heading' => 'Who it is for', 'text' => 'The newest way Naara keeps you close to the people who matter, wherever you both are.'],
+                    ['heading' => 'Who it is for', 'text' => BrandSettings::rebrand('The newest way Naara keeps you close to the people who matter, wherever you both are.')],
                 ],
             ],
         ];
