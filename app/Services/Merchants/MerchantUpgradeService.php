@@ -6,6 +6,7 @@ use App\Exceptions\InsufficientBalanceException;
 use App\Models\Merchant;
 use App\Models\User;
 use App\Services\Wallet\WalletService;
+use App\Support\AppPlatform;
 use App\Support\Auditor;
 use App\Support\MerchantSettings;
 
@@ -17,6 +18,11 @@ use App\Support\MerchantSettings;
  *     the platform's payment gateways, so this reuses that infrastructure.
  *   • admin-grant: an admin upgrades a merchant for free.
  * V2 is additive — the merchant keeps their normal reseller earnings unchanged.
+ *
+ * App Store payments-compliance doc (BUILD-5 §6): the self-pay path is an
+ * in-app digital entitlement — on iOS this is hidden rather than collected
+ * through our own gateway (no native IAP integration exists to route it
+ * through StoreKit instead). Admin-grant is unaffected on any platform.
  */
 class MerchantUpgradeService
 {
@@ -32,6 +38,9 @@ class MerchantUpgradeService
         }
         if (! $merchant->isActive()) {
             throw new MerchantException('Your merchant account must be active to upgrade.');
+        }
+        if (AppPlatform::isIosBuild()) {
+            throw new MerchantException('Merchant V2 upgrade isn\'t available in the iOS app yet — open naara.app in your browser or use the Android app to upgrade.');
         }
 
         $price = MerchantSettings::upgradePriceUsd();

@@ -122,7 +122,8 @@ class ProviderKeys
             'appexport' => [
                 'label' => 'App Export — CI / cloud build',
                 'fields' => [
-                    'codemagic_api_token' => ['label' => 'Codemagic — API Token', 'config' => 'services.appexport.codemagic_api_token', 'env' => 'CODEMAGIC_API_TOKEN', 'secret' => true, 'hint' => 'codemagic.io → Teams → Personal Access Tokens. Only needed if App Builder\'s CI provider is set to "Codemagic". Sent as the x-auth-token header when triggering a build.'],
+                    'codemagic_api_token' => ['label' => 'Codemagic — API Token', 'config' => 'services.appexport.codemagic_api_token', 'env' => 'CODEMAGIC_API_TOKEN', 'secret' => true, 'hint' => 'codemagic.io → Teams → Personal Access Tokens. Only needed if App Builder\'s iOS CI provider is set to "Codemagic". Sent as the x-auth-token header when triggering an iOS build.'],
+                    'appexport_github_token' => ['label' => 'GitHub — App Export Token', 'config' => 'services.appexport.github_token', 'env' => 'APPEXPORT_GITHUB_TOKEN', 'secret' => true, 'hint' => 'github.com/settings/personal-access-tokens/new → fine-grained PAT scoped to THIS repo only, with "Contents: read" + "Actions: write" permissions. Fires the repo\'s own android-build.yml via repository_dispatch — Android builds run on GitHub Actions, never Codemagic.'],
                 ],
             ],
             'social' => [

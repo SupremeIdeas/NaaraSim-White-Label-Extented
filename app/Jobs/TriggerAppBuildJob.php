@@ -42,19 +42,83 @@ class TriggerAppBuildJob implements ShouldQueue
             return;
         }
 
-        if ((string) AppExport::get('ci_provider', 'generic') === 'codemagic') {
+        // Android and iOS use DIFFERENT CI (owner audit, 2026-09-15 — Doc B
+        // Stage 1): Android always builds via this repo's own pre-built
+        // android-build.yml on GitHub Actions (cheap, no macOS runner needed);
+        // Codemagic/generic-webhook is an iOS-only choice. Never cross lanes —
+        // same "capability routing, not blind failover" discipline the
+        // number-provider lanes use.
+        if ($build->platform === 'android') {
+            $this->triggerGithubActions($build);
+        } elseif ((string) AppExport::get('ci_provider', 'generic') === 'codemagic') {
             $this->triggerCodemagic($build);
         } else {
             $this->triggerGeneric($build);
         }
     }
 
-    /** The original provider-agnostic path: a signed webhook to any custom receiver. */
+    /**
+     * Android CI (docs/APP-EXPORT.md): fires this repo's own
+     * .github/workflows/android-build.yml via GitHub's repository_dispatch
+     * API — a signed APK+AAB build on a standard Linux runner, far cheaper
+     * than a macOS CI provider and exactly what that workflow already expects.
+     * The workflow reports back to the SAME signed `/webhooks/appbuild/{provider}`
+     * endpoint the generic/Codemagic paths use, so AppBuildWebhookController
+     * never needed to change (Doc A Part A item 3).
+     */
+    private function triggerGithubActions(AppBuild $build): void
+    {
+        $token = trim((string) config('services.appexport.github_token', ''));
+        $repo = trim((string) AppExport::get('github_repo'));
+
+        if ($token === '' || $repo === '') {
+            $this->failNoProvider($build, 'GitHub Actions is not configured — set the App Export GitHub token (Admin → API Keys) and the github_repo (owner/repo) in App Builder before generating an Android build.');
+
+            return;
+        }
+
+        $response = Http::withHeaders([
+            'Authorization' => 'Bearer '.$token,
+            'Accept' => 'application/vnd.github+json',
+            'X-GitHub-Api-Version' => '2022-11-28',
+        ])
+            ->timeout(20)
+            ->post("https://api.github.com/repos/{$repo}/dispatches", [
+                'event_type' => 'app-build',
+                'client_payload' => [
+                    'build_id' => (string) $build->id,
+                    'version' => $build->version,
+                    'build_number' => (string) $build->build_number,
+                    'callback_url' => route('webhooks.appbuild', ['provider' => 'github']),
+                    // Live App Studio config so an admin's settings actually take
+                    // effect in the compiled build, not whatever's stale in the
+                    // checked-in capacitor.config.json (owner audit gap).
+                    'app_config' => \App\Support\AppStudio::medianConfig(),
+                    'offline_html' => \App\Support\AppStudio::offlineHtml(),
+                ],
+            ]);
+
+        // repository_dispatch returns 204 No Content with no body on success —
+        // there is no build id to store, unlike Codemagic; the workflow's own
+        // callback carries our build_id back, which is all applyStatus() needs.
+        if (! $response->successful()) {
+            $this->failTriggerRejected($build, $response, 'GitHub Actions');
+
+            return;
+        }
+
+        $build->update([
+            'status' => AppBuild::STATUS_BUILDING,
+            'external_ref' => "github_actions:{$repo}@".(string) AppExport::get('github_branch', 'main'),
+        ]);
+    }
+
+    /** The original provider-agnostic iOS path: a signed webhook to any custom macOS-CI receiver. */
     private function triggerGeneric(AppBuild $build): void
     {
         $webhook = trim((string) AppExport::get('ci_webhook_url'));
         if ($webhook === '') {
-            $this->failNoProvider($build, 'No CI provider configured — set a CI webhook URL, or switch to Codemagic and configure it, in App Builder before generating a build.');
+            $this->failNoProvider($build, 'No iOS CI provider configured — set a CI webhook URL, or switch to Codemagic and configure it, in App Builder before generating an iOS build.');
 
             return;
         }
@@ -107,12 +171,10 @@ class TriggerAppBuildJob implements ShouldQueue
     {
         $token = trim((string) config('services.appexport.codemagic_api_token', ''));
         $appId = trim((string) AppExport::get('codemagic_app_id'));
-        $workflowId = trim((string) AppExport::get(
-            $build->platform === 'ios' ? 'codemagic_ios_workflow_id' : 'codemagic_android_workflow_id'
-        ));
+        $workflowId = trim((string) AppExport::get('codemagic_ios_workflow_id'));
 
         if ($token === '' || $appId === '' || $workflowId === '') {
-            $this->failNoProvider($build, 'Codemagic is not fully configured — set the API token (Admin → API Keys), app id, and '.$build->platform.' workflow id in App Builder before generating a build.');
+            $this->failNoProvider($build, 'Codemagic is not fully configured — set the API token (Admin → API Keys), app id, and iOS workflow id in App Builder before generating an iOS build.');
 
             return;
         }
@@ -131,6 +193,11 @@ class TriggerAppBuildJob implements ShouldQueue
                         'NAARA_VERSION' => $build->version,
                         'NAARA_BUILD_NUMBER' => (string) $build->build_number,
                         'NAARA_CALLBACK_URL' => route('webhooks.appbuild', ['provider' => 'codemagic']),
+                        // Live App Studio config, same reasoning as the generic/
+                        // GitHub Actions paths — codemagic.yaml's "Apply live app
+                        // config" step patches capacitor.config.json from this
+                        // before `cap add ios` copies it into the native project.
+                        'NAARA_APP_CONFIG' => json_encode(\App\Support\AppStudio::medianConfig()),
                     ],
                 ],
             ]);

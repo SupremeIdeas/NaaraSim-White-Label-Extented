@@ -387,6 +387,14 @@ return [
         // branch are plain (non-secret) Settings, not config, since they're
         // just identifiers, not credentials.
         'codemagic_api_token' => env('CODEMAGIC_API_TOKEN'),
+        // GitHub PAT used ONLY to fire the repo's own pre-built
+        // android-build.yml via repository_dispatch (docs/APP-EXPORT.md §
+        // "Android CI") — owner audit, 2026-09-15 (Doc B Stage 1): Android
+        // builds via GitHub Actions (cheap, no macOS runner needed), NOT
+        // Codemagic. Least-privilege: a fine-grained PAT scoped to this one
+        // repo with "Contents: read" + "Actions: write" is enough — it never
+        // touches code, secrets, or other repos.
+        'github_token' => env('APPEXPORT_GITHUB_TOKEN'),
     ],
 
     // Reloadly Gift Cards (Naara Gift — primary gift-card provider). OAuth2

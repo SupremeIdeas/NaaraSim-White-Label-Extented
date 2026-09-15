@@ -65,23 +65,37 @@ class AppExport
             'ios_store_live' => false,
             'ios_store_url' => '',
             'keystore_backed_up' => false,
-            // CI provider (owner audit, 2026-09-15 — Codemagic reference doc):
-            // 'generic' posts the original signed webhook payload to
-            // ci_webhook_url (any custom receiver); 'codemagic' calls
-            // Codemagic's real REST API directly (docs.codemagic.io) using the
-            // admin-set app/workflow ids below + the ProviderKeys-stored token.
+            // CI provider (owner audit, 2026-09-15 — Codemagic reference doc;
+            // revised 2026-09-15 per docs/APP-EXPORT.md + the merchant-app-export
+            // blueprint's Stage 1: Android and iOS use DIFFERENT CI, not one
+            // shared toggle. Android always builds via this repo's own
+            // .github/workflows/android-build.yml on GitHub Actions (cheap, no
+            // macOS runner) — github_repo/github_branch below are ALL it needs.
+            // `ci_provider` now governs iOS ONLY: 'generic' posts the original
+            // signed webhook payload to ci_webhook_url (any custom macOS-CI
+            // receiver); 'codemagic' calls Codemagic's real REST API directly
+            // (docs.codemagic.io) using codemagic_app_id/codemagic_ios_workflow_id
+            // + the ProviderKeys-stored token.
             'ci_provider' => 'generic',
             'ci_webhook_url' => '',
             'codemagic_app_id' => '',
-            'codemagic_android_workflow_id' => '',
             'codemagic_ios_workflow_id' => '',
             'codemagic_branch' => 'main',
+            // Android CI — this repo's own GitHub Actions workflow, fired via
+            // repository_dispatch. owner/repo, e.g. "SupremeIdeas/NaaraSim".
+            'github_repo' => '',
+            'github_branch' => 'main',
             // §1.5/§3.5 — honest visibility for the one thing NaaraSim itself
             // cannot do (sign an .ipa): an admin who configured Apple signing
             // directly on the CI provider's own dashboard (the common path for
             // an App Store Connect API key) checks this instead of leaving a
             // silent gap.
             'ios_signing_on_provider' => false,
+            // App Store payments-compliance doc (BUILD-5 §6): gift cards read as
+            // "digital gift cards redeemed for digital goods" — Apple's IAP
+            // territory. Default OFF on iOS until a per-brand determination is
+            // made; the admin can flip this on once that review is done.
+            'ios_gift_cards_enabled' => false,
             'placements' => [],               // key => ['active'=>bool,'label'=>?string]
 
             // --- Store listing + compliance (required for Play/App Store pass) ---
@@ -113,18 +127,31 @@ class AppExport
      * Whether a real CI provider is actually reachable right now — the exact
      * gap the 2026-09-15 audit found (a blank config here used to leave every
      * build silently stuck at "Queued" forever, since no self-hosted runner
-     * ever existed to pick it up).
+     * ever existed to pick it up). Split per-platform (2026-09-15 revision):
+     * Android and iOS use genuinely different CI, not one shared toggle — see
+     * `ci_provider`'s docblock above.
      */
-    public static function ciConfigured(): bool
+    public static function androidCiConfigured(): bool
+    {
+        return trim((string) config('services.appexport.github_token', '')) !== ''
+            && trim((string) self::get('github_repo')) !== '';
+    }
+
+    public static function iosCiConfigured(): bool
     {
         if ((string) self::get('ci_provider', 'generic') === 'codemagic') {
             return trim((string) config('services.appexport.codemagic_api_token', '')) !== ''
                 && trim((string) self::get('codemagic_app_id')) !== ''
-                && (trim((string) self::get('codemagic_android_workflow_id')) !== ''
-                    || trim((string) self::get('codemagic_ios_workflow_id')) !== '');
+                && trim((string) self::get('codemagic_ios_workflow_id')) !== '';
         }
 
         return trim((string) self::get('ci_webhook_url')) !== '';
+    }
+
+    /** Either platform's CI is configured — used only where a single yes/no is needed. */
+    public static function ciConfigured(): bool
+    {
+        return self::androidCiConfigured() || self::iosCiConfigured();
     }
 
     /** Persist a validated subset (secrets handled separately, never here). */
@@ -262,12 +289,11 @@ class AppExport
             self::item('Content rating', $has('content_rating'), 'Complete the content-rating questionnaire answer.'),
         ];
 
-        // CI provider (owner audit, 2026-09-15): a build with nowhere real to
-        // compile used to sit silently "Queued" forever — surface it here so
-        // that state is visible before anyone clicks Generate, not after.
-        $shared[] = self::item('CI/build provider configured', self::ciConfigured(), 'Set a CI webhook URL, or pick Codemagic and fill in its app/workflow ids + API token, in the section below — otherwise a build will fail immediately instead of compiling.');
-
         $android = [
+            // Android CI (owner audit, 2026-09-15): a build with nowhere real to
+            // compile used to sit silently "Queued" forever — surface it here so
+            // that state is visible before anyone clicks Generate, not after.
+            self::item('GitHub Actions CI configured', self::androidCiConfigured(), 'Set the GitHub token (Admin → API Keys) and github_repo below — Android builds fire the repo\'s own android-build.yml via repository_dispatch.'),
             self::item('Signing keystore stored', self::hasCredential('android_keystore'), 'Upload the release keystore (encrypted).'),
             self::item('Keystore backup confirmed', (bool) self::get('keystore_backed_up'), 'Confirm you have securely backed up the keystore.'),
             self::item('Recent target API', (int) self::get('min_android_target_api') >= 34, 'Play requires a recent target API level.'),
@@ -281,6 +307,7 @@ class AppExport
         // can use them) or they're configured directly on the CI provider's
         // own dashboard. Both are shown honestly rather than a silent gap.
         $ios = [
+            self::item('iOS CI provider configured', self::iosCiConfigured(), 'Set a CI webhook URL, or pick Codemagic and fill in its app/workflow id + API token, in the section below — otherwise an iOS build will fail immediately instead of compiling.'),
             self::item(
                 'iOS signing (stored here or on the CI provider)',
                 (self::hasCredential('ios_cert') && self::hasCredential('ios_provisioning_profile')) || (bool) self::get('ios_signing_on_provider'),

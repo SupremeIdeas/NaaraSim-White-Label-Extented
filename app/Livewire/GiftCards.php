@@ -5,6 +5,8 @@ namespace App\Livewire;
 use App\Models\GiftCardProduct;
 use App\Services\GiftCards\GiftCardException;
 use App\Services\GiftCards\GiftCardOrderService;
+use App\Support\AppExport;
+use App\Support\AppPlatform;
 use App\Support\FeatureFlags;
 use App\Support\GiftCardPricing;
 use Illuminate\Support\Facades\Auth;
@@ -52,6 +54,9 @@ class GiftCards extends Component
         // the feature hidden entirely (a 404, like any disabled feature) until
         // the operator pays up. Inert on the master (never locked there).
         abort_if(\App\Support\FeatureEntitlements::locked(\App\Support\FeatureLocks::F_GIFT_CARDS), 404);
+        // App Store payments-compliance doc (BUILD-5 §6): gated off by default
+        // in the iOS build until a per-brand IAP determination is made.
+        abort_if(AppPlatform::isIosBuild() && ! (bool) AppExport::get('ios_gift_cards_enabled'), 404);
         $this->live = FeatureFlags::configured('naara_gift');
     }
 

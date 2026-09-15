@@ -240,11 +240,13 @@ class AppExportTest extends TestCase
 
     public function test_checklist_flags_a_missing_ci_provider(): void
     {
-        AppExport::save(['ci_provider' => 'generic', 'ci_webhook_url' => '']);
-        $item = fn () => collect(AppExport::publishChecklist()['Shared'])->firstWhere('label', 'CI/build provider configured');
+        AppExport::save(['github_repo' => '']);
+        config(['services.appexport.github_token' => '']);
+        $item = fn () => collect(AppExport::publishChecklist()['Android'])->firstWhere('label', 'GitHub Actions CI configured');
         $this->assertFalse($item()['ok']);
 
-        AppExport::save(['ci_webhook_url' => 'https://ci.example.test/trigger']);
+        AppExport::save(['github_repo' => 'SupremeIdeas/NaaraSim']);
+        config(['services.appexport.github_token' => 'gh-token']);
         $this->assertTrue($item()['ok']);
     }
 

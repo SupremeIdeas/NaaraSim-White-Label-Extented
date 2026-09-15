@@ -49,3 +49,12 @@ Homestead.yaml
 # Graphify — generated knowledge-graph output (rebuilt per-machine via
 # `graphify update .`; large + volatile, never committed). Also in .claudeignore.
 /graphify-out/
+
+# App Export — native Capacitor platform projects. Generated fresh by CI on
+# every build (`npx cap add android|ios` — idempotent, see android-build.yml /
+# codemagic.yaml) from capacitor.config.json + the compiled web assets. Unlike
+# /public/build these never ship to end users directly (they're compiled into
+# an APK/AAB/IPA, not served), so there's no shared-cPanel reason to commit
+# generated native-project boilerplate here.
+/android
+/ios

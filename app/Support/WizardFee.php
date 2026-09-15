@@ -12,6 +12,12 @@ use App\Models\User;
  * free. Amount + free allowance are admin-settable (Setting), defaulting to
  * $0.45 after 3 free sessions. This is a service fee, not a product price, so
  * it never flows through PricingEngine/MarginGuard.
+ *
+ * App Store payments-compliance doc (BUILD-5 §6): this is a genuinely-digital
+ * in-app fee, which on iOS is either StoreKit IAP or hidden — no native IAP
+ * integration exists here, so on iOS it's hidden/disabled (option b) rather
+ * than ever collected through our own gateway inside the iOS app. Web and
+ * Android are completely unaffected.
  */
 class WizardFee
 {
@@ -30,6 +36,10 @@ class WizardFee
     /** Does the fee apply to this user's NEXT wizard purchase? */
     public static function appliesTo(User $user): bool
     {
+        if (AppPlatform::isIosBuild()) {
+            return false;
+        }
+
         return self::amount() > 0 && (int) $user->wizard_uses >= self::freeSessions();
     }
 
