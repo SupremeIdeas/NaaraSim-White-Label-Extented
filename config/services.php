@@ -117,22 +117,52 @@ return [
 
     // HeroSMS — official SMS-Activate successor (SMS-Activate shut down
     // 2025-12-29). PRIMARY "full rent" provider. Protocol-compatible
-    // handler_api.php; api_key passed as a query param. country_map/service_map
-    // are operator-fillable at go-live (SMS-Activate uses numeric country IDs).
+    // handler_api.php; api_key passed as a query param.
+    //
+    // country_map is no longer hand-filled here: `numbers:catalogue-sync`
+    // live-discovers it from HeroSMS's own `getCountries` action and name-
+    // matches it against NumberCatalogue (HeroSmsService::syncCatalogue(),
+    // owner audit, 2026-09-15) — accurate, not guessed, and it self-updates
+    // on every re-sync. This array stays as the MANUAL fallback for a
+    // country the auto-match ever misses; leave a slug unmapped and it
+    // passes through unchanged, which fails safely (out-of-stock) rather
+    // than silently hitting the wrong country.
+    //
+    // service_map has no live-discovery path (the protocol has no named
+    // service-list action) — these 5 are the SMS-Activate-standard short
+    // codes long established across every known clone of this protocol, so
+    // they're safe to ship. Everything else is intentionally left
+    // unmapped — the "go-live" step for the rest is checking HeroSMS's own
+    // current service dictionary before adding entries here, NOT guessing:
+    // a wrong-but-valid code would silently route to the WRONG real
+    // service, unlike an unmapped one, which just fails safely.
     // OPS: HeroSMS funds via CRYPTO ONLY — surface before go-live.
     'herosms' => [
         'api_key' => env('HEROSMS_API_KEY'),
         'base_url' => env('HEROSMS_BASE_URL', 'https://hero-sms.com/stubs/handler_api.php'),
         'country_map' => [],
-        'service_map' => [],
+        'service_map' => [
+            'whatsapp' => 'wa',
+            'telegram' => 'tg',
+            'google' => 'go',
+            'facebook' => 'fb',
+            'instagram' => 'ig',
+        ],
     ],
 
-    // VirtSMS — SMS-Activate-protocol fallback behind HeroSMS in the same lane.
+    // VirtSMS — SMS-Activate-protocol fallback behind HeroSMS in the same
+    // lane; same maps, same caveats (see herosms above).
     'virtsms' => [
         'api_key' => env('VIRTSMS_API_KEY'),
         'base_url' => env('VIRTSMS_BASE_URL', 'https://virtsms.io/stubs/handler_api.php'),
         'country_map' => [],
-        'service_map' => [],
+        'service_map' => [
+            'whatsapp' => 'wa',
+            'telegram' => 'tg',
+            'google' => 'go',
+            'facebook' => 'fb',
+            'instagram' => 'ig',
+        ],
     ],
 
     'telnyx' => [

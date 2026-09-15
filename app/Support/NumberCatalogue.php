@@ -29,9 +29,14 @@ class NumberCatalogue
 
     public const SERVICES_KEY = 'numbers.catalogue.services';
 
+    /** Per-provider slug => provider country id, live-discovered (owner audit, 2026-09-15). */
+    private const PROVIDER_MAP_KEY_PREFIX = 'numbers.catalogue.provider_map.';
+
     private const CACHE_COUNTRIES = 'numbers.catalogue.countries.resolved';
 
     private const CACHE_SERVICES = 'numbers.catalogue.services.resolved';
+
+    private const CACHE_PROVIDER_MAP_PREFIX = 'numbers.catalogue.provider_map.resolved.';
 
     /**
      * Every country, slug => label. Merges the static base with the synced
@@ -110,6 +115,50 @@ class NumberCatalogue
     public static function isCatalogueKey(string $key): bool
     {
         return $key === self::COUNTRIES_KEY || $key === self::SERVICES_KEY;
+    }
+
+    /**
+     * A provider's live-discovered country map — OUR slug => THEIR country id
+     * (e.g. HeroSMS's numeric SMS-Activate-style id). Sourced from the
+     * provider's own API by name-matching (never guessed), so it is accurate
+     * where it exists and simply absent otherwise; `country_map` in
+     * config/services.php remains the manual operator fallback beneath it.
+     *
+     * @return array<string, string>
+     */
+    public static function providerCountryMap(string $provider): array
+    {
+        try {
+            return Cache::rememberForever(self::CACHE_PROVIDER_MAP_PREFIX.$provider, function () use ($provider) {
+                $map = Setting::getValue(self::PROVIDER_MAP_KEY_PREFIX.$provider, []);
+
+                return is_array($map) ? $map : [];
+            });
+        } catch (\Throwable) {
+            return [];
+        }
+    }
+
+    /**
+     * Persist a provider's discovered country map, merged over whatever is
+     * already stored (never shrinks — a partial/failed re-sync can't erase a
+     * previously-confirmed mapping). Empty input is a safe no-op.
+     *
+     * @param  array<string, string>  $map
+     */
+    public static function storeProviderCountryMap(string $provider, array $map): void
+    {
+        if ($map === []) {
+            return;
+        }
+        $existing = Setting::getValue(self::PROVIDER_MAP_KEY_PREFIX.$provider, []);
+        Setting::setValue(
+            self::PROVIDER_MAP_KEY_PREFIX.$provider,
+            array_merge(is_array($existing) ? $existing : [], $map),
+            'numbers',
+            "Live-discovered country map for {$provider}.",
+        );
+        Cache::forget(self::CACHE_PROVIDER_MAP_PREFIX.$provider);
     }
 
     /**

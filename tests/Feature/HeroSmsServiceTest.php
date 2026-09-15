@@ -7,6 +7,8 @@ use App\Services\SMS\HeroSmsService;
 use App\Services\SMS\OtpStatus;
 use App\Services\SMS\NumberRequest;
 use App\Services\SMS\VirtSmsService;
+use App\Support\NumberCatalogue;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
 
@@ -18,6 +20,8 @@ use Tests\TestCase;
  */
 class HeroSmsServiceTest extends TestCase
 {
+    use RefreshDatabase;
+
     public function test_it_reports_unavailable_and_not_full_rent_until_configured(): void
     {
         config(['services.herosms.api_key' => null]);
@@ -74,5 +78,64 @@ class HeroSmsServiceTest extends TestCase
         // VirtSMS is configured independently of HeroSMS.
         $this->assertTrue(app(VirtSmsService::class)->supportsFullRent());
         $this->assertFalse(app(HeroSmsService::class)->supportsFullRent());
+    }
+
+    // --- Owner audit (2026-09-15): live country-map discovery ---
+
+    public function test_sync_catalogue_matches_known_countries_by_name_and_extends_unknown_ones(): void
+    {
+        config(['services.herosms.api_key' => 'hs-key', 'services.herosms.base_url' => 'https://hero-sms.com/stubs/handler_api.php']);
+        Http::fake(['hero-sms.com/*' => Http::response([
+            '0' => ['id' => 0, 'eng' => 'Nigeria'],
+            '1' => ['id' => 1, 'eng' => 'USA'],       // alias → "United States"
+            '2' => ['id' => 2, 'eng' => 'England'],   // alias → "United Kingdom"
+            '3' => ['id' => 3, 'eng' => 'Iceland'],   // not in our base catalogue yet
+        ])]);
+
+        $result = app(HeroSmsService::class)->syncCatalogue();
+
+        $this->assertSame('0', $result['country_map']['nigeria']);
+        $this->assertSame('1', $result['country_map']['usa']);
+        $this->assertSame('2', $result['country_map']['england']);
+        $this->assertSame('3', $result['country_map']['iceland']);
+        $this->assertSame('Iceland', $result['countries']['iceland']);
+        Http::assertSent(fn ($r) => $r['action'] === 'getCountries');
+    }
+
+    public function test_sync_catalogue_is_empty_and_makes_no_call_when_unconfigured(): void
+    {
+        config(['services.herosms.api_key' => null]);
+        Http::fake();
+
+        $result = app(HeroSmsService::class)->syncCatalogue();
+
+        $this->assertSame(['countries' => [], 'country_map' => []], $result);
+        Http::assertNothingSent();
+    }
+
+    public function test_sync_catalogue_fails_soft_on_a_malformed_response(): void
+    {
+        config(['services.herosms.api_key' => 'hs-key', 'services.herosms.base_url' => 'https://hero-sms.com/stubs/handler_api.php']);
+        Http::fake(['hero-sms.com/*' => Http::response('ERROR_SQL', 500)]);
+
+        $result = app(HeroSmsService::class)->syncCatalogue();
+
+        $this->assertSame(['countries' => [], 'country_map' => []], $result);
+    }
+
+    public function test_country_prefers_the_live_discovered_map_over_the_static_config_one(): void
+    {
+        config([
+            'services.herosms.api_key' => 'hs-key',
+            'services.herosms.base_url' => 'https://hero-sms.com/stubs/handler_api.php',
+            'services.herosms.country_map' => ['nigeria' => 'WRONG-STATIC-ID'],
+        ]);
+        NumberCatalogue::storeProviderCountryMap('herosms', ['nigeria' => '19']);
+        // 'whatsapp' also maps to the seeded service code 'wa' — assert both hold.
+        Http::fake(['hero-sms.com/*' => Http::response(['19' => ['wa' => ['cost' => 0.2, 'count' => 5]]])]);
+
+        app(HeroSmsService::class)->priceFor('nigeria', 'whatsapp');
+
+        Http::assertSent(fn ($r) => $r['country'] === '19' && $r['service'] === 'wa');
     }
 }

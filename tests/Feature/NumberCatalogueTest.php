@@ -79,6 +79,58 @@ class NumberCatalogueTest extends TestCase
         $this->assertSame('WhatsApp', NumberCatalogue::services()['whatsapp']); // base label kept
     }
 
+    // --- Owner audit (2026-09-15): HeroSMS/VirtSMS live country-map sync ---
+
+    public function test_provider_country_map_stores_merge_and_never_shrink(): void
+    {
+        $this->assertSame([], NumberCatalogue::providerCountryMap('herosms'));
+
+        NumberCatalogue::storeProviderCountryMap('herosms', ['nigeria' => '19']);
+        $this->assertSame(['nigeria' => '19'], NumberCatalogue::providerCountryMap('herosms'));
+
+        NumberCatalogue::storeProviderCountryMap('herosms', ['usa' => '12']);
+        $this->assertSame(['nigeria' => '19', 'usa' => '12'], NumberCatalogue::providerCountryMap('herosms'));
+
+        // Providers are independent stores.
+        NumberCatalogue::storeProviderCountryMap('virtsms', ['nigeria' => '999']);
+        $this->assertSame(['nigeria' => '19', 'usa' => '12'], NumberCatalogue::providerCountryMap('herosms'));
+
+        // An empty sync (a failed re-fetch) must not wipe what's stored.
+        NumberCatalogue::storeProviderCountryMap('herosms', []);
+        $this->assertSame(['nigeria' => '19', 'usa' => '12'], NumberCatalogue::providerCountryMap('herosms'));
+    }
+
+    public function test_the_sync_command_matches_herosms_countries_and_extends_the_catalogue(): void
+    {
+        config([
+            'services.herosms.api_key' => 'hs-key',
+            'services.herosms.base_url' => 'https://hero-sms.com/stubs/handler_api.php',
+        ]);
+        Http::fake([
+            'hero-sms.com/*' => Http::response([
+                '19' => ['id' => 19, 'eng' => 'Nigeria'],
+                '3' => ['id' => 3, 'eng' => 'Iceland'], // not in the static base
+            ]),
+        ]);
+
+        $this->artisan('numbers:catalogue-sync')->assertSuccessful();
+
+        $this->assertSame('19', NumberCatalogue::providerCountryMap('herosms')['nigeria']);
+        $this->assertSame('3', NumberCatalogue::providerCountryMap('herosms')['iceland']);
+        $this->assertArrayHasKey('iceland', NumberCatalogue::countries());
+    }
+
+    public function test_the_sync_command_skips_herosms_and_virtsms_when_unconfigured(): void
+    {
+        config(['services.herosms.api_key' => null, 'services.virtsms.api_key' => null]);
+        Http::fake();
+
+        $this->artisan('numbers:catalogue-sync')->assertSuccessful();
+
+        $this->assertSame([], NumberCatalogue::providerCountryMap('herosms'));
+        $this->assertSame([], NumberCatalogue::providerCountryMap('virtsms'));
+    }
+
     public function test_get_number_page_offers_the_full_catalogue(): void
     {
         $this->seed(RoleSeeder::class);

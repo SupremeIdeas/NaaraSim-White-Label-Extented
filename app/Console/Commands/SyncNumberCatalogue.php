@@ -13,7 +13,12 @@ use Illuminate\Console\Command;
  * is skipped, and the stored catalogue is only ever extended, never shrunk.
  *
  * Primary source is 5sim (global, 180+ countries, slug-based — matching the buy
- * flow). Scheduled weekly; run on demand after adding keys.
+ * flow). HeroSMS/VirtSMS (owner audit, 2026-09-15) additionally contribute their
+ * live-discovered country ID map (HeroSmsService::syncCatalogue(), name-matched
+ * against this same catalogue — see NumberCatalogue::providerCountryMap()),
+ * which is what actually lets those two providers route correctly; this was the
+ * "claims to sync from HeroSMS" half that was never wired up. Scheduled weekly;
+ * run on demand after adding keys.
  */
 class SyncNumberCatalogue extends Command
 {
@@ -47,6 +52,28 @@ class SyncNumberCatalogue extends Command
         }
 
         NumberCatalogue::storeSynced($countries, $services);
+
+        foreach (['herosms' => 'number.herosms', 'virtsms' => 'number.virtsms'] as $provider => $binding) {
+            if (empty(config("services.{$provider}.api_key"))) {
+                $this->line("{$provider} not configured — skipping its country map sync.");
+
+                continue;
+            }
+            try {
+                /** @var \App\Services\SMS\HeroSmsService $svc */
+                $svc = app($binding);
+                $result = $svc->syncCatalogue();
+                NumberCatalogue::storeSynced($result['countries'], []);
+                NumberCatalogue::storeProviderCountryMap($provider, $result['country_map']);
+                $countries = array_merge($countries, $result['countries']);
+                $this->info(sprintf(
+                    '%s: matched %d countries to its live id table (+%d new to the catalogue).',
+                    ucfirst($provider), count($result['country_map']), count($result['countries']),
+                ));
+            } catch (\Throwable $e) {
+                $this->warn("{$provider} catalogue sync failed: ".$e->getMessage());
+            }
+        }
 
         $this->info(sprintf(
             'Catalogue synced: +%d countries, +%d extra services (total %d countries, %d services).',

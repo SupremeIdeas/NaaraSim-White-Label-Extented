@@ -87,4 +87,36 @@ class FiveSimServiceTest extends TestCase
         $this->expectException(OutOfStockException::class);
         app(FiveSimService::class)->priceFor('nigeria', 'whatsapp');
     }
+
+    // --- Owner audit (2026-09-15): unconfigured never makes a live call ---
+
+    public function test_an_unconfigured_key_refuses_before_any_http_call(): void
+    {
+        config(['services.fivesim.api_key' => '']);
+        Http::fake();
+
+        try {
+            app(FiveSimService::class)->priceFor('nigeria', 'whatsapp');
+            $this->fail('Expected an OutOfStockException.');
+        } catch (OutOfStockException) {
+            // expected
+        }
+
+        Http::assertNothingSent();
+    }
+
+    public function test_an_unconfigured_key_refuses_buy_otp_before_any_http_call(): void
+    {
+        config(['services.fivesim.api_key' => null]);
+        Http::fake();
+
+        try {
+            app(FiveSimService::class)->buyOtp('nigeria', 'whatsapp');
+            $this->fail('Expected an OutOfStockException.');
+        } catch (OutOfStockException) {
+            // expected
+        }
+
+        Http::assertNothingSent();
+    }
 }

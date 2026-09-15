@@ -9,6 +9,25 @@
 
 ## DONE
 
+### 📡 HeroSMS/VirtSMS live country-map discovery + key-gating — 2026-09-15
+Synced from master. Owner audit follow-up: `FiveSimService`/`GetatextService`
+now guard `priceFor()`/`buyOtp()`/`buyRental()` the same way `HeroSmsService`
+already did, so an unconfigured provider throws `OutOfStockException`
+immediately instead of a real HTTP call getting recorded as a genuine
+circuit-breaker failure (a false "provider down"). `HeroSmsService::
+syncCatalogue()` live-discovers the provider's country id table via the
+protocol's own `getCountries` action and name-matches it against
+`NumberCatalogue` — accurate because it's sourced from the provider
+itself, never a guessed numeric table — stored via new
+`NumberCatalogue::providerCountryMap()`/`storeProviderCountryMap()`
+(merge-only), checked ahead of the static config map. `numbers:
+catalogue-sync` now actually syncs HeroSMS/VirtSMS (it claimed to before
+but never wrote that half). `service_map` seeded with the 5 SMS-Activate-
+standard codes stable across every known clone of the protocol
+(`wa`/`tg`/`go`/`fb`/`ig`); everything else stays unmapped on purpose —
+passthrough fails safely rather than a guessed code hitting the wrong
+service. Full suite green.
+
 ### 🌙 Provider pause/sleep + API-key clearing — 2026-09-15
 Synced from master: a durable way for admin to put a struggling provider
 to sleep — new `provider_registry.paused_at` column, checked by
@@ -4183,41 +4202,37 @@ Rate limits (Section 19.2): `api` limiter 300/min auth · 60/min public (on `rou
 
 ## NEXT  (build strictly top to bottom)
 
-### ▶ TOP OF NEXT — Naara Verify/Rent audit gaps + white-label brand-rename gaps (2026-09-15)
+### ▶ TOP OF NEXT — white-label brand-rename wiring (2026-09-15, IN PROGRESS)
 Synced from master: owner audit of Naara Verify (OTP/SMS) + Naara Rent
 (short-term rentals) catalogue sync and provider coverage, plus the
 white-label brand-rename ask (a fork's brand-word setting should
 consistently replace "Naara" across BOTH the user dashboard and marketing
-pages — this is the direct one relevant to THIS repo). The provider
-pause/sleep + key-clearing feature above is DONE. Remaining gaps found,
-ordered by severity — build top to bottom:
+pages — this is the direct one relevant to THIS repo). Of the 4 gaps found:
 
-1. **HeroSMS/VirtSMS have empty country/service maps** (`config/services.php`
-   `country_map`/`service_map` — both `[]`) — the "global backup lane" cannot
-   serve a single real request today; every fallthrough call hard-fails.
-2. **Key-gate FiveSimService/GetatextService** the way `HeroSmsService::
-   guardConfigured()` already does — an unconfigured provider today makes a
-   real API call whose failure gets recorded as a genuine circuit-breaker
-   failure, a false "provider down" alert.
-3. **Real multi-provider Numbers/Verify/Rent catalogue sync** mirroring the
-   eSIM pattern (`app/Services/eSIM/CatalogueSyncService.php`): today only
-   5sim can pull a live catalogue; needs to be a queued job with retries,
-   `SyncStatus::record()` observability, and an admin trigger button.
-4. **Wire `BrandSettings::rebrand()` into the hardcoded "Naara Verify" /
-   "Naara Rent" copy** — this is the direct fix for the white-label
-   brand-rename gap: `ProviderModels::brandize()` is the ONLY production
-   call site for the rebrand mechanism today; `lang/en/numbers.php`,
-   `app/Support/NumbersBento.php`, `app/Support/ProductLineSettings.php`,
-   `app/Support/SectionLibrary.php`, and several raw blade strings
-   (`call-forwarding.blade.php`, `send-message.blade.php`,
-   `messages.blade.php`, `my-connectivity.blade.php`) all hardcode the
-   literal word "Naara" with no rename path. "NaaraCredits" and "Naara
-   Gift" are the worst offenders (100% hardcoded; Naara Gift isn't even in
-   `ProviderModels::MODELS`) — lower priority than Verify/Rent, same fix.
+1. ✅ DONE — HeroSMS/VirtSMS empty country/service maps (see DONE above).
+2. ✅ DONE — FiveSimService/GetatextService key-gating (see DONE above).
+3. ⏳ QUEUED (after #4) — real multi-provider Numbers/Verify/Rent catalogue
+   sync mirroring the eSIM pattern
+   (`app/Services/eSIM/CatalogueSyncService.php`): `SyncNumberCatalogue`
+   still runs synchronously (not a queued job with retries) and has no
+   `SyncStatus::record()` observability or admin trigger button.
+4. **◀ BUILD THIS NEXT — wire `BrandSettings::rebrand()` into the
+   hardcoded "Naara Verify" / "Naara Rent" copy** — this is the direct fix
+   for the white-label brand-rename gap: `ProviderModels::brandize()` is
+   the ONLY production call site for the rebrand mechanism today;
+   `lang/en/numbers.php`, `app/Support/NumbersBento.php`,
+   `app/Support/ProductLineSettings.php`, `app/Support/SectionLibrary.php`,
+   and several raw blade strings (`call-forwarding.blade.php`,
+   `send-message.blade.php`, `messages.blade.php`,
+   `my-connectivity.blade.php`) all hardcode the literal word "Naara" with
+   no rename path. "NaaraCredits" and "Naara Gift" are the worst offenders
+   (100% hardcoded; Naara Gift isn't even in `ProviderModels::MODELS`) —
+   lower priority than Verify/Rent, same fix.
+
 3 orphaned providers with live keys but no routing lane (SMSPool,
 OnlineSIM, Sonetel) and the missing `virtsms` entry in
 `SmsInboundWebhookController::PROVIDERS` are smaller follow-ups once the
-above four ship — flag to the owner rather than silently deciding.
+above ship — flag to the owner rather than silently deciding.
 
 > The Merchant V2 Invoice Dashboard and the My Journey / Journey Goals arc
 > (loyalty milestones, travel timeline, admin-defined achievements paying
