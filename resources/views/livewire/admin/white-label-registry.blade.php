@@ -94,6 +94,9 @@
                                         @if ($i->price_usd)
                                             <span class="block text-[11px] text-slate-400">Priced ${{ number_format((float) $i->price_usd, 2) }} · paid ${{ number_format($i->amountPaidTotal(), 2) }}</span>
                                         @endif
+                                        @if ($i->hasThemeAddon())
+                                            <span class="mt-1 block text-[11px] font-medium text-accent">{{ \App\Support\ThemeAddonCatalog::labelFor($i->theme_addon) }} — ${{ number_format((float) $i->theme_addon_price_usd, 2) }}</span>
+                                        @endif
                                     @endif
                                 </td>
                                 <td class="py-2 pr-4">

@@ -9,6 +9,21 @@
 
 ## DONE
 
+### 🎨 Merchant V2 custom-theme add-on billing — 2026-09-15
+Synced from master: at white-label license purchase time, a merchant can
+optionally add a custom-theme design request to their order — Basic $1200,
+Elegant $2900, Premium $4000, or $0/None (default, normal setup, no extra
+checkout cost). New `App\Support\ThemeAddonCatalog` (Setting-backed prices,
+fixed 4-option set). Picked at request time, price snapshotted onto the
+instance so a later price retune never changes what a pending request owes,
+billed in the SAME atomic wallet charge as the license but recorded as its
+own `WhiteLabelLicensePayment` ledger row (`KIND_THEME_ADDON`) for
+independent auditability. Includes a money-safety fix found during
+master's live verification: `amountPaidTotal()` (the Normal→Extended
+balance-completion figure) was summing theme-addon payments too, letting a
+merchant buy their way to Extended early just by picking an expensive theme
+tier — scoped to license-kind payments only, with a regression test.
+
 ### 🌓 Theme Toggle Studio — admin-selectable dark/light switch style — 2026-09-15
 Synced from master: `<x-theme-toggle>` was a single hardcoded sun/moon
 switch used everywhere (every header, login page, UI kit, admin sidebar

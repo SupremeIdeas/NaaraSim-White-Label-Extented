@@ -100,6 +100,8 @@ class WhiteLabelInstance extends Model
         'hosting_preference',
         'hosting_disclaimer_acknowledged_at',
         'price_usd',
+        'theme_addon',
+        'theme_addon_price_usd',
         'payment_reference',
         'license_key',
         'api_token_last_four',
@@ -125,7 +127,24 @@ class WhiteLabelInstance extends Model
             'license_revoked_at' => 'datetime',
             'hosting_disclaimer_acknowledged_at' => 'datetime',
             'price_usd' => 'decimal:2',
+            'theme_addon_price_usd' => 'decimal:2',
         ];
+    }
+
+    public function hasThemeAddon(): bool
+    {
+        return $this->theme_addon !== null && $this->theme_addon !== \App\Support\ThemeAddonCatalog::NONE;
+    }
+
+    /** The full amount due at payAndActivate() — the license price plus
+     *  whatever custom-theme add-on was requested alongside it, if any. */
+    public function totalDueUsd(): ?float
+    {
+        if ($this->price_usd === null) {
+            return null;
+        }
+
+        return round((float) $this->price_usd + (float) ($this->theme_addon_price_usd ?? 0), 2);
     }
 
     /** True when this instance is allowed to talk to the API at all. */
@@ -203,9 +222,19 @@ class WhiteLabelInstance extends Model
      *  own payment ledger rather than re-derived from price_usd (which is
      *  only ever what was CHARGED for the initial purchase, not a running
      *  total once a balance-completion payment follows it). */
+    /**
+     * Sum of LICENSE payments only (initial + balance-completion) — the
+     * figure the Normal→Extended balance-completion math is built on.
+     * Deliberately excludes theme_addon payments: a custom-theme add-on is
+     * a separate purchase and must never let a merchant pay their way to
+     * Extended early just by picking an expensive theme tier (money-safety
+     * rule 1 — retail is never silently discounted).
+     */
     public function amountPaidTotal(): float
     {
-        return round((float) $this->payments()->sum('amount_usd'), 2);
+        return round((float) $this->payments()
+            ->whereIn('kind', [WhiteLabelLicensePayment::KIND_INITIAL, WhiteLabelLicensePayment::KIND_BALANCE_COMPLETION])
+            ->sum('amount_usd'), 2);
     }
 
     /** Prompt 21-EXT2 §2 — the current project-commencement brief, one per

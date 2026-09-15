@@ -110,6 +110,23 @@ class MerchantWhiteLabelTest extends TestCase
         $this->assertSame(WhiteLabelInstance::ACQUISITION_MERCHANT_SELF_SERVICE, $instance->acquisition_method);
     }
 
+    public function test_a_v2_merchant_can_request_a_plan_with_a_theme_addon(): void
+    {
+        $merchant = $this->merchant(Merchant::TIER_V2);
+        $plan = WhiteLabelLicensePlan::where('key', 'basic')->firstOrFail();
+
+        Livewire::actingAs($merchant->owner)
+            ->test(MerchantWhiteLabel::class)
+            ->set('disclaimerAcknowledged', true)
+            ->set('themeAddon', \App\Support\ThemeAddonCatalog::ELEGANT)
+            ->call('requestLicense', $plan->id)
+            ->assertSet('error', null);
+
+        $instance = WhiteLabelInstance::where('merchant_id', $merchant->id)->first();
+        $this->assertSame(\App\Support\ThemeAddonCatalog::ELEGANT, $instance->theme_addon);
+        $this->assertSame('2900.00', (string) $instance->theme_addon_price_usd);
+    }
+
     public function test_requesting_without_acknowledging_the_disclaimer_is_refused(): void
     {
         $merchant = $this->merchant(Merchant::TIER_V2);
@@ -150,6 +167,29 @@ class MerchantWhiteLabelTest extends TestCase
 
         Livewire::actingAs($merchant->owner)
             ->test(MerchantWhiteLabel::class)
+            ->call('payNow')
+            ->assertSet('error', null);
+
+        $this->assertSame(WhiteLabelInstance::ACTIVE, $instance->fresh()->status);
+        $this->assertSame('0.0000', (string) $merchant->owner->wallet->fresh()->usd_balance);
+    }
+
+    public function test_paying_a_priced_request_with_a_theme_addon_charges_the_combined_total(): void
+    {
+        $merchant = $this->merchant(Merchant::TIER_V2, fund: 4400);
+        $instance = app(WhiteLabelLicenseService::class)->register([
+            'brand_name' => 'Biz', 'contact_email' => 'biz@test.co',
+            'merchant_id' => $merchant->id,
+            'acquisition_method' => WhiteLabelInstance::ACQUISITION_MERCHANT_SELF_SERVICE,
+            'requested_tier' => WhiteLabelInstance::TIER_NORMAL,
+            'theme_addon' => \App\Support\ThemeAddonCatalog::BASIC,
+        ]);
+        $instance->forceFill(['price_usd' => 3200.00])->save();
+
+        Livewire::actingAs($merchant->owner)
+            ->test(MerchantWhiteLabel::class)
+            ->assertSet('totalDue', 4400.0)
+            ->assertSee('$4,400')
             ->call('payNow')
             ->assertSet('error', null);
 

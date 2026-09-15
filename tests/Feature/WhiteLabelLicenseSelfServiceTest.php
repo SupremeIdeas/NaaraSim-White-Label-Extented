@@ -10,6 +10,7 @@ use App\Models\WhiteLabelLicensePlan;
 use App\Services\Platform\PlatformEarningsService;
 use App\Services\Updater\WhiteLabelLicenseService;
 use App\Services\Wallet\WalletService;
+use App\Support\ThemeAddonCatalog;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -67,6 +68,118 @@ class WhiteLabelLicenseSelfServiceTest extends TestCase
         $this->assertSame(WhiteLabelInstance::TIER_NORMAL, $instance->requested_tier);
         $this->assertSame(WhiteLabelInstance::HOSTING_SUPREME_IDEAS_SERVER, $instance->hosting_preference);
         $this->assertNotNull($instance->hosting_disclaimer_acknowledged_at);
+    }
+
+    // --- register(): theme add-on (owner request, 2026-09-15) ---
+
+    public function test_register_snapshots_the_theme_addon_price_at_request_time(): void
+    {
+        $instance = $this->service()->register([
+            'brand_name' => 'Themed Co', 'contact_email' => 't@co.test',
+            'theme_addon' => ThemeAddonCatalog::ELEGANT,
+        ]);
+
+        $this->assertSame(ThemeAddonCatalog::ELEGANT, $instance->theme_addon);
+        $this->assertSame('2900.00', (string) $instance->theme_addon_price_usd);
+        $this->assertTrue($instance->hasThemeAddon());
+    }
+
+    public function test_register_with_no_addon_or_none_stores_null_and_zero_extra_cost(): void
+    {
+        $noAddon = $this->service()->register(['brand_name' => 'Plain Co', 'contact_email' => 'p@co.test']);
+        $this->assertNull($noAddon->theme_addon);
+        $this->assertNull($noAddon->theme_addon_price_usd);
+        $this->assertFalse($noAddon->hasThemeAddon());
+
+        $explicitNone = $this->service()->register([
+            'brand_name' => 'Explicit None Co', 'contact_email' => 'e@co.test',
+            'theme_addon' => ThemeAddonCatalog::NONE,
+        ]);
+        $this->assertNull($explicitNone->theme_addon);
+        $this->assertFalse($explicitNone->hasThemeAddon());
+    }
+
+    public function test_register_degrades_an_unknown_theme_addon_key_to_none(): void
+    {
+        $instance = $this->service()->register([
+            'brand_name' => 'Bad Key Co', 'contact_email' => 'bk@co.test',
+            'theme_addon' => 'not-a-real-tier',
+        ]);
+
+        $this->assertNull($instance->theme_addon);
+        $this->assertFalse($instance->hasThemeAddon());
+    }
+
+    public function test_a_later_admin_price_retune_never_changes_an_already_requested_instances_addon_price(): void
+    {
+        $instance = $this->service()->register([
+            'brand_name' => 'Snapshot Co', 'contact_email' => 's2@co.test',
+            'theme_addon' => ThemeAddonCatalog::BASIC,
+        ]);
+        $this->assertSame('1200.00', (string) $instance->theme_addon_price_usd);
+
+        \App\Models\Setting::setValue('whitelabel.theme_addon.price.basic', 9999.00);
+
+        $this->assertSame('1200.00', (string) $instance->fresh()->theme_addon_price_usd, 'a retuned catalog price must never retroactively change an already-snapshotted instance');
+        $this->assertSame(9999.0, ThemeAddonCatalog::priceFor(ThemeAddonCatalog::BASIC), 'but new requests DO see the retuned price');
+    }
+
+    // --- payAndActivate(): theme add-on billed in the SAME atomic charge ---
+
+    public function test_pay_and_activate_bills_the_theme_addon_in_one_combined_charge_with_its_own_ledger_row(): void
+    {
+        // 1500 license + 4000 Premium theme add-on = 5500 total.
+        $payer = $this->fundedUser(5500);
+        $instance = $this->service()->register([
+            'brand_name' => 'Addon Co', 'contact_email' => 'ad@co.test',
+            'theme_addon' => ThemeAddonCatalog::PREMIUM,
+        ]);
+        $instance->forceFill(['price_usd' => 1500.00, 'requested_tier' => WhiteLabelInstance::TIER_NORMAL])->save();
+
+        $result = $this->service()->payAndActivate($instance, $payer);
+
+        $this->assertSame(WhiteLabelInstance::ACTIVE, $result->status);
+        $this->assertSame('0.0000', (string) $payer->wallet->fresh()->usd_balance, 'the payer must be charged for the license PLUS the theme add-on, not the license alone');
+
+        $this->assertSame(2, WhiteLabelLicensePayment::count());
+        $license = WhiteLabelLicensePayment::where('kind', WhiteLabelLicensePayment::KIND_INITIAL)->first();
+        $addon = WhiteLabelLicensePayment::where('kind', WhiteLabelLicensePayment::KIND_THEME_ADDON)->first();
+        $this->assertSame('1500.00', (string) $license->amount_usd);
+        $this->assertSame('4000.00', (string) $addon->amount_usd);
+
+        $this->assertSame(5500.0, app(PlatformEarningsService::class)->balance());
+    }
+
+    public function test_a_theme_addon_payment_never_counts_toward_the_balance_to_extended(): void
+    {
+        // Money-safety regression: a merchant must never be able to pay
+        // their way to Extended early just by picking an expensive theme
+        // tier — only genuine license payments (initial + balance
+        // completion) may count toward that threshold.
+        $payer = $this->fundedUser(5500);
+        $instance = $this->service()->register([
+            'brand_name' => 'NoShortcut Co', 'contact_email' => 'ns@co.test',
+            'theme_addon' => ThemeAddonCatalog::PREMIUM, // $4000
+        ]);
+        $instance->forceFill(['price_usd' => 1500.00, 'requested_tier' => WhiteLabelInstance::TIER_NORMAL])->save();
+
+        $this->service()->payAndActivate($instance, $payer);
+
+        // Paid $1500 (license) + $4000 (theme) = $5500 total, but only the
+        // $1500 license portion may count toward the Extended threshold.
+        $this->assertSame(1500.0, $instance->fresh()->amountPaidTotal());
+    }
+
+    public function test_pay_and_activate_with_no_theme_addon_charges_only_the_license_price(): void
+    {
+        $payer = $this->fundedUser(1500);
+        $instance = $this->service()->register(['brand_name' => 'No Addon Co', 'contact_email' => 'na@co.test']);
+        $instance->forceFill(['price_usd' => 1500.00, 'requested_tier' => WhiteLabelInstance::TIER_NORMAL])->save();
+
+        $this->service()->payAndActivate($instance, $payer);
+
+        $this->assertSame('0.0000', (string) $payer->wallet->fresh()->usd_balance);
+        $this->assertSame(1, WhiteLabelLicensePayment::count(), 'no theme add-on chosen means no second ledger row at all');
     }
 
     // --- priceForPayment(): admin pricing without issuing ---

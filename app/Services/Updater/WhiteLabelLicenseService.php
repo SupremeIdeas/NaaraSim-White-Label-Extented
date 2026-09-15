@@ -11,6 +11,7 @@ use App\Models\WhiteLabelLicensePlan;
 use App\Services\Platform\PlatformEarningsService;
 use App\Services\Wallet\WalletService;
 use App\Support\Auditor;
+use App\Support\ThemeAddonCatalog;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -55,6 +56,13 @@ class WhiteLabelLicenseService
      * carousel already hid a closed tier (defense in depth, same principle this
      * codebase applies everywhere else).
      *
+     * Owner request (2026-09-15) — a self-service request may also carry an
+     * optional `theme_addon` (App\Support\ThemeAddonCatalog key). Its price
+     * is snapshotted onto the instance NOW (theme_addon_price_usd), never
+     * recomputed later, so a subsequent admin price retune never changes
+     * what an already-pending request will be charged. An invalid/unknown
+     * key degrades to None ($0) rather than erroring the whole request.
+     *
      * @throws \RuntimeException when the requested tier's resell status is closed.
      */
     public function register(array $details): WhiteLabelInstance
@@ -63,6 +71,10 @@ class WhiteLabelLicenseService
         if ($requestedTier !== null && ! WhiteLabelLicensePlan::resellOpenForTier($this->normalizeTier($requestedTier))) {
             throw new \RuntimeException('resell_closed');
         }
+
+        $themeAddon = (string) ($details['theme_addon'] ?? ThemeAddonCatalog::NONE);
+        $themeAddon = ThemeAddonCatalog::isValid($themeAddon) ? $themeAddon : ThemeAddonCatalog::NONE;
+        $themeAddonPrice = ThemeAddonCatalog::priceFor($themeAddon);
 
         $instance = WhiteLabelInstance::create([
             'brand_name' => $this->cleanName($details['brand_name'] ?? 'White-label brand'),
@@ -76,6 +88,8 @@ class WhiteLabelLicenseService
             'hosting_preference' => $details['hosting_preference'] ?? null,
             'hosting_disclaimer_acknowledged_at' => ! empty($details['hosting_disclaimer_acknowledged']) ? now() : null,
             'registration_note' => isset($details['note']) ? Str::limit((string) $details['note'], 2000, '') : null,
+            'theme_addon' => $themeAddon === ThemeAddonCatalog::NONE ? null : $themeAddon,
+            'theme_addon_price_usd' => $themeAddon === ThemeAddonCatalog::NONE ? null : $themeAddonPrice,
             'status' => WhiteLabelInstance::PENDING,
         ]);
 
@@ -191,6 +205,15 @@ class WhiteLabelLicenseService
      * platform earnings bucket for the full amount (a flat product sale, no
      * underlying cost to net out).
      *
+     * Owner request (2026-09-15) — if the instance carries a theme_addon
+     * (chosen at request time, priced then), it is billed in this SAME
+     * atomic wallet charge as one combined total — never a second, separate
+     * checkout — but recorded as its own WhiteLabelLicensePayment ledger row
+     * (KIND_THEME_ADDON) so the license price and the add-on price stay
+     * independently auditable. A request with no add-on (the default —
+     * "just set up my platform, no custom theme") is billed exactly as
+     * before, with zero extra cost and zero extra ledger rows.
+     *
      * @throws \App\Exceptions\InsufficientBalanceException
      */
     public function payAndActivate(WhiteLabelInstance $instance, User $payer, ?int $reviewerId = null): WhiteLabelInstance
@@ -202,21 +225,35 @@ class WhiteLabelLicenseService
             throw new LicenseActivationException('already_licensed');
         }
 
-        $amount = (float) $instance->price_usd;
+        $licenseAmount = (float) $instance->price_usd;
+        $addonAmount = (float) ($instance->theme_addon_price_usd ?? 0);
+        $totalAmount = round($licenseAmount + $addonAmount, 2);
         $tier = $this->normalizeTier($instance->requested_tier ?? WhiteLabelInstance::TIER_NORMAL);
         $ref = 'wl-license:'.$instance->id.':initial:'.now()->timestamp;
 
-        return $this->wallet->charge($payer, $amount, 'USD', function () use ($instance, $tier, $reviewerId, $amount, $ref) {
+        return $this->wallet->charge($payer, $totalAmount, 'USD', function () use ($instance, $tier, $reviewerId, $licenseAmount, $addonAmount, $ref) {
             $this->issueLicense($instance, $tier, $reviewerId);
             $instance->forceFill(['payment_reference' => $ref])->save();
 
             WhiteLabelLicensePayment::create([
                 'white_label_instance_id' => $instance->id,
-                'amount_usd' => $amount,
+                'amount_usd' => $licenseAmount,
                 'kind' => WhiteLabelLicensePayment::KIND_INITIAL,
                 'payment_reference' => $ref,
             ]);
-            $this->earnings->accrue($amount, 'white_label_license', 'plat-earn:'.$ref, 'White-label license — '.$instance->brand_name);
+            $this->earnings->accrue($licenseAmount, 'white_label_license', 'plat-earn:'.$ref, 'White-label license — '.$instance->brand_name);
+
+            if ($addonAmount > 0) {
+                $addonRef = $ref.':theme-addon';
+                WhiteLabelLicensePayment::create([
+                    'white_label_instance_id' => $instance->id,
+                    'amount_usd' => $addonAmount,
+                    'kind' => WhiteLabelLicensePayment::KIND_THEME_ADDON,
+                    'payment_reference' => $addonRef,
+                ]);
+                $this->earnings->accrue($addonAmount, 'white_label_theme_addon', 'plat-earn:'.$addonRef, 'Custom theme add-on ('.ThemeAddonCatalog::labelFor($instance->theme_addon).') — '.$instance->brand_name);
+            }
+
             $this->checkResellAutoClose();
 
             return $instance->fresh();
