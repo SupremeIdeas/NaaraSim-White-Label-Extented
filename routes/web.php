@@ -84,6 +84,7 @@ use App\Livewire\Admin\Payouts;
 use App\Livewire\Admin\PlatformThemePage;
 use App\Livewire\Admin\Posts;
 use App\Livewire\Admin\PreloaderStudio;
+use App\Livewire\Admin\ThemeToggleStudio;
 use App\Livewire\Admin\Pricing;
 use App\Livewire\Admin\PricingArchitect;
 use App\Livewire\Admin\ProductLines;
@@ -389,6 +390,7 @@ Route::middleware(['admin', 'throttle:admin'])
             Route::get('/bento-icons', BentoIcons::class)->name('bento-icons');
             Route::get('/appearance', Splash::class)->name('appearance');
             Route::get('/preloader-studio', PreloaderStudio::class)->name('preloader-studio');
+            Route::get('/theme-toggle-studio', ThemeToggleStudio::class)->name('theme-toggle-studio');
             // Marketing Copy Studio — Claude-assisted copy population for CMS pages.
             Route::get('/copy-studio', MarketingCopyStudio::class)->name('copy-studio');
             Route::get('/dashboard-theme', PlatformThemePage::class)->name('dashboard-theme');

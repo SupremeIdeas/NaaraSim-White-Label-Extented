@@ -9,6 +9,19 @@
 
 ## DONE
 
+### 🌓 Theme Toggle Studio — admin-selectable dark/light switch style — 2026-09-15
+Synced from master: `<x-theme-toggle>` was a single hardcoded sun/moon
+switch used everywhere (every header, login page, UI kit, admin sidebar
+footer). New Admin → Theme Toggle page (super_admin/admin only) lets the
+owner pick from 5 presets — Sun & Moon (default, byte-identical to before),
+Eclipse Orb, Day/Night Dial, Aurora Pill, Horizon Track — via one global
+Setting (`ThemeToggleSettings`) that covers every usage at once, live.
+Also fixes a pre-existing `.nx-switch` class collision between the
+theme-toggle and the generic admin `x-ui.switch` form component (equal CSS
+specificity meant the theme-toggle's own sizing was silently overriding the
+generic switch everywhere); theme-toggle styles now live under their own
+`.nx-theme-toggle` namespace. Not master-only — ships to all 3 repos.
+
 ### 📞 Prompt 12 §2/§3 — Vonage + Sinch built and wired into the lane — 2026-09-14
 Same dedicated pass as §1 (Plivo, DONE below). New `VonageService`/
 `SinchService`, both `NumberProviderInterface` only (search/buy/sms/cost/
