@@ -3,11 +3,19 @@ name: Android App Build
 # Compiles the Capacitor Android app (signed APK for direct download + AAB for
 # the Play Store) on a standard Linux runner, then reports status back to the
 # platform's build webhook (App Export §1). iOS is NOT built here — it requires
-# a macOS environment; see docs/APP-EXPORT.md.
+# a macOS environment; see codemagic.yaml / docs/APP-EXPORT.md.
 #
-# Triggered by the admin "Generate Build" action via a repository_dispatch of
-# type `app-build`, or manually. Signing secrets live in the repo/Actions
-# secrets, never in the repo tree.
+# Triggered by TriggerAppBuildJob's repository_dispatch of type `app-build`
+# (App Export §1, Doc B Stage 1 — Android always builds via GitHub Actions,
+# never Codemagic: no paid macOS runner needed), or manually. Signing secrets
+# live in the repo/Actions secrets, never in the repo tree.
+#
+# Owner audit (2026-09-15): `android`/`ios` are NOT committed to this repo —
+# they're generated fresh on every run by `npx cap add` below, from
+# capacitor.config.json + the compiled web assets in /public. This was a real,
+# previously-undiscovered gap: neither native platform directory existed, and
+# @capacitor/* wasn't even an npm dependency, so this workflow would have
+# failed at "Install deps + sync Capacitor" on its very first real run.
 
 on:
   workflow_dispatch:
@@ -50,9 +58,41 @@ jobs:
           distribution: temurin
           java-version: 17
 
-      - name: Install deps + sync Capacitor
+      - name: Install deps + build web assets
         run: |
           npm ci
+          npm run build
+
+      # Live App Studio config (owner audit, 2026-09-15): TriggerAppBuildJob
+      # sends the admin's CURRENT App Studio settings (package name, app name,
+      # domain) as client_payload.app_config, in the real Median appConfig.json
+      # shape. Patched into capacitor.config.json BEFORE `cap add`/`cap sync`
+      # copy it into the native project, so a build actually reflects what the
+      # admin configured — not whatever's checked into this repo's static
+      # capacitor.config.json. Only appId/appName/server.url are wired end to
+      # end into the real native build; the rest of app_config's richer schema
+      # (permission descriptions, link rules, offline HTML) is not consumed by
+      # this Capacitor pipeline today.
+      - name: Apply live app config
+        env:
+          APP_CONFIG: ${{ toJson(github.event.client_payload.app_config) }}
+        run: |
+          if [ -n "$APP_CONFIG" ] && [ "$APP_CONFIG" != "null" ]; then
+            PKG=$(echo "$APP_CONFIG" | jq -r '.general.androidPackageName // empty')
+            NAME=$(echo "$APP_CONFIG" | jq -r '.general.appName // empty')
+            URL=$(echo "$APP_CONFIG" | jq -r '.general.initialUrl // empty')
+            TMP=$(mktemp)
+            jq --arg pkg "$PKG" --arg name "$NAME" --arg url "$URL" '
+              (if $pkg != "" then .appId = $pkg else . end) |
+              (if $name != "" then .appName = $name else . end) |
+              (if $url != "" then .server.url = ($url | capture("^(?<u>https?://[^/]+)").u) else . end)
+            ' capacitor.config.json > "$TMP" && mv "$TMP" capacitor.config.json
+          fi
+          cat capacitor.config.json
+
+      - name: Scaffold + sync the Android platform
+        run: |
+          test -d android || npx cap add android
           npx cap sync android
 
       - name: Decode signing keystore
@@ -72,7 +112,7 @@ jobs:
             -PversionName=${{ steps.meta.outputs.version }} \
             -PversionCode=${{ steps.meta.outputs.build_number }}
 
-      - name: Upload build artifacts
+      - name: Upload build artifacts (workflow run, for debugging)
         uses: actions/upload-artifact@v4
         with:
           name: naara-android-${{ steps.meta.outputs.version }}
@@ -80,14 +120,38 @@ jobs:
             android/app/build/outputs/apk/release/*.apk
             android/app/build/outputs/bundle/release/*.aab
 
+      # Owner audit (2026-09-15): the previous version of this step reported
+      # {build_id, status} only — actions/upload-artifact's storage requires a
+      # GitHub-authenticated request to download, so a "ready" build never
+      # actually had a working public download link, directly contradicting
+      # docs/APP-EXPORT.md's "/download page — live APK button the moment a
+      # build is marked ready" claim. The signed APK is now pushed to the
+      # platform's own Wasabi bucket (public-read, matching MediaStorage's
+      # existing storePublic() pattern) and that real, permanent URL is what
+      # gets reported back as artifact_url.
+      - name: Upload signed APK to Wasabi
+        if: success()
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.WASABI_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.WASABI_SECRET_ACCESS_KEY }}
+          WASABI_BUCKET: ${{ secrets.WASABI_BUCKET }}
+          WASABI_ENDPOINT: ${{ secrets.WASABI_ENDPOINT }}
+        run: |
+          APK=$(ls android/app/build/outputs/apk/release/*.apk | head -n1)
+          KEY="app-builds/android/naara-${{ steps.meta.outputs.version }}-${{ steps.meta.outputs.build_number }}.apk"
+          aws s3 cp "$APK" "s3://${WASABI_BUCKET}/${KEY}" \
+            --endpoint-url "$WASABI_ENDPOINT" --acl public-read --only-show-errors
+          echo "artifact_url=${WASABI_ENDPOINT}/${WASABI_BUCKET}/${KEY}" >> "$GITHUB_ENV"
+
       - name: Report status to platform
         if: always() && steps.meta.outputs.callback != ''
         env:
           SECRET: ${{ secrets.APPEXPORT_CI_SECRET }}
+          ARTIFACT_URL: ${{ env.artifact_url }}
         run: |
           STATUS=$([ "${{ job.status }}" = "success" ] && echo ready || echo failed)
-          BODY=$(jq -nc --arg id "${{ steps.meta.outputs.build_id }}" --arg s "$STATUS" \
-            '{build_id: ($id|tonumber), status: $s}')
+          BODY=$(jq -nc --arg id "${{ steps.meta.outputs.build_id }}" --arg s "$STATUS" --arg url "$ARTIFACT_URL" \
+            '{build_id: ($id|tonumber), status: $s} + (if $url != "" then {artifact_url: $url} else {} end)')
           SIG=$(printf '%s' "$BODY" | openssl dgst -sha256 -hmac "$SECRET" | awk '{print $2}')
           curl -sS -X POST "${{ steps.meta.outputs.callback }}" \
             -H "Content-Type: application/json" \

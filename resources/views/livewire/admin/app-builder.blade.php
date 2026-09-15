@@ -210,12 +210,52 @@
                 @error('form.ios_store_url') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
             </div>
         </div>
+        {{-- Android and iOS use DIFFERENT CI (owner audit, 2026-09-15 — Doc B
+             Stage 1): Android always builds via this repo's own GitHub Actions
+             workflow (cheap, no macOS runner); the provider picker below is
+             iOS-only. Never one shared toggle for both, like the number-provider
+             lanes never cross. --}}
         <div class="mt-4 rounded-xl bg-slate-50 p-4 dark:bg-white/5">
             <div class="mb-3 flex items-center justify-between">
-                <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400">CI / cloud-build provider</label>
-                <span class="flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold {{ $ciConfigured ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300' : 'bg-red-100 text-red-700 dark:bg-red-500/15 dark:text-red-300' }}">
-                    <x-icon name="{{ $ciConfigured ? 'shield-check' : 'x' }}" class="h-3 w-3" />
-                    {{ $ciConfigured ? 'Configured' : 'Not configured — builds will fail immediately' }}
+                <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400">Android CI — GitHub Actions</label>
+                <span class="flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold {{ $androidCiConfigured ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300' : 'bg-red-100 text-red-700 dark:bg-red-500/15 dark:text-red-300' }}">
+                    <x-icon name="{{ $androidCiConfigured ? 'shield-check' : 'x' }}" class="h-3 w-3" />
+                    {{ $androidCiConfigured ? 'Configured' : 'Not configured — Android builds will fail immediately' }}
+                </span>
+            </div>
+            <p class="mb-3 text-xs text-slate-500 dark:text-slate-400">
+                Android compiles for free on this repo's own GitHub Actions runner (<code>.github/workflows/android-build.yml</code>)
+                — there's no Codemagic/paid macOS step for Android. Set the GitHub token under
+                Admin → API Keys → App Export, then fill in the repo it fires against.
+            </p>
+            <div class="grid gap-3 sm:grid-cols-2">
+                <div>
+                    <label class="mb-1 block text-xs font-semibold text-slate-500 dark:text-slate-400">GitHub repo (owner/repo)</label>
+                    <input type="text" wire:model="form.github_repo" placeholder="SupremeIdeas/NaaraSim" class="{{ $inp }}">
+                </div>
+                <div>
+                    <label class="mb-1 block text-xs font-semibold text-slate-500 dark:text-slate-400">Branch</label>
+                    <input type="text" wire:model="form.github_branch" placeholder="main" class="{{ $inp }}">
+                </div>
+            </div>
+            <details class="mt-3 text-xs text-slate-500 dark:text-slate-400">
+                <summary class="cursor-pointer font-semibold text-primary dark:text-teal-300">Where do I get the GitHub token?</summary>
+                <ol class="mt-2 list-decimal space-y-1 pl-4">
+                    <li>Go to <span class="font-mono">github.com/settings/personal-access-tokens/new</span> (while signed in as an account with access to this repo).</li>
+                    <li>Set "Resource owner" to the repo's owner, and "Repository access" → Only select repositories → this one.</li>
+                    <li>Under Permissions → Repository permissions, grant <strong>Contents: Read-only</strong> and <strong>Actions: Read and write</strong> — nothing more.</li>
+                    <li>Generate, then paste the token under Admin → API Keys → App Export → "GitHub — App Export Token".</li>
+                    <li>Also add these as <strong>repository secrets</strong> (Settings → Secrets and variables → Actions) so the workflow itself can sign in and upload the built app: <span class="font-mono">ANDROID_KEYSTORE_BASE64</span>, <span class="font-mono">ANDROID_STORE_PASSWORD</span>, <span class="font-mono">ANDROID_KEY_ALIAS</span>, <span class="font-mono">ANDROID_KEY_PASSWORD</span>, <span class="font-mono">APPEXPORT_CI_SECRET</span> (same value as this app's <span class="font-mono">.env</span>), and <span class="font-mono">WASABI_ACCESS_KEY_ID</span> / <span class="font-mono">WASABI_SECRET_ACCESS_KEY</span> / <span class="font-mono">WASABI_BUCKET</span> / <span class="font-mono">WASABI_ENDPOINT</span> (same Wasabi account this app already uses for storage — the workflow uploads the signed APK there so <code>/download</code> has a real, working link).</li>
+                </ol>
+            </details>
+        </div>
+
+        <div class="mt-4 rounded-xl bg-slate-50 p-4 dark:bg-white/5">
+            <div class="mb-3 flex items-center justify-between">
+                <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400">iOS CI provider</label>
+                <span class="flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold {{ $iosCiConfigured ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300' : 'bg-red-100 text-red-700 dark:bg-red-500/15 dark:text-red-300' }}">
+                    <x-icon name="{{ $iosCiConfigured ? 'shield-check' : 'x' }}" class="h-3 w-3" />
+                    {{ $iosCiConfigured ? 'Configured' : 'Not configured — iOS builds will fail immediately' }}
                 </span>
             </div>
 
@@ -226,8 +266,9 @@
 
             @if (($form['ci_provider'] ?? 'generic') === 'codemagic')
                 <p class="mb-3 text-xs text-slate-500 dark:text-slate-400">
-                    Set the Codemagic API token under Admin → API Keys → App Export. App id and workflow ids come
-                    from your Codemagic app's settings page.
+                    Set the Codemagic API token under Admin → API Keys → App Export. App id and workflow id come
+                    from your Codemagic app's settings page — this repo's <code>codemagic.yaml</code> already
+                    defines the <span class="font-mono">ios-release</span> workflow it should point at.
                 </p>
                 <div class="grid gap-3 sm:grid-cols-2">
                     <div>
@@ -238,15 +279,21 @@
                         <label class="mb-1 block text-xs font-semibold text-slate-500 dark:text-slate-400">Branch</label>
                         <input type="text" wire:model="form.codemagic_branch" placeholder="main" class="{{ $inp }}">
                     </div>
-                    <div>
-                        <label class="mb-1 block text-xs font-semibold text-slate-500 dark:text-slate-400">Android workflow ID</label>
-                        <input type="text" wire:model="form.codemagic_android_workflow_id" class="{{ $inp }}">
-                    </div>
-                    <div>
+                    <div class="sm:col-span-2">
                         <label class="mb-1 block text-xs font-semibold text-slate-500 dark:text-slate-400">iOS workflow ID</label>
-                        <input type="text" wire:model="form.codemagic_ios_workflow_id" class="{{ $inp }}">
+                        <input type="text" wire:model="form.codemagic_ios_workflow_id" placeholder="ios-release" class="{{ $inp }}">
                     </div>
                 </div>
+                <details class="mt-3 text-xs text-slate-500 dark:text-slate-400">
+                    <summary class="cursor-pointer font-semibold text-primary dark:text-teal-300">Where do I get these?</summary>
+                    <ol class="mt-2 list-decimal space-y-1 pl-4">
+                        <li>Sign in at <span class="font-mono">codemagic.io</span> and add this repo as an app — the App ID is in the URL bar once it's added.</li>
+                        <li>Codemagic auto-detects the <span class="font-mono">ios-release</span> workflow from this repo's <span class="font-mono">codemagic.yaml</span> — copy its workflow ID from the workflow's settings page.</li>
+                        <li>Teams → Personal Access Tokens → create one, paste it under Admin → API Keys → App Export → "Codemagic — API Token".</li>
+                        <li>In the workflow's own environment variables (Codemagic dashboard, marked Secure), set <span class="font-mono">APPEXPORT_CI_SECRET</span> to the same value as this app's <span class="font-mono">.env</span> — this is what signs the build-complete callback.</li>
+                        <li>Under Team settings → Code signing identities, add your Apple Developer distribution certificate + an App Store Connect API key (Apple's modern, non-interactive signing method — no manually expiring profiles to babysit).</li>
+                    </ol>
+                </details>
             @else
                 <label class="mb-1 block text-xs font-semibold text-slate-500 dark:text-slate-400">CI / cloud-build webhook URL</label>
                 <input type="url" wire:model="form.ci_webhook_url" placeholder="https://your-ci-provider.example/webhook" class="{{ $inp }}">
@@ -306,6 +353,17 @@
         <div class="mt-3">
             <label class="mb-1 block text-xs font-semibold text-slate-500 dark:text-slate-400">Permissions justification</label>
             <textarea wire:model="form.permissions_note" rows="2" class="{{ $inp }}"></textarea></div>
+
+        {{-- App Store payments-compliance doc (BUILD-5 §6): gift cards read as
+             "digital gift cards redeemed for digital goods" on iOS — gated off
+             by default until a per-brand IAP determination is made. --}}
+        <label class="mt-4 flex items-start gap-3 rounded-xl bg-amber-50 p-3 text-sm text-slate-700 dark:bg-amber-500/10 dark:text-slate-200">
+            <input type="checkbox" wire:model="form.ios_gift_cards_enabled" class="mt-0.5 rounded border-slate-300 text-primary focus:ring-primary">
+            <span>
+                <span class="font-semibold">Enable Naara Gift on iOS</span>
+                <span class="mt-0.5 block text-xs text-slate-500 dark:text-slate-400">Off by default — Apple treats digital gift cards as an In-App Purchase item. Only turn this on after confirming per-brand with Apple's current guidelines.</span>
+            </span>
+        </label>
     </div>
 
     {{-- ===== First-run onboarding slides ================================= --}}

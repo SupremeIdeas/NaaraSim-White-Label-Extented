@@ -9,6 +9,24 @@
 
 ## DONE
 
+### 📱 App Export — real Android/iOS CI split, Capacitor scaffolding gap, is_ios_build compliance flag — 2026-09-16
+Synced from master. Android and iOS now use genuinely different CI (GitHub
+Actions `repository_dispatch` for Android, Codemagic/generic webhook for
+iOS) instead of one shared toggle. Fixed a real, previously-undiscovered
+gap: `@capacitor/*` was never an npm dependency and neither `android/` nor
+`ios/` native platforms were ever scaffolded — confirmed by actually running
+`npx cap add android`/`ios` in a scratch copy; both scaffold cleanly on
+Linux. Both CI workflows now scaffold the platform themselves (idempotent,
+gitignored). `codemagic.yaml` added at the repo root (`ios-release` only).
+Fixed a real bug in `android-build.yml`: its callback never sent
+`artifact_url` and the only artifact storage required GitHub auth to
+download, so a "ready" Android build never had a working public download
+link — now uploads to Wasabi (public-read). New `App\Support\AppPlatform::
+isIosBuild()` capability flag wired into wallet top-up, the Wizard fee, the
+Merchant V2 upgrade fee, and Naara Gift per the payments-compliance doc. New
+in-admin config guide for GitHub PAT scopes, GitHub Actions secrets, and
+Codemagic setup. Full suite green.
+
 ### 📱 App Export — root-cause fix: builds now actually compile, or fail loud — 2026-09-15
 Synced from master. Owner-flagged top priority. Root cause:
 `TriggerAppBuildJob` used to leave an unconfigured build silently "queued"

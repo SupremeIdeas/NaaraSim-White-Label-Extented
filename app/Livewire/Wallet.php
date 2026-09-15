@@ -13,6 +13,7 @@ use App\Services\Payouts\PayoutThreshold;
 use App\Services\Payouts\WithdrawalService;
 use App\Services\Pricing\CurrencyService;
 use App\Services\Wallet\WalletGroupService;
+use App\Support\AppPlatform;
 use App\Support\GatewayCurrencyMatrix;
 use App\Support\LocaleCurrency;
 use App\Support\MobileMoneyRails;
@@ -271,8 +272,26 @@ class Wallet extends Component
         $this->currency = GatewayCurrencyMatrix::currenciesFor($this->gateway)[0] ?? $this->currency;
     }
 
+    /**
+     * App Store payments-compliance doc (BUILD-5 §6, structural recommendation
+     * #1): on iOS, don't offer a free-floating "add funds to wallet" screen —
+     * that reads as generic digital credit, which Apple's IAP rules apply to.
+     * The wallet still exists and can hold change/refunds; the entry point
+     * just isn't a standalone top-up on iOS. Web/Android are unaffected.
+     */
+    public function isIosBuild(): bool
+    {
+        return AppPlatform::isIosBuild();
+    }
+
     public function topUp()
     {
+        if ($this->isIosBuild()) {
+            $this->error = 'Wallet top-ups aren\'t available in the iOS app — pay for your eSIM or number directly at checkout instead.';
+
+            return null;
+        }
+
         $this->validate();
         $this->error = null;
 

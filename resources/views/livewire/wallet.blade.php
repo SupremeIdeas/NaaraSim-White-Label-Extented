@@ -123,6 +123,18 @@
              payment-method radios, quick-cash blocks — all wired to the real
              gateway initialisation. --}}
         <div class="rounded-2xl border border-slate-200 nx-glass-tile p-5 dark:border-[var(--brand-card-border-dark)]">
+            @if ($this->isIosBuild())
+                {{-- App Store payments-compliance doc (BUILD-5 §6): no
+                     free-floating "add funds" entry point on iOS — pay at the
+                     point of buying an eSIM or a number instead. --}}
+                <div class="flex items-start gap-3 rounded-lg bg-slate-50 p-4 text-sm text-slate-600 dark:bg-white/5 dark:text-slate-300">
+                    <x-icon name="info" class="mt-0.5 h-5 w-5 shrink-0 text-primary" />
+                    <div>
+                        <p class="font-semibold text-slate-800 dark:text-slate-100">Wallet top-ups aren't available here</p>
+                        <p class="mt-1">Pay for your eSIM or number directly when you check out — your card or Apple Pay covers it in one step. Any refunds or change still land in your wallet.</p>
+                    </div>
+                </div>
+            @else
             @if ($error)
                 <div class="mb-3 flex items-start gap-2 rounded-lg bg-red-50 p-3 text-sm text-red-700 dark:bg-red-950/40 dark:text-red-300">
                     <x-icon name="x" class="mt-0.5 h-4 w-4 shrink-0" /> <span>{{ $error }}</span>
@@ -227,6 +239,7 @@
                 </div>
                 <p class="text-center text-[11px] text-slate-400 dark:text-slate-500">You’ll be redirected to a secure payment page.</p>
             </form>
+            @endif
         </div>
     </div>
 
