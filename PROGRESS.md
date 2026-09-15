@@ -9,6 +9,31 @@
 
 ## DONE
 
+### 📱 App Export — root-cause fix: builds now actually compile, or fail loud — 2026-09-15
+Synced from master. Owner-flagged top priority. Root cause:
+`TriggerAppBuildJob` used to leave an unconfigured build silently "queued"
+forever, waiting on a self-hosted runner that was never built anywhere in
+the codebase. Fixed to fail loud (clear `Failed` status + log) instead.
+Codemagic's real REST API (verified against `docs.codemagic.io/rest-api/builds/`)
+wired in as a first-class CI provider alongside the original generic-webhook
+path — `buildId` now populates the previously-unused `external_ref` column.
+Live status polling (`wire:poll`, gated on an active build) and real
+auto-download on the queued/building→ready transition replace the static
+list + manual-only link. iOS credential storage (cert + provisioning
+profile) added to match Android's keystore, plus an honest "configured on
+provider" checkbox and CI-readiness checklist items.
+
+**Live-boot-tested end to end in a real browser** (MySQL+Redis+queue
+worker+`php artisan serve`, Playwright) — not just PHPUnit. That live test
+caught a real bug the unit tests couldn't: the auto-download anchor had no
+`download` attribute, so a same-origin renderable artifact URL navigated the
+whole admin page away instead of downloading. Fixed and re-verified live —
+confirmed as a real download event, page showing "Ready" with no manual
+refresh. Also re-confirmed the existing signature-verification fix still
+hard-rejects a blank/wrong-secret callback with 401.
+
+34 new/updated tests. Full suite green.
+
 ### 🔌 SMSPool/OnlineSIM/Sonetel — verified against real API docs + wired into failover — 2026-09-15
 Synced from master. Owner's explicit follow-up: "don't just focus on
 HeroSMS" — verified the other 3 orphaned Numbers/Verify/Rent providers

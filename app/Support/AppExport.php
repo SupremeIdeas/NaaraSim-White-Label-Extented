@@ -65,7 +65,23 @@ class AppExport
             'ios_store_live' => false,
             'ios_store_url' => '',
             'keystore_backed_up' => false,
+            // CI provider (owner audit, 2026-09-15 — Codemagic reference doc):
+            // 'generic' posts the original signed webhook payload to
+            // ci_webhook_url (any custom receiver); 'codemagic' calls
+            // Codemagic's real REST API directly (docs.codemagic.io) using the
+            // admin-set app/workflow ids below + the ProviderKeys-stored token.
+            'ci_provider' => 'generic',
             'ci_webhook_url' => '',
+            'codemagic_app_id' => '',
+            'codemagic_android_workflow_id' => '',
+            'codemagic_ios_workflow_id' => '',
+            'codemagic_branch' => 'main',
+            // §1.5/§3.5 — honest visibility for the one thing NaaraSim itself
+            // cannot do (sign an .ipa): an admin who configured Apple signing
+            // directly on the CI provider's own dashboard (the common path for
+            // an App Store Connect API key) checks this instead of leaving a
+            // silent gap.
+            'ios_signing_on_provider' => false,
             'placements' => [],               // key => ['active'=>bool,'label'=>?string]
 
             // --- Store listing + compliance (required for Play/App Store pass) ---
@@ -91,6 +107,24 @@ class AppExport
     public static function get(string $key, mixed $default = null): mixed
     {
         return self::all()[$key] ?? $default;
+    }
+
+    /**
+     * Whether a real CI provider is actually reachable right now — the exact
+     * gap the 2026-09-15 audit found (a blank config here used to leave every
+     * build silently stuck at "Queued" forever, since no self-hosted runner
+     * ever existed to pick it up).
+     */
+    public static function ciConfigured(): bool
+    {
+        if ((string) self::get('ci_provider', 'generic') === 'codemagic') {
+            return trim((string) config('services.appexport.codemagic_api_token', '')) !== ''
+                && trim((string) self::get('codemagic_app_id')) !== ''
+                && (trim((string) self::get('codemagic_android_workflow_id')) !== ''
+                    || trim((string) self::get('codemagic_ios_workflow_id')) !== '');
+        }
+
+        return trim((string) self::get('ci_webhook_url')) !== '';
     }
 
     /** Persist a validated subset (secrets handled separately, never here). */
@@ -228,6 +262,11 @@ class AppExport
             self::item('Content rating', $has('content_rating'), 'Complete the content-rating questionnaire answer.'),
         ];
 
+        // CI provider (owner audit, 2026-09-15): a build with nowhere real to
+        // compile used to sit silently "Queued" forever — surface it here so
+        // that state is visible before anyone clicks Generate, not after.
+        $shared[] = self::item('CI/build provider configured', self::ciConfigured(), 'Set a CI webhook URL, or pick Codemagic and fill in its app/workflow ids + API token, in the section below — otherwise a build will fail immediately instead of compiling.');
+
         $android = [
             self::item('Signing keystore stored', self::hasCredential('android_keystore'), 'Upload the release keystore (encrypted).'),
             self::item('Keystore backup confirmed', (bool) self::get('keystore_backed_up'), 'Confirm you have securely backed up the keystore.'),
@@ -236,7 +275,17 @@ class AppExport
             self::operatorItem('Google Play Console account ($25 + closed test)', 'One-time fee, ID verification, and a 12-tester closed test — Frank must complete this.'),
         ];
 
+        // iOS signing (owner audit, 2026-09-15, §1.5/§3.5): NaaraSim itself has
+        // no code path that can sign an .ipa — either the credentials are
+        // uploaded here (so a provider whose API accepts pushed credentials
+        // can use them) or they're configured directly on the CI provider's
+        // own dashboard. Both are shown honestly rather than a silent gap.
         $ios = [
+            self::item(
+                'iOS signing (stored here or on the CI provider)',
+                (self::hasCredential('ios_cert') && self::hasCredential('ios_provisioning_profile')) || (bool) self::get('ios_signing_on_provider'),
+                'Upload the distribution certificate + provisioning profile below, OR configure them directly on your CI provider\'s dashboard (common for App Store Connect API keys) and check the box confirming that.',
+            ),
             self::item('App Store URL (when live)', $has('ios_store_url'), 'Add the App Store listing URL once created.'),
             self::operatorItem('Apple Developer Program ($99/yr)', 'Enrollment + identity verification — Frank must complete this.'),
             self::operatorItem('Cloud macOS build service', 'iOS IPA needs a macOS build environment (Codemagic/Capawesome/etc.).'),

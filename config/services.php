@@ -374,11 +374,19 @@ return [
 
     // Native app-export CI / cloud-build service (App Export §1). The trigger
     // signs its outbound payload with this secret and the status callback is
-    // verified against it (hash_equals). Leave blank for a same-host,
-    // self-hosted trusted runner. The build-trigger webhook URL itself is
-    // admin-editable (Setting: appexport.ci_webhook_url).
+    // verified against it (hash_equals) — a callback is hard-rejected with 401
+    // whenever this is blank, never accepted unsigned (owner audit, 2026-09-15).
+    // The build-trigger webhook URL itself is admin-editable
+    // (Setting: appexport.ci_webhook_url) for the generic/custom-CI path.
     'appexport' => [
         'ci_secret' => env('APPEXPORT_CI_SECRET'),
+        // Codemagic REST API token (x-auth-token header) — owner audit,
+        // 2026-09-15: verified against Codemagic's own public docs
+        // (docs.codemagic.io/rest-api/builds/). Only used when the admin picks
+        // "Codemagic" as the CI provider in App Builder; appId/workflowId/
+        // branch are plain (non-secret) Settings, not config, since they're
+        // just identifiers, not credentials.
+        'codemagic_api_token' => env('CODEMAGIC_API_TOKEN'),
     ],
 
     // Reloadly Gift Cards (Naara Gift — primary gift-card provider). OAuth2
