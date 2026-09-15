@@ -9,6 +9,17 @@
 
 ## DONE
 
+### 📖 In-app Merchant White Label Guide + admin-configurable reference links — 2026-09-16
+Synced from master. New `white_label_guide_links` table + `WhiteLabelGuideLink`
+model (domain/vps/shared/general categories), seeded with the same providers
+the intake form already names (Cloudways/Hostinger/Namecheap). Admin gets a
+"Guide links" CRUD panel in `Admin\WhiteLabelRegistry` — editing a link's URL
+is the only step needed to swap it for an affiliate link. Merchant gets a
+5-step accordion at the top of `/merchant/white-label`, Merchant V2 only,
+opening on whichever step matches their current status; domain links always
+show, hosting links show only for the category matching whichever hosting
+choice is currently live for that merchant. 12 new tests.
+
 ### 📘 Merchant White Label Purchase & Onboarding Guide — 2026-09-16
 Synced from master. New `docs/MERCHANT-WHITE-LABEL-GUIDE.md` — merchant-
 facing guide to the V2 white-label purchase flow, project intake form

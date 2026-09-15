@@ -8,6 +8,82 @@
         <div class="mb-4 rounded-2xl border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-300">{{ $error }}</div>
     @endif
 
+    {{-- Owner request (2026-09-15) — the in-app step-by-step guide. Merchant
+         V2 only; opens on whichever step matches where this merchant
+         actually is, and surfaces admin-configurable reference links
+         (domain/hosting) the moment a hosting choice is made. --}}
+    @if ($this->isV2)
+        <div class="mb-5 rounded-2xl border border-slate-200 nx-glass-tile p-4 dark:border-white/10" x-data="{ step: {{ $this->guideCurrentStep }} }">
+            <div class="mb-3 flex items-center gap-2">
+                <x-icon name="list" class="h-4 w-4 text-primary" />
+                <p class="text-sm font-semibold text-slate-900 dark:text-white">Your white-label guide</p>
+            </div>
+            <div class="space-y-1.5">
+                @php
+                    $guideSteps = [
+                        1 => ['title' => 'Choose & request a plan', 'body' => "Pick a plan below and a hosting preference, then request it. Nothing is charged yet — an admin confirms your price next."],
+                        2 => ['title' => 'Pay to activate', 'body' => 'Once your price is confirmed, pay from this page. Your license activates instantly and your feature set unlocks automatically for your tier.'],
+                        3 => ['title' => 'Tell us about your project', 'body' => "Submit your brand name, colours, logo, and hosting choice below. If you're self-hosting, sort out your domain/hosting first — see the links here."],
+                        4 => ['title' => 'We build your platform', 'body' => "Our team deploys your platform by hand using what you submitted. The progress bar below is our current estimate, not a live tracker — we'll message you on WhatsApp with real updates."],
+                        5 => ['title' => 'Log in and go live', 'body' => "You'll get a separate login for your own platform — not this dashboard. Work through the checklist here before you announce you're open."],
+                    ];
+                @endphp
+                @foreach ($guideSteps as $n => $s)
+                    <div class="rounded-xl border border-slate-100 dark:border-white/5">
+                        <button type="button" @click="step = (step === {{ $n }} ? null : {{ $n }})" class="flex w-full items-center justify-between gap-2 px-3 py-2 text-left">
+                            <span class="flex items-center gap-2">
+                                <span class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full {{ $n <= $this->guideCurrentStep ? 'bg-primary text-white' : 'bg-slate-100 text-slate-400 dark:bg-white/10' }} text-[11px] font-semibold">{{ $n }}</span>
+                                <span class="text-sm font-medium text-slate-700 dark:text-slate-200">{{ $s['title'] }}</span>
+                            </span>
+                            <x-icon name="chevron-right" class="h-4 w-4 shrink-0 text-slate-400 transition-transform" x-bind:class="step === {{ $n }} ? 'rotate-90' : ''" />
+                        </button>
+                        <div x-show="step === {{ $n }}" x-transition class="px-3 pb-3 text-xs text-slate-500 dark:text-slate-400">
+                            <p>{{ $s['body'] }}</p>
+
+                            @if ($n === 3 && ($this->guideDomainLinks->isNotEmpty() || $this->guideHostingLinks->isNotEmpty()))
+                                <div class="mt-2 space-y-2 border-t border-slate-100 pt-2 dark:border-white/5">
+                                    @if ($this->guideDomainLinks->isNotEmpty())
+                                        <div>
+                                            <p class="mb-1 font-medium text-slate-600 dark:text-slate-300">Need a domain?</p>
+                                            @foreach ($this->guideDomainLinks as $link)
+                                                <a href="{{ $link->url }}" target="_blank" rel="noopener nofollow sponsored" class="flex items-center gap-1.5 text-primary hover:underline">
+                                                    <x-icon name="link" class="h-3 w-3 shrink-0" /> {{ $link->label }}
+                                                </a>
+                                            @endforeach
+                                        </div>
+                                    @endif
+                                    @if ($this->guideHostingLinks->isNotEmpty())
+                                        <div>
+                                            <p class="mb-1 font-medium text-slate-600 dark:text-slate-300">Recommended hosting for your choice:</p>
+                                            @foreach ($this->guideHostingLinks as $link)
+                                                <a href="{{ $link->url }}" target="_blank" rel="noopener nofollow sponsored" class="flex items-center gap-1.5 text-primary hover:underline">
+                                                    <x-icon name="link" class="h-3 w-3 shrink-0" /> {{ $link->label }}
+                                                </a>
+                                                @if ($link->description)
+                                                    <span class="block pl-[18px] text-[11px] text-slate-400">{{ $link->description }}</span>
+                                                @endif
+                                            @endforeach
+                                        </div>
+                                    @endif
+                                    <p class="text-[10px] italic text-slate-400">Some of these may be affiliate links that support NaaraSim at no extra cost to you.</p>
+                                </div>
+                            @endif
+
+                            @if ($n === 5)
+                                <ul class="mt-2 space-y-1 border-t border-slate-100 pt-2 dark:border-white/5">
+                                    <li class="flex items-start gap-1.5"><x-icon name="check" class="mt-0.5 h-3 w-3 shrink-0 text-primary" /> Change the default admin password &amp; enable 2FA</li>
+                                    <li class="flex items-start gap-1.5"><x-icon name="check" class="mt-0.5 h-3 w-3 shrink-0 text-primary" /> Add your own Provider API keys (Admin → Provider Keys)</li>
+                                    <li class="flex items-start gap-1.5"><x-icon name="check" class="mt-0.5 h-3 w-3 shrink-0 text-primary" /> Confirm your branding &amp; unlocked features match what you bought</li>
+                                    <li class="flex items-start gap-1.5"><x-icon name="check" class="mt-0.5 h-3 w-3 shrink-0 text-primary" /> Run one real (or sandbox) purchase before announcing you're open</li>
+                                </ul>
+                            @endif
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+    @endif
+
     @unless ($this->isV2)
         {{-- Visible-but-locked: the same pattern the Merchant-V2 gate itself uses. --}}
         <div class="rounded-2xl border border-slate-200 nx-glass-tile p-6 text-center dark:border-white/10">
@@ -159,6 +235,29 @@
                                         Please purchase a <strong>premium shared hosting plan from Hostinger or Namecheap</strong> and share the login details below so our team can deploy your platform there.
                                     @endif
                                 </div>
+
+                                @if ($this->guideHostingLinks->isNotEmpty() || $this->guideDomainLinks->isNotEmpty())
+                                    <div class="rounded-xl border border-slate-100 bg-slate-50 p-3 text-xs dark:border-white/5 dark:bg-white/5">
+                                        @if ($this->guideHostingLinks->isNotEmpty())
+                                            <p class="mb-1 font-medium text-slate-600 dark:text-slate-300">Get hosting here:</p>
+                                            @foreach ($this->guideHostingLinks as $link)
+                                                <a href="{{ $link->url }}" target="_blank" rel="noopener nofollow sponsored" class="flex items-center gap-1.5 text-primary hover:underline">
+                                                    <x-icon name="link" class="h-3 w-3 shrink-0" /> {{ $link->label }}
+                                                </a>
+                                            @endforeach
+                                        @endif
+                                        @if ($this->guideDomainLinks->isNotEmpty())
+                                            <p class="mb-1 mt-2 font-medium text-slate-600 dark:text-slate-300">Need a domain too?</p>
+                                            @foreach ($this->guideDomainLinks as $link)
+                                                <a href="{{ $link->url }}" target="_blank" rel="noopener nofollow sponsored" class="flex items-center gap-1.5 text-primary hover:underline">
+                                                    <x-icon name="link" class="h-3 w-3 shrink-0" /> {{ $link->label }}
+                                                </a>
+                                            @endforeach
+                                        @endif
+                                        <p class="mt-2 text-[10px] italic text-slate-400">Some of these may be affiliate links that support NaaraSim at no extra cost to you.</p>
+                                    </div>
+                                @endif
+
                                 <div>
                                     <label class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">Host / control panel URL</label>
                                     <input type="text" wire:model="intakeHostingHost" class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-white/10 dark:bg-white/5 dark:text-slate-100">
@@ -345,7 +444,7 @@
 
             <div class="mt-4 rounded-2xl border border-slate-200 nx-glass-tile p-4 dark:border-white/10">
                 <label class="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-200">Hosting preference</label>
-                <select wire:model="hostingPreference" class="mb-3 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-white/10 dark:bg-white/5 dark:text-slate-100">
+                <select wire:model.live="hostingPreference" class="mb-3 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-white/10 dark:bg-white/5 dark:text-slate-100">
                     <option value="supreme_ideas_server">Host on Supreme Ideas' server</option>
                     <option value="own_vps">Host on my own VPS (Cloudways)</option>
                     <option value="own_shared">Host on my own shared hosting (Hostinger/Namecheap)</option>

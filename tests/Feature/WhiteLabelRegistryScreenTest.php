@@ -463,4 +463,70 @@ class WhiteLabelRegistryScreenTest extends TestCase
 
         $this->assertSame(1, $instance->fresh()->tokens()->count());
     }
+
+    // --- Owner request (2026-09-15): merchant guide reference links ---
+
+    public function test_an_admin_can_create_a_guide_link(): void
+    {
+        Livewire::actingAs($this->admin())
+            ->test(WhiteLabelRegistry::class)
+            ->set('guideLinkCategory', \App\Models\WhiteLabelGuideLink::CATEGORY_VPS)
+            ->set('guideLinkLabel', 'Cloudways — VPS hosting')
+            ->set('guideLinkUrl', 'https://www.cloudways.com/en/')
+            ->set('guideLinkDescription', 'Laravel-optimized VPS')
+            ->call('saveGuideLink')
+            ->assertHasNoErrors();
+
+        $link = \App\Models\WhiteLabelGuideLink::first();
+        $this->assertNotNull($link);
+        $this->assertSame(\App\Models\WhiteLabelGuideLink::CATEGORY_VPS, $link->category);
+        $this->assertSame('https://www.cloudways.com/en/', $link->url);
+    }
+
+    public function test_saving_a_guide_link_rejects_an_invalid_url(): void
+    {
+        Livewire::actingAs($this->admin())
+            ->test(WhiteLabelRegistry::class)
+            ->set('guideLinkLabel', 'Bad link')
+            ->set('guideLinkUrl', 'not-a-url')
+            ->call('saveGuideLink')
+            ->assertHasErrors(['guideLinkUrl']);
+
+        $this->assertNull(\App\Models\WhiteLabelGuideLink::first());
+    }
+
+    public function test_an_admin_can_edit_swap_the_url_to_their_own_affiliate_link(): void
+    {
+        $link = \App\Models\WhiteLabelGuideLink::create([
+            'category' => \App\Models\WhiteLabelGuideLink::CATEGORY_DOMAIN,
+            'label' => 'Namecheap', 'url' => 'https://www.namecheap.com/domains/', 'is_active' => true,
+        ]);
+
+        Livewire::actingAs($this->admin())
+            ->test(WhiteLabelRegistry::class)
+            ->call('editGuideLink', $link->id)
+            ->assertSet('guideLinkUrl', 'https://www.namecheap.com/domains/')
+            ->set('guideLinkUrl', 'https://www.namecheap.com/domains/?aff=frank123')
+            ->call('saveGuideLink')
+            ->assertHasNoErrors();
+
+        $this->assertSame('https://www.namecheap.com/domains/?aff=frank123', $link->fresh()->url);
+    }
+
+    public function test_an_admin_can_toggle_and_delete_a_guide_link(): void
+    {
+        $link = \App\Models\WhiteLabelGuideLink::create([
+            'category' => \App\Models\WhiteLabelGuideLink::CATEGORY_SHARED,
+            'label' => 'Hostinger', 'url' => 'https://www.hostinger.com/', 'is_active' => true,
+        ]);
+
+        $c = Livewire::actingAs($this->admin())->test(WhiteLabelRegistry::class);
+
+        $c->call('toggleGuideLinkActive', $link->id);
+        $this->assertFalse($link->fresh()->is_active);
+
+        $c->call('deleteGuideLink', $link->id);
+        $this->assertNull(\App\Models\WhiteLabelGuideLink::find($link->id));
+    }
+
 }

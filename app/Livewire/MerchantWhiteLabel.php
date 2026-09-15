@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use App\Exceptions\LicenseActivationException;
 use App\Models\Merchant;
+use App\Models\WhiteLabelGuideLink;
 use App\Models\WhiteLabelInstance;
 use App\Models\WhiteLabelLicensePlan;
 use App\Models\WhiteLabelProjectIntake;
@@ -253,6 +254,63 @@ class MerchantWhiteLabel extends Component
     public function getIntakeProperty(): ?WhiteLabelProjectIntake
     {
         return $this->instance?->intake;
+    }
+
+    /** Owner request (2026-09-15) — the in-app step-by-step guide. Whichever
+     *  hosting choice is currently "live" for this merchant: the submitted
+     *  intake's binding choice once it exists, otherwise the in-progress
+     *  intake form's selection once the license is active, otherwise the
+     *  pre-purchase soft preference — so the guide's reference links update
+     *  the moment a merchant picks something, at every stage. */
+    public function getEffectiveHostingChoiceProperty(): string
+    {
+        if ($this->intake !== null) {
+            return $this->intake->hosting_choice;
+        }
+        if ($this->instance?->status === WhiteLabelInstance::ACTIVE) {
+            return $this->intakeHostingChoice;
+        }
+
+        return $this->hostingPreference;
+    }
+
+    public function getGuideDomainLinksProperty()
+    {
+        return WhiteLabelGuideLink::forCategory(WhiteLabelGuideLink::CATEGORY_DOMAIN);
+    }
+
+    public function getGuideHostingLinksProperty()
+    {
+        $category = match ($this->effectiveHostingChoice) {
+            WhiteLabelInstance::HOSTING_OWN_VPS => WhiteLabelGuideLink::CATEGORY_VPS,
+            WhiteLabelInstance::HOSTING_OWN_SHARED => WhiteLabelGuideLink::CATEGORY_SHARED,
+            default => null,
+        };
+
+        return $category !== null ? WhiteLabelGuideLink::forCategory($category) : collect();
+    }
+
+    /** Which of the 5 guide steps is most relevant right now, so the guide
+     *  opens on the step that actually matches where this merchant is. */
+    public function getGuideCurrentStepProperty(): int
+    {
+        $instance = $this->instance;
+        if ($instance === null) {
+            return 1;
+        }
+        if ($instance->status === WhiteLabelInstance::PENDING) {
+            return $instance->price_usd === null ? 1 : 2;
+        }
+        if ($instance->status === WhiteLabelInstance::ACTIVE) {
+            $intake = $this->intake;
+            if ($intake === null) {
+                return 3;
+            }
+
+            return $intake->status === WhiteLabelProjectIntake::STATUS_COMPLETED ? 5 : 4;
+        }
+
+        return 1;
     }
 
     public function getIntakeIsSelfHostedProperty(): bool
