@@ -18,6 +18,26 @@ use Illuminate\Support\Facades\Http;
  */
 class GetatextService implements SmsProviderInterface
 {
+    /**
+     * Key-gated (mirrors HeroSmsService): an unconfigured Getatext would
+     * otherwise make a real, unauthenticated HTTP call on every attempt,
+     * recorded as a genuine circuit-breaker FAILURE and eventually opening
+     * the circuit / alerting on a provider that was never live (owner audit,
+     * 2026-09-15). Throwing OutOfStock here keeps the router's "try next in
+     * lane" behaviour unchanged while NCI weighs it as no-stock, not down.
+     */
+    private function configured(): bool
+    {
+        return ! empty(config('services.getatext.api_key'));
+    }
+
+    private function guardConfigured(): void
+    {
+        if (! $this->configured()) {
+            throw new OutOfStockException('Getatext is not configured yet.');
+        }
+    }
+
     private function client(): PendingRequest
     {
         // Bounded so a slow/dead provider can't hang the worker + session lock.
@@ -31,6 +51,8 @@ class GetatextService implements SmsProviderInterface
 
     public function priceFor(string $country, string $service, ?string $operator = null): float
     {
+        $this->guardConfigured();
+
         $items = $this->client()->get('/prices-info')->throw()->json() ?? [];
 
         foreach ($items as $item) {
@@ -48,6 +70,8 @@ class GetatextService implements SmsProviderInterface
 
     public function buyOtp(string $country, string $service, array $options = []): array
     {
+        $this->guardConfigured();
+
         $payload = array_filter([
             'service' => $service,
             'max_price' => $options['max_price'] ?? null,
@@ -68,6 +92,8 @@ class GetatextService implements SmsProviderInterface
 
     public function buyRental(string $country, string $service, array $options = []): array
     {
+        $this->guardConfigured();
+
         // Purchase call — longer 15s ceiling for a real rental buy.
         $json = $this->guard($this->client()->timeout(15)->post('/long-rentals', array_filter([
             'service' => $service,

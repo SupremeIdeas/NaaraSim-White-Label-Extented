@@ -55,4 +55,36 @@ class GetatextServiceTest extends TestCase
         $this->expectException(GetatextAuthException::class);
         app(GetatextService::class)->buyOtp('US', 'whatsapp');
     }
+
+    // --- Owner audit (2026-09-15): unconfigured never makes a live call ---
+
+    public function test_an_unconfigured_key_refuses_before_any_http_call(): void
+    {
+        config(['services.getatext.api_key' => '']);
+        Http::fake();
+
+        try {
+            app(GetatextService::class)->priceFor('US', 'whatsapp');
+            $this->fail('Expected an OutOfStockException.');
+        } catch (OutOfStockException) {
+            // expected
+        }
+
+        Http::assertNothingSent();
+    }
+
+    public function test_an_unconfigured_key_refuses_buy_otp_before_any_http_call(): void
+    {
+        config(['services.getatext.api_key' => null]);
+        Http::fake();
+
+        try {
+            app(GetatextService::class)->buyOtp('US', 'whatsapp');
+            $this->fail('Expected an OutOfStockException.');
+        } catch (OutOfStockException) {
+            // expected
+        }
+
+        Http::assertNothingSent();
+    }
 }

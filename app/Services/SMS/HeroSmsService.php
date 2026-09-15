@@ -3,8 +3,10 @@
 namespace App\Services\SMS;
 
 use App\Exceptions\OutOfStockException;
+use App\Support\NumberCatalogue;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Str;
 
 /**
  * HeroSMS — the official successor to SMS-Activate (which shut down permanently
@@ -33,6 +35,26 @@ class HeroSmsService implements SmsProviderInterface
 {
     /** SMS-Activate "full rent" sentinel — a number open to ANY service. */
     private const FULL_RENT_SERVICE = 'full';
+
+    /**
+     * Provider-side English country names (as the protocol's `getCountries`
+     * reports them) that diverge from NaaraSim's own NumberCatalogue label —
+     * normalized name => our canonical label, so the live-discovery match in
+     * syncCatalogue() still lines up (owner audit, 2026-09-15).
+     */
+    private const COUNTRY_NAME_ALIASES = [
+        'usa' => 'United States',
+        'unitedstatesofamerica' => 'United States',
+        'england' => 'United Kingdom',
+        'greatbritain' => 'United Kingdom',
+        'uk' => 'United Kingdom',
+        'czechrepublic' => 'Czechia',
+        'ivorycoast' => "Côte d'Ivoire",
+        'uae' => 'United Arab Emirates',
+        'drcongo' => 'Congo',
+        'democraticrepublicofcongo' => 'Congo',
+        'republicofcongo' => 'Congo',
+    ];
 
     /** The config()/label key for this provider — overridden by VirtSmsService. */
     protected function providerKey(): string
@@ -77,12 +99,25 @@ class HeroSmsService implements SmsProviderInterface
         ], $params));
     }
 
-    /** Country name → provider identifier (operator-mapped; passthrough default). */
+    /**
+     * Country name → provider identifier. Checks the LIVE-DISCOVERED map
+     * (syncCatalogue(), name-matched against the provider's own API, never
+     * guessed) first, then the manual operator-filled config map, then
+     * passes the raw slug through unchanged — which fails safely via
+     * priceFor()'s stock check rather than silently hitting the wrong
+     * country (owner audit, 2026-09-15).
+     */
     private function country(string $country): string
     {
+        $key = strtolower($country);
+        $discovered = NumberCatalogue::providerCountryMap($this->providerKey());
+        if (isset($discovered[$key])) {
+            return $discovered[$key];
+        }
+
         $map = (array) $this->cfg('country_map', []);
 
-        return (string) ($map[strtolower($country)] ?? $country);
+        return (string) ($map[$key] ?? $country);
     }
 
     /** Service slug → provider code (operator-mapped; passthrough default). */
@@ -206,6 +241,76 @@ class HeroSmsService implements SmsProviderInterface
         return str_starts_with($body, 'ACCESS_BALANCE:')
             ? (float) substr($body, strlen('ACCESS_BALANCE:'))
             : 0.0;
+    }
+
+    /**
+     * Live-discover this provider's country id table via the protocol's
+     * `getCountries` action (SMS-Activate-standard: `{id: {id, eng, ...}}`)
+     * and name-match it against NaaraSim's own NumberCatalogue — accurate,
+     * since it is sourced from the provider itself rather than a guessed
+     * numeric table, and safe to re-run at any time. A country the provider
+     * has that we don't yet know about is returned too, so the catalogue
+     * sync can extend NumberCatalogue with it (owner audit, 2026-09-15).
+     * Fails soft (empty arrays) if the action doesn't exist or errors — this
+     * NEVER blocks routing, which still falls back to the manual config map.
+     *
+     * @return array{countries: array<string, string>, country_map: array<string, string>}
+     */
+    public function syncCatalogue(): array
+    {
+        $empty = ['countries' => [], 'country_map' => []];
+        if (! $this->configured()) {
+            return $empty;
+        }
+
+        try {
+            $data = $this->send('getCountries')->throw()->json();
+        } catch (\Throwable) {
+            return $empty;
+        }
+        if (! is_array($data)) {
+            return $empty;
+        }
+
+        $base = NumberCatalogue::baseCountries();
+        $byNormalizedLabel = [];
+        foreach ($base as $slug => $label) {
+            $byNormalizedLabel[self::normalizeName($label)] = $slug;
+        }
+
+        $countries = [];
+        $countryMap = [];
+        foreach ($data as $row) {
+            if (! is_array($row) || ! isset($row['id']) || empty($row['eng']) || ! is_string($row['eng'])) {
+                continue;
+            }
+            $id = (string) $row['id'];
+            $engName = (string) $row['eng'];
+            $aliased = self::COUNTRY_NAME_ALIASES[self::normalizeName($engName)] ?? $engName;
+            $norm = self::normalizeName($aliased);
+
+            if (isset($byNormalizedLabel[$norm])) {
+                $countryMap[$byNormalizedLabel[$norm]] = $id;
+
+                continue;
+            }
+
+            // Not one of ours yet — extend the catalogue with it too.
+            $slug = Str::slug($engName, '');
+            if ($slug === '' || isset($base[$slug]) || isset($countries[$slug])) {
+                continue;
+            }
+            $countries[$slug] = $engName;
+            $countryMap[$slug] = $id;
+        }
+
+        return ['countries' => $countries, 'country_map' => $countryMap];
+    }
+
+    /** Lowercase, ASCII-folded, alnum-only — so accents/punctuation/spacing never break a name match. */
+    private static function normalizeName(string $name): string
+    {
+        return (string) preg_replace('/[^a-z0-9]+/', '', strtolower(Str::ascii($name)));
     }
 
     /** Parse `ACCESS_NUMBER:id:phone` (or throw on a stock/error body). */

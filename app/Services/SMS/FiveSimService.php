@@ -19,6 +19,27 @@ use Illuminate\Support\Facades\Http;
  */
 class FiveSimService implements SmsProviderInterface
 {
+    /**
+     * Key-gated (mirrors HeroSmsService): an unconfigured 5sim would otherwise
+     * make a real, unauthenticated HTTP call on every attempt, which either
+     * times out or 401s — recorded as a genuine circuit-breaker FAILURE and
+     * eventually opening the circuit / alerting on a provider that was never
+     * live in the first place (owner audit, 2026-09-15). Throwing OutOfStock
+     * here instead keeps the router's existing "try next in lane" behaviour
+     * unchanged while NCI correctly weighs it as no-stock, not down.
+     */
+    private function configured(): bool
+    {
+        return ! empty(config('services.fivesim.api_key'));
+    }
+
+    private function guardConfigured(): void
+    {
+        if (! $this->configured()) {
+            throw new OutOfStockException('5sim is not configured yet.');
+        }
+    }
+
     private function client(): PendingRequest
     {
         // Every call is bounded so a slow/dead provider can never hang the PHP
@@ -32,6 +53,8 @@ class FiveSimService implements SmsProviderInterface
 
     public function priceFor(string $country, string $service, ?string $operator = null): float
     {
+        $this->guardConfigured();
+
         $operators = $this->rawOperators($country, $service);
 
         // A specific operator was chosen (Step-3 comparison) — price THAT one so
@@ -122,6 +145,8 @@ class FiveSimService implements SmsProviderInterface
 
     public function buyOtp(string $country, string $service, array $options = []): array
     {
+        $this->guardConfigured();
+
         $operator = $options['operator'] ?? 'any';
         $query = array_filter([
             'voice' => ($options['voice'] ?? false) ? 1 : null,
@@ -137,6 +162,8 @@ class FiveSimService implements SmsProviderInterface
 
     public function buyRental(string $country, string $service, array $options = []): array
     {
+        $this->guardConfigured();
+
         $operator = $options['operator'] ?? 'any';
         // Purchase call — allow the longer 15s ceiling for a real rental buy.
         $json = $this->guard($this->client()->timeout(15)
