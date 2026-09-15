@@ -9,6 +9,16 @@
 
 ## DONE
 
+### 📘 Merchant White Label Purchase & Onboarding Guide — 2026-09-16
+Synced from master. New `docs/MERCHANT-WHITE-LABEL-GUIDE.md` — merchant-
+facing guide to the V2 white-label purchase flow, project intake form
+requirements, merchant responsibilities while their platform is built
+(Naara-hosted vs self-hosted), and the first-login validation checklist.
+Honest about the two gaps: deployment is confirmed manual ops work (the
+`deploy_days` countdown is elapsed-time math, not a live status feed), and
+the Installer has zero license-key involvement, so a merchant's live-
+platform login is a separate handover from their merchant-dashboard account.
+
 ### 🔌 App Export master kill-switch — 2026-09-16
 Synced from master. New `AppExport::app_export_enabled` Setting (default
 `true`) gating the public `/download` page, `BuildDispatcher::create()`,
