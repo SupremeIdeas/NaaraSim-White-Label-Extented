@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Livewire\MerchantWhiteLabel;
 use App\Models\Merchant;
 use App\Models\User;
+use App\Models\WhiteLabelGuideLink;
 use App\Models\WhiteLabelInstance;
 use App\Models\WhiteLabelLicensePlan;
 use App\Models\WhiteLabelProjectIntake;
@@ -351,5 +352,76 @@ class MerchantWhiteLabelTest extends TestCase
             ->assertSet('deployProgress', 0)
             ->assertSee('Day 1 of 10')
             ->assertSee('Deployment in progress');
+    }
+
+    // --- Owner request (2026-09-15): in-app step-by-step guide ---
+
+    public function test_a_standard_merchant_does_not_see_the_guide(): void
+    {
+        $merchant = $this->merchant(Merchant::TIER_STANDARD);
+
+        Livewire::actingAs($merchant->owner)
+            ->test(MerchantWhiteLabel::class)
+            ->assertDontSee('Your white-label guide');
+    }
+
+    public function test_a_v2_merchant_sees_the_guide(): void
+    {
+        $merchant = $this->merchant(Merchant::TIER_V2);
+
+        Livewire::actingAs($merchant->owner)
+            ->test(MerchantWhiteLabel::class)
+            ->assertSee('Your white-label guide')
+            ->assertSee('Choose & request a plan')
+            ->assertSee('Log in and go live');
+    }
+
+    public function test_guide_shows_domain_links_always_and_hosting_links_only_for_the_chosen_category(): void
+    {
+        WhiteLabelGuideLink::create(['category' => WhiteLabelGuideLink::CATEGORY_DOMAIN, 'label' => 'Namecheap Domains', 'url' => 'https://namecheap.test/', 'is_active' => true]);
+        WhiteLabelGuideLink::create(['category' => WhiteLabelGuideLink::CATEGORY_VPS, 'label' => 'Cloudways VPS', 'url' => 'https://cloudways.test/', 'is_active' => true]);
+        WhiteLabelGuideLink::create(['category' => WhiteLabelGuideLink::CATEGORY_SHARED, 'label' => 'Hostinger Shared', 'url' => 'https://hostinger.test/', 'is_active' => true]);
+        $merchant = $this->merchant(Merchant::TIER_V2);
+
+        Livewire::actingAs($merchant->owner)
+            ->test(MerchantWhiteLabel::class)
+            ->set('hostingPreference', WhiteLabelInstance::HOSTING_OWN_VPS)
+            ->assertSee('Namecheap Domains')
+            ->assertSee('Cloudways VPS')
+            ->assertDontSee('Hostinger Shared');
+    }
+
+    public function test_guide_hides_hosting_links_when_hosting_on_supreme_ideas_server(): void
+    {
+        WhiteLabelGuideLink::create(['category' => WhiteLabelGuideLink::CATEGORY_VPS, 'label' => 'Cloudways VPS', 'url' => 'https://cloudways.test/', 'is_active' => true]);
+        $merchant = $this->merchant(Merchant::TIER_V2);
+
+        Livewire::actingAs($merchant->owner)
+            ->test(MerchantWhiteLabel::class)
+            ->set('hostingPreference', WhiteLabelInstance::HOSTING_SUPREME_IDEAS_SERVER)
+            ->assertDontSee('Cloudways VPS');
+    }
+
+    public function test_an_inactive_guide_link_is_never_shown(): void
+    {
+        WhiteLabelGuideLink::create(['category' => WhiteLabelGuideLink::CATEGORY_VPS, 'label' => 'Retired Host', 'url' => 'https://retired.test/', 'is_active' => false]);
+        $merchant = $this->merchant(Merchant::TIER_V2);
+
+        Livewire::actingAs($merchant->owner)
+            ->test(MerchantWhiteLabel::class)
+            ->set('hostingPreference', WhiteLabelInstance::HOSTING_OWN_VPS)
+            ->assertDontSee('Retired Host');
+    }
+
+    public function test_guide_uses_the_intake_hosting_choice_once_the_intake_form_is_reachable(): void
+    {
+        WhiteLabelGuideLink::create(['category' => WhiteLabelGuideLink::CATEGORY_SHARED, 'label' => 'Hostinger Shared', 'url' => 'https://hostinger.test/', 'is_active' => true]);
+        $merchant = $this->merchant(Merchant::TIER_V2);
+        $this->activeInstance($merchant);
+
+        Livewire::actingAs($merchant->owner)
+            ->test(MerchantWhiteLabel::class)
+            ->set('intakeHostingChoice', WhiteLabelInstance::HOSTING_OWN_SHARED)
+            ->assertSee('Hostinger Shared');
     }
 }

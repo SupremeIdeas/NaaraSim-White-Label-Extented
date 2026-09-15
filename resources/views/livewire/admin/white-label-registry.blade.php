@@ -399,6 +399,89 @@
         </div>
     </div>
 
+    {{-- Owner request (2026-09-15) — merchant guide reference links. Shown
+         inside the in-app Merchant White Label Guide, contextually by the
+         hosting choice a merchant picks. Editing the URL here is the ONLY
+         step needed to point it at an affiliate link instead. --}}
+    <div class="mb-6 rounded-2xl border border-slate-200 bg-white p-5 dark:border-[#2D4060] dark:bg-[#1B2A45]">
+        <h2 class="mb-1 text-lg font-semibold text-slate-900 dark:text-slate-100">Guide links</h2>
+        <p class="mb-4 text-sm text-slate-500 dark:text-slate-400">Reference links shown to merchants inside their in-app onboarding guide, grouped by category — shown only when relevant to the hosting option they've chosen. Change a URL here (e.g. to your own affiliate link) any time; it takes effect immediately, no redeploy.</p>
+
+        <form wire:submit="saveGuideLink" class="mb-5 grid gap-3 rounded-xl border border-slate-200 p-4 dark:border-[#2D4060] sm:grid-cols-2">
+            <div class="sm:col-span-2 flex items-center justify-between">
+                <p class="text-sm font-semibold text-slate-700 dark:text-slate-200">{{ $editingGuideLinkId ? 'Edit link' : 'New link' }}</p>
+                @if ($editingGuideLinkId)
+                    <button type="button" wire:click="newGuideLinkForm" class="text-xs font-medium text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">Cancel edit</button>
+                @endif
+            </div>
+            <div>
+                <select wire:model="guideLinkCategory" class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                    @foreach ($this->guideLinkCategories as $value => $label)
+                        <option value="{{ $value }}">{{ $label }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div>
+                <input type="number" min="0" wire:model="guideLinkSortOrder" placeholder="Sort order" class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100" />
+            </div>
+            <div class="sm:col-span-2">
+                <input type="text" wire:model="guideLinkLabel" placeholder="Label, e.g. Namecheap — register your domain" class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100" />
+                @error('guideLinkLabel') <span class="text-xs text-red-500">{{ $message }}</span> @enderror
+            </div>
+            <div class="sm:col-span-2">
+                <input type="url" wire:model="guideLinkUrl" placeholder="https://... (swap in your affiliate link here)" class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100" />
+                @error('guideLinkUrl') <span class="text-xs text-red-500">{{ $message }}</span> @enderror
+            </div>
+            <div class="sm:col-span-2">
+                <input type="text" wire:model="guideLinkDescription" placeholder="Short description shown under the link (optional)" class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100" />
+                @error('guideLinkDescription') <span class="text-xs text-red-500">{{ $message }}</span> @enderror
+            </div>
+            <label class="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
+                <input type="checkbox" wire:model="guideLinkIsActive" class="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary dark:border-[#2D4060] dark:bg-[#243352]"> Visible in the guide
+            </label>
+            <div class="flex justify-end">
+                <button type="submit" wire:loading.attr="disabled" wire:target="saveGuideLink"
+                    class="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary-dark disabled:opacity-60">
+                    {{ $editingGuideLinkId ? 'Update link' : 'Add link' }}
+                </button>
+            </div>
+        </form>
+
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm">
+                <thead class="text-xs uppercase text-slate-400 dark:text-slate-500">
+                    <tr>
+                        <th class="py-2 pr-4">Category</th>
+                        <th class="py-2 pr-4">Label</th>
+                        <th class="py-2 pr-4">URL</th>
+                        <th class="py-2 pr-4">Visible</th>
+                        <th class="py-2 pr-4"></th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 dark:divide-[#2D4060]">
+                    @forelse ($this->guideLinks as $link)
+                        <tr class="text-slate-700 dark:text-slate-200">
+                            <td class="py-2 pr-4">{{ $this->guideLinkCategories[$link->category] ?? $link->category }}</td>
+                            <td class="py-2 pr-4 font-medium">{{ $link->label }}{{ $link->description ? ' ' : '' }}<span class="block text-xs font-normal text-slate-400">{{ $link->description }}</span></td>
+                            <td class="max-w-xs truncate py-2 pr-4 text-xs text-slate-500 dark:text-slate-400"><a href="{{ $link->url }}" target="_blank" rel="noopener" class="hover:underline">{{ $link->url }}</a></td>
+                            <td class="py-2 pr-4">
+                                <button type="button" wire:click="toggleGuideLinkActive({{ $link->id }})" class="rounded-full px-2 py-0.5 text-xs font-medium {{ $link->is_active ? 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300' : 'bg-slate-100 text-slate-600 dark:bg-[#243352] dark:text-slate-300' }}">
+                                    {{ $link->is_active ? 'Visible' : 'Hidden' }}
+                                </button>
+                            </td>
+                            <td class="py-2 pr-4 whitespace-nowrap">
+                                <button type="button" wire:click="editGuideLink({{ $link->id }})" class="rounded-lg border border-slate-200 px-2 py-1 text-xs font-medium text-slate-600 hover:bg-slate-50 dark:border-[#2D4060] dark:text-slate-300 dark:hover:bg-[#243352]">Edit</button>
+                                <button type="button" wire:click="deleteGuideLink({{ $link->id }})" wire:confirm="Remove this link from the guide?" class="ml-1 rounded-lg border border-red-200 px-2 py-1 text-xs font-medium text-red-600 hover:bg-red-50 dark:border-red-900/50 dark:text-red-300 dark:hover:bg-red-950/30">Delete</button>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr><td colspan="5" class="py-4 text-center text-sm text-slate-400">No guide links yet.</td></tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
+
     {{-- Prompt 21-EXT §5.3/§5.5 — platform earnings wallet + withdrawal.
          super_admin only: this bucket is deliberately kept separate from
          general platform-profit reporting, so cashing it out is a stricter

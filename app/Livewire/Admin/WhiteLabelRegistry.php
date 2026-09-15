@@ -7,6 +7,7 @@ use App\Models\DistributedPackage;
 use App\Models\PayoutAccount;
 use App\Models\Setting;
 use App\Models\WhiteLabelApiLog;
+use App\Models\WhiteLabelGuideLink;
 use App\Models\WhiteLabelInstance;
 use App\Models\WhiteLabelLicensePlan;
 use App\Models\WhiteLabelProjectIntake;
@@ -86,6 +87,22 @@ class WhiteLabelRegistry extends Component
     public bool $planIsActive = true;
 
     public $planCoverUpload = null;
+
+    // Owner request (2026-09-15) — merchant guide reference-link create/edit
+    // form (Admin → White Label → Guide Links).
+    public ?int $editingGuideLinkId = null;
+
+    public string $guideLinkCategory = WhiteLabelGuideLink::CATEGORY_DOMAIN;
+
+    public string $guideLinkLabel = '';
+
+    public string $guideLinkUrl = '';
+
+    public string $guideLinkDescription = '';
+
+    public int $guideLinkSortOrder = 0;
+
+    public bool $guideLinkIsActive = true;
 
     // Prompt 21-EXT §5.3/§5.5 — platform earnings withdrawal (super_admin only,
     // to the acting admin's OWN verified payout account — same shape as the
@@ -430,6 +447,100 @@ class WhiteLabelRegistry extends Component
         $this->planSupportLevel = WhiteLabelLicensePlan::SUPPORT_STANDARD;
         $this->planIsActive = true;
         $this->planSortOrder = 0;
+    }
+
+    // --- Owner request (2026-09-15): merchant guide reference links ---
+
+    public function getGuideLinksProperty()
+    {
+        return WhiteLabelGuideLink::query()->orderBy('category')->orderBy('sort_order')->get();
+    }
+
+    public function getGuideLinkCategoriesProperty(): array
+    {
+        return WhiteLabelGuideLink::CATEGORY_LABELS;
+    }
+
+    public function newGuideLinkForm(): void
+    {
+        $this->guard();
+        $this->resetGuideLinkForm();
+    }
+
+    public function editGuideLink(int $id): void
+    {
+        $this->guard();
+        $link = WhiteLabelGuideLink::findOrFail($id);
+
+        $this->editingGuideLinkId = $link->id;
+        $this->guideLinkCategory = $link->category;
+        $this->guideLinkLabel = $link->label;
+        $this->guideLinkUrl = $link->url;
+        $this->guideLinkDescription = (string) $link->description;
+        $this->guideLinkSortOrder = $link->sort_order;
+        $this->guideLinkIsActive = $link->is_active;
+    }
+
+    /** Create or update a guide reference link. This is the only place an
+     *  admin needs to touch to point merchants at a different provider, or
+     *  swap a plain URL for their own affiliate link — no code change. */
+    public function saveGuideLink(): void
+    {
+        $this->guard();
+
+        $data = $this->validate([
+            'guideLinkCategory' => ['required', 'in:'.implode(',', array_keys(WhiteLabelGuideLink::CATEGORY_LABELS))],
+            'guideLinkLabel' => ['required', 'string', 'max:150'],
+            'guideLinkUrl' => ['required', 'url', 'max:2048'],
+            'guideLinkDescription' => ['nullable', 'string', 'max:255'],
+            'guideLinkSortOrder' => ['nullable', 'integer', 'min:0'],
+        ]);
+
+        $payload = [
+            'category' => $data['guideLinkCategory'],
+            'label' => $data['guideLinkLabel'],
+            'url' => $data['guideLinkUrl'],
+            'description' => $data['guideLinkDescription'] ?: null,
+            'sort_order' => $data['guideLinkSortOrder'] ?? 0,
+            'is_active' => $this->guideLinkIsActive,
+        ];
+
+        if ($this->editingGuideLinkId) {
+            $link = WhiteLabelGuideLink::findOrFail($this->editingGuideLinkId);
+            $link->update($payload);
+        } else {
+            $link = WhiteLabelGuideLink::create($payload);
+        }
+
+        Auditor::log('white_label.guide_link_saved', WhiteLabelGuideLink::class, $link->id, ['label' => $link->label]);
+        $this->resetGuideLinkForm();
+        $this->dispatch('nx-toast', type: 'success', message: 'Guide link saved.');
+    }
+
+    public function toggleGuideLinkActive(int $id): void
+    {
+        $this->guard();
+        $link = WhiteLabelGuideLink::findOrFail($id);
+        $link->update(['is_active' => ! $link->is_active]);
+        $this->dispatch('nx-toast', type: 'success', message: $link->label.' is now '.($link->is_active ? 'visible' : 'hidden').' in the merchant guide.');
+    }
+
+    public function deleteGuideLink(int $id): void
+    {
+        $this->guard();
+        $link = WhiteLabelGuideLink::find($id);
+        if ($link !== null) {
+            $link->delete();
+            $this->dispatch('nx-toast', type: 'success', message: 'Guide link removed.');
+        }
+    }
+
+    private function resetGuideLinkForm(): void
+    {
+        $this->reset('editingGuideLinkId', 'guideLinkLabel', 'guideLinkUrl', 'guideLinkDescription');
+        $this->guideLinkCategory = WhiteLabelGuideLink::CATEGORY_DOMAIN;
+        $this->guideLinkSortOrder = 0;
+        $this->guideLinkIsActive = true;
     }
 
     // --- Prompt 21-EXT §5.3/§5.5: platform earnings withdrawal ---
