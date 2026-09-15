@@ -387,8 +387,30 @@ class AppBuilder extends Component
     public function generateBuild(string $platform, string $artifactType): void
     {
         abort_unless(Auth::user()?->hasAnyRole(['super_admin', 'admin']), 403);
+        if (! AppExport::enabled()) {
+            $this->dispatch('nx-toast', type: 'error', message: 'App Export is switched off — flip it back on above before generating a build.');
+
+            return;
+        }
         app(BuildDispatcher::class)->create($platform, $artifactType, Auth::user());
         $this->dispatch('nx-toast', type: 'success', message: ucfirst($platform).' build queued.');
+    }
+
+    /**
+     * Master kill-switch (owner request, 2026-09-16). Deliberately NOT part of
+     * `booted()` — the switch has to stay reachable from this same screen so
+     * turning App Export back on never needs a database edit. Only build
+     * generation, the public /download page, and the CI trigger itself
+     * respect this; viewing/editing settings always stays open to an admin.
+     */
+    public function toggleAppExportEnabled(): void
+    {
+        abort_unless(Auth::user()?->hasAnyRole(['super_admin', 'admin']), 403);
+        $next = ! AppExport::enabled();
+        AppExport::save(['app_export_enabled' => $next]);
+        $this->form['app_export_enabled'] = $next;
+        Auditor::log('appexport.enabled_toggled', null, null, ['enabled' => $next]);
+        $this->dispatch('nx-toast', type: $next ? 'success' : 'error', message: $next ? 'App Export is back on.' : 'App Export is now closed — no new builds can be generated and /download is hidden.');
     }
 
     /**

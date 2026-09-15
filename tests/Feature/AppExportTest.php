@@ -57,6 +57,55 @@ class AppExportTest extends TestCase
         $this->get('/download')->assertOk();
     }
 
+    public function test_app_export_enabled_defaults_true_and_gates_the_download_page(): void
+    {
+        $this->assertTrue(AppExport::enabled());
+
+        AppExport::save(['download_enabled' => true]);
+        $this->get('/download')->assertOk();
+
+        AppExport::save(['app_export_enabled' => false]);
+        $this->assertFalse(AppExport::enabled());
+        // Still 404 even though download_enabled itself is untouched — the
+        // master switch overrides it.
+        $this->get('/download')->assertNotFound();
+
+        AppExport::save(['app_export_enabled' => true]);
+        $this->get('/download')->assertOk();
+    }
+
+    public function test_build_dispatcher_refuses_to_create_a_build_while_disabled(): void
+    {
+        AppExport::save(['app_export_enabled' => false]);
+
+        $this->expectException(\Symfony\Component\HttpKernel\Exception\HttpException::class);
+        app(\App\Services\AppExport\BuildDispatcher::class)->create('android', 'apk');
+    }
+
+    public function test_admin_can_toggle_app_export_enabled_from_app_builder(): void
+    {
+        Livewire::actingAs($this->admin())->test(AppBuilder::class)
+            ->assertSet('form.app_export_enabled', true)
+            ->call('toggleAppExportEnabled')
+            ->assertSet('form.app_export_enabled', false);
+
+        $this->assertFalse(AppExport::enabled());
+
+        // Generating a build while off shows a toast instead of crashing, and
+        // never creates a build row.
+        Livewire::actingAs($this->admin())->test(AppBuilder::class)
+            ->call('generateBuild', 'android', 'apk')
+            ->assertDispatched('nx-toast');
+        $this->assertSame(0, AppBuild::count());
+
+        // Flip back on — App Builder itself is never gated, so the admin can
+        // always reach this switch again.
+        Livewire::actingAs($this->admin())->test(AppBuilder::class)
+            ->call('toggleAppExportEnabled')
+            ->assertSet('form.app_export_enabled', true);
+        $this->assertTrue(AppExport::enabled());
+    }
+
     public function test_apk_shows_only_when_a_ready_apk_exists(): void
     {
         AppExport::save(['download_enabled' => true]);

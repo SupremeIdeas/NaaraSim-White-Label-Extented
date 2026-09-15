@@ -19,6 +19,12 @@ class BuildDispatcher
 {
     public function create(string $platform, string $artifactType, ?User $user = null): AppBuild
     {
+        // Master kill-switch (owner request, 2026-09-16) — checked here, not
+        // only in the Livewire action, so ANY caller (including a future
+        // merchant-facing trigger) is stopped from queuing a build while the
+        // App Export layer is closed. Aborts before a build row is even
+        // created, never leaving a frozen "queued" record behind.
+        abort_unless(AppExport::enabled(), 403, 'App Export is currently disabled.');
         abort_unless(in_array($platform, ['android', 'ios'], true), 422);
         abort_unless(in_array($artifactType, ['apk', 'aab', 'ipa'], true), 422);
 
