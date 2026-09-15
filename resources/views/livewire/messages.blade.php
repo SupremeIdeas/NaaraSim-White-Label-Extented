@@ -42,7 +42,7 @@
             @empty
                 <div class="px-4 py-16 text-center text-sm text-slate-400 dark:text-slate-500">
                     <x-icon name="inbox" class="mx-auto mb-2 h-6 w-6" />
-                    No conversations yet. Messages you send and receive on your Naara Lines appear here.
+                    {{ \App\Support\BrandSettings::rebrand('No conversations yet. Messages you send and receive on your Naara Lines appear here.') }}
                 </div>
             @endforelse
         </div>

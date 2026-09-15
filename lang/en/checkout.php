@@ -20,7 +20,7 @@ return [
     'remove' => 'Remove',
     'apply' => 'Apply',
     'checking' => 'Checking…',
-    'use_naaracredits' => 'Use my NaaraCredits',
+    'use_naaracredits' => \App\Support\BrandSettings::rebrand('Use my NaaraCredits'),
     'credits_balance' => 'You have :balance credits. Apply :credits to save :amount on this order.',
     'charged_after_credits' => 'Charged to wallet after credits',
     'go_to_connectivity' => 'Go to My Connectivity',
@@ -35,7 +35,7 @@ return [
     'confirm_compatible' => 'I confirm my device supports eSIM (dial *#06# to find your EID).',
     'pay_with_wallet' => 'Pay with wallet',
     'processing' => 'Processing…',
-    'wallet_disclaimer' => 'Charged securely from your NaaraSim wallet. :refundPolicy.',
+    'wallet_disclaimer' => \App\Support\BrandSettings::rebrand('Charged securely from your NaaraSim wallet. :refundPolicy.'),
     'refund_policy' => 'Refund policy',
 
     // Shared plan (Prompt 11 §3)

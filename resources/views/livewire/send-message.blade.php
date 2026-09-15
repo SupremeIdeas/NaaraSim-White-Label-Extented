@@ -24,11 +24,11 @@
                 @if ($lines->isEmpty())
                     {{-- No Line yet — messaging needs a real "from" number. --}}
                     <div class="rounded-2xl border border-dashed border-slate-300 p-5 text-center dark:border-white/10">
-                        <p class="mb-1 text-sm font-semibold text-slate-800 dark:text-slate-100">You need a Naara Line to text</p>
+                        <p class="mb-1 text-sm font-semibold text-slate-800 dark:text-slate-100">{{ \App\Support\BrandSettings::rebrand('You need a Naara Line to text') }}</p>
                         <p class="mb-4 text-xs text-slate-500 dark:text-slate-400">A message has to come from a number you own. Get a permanent voice + SMS line to start texting.</p>
                         <a href="{{ route('numbers', ['modal' => 'line']) }}" wire:navigate
                            class="inline-flex items-center gap-2 rounded-2xl bg-primary px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-primary-dark">
-                            <x-icon name="plus" class="h-4 w-4" /> Get a Naara Line
+                            <x-icon name="plus" class="h-4 w-4" /> {{ \App\Support\BrandSettings::rebrand('Get a Naara Line') }}
                         </a>
                     </div>
                 @else

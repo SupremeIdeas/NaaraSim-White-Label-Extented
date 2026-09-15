@@ -55,21 +55,21 @@ class NumbersBento
         return [
             'verify' => [
                 'badge_label' => 'FEATURED', 'icon' => 'shield-check', 'image' => '/img/numbers/bento/verify.webp',
-                'title' => 'Naara Verify',
+                'title' => BrandSettings::rebrand('Naara Verify'),
                 'subtitle' => 'Receive OTPs and verification codes instantly from trusted virtual numbers.',
                 'bullets' => ['WhatsApp', 'Telegram', 'Google'], // + live "+N more" appended at render
                 'link' => ['modal' => 'verify'],
             ],
             'rent' => [
                 'badge_label' => 'POPULAR', 'icon' => 'hash', 'image' => '/img/numbers/bento/rent.webp',
-                'title' => 'Naara Rent',
+                'title' => BrandSettings::rebrand('Naara Rent'),
                 'subtitle' => 'Rent temporary virtual phone numbers whenever you need one.',
                 'bullets' => ['Short-term use', 'Multiple countries', 'Instant activation'],
                 'link' => ['modal' => 'rent'],
             ],
             'line' => [
                 'badge_label' => 'PREMIUM', 'icon' => 'phone', 'image' => '/img/numbers/bento/line.webp',
-                'title' => 'Naara Line',
+                'title' => BrandSettings::rebrand('Naara Line'),
                 'subtitle' => 'Own a permanent international number that works for voice calls and SMS.',
                 'bullets' => ['Permanent number', 'Voice calls', 'SMS & more'],
                 'link' => ['modal' => 'line'],
@@ -77,7 +77,7 @@ class NumbersBento
             'call_forwarding' => [
                 'badge_label' => 'SMART', 'icon' => 'phone-forwarded', 'image' => '/img/numbers/bento/call-forwarding.webp',
                 'title' => 'Call Forwarding',
-                'subtitle' => 'Forward calls from your permanent Naara number to any mobile phone worldwide.',
+                'subtitle' => BrandSettings::rebrand('Forward calls from your permanent Naara number to any mobile phone worldwide.'),
                 'bullets' => [],
                 'link' => ['route' => 'numbers.forwarding'],
             ],

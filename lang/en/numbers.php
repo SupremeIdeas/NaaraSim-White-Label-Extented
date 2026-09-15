@@ -9,11 +9,13 @@ return [
     'send_sms' => 'Send an SMS',
     'view_on_dashboard' => 'View on dashboard',
 
-    // numbers-modals.blade.php — shared modal chrome
+    // numbers-modals.blade.php — shared modal chrome. Rebranded at the source
+    // (owner audit, 2026-09-15) so every consumer gets the white-label word
+    // for free, matching ProviderModels::brandize()'s existing convention.
     'modal_title' => [
-        'verify' => 'Naara Verify',
-        'rent' => 'Naara Rent',
-        'line' => 'Naara Line',
+        'verify' => \App\Support\BrandSettings::rebrand('Naara Verify'),
+        'rent' => \App\Support\BrandSettings::rebrand('Naara Rent'),
+        'line' => \App\Support\BrandSettings::rebrand('Naara Line'),
         'default' => 'Numbers',
     ],
     'back_to_numbers' => 'Back to Numbers',
@@ -23,7 +25,7 @@ return [
     'taxes_and_fees' => 'Taxes & fees',
     'you_pay' => 'You pay',
     'priced_at_reservation' => 'Priced at reservation',
-    'use_naaracredits' => 'Use my NaaraCredits',
+    'use_naaracredits' => \App\Support\BrandSettings::rebrand('Use my NaaraCredits'),
     'credits_balance' => 'You have :balance credits. Apply :credits to save :amount on this order.',
     'reserving' => 'Reserving…',
     'country_label' => 'Country',
@@ -71,16 +73,16 @@ return [
     'line' => [
         'mobile_numbers' => 'Mobile numbers',
         'toll_free' => 'Toll-free',
-        'coming_soon_title' => 'Naara Line is coming soon',
+        'coming_soon_title' => \App\Support\BrandSettings::rebrand('Naara Line is coming soon'),
         'coming_soon_body' => 'A permanent international number with voice & SMS — we’re finishing the last checks with our carrier.',
         'intro' => 'A permanent international number that’s yours to keep — :bold, billed monthly.',
         'intro_bold' => 'voice calls and SMS',
         'vanity_label' => 'Find a memorable number (optional)',
         'vanity_placeholder' => 'e.g. 777 or ends with 0000',
-        'active_title' => 'Naara Line active',
+        'active_title' => \App\Support\BrandSettings::rebrand('Naara Line active'),
         'active_hint' => 'Set up forwarding or the dialer from your dashboard.',
         'active_hint_sms_only' => 'This number supports SMS only — voice calls and call forwarding aren’t available on it.',
-        'monthly_note' => 'Naara Line is a monthly subscription — the first month is charged now, then it renews monthly. Voice & SMS included.',
+        'monthly_note' => \App\Support\BrandSettings::rebrand('Naara Line is a monthly subscription — the first month is charged now, then it renews monthly. Voice & SMS included.'),
         'mobile_fallback' => 'Mobile',
         'get_this_number' => 'Get this number',
         'search_again' => 'Search again',

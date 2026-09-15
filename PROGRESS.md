@@ -9,6 +9,24 @@
 
 ## DONE
 
+### 🏷️ White-label brand-rename wiring for Naara Verify/Rent/Line — 2026-09-15
+Synced from master. `BrandSettings::rebrand()` existed and worked, but
+`ProviderModels::brandize()` was its ONLY production call site — every
+other "Naara Verify"/"Naara Rent"/"Naara Line" (and NaaraCredits) literal
+had no rename path. Wired at the source so every consumer gets the
+white-label word for free: `lang/en/numbers.php` + `lang/en/checkout.php`
+(modal titles, the Naara Line copy trio, `use_naaracredits`, the wallet
+disclaimer), `NumbersBento::defaults()` (bento card titles + Call
+Forwarding subtitle), `ProductLineSettings::defaults()` (all 6 product
+lines, not just Verify/Rent, plus two CTA labels and two body-copy
+sentences), `SectionLibrary::types()` (bento section-builder defaults),
+and 3 blade empty-states (`call-forwarding`, `send-message`, `messages`).
+Found and fixed a real bug: `ProductLineSettings::products()` caches
+`defaults()` forever, and nothing flushed it when the brand word changed
+— fixed by flushing `ProductLineSettings` alongside `BrandSettings` in
+the brand-key-changed observer. A full "NaaraCredits"/"Naara Gift" sweep
+beyond these files stays a separate, larger follow-up. Full suite green.
+
 ### 📡 HeroSMS/VirtSMS live country-map discovery + key-gating — 2026-09-15
 Synced from master. Owner audit follow-up: `FiveSimService`/`GetatextService`
 now guard `priceFor()`/`buyOtp()`/`buyRental()` the same way `HeroSmsService`
@@ -4202,37 +4220,31 @@ Rate limits (Section 19.2): `api` limiter 300/min auth · 60/min public (on `rou
 
 ## NEXT  (build strictly top to bottom)
 
-### ▶ TOP OF NEXT — white-label brand-rename wiring (2026-09-15, IN PROGRESS)
-Synced from master: owner audit of Naara Verify (OTP/SMS) + Naara Rent
-(short-term rentals) catalogue sync and provider coverage, plus the
-white-label brand-rename ask (a fork's brand-word setting should
-consistently replace "Naara" across BOTH the user dashboard and marketing
-pages — this is the direct one relevant to THIS repo). Of the 4 gaps found:
+### ▶ TOP OF NEXT — Numbers/Verify/Rent catalogue sync: queued job + observability
+Synced from master. Owner's Naara Verify/Rent audit (2026-09-15), all 4
+gaps in order:
 
-1. ✅ DONE — HeroSMS/VirtSMS empty country/service maps (see DONE above).
-2. ✅ DONE — FiveSimService/GetatextService key-gating (see DONE above).
-3. ⏳ QUEUED (after #4) — real multi-provider Numbers/Verify/Rent catalogue
-   sync mirroring the eSIM pattern
+1. ✅ DONE — HeroSMS/VirtSMS empty country/service maps.
+2. ✅ DONE — FiveSimService/GetatextService key-gating.
+3. **◀ BUILD THIS NEXT — real multi-provider Numbers/Verify/Rent catalogue
+   sync** mirroring the eSIM pattern
    (`app/Services/eSIM/CatalogueSyncService.php`): `SyncNumberCatalogue`
-   still runs synchronously (not a queued job with retries) and has no
-   `SyncStatus::record()` observability or admin trigger button.
-4. **◀ BUILD THIS NEXT — wire `BrandSettings::rebrand()` into the
-   hardcoded "Naara Verify" / "Naara Rent" copy** — this is the direct fix
-   for the white-label brand-rename gap: `ProviderModels::brandize()` is
-   the ONLY production call site for the rebrand mechanism today;
-   `lang/en/numbers.php`, `app/Support/NumbersBento.php`,
-   `app/Support/ProductLineSettings.php`, `app/Support/SectionLibrary.php`,
-   and several raw blade strings (`call-forwarding.blade.php`,
-   `send-message.blade.php`, `messages.blade.php`,
-   `my-connectivity.blade.php`) all hardcode the literal word "Naara" with
-   no rename path. "NaaraCredits" and "Naara Gift" are the worst offenders
-   (100% hardcoded; Naara Gift isn't even in `ProviderModels::MODELS`) —
-   lower priority than Verify/Rent, same fix.
+   still runs synchronously in the scheduler (not a queued job with
+   retries) and has no `SyncStatus::record()` observability or admin
+   trigger button — all three of which the eSIM side already has.
+4. ✅ DONE — `BrandSettings::rebrand()` wired into the hardcoded "Naara
+   Verify"/"Naara Rent"/"Naara Line" copy across `lang/en/numbers.php`,
+   `lang/en/checkout.php`, `NumbersBento`, `ProductLineSettings` (all 6
+   product lines, not just Verify/Rent — plus a real cache-invalidation
+   bug fixed along the way), `SectionLibrary`, and 3 blade empty-states.
+   A full "NaaraCredits"/"Naara Gift" sweep beyond what these files
+   already touched stays a separate, larger follow-up — flag to the
+   owner rather than silently expanding scope.
 
 3 orphaned providers with live keys but no routing lane (SMSPool,
 OnlineSIM, Sonetel) and the missing `virtsms` entry in
 `SmsInboundWebhookController::PROVIDERS` are smaller follow-ups once the
-above ship — flag to the owner rather than silently deciding.
+above ships — flag to the owner rather than silently deciding.
 
 > The Merchant V2 Invoice Dashboard and the My Journey / Journey Goals arc
 > (loyalty milestones, travel timeline, admin-defined achievements paying

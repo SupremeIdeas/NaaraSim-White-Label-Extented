@@ -55,6 +55,19 @@ class MessageSenderTest extends TestCase
         return $user->fresh();
     }
 
+    // --- Owner audit (2026-09-15): brand-word wiring ---
+
+    public function test_the_no_line_empty_state_copy_is_rebranded(): void
+    {
+        \App\Models\Setting::setValue('brand.word', 'Acme', 'brand');
+        \App\Support\BrandSettings::flush();
+
+        Livewire::actingAs(User::factory()->create())->test(SendMessage::class)
+            ->set('open', true)
+            ->assertSee('Acme Line')
+            ->assertDontSee('Naara Line');
+    }
+
     public function test_quote_returns_retail_total_without_cost(): void
     {
         $user = $this->fundedUser(smsCost: 0.01);

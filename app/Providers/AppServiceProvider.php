@@ -98,6 +98,7 @@ use App\Support\NumbersBento;
 use App\Support\NumbersHeroContent;
 use App\Support\PaymentGatewayConfig;
 use App\Support\PreloaderSettings;
+use App\Support\ProductLineSettings;
 use App\Support\ProviderKeys;
 use App\Support\SchedulerHealth;
 use App\Support\SecuritySettings;
@@ -437,6 +438,11 @@ class AppServiceProvider extends ServiceProvider
             }
             if (BrandSettings::isBrandKey($setting->key)) {
                 BrandSettings::flush();
+                // ProductLineSettings::defaults() rebrands its seed copy
+                // (owner audit, 2026-09-15) but products() caches forever —
+                // bust it too so a brand-word change reflects immediately
+                // rather than waiting on an unrelated product-line save.
+                ProductLineSettings::flush();
             }
             if (BentoIcons::isBentoKey($setting->key)) {
                 BentoIcons::flush();
