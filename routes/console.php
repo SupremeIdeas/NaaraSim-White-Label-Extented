@@ -126,4 +126,3 @@ Schedule::command('brand-subscriptions:bill')->dailyAt('05:45')->withoutOverlapp
 
 // Prompt 21-EXT2 §6: complete an in_progress white-label project intake once
 // its admin-set deploy timeline has elapsed, and email the merchant.
-Schedule::command('whitelabel:intake-deploy-check')->dailyAt('06:00')->withoutOverlapping();

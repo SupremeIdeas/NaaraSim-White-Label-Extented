@@ -25,8 +25,6 @@ class DatabaseSeeder extends Seeder
             ProviderRegistrySeeder::class, // provider registry metadata + URLs (BUILD-14)
             ProviderExpansionSeeder::class, // new adapters, enabled=false (BUILD-18)
             ThemePresetSeeder::class,       // switchable visual skins — built-in naara-official (Theme Batch 1)
-            WhiteLabelLicensePlanSeeder::class, // Basic/Medium/Extended/Extended V2 catalog (Prompt 21-EXT §1)
-            WhiteLabelGuideLinkSeeder::class,   // merchant guide reference links (admin can swap for affiliate URLs)
         ]);
     }
 }

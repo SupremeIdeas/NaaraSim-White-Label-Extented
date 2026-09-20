@@ -18,11 +18,13 @@ use Livewire\Livewire;
 use Tests\TestCase;
 
 /**
- * Batch 8B — the enforcement gates. Each lockable feature 404s (hidden, like any
- * disabled feature) on a white-label fork whose license locks it, and is fully
- * reachable both on that fork once unlocked AND on the master, which is never
- * gated. The gate code is universal (forks are copies of the master); only the
- * received lock list differs.
+ * Batch 8B — the enforcement gates, WHITE-LABEL EXTENDED variant. Extended
+ * ships with ZERO feature locks (blueprint §0.4): every lockable feature stays
+ * reachable even when a lock list happens to be stored, because
+ * `FeatureEntitlements::all()` is hard-empty on this build. So the "fork" cases
+ * below assert reachability DESPITE a stored lock (the Extended guarantee),
+ * where the normal white-label fork would 404. The master (never gated) behaves
+ * the same as always.
  */
 class FeatureGateTest extends TestCase
 {
@@ -34,10 +36,11 @@ class FeatureGateTest extends TestCase
         parent::tearDown();
     }
 
-    /** Put this deployment in "fork" mode with a given lock list. */
+    /** Put this deployment in "fork" mode with a given lock list stored. On
+     *  Extended the stored list is deliberately ignored by the gate. */
     private function fork(array $locks): void
     {
-        config()->set('updater.product_identifier', 'naarasim-whitelabel');
+        config()->set('updater.product_identifier', 'naarasim-whitelabel-extended');
         FeatureEntitlements::store($locks);
     }
 
@@ -58,12 +61,12 @@ class FeatureGateTest extends TestCase
 
     // --- Gift cards ---
 
-    public function test_gift_cards_are_404_on_a_fork_that_locks_them(): void
+    public function test_gift_cards_stay_reachable_on_extended_even_when_a_lock_is_stored(): void
     {
         $this->enableGiftCards();
-        $this->fork([FeatureLocks::F_GIFT_CARDS]);
+        $this->fork([FeatureLocks::F_GIFT_CARDS]); // Extended ignores stored locks
 
-        Livewire::actingAs($this->user())->test(GiftCards::class)->assertStatus(404);
+        Livewire::actingAs($this->user())->test(GiftCards::class)->assertStatus(200);
     }
 
     public function test_gift_cards_are_reachable_on_a_fork_that_does_not_lock_them(): void
@@ -85,25 +88,25 @@ class FeatureGateTest extends TestCase
 
     // --- Preloader Studio ---
 
-    public function test_preloader_studio_is_404_on_a_fork_that_locks_it(): void
+    public function test_preloader_studio_stays_reachable_on_extended_even_when_a_lock_is_stored(): void
     {
         $this->seed(RoleSeeder::class);
         $admin = User::factory()->create();
         $admin->assignRole('admin');
         $this->fork([FeatureLocks::F_PRELOADER]);
 
-        Livewire::actingAs($admin)->test(PreloaderStudio::class)->assertStatus(404);
+        Livewire::actingAs($admin)->test(PreloaderStudio::class)->assertStatus(200);
     }
 
     // --- Brand Hunt family ---
 
-    public function test_brand_hunt_surfaces_are_404_on_a_fork_that_locks_them(): void
+    public function test_brand_hunt_surfaces_stay_reachable_on_extended_even_when_a_lock_is_stored(): void
     {
         $this->fork([FeatureLocks::F_BRAND_HUNT]);
         $user = $this->user();
 
-        Livewire::actingAs($user)->test(BrandHunt::class)->assertStatus(404);
-        Livewire::actingAs($user)->test(GetListed::class)->assertStatus(404);
+        Livewire::actingAs($user)->test(BrandHunt::class)->assertStatus(200);
+        Livewire::actingAs($user)->test(GetListed::class)->assertStatus(200);
     }
 
     public function test_brand_hunt_is_reachable_on_the_master(): void
@@ -116,17 +119,15 @@ class FeatureGateTest extends TestCase
 
     // --- Catalogue voice line ---
 
-    public function test_the_voice_line_is_hidden_and_unreachable_on_a_fork_that_locks_it(): void
+    public function test_the_voice_line_stays_unlocked_on_extended_even_when_a_lock_is_stored(): void
     {
         $this->fork([FeatureLocks::F_ESIM_VOICE]);
 
         Livewire::actingAs($this->user())
-            ->withQueryParams(['tab' => 'full'])
             ->test(Catalogue::class)
-            ->assertSet('voiceLocked', true)
-            ->assertSet('tab', 'data')          // ?tab=full deep link forced back to data
+            ->assertSet('voiceLocked', false)
             ->call('setTab', 'full')
-            ->assertSet('tab', 'data');         // can't switch to the locked line
+            ->assertSet('tab', 'full');       // Extended can always reach the voice line
     }
 
     public function test_the_voice_line_works_normally_on_the_master(): void

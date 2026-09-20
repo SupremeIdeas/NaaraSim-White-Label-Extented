@@ -9,6 +9,22 @@
 
 ## DONE
 
+### 🔪 White-label license boundary surgery (EXTENDED) — consumer-only, fully unlocked — 2026-09-20
+Same boundary surgery as the normal fork (removed the entire issuer/oversight/
+distributor + merchant license-sales + PlatformEarnings resale surface, plus
+their routes/nav/seeders/migrations/tests), PLUS the Extended difference:
+`FeatureEntitlements::all()` is now hard-empty so EVERY feature is always
+unlocked regardless of what the master sends (blueprint §0.4 — "Extended
+ships with zero feature locks, every feature live from install"). Extended's
+only gate is license validity (the update/entitlement check-in), never a
+per-feature lock. Adapted the two fork-side tests that assumed data-driven
+locks (`WhiteLabelEntitlementClientTest`, `FeatureGateTest`) to prove the
+always-unlocked guarantee at both the client-cache and gate levels. Kept the
+consumer leaf intact (WhiteLabelUpdateClient, /updater, verify/apply, the local
+gate). Dangling-reference sweep: zero. Full suite green: 2204 tests, 6953
+assertions. Docs: docs/audits/WHITE-LABEL-BOUNDARY-AUDIT.md,
+docs/architecture/WHITE-LABEL-LICENSE-BOUNDARY.md.
+
 ### 📖 In-app Merchant White Label Guide + admin-configurable reference links — 2026-09-16
 Synced from master. New `white_label_guide_links` table + `WhiteLabelGuideLink`
 model (domain/vps/shared/general categories), seeded with the same providers

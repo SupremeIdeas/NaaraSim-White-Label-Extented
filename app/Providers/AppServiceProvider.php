@@ -10,7 +10,6 @@ use App\Events\ProviderOutcomeRecorded;
 use App\Listeners\RecordLoginDevice;
 use App\Listeners\ReturnMerchantEarnings;
 use App\Listeners\ReturnPartnerEarnings;
-use App\Listeners\ReturnPlatformEarnings;
 use App\Listeners\ReturnReferralEarnings;
 use App\Listeners\ReturnStaffEarnings;
 use App\Listeners\ReturnWithdrawnCredits;
@@ -341,12 +340,9 @@ class AppServiceProvider extends ServiceProvider
             ReturnPartnerEarnings::class,
         );
 
-        // Same, for a reversed platform-earnings (white-label license sale
-        // proceeds) withdrawal — Prompt 21-EXT §5.4.
-        Event::listen(
-            PayoutReversed::class,
-            ReturnPlatformEarnings::class,
-        );
+        // NOTE: the platform-earnings (white-label license sale proceeds)
+        // reversal handler is master-only and was removed — a white-label build
+        // never books resale earnings (see docs/architecture/WHITE-LABEL-LICENSE-BOUNDARY.md).
 
         // Same, for a reversed referral margin-share payout (BUILD-22).
         Event::listen(
