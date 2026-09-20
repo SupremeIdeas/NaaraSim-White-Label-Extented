@@ -9,6 +9,18 @@
 
 ## DONE
 
+### 🗄️ Account erasure fix (Tier 0 #2, overdue) — anonymize-and-retain (synced from master) — 2026-09-20
+Same fix as master (AccountService.php is core, no fork-specific behavior):
+`erase()` now anonymizes-and-retains instead of hard-deleting on super-admin
+deletion approval — PII nulled, account deactivated, financial/order records
+retained under the same user id until `account_erasure.retention_years`
+elapses. New `account:purge-erased` scheduled command performs the real,
+final purge. New Admin → Legal hold records screen (super-admin only,
+audited) for a read-only lookup of retained records during the window.
+`docs/ACCOUNT-ERASURE.md` copied for the compliance-facing summary. Full
+suite green after sync.
+
+
 ### 🔪 White-label license boundary surgery (EXTENDED) — consumer-only, fully unlocked — 2026-09-20
 Same boundary surgery as the normal fork (removed the entire issuer/oversight/
 distributor + merchant license-sales + PlatformEarnings resale surface, plus

@@ -54,6 +54,19 @@ class User extends Authenticatable implements MustVerifyEmail
     ];
 
     /**
+     * PII fields nulled/replaced on erasure (anonymize-and-retain). Kept as a
+     * single list so AccountService::erase() and any future export/audit code
+     * agree on exactly what "anonymized" means for a User row.
+     *
+     * @var list<string>
+     */
+    public const ANONYMIZED_FIELDS = [
+        'name', 'email', 'google_id', 'avatar', 'phone', 'whatsapp_number',
+        'country_code', 'bio', 'city', 'address_line', 'postal_code',
+        'date_of_birth',
+    ];
+
+    /**
      * The attributes that should be hidden for serialization.
      *
      * @var list<string>
@@ -84,6 +97,8 @@ class User extends Authenticatable implements MustVerifyEmail
             'data_export_ready_at' => 'datetime',
             'deletion_requested_at' => 'datetime',
             'deletion_approved_at' => 'datetime',
+            'anonymized_at' => 'datetime',
+            'retention_purge_due_at' => 'datetime',
             'merchant_enrollment_paid_at' => 'datetime',
             'merchant_margin_pct' => 'decimal:3', // referral-margin lock (§3.3)
         ];
@@ -131,6 +146,12 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return ! is_null($this->deletion_requested_at)
             && is_null($this->deletion_approved_at);
+    }
+
+    /** Deletion was approved and PII was anonymized (financial records retained). */
+    public function isAnonymized(): bool
+    {
+        return ! is_null($this->anonymized_at);
     }
 
     // -- Relationships -----------------------------------------------------

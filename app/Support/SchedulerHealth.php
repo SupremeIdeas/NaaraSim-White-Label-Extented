@@ -62,6 +62,9 @@ class SchedulerHealth
         'brand-subscriptions:bill' => ['Brand Directory subscription billing', 86400],
         // Prompt 21-EXT2 §6 — completes elapsed white-label deploy timelines.
         'whitelabel:intake-deploy-check' => ['White-label deploy timeline check', 86400],
+        // Erasure-fix Phase A stage 3 — permanently purges anonymized accounts
+        // whose admin-configured retention window has elapsed.
+        'account:purge-erased' => ['Account erasure retention purge', 86400],
     ];
 
     /** Record a task's completion. Accepts the raw scheduler command string. */

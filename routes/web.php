@@ -34,6 +34,7 @@ use App\Http\Controllers\VoicemailAudioController;
 use App\Http\Controllers\Webhooks\WhatsAppWebhookController;
 use App\Livewire\Account;
 use App\Livewire\Admin\AccountDeletions;
+use App\Livewire\Admin\LegalHoldRecords;
 use App\Livewire\Admin\Alerts;
 use App\Livewire\Admin\Analytics;
 use App\Livewire\Admin\Announcements;
@@ -446,6 +447,9 @@ Route::middleware(['admin', 'throttle:admin'])
             // Growth stack: social links, tracking pixels, social sign-in guides.
             Route::get('/integrations', Integrations::class)->name('integrations');
             Route::get('/deletions', AccountDeletions::class)->name('deletions');
+            // Erasure fix Phase A: read-only, heavily-audited lookup of an
+            // anonymized account's retained financial/order trail.
+            Route::get('/legal-hold', LegalHoldRecords::class)->name('legal-hold');
             Route::get('/support-agent', SupportAgent::class)->name('support-agent');
         });
 

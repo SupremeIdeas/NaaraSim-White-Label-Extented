@@ -93,6 +93,7 @@
         $support[] = ['route' => 'admin.users', 'label' => 'Users', 'icon' => 'id-card'];
         $support[] = ['route' => 'admin.support-agent', 'label' => 'Support agent', 'icon' => 'message-circle'];
         $support[] = ['route' => 'admin.deletions', 'label' => 'Deletions', 'icon' => 'trash'];
+        $support[] = ['route' => 'admin.legal-hold', 'label' => 'Legal hold records', 'icon' => 'lock'];
         $support[] = ['route' => 'admin.port-in-requests', 'label' => 'Port-in requests', 'icon' => 'phone-forwarded'];
     }
     if ($isPrivileged || $u->can('tickets.manage')) {

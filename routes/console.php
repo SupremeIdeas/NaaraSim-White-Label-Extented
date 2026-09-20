@@ -72,6 +72,11 @@ Schedule::command('numbers:catalogue-sync')->weekly()->sundays()->at('03:30')->w
 // Nightly encrypted database backup + cleanup of old archives (Section 28).
 Schedule::command('backup:clean')->dailyAt('02:30')->withoutOverlapping();
 
+// GDPR erasure fix, stage 3: permanently purge accounts anonymized by
+// AccountService::erase() once their admin-configured retention window has
+// elapsed (Section 26 / erasure-fix Phase A). Off-peak, once a day is plenty.
+Schedule::command('account:purge-erased')->dailyAt('03:15')->withoutOverlapping();
+
 // Auto-promote eligible users to Merchant V1 — no-op unless the admin enabled it
 // (BUILD-4 §4.3; the default is the manual "Ready to promote" queue).
 Schedule::command('merchants:auto-promote')->dailyAt('05:00')->withoutOverlapping();

@@ -23,7 +23,7 @@ class AccountDeletions extends Component
     {
         $user = User::whereKey($userId)->firstOrFail();
         $service->approveDeletion($user, Auth::user());
-        $this->status = 'Account #'.$userId.' was approved and permanently erased.';
+        $this->status = 'Account #'.$userId.' was approved and anonymized. Financial/order records remain retained until the retention window elapses.';
     }
 
     public function render()

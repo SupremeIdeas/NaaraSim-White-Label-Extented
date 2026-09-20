@@ -131,10 +131,11 @@ class AccountLifecycleTest extends TestCase
         $this->assertStringContainsString('user #'.$referred->id, $json);
     }
 
-    public function test_a_super_admin_approves_a_deletion_and_the_account_is_erased(): void
+    public function test_a_super_admin_approves_a_deletion_and_the_account_is_anonymized_not_hard_deleted(): void
     {
         Notification::fake();
         $user = $this->user();
+        $originalEmail = $user->email;
         $order = EsimOrder::create([
             'user_id' => $user->id, 'provider' => 'esimgo', 'provider_order_ref' => 'REF-2',
             'status' => 'active', 'price_charged' => 5.00, 'wholesale_cost' => 2.00, 'currency' => 'USD',
@@ -147,7 +148,7 @@ class AccountLifecycleTest extends TestCase
         $this->assertDatabaseHas('audit_logs', ['action' => 'account.deletion_requested']);
         Notification::assertSentTo($user, AccountLifecycleNotification::class, fn ($n) => $n->action === AccountLifecycleNotification::DELETION_REQUESTED);
 
-        // Super admin approves via the admin queue -> erased.
+        // Super admin approves via the admin queue -> anonymized, NOT erased.
         $super = User::factory()->create();
         $super->assignRole('super_admin');
 
@@ -155,14 +156,114 @@ class AccountLifecycleTest extends TestCase
             ->assertSee($user->email)
             ->call('approve', $user->id);
 
+        $user->refresh();
+
+        // The user row survives, but every PII field is wiped.
+        $this->assertDatabaseHas('users', ['id' => $user->id]);
+        $this->assertNotSame($originalEmail, $user->email);
+        $this->assertSame('Deleted User', $user->name);
+        $this->assertNull($user->phone);
+        $this->assertNull($user->date_of_birth);
+        $this->assertFalse((bool) $user->is_active);
+        $this->assertNotNull($user->anonymized_at);
+        $this->assertNotNull($user->retention_purge_due_at);
+        $this->assertTrue($user->retention_purge_due_at->isFuture());
+
+        // The financial/order trail is fully retained under the same user id.
+        $this->assertDatabaseHas('esim_orders', ['id' => $order->id, 'user_id' => $user->id]);
+
+        $this->assertDatabaseHas('audit_logs', ['action' => 'account.deletion_approved']);
+        $this->assertDatabaseHas('audit_logs', ['action' => 'account.anonymized']);
+        // No hard-delete tombstone is written at approval time anymore.
+        $this->assertDatabaseMissing('audit_logs', ['action' => 'account.erased']);
+        // Sent BEFORE the PII fields were overwritten (notifyNow) so the real
+        // name/email still render in the notification, not the placeholder.
+        Notification::assertSentTo($user, AccountLifecycleNotification::class, fn ($n) => $n->action === AccountLifecycleNotification::ERASED);
+    }
+
+    public function test_the_scheduled_purge_command_leaves_an_account_within_its_retention_window_untouched(): void
+    {
+        $user = $this->user();
+        $service = app(\App\Services\Account\AccountService::class);
+        $service->erase($user);
+        $user->refresh();
+        $this->assertTrue($user->retention_purge_due_at->isFuture());
+
+        $this->artisan('account:purge-erased')->assertSuccessful();
+
+        $this->assertDatabaseHas('users', ['id' => $user->id]);
+    }
+
+    public function test_the_scheduled_purge_command_permanently_deletes_an_account_past_its_retention_window(): void
+    {
+        $user = $this->user();
+        $order = EsimOrder::create([
+            'user_id' => $user->id, 'provider' => 'esimgo', 'provider_order_ref' => 'REF-3',
+            'status' => 'active', 'price_charged' => 5.00, 'wholesale_cost' => 2.00, 'currency' => 'USD',
+        ]);
+
+        $service = app(\App\Services\Account\AccountService::class);
+        $service->erase($user);
+        $user->forceFill(['retention_purge_due_at' => now()->subDay()])->save();
+
+        $this->artisan('account:purge-erased')->assertSuccessful();
+
         $this->assertDatabaseMissing('users', ['id' => $user->id]);
         $this->assertDatabaseMissing('esim_orders', ['id' => $order->id]);
-        $this->assertDatabaseHas('audit_logs', ['action' => 'account.deletion_approved']);
-        // Erasure tombstone survives the user row.
-        $this->assertDatabaseHas('audit_logs', ['action' => 'account.erased']);
-        // Sent BEFORE the row was deleted (notifyNow — a queued send couldn't
-        // resolve a model that no longer exists by the time a worker ran it).
-        Notification::assertSentTo($user, AccountLifecycleNotification::class, fn ($n) => $n->action === AccountLifecycleNotification::ERASED);
+        $this->assertDatabaseHas('audit_logs', ['action' => 'account.purged']);
+    }
+
+    public function test_a_super_admin_can_view_retained_records_under_a_legal_hold_with_a_case_reference_and_reason(): void
+    {
+        $user = $this->user();
+        EsimOrder::create([
+            'user_id' => $user->id, 'provider' => 'esimgo', 'provider_order_ref' => 'REF-4',
+            'status' => 'active', 'price_charged' => 5.00, 'wholesale_cost' => 2.00, 'currency' => 'USD',
+        ]);
+
+        $service = app(\App\Services\Account\AccountService::class);
+        $service->erase($user);
+        $user->refresh();
+
+        $super = User::factory()->create();
+        $super->assignRole('super_admin');
+
+        $view = $service->viewRetainedRecordsForLegalHold($user, $super, 'CASE-123', 'AML audit request');
+
+        $this->assertSame($user->id, $view['user_id']);
+        $this->assertCount(1, $view['esim_orders']);
+        $this->assertDatabaseHas('audit_logs', [
+            'action' => 'account.legal_hold_viewed',
+            'model_id' => $user->id,
+        ]);
+    }
+
+    public function test_a_legal_hold_view_requires_a_case_reference_and_reason(): void
+    {
+        $user = $this->user();
+        $service = app(\App\Services\Account\AccountService::class);
+        $service->erase($user);
+        $user->refresh();
+
+        $super = User::factory()->create();
+        $super->assignRole('super_admin');
+
+        $this->expectException(\Symfony\Component\HttpKernel\Exception\HttpException::class);
+        $service->viewRetainedRecordsForLegalHold($user, $super, '', '');
+    }
+
+    public function test_a_non_super_admin_cannot_view_retained_records_under_legal_hold(): void
+    {
+        $user = $this->user();
+        $service = app(\App\Services\Account\AccountService::class);
+        $service->erase($user);
+        $user->refresh();
+
+        $admin = User::factory()->create();
+        $admin->assignRole('admin');
+
+        $this->expectException(\Symfony\Component\HttpKernel\Exception\HttpException::class);
+        $service->viewRetainedRecordsForLegalHold($user, $admin, 'CASE-1', 'reason');
     }
 
     public function test_a_user_can_cancel_a_pending_deletion_request(): void
