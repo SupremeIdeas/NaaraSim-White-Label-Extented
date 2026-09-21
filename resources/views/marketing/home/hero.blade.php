@@ -22,8 +22,19 @@
             <div class="absolute inset-0 bg-gradient-to-b from-[#F8F9FA] via-[#F8F9FA]/55 to-[#F8F9FA]/70 dark:from-[#0D1B2A] dark:via-[#0D1B2A]/15 dark:to-[#0D1B2A]/65"></div>
         </div>
         {{-- Flag + comms nodes over the planet: our brand's "connect across
-             borders" message, above the scrim so they read clearly. --}}
-        <x-flag-orbit tone="light" class="z-[1]" />
+             borders" message, above the scrim so they read clearly.
+             Frontend-UX-fix blueprint Phase C — root-caused via Playwright:
+             node positions are percentages of this section's own height,
+             tuned for a short, wide desktop hero. On a narrow phone the same
+             hero reflows much taller (headline wraps to 2 lines, full-width
+             paragraph, stacked CTA/stat grid), so those same percentages
+             land the flag chips directly on top of the headline, paragraph,
+             CTA buttons and stat numbers (reproduced live at 375px — visibly
+             overlapping every one of those). Purely decorative with zero
+             information loss if hidden; `lg:` is where the hero is short
+             enough for the periphery these positions assume to actually
+             exist. --}}
+        <x-flag-orbit tone="light" class="z-[1] hidden lg:block" />
     @endif
     <div class="relative z-10 mx-auto max-w-6xl px-4 pb-20 pt-16 text-center sm:pt-24 {{ ! empty($s['image']) ? 'text-white' : '' }}">
         {{-- Admin image branch sits on a dark navy scrim regardless of the
