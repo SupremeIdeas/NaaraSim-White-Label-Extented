@@ -31,6 +31,15 @@
         $more[] = ['route' => 'admin.notices', 'label' => 'Login notices', 'icon' => 'bell'];
         $more[] = ['route' => 'admin.guides', 'label' => 'User guides', 'icon' => 'help-circle'];
         $more[] = ['route' => 'admin.banners', 'label' => 'Banners', 'icon' => 'image'];
+        // Distinct from "Banners" above (Module 31 — admin-uploaded promo
+        // artwork/coupons): this is the "More from Naara" curated
+        // feature-highlight carousel's own placement toggle (Frontend-UX-fix
+        // blueprint Phase G).
+        $more[] = ['route' => 'admin.banner-placements', 'label' => 'More from Naara banners', 'icon' => 'grid'];
+        // Note: master also has a "More Apps" (admin.more-apps) entry here,
+        // gated FeatureEntitlements::isMaster() — that feature/route was never
+        // built in this fork at all (not just gated off), so it's omitted
+        // rather than referencing a route name that doesn't exist here.
         $more[] = ['route' => 'admin.esim-hero', 'label' => 'eSIM hero', 'icon' => 'signal'];
         $more[] = ['route' => 'admin.numbers-hero', 'label' => 'Numbers hero', 'icon' => 'phone'];
         $more[] = ['route' => 'admin.numbers-cards', 'label' => 'Numbers cards', 'icon' => 'grid'];

@@ -9,4 +9,12 @@
         explicit choice, so a missing/mid-migration preset never breaks the page.
     --}}
     @include('livewire.partials.dashboard-home-'.\App\Support\ThemePreset::layoutVariant('dashboard_home'))
+
+    {{-- Frontend-UX-fix blueprint Phase G — the `dashboard_footer` banner
+         placement (App\Support\BannerPlacements). Rendered once here, after
+         all 3 layout variants' shared content, so it always sits at the true
+         bottom of the dashboard regardless of which variant is active — and
+         is OFF by default, so an unconfigured install renders nothing new
+         here at all. --}}
+    @include('partials.banner-carousel', ['placement' => 'dashboard_footer'])
 </div>

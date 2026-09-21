@@ -190,7 +190,12 @@ class LinkPreviewSettingsTest extends TestCase
      */
     public function test_the_banner_carousel_stage_uses_the_banners_own_aspect_ratio_not_a_fixed_height(): void
     {
-        $html = file_get_contents(resource_path('views/marketing/home/_banner_carousel.blade.php'));
+        // Frontend-UX-fix blueprint Phase G moved the actual carousel markup
+        // out of this file and into the shared `partials.banner-carousel`
+        // (App\Support\BannerPlacements) that every placement now renders
+        // through — this homepage-specific file is just a thin `@include`
+        // wrapper today, so the aspect-ratio fix from Phase D lives there.
+        $html = file_get_contents(resource_path('views/partials/banner-carousel.blade.php'));
 
         $this->assertStringContainsString('height="aspect-[16/9]"', $html);
         $this->assertStringNotContainsString('height="h-56 sm:h-80"', $html);

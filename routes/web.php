@@ -40,6 +40,7 @@ use App\Livewire\Admin\Analytics;
 use App\Livewire\Admin\Announcements;
 use App\Livewire\Admin\AppBuilder;
 use App\Livewire\Admin\Backups;
+use App\Livewire\Admin\BannerPlacements;
 use App\Livewire\Admin\Banners;
 use App\Livewire\Admin\BentoIcons;
 use App\Livewire\Admin\BrandDirectory;
@@ -422,6 +423,8 @@ Route::middleware(['admin', 'throttle:admin'])
             Route::get('/guides', Guides::class)->name('guides');
             Route::get('/service-icons', ServiceIconsPage::class)->name('service-icons');
             Route::get('/banners', Banners::class)->name('banners');
+            // Frontend-UX-fix blueprint Phase G — "More from Naara" banner placement system.
+            Route::get('/banner-placements', BannerPlacements::class)->name('banner-placements');
             Route::get('/coupons', Coupons::class)->name('coupons');
             // Announcements & offers — push to every user's notification bell.
             Route::get('/announcements', Announcements::class)->name('announcements');
