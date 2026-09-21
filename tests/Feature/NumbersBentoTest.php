@@ -137,12 +137,37 @@ class NumbersBentoTest extends TestCase
         $admin->assignRole('super_admin');
 
         Livewire::actingAs($admin)->test(\App\Livewire\Admin\NumbersBento::class)
-            ->set('form.rent.title', str_repeat('a', 29))
+            ->set('form.rent.title', str_repeat('a', 21))
             ->call('save', 'rent')
             ->assertHasErrors(['form.rent.title']);
 
         Livewire::actingAs($admin)->test(\App\Livewire\Admin\NumbersBento::class)
-            ->set('form.rent.title', str_repeat('a', 28))
+            ->set('form.rent.title', str_repeat('a', 20))
+            ->call('save', 'rent')
+            ->assertHasNoErrors();
+    }
+
+    /**
+     * Frontend-UX-fix blueprint Phase E, tightened after owner feedback: a
+     * character cap alone still let a full descriptive PHRASE through
+     * ("Rent Numbers Worldwide", 22 chars, well under the old max:28) —
+     * bento titles are meant to stay a short label like "Verify"/"Rent"/
+     * "Line", never a sentence. The word-count rule is what actually
+     * enforces that, independent of length.
+     */
+    public function test_a_bento_card_title_cannot_become_a_multi_word_phrase(): void
+    {
+        $this->seed(\Database\Seeders\RoleSeeder::class);
+        $admin = User::factory()->create();
+        $admin->assignRole('super_admin');
+
+        Livewire::actingAs($admin)->test(\App\Livewire\Admin\NumbersBento::class)
+            ->set('form.rent.title', 'One Two Three Four')
+            ->call('save', 'rent')
+            ->assertHasErrors(['form.rent.title']);
+
+        Livewire::actingAs($admin)->test(\App\Livewire\Admin\NumbersBento::class)
+            ->set('form.rent.title', 'Naara Rent Now')
             ->call('save', 'rent')
             ->assertHasNoErrors();
     }

@@ -23,8 +23,12 @@
             $navDevelopers = [
                 ['route' => 'developers', 'label' => 'Developers', 'desc' => 'Resell via our API', 'icon' => 'key'],
                 ['route' => 'pricing', 'label' => 'Pricing', 'desc' => 'Transparent, no surprises', 'icon' => 'credit-card'],
-                ['route' => 'faq', 'label' => 'FAQ', 'desc' => 'Answers to common questions', 'icon' => 'help-circle'],
             ];
+            // FAQ page is master-only (owner decision, 2026-09-21) — its
+            // route 404s on a fork, so never link to it there either.
+            if (\App\Support\FeatureEntitlements::isMaster()) {
+                $navDevelopers[] = ['route' => 'faq', 'label' => 'FAQ', 'desc' => 'Answers to common questions', 'icon' => 'help-circle'];
+            }
             $navCompany = [
                 ['route' => 'about', 'label' => 'About', 'desc' => 'Our mission & story', 'icon' => 'info'],
                 ['route' => 'blog', 'label' => 'Blog', 'desc' => 'News & guides', 'icon' => 'file-text'],

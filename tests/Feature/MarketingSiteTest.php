@@ -85,6 +85,39 @@ class MarketingSiteTest extends TestCase
             ->assertDontSee('data-webgl-hero="liquid"', false);
     }
 
+    /**
+     * FAQ is master-only (owner decision, 2026-09-21) — a white-label fork
+     * never gets the dedicated page: the route 404s, the nav link
+     * disappears, and the admin's Pages editor drops its tab too.
+     */
+    public function test_the_faq_page_404s_on_a_white_label_fork(): void
+    {
+        config()->set('updater.product_identifier', 'naarasim-whitelabel');
+
+        $this->get('/faq')->assertNotFound();
+
+        config()->set('updater.product_identifier', 'naarasim-core');
+    }
+
+    public function test_the_faq_nav_link_is_hidden_on_a_white_label_fork(): void
+    {
+        config()->set('updater.product_identifier', 'naarasim-whitelabel');
+
+        $this->get('/')->assertOk()->assertDontSee('Answers to common questions');
+
+        config()->set('updater.product_identifier', 'naarasim-core');
+    }
+
+    public function test_the_faq_page_is_dropped_from_the_site_editors_page_list_on_a_white_label_fork(): void
+    {
+        config()->set('updater.product_identifier', 'naarasim-whitelabel');
+
+        $this->assertNotContains('faq', SiteContent::editablePages());
+        $this->assertContains('faq', SiteContent::PAGES); // the raw catalogue is unchanged
+
+        config()->set('updater.product_identifier', 'naarasim-core');
+    }
+
     public function test_an_admin_override_changes_the_public_page(): void
     {
         SiteContent::saveOverrides('home', [

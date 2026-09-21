@@ -197,7 +197,14 @@ Route::get('/refund-policy', fn () => view('legal.show', ['doc' => LegalContent:
 // page (admin-editable hero incl. background image via Admin → Pages → FAQ)
 // whose Q&A content is pulled live from the homepage's own 'faq' section, so
 // there is exactly one FAQ list on the whole site, never two copies to drift.
-Route::get('/faq', fn () => view('marketing.faq', ['sections' => SiteContent::page('faq')]))->name('faq');
+// Master-only (owner decision, 2026-09-21) — a white-label fork never gets
+// this dedicated page, same 404-on-a-fork posture as every other
+// master-only route in this codebase.
+Route::get('/faq', function () {
+    abort_unless(\App\Support\FeatureEntitlements::isMaster(), 404);
+
+    return view('marketing.faq', ['sections' => SiteContent::page('faq')]);
+})->name('faq');
 
 // Installable app: dynamic PWA manifest + public "Download the App" page.
 Route::get('/manifest.webmanifest', ManifestController::class)->name('manifest');

@@ -83,17 +83,26 @@ class NumbersBento extends Component
 
         $data = $this->validate([
             "form.{$key}.badge_label" => 'nullable|string|max:24',
-            // Frontend-UX-fix blueprint Phase E: the title renders next to a
-            // fixed 36px icon in a row that also reserves clearance for the
-            // card's absolute-positioned badge — on the narrowest two-up
-            // mobile card (~126px content width) that leaves very little
-            // room. Reproduced live at the old max:60: a 45-char title left
-            // the title's own box only ~16px wide, clipping to nothing under
-            // `line-clamp-2`'s `overflow: hidden`. 28 chars comfortably clears
-            // the longest current default ("Contact Management", 19 chars)
-            // plus headroom for a rebrand, while still wrapping cleanly to 2
-            // lines at every card width instead of vanishing.
-            "form.{$key}.title" => 'required|string|max:28',
+            // Frontend-UX-fix blueprint Phase E, tightened after owner
+            // feedback: the title renders next to a fixed 36px icon in a row
+            // that also reserves clearance for the card's absolute-
+            // positioned badge — on the narrowest two-up mobile card
+            // (~126px content width) that leaves very little room.
+            // Reproduced live at the old max:60: a 45-char title left the
+            // title's own box only ~16px wide, clipping to nothing. But a
+            // char cap alone still let a full descriptive PHRASE through
+            // ("Rent Numbers Worldwide", 22 chars) — this is meant to stay a
+            // short label like "Verify"/"Rent"/"Line", never a sentence.
+            // 20 chars still clears the longest current default ("Contact
+            // Management"/"Make Internet Calls", 19 chars); the word-count
+            // rule below is the one that actually stops a phrase, since a
+            // short-but-multi-word string could otherwise still slip under
+            // any character cap.
+            "form.{$key}.title" => ['required', 'string', 'max:20', function (string $attribute, mixed $value, \Closure $fail) {
+                if (str_word_count((string) $value) > 3) {
+                    $fail('Keep it a short label like "Naara Verify" — 3 words max, not a full sentence.');
+                }
+            }],
             "form.{$key}.subtitle" => 'required|string|max:500',
             "form.{$key}.bullets" => 'nullable|string|max:400',
             "form.{$key}.display_mode" => 'required|in:modal,page',

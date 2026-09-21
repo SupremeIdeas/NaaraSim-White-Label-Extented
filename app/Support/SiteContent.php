@@ -19,6 +19,22 @@ class SiteContent
     public const PAGES = ['home', 'about', 'how-it-works', 'contact', 'faq'];
 
     /**
+     * PAGES minus any page that's master-only. Today that's just 'faq'
+     * (owner decision, 2026-09-21 — the dedicated FAQ page's own route
+     * 404s on a white-label fork, so its admin editor tab and page-select
+     * shouldn't be reachable there either). Use this instead of the raw
+     * PAGES const anywhere an admin picks a page to edit.
+     *
+     * @return list<string>
+     */
+    public static function editablePages(): array
+    {
+        return FeatureEntitlements::isMaster()
+            ? self::PAGES
+            : array_values(array_diff(self::PAGES, ['faq']));
+    }
+
+    /**
      * Sections that are self-contained and safe to reuse on ANY marketing page
      * (BUILD: reusable sections). Each renders through a shared partial —
      * `resources/views/marketing/sections/{key}.blade.php` — rather than a
