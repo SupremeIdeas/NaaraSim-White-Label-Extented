@@ -38,6 +38,47 @@
             </div>
         </div>
 
+        {{-- Tier 5 #11 Phase A1 — two selectable presentation styles. --}}
+        <div>
+            <label class="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-300">Style</label>
+            <div class="grid gap-2 sm:grid-cols-2">
+                <button type="button" wire:click="$set('style', 'banner_hero')"
+                        class="rounded-lg border p-3 text-left transition {{ $style === 'banner_hero' ? 'border-primary bg-primary/5' : 'border-slate-300 dark:border-[#2D4060]' }}">
+                    <p class="text-sm font-semibold text-slate-800 dark:text-slate-100">Banner hero</p>
+                    <p class="mt-0.5 text-[11px] text-slate-500 dark:text-slate-400">Wide image up top, headline + one prominent button.</p>
+                </button>
+                <button type="button" wire:click="$set('style', 'dark_feature')"
+                        class="rounded-lg border p-3 text-left transition {{ $style === 'dark_feature' ? 'border-primary bg-primary/5' : 'border-slate-300 dark:border-[#2D4060]' }}">
+                    <p class="text-sm font-semibold text-slate-800 dark:text-slate-100">Dark feature card</p>
+                    <p class="mt-0.5 text-[11px] text-slate-500 dark:text-slate-400">Premium "what's new" card, inset preview + bullet points.</p>
+                </button>
+            </div>
+        </div>
+
+        @if ($style === 'banner_hero')
+            <div>
+                <label class="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-300">Banner image <span class="text-slate-400">(optional — WebP/JPG, 1600×800 recommended, same as the dashboard hero)</span></label>
+                <input type="file" wire:model="image" accept="{{ \App\Support\MediaStorage::acceptAttribute() }}"
+                       class="block w-full text-xs text-slate-500 file:mr-3 file:rounded-lg file:border-0 file:bg-primary/10 file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-primary dark:text-slate-400">
+                @error('image') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+            </div>
+        @else
+            <div class="grid gap-4 sm:grid-cols-2">
+                <div>
+                    <label class="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-300">Inset preview image <span class="text-slate-400">(optional — smaller, ~800×800)</span></label>
+                    <input type="file" wire:model="featureImage" accept="{{ \App\Support\MediaStorage::acceptAttribute() }}"
+                           class="block w-full text-xs text-slate-500 file:mr-3 file:rounded-lg file:border-0 file:bg-primary/10 file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-primary dark:text-slate-400">
+                    @error('featureImage') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+                </div>
+                <div>
+                    <label class="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-300">Feature bullets <span class="text-slate-400">(one per line, optional)</span></label>
+                    <textarea wire:model="bulletsText" rows="3" maxlength="1000" placeholder="Faster eSIM activation&#10;New number ports&#10;Lower fees"
+                              class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100"></textarea>
+                    @error('bulletsText') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+                </div>
+            </div>
+        @endif
+
         <div class="grid gap-4 sm:grid-cols-2">
             <div>
                 <label class="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-300">Button label (optional)</label>
@@ -53,13 +94,45 @@
             </div>
         </div>
 
+        {{-- Tier 5 #11 Phase A2 — sitewide deep-link picker; still allows a raw
+             custom URL for the rare external-link case. --}}
         <div>
-            <label class="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-300">Custom link (optional — ignored if a coupon is set)</label>
-            <input type="url" wire:model="cta_url" maxlength="300" placeholder="https://…"
-                   class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+            <label class="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-300">Link to (optional — ignored if a coupon is set)</label>
+            <div class="flex flex-col gap-2 sm:flex-row">
+                <select @change="$wire.set('cta_url', $event.target.value)"
+                        class="rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100 sm:w-56">
+                    <option value="">— Pick an in-app page —</option>
+                    @foreach ($deepLinks as $link)
+                        <option value="{{ $link['url'] }}" @selected($cta_url === $link['url'])>{{ $link['label'] }}</option>
+                    @endforeach
+                </select>
+                <input type="url" wire:model="cta_url" maxlength="300" placeholder="https://… (or pick a page above)"
+                       class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+            </div>
             <p class="mt-1 text-[11px] text-slate-400">With a coupon set, the button sends users to the catalogue with the code ready to claim.</p>
             @error('cta_url') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
         </div>
+
+        @if ($style === 'dark_feature')
+            <div>
+                <label class="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-300">Secondary link (optional — e.g. "View all changelogs")</label>
+                <div class="grid gap-2 sm:grid-cols-[1fr_auto_2fr]">
+                    <input type="text" wire:model="secondary_label" maxlength="40" placeholder="View all changelogs"
+                           class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                    <select @change="$wire.set('secondary_url', $event.target.value)"
+                            class="rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                        <option value="">— Pick a page —</option>
+                        @foreach ($deepLinks as $link)
+                            <option value="{{ $link['url'] }}" @selected($secondary_url === $link['url'])>{{ $link['label'] }}</option>
+                        @endforeach
+                    </select>
+                    <input type="url" wire:model="secondary_url" maxlength="300" placeholder="https://…"
+                           class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                </div>
+                @error('secondary_label') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+                @error('secondary_url') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+            </div>
+        @endif
 
         <div class="flex justify-end">
             <button type="submit" wire:loading.attr="disabled" wire:target="send"

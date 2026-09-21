@@ -4,8 +4,13 @@ namespace Tests\Feature;
 
 use App\Livewire\NotificationCenter;
 use App\Livewire\Notifications as NotificationsPage;
+use App\Models\Announcement;
 use App\Models\User;
+use App\Models\WalletGroupMember;
+use App\Notifications\BroadcastAnnouncement;
 use App\Notifications\RefundNotification;
+use App\Services\Wallet\WalletGroupService;
+use App\Services\Wallet\WalletService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Tests\TestCase;
@@ -130,5 +135,149 @@ class NotificationCenterTest extends TestCase
             ->assertSee('Refunded to your wallet')
             ->set('filter', 'support')
             ->assertDontSee('Refunded to your wallet');
+    }
+
+    /**
+     * Tier 5 #11 Phase A1/A3 — the real notification surface (not just the
+     * admin preview) renders each announcement's chosen style: banner_hero's
+     * wide image + single CTA, or dark_feature's dark card + bullets +
+     * secondary link. The compact bell dropdown stays a generic row for
+     * every notification type — only the full /notifications page gets the
+     * rich per-style treatment.
+     */
+    public function test_the_full_page_renders_the_banner_hero_style(): void
+    {
+        $user = User::factory()->create();
+        $announcement = Announcement::create([
+            'title' => 'Weekend sale', 'body' => '20% off everything.', 'icon' => 'tag',
+            'style' => 'banner_hero', 'image_path' => 'https://cdn.example.com/banner.jpg',
+            'cta_label' => 'Shop now', 'cta_url' => 'https://example.com/catalogue',
+            'audience' => 'all', 'status' => 'draft',
+        ]);
+        $user->notifyNow(new BroadcastAnnouncement($announcement));
+
+        Livewire::actingAs($user)->test(NotificationsPage::class)
+            ->assertSee('Weekend sale')
+            ->assertSee('Shop now')
+            ->assertSee('https://cdn.example.com/banner.jpg', false);
+    }
+
+    public function test_the_full_page_renders_the_dark_feature_style_with_bullets_and_secondary_link(): void
+    {
+        $user = User::factory()->create();
+        $announcement = Announcement::create([
+            'title' => "What's new", 'body' => 'A few things landed.', 'icon' => 'bell',
+            'style' => 'dark_feature', 'feature_image_path' => 'https://cdn.example.com/inset.jpg',
+            'bullets' => ['Faster eSIM activation', 'Lower fees'],
+            'cta_label' => 'Open', 'cta_url' => 'https://example.com',
+            'secondary_label' => 'View all changelogs', 'secondary_url' => 'https://example.com/whats-new',
+            'audience' => 'all', 'status' => 'draft',
+        ]);
+        $user->notifyNow(new BroadcastAnnouncement($announcement));
+
+        Livewire::actingAs($user)->test(NotificationsPage::class)
+            ->assertSee("What's new")
+            ->assertSee('Faster eSIM activation')
+            ->assertSee('Lower fees')
+            ->assertSee('View all changelogs')
+            ->assertSee('https://cdn.example.com/inset.jpg', false);
+    }
+
+    public function test_the_bell_dropdown_stays_a_compact_row_for_a_styled_announcement(): void
+    {
+        $user = User::factory()->create();
+        $announcement = Announcement::create([
+            'title' => 'Weekend sale', 'body' => '20% off everything.', 'icon' => 'tag',
+            'style' => 'banner_hero', 'image_path' => 'https://cdn.example.com/banner.jpg',
+            'cta_label' => 'Shop now', 'cta_url' => 'https://example.com/catalogue',
+            'audience' => 'all', 'status' => 'draft',
+        ]);
+        $user->notifyNow(new BroadcastAnnouncement($announcement));
+
+        Livewire::actingAs($user)->test(NotificationCenter::class)
+            ->assertSee('Weekend sale')
+            ->assertDontSee('https://cdn.example.com/banner.jpg', false);
+    }
+
+    /**
+     * Tier 5 #11 Phase B — the header's own 30s poll doubles as the live
+     * shared-wallet-invite check. A pending invite that hasn't been toasted
+     * yet fires a hero toast with wired Accept/Decline actions the instant
+     * the poll ticks, no page reload needed.
+     */
+    public function test_the_poll_toasts_a_new_pending_wallet_invite(): void
+    {
+        $owner = User::factory()->create(['name' => 'Ada']);
+        $invitee = User::factory()->create();
+        $member = app(WalletGroupService::class)->invite($owner, $invitee, null, null);
+
+        Livewire::actingAs($invitee)->test(NotificationCenter::class)
+            ->call('checkForWalletInvites')
+            ->assertDispatched('nx-toast', function (string $name, array $params) use ($member) {
+                return ($params['variant'] ?? null) === 'hero'
+                    && str_contains($params['message'], 'Ada')
+                    && ($params['actions'][0]['payload']['memberId'] ?? null) === $member->id;
+            });
+
+        $this->assertNotNull($member->fresh()->toast_shown_at);
+    }
+
+    public function test_the_poll_never_double_toasts_the_same_invite(): void
+    {
+        $owner = User::factory()->create();
+        $invitee = User::factory()->create();
+        app(WalletGroupService::class)->invite($owner, $invitee, null, null);
+
+        Livewire::actingAs($invitee)->test(NotificationCenter::class)
+            ->call('checkForWalletInvites')
+            ->assertDispatched('nx-toast');
+
+        // A second instance (e.g. the desktop header) polling right after
+        // must see the invite already marked toasted and stay silent.
+        Livewire::actingAs($invitee)->test(NotificationCenter::class)
+            ->call('checkForWalletInvites')
+            ->assertNotDispatched('nx-toast');
+    }
+
+    public function test_the_toasts_accept_action_actually_joins_the_plan(): void
+    {
+        $owner = User::factory()->create();
+        $invitee = User::factory()->create();
+        app(WalletService::class)->credit($owner, 50.0, 'USD', ['reference' => 'seed']);
+        $member = app(WalletGroupService::class)->invite($owner, $invitee, null, null);
+
+        Livewire::actingAs($invitee)->test(NotificationCenter::class)
+            ->call('respondToWalletInvite', $member->id, true)
+            ->assertDispatched('nx-toast', type: 'success');
+
+        $this->assertNotNull($member->fresh()->accepted_at);
+    }
+
+    public function test_the_toasts_decline_action_removes_the_invite(): void
+    {
+        $owner = User::factory()->create();
+        $invitee = User::factory()->create();
+        $member = app(WalletGroupService::class)->invite($owner, $invitee, null, null);
+
+        Livewire::actingAs($invitee)->test(NotificationCenter::class)
+            ->call('respondToWalletInvite', $member->id, false)
+            ->assertDispatched('nx-toast', type: 'info');
+
+        $this->assertDatabaseMissing('wallet_group_members', ['id' => $member->id]);
+    }
+
+    public function test_a_user_cannot_respond_to_someone_elses_invite(): void
+    {
+        $owner = User::factory()->create();
+        $invitee = User::factory()->create();
+        $attacker = User::factory()->create();
+        $member = app(WalletGroupService::class)->invite($owner, $invitee, null, null);
+
+        Livewire::actingAs($attacker)->test(NotificationCenter::class)
+            ->call('respondToWalletInvite', $member->id, true)
+            ->assertNotDispatched('nx-toast');
+
+        $this->assertNull($member->fresh()->accepted_at);
+        $this->assertDatabaseHas('wallet_group_members', ['id' => $member->id]);
     }
 }

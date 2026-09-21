@@ -223,4 +223,39 @@ class WalletGroupTest extends TestCase
         $this->assertNull($debit->spent_by_user_id);
         $this->assertSame('40.0000', (string) $user->wallet->fresh()->usd_balance);
     }
+
+    /**
+     * Tier 5 #11 Phase B2.3 — explicitly verify, rather than just trust the
+     * architecture, that a shared-plan debit is shape/correctness-identical
+     * to a normal one: both write balance_before/balance_after (money-safety
+     * rule 5) and both round-trip the same amount/currency/type — the ONLY
+     * difference a shared-plan debit adds is `spent_by_user_id` attribution.
+     */
+    public function test_a_shared_plan_debit_is_shape_identical_to_a_normal_debit(): void
+    {
+        $solo = User::factory()->create();
+        $this->wallet()->credit($solo, 50.0, 'USD', ['reference' => 'seed-solo']);
+        $normal = $this->wallet()->debit($solo, 10.0, 'USD', ['reference' => 'normal-purchase']);
+
+        $owner = User::factory()->create();
+        $invitee = User::factory()->create();
+        $this->wallet()->credit($owner, 50.0, 'USD', ['reference' => 'seed-owner']);
+        $member = $this->walletGroups()->invite($owner, $invitee, null, null);
+        $this->walletGroups()->accept($member);
+        $this->walletGroups()->chargeFromGroup($member, 10.0, 'USD', fn () => true);
+        $shared = WalletTransaction::where('user_id', $owner->id)->where('type', 'debit')->firstOrFail();
+
+        // Identical shape: same fields populated, same correctness guarantees.
+        $this->assertSame($normal->type, $shared->type);
+        $this->assertSame($normal->currency, $shared->currency);
+        $this->assertSame((string) $normal->amount, (string) $shared->amount);
+        $this->assertSame('40.0000', (string) $normal->balance_after);
+        $this->assertSame('40.0000', (string) $shared->balance_after);
+        $this->assertSame((string) $normal->balance_before, (string) $shared->balance_before);
+        $this->assertNotNull($normal->balance_before);
+        $this->assertNotNull($shared->balance_before);
+        // The only real difference: attribution to the member who spent it.
+        $this->assertNull($normal->spent_by_user_id);
+        $this->assertSame($invitee->id, $shared->spent_by_user_id);
+    }
 }

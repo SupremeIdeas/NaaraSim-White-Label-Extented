@@ -178,4 +178,92 @@ class KycTest extends TestCase
 
         $this->assertSame('dojah', KycSettings::provider());
     }
+
+    // -- Tier 5 #11 Phase C: automated business KYB (Nigeria/CAC via Dojah) --
+
+    public function test_a_nigerian_cac_submission_is_automatically_verified_via_dojah(): void
+    {
+        config(['services.dojah.app_id' => 'app', 'services.dojah.api_key' => 'key']);
+        Setting::setValue(KycSettings::PROVIDER, 'dojah', 'kyc');
+        Http::fake(['*/api/v1/kyc/cac*' => Http::response(['entity' => ['company_name' => 'Naara Traders Ltd']], 200)]);
+
+        $user = User::factory()->create();
+        $v = $this->kyc()->submit($user, KycVerification::L3, [
+            'country' => 'NG', 'id_type' => 'CAC', 'id_number' => 'RC123456',
+        ]);
+
+        $this->assertSame('dojah', $v->provider);
+        $this->assertSame(KycVerification::APPROVED, $v->status);
+        $this->assertSame('Naara Traders Ltd', $v->checks['company_name']);
+        $this->assertTrue($this->kyc()->hasLevel($user, KycVerification::L3));
+    }
+
+    public function test_a_nigerian_cac_submission_not_found_is_rejected(): void
+    {
+        config(['services.dojah.app_id' => 'app', 'services.dojah.api_key' => 'key']);
+        Setting::setValue(KycSettings::PROVIDER, 'dojah', 'kyc');
+        Http::fake(['*/api/v1/kyc/cac*' => Http::response(['entity' => null], 200)]);
+
+        $user = User::factory()->create();
+        $v = $this->kyc()->submit($user, KycVerification::L3, [
+            'country' => 'NG', 'id_type' => 'CAC', 'id_number' => 'RC000000',
+        ]);
+
+        $this->assertSame(KycVerification::REJECTED, $v->status);
+    }
+
+    /**
+     * A Nigerian applicant registering under TIN (not CAC) has no automated
+     * Dojah product behind it — it must sit pending for a human, not get
+     * silently rejected by a lookup that was never going to answer for it.
+     */
+    public function test_a_nigerian_tin_submission_stays_pending_for_manual_review(): void
+    {
+        config(['services.dojah.app_id' => 'app', 'services.dojah.api_key' => 'key']);
+        Setting::setValue(KycSettings::PROVIDER, 'dojah', 'kyc');
+
+        $user = User::factory()->create();
+        $v = $this->kyc()->submit($user, KycVerification::L3, [
+            'country' => 'NG', 'id_type' => 'TIN', 'id_number' => '12345678',
+        ]);
+
+        $this->assertSame('dojah', $v->provider);
+        $this->assertSame(KycVerification::PENDING, $v->status);
+    }
+
+    /**
+     * No confirmed automated business-registry lookup exists outside Nigeria
+     * — a non-NG L3 submission goes straight to manual review rather than
+     * being routed through Dojah/Smile ID's personal-ID endpoints, which
+     * would silently misfire on a business registration number.
+     */
+    public function test_a_non_nigerian_business_submission_goes_straight_to_manual_review(): void
+    {
+        config(['services.dojah.app_id' => 'app', 'services.dojah.api_key' => 'key']);
+        Setting::setValue(KycSettings::PROVIDER, 'dojah', 'kyc');
+
+        $user = User::factory()->create();
+        $v = $this->kyc()->submit($user, KycVerification::L3, [
+            'country' => 'GB', 'id_type' => 'CRN', 'id_number' => '01234567',
+        ]);
+
+        $this->assertSame('manual', $v->provider);
+        $this->assertSame(KycVerification::PENDING, $v->status);
+    }
+
+    public function test_the_become_merchant_kyb_form_submits_a_real_l3_verification(): void
+    {
+        config(['services.dojah.app_id' => 'app', 'services.dojah.api_key' => 'key']);
+        Setting::setValue(KycSettings::PROVIDER, 'dojah', 'kyc');
+        Http::fake(['*/api/v1/kyc/cac*' => Http::response(['entity' => ['company_name' => 'Ada Foods']], 200)]);
+
+        $user = User::factory()->create(['is_active' => true]);
+
+        Livewire::actingAs($user)->test(\App\Livewire\BecomeMerchant::class)
+            ->set('country', 'NG')->set('regType', 'CAC')->set('regNumber', 'RC998877')
+            ->call('submitKyb')
+            ->assertHasNoErrors();
+
+        $this->assertTrue($this->kyc()->hasLevel($user, KycVerification::L3));
+    }
 }

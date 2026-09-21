@@ -11,6 +11,15 @@ use Illuminate\Support\Facades\Http;
  * lookups. For an L2 ID check Dojah returns a match immediately, so submit()
  * yields a synchronous approved/rejected. Coded to the documented API shape and
  * key-gated; the real HTTP can only run with live keys.
+ *
+ * Tier 5 #11 Phase C — also handles L3 (KYB): Dojah's CAC product looks up a
+ * Nigerian business by its CAC/RC number against the Corporate Affairs
+ * Commission registry. `KycService::resolveProvider()` only ever routes an L3
+ * submission here for a Nigerian (`NG`) applicant using the `CAC` registration
+ * type — every other country/type combination goes straight to manual review,
+ * since this is the one business-registry lookup actually confirmed to exist
+ * on Dojah's documented API; nothing here pretends to cover the other 190+
+ * countries in the business-registration catalogue.
  */
 class DojahKycProvider implements KycProviderInterface
 {
@@ -25,6 +34,13 @@ class DojahKycProvider implements KycProviderInterface
     }
 
     public function submit(KycVerification $verification, array $data): KycResult
+    {
+        return $verification->level === KycVerification::L3
+            ? $this->submitBusiness($data)
+            : $this->submitIndividual($data);
+    }
+
+    private function submitIndividual(array $data): KycResult
     {
         try {
             $response = Http::acceptJson()
@@ -45,6 +61,47 @@ class DojahKycProvider implements KycProviderInterface
         }
 
         return new KycResult(status: KycVerification::APPROVED, checks: ['verified' => true]);
+    }
+
+    /**
+     * Only a `CAC` registration number is actually verifiable here today. A
+     * Nigerian applicant registered under a different type (e.g. TIN) stays
+     * `pending` for manual admin review, rather than being wrongly rejected
+     * for a lookup this endpoint was never going to be able to answer.
+     */
+    private function submitBusiness(array $data): KycResult
+    {
+        if (strtoupper((string) ($data['id_type'] ?? '')) !== 'CAC') {
+            return new KycResult(status: KycVerification::PENDING, reason: 'Awaiting manual review.');
+        }
+
+        $rcNumber = $data['id_number'] ?? null;
+        if (blank($rcNumber)) {
+            return new KycResult(status: KycVerification::FAILED, reason: 'Missing CAC/RC number.');
+        }
+
+        try {
+            $response = Http::acceptJson()
+                ->withHeaders([
+                    'AppId' => (string) config('services.dojah.app_id'),
+                    'Authorization' => (string) config('services.dojah.api_key'),
+                ])
+                ->get(rtrim((string) config('services.dojah.base_url'), '/').'/api/v1/kyc/cac', [
+                    'rc_number' => $rcNumber,
+                ])->throw()->json();
+        } catch (\Throwable $e) {
+            return new KycResult(status: KycVerification::FAILED, reason: 'Could not reach Dojah.');
+        }
+
+        $entity = data_get($response, 'entity');
+        if ($entity === null) {
+            return new KycResult(status: KycVerification::REJECTED, reason: 'Business registration not found.');
+        }
+
+        return new KycResult(status: KycVerification::APPROVED, checks: [
+            'verified' => true,
+            'company_name' => data_get($entity, 'company_name'),
+        ]);
     }
 
     public function verifyWebhook(Request $request): bool

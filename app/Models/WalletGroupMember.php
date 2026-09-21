@@ -20,6 +20,7 @@ class WalletGroupMember extends Model
         'spend_cap_ngn',
         'invited_at',
         'accepted_at',
+        'toast_shown_at',
     ];
 
     protected function casts(): array
@@ -29,6 +30,7 @@ class WalletGroupMember extends Model
             'spend_cap_ngn' => 'decimal:4',
             'invited_at' => 'datetime',
             'accepted_at' => 'datetime',
+            'toast_shown_at' => 'datetime',
         ];
     }
 
