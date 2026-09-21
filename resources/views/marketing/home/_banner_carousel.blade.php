@@ -69,7 +69,23 @@
                 <p class="text-xs font-semibold uppercase tracking-[0.25em] text-accent-dark dark:text-accent">More from Naara</p>
                 <h2 class="mt-3 text-3xl font-bold text-slate-900 sm:text-4xl dark:text-white">Everything else you can do here</h2>
             </div>
-            <x-storytelling-carousel :slides="$bannerSlides" section-key="home-banners" height="h-56 sm:h-80" />
+            {{-- Frontend-UX-fix blueprint Phase D — root-caused via Playwright:
+                 a fixed `h-56 sm:h-80` stage height stays constant while the
+                 stage's own WIDTH swings from "full single column" (below
+                 `lg`) to "half a 2-column row" (at `lg`+), so the box's
+                 aspect ratio spiked to ~2.68:1 in the 640–1023px range —
+                 versus the banners' own genuine 16:9 (1.78:1) — and
+                 `object-fit: cover` cropped off ~34% of every banner's
+                 height there, cutting the bottom tagline band clean off
+                 (confirmed live at 900px: intact at both 375px and 1440px,
+                 gone at 900px). `aspect-[16/9]` makes the stage's height
+                 track its own width at every breakpoint instead of a fixed
+                 guess, so it always matches these banners' real ratio and
+                 nothing is ever cropped. Scoped to this carousel only —
+                 the other `<x-storytelling-carousel>` callers (About,
+                 Products, admin-managed sections) keep their own literal
+                 heights since their imagery isn't guaranteed 16:9. --}}
+            <x-storytelling-carousel :slides="$bannerSlides" section-key="home-banners" height="aspect-[16/9]" />
         </div>
     </section>
 @endif
