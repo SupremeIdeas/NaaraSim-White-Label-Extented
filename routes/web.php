@@ -192,7 +192,11 @@ Route::get('/legal/{slug}', function (string $slug) {
     return view('legal.show', ['doc' => LegalContent::doc($slug)]);
 })->name('legal.show');
 Route::get('/refund-policy', fn () => view('legal.show', ['doc' => LegalContent::doc('refund')]))->name('refund-policy');
-Route::view('/faq', 'pages.faq')->name('faq');
+// FAQ — wired the same way as About/How It Works/Contact: a SiteContent-driven
+// page (admin-editable hero incl. background image via Admin → Pages → FAQ)
+// whose Q&A content is pulled live from the homepage's own 'faq' section, so
+// there is exactly one FAQ list on the whole site, never two copies to drift.
+Route::get('/faq', fn () => view('marketing.faq', ['sections' => SiteContent::page('faq')]))->name('faq');
 
 // Installable app: dynamic PWA manifest + public "Download the App" page.
 Route::get('/manifest.webmanifest', ManifestController::class)->name('manifest');

@@ -48,6 +48,43 @@ class MarketingSiteTest extends TestCase
         $this->get('/contact')->assertOk()->assertSee('We Actually Respond');
     }
 
+    /**
+     * FAQ wiring: the dedicated /faq page is a real SiteContent page (like
+     * about/how-it-works/contact) with its own admin-editable hero, and its
+     * Q&A content is pulled LIVE from the homepage's own 'faq' section — a
+     * single source of truth, so the two never show different answers.
+     */
+    public function test_the_faq_page_renders_its_own_hero_and_the_homes_faq_content(): void
+    {
+        $this->get('/faq')->assertOk()
+            ->assertSee('Frequently Asked Questions')
+            ->assertSee('Does my phone support eSIM?') // home.faq's q1, proves it's the same source
+            ->assertSee('Questions We Hear a Lot');     // home.faq's own headline field
+    }
+
+    public function test_editing_the_homes_faq_from_the_admin_also_changes_the_dedicated_faq_page(): void
+    {
+        SiteContent::saveOverrides('home', [
+            'faq' => ['q1' => 'A brand new question only an admin could have written?'],
+        ]);
+
+        $this->get('/')->assertOk()->assertSee('A brand new question only an admin could have written?');
+        $this->get('/faq')->assertOk()->assertSee('A brand new question only an admin could have written?');
+    }
+
+    public function test_the_faq_page_is_a_registered_site_editor_page_with_its_own_hero_image(): void
+    {
+        $this->assertContains('faq', SiteContent::PAGES);
+
+        SiteContent::saveOverrides('faq', [
+            'hero' => ['image' => 'https://cdn.example.com/faq-hero.jpg'],
+        ]);
+
+        $this->get('/faq')->assertOk()
+            ->assertSee('https://cdn.example.com/faq-hero.jpg', false)
+            ->assertDontSee('data-webgl-hero="liquid"', false);
+    }
+
     public function test_an_admin_override_changes_the_public_page(): void
     {
         SiteContent::saveOverrides('home', [

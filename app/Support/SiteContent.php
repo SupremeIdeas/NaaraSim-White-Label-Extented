@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\Cache;
  */
 class SiteContent
 {
-    public const PAGES = ['home', 'about', 'how-it-works', 'contact'];
+    public const PAGES = ['home', 'about', 'how-it-works', 'contact', 'faq'];
 
     /**
      * Sections that are self-contained and safe to reuse on ANY marketing page
@@ -190,6 +190,13 @@ class SiteContent
                     'cta_primary' => 'Get Connected Now',
                     'cta_secondary' => 'Browse Plans',
                     'trust' => 'Instant activation · No contracts · 190+ countries · 24/7 support',
+                ],
+            ],
+            'faq' => [
+                'hero' => [
+                    'eyebrow' => 'Support',
+                    'headline' => 'Frequently Asked Questions',
+                    'subtext' => 'Everything you need to know about eSIMs, numbers, payments and more — the same answers as on our homepage, always in sync.',
                 ],
             ],
             'about' => [
