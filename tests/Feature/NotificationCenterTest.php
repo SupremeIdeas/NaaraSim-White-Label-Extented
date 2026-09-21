@@ -91,6 +91,34 @@ class NotificationCenterTest extends TestCase
             ->assertSee('See all notifications');
     }
 
+    /**
+     * Frontend-UX-fix blueprint Phase A — found while verifying the modal
+     * engine's own x-teleport fix: the mobile and desktop headers each mount
+     * a SEPARATE instance of this component. `open-modal`/`close-modal` fire
+     * as global window events matched by name, so a shared literal modal
+     * name would open BOTH instances' dialogs the instant either bell is
+     * clicked. This went unnoticed for a long time because the mobile
+     * instance's dialog lived inside a `lg:hidden` header at desktop
+     * widths, which happened to keep its (also-open) dialog invisible —
+     * teleporting removed that accidental masking. The modal name must be
+     * derived from this Livewire instance's own id so two instances never
+     * collide.
+     */
+    public function test_two_bell_instances_never_share_a_modal_name(): void
+    {
+        $user = User::factory()->create();
+
+        $mobile = Livewire::actingAs($user)->test(NotificationCenter::class);
+        $desktop = Livewire::actingAs($user)->test(NotificationCenter::class);
+
+        preg_match("/name: '([^']+)'/", $mobile->html(), $mobileMatch);
+        preg_match("/name: '([^']+)'/", $desktop->html(), $desktopMatch);
+
+        $this->assertNotEmpty($mobileMatch[1] ?? null);
+        $this->assertNotEmpty($desktopMatch[1] ?? null);
+        $this->assertNotSame($mobileMatch[1], $desktopMatch[1]);
+    }
+
     public function test_the_full_page_lists_and_filters(): void
     {
         $user = User::factory()->create();

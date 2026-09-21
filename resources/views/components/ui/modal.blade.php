@@ -14,7 +14,22 @@
     The ONE modal engine (blueprint Section 31): focus-trap, ESC + backdrop
     close, body-scroll lock, and full ARIA. Every dialog uses this — no
     per-feature modal markup.
+
+    x-teleport="body" (root-caused via Playwright, frontend-UX-fix blueprint
+    Phase A): any ancestor with a CSS `filter`/`transform`/`backdrop-filter`
+    creates a new containing block for `position: fixed` descendants, so a
+    modal instance triggered from inside the sticky header — which applies
+    `filter: drop-shadow(...)` to its direct children via `.nx-header-fade
+    > *` — was rendering pinned to a tiny box near the trigger instead of
+    covering the viewport (reproduced live: computed rect ~148x40px at the
+    bell icon, not full-screen). This is the exact trap `global-sidebar.
+    blade.php`'s own panel already works around the same way — the fix
+    just hadn't been applied to this shared engine yet, which is why the
+    notification popup specifically (triggered from inside that header)
+    kept resurfacing across prior fix attempts while other modals
+    triggered from elsewhere on the page never showed the bug.
 --}}
+<template x-teleport="body">
 <div
     x-data="{
         open: @if ($wire) @entangle($wire).live @else false @endif,
@@ -68,3 +83,4 @@
         </div>
     </div>
 </div>
+</template>

@@ -75,6 +75,26 @@ class UiElementsTest extends TestCase
             ->assertSee('nx-switch', false);
     }
 
+    /**
+     * Frontend-UX-fix blueprint Phase A — root-caused via Playwright: any
+     * ancestor with a CSS `filter` (the sticky header applies `filter:
+     * drop-shadow(...)` to its direct children via `.nx-header-fade > *`)
+     * creates a new containing block for `position: fixed` descendants, so a
+     * modal triggered from inside the header rendered pinned to a tiny box
+     * near the trigger instead of covering the viewport. `x-teleport="body"`
+     * (the same fix `global-sidebar.blade.php`'s own panel already uses for
+     * the identical trap) moves the dialog out of that subtree at runtime.
+     * A fitness guard: if this ever regresses, EVERY modal on the platform
+     * silently breaks again the moment its trigger sits inside a filtered/
+     * transformed ancestor — not just the one that was visibly reported.
+     */
+    public function test_the_modal_engine_teleports_out_of_any_filtered_or_transformed_ancestor(): void
+    {
+        $html = file_get_contents(resource_path('views/components/ui/modal.blade.php'));
+
+        $this->assertStringContainsString('x-teleport="body"', $html);
+    }
+
     public function test_elements_css_is_part_of_the_compiled_bundle(): void
     {
         $this->assertFileExists(resource_path('css/ui-elements.css'));
