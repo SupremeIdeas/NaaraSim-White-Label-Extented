@@ -83,7 +83,17 @@ class NumbersBento extends Component
 
         $data = $this->validate([
             "form.{$key}.badge_label" => 'nullable|string|max:24',
-            "form.{$key}.title" => 'required|string|max:60',
+            // Frontend-UX-fix blueprint Phase E: the title renders next to a
+            // fixed 36px icon in a row that also reserves clearance for the
+            // card's absolute-positioned badge — on the narrowest two-up
+            // mobile card (~126px content width) that leaves very little
+            // room. Reproduced live at the old max:60: a 45-char title left
+            // the title's own box only ~16px wide, clipping to nothing under
+            // `line-clamp-2`'s `overflow: hidden`. 28 chars comfortably clears
+            // the longest current default ("Contact Management", 19 chars)
+            // plus headroom for a rebrand, while still wrapping cleanly to 2
+            // lines at every card width instead of vanishing.
+            "form.{$key}.title" => 'required|string|max:28',
             "form.{$key}.subtitle" => 'required|string|max:500',
             "form.{$key}.bullets" => 'nullable|string|max:400',
             "form.{$key}.display_mode" => 'required|in:modal,page',

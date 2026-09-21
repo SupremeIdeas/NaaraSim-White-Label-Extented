@@ -119,4 +119,49 @@ class NumbersBentoTest extends TestCase
         Livewire::actingAs($user)->test(\App\Livewire\Admin\NumbersBento::class)
             ->assertForbidden();
     }
+
+    /**
+     * Frontend-UX-fix blueprint Phase E — root-caused via Playwright: the old
+     * max:60 title let an admin set a 45-char title that, once the display
+     * gained `line-clamp-2` discipline (below), computed a title box only
+     * ~16px wide on the narrowest two-up mobile card (icon + badge clearance
+     * already claim most of the row) and clipped to NOTHING — worse than the
+     * unbounded-height bug it was meant to fix. 28 chars comfortably clears
+     * the longest current default ("Contact Management", 19 chars) with
+     * headroom for a rebrand, while never reproducing that failure mode.
+     */
+    public function test_a_bento_card_title_is_capped_well_under_the_length_that_broke_rendering(): void
+    {
+        $this->seed(\Database\Seeders\RoleSeeder::class);
+        $admin = User::factory()->create();
+        $admin->assignRole('super_admin');
+
+        Livewire::actingAs($admin)->test(\App\Livewire\Admin\NumbersBento::class)
+            ->set('form.rent.title', str_repeat('a', 29))
+            ->call('save', 'rent')
+            ->assertHasErrors(['form.rent.title']);
+
+        Livewire::actingAs($admin)->test(\App\Livewire\Admin\NumbersBento::class)
+            ->set('form.rent.title', str_repeat('a', 28))
+            ->call('save', 'rent')
+            ->assertHasNoErrors();
+    }
+
+    /**
+     * Frontend-UX-fix blueprint Phase E — the title span now truncates to one
+     * line (`truncate`) instead of growing the card unboundedly, and its `h3`
+     * carries `flex-1` so it actually claims the row's remaining width rather
+     * than collapsing to its own near-zero max-content size next to the fixed
+     * icon — both load-bearing for the fix (reproduced live: without
+     * `flex-1`, even the plain default "Verify" title vanished entirely on
+     * the narrow mobile card, not just an overly long custom one).
+     */
+    public function test_the_bento_title_truncates_instead_of_growing_the_card_unboundedly(): void
+    {
+        $html = file_get_contents(resource_path('views/partials/numbers-bento.blade.php'));
+
+        $this->assertStringContainsString('flex-1 font-display', $html);
+        $this->assertMatchesRegularExpression('/class="truncate w-full font-bold text-primary/', $html);
+    }
+
 }

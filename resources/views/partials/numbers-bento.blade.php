@@ -45,17 +45,81 @@
             <div class="relative z-10 flex h-full w-full gap-3 {{ $wide ? 'items-center' : 'flex-col' }}">
                 {{-- Text column --}}
                 <div class="flex min-w-0 flex-1 flex-col">
-                    <div class="flex items-center gap-2.5 {{ $card['badge_label'] ? 'pr-20' : '' }}">
+                    {{-- Phase E: measured live — the badge is 45px wide sitting
+                         10px from the card's outer edge, so relative to this row's
+                         own content box it only ever needs ~40px of clearance to
+                         never overlap. `pr-20` (80px) over-reserved by half again
+                         that on EVERY badged card (all 6 defaults carry one),
+                         starving the title of width it needed most on the
+                         narrowest cards — mobile renders every non-full card at
+                         the same ~127px content width regardless of its desktop
+                         `span`, so this hit the FEATURED "Verify" card too, not
+                         just the visually narrower ones (reproduced live: the
+                         combination of `pr-20` + the icon + gap left the title's
+                         own box only ~16px wide once `line-clamp-2`'s
+                         `overflow: hidden` was added below, clipping it to
+                         nothing instead of the harmless visual overflow a plain
+                         `block` title used to get away with). `pr-10` (40px)
+                         matches the badge's real footprint with a few px to
+                         spare, verified clean at 375px on every card. --}}
+                    <div class="flex items-center gap-2.5 {{ $card['badge_label'] ? 'pr-10' : '' }}">
+                        {{-- Frontend-UX-fix blueprint Phase E: measured `text-primary`
+                             here at ~2.09:1 against this card's dark background
+                             (Playwright + WCAG relative-luminance math), under the
+                             3:1 floor for UI/graphic elements. Tried
+                             `dark:text-teal-300` first, but `ThemeTokenRemediationTest`
+                             caught it immediately — a literal Tailwind teal is
+                             exactly the "hardcoded color bypassing the active
+                             theme" bug that test exists to prevent, and this same
+                             `text-primary`-with-no-dark-override is the codebase's
+                             own established convention for an icon-in-a-tinted-
+                             circle (see `wallet.blade.php`'s identical
+                             `bg-primary/15 text-primary dark:bg-primary/20`). The
+                             theme system has no per-theme "primary, lightened for
+                             a dark surface" token today (only `accent_dark`, which
+                             darkens for a LIGHT surface — the opposite need) — a
+                             real contrast gap, but a design-system-wide one, not
+                             specific to this card, and not fixable per-component
+                             without breaking custom themes. Flagged as a follow-up
+                             (a proper `--brand-primary-on-dark` token, computed per
+                             theme) rather than patched here in a way that would
+                             silently ignore every non-Naara theme's own primary
+                             colour. --}}
                         <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary ring-1 ring-primary/15 dark:bg-primary/20 dark:ring-primary/30">
                             <x-icon :name="$card['icon']" class="h-4 w-4" />
                         </span>
-                        <h3 class="min-w-0 font-display leading-tight">
+                        {{-- `flex-1` gives this h3 a real claim on the row's
+                             remaining width instead of only its own max-content
+                             size, so the `truncate` span below always has actual
+                             room to work with on the tightest two-up mobile
+                             cards. --}}
+                        <h3 class="min-w-0 flex-1 font-display leading-tight">
                             @if ($w2)
                                 {{-- Kicker hidden on the tight two-up mobile cards so the badge never clips it. --}}
                                 <span class="hidden text-[11px] font-semibold tracking-wide text-slate-400 sm:block dark:text-white/55">{{ $w1 }}</span>
-                                <span class="block font-bold text-primary {{ $card['tall'] ? 'text-lg' : 'text-base' }}">{{ $w2 }}</span>
+                                {{-- Phase E: admin-set titles go up to 60 chars
+                                     with no cap here before, unlike the
+                                     subtitle's own `line-clamp-2` — a long one
+                                     wrapped across many lines on the narrow
+                                     two-up cards, blowing past every
+                                     neighbouring card's height (reproduced
+                                     live). Tried `line-clamp-2` first, but its
+                                     `-webkit-box` display needs real measurable
+                                     width to compute where to wrap BEFORE it
+                                     clips — on this row (icon + badge
+                                     clearance already eating most of a ~127px
+                                     mobile card) that measured so tight it
+                                     clipped even the plain 6-character default
+                                     "Verify" down to nothing (reproduced live).
+                                     A single-line `truncate` (`overflow-hidden
+                                     text-overflow-ellipsis whitespace-nowrap`)
+                                     needs no such pre-measurement — it always
+                                     shows as much as fits plus an ellipsis,
+                                     which also fits how every shipped default
+                                     title is already a single short word. --}}
+                                <span class="truncate w-full font-bold text-primary {{ $card['tall'] ? 'text-lg' : 'text-base' }}">{{ $w2 }}</span>
                             @else
-                                <span class="block font-bold text-primary {{ $card['tall'] ? 'text-lg' : 'text-base' }}">{{ $w1 }}</span>
+                                <span class="truncate w-full font-bold text-primary {{ $card['tall'] ? 'text-lg' : 'text-base' }}">{{ $w1 }}</span>
                             @endif
                         </h3>
                     </div>
