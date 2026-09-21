@@ -36,12 +36,17 @@ class RefundGuaranteeTrustTest extends TestCase
             ->assertSee(route('refund-policy'), false);
     }
 
+    /** /faq itself is master-only on this fork — exercised under a temporary master identity. */
     public function test_the_faq_states_the_real_timeout_and_links_the_policy(): void
     {
+        config()->set('updater.product_identifier', 'naarasim-core');
+
         $this->get('/faq')
             ->assertOk()
             ->assertSee(PollSmsOtpJob::TIMEOUT_MINUTES.' minutes')
             ->assertSee(route('refund-policy'), false);
+
+        config()->set('updater.product_identifier', 'naarasim-whitelabel');
     }
 
     public function test_the_refund_policy_page_states_the_real_timeout(): void

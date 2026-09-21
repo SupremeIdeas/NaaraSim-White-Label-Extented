@@ -9,6 +9,49 @@
 
 ## DONE
 
+### 🔁 Reconciliation sync from master — role-mass-assignment fix, Frontend-UX-fix Phases A-G + FAQ, Tier 4 #10 — 2026-09-21
+This fork had fallen behind master by 20 commits (last synced at the
+account-erasure fix). Owner instruction: port what children genuinely need,
+never widen the license/oversight surface. Reviewed each pending master
+commit and split them:
+
+**Ported here** (all master-only surfaces stayed correctly gated or absent):
+- **Tier 5 #16 — role mass-assignment fix** (security: `role` removed from
+  `User::$fillable`, `setRole()` added as the one sanctioned mutator) —
+  committed explicitly here even though this fork's `User.php` already
+  carried the equivalent change from an earlier sync; `UserRoleMassAssignmentTest`
+  was missing and is now added.
+- **Frontend-UX-fix Phases A-G** (notification popup teleport fix, Nia chat
+  input runtime-height fix, homepage flag-orbit/modal-gutter fix, banner
+  carousel cropping fix, bento title overflow + word-count validation,
+  MarketingCopyStudio White-Label-reach verification, admin-configurable
+  "More from Naara" banner placements) + the FAQ page wiring/master-only
+  gating that shipped alongside it on master. Two adaptations for this
+  fork: Phase A's duplicate-modal-name fix only touched
+  `notification-center.blade.php` (master's `admin/hot-menu.blade.php`
+  half doesn't apply — no Hot Menu here, Tier 3 #9 Phase G); Phase G's
+  admin nav gained `banner-placements` but NOT master's isMaster()-gated
+  "More Apps" entry (that route was never built in this fork). 4
+  pre-existing tests that assumed `/faq` worked by default were updated to
+  exercise it under a temporary `naarasim-core` identity (or, for one
+  generic layout test, switched to `/about`) — this fork's real default
+  identity is `naarasim-whitelabel`.
+- **Tier 4 #10 — error-log root-cause fixes + System Health hero**: the
+  unconfigured-eSIM-provider skip, the `DecryptException` session-resilience
+  handler, and the full `job_heartbeats`-backed System Health rebuild are
+  generic platform reliability/observability code with zero license surface
+  — ported as-is.
+
+**Deliberately NOT ported** (master-only by design, entangled with
+white-label purchase/billing/oversight models this fork never has):
+Tier 3 #9's content/billing/hot-menu blueprint (Phases B-G — email/
+announcement composers, changelog, and specifically Phases F1/F2 which are
+master's own oversight of *other* white-label instances' billing) and the
+UX/localization/platform-reach blueprint (both already marked "master repo
+only" in master's own PROGRESS.md when built).
+
+Full suite: 2259 tests, 7137 assertions, green. `npm run build` clean.
+
 ### 🗄️ Account erasure fix (Tier 0 #2, overdue) — anonymize-and-retain (synced from master) — 2026-09-20
 Same fix as master (AccountService.php is core, no fork-specific behavior):
 `erase()` now anonymizes-and-retains instead of hard-deleting on super-admin

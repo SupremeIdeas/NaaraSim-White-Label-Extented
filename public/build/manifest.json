@@ -2199,7 +2199,7 @@
     "src": "node_modules/flag-icons/flags/4x3/zw.svg"
   },
   "resources/css/app.css": {
-    "file": "assets/app-CzL8I06b.css",
+    "file": "assets/app-BQyorzmR.css",
     "src": "resources/css/app.css",
     "isEntry": true
   },
@@ -2246,7 +2246,7 @@
     "isDynamicEntry": true
   },
   "resources/js/app.js": {
-    "file": "assets/app-ZVwI3Mz2.js",
+    "file": "assets/app-Cgr_LizU.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
@@ -2267,7 +2267,7 @@
     ]
   },
   "resources/js/dialer.js": {
-    "file": "assets/dialer-iLPwGMeh.js",
+    "file": "assets/dialer-D0RS1TcR.js",
     "name": "dialer",
     "src": "resources/js/dialer.js",
     "isDynamicEntry": true,

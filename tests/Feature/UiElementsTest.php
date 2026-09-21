@@ -62,7 +62,8 @@ class UiElementsTest extends TestCase
     public function test_the_toast_stack_is_mounted_globally(): void
     {
         // Any page rendered through the base layout carries the toast listener.
-        $this->get('/faq')->assertOk()->assertSee('nx-toast', false);
+        // /about, not /faq — the dedicated FAQ page is master-only on this fork.
+        $this->get('/about')->assertOk()->assertSee('nx-toast', false);
     }
 
     public function test_security_page_uses_branded_switches(): void
