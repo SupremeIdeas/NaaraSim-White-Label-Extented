@@ -16,6 +16,62 @@
 
 ---
 
+## WHITE-LABEL SHIPPING DISCIPLINE (non-negotiable, read before porting anything here from master)
+
+Owner directive (2026-09-21, repeated verbatim because it matters): *"do not
+commit blindly, check that what we are committing is truly meant to be
+needed for the children repos... I don't want to come back re-explaining
+myself over and over again."* This section is the permanent, standing
+answer — do not ask the owner to re-litigate it; apply it and move on.
+
+**Default assumption: a new admin/oversight/billing feature from master is
+MASTER-ONLY until proven otherwise.** Never port something into THIS repo
+on the assumption that "it's probably fine" — check first.
+
+**Named master-only examples (do not re-derive these, just remember them):**
+- The dedicated `/faq` page (owner decision, 2026-09-21) — this fork must
+  404 on it, hide its nav link, and drop it from the Site Editor's page
+  list. `FeatureEntitlements::isMaster()` is the gate, already wired here.
+- Anything from the License Surgery boundary (Phases 1–6): the license
+  issuer, the oversight/distribution registry, the White Label purchase
+  route, `WhiteLabelInstance`/`WhiteLabelLicensePlan`/
+  `WhiteLabelLicensePayment`/project-intake models — these were REMOVED
+  from this fork on purpose and must never be reintroduced.
+- Tier 3 #9 (content/billing/hot-menu blueprint) and the UX/localization/
+  platform-reach blueprint — both marked "master repo only" in master's own
+  PROGRESS.md when built; Phases F1/F2 of Tier 3 #9 specifically are
+  master's own oversight of *other* white-label instances' billing.
+- Tier 5 #14 (Provider Capability Radar) — admin Updater-only surface, its
+  own blueprint says "Master repo only" explicitly.
+- Any admin nav entry gated `FeatureEntitlements::isMaster()` (e.g. "More
+  Apps") — if the underlying route/feature was never built in this fork at
+  all, don't add a nav entry referencing it, even inert/gated ones.
+
+**What DOES belong here:** generic platform reliability, security, and
+consumer-facing fixes with zero license/oversight content — e.g. the
+role-mass-assignment fix, session/`DecryptException` resilience,
+scheduled-job observability (`job_heartbeats`/`SchedulerHealth`), UI bug
+fixes (notification popup, chat input, layout). These have no cross-tenant
+or billing-of-other-instances content, so they ship to this fork too.
+
+**The actual test before porting or building anything admin-facing:** does
+it reference *another* white-label instance, a license purchase/issuance/
+approval flow, or oversight of accounts/data outside this one install? If
+yes → master-only, full stop. If it's purely this install's own operation
+(its own users, its own scheduled jobs, its own UI bugs) → fine here,
+subject to the master-only exclusions already named above.
+
+**Never assume "already fixed elsewhere" without checking this repo's
+actual committed state.** (2026-09-21 near-miss: assumed a security fix was
+already present here based on a stale read; the committed `HEAD` state did
+NOT have it. Always `git show HEAD:<file>` this repo directly before
+concluding parity with master.)
+
+When in doubt on a genuinely new, ambiguous case not covered above, ask
+the owner once — but for everything already named here, just apply it.
+
+---
+
 ## GITHUB ACTIONS BUDGET (non-negotiable until usage resets — 2026-10-01)
 
 The SupremeIdeas GitHub account hit 90% of its 2,000 included Actions
