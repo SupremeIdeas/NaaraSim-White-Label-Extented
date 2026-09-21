@@ -47,7 +47,6 @@ class User extends Authenticatable implements MustVerifyEmail
         'referred_by',
         'kyc_status',
         'is_active',
-        'role',
         'password',
         'deactivated_at',
         'deletion_requested_at',
@@ -152,6 +151,18 @@ class User extends Authenticatable implements MustVerifyEmail
     public function isAnonymized(): bool
     {
         return ! is_null($this->anonymized_at);
+    }
+
+    /**
+     * Set the display-role column (Tier 5 #16 mass-assignment fix). `role` is
+     * deliberately NOT in $fillable — it must never be settable from a plain
+     * array a request could shape (mass-assignment of the account-privilege
+     * column), only through this explicit call. This mirrors, but does not
+     * replace, the real authorization source: Spatie's assignRole()/roles.
+     */
+    public function setRole(string $role): void
+    {
+        $this->forceFill(['role' => $role])->save();
     }
 
     // -- Relationships -----------------------------------------------------

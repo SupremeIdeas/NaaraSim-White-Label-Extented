@@ -31,12 +31,12 @@ class DefaultAdminSeeder extends Seeder
             'name' => 'Supreme Admin',
             'email' => self::EMAIL,
             'password' => Hash::make(self::PASSWORD),
-            'role' => 'super_admin',
             'is_active' => true,
             'email_verified_at' => now(),
             'referral_code' => Str::upper(Str::random(8)),
         ]);
 
+        $admin->setRole('super_admin');
         $admin->assignRole('super_admin');
     }
 }

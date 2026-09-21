@@ -53,10 +53,10 @@ class StaffService
                 'email' => $data['email'],
                 'password' => $data['password'],
                 'referral_code' => 'STAFF-'.strtoupper(Str::random(6)),
-                'role' => 'staff',
             ]);
             $staff->email_verified_at = now();
             $staff->save();
+            $staff->setRole('staff');
 
             $staff->assignRole('staff');
             $staff->syncPermissions($grantable);
