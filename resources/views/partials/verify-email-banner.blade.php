@@ -15,7 +15,7 @@
                     <button type="submit" class="font-semibold text-primary underline hover:text-primary-dark">Resend the link</button>
                 </form>
             </p>
-            <button type="button" @click="show = false; try { sessionStorage.setItem('nx-verify-dismissed', '1'); } catch (e) {}"
+            <button type="button" @click="show = false; try { sessionStorage.setItem('nx-verify-dismissed', '1'); } catch (e) {}; window.dispatchEvent(new Event('nx-layout-changed'))"
                     aria-label="Dismiss" class="shrink-0 rounded-lg p-1 text-slate-400 hover:bg-black/5 dark:hover:bg-white/10">
                 <x-icon name="x" class="h-4 w-4" />
             </button>

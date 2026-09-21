@@ -53,6 +53,36 @@ class NiaGlowTest extends TestCase
         $this->assertStringContainsString("\$store.nia.phase === 'typing'", $html);
     }
 
+    /**
+     * Frontend-UX-fix blueprint Phase B — root-caused via Playwright: the page
+     * used to size itself with a hardcoded `h-[calc(100vh-9rem)]`, which never
+     * accounted for the optional "confirm your email" banner. Whenever that
+     * banner showed, the input row — sitting at the bottom of that fixed-height
+     * flex column — rendered PARTLY BEHIND the floating mobile bottom nav
+     * instead of above it, which is exactly what read as a clipped/"boxed"
+     * pill rather than the full rounded shape. Fixed by measuring the real
+     * available space at runtime (niaChatLayout in resources/js/nia-chat.js)
+     * instead of guessing a static number.
+     */
+    public function test_the_page_measures_its_own_height_instead_of_guessing_a_static_number(): void
+    {
+        $html = Livewire::actingAs(User::factory()->create())->test(SupportChat::class)->html();
+
+        $this->assertStringContainsString('x-data="niaChatLayout"', $html);
+        $this->assertStringNotContainsString('h-[calc(100vh-9rem)]', $html);
+
+        $js = file_get_contents(resource_path('js/nia-chat.js'));
+        $this->assertStringContainsString("A.data('niaChatLayout'", $js);
+    }
+
+    public function test_the_input_has_appearance_none_and_a_subtle_border(): void
+    {
+        $html = Livewire::actingAs(User::factory()->create())->test(SupportChat::class)->html();
+
+        $this->assertStringContainsString('appearance-none', $html);
+        $this->assertStringContainsString('border-slate-200/70', $html);
+    }
+
     public function test_the_brand_glow_colours_are_defined(): void
     {
         // The three colours pulled from the Naara brand gradient (§5).

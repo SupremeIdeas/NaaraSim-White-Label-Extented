@@ -93,6 +93,50 @@ export function registerNiaChat() {
             },
         });
 
+        // Frontend-UX-fix blueprint Phase B — the support-chat page used to size
+        // itself with a hardcoded `h-[calc(100vh-9rem)]`, guessing at how much
+        // chrome sits above it. That guess didn't account for the optional
+        // "confirm your email" banner (only shown to unverified users), so on
+        // any page load where it appeared the chat's own height overflowed the
+        // viewport and the input row — sitting at the bottom of that flex
+        // column — rendered partly BEHIND the floating mobile bottom nav
+        // instead of above it (root-caused with Playwright: the input's own
+        // bounding box overlapped the nav's). Measuring the real distance from
+        // this element's top to the viewport bottom is robust to ANY chrome
+        // above it, banner or not, present or future.
+        A.data('niaChatLayout', () => ({
+            height: null,
+            calc() {
+                const isDesktop = window.matchMedia('(min-width: 1024px)').matches;
+                // Matches the bottom-nav clearance <main> already reserves
+                // site-wide (`pb-28` mobile / `pb-10` desktop, where the
+                // floating nav is hidden entirely) — same convention, not a
+                // new guess.
+                const navClearance = isDesktop ? 40 : 112;
+                const top = this.$el.getBoundingClientRect().top;
+                this.height = Math.max(320, Math.round(window.innerHeight - top - navClearance - 8));
+            },
+            init() {
+                // Measuring immediately on init() can run before the page's
+                // full chrome (the optional "confirm your email" banner in
+                // particular) has finished laying out, under-measuring `top`
+                // and over-allocating height — the exact overflow this fix
+                // exists to prevent. Two animation frames guarantee the
+                // browser has completed a real layout/paint pass first; the
+                // delayed re-check catches anything that settles later still
+                // (e.g. Livewire's own async mount).
+                requestAnimationFrame(() => requestAnimationFrame(() => this.calc()));
+                setTimeout(() => this.calc(), 300);
+                this._onChange = () => this.calc();
+                window.addEventListener('resize', this._onChange);
+                window.addEventListener('nx-layout-changed', this._onChange);
+            },
+            destroy() {
+                window.removeEventListener('resize', this._onChange);
+                window.removeEventListener('nx-layout-changed', this._onChange);
+            },
+        }));
+
         // One assistant bubble. Reads its text + role from data-* attributes.
         // When it's the freshly-arrived reply (data-stream="1"), it registers
         // with the store and reveals as `shown`; otherwise it shows full text.

@@ -1,4 +1,4 @@
-<div class="mx-auto flex h-[calc(100vh-9rem)] max-w-2xl flex-col">
+<div class="mx-auto flex max-w-2xl flex-col" x-data="niaChatLayout" :style="height ? `height: ${height}px` : ''">
     <div class="mb-3 flex items-center gap-3">
         <span class="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary dark:bg-primary/20">
             <x-icon name="message-circle" class="h-5 w-5" />
@@ -146,12 +146,17 @@
         <form wire:submit="send" class="flex items-center gap-2"
               x-on:message-added.window="$nextTick(() => { const i = $el.querySelector('input[type=text]'); i && i.focus(); })">
             <x-nia-glow-wrapper interactive class="flex-1 rounded-full">
-            <div class="flex items-center gap-1 rounded-full border border-slate-300 bg-white px-2 py-1 focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/40 dark:border-[var(--brand-card-border-dark)] dark:bg-[#243352]">
+            <div class="flex items-center gap-1 rounded-full border border-slate-200/70 bg-white px-2 py-1 focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/40 dark:border-white/10 dark:bg-[#243352]">
 
-                {{-- Normal controls (hidden while recording). --}}
+                {{-- Normal controls (hidden while recording). appearance-none:
+                     some browsers paint a subtle default text-field chrome on
+                     `appearance: auto` inputs that can peek through a parent's
+                     rounded border — belt-and-suspenders alongside the real
+                     fix (the input row now correctly clears the bottom nav
+                     instead of rendering behind it). --}}
                 <input type="text" wire:model="draft" autocomplete="off" placeholder="Type your message…"
                        x-show="state !== 'recording' && state !== 'uploading'"
-                       class="min-w-0 flex-1 border-0 bg-transparent px-2 py-1.5 text-sm text-slate-900 focus:ring-0 dark:text-slate-100"
+                       class="min-w-0 flex-1 appearance-none border-0 bg-transparent px-2 py-1.5 text-sm text-slate-900 focus:ring-0 dark:text-slate-100"
                        wire:loading.attr="disabled" wire:target="send,sendVoice">
 
                 <label x-show="state !== 'recording' && state !== 'uploading'"
