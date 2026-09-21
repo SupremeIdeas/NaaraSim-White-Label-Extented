@@ -9,6 +9,27 @@
 
 ## DONE
 
+### 📣 Tier 5 #11: announcements/wallet/KYB blueprint (ported from master) — 2026-09-21
+Ported master's Phases A-C (announcement presentation styles + DeepLinkLibrary,
+shared-wallet live toast, Nigeria/CAC business KYB via Dojah) — all pure
+consumer/admin content-authoring and generic provider-routing, zero license/
+oversight content. Two things this fork genuinely lacks and were correctly
+EXCLUDED rather than blindly ported:
+- The AI-assisted Announcements composer (mount(Request)/refine()/
+  render(MarketingCopywriter)) — that's the content/billing/hot-menu
+  blueprint's Phase B/E, master-only and never built in this fork's
+  Announcements screen. Kept the composer's Phase A additions (styles,
+  DeepLinkLibrary picker) without that wiring.
+- Stripe Identity / non-African global-KYC routing in `KycService::
+  resolveProvider()` — that's the UX/localization/platform-reach
+  blueprint's Phase F, master-only; this fork has no `AfricanCountries` or
+  `StripeIdentityKycProvider` at all. Wrote a fork-appropriate
+  `resolveProvider()` with only the L3/Nigeria/CAC branch.
+`merchant.white-label` in the widened `DeepLinkLibrary` is inert here —
+that route doesn't exist in this fork, so `Route::has()` excludes it
+automatically; a dedicated test confirms the exclusion instead of assuming it.
+Full suite green (2281 tests, 7270 assertions).
+
 ### 🔁 Reconciliation sync from master — role-mass-assignment fix, Frontend-UX-fix Phases A-G + FAQ, Tier 4 #10 — 2026-09-21
 This fork had fallen behind master by 20 commits (last synced at the
 account-erasure fix). Owner instruction: port what children genuinely need,
