@@ -17,8 +17,13 @@ class SyncStatus
 
     private const CACHE = 'esim.sync_status.v1';
 
-    /** Record the outcome of one provider sync. */
-    public static function record(string $provider, bool $ok, ?int $count = null, ?string $error = null): void
+    /**
+     * Record the outcome of one provider sync. `skipped` (Tier 4 #10 Phase
+     * A1) marks a provider with no API key configured — a legitimate,
+     * NEUTRAL state shown distinctly from both a successful sync and a
+     * genuine failure, never lumped in with either.
+     */
+    public static function record(string $provider, bool $ok, ?int $count = null, ?string $error = null, bool $skipped = false): void
     {
         try {
             $all = self::all();
@@ -26,6 +31,7 @@ class SyncStatus
                 'ok' => $ok,
                 'count' => $count,
                 'error' => $error ? mb_substr($error, 0, 300) : null,
+                'skipped' => $skipped,
                 'at' => now()->toIso8601String(),
             ];
             Setting::setValue(self::KEY, $all, 'esim');
@@ -35,7 +41,7 @@ class SyncStatus
         }
     }
 
-    /** @return array<string, array{ok: bool, count: ?int, error: ?string, at: string}> */
+    /** @return array<string, array{ok: bool, count: ?int, error: ?string, skipped: bool, at: string}> */
     public static function all(): array
     {
         return Cache::rememberForever(self::CACHE, function () {
@@ -49,7 +55,7 @@ class SyncStatus
         });
     }
 
-    /** @return array{ok: bool, count: ?int, error: ?string, at: string}|null */
+    /** @return array{ok: bool, count: ?int, error: ?string, skipped: bool, at: string}|null */
     public static function for(string $provider): ?array
     {
         return self::all()[$provider] ?? null;

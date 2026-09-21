@@ -17,6 +17,19 @@ class CatalogueSyncTest extends TestCase
     {
         parent::setUp();
         $this->seed(PricingSettingsSeeder::class);
+
+        // Tier 4 #10 Phase A1 added a not-configured skip to sync() — this
+        // suite tests each provider's catalogue MAPPING correctness via a
+        // bound fake, so every provider must read as configured regardless.
+        config([
+            'services.esimgo.api_key' => 'test-key',
+            'services.airalo.client_id' => 'test-client',
+            'services.quibity.api_key' => 'test-key',
+            'services.zendit.api_key' => 'test-key',
+            'services.oneglobal.client_id' => 'test-client',
+            'services.montymobile.api_key' => 'test-key',
+            'services.gigs.api_key' => 'test-key',
+        ]);
     }
 
     private function bindProvider(string $name, array $catalogue): void

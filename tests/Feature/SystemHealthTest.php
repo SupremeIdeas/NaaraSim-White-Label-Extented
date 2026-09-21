@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Livewire\Admin\SystemHealth;
 use App\Models\AuditLog;
+use App\Models\JobHeartbeat;
 use App\Models\User;
 use App\Support\HostingGuide;
 use App\Support\PendingMigrations;
@@ -223,6 +224,79 @@ class SystemHealthTest extends TestCase
         Livewire::actingAs($admin)->test(SystemHealth::class)
             ->call('runMigrations')
             ->assertStatus(403);
+    }
+
+    /**
+     * Tier 4 #10 Phase B2.4 fix — nciHealth() used to compute its OWN
+     * hardcoded "overdue after 26h" window for nci:recompute (a daily job),
+     * which never matched what SchedulerHealth::report() already computes
+     * for that exact task (expected 86400s -> threshold ~114912s, ~31.9h).
+     * At 27h since the last run — overdue under the OLD 26h constant, but
+     * NOT overdue under the real ~31.9h threshold — the page must now agree
+     * with SchedulerHealth's own math, proving the duplicate check is gone.
+     */
+    public function test_nci_health_no_longer_uses_its_own_hardcoded_26_hour_window(): void
+    {
+        JobHeartbeat::create([
+            'job_name' => 'nci:recompute',
+            'started_at' => now()->subHours(27)->subMinute(),
+            'finished_at' => now()->subHours(27),
+            'duration_ms' => 500,
+            'outcome' => 'success',
+        ]);
+
+        $report = collect(SchedulerHealth::report())->firstWhere('name', 'nci:recompute');
+        $this->assertFalse($report['overdue']);
+
+        $admin = User::factory()->create();
+        $admin->assignRole('admin');
+
+        Livewire::actingAs($admin)->test(SystemHealth::class)
+            ->assertOk()
+            ->assertViewHas('nci', fn ($nci) => $nci['recompute_overdue'] === false);
+    }
+
+    /** Tier 4 #10 Phase B2 — three real states on the scheduled-tasks list, not two. */
+    public function test_the_scheduled_tasks_list_shows_a_neutral_state_for_a_skipped_run(): void
+    {
+        JobHeartbeat::create([
+            'job_name' => 'esim:sync',
+            'started_at' => now(),
+            'finished_at' => now(),
+            'outcome' => 'skipped',
+            'detail' => 'All 6 provider(s) skipped — not configured.',
+        ]);
+
+        $admin = User::factory()->create();
+        $admin->assignRole('admin');
+
+        Livewire::actingAs($admin)->test(SystemHealth::class)
+            ->assertOk()
+            ->assertSee('Not configured')
+            ->assertSee('All 6 provider(s) skipped — not configured.');
+    }
+
+    /** Tier 4 #10 Phase B2.1 — a live, timestamped feed of real executions. */
+    public function test_the_recent_activity_feed_shows_real_heartbeats(): void
+    {
+        JobHeartbeat::create([
+            'job_name' => 'esim:sync',
+            'started_at' => now(),
+            'finished_at' => now(),
+            'duration_ms' => 1234,
+            'outcome' => 'success',
+            'detail' => 'esimgo synced; 6 skipped (not configured).',
+        ]);
+
+        $admin = User::factory()->create();
+        $admin->assignRole('admin');
+
+        Livewire::actingAs($admin)->test(SystemHealth::class)
+            ->assertOk()
+            ->assertSee('Recent activity')
+            ->assertSee('esim:sync')
+            ->assertSee('esimgo synced; 6 skipped (not configured).')
+            ->assertSee('1234ms');
     }
 
     public function test_a_super_admin_running_migrations_with_nothing_pending_is_a_safe_no_op(): void

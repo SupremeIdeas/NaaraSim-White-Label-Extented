@@ -6,6 +6,7 @@ use App\Models\EsimPlan;
 use App\Services\Pricing\PricingEngine;
 use App\Support\CountryPickerSources;
 use App\Support\EsimRegions;
+use App\Support\ProviderModels;
 use App\Support\SupplierScrub;
 use App\Support\SyncStatus;
 use Illuminate\Support\Arr;
@@ -41,6 +42,20 @@ class CatalogueSyncService
      *  outcome (success/fail + count/error) for admin observability either way. */
     public function sync(string $provider): int
     {
+        // Tier 4 #10 Phase A1: a provider with no API key configured yet
+        // (real credentials not entered — not onboarded, not a failure) was
+        // attempted every single cycle regardless, guaranteeing a permanent,
+        // zero-value error-log entry. Skip it at info level instead: "not
+        // configured" is a legitimate, visible, NEUTRAL state (surfaced
+        // distinctly by SyncStatus below), never silently hidden and never
+        // indistinguishable from a genuine provider failure.
+        if (! ProviderModels::providerConfigured($provider)) {
+            SyncStatus::record($provider, ok: true, count: 0, skipped: true);
+            Log::info("[esim] Catalogue sync skipped for {$provider}: not configured.");
+
+            return 0;
+        }
+
         try {
             $count = $this->doSync($provider);
             SyncStatus::record($provider, ok: true, count: $count);

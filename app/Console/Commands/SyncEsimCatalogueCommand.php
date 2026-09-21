@@ -4,6 +4,8 @@ namespace App\Console\Commands;
 
 use App\Jobs\SyncEsimCatalogueJob;
 use App\Services\eSIM\CatalogueSyncService;
+use App\Support\JobHeartbeats;
+use App\Support\ProviderModels;
 use Illuminate\Console\Command;
 
 /**
@@ -23,6 +25,9 @@ class SyncEsimCatalogueCommand extends Command
             ? [$this->argument('provider')]
             : ['esimgo', 'airalo', 'quibity', 'zendit', 'oneglobal', 'montymobile', 'gigs'];
 
+        $configured = [];
+        $skipped = [];
+
         foreach ($providers as $provider) {
             if ($this->option('now')) {
                 $count = $sync->sync($provider);
@@ -31,7 +36,22 @@ class SyncEsimCatalogueCommand extends Command
                 SyncEsimCatalogueJob::dispatch($provider);
                 $this->info("Queued catalogue sync for {$provider}.");
             }
+
+            if (ProviderModels::providerConfigured($provider)) {
+                $configured[] = $provider;
+            } else {
+                $skipped[] = $provider;
+            }
         }
+
+        // Tier 4 #10 Phase B2.5 — a real "proof of work" detail attached to
+        // this scheduled command's next heartbeat row, so the System Health
+        // hero shows exactly what happened, not just a bare "OK".
+        JobHeartbeats::note('esim:sync', match (true) {
+            $skipped === [] => implode(', ', $configured).' synced.',
+            $configured === [] => 'All '.count($skipped).' provider(s) skipped — not configured.',
+            default => implode(', ', $configured).' synced; '.implode(', ', $skipped).' skipped (not configured).',
+        });
 
         return self::SUCCESS;
     }

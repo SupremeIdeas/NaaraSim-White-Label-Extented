@@ -82,6 +82,31 @@ browser-session artifact, not contaminated data.
   credentials) so an operator can eyeball that two installs point at genuinely
   different databases. Wire it into your deploy checklist for every new install.
 
+### Added since (Tier 4 #10 Phase A2)
+Production logs on both `rehav.online` (master) and `farm.rehav.online`
+(White Label) showed recurring "The MAC is invalid" errors, specifically on
+`white-label-registry.blade.php` — very likely tied to this exact issue.
+Two things came out of re-checking it:
+
+- **The live-server `APP_KEY`/DB/Redis comparison above is still an operator
+  task** — this repo cannot see another install's `.env`, so run the runbook
+  steps above on the real servers to confirm they're distinct; that part
+  hasn't changed.
+- **A genuine code gap was found and fixed regardless of root cause**: a
+  session row encrypted under a stale/rotated `APP_KEY` (or a corrupted
+  payload) throws `DecryptException` from deep inside the encrypted session
+  store's read, and that specific failure was NOT caught anywhere — it
+  surfaced as a hard "MAC is invalid" error page. (Laravel's own
+  `DecryptCookies` middleware already tolerates a bad session-ID *cookie* by
+  treating it as "no cookie"; it does not protect the session *payload*
+  stored server-side.) `bootstrap/app.php`'s exception handler now catches
+  `\Illuminate\Contracts\Encryption\DecryptException` platform-wide, drops
+  the poisoned session cookie, and sends the visitor to a fresh session
+  instead of a broken page — on both master and every White Label install,
+  with zero extra configuration. This is resilience, not a substitute for
+  fixing an actual shared-`APP_KEY` misconfiguration if the operator check
+  above finds one.
+
 ### Still to wire (flagged, not yet built)
 The definitive **cross-instance** collision check — master recording each
 issued instance's intended database name / `APP_KEY` hash at license-issuance

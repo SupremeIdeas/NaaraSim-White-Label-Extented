@@ -109,4 +109,28 @@ return Application::configure(basePath: dirname(__DIR__))
                 ->withInput($request->except(['password', 'password_confirmation', '_token']))
                 ->with('status', 'Your session timed out for security — please try again.');
         });
+
+        // Tier 4 #10 Phase A2: a session row encrypted under a stale/rotated
+        // APP_KEY (or a genuinely corrupted payload) throws DecryptException
+        // from deep inside the encrypted session store's read — unlike a bad
+        // session-ID cookie (which Laravel's own DecryptCookies middleware
+        // already tolerates and just treats as "no cookie"), a bad session
+        // PAYLOAD is not caught anywhere by default and surfaces as a hard
+        // "MAC is invalid" error page. This doesn't fix a genuine cross-tenant
+        // APP_KEY collision (that's an operator fix — see docs/TENANT-
+        // ISOLATION.md) but it stops any one visitor with a poisoned session
+        // from being shown a broken page: simply completing the request as a
+        // normal response (instead of an uncaught 500) lets StartSession's
+        // own middleware run its course and issue the visitor a genuinely
+        // fresh, working session cookie in place of the poisoned one.
+        $exceptions->render(function (\Illuminate\Contracts\Encryption\DecryptException $e, \Illuminate\Http\Request $request) {
+            if ($request->expectsJson()) {
+                return response()->json(['message' => 'Your session could not be verified. Please refresh and try again.'], 419);
+            }
+
+            $target = $request->isMethod('get') ? $request->fullUrl() : url('/');
+
+            return redirect($target)
+                ->with('status', 'Your session was reset for security — please try again.');
+        });
     })->create();
