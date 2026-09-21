@@ -9,6 +9,26 @@
 
 ## DONE
 
+### 📊 Tier 5 #15: Admin Overview Analytics — ported from master — 2026-09-21
+
+Ported Phase A (per-provider live analytics cards), Phase B items 1
+(background-jobs tile) and 3 (KYC auto-resolution tile), and Phase C
+(card spacing/density polish). Excluded Phase B item 4 (attention tile) —
+this fork has no `AdminHotMenu` (Tier 3 #9 Phase G, master-only, confirmed
+absent via direct file check, not assumed) — identical exclusion reason
+as `NaaraSim-WhiteLabel`'s port (this fork's pre-port state was confirmed
+byte-identical to WhiteLabel's, so the whole port was copied straight
+across rather than re-derived from master).
+
+`NciScorer::dailySuccessRateTrend()`, `PlatformAnalyticsService::
+providerOrderVolume()`/`kycAutomationResolutionRate()`, and
+`ProviderModels::PROVIDER_LABELS`/`providerLabel()` copied verbatim.
+`Dashboard.php`/`dashboard.blade.php` hand-ported with the attention-tile
+block omitted. Tests ported: `PublicSuccessRateTest.php`,
+`PlatformAnalyticsServiceTest.php`, `ProviderModelsTest.php` additions,
+and `AdminDashboardProviderCardsTest.php` (copied verbatim). Full suite
+green. `npm run build` run for the Blade/CSS changes.
+
 ### 📣 Tier 5 #11: announcements/wallet/KYB blueprint (ported from master) — 2026-09-21
 Ported master's Phases A-C (announcement presentation styles + DeepLinkLibrary,
 shared-wallet live toast, Nigeria/CAC business KYB via Dojah) — all pure

@@ -113,6 +113,39 @@ class ProviderModels
         'permanent' => 'naara_line',
     ];
 
+    /**
+     * Internal provider key => real display label, for admin-only surfaces
+     * that DO name the actual supplier (Tier 5 #15's per-provider analytics
+     * cards) — never shown to a customer, who only ever sees the Model name.
+     */
+    private const PROVIDER_LABELS = [
+        'esimgo' => 'eSIM Go',
+        'airalo' => 'Airalo',
+        'quibity' => 'Quibity',
+        'zendit' => 'Zendit',
+        'oneglobal' => '1GLOBAL',
+        'montymobile' => 'Monty Mobile',
+        'gigs' => 'Gigs',
+        'getatext' => 'Getatext',
+        'fivesim' => '5sim',
+        'herosms' => 'HeroSMS',
+        'virtsms' => 'VirtSMS',
+        'smspool' => 'SMSPool',
+        'onlinesim' => 'OnlineSIM',
+        'twilio' => 'Twilio',
+        'telnyx' => 'Telnyx',
+        'plivo' => 'Plivo',
+        'vonage' => 'Vonage',
+        'sinch' => 'Sinch',
+        'sonetel' => 'Sonetel',
+    ];
+
+    /** The real display label for an internal provider key (admin-only surfaces). */
+    public static function providerLabel(string $provider): string
+    {
+        return self::PROVIDER_LABELS[$provider] ?? ucfirst($provider);
+    }
+
     /** A Model definition + its key, or null if the key is unknown. */
     public static function find(string $key): ?array
     {

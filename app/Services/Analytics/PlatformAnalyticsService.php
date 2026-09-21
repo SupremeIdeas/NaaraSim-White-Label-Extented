@@ -287,6 +287,34 @@ class PlatformAnalyticsService
     }
 
     /**
+     * Tier 5 #15 Phase B — what fraction of KYC submissions the automated
+     * providers (anything except 'manual') resolved outright versus how
+     * many needed a human decision. Only counts FINAL decisions, same
+     * philosophy as kycApprovalRate() — a still-pending verification isn't
+     * a resolution yet.
+     *
+     * @return array{automated: int, escalated: int, total: int, automated_pct: ?float}
+     */
+    public function kycAutomationResolutionRate(string $range = '30d'): array
+    {
+        return Cache::remember("platform-analytics:kyc-automation-rate:{$range}", now()->addMinutes(10), function () use ($range) {
+            $final = KycVerification::where('created_at', '>=', $this->since($range))
+                ->whereIn('status', [KycVerification::APPROVED, KycVerification::REJECTED, KycVerification::FAILED])
+                ->get(['provider']);
+
+            $automated = $final->where('provider', '!=', 'manual')->count();
+            $total = $final->count();
+
+            return [
+                'automated' => $automated,
+                'escalated' => $total - $automated,
+                'total' => $total,
+                'automated_pct' => $total > 0 ? round($automated / $total * 100, 1) : null,
+            ];
+        });
+    }
+
+    /**
      * Refunds as a % of total revenue over the window (§7.2, fixes gap #4).
      * Only settled refunds (STATUS_DONE) count — a pending/failed refund
      * request hasn't actually moved money yet.
@@ -416,6 +444,25 @@ class PlatformAnalyticsService
                     ->whereBetween('expires_at', [now(), now()->addDays(3)])
                     ->count(),
             ];
+        });
+    }
+
+    /**
+     * Tier 5 #15 Phase A — real order volume attributable to one internal
+     * provider over the window, for the admin overview's per-provider
+     * cards. `$stack` picks the right ledger (esim_orders vs sms_orders —
+     * the latter covers OTP/rental/permanent, all attributed via the same
+     * `provider` column).
+     */
+    public function providerOrderVolume(string $stack, string $providerKey, string $range = '30d'): int
+    {
+        return Cache::remember("platform-analytics:provider-volume:{$stack}:{$providerKey}:{$range}", now()->addMinutes(10), function () use ($stack, $providerKey, $range) {
+            $since = $this->since($range);
+
+            return $stack === 'esim'
+                ? EsimOrder::where('provider', $providerKey)->where('created_at', '>=', $since)->count()
+                : SmsOrder::where('provider', $providerKey)->where('created_at', '>=', $since)
+                    ->whereNotIn('status', ['timeout', 'cancelled'])->count();
         });
     }
 

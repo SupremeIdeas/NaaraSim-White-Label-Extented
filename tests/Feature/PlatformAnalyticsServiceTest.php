@@ -346,4 +346,62 @@ class PlatformAnalyticsServiceTest extends TestCase
         $this->assertSame(300.0, $summary['total_mb_this_week']); // 200 (A) + 100 (B)
         $this->assertSame(2, $summary['active_esims']);
     }
+
+    // -------------------------- Tier 5 #15 additions --------------------------
+
+    public function test_provider_order_volume_counts_esim_orders_by_provider(): void
+    {
+        $user = User::factory()->create();
+        EsimOrder::create(['user_id' => $user->id, 'plan_id' => $this->plan()->id, 'provider' => 'esimgo', 'status' => 'active', 'price_charged' => 9, 'wholesale_cost' => 3, 'currency' => 'USD']);
+        EsimOrder::create(['user_id' => $user->id, 'plan_id' => $this->plan()->id, 'provider' => 'esimgo', 'status' => 'active', 'price_charged' => 9, 'wholesale_cost' => 3, 'currency' => 'USD']);
+        EsimOrder::create(['user_id' => $user->id, 'plan_id' => $this->plan()->id, 'provider' => 'airalo', 'status' => 'active', 'price_charged' => 9, 'wholesale_cost' => 3, 'currency' => 'USD']);
+
+        $volume = (new PlatformAnalyticsService)->providerOrderVolume('esim', 'esimgo', '30d');
+
+        $this->assertSame(2, $volume);
+    }
+
+    public function test_provider_order_volume_counts_sms_orders_excluding_timeout_and_cancelled(): void
+    {
+        $user = User::factory()->create();
+        SmsOrder::create(['user_id' => $user->id, 'provider' => 'fivesim', 'type' => 'otp', 'status' => 'completed', 'charged_to_user' => 2, 'provider_cost' => 0.5]);
+        SmsOrder::create(['user_id' => $user->id, 'provider' => 'fivesim', 'type' => 'otp', 'status' => 'completed', 'charged_to_user' => 2, 'provider_cost' => 0.5]);
+        SmsOrder::create(['user_id' => $user->id, 'provider' => 'fivesim', 'type' => 'otp', 'status' => 'timeout', 'charged_to_user' => 0, 'provider_cost' => 0]);
+        SmsOrder::create(['user_id' => $user->id, 'provider' => 'fivesim', 'type' => 'otp', 'status' => 'cancelled', 'charged_to_user' => 0, 'provider_cost' => 0]);
+
+        $volume = (new PlatformAnalyticsService)->providerOrderVolume('sms', 'fivesim', '30d');
+
+        $this->assertSame(2, $volume);
+    }
+
+    public function test_provider_order_volume_is_zero_for_a_provider_with_no_orders(): void
+    {
+        $volume = (new PlatformAnalyticsService)->providerOrderVolume('esim', 'quibity', '30d');
+
+        $this->assertSame(0, $volume);
+    }
+
+    public function test_kyc_automation_resolution_rate_splits_automated_vs_escalated_final_decisions(): void
+    {
+        $user = User::factory()->create();
+        KycVerification::create(['user_id' => $user->id, 'level' => KycVerification::L2, 'provider' => 'sumsub', 'status' => KycVerification::APPROVED, 'reference' => 'kyc-auto-1']);
+        KycVerification::create(['user_id' => $user->id, 'level' => KycVerification::L2, 'provider' => 'dojah', 'status' => KycVerification::APPROVED, 'reference' => 'kyc-auto-2']);
+        KycVerification::create(['user_id' => $user->id, 'level' => KycVerification::L3, 'provider' => 'manual', 'status' => KycVerification::APPROVED, 'reference' => 'kyc-manual-1']);
+        KycVerification::create(['user_id' => $user->id, 'level' => KycVerification::L2, 'provider' => 'sumsub', 'status' => KycVerification::PENDING, 'reference' => 'kyc-pending-1']);
+
+        $result = (new PlatformAnalyticsService)->kycAutomationResolutionRate('30d');
+
+        $this->assertSame(2, $result['automated']);
+        $this->assertSame(1, $result['escalated']);
+        $this->assertSame(3, $result['total']); // pending excluded — not a final decision
+        $this->assertSame(66.7, $result['automated_pct']);
+    }
+
+    public function test_kyc_automation_resolution_rate_is_null_pct_when_no_decisions_yet(): void
+    {
+        $result = (new PlatformAnalyticsService)->kycAutomationResolutionRate('30d');
+
+        $this->assertSame(0, $result['total']);
+        $this->assertNull($result['automated_pct']);
+    }
 }
