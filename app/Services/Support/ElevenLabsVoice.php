@@ -71,9 +71,12 @@ class ElevenLabsVoice implements VoiceSynthesizer
         return match ($mime) {
             'audio/mpeg' => 'mp3',
             'audio/wav', 'audio/x-wav' => 'wav',
-            'audio/webm' => 'webm',
+            'audio/webm', 'video/webm' => 'webm',
             'audio/ogg' => 'ogg',
             'audio/mp4', 'audio/m4a', 'audio/x-m4a' => 'm4a',
+            'audio/aac' => 'aac',
+            'audio/3gpp' => '3gp',
+            'audio/amr' => 'amr',
             default => 'bin',
         };
     }

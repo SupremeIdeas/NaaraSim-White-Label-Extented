@@ -70,9 +70,18 @@ class VirtualNumber extends Model
     }
 
     /**
-     * Whether this line can send MMS (media attachments). Carriers only deliver
-     * MMS reliably on US/Canada (+1) numbers, so we gate attachments to those —
-     * an honest capability check rather than letting a media send silently drop.
+     * Whether this line can send MMS (media attachments). Two conditions,
+     * both required: carriers only deliver MMS reliably on US/Canada (+1)
+     * numbers, AND — confirmed per-provider (Marketing/Chat blueprint Phase
+     * B3 audit) — only Twilio, Telnyx, and Plivo's send-SMS APIs accept a
+     * real native media attachment (`MediaUrl`/`media_urls`). Vonage and
+     * Sinch have no MMS field at all (MessageSenderService silently
+     * degrades a media URL to an appended text link for them — never a real
+     * attachment), and Sonetel has no outbound-SMS endpoint whatsoever. A
+     * number provisioned via one of those three would otherwise show
+     * "supports MMS" and let a user attach an image/voice note that quietly
+     * arrives as a bare link instead — an honest capability check rather
+     * than letting a media send silently drop or degrade.
      */
     public function supportsMms(): bool
     {
@@ -81,7 +90,7 @@ class VirtualNumber extends Model
             return (bool) $caps['mms'];
         }
 
-        return $this->isUsCanada();
+        return $this->isUsCanada() && in_array($this->provider, ['twilio', 'telnyx', 'plivo'], true);
     }
 
     /**

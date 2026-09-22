@@ -144,30 +144,53 @@
         </div>
 
         <form wire:submit="send" class="flex items-center gap-2"
-              x-on:message-added.window="$nextTick(() => { const i = $el.querySelector('input[type=text]'); i && i.focus(); })">
+              x-on:message-added.window="$nextTick(() => { const i = $el.querySelector('textarea'); i && i.focus(); })">
             <x-nia-glow-wrapper interactive class="flex-1 rounded-full">
-            <div class="flex items-center gap-1 rounded-full border border-slate-200/70 bg-white px-2 py-1 focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/40 dark:border-white/10 dark:bg-[#243352]">
+            {{-- Marketing/Chat blueprint Phase B: elastic growth (auto-resizing,
+                 capped, internal scroll beyond that) + contextual reveal — the
+                 mic is the resting default (WhatsApp's own behaviour); the send
+                 button and attach icon reveal together the moment there's
+                 actual content (typed text or an attached file) to send.
+                 `hasContent` reads `$wire.draft`/`$wire.evidence` directly
+                 (same pattern already used in send-message.blade.php's char
+                 counter) so the reveal is instant with zero extra network
+                 round-trips. --}}
+            <div class="flex items-end gap-1 rounded-3xl border border-slate-200/70 bg-white px-2 py-1 focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/40 dark:border-white/10 dark:bg-[#243352]"
+                 x-data="{
+                    autoGrow(el) { el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight, 120) + 'px'; },
+                    get hasContent() { return (($wire.draft || '').trim() !== '') || !!$wire.evidence; },
+                 }">
 
                 {{-- Normal controls (hidden while recording). appearance-none:
                      some browsers paint a subtle default text-field chrome on
                      `appearance: auto` inputs that can peek through a parent's
                      rounded border — belt-and-suspenders alongside the real
                      fix (the input row now correctly clears the bottom nav
-                     instead of rendering behind it). --}}
-                <input type="text" wire:model="draft" autocomplete="off" placeholder="Type your message…"
-                       x-show="state !== 'recording' && state !== 'uploading'"
-                       class="min-w-0 flex-1 appearance-none border-0 bg-transparent px-2 py-1.5 text-sm text-slate-900 focus:ring-0 dark:text-slate-100"
-                       wire:loading.attr="disabled" wire:target="send,sendVoice">
+                     instead of rendering behind it). `wire:model` (deferred,
+                     not `.live`) keeps typing itself request-free; the
+                     `hasContent` getter above reads `$wire.draft` directly
+                     rather than a separate entangled copy. --}}
+                <textarea rows="1" wire:model="draft" autocomplete="off" placeholder="Type your message…"
+                          x-show="state !== 'recording' && state !== 'uploading'"
+                          x-init="autoGrow($el)" x-on:input="autoGrow($el)"
+                          class="min-w-0 flex-1 resize-none appearance-none overflow-y-auto border-0 bg-transparent px-2 py-2 text-sm text-slate-900 focus:ring-0 dark:text-slate-100"
+                          wire:loading.attr="disabled" wire:target="send,sendVoice"></textarea>
 
-                <label x-show="state !== 'recording' && state !== 'uploading'"
+                <label x-show="(state !== 'recording' && state !== 'uploading') && hasContent"
                        class="flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-full text-slate-500 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-[#2D4060]" title="Attach evidence (image or PDF)">
                     <x-icon name="upload" class="h-5 w-5" />
                     <input type="file" accept="{{ \App\Support\SupportAttachment::acceptAttribute() }}" class="hidden" wire:model="evidence">
                 </label>
 
+                {{-- Mic — the resting default when there's nothing to send yet
+                     (a soft breathing pulse invites the tap, since the app's
+                     own "explain permissions before requesting" safety design
+                     needs a real click to show that explanation first, rather
+                     than a press-and-hold that could get interrupted mid-hold
+                     by the OS permission dialog). --}}
                 <button type="button" @click="promptMic()"
-                        x-show="state !== 'recording' && state !== 'uploading'"
-                        class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-slate-500 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-[#2D4060]" title="Record a voice note">
+                        x-show="(state !== 'recording' && state !== 'uploading') && ! hasContent"
+                        class="flex h-9 w-9 shrink-0 animate-pulse items-center justify-center rounded-full text-slate-500 hover:bg-slate-100 hover:!animate-none dark:text-slate-300 dark:hover:bg-[#2D4060]" title="Record a voice note">
                     <x-icon name="mic" class="h-5 w-5" />
                 </button>
 
@@ -192,6 +215,7 @@
             </x-nia-glow-wrapper>
 
             <button type="submit" wire:loading.attr="disabled" wire:target="send"
+                    x-show="(($wire.draft || '').trim() !== '') || !!$wire.evidence"
                     x-bind:disabled="state === 'recording' || state === 'uploading' || state === 'requesting'"
                     class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary text-white hover:bg-primary-dark disabled:opacity-60">
                 <x-icon name="send" class="h-5 w-5" />
