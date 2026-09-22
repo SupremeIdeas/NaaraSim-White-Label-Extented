@@ -29,7 +29,14 @@ function extForMime(mime) {
 
 export function registerVoiceRecorder() {
     document.addEventListener('alpine:init', () => {
-        window.Alpine.data('voiceRecorder', () => ({
+        // `sendMethod` names the Livewire method to call once the recorded
+        // blob has uploaded — defaults to NaaraCare chat's own `sendVoice()`.
+        // Naara Line's SendMessage modal (Marketing/Chat blueprint Phase B3)
+        // reuses this exact same recorder rather than a second copy, passing
+        // `sendMethod: 'send'` since that one component's `send()` already
+        // branches on whichever of text/attachment/voice is present.
+        window.Alpine.data('voiceRecorder', (options = {}) => ({
+            sendMethod: options.sendMethod || 'sendVoice',
             // idle | priming | requesting | recording | uploading | denied | unsupported | error
             state: 'idle',
             seconds: 0,
@@ -130,7 +137,7 @@ export function registerVoiceRecorder() {
                 this.$wire.upload(
                     'voiceNote',
                     file,
-                    () => { this.$wire.sendVoice(); this.reset(); },
+                    () => { this.$wire[this.sendMethod](); this.reset(); },
                     () => { this.state = 'error'; },
                 );
             },

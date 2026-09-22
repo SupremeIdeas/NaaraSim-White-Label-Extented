@@ -5,12 +5,17 @@ namespace Tests\Feature;
 use App\Exceptions\SmsException;
 use App\Livewire\SendMessage;
 use App\Models\OutboundMessage;
+use App\Models\Setting;
 use App\Models\User;
 use App\Models\VirtualNumber;
+use App\Services\Pricing\PricingEngine;
 use App\Services\SMS\MessageSenderService;
 use App\Services\Wallet\WalletService;
+use App\Support\BrandSettings;
 use Database\Seeders\PricingSettingsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 use Tests\Support\FakePermanentProvider;
 use Tests\TestCase;
@@ -59,8 +64,8 @@ class MessageSenderTest extends TestCase
 
     public function test_the_no_line_empty_state_copy_is_rebranded(): void
     {
-        \App\Models\Setting::setValue('brand.word', 'Acme', 'brand');
-        \App\Support\BrandSettings::flush();
+        Setting::setValue('brand.word', 'Acme', 'brand');
+        BrandSettings::flush();
 
         Livewire::actingAs(User::factory()->create())->test(SendMessage::class)
             ->set('open', true)
@@ -88,7 +93,7 @@ class MessageSenderTest extends TestCase
         $line = $this->line($user);
 
         // Retail comes from the engine (never a literal here) — MarginGuard-floored.
-        $retail = round(app(\App\Services\Pricing\PricingEngine::class)->calculateSmsRetail(0.10, 'twilio'), 4);
+        $retail = round(app(PricingEngine::class)->calculateSmsRetail(0.10, 'twilio'), 4);
 
         $msg = app(MessageSenderService::class)->send($user, $line, '+2348012345678', 'Hello world');
 
@@ -108,7 +113,7 @@ class MessageSenderTest extends TestCase
         $user = $this->fundedUser(usd: 5.0, smsCost: 0.10);
         $line = $this->line($user);
 
-        $retail = round(app(\App\Services\Pricing\PricingEngine::class)->calculateSmsRetail(0.10, 'twilio'), 4);
+        $retail = round(app(PricingEngine::class)->calculateSmsRetail(0.10, 'twilio'), 4);
 
         $msg = app(MessageSenderService::class)->send($user, $line, '+2348012345678', str_repeat('a', 200));
 
@@ -135,7 +140,7 @@ class MessageSenderTest extends TestCase
 
     public function test_an_attachment_sends_as_mms_and_is_stored(): void
     {
-        \Illuminate\Support\Facades\Storage::fake('public');
+        Storage::fake('public');
         $user = $this->fundedUser(usd: 5.0);
         $line = $this->line($user); // +1 US number → MMS-capable
         $fake = app('number.twilio');
@@ -165,6 +170,74 @@ class MessageSenderTest extends TestCase
         }
 
         // Never charged — the media send was refused before any debit.
+        $this->assertSame('5.0000', (string) $user->wallet->fresh()->usd_balance);
+    }
+
+    /**
+     * Marketing/Chat blueprint Phase B3 audit: only Twilio, Telnyx and Plivo
+     * actually accept a native MMS media attachment — Vonage and Sinch
+     * silently degrade a media URL to an appended text link
+     * (VonageService/SinchService::sendSms()), and Sonetel has no
+     * outbound-SMS endpoint at all. A US/Canada number provisioned via one
+     * of those must NOT report itself as MMS-capable, or a user's photo/
+     * voice note would quietly arrive as a bare link instead of a real
+     * attachment.
+     */
+    public function test_mms_capability_is_provider_aware_not_just_country_aware(): void
+    {
+        $user = $this->fundedUser(usd: 5.0);
+        $n = 0;
+        $lineFor = function (string $provider) use ($user, &$n) {
+            $n++;
+
+            return VirtualNumber::create([
+                'user_id' => $user->id, 'provider' => $provider, 'phone_number' => "+1555000{$n}",
+                'sid' => "SID-{$n}", 'capabilities' => ['sms' => true, 'voice' => true],
+                'monthly_cost' => 1.0, 'monthly_retail' => 1.4, 'status' => 'active',
+                'next_billing_date' => now()->addMonth()->toDateString(), 'provisioned_at' => now(),
+            ]);
+        };
+
+        $this->assertTrue($lineFor('twilio')->supportsMms());
+        $this->assertTrue($lineFor('telnyx')->supportsMms());
+        $this->assertTrue($lineFor('plivo')->supportsMms());
+        $this->assertFalse($lineFor('vonage')->supportsMms());
+        $this->assertFalse($lineFor('sinch')->supportsMms());
+        $this->assertFalse($lineFor('sonetel')->supportsMms());
+    }
+
+    public function test_a_voice_note_sends_as_mms_through_the_modal(): void
+    {
+        Storage::fake('public');
+        $user = $this->fundedUser(usd: 5.0, smsCost: 0.10);
+        $line = $this->line($user); // twilio, US → MMS-capable
+
+        Livewire::actingAs($user)->test(SendMessage::class)
+            ->call('openFor', '+2348012345678', 'Ada Obi')
+            ->set('voiceNote', UploadedFile::fake()->create('note.webm', 50, 'audio/webm'))
+            ->call('send')
+            ->assertSet('open', false)
+            ->assertSet('error', null);
+
+        $msg = OutboundMessage::first();
+        $this->assertSame('sent', $msg->status);
+        $this->assertNotNull($msg->attachment_url);
+        $this->assertSame(1, $msg->segments); // MMS billed as one media message
+    }
+
+    public function test_a_voice_note_from_a_non_mms_provider_is_refused_before_charging(): void
+    {
+        $user = $this->fundedUser(usd: 5.0);
+        $line = $this->line($user, 'vonage'); // US number, but Vonage has no native MMS
+
+        Livewire::actingAs($user)->test(SendMessage::class)
+            ->call('openFor', '+2348012345678', 'Ada Obi')
+            ->set('lineId', $line->id)
+            ->set('voiceNote', UploadedFile::fake()->create('note.webm', 50, 'audio/webm'))
+            ->call('send')
+            ->assertSet('open', true); // never closes — refused, not sent
+
+        $this->assertSame(0, OutboundMessage::count());
         $this->assertSame('5.0000', (string) $user->wallet->fresh()->usd_balance);
     }
 

@@ -6,8 +6,10 @@ use App\Exceptions\InsufficientBalanceException;
 use App\Exceptions\SmsException;
 use App\Models\VirtualNumber;
 use App\Services\SMS\MessageSenderService;
+use App\Services\Support\AudioTranscoder;
 use App\Support\MediaStorage;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\On;
 use Livewire\Component;
 use Livewire\WithFileUploads;
@@ -34,6 +36,15 @@ class SendMessage extends Component
     /** Optional MMS attachment (US/CA lines only). */
     public $attachment = null;
 
+    /**
+     * Optional voice-note MMS attachment — mutually exclusive with
+     * $attachment (Twilio/Telnyx/Plivo's MMS APIs accept exactly one
+     * MediaUrl). Marketing/Chat blueprint Phase B3: confirmed against every
+     * integrated provider's actual API before building this — see
+     * VirtualNumber::supportsMms()'s docblock for the per-provider audit.
+     */
+    public $voiceNote = null;
+
     /** The Line to send FROM (defaults to the user's first active SMS line). */
     public ?int $lineId = null;
 
@@ -43,7 +54,7 @@ class SendMessage extends Component
     #[On('open-send-message')]
     public function openFor(string $to = '', string $name = ''): void
     {
-        $this->reset('body', 'error', 'attachment');
+        $this->reset('body', 'error', 'attachment', 'voiceNote');
         $this->to = $to;
         $this->peerName = $name;
 
@@ -72,13 +83,19 @@ class SendMessage extends Component
             ->values();
     }
 
-    public function send(MessageSenderService $sender): void
+    public function send(MessageSenderService $sender, AudioTranscoder $transcoder): void
     {
         $this->error = null;
 
         $line = VirtualNumber::where('user_id', Auth::id())->find($this->lineId);
         if ($line === null) {
             $this->error = 'Choose one of your numbers to send from.';
+
+            return;
+        }
+
+        if ($this->attachment && $this->voiceNote) {
+            $this->error = 'Send either an image or a voice note, not both.';
 
             return;
         }
@@ -97,7 +114,7 @@ class SendMessage extends Component
                     'attachment.mimes' => 'Attach an image (JPG, PNG or GIF).',
                     'attachment.max' => 'Keep the image under 1 MB.',
                 ]);
-            } catch (\Illuminate\Validation\ValidationException $e) {
+            } catch (ValidationException $e) {
                 $this->error = collect($e->errors())->flatten()->first();
 
                 return;
@@ -108,6 +125,28 @@ class SendMessage extends Component
                 return;
             }
             $mediaUrl = MediaStorage::storePublic($this->attachment, 'mms');
+        } elseif ($this->voiceNote) {
+            try {
+                $this->validate([
+                    'voiceNote' => ['file', 'mimetypes:audio/mpeg,audio/wav,audio/webm,audio/ogg,audio/mp4,audio/x-m4a,audio/aac,audio/3gpp,audio/amr,video/webm', 'max:10240'],
+                ], [
+                    'voiceNote.mimetypes' => 'That recording format isn\'t supported.',
+                    'voiceNote.max' => 'Keep the voice note under 10 MB.',
+                ]);
+            } catch (ValidationException $e) {
+                $this->error = collect($e->errors())->flatten()->first();
+
+                return;
+            }
+            if (! $line->supportsMms()) {
+                $this->error = 'Voice notes only send from a US or Canada Twilio/Telnyx/Plivo number.';
+
+                return;
+            }
+            $rawBytes = file_get_contents($this->voiceNote->getRealPath());
+            [$bytes, $mime] = $transcoder->toCanonical($rawBytes, $this->voiceNote->getMimeType(), $this->voiceNote->extension());
+            $extension = $mime === 'audio/mpeg' ? $transcoder->canonicalExtension() : $this->voiceNote->extension();
+            $mediaUrl = MediaStorage::storePublicBytes($bytes, $extension, 'mms');
         }
 
         try {
@@ -126,7 +165,7 @@ class SendMessage extends Component
             return;
         }
 
-        $this->reset('body', 'error', 'attachment');
+        $this->reset('body', 'error', 'attachment', 'voiceNote');
         $this->open = false;
         $this->dispatch('nx-toast', type: 'success', message: 'Message sent.');
     }
@@ -140,7 +179,7 @@ class SendMessage extends Component
         // surfaced). Only computed while the modal is open and a Line is chosen.
         $quote = null;
         if ($this->open && $line) {
-            $quote = app(MessageSenderService::class)->quote($line, $this->body, (bool) $this->attachment);
+            $quote = app(MessageSenderService::class)->quote($line, $this->body, (bool) ($this->attachment || $this->voiceNote));
         }
 
         return view('livewire.send-message', [
