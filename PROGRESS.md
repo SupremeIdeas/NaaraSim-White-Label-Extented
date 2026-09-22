@@ -9,6 +9,118 @@
 
 ## DONE
 
+### 📊 Tier 5 #15: Admin Overview Analytics — ported from master — 2026-09-21
+
+Ported Phase A (per-provider live analytics cards), Phase B items 1
+(background-jobs tile) and 3 (KYC auto-resolution tile), and Phase C
+(card spacing/density polish). Excluded Phase B item 4 (attention tile) —
+this fork has no `AdminHotMenu` (Tier 3 #9 Phase G, master-only, confirmed
+absent via direct file check, not assumed) — identical exclusion reason
+as `NaaraSim-WhiteLabel`'s port (this fork's pre-port state was confirmed
+byte-identical to WhiteLabel's, so the whole port was copied straight
+across rather than re-derived from master).
+
+`NciScorer::dailySuccessRateTrend()`, `PlatformAnalyticsService::
+providerOrderVolume()`/`kycAutomationResolutionRate()`, and
+`ProviderModels::PROVIDER_LABELS`/`providerLabel()` copied verbatim.
+`Dashboard.php`/`dashboard.blade.php` hand-ported with the attention-tile
+block omitted. Tests ported: `PublicSuccessRateTest.php`,
+`PlatformAnalyticsServiceTest.php`, `ProviderModelsTest.php` additions,
+and `AdminDashboardProviderCardsTest.php` (copied verbatim). Full suite
+green. `npm run build` run for the Blade/CSS changes.
+
+### 📣 Tier 5 #11: announcements/wallet/KYB blueprint (ported from master) — 2026-09-21
+Ported master's Phases A-C (announcement presentation styles + DeepLinkLibrary,
+shared-wallet live toast, Nigeria/CAC business KYB via Dojah) — all pure
+consumer/admin content-authoring and generic provider-routing, zero license/
+oversight content. Two things this fork genuinely lacks and were correctly
+EXCLUDED rather than blindly ported:
+- The AI-assisted Announcements composer (mount(Request)/refine()/
+  render(MarketingCopywriter)) — that's the content/billing/hot-menu
+  blueprint's Phase B/E, master-only and never built in this fork's
+  Announcements screen. Kept the composer's Phase A additions (styles,
+  DeepLinkLibrary picker) without that wiring.
+- Stripe Identity / non-African global-KYC routing in `KycService::
+  resolveProvider()` — that's the UX/localization/platform-reach
+  blueprint's Phase F, master-only; this fork has no `AfricanCountries` or
+  `StripeIdentityKycProvider` at all. Wrote a fork-appropriate
+  `resolveProvider()` with only the L3/Nigeria/CAC branch.
+`merchant.white-label` in the widened `DeepLinkLibrary` is inert here —
+that route doesn't exist in this fork, so `Route::has()` excludes it
+automatically; a dedicated test confirms the exclusion instead of assuming it.
+Full suite green (2281 tests, 7270 assertions).
+
+### 🔁 Reconciliation sync from master — role-mass-assignment fix, Frontend-UX-fix Phases A-G + FAQ, Tier 4 #10 — 2026-09-21
+This fork had fallen behind master by 20 commits (last synced at the
+account-erasure fix). Owner instruction: port what children genuinely need,
+never widen the license/oversight surface. Reviewed each pending master
+commit and split them:
+
+**Ported here** (all master-only surfaces stayed correctly gated or absent):
+- **Tier 5 #16 — role mass-assignment fix** (security: `role` removed from
+  `User::$fillable`, `setRole()` added as the one sanctioned mutator) —
+  committed explicitly here even though this fork's `User.php` already
+  carried the equivalent change from an earlier sync; `UserRoleMassAssignmentTest`
+  was missing and is now added.
+- **Frontend-UX-fix Phases A-G** (notification popup teleport fix, Nia chat
+  input runtime-height fix, homepage flag-orbit/modal-gutter fix, banner
+  carousel cropping fix, bento title overflow + word-count validation,
+  MarketingCopyStudio White-Label-reach verification, admin-configurable
+  "More from Naara" banner placements) + the FAQ page wiring/master-only
+  gating that shipped alongside it on master. Two adaptations for this
+  fork: Phase A's duplicate-modal-name fix only touched
+  `notification-center.blade.php` (master's `admin/hot-menu.blade.php`
+  half doesn't apply — no Hot Menu here, Tier 3 #9 Phase G); Phase G's
+  admin nav gained `banner-placements` but NOT master's isMaster()-gated
+  "More Apps" entry (that route was never built in this fork). 4
+  pre-existing tests that assumed `/faq` worked by default were updated to
+  exercise it under a temporary `naarasim-core` identity (or, for one
+  generic layout test, switched to `/about`) — this fork's real default
+  identity is `naarasim-whitelabel`.
+- **Tier 4 #10 — error-log root-cause fixes + System Health hero**: the
+  unconfigured-eSIM-provider skip, the `DecryptException` session-resilience
+  handler, and the full `job_heartbeats`-backed System Health rebuild are
+  generic platform reliability/observability code with zero license surface
+  — ported as-is.
+
+**Deliberately NOT ported** (master-only by design, entangled with
+white-label purchase/billing/oversight models this fork never has):
+Tier 3 #9's content/billing/hot-menu blueprint (Phases B-G — email/
+announcement composers, changelog, and specifically Phases F1/F2 which are
+master's own oversight of *other* white-label instances' billing) and the
+UX/localization/platform-reach blueprint (both already marked "master repo
+only" in master's own PROGRESS.md when built).
+
+Full suite: 2259 tests, 7137 assertions, green. `npm run build` clean.
+
+### 🗄️ Account erasure fix (Tier 0 #2, overdue) — anonymize-and-retain (synced from master) — 2026-09-20
+Same fix as master (AccountService.php is core, no fork-specific behavior):
+`erase()` now anonymizes-and-retains instead of hard-deleting on super-admin
+deletion approval — PII nulled, account deactivated, financial/order records
+retained under the same user id until `account_erasure.retention_years`
+elapses. New `account:purge-erased` scheduled command performs the real,
+final purge. New Admin → Legal hold records screen (super-admin only,
+audited) for a read-only lookup of retained records during the window.
+`docs/ACCOUNT-ERASURE.md` copied for the compliance-facing summary. Full
+suite green after sync.
+
+
+### 🔪 White-label license boundary surgery (EXTENDED) — consumer-only, fully unlocked — 2026-09-20
+Same boundary surgery as the normal fork (removed the entire issuer/oversight/
+distributor + merchant license-sales + PlatformEarnings resale surface, plus
+their routes/nav/seeders/migrations/tests), PLUS the Extended difference:
+`FeatureEntitlements::all()` is now hard-empty so EVERY feature is always
+unlocked regardless of what the master sends (blueprint §0.4 — "Extended
+ships with zero feature locks, every feature live from install"). Extended's
+only gate is license validity (the update/entitlement check-in), never a
+per-feature lock. Adapted the two fork-side tests that assumed data-driven
+locks (`WhiteLabelEntitlementClientTest`, `FeatureGateTest`) to prove the
+always-unlocked guarantee at both the client-cache and gate levels. Kept the
+consumer leaf intact (WhiteLabelUpdateClient, /updater, verify/apply, the local
+gate). Dangling-reference sweep: zero. Full suite green: 2204 tests, 6953
+assertions. Docs: docs/audits/WHITE-LABEL-BOUNDARY-AUDIT.md,
+docs/architecture/WHITE-LABEL-LICENSE-BOUNDARY.md.
+
 ### 📖 In-app Merchant White Label Guide + admin-configurable reference links — 2026-09-16
 Synced from master. New `white_label_guide_links` table + `WhiteLabelGuideLink`
 model (domain/vps/shared/general categories), seeded with the same providers

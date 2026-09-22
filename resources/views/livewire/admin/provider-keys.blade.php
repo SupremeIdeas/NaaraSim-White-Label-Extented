@@ -40,6 +40,8 @@
                     <span class="w-24 shrink-0 text-sm font-medium text-slate-700 dark:text-slate-200">{{ $label }}</span>
                     @if ($st === null)
                         <span class="text-xs text-slate-400">Never synced</span>
+                    @elseif ($st['skipped'] ?? false)
+                        <span class="inline-flex items-center gap-1 text-xs text-slate-400"><x-icon name="info" class="h-3.5 w-3.5" /> Not configured — no API key set</span>
                     @elseif ($st['ok'])
                         <span class="inline-flex items-center gap-1 text-xs text-green-600 dark:text-green-400"><x-icon name="badge-check" class="h-3.5 w-3.5" /> {{ $st['count'] }} plans</span>
                         <span class="text-[11px] text-slate-400">{{ \Illuminate\Support\Carbon::parse($st['at'])->diffForHumans() }}</span>

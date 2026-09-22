@@ -89,11 +89,11 @@
 
         {{-- Revenue split donut (Module 32 pick — code-town3 stat card, made
              functional): 30-day revenue share per product line. --}}
-        <div class="rounded-2xl border border-slate-200 bg-white p-6 dark:border-[#2D4060] dark:bg-[#1A2840]">
+        <div class="rounded-2xl border border-slate-200 bg-white p-5 dark:border-[#2D4060] dark:bg-[#1A2840]">
             <h2 class="flex items-center gap-2 text-sm font-semibold text-slate-800 dark:text-slate-100">
                 <x-icon name="signal" class="h-4 w-4 text-primary" /> Revenue split (30d)
             </h2>
-            <div class="mt-4 flex items-center gap-5">
+            <div class="mt-3 flex items-center gap-5">
                 <div class="nx-donut shrink-0" @if ($splitTotal > 0) style="--donut: {{ $splitGradient }}" @endif
                      role="img" aria-label="Revenue split by product">
                     <div class="nx-donut__hole">
@@ -131,11 +131,11 @@
             ];
         @endphp
         @foreach ($tiles as [$label, $value, $icon, $valueClass])
-            <div class="rounded-xl border border-slate-200 bg-white p-5 dark:border-[#2D4060] dark:bg-[#1A2840]">
+            <div class="rounded-xl border border-slate-200 bg-white p-4 dark:border-[#2D4060] dark:bg-[#1A2840]">
                 <div class="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
                     <x-icon :name="$icon" class="h-4 w-4" /> {{ $label }}
                 </div>
-                <div class="mt-2 text-2xl font-bold {{ $valueClass }}">{{ $value }}</div>
+                <div class="mt-1.5 text-2xl font-bold {{ $valueClass }}">{{ $value }}</div>
             </div>
         @endforeach
     </div>
@@ -154,7 +154,7 @@
             ];
         @endphp
         @foreach ($oversight as [$label, $value, $sub, $icon, $valueClass])
-            <div class="rounded-xl border border-slate-200 bg-white p-5 dark:border-[#2D4060] dark:bg-[#1A2840]">
+            <div class="rounded-xl border border-slate-200 bg-white p-4 dark:border-[#2D4060] dark:bg-[#1A2840]">
                 <div class="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
                     <x-icon :name="$icon" class="h-4 w-4" /> {{ $label }}
                 </div>
@@ -166,12 +166,14 @@
 
     {{-- Most-bought by country + most-used models (owner request). --}}
     <div class="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <div class="rounded-2xl border border-slate-200 bg-white p-5 dark:border-[#2D4060] dark:bg-[#1A2840]">
-            <h3 class="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-700 dark:text-slate-200">
+        <div class="rounded-2xl border border-slate-200 bg-white p-4 dark:border-[#2D4060] dark:bg-[#1A2840]">
+            <h3 class="mb-2.5 flex items-center gap-2 text-sm font-semibold text-slate-700 dark:text-slate-200">
                 <x-icon name="globe" class="h-4 w-4" /> Most-bought numbers by country <span class="text-xs font-normal text-slate-400">· 30d</span>
             </h3>
             @forelse ($topCountries as $row)
-                @php($__max = max(array_column($topCountries, 'count')) ?: 1)
+                @php
+                    $__max = max(array_column($topCountries, 'count')) ?: 1;
+                @endphp
                 <div class="mb-2 flex items-center gap-3" wire:key="tc-{{ $row['country'] }}">
                     <span class="w-28 shrink-0 truncate text-sm capitalize text-slate-700 dark:text-slate-200">{{ str_replace('_', ' ', $row['country']) }}</span>
                     <div class="h-2 flex-1 overflow-hidden rounded-full bg-slate-100 dark:bg-[#243352]">
@@ -184,12 +186,14 @@
             @endforelse
         </div>
 
-        <div class="rounded-2xl border border-slate-200 bg-white p-5 dark:border-[#2D4060] dark:bg-[#1A2840]">
-            <h3 class="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-700 dark:text-slate-200">
+        <div class="rounded-2xl border border-slate-200 bg-white p-4 dark:border-[#2D4060] dark:bg-[#1A2840]">
+            <h3 class="mb-2.5 flex items-center gap-2 text-sm font-semibold text-slate-700 dark:text-slate-200">
                 <x-icon name="grid" class="h-4 w-4" /> Most-used NaaraSim models <span class="text-xs font-normal text-slate-400">· 30d</span>
             </h3>
             @forelse ($topModels as $row)
-                @php($__mmax = max(array_column($topModels, 'count')) ?: 1)
+                @php
+                    $__mmax = max(array_column($topModels, 'count')) ?: 1;
+                @endphp
                 <div class="mb-2 flex items-center gap-3" wire:key="tm-{{ $row['label'] }}">
                     <span class="w-28 shrink-0 truncate text-sm text-slate-700 dark:text-slate-200">{{ $row['label'] }}</span>
                     <div class="h-2 flex-1 overflow-hidden rounded-full bg-slate-100 dark:bg-[#243352]">
@@ -255,6 +259,107 @@
                 @endforeach
             </div>
         </section>
+    </div>
+
+    {{-- ============================================================
+         Tier 5 #15 — appended below every existing section above.
+         Nothing above this divider moves, restyles, or reorders. Phase B
+         item 4 (Hot Menu attention tile) is excluded in this fork — no
+         Hot Menu here (Tier 3 #9 Phase G, master-only). ==== --}}
+    <div class="mb-6 mt-8 border-t-2 border-dashed border-primary/30 pt-6">
+        {{-- Supreme-overview tiles (Phase B). Items 2/5/6 from the blueprint
+             need a dependency that hasn't landed yet (a tracked provider-
+             wallet-topup ledger, recurring white-label billing, a general
+             fraud-signal service) — deferred rather than built on invented
+             data; see PROGRESS.md for the explicit accounting. --}}
+        <div class="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <div class="rounded-xl border border-slate-200 bg-white p-4 dark:border-[#2D4060] dark:bg-[#1A2840]">
+                <p class="flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                    <x-icon name="zap" class="h-3.5 w-3.5" /> Background jobs (1h)
+                </p>
+                <div class="mt-2 flex items-baseline gap-2">
+                    <span class="text-xl font-bold text-slate-900 dark:text-slate-100">{{ $jobsThisHourTotal }}</span>
+                    @if ($jobsFailedThisHour > 0)
+                        <span class="text-xs font-semibold text-red-600 dark:text-red-400">{{ $jobsFailedThisHour }} failed</span>
+                    @else
+                        <span class="inline-flex items-center gap-1 text-xs font-semibold text-green-600 dark:text-green-400">
+                            <x-icon name="check" class="h-3 w-3" /> all healthy
+                        </span>
+                    @endif
+                </div>
+            </div>
+            <div class="rounded-xl border border-slate-200 bg-white p-4 dark:border-[#2D4060] dark:bg-[#1A2840]">
+                <p class="flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                    <x-icon name="shield" class="h-3.5 w-3.5" /> KYC auto-resolved (30d)
+                </p>
+                <div class="mt-2 flex items-baseline gap-2">
+                    @if ($kycAutomation['automated_pct'] !== null)
+                        <span class="text-xl font-bold text-slate-900 dark:text-slate-100">{{ $kycAutomation['automated_pct'] }}%</span>
+                        <span class="text-xs text-slate-400">{{ $kycAutomation['automated'] }}/{{ $kycAutomation['total'] }} automated</span>
+                    @else
+                        <span class="text-sm text-slate-400">No decisions yet this window.</span>
+                    @endif
+                </div>
+            </div>
+        </div>
+
+        {{-- Per-provider live analytics (Phase A) — one card per currently
+             CONFIGURED provider only; an unconfigured provider never
+             appears here at all. --}}
+        <h2 class="mb-3 text-sm font-semibold text-slate-800 dark:text-slate-100">Provider network</h2>
+        @if (empty($providerCards))
+            <p class="rounded-xl border border-dashed border-slate-200 p-6 text-center text-sm text-slate-400 dark:border-[#2D4060]">
+                No providers configured yet.
+            </p>
+        @else
+            <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                @foreach ($providerCards as $card)
+                    @php
+                        $status = $card['health']['status'] ?? null;
+                        $dot = match ($status) {
+                            'ok', 'configured' => 'bg-green-400',
+                            'low' => 'bg-amber-400',
+                            'down', 'error' => 'bg-red-400',
+                            default => 'bg-slate-400',
+                        };
+                        $rates = collect($card['trend'])->pluck('rate_pct')->filter(fn ($r) => $r !== null)->values();
+                        $latestRate = $rates->last();
+                        $points = collect($card['trend'])->values()->map(function ($d, $i) use ($card) {
+                            $x = count($card['trend']) > 1 ? $i / (count($card['trend']) - 1) * 100 : 0;
+                            $y = $d['rate_pct'] === null ? 26 : round(26 - ($d['rate_pct'] / 100 * 26), 1);
+                            return "{$x},{$y}";
+                        })->implode(' ');
+                    @endphp
+                    <div wire:key="provider-card-{{ $card['provider'] }}" class="rounded-xl border border-slate-200 bg-white p-4 dark:border-[#2D4060] dark:bg-[#1A2840]">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <span class="h-2 w-2 rounded-full {{ $dot }}"></span>
+                                <span class="text-sm font-semibold text-slate-900 dark:text-slate-100">{{ $card['label'] }}</span>
+                            </div>
+                            <span class="text-[11px] uppercase text-slate-400">{{ $card['stack'] }}</span>
+                        </div>
+                        <div class="mt-3 grid grid-cols-2 gap-3">
+                            <div>
+                                <p class="text-[11px] font-medium text-slate-400">Success rate (7d)</p>
+                                <svg viewBox="0 0 100 26" class="mt-1 h-5 w-full text-primary" preserveAspectRatio="none">
+                                    <polyline points="{{ $points }}" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+                                </svg>
+                                <p class="mt-1 text-base font-bold text-slate-900 dark:text-slate-100">
+                                    {{ $latestRate !== null ? $latestRate.'%' : '—' }}
+                                </p>
+                            </div>
+                            <div>
+                                <p class="text-[11px] font-medium text-slate-400">Orders (30d)</p>
+                                <p class="mt-1 pt-6 text-base font-bold text-slate-900 dark:text-slate-100">{{ $card['order_volume'] }}</p>
+                            </div>
+                        </div>
+                        <div class="mt-3 flex items-center justify-between border-t border-slate-100 pt-2.5 text-[11px] text-slate-400 dark:border-[#2D4060]">
+                            <span>Reachability: <span class="font-medium capitalize text-slate-600 dark:text-slate-300">{{ str_replace('_', ' ', $status ?? 'unknown') }}</span></span>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        @endif
     </div>
     @endunless
 </div>

@@ -34,11 +34,13 @@ use App\Http\Controllers\VoicemailAudioController;
 use App\Http\Controllers\Webhooks\WhatsAppWebhookController;
 use App\Livewire\Account;
 use App\Livewire\Admin\AccountDeletions;
+use App\Livewire\Admin\LegalHoldRecords;
 use App\Livewire\Admin\Alerts;
 use App\Livewire\Admin\Analytics;
 use App\Livewire\Admin\Announcements;
 use App\Livewire\Admin\AppBuilder;
 use App\Livewire\Admin\Backups;
+use App\Livewire\Admin\BannerPlacements;
 use App\Livewire\Admin\Banners;
 use App\Livewire\Admin\BentoIcons;
 use App\Livewire\Admin\BrandDirectory;
@@ -112,6 +114,7 @@ use App\Livewire\BecomeMerchant;
 use App\Livewire\Blog;
 use App\Livewire\BrandHunt;
 use App\Livewire\BrandManage;
+use App\Livewire\BrandProfile;
 use App\Livewire\CallForwarding;
 use App\Livewire\Catalogue;
 use App\Livewire\Checkout;
@@ -131,7 +134,6 @@ use App\Livewire\MerchantDashboard;
 use App\Livewire\MerchantEarnings;
 use App\Livewire\MerchantInvoices;
 use App\Livewire\MerchantJoin;
-use App\Livewire\MerchantWhiteLabel;
 use App\Livewire\Messages;
 use App\Livewire\MyLines;
 use App\Livewire\PortIn;
@@ -192,7 +194,18 @@ Route::get('/legal/{slug}', function (string $slug) {
     return view('legal.show', ['doc' => LegalContent::doc($slug)]);
 })->name('legal.show');
 Route::get('/refund-policy', fn () => view('legal.show', ['doc' => LegalContent::doc('refund')]))->name('refund-policy');
-Route::view('/faq', 'pages.faq')->name('faq');
+// FAQ — wired the same way as About/How It Works/Contact: a SiteContent-driven
+// page (admin-editable hero incl. background image via Admin → Pages → FAQ)
+// whose Q&A content is pulled live from the homepage's own 'faq' section, so
+// there is exactly one FAQ list on the whole site, never two copies to drift.
+// Master-only (owner decision, 2026-09-21) — a white-label fork never gets
+// this dedicated page, same 404-on-a-fork posture as every other
+// master-only route in this codebase.
+Route::get('/faq', function () {
+    abort_unless(\App\Support\FeatureEntitlements::isMaster(), 404);
+
+    return view('marketing.faq', ['sections' => SiteContent::page('faq')]);
+})->name('faq');
 
 // Installable app: dynamic PWA manifest + public "Download the App" page.
 Route::get('/manifest.webmanifest', ManifestController::class)->name('manifest');
@@ -267,6 +280,10 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::get('/journey', Journey::class)->name('journey');
         // Brand Partner Hunt (BUILD-6 §C) — follow-to-earn NaaraCredits.
         Route::get('/rewards/hunt', BrandHunt::class)->name('rewards.hunt');
+        // Brand Profile (owner request, 2026-09-22) — the dedicated per-brand
+        // page reached from a Hunt card: full gallery, every handle's own
+        // "last post" teaser, same follow-to-earn claim.
+        Route::get('/rewards/hunt/{brandPartner}', BrandProfile::class)->name('rewards.hunt.profile');
         // Brand Directory self-service (BUILD-9) — get listed + manage a listing.
         Route::get('/brand/get-listed', GetListed::class)->name('brand.get-listed');
         Route::get('/brand/manage', BrandManage::class)->name('brand.manage');
@@ -300,9 +317,9 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::get('/merchant/clients', MerchantClients::class)->name('merchant.clients');
         // Merchant V2 — invoice dashboard (404s for a non-V2 merchant).
         Route::get('/merchant/invoices', MerchantInvoices::class)->name('merchant.invoices');
-        // Prompt 21-EXT — self-service white-label license (visible-but-locked
-        // for a non-V2 merchant, same pattern as the Merchant-V2 gate itself).
-        Route::get('/merchant/white-label', MerchantWhiteLabel::class)->name('merchant.white-label');
+        // NOTE: self-service white-label license SALES are master-only and were
+        // removed here (see docs/architecture/WHITE-LABEL-LICENSE-BOUNDARY.md) —
+        // a white-label instance never resells licenses to sub-merchants.
 
         // eSIM activation QR (SVG), generated from the LPA string. Owner- or
         // assigning-merchant-scoped inside the controller.
@@ -418,6 +435,8 @@ Route::middleware(['admin', 'throttle:admin'])
             Route::get('/guides', Guides::class)->name('guides');
             Route::get('/service-icons', ServiceIconsPage::class)->name('service-icons');
             Route::get('/banners', Banners::class)->name('banners');
+            // Frontend-UX-fix blueprint Phase G — "More from Naara" banner placement system.
+            Route::get('/banner-placements', BannerPlacements::class)->name('banner-placements');
             Route::get('/coupons', Coupons::class)->name('coupons');
             // Announcements & offers — push to every user's notification bell.
             Route::get('/announcements', Announcements::class)->name('announcements');
@@ -435,11 +454,10 @@ Route::middleware(['admin', 'throttle:admin'])
             Route::get('/analytics', Analytics::class)->name('analytics');
             Route::get('/tax-rates', TaxRates::class)->name('tax-rates');
             Route::get('/system-health', SystemHealth::class)->name('system-health');
-            // White-label distribution oversight (Updater Batch 4).
-            Route::get('/white-label', App\Livewire\Admin\WhiteLabelRegistry::class)->name('white-label');
-            // Project-intake PDF export (Prompt 21-EXT2 §6) — Livewire can't
-            // stream a file download, so this is a real controller route.
-            Route::get('/white-label/intake/{intake}/pdf', App\Http\Controllers\Admin\WhiteLabelIntakePdfController::class)->name('white-label.intake.pdf');
+            // NOTE: white-label OVERSIGHT (the registry of all instances) and the
+            // project-intake PDF are master-only and were removed here (see
+            // docs/architecture/WHITE-LABEL-LICENSE-BOUNDARY.md). This build keeps
+            // only the consumer-side `/updater` screen below.
             Route::get('/gateways', Gateways::class)->name('gateways');
             Route::get('/kyc', KycReview::class)->name('kyc');
             Route::get('/merchants', Merchants::class)->name('merchants');
@@ -448,6 +466,9 @@ Route::middleware(['admin', 'throttle:admin'])
             // Growth stack: social links, tracking pixels, social sign-in guides.
             Route::get('/integrations', Integrations::class)->name('integrations');
             Route::get('/deletions', AccountDeletions::class)->name('deletions');
+            // Erasure fix Phase A: read-only, heavily-audited lookup of an
+            // anonymized account's retained financial/order trail.
+            Route::get('/legal-hold', LegalHoldRecords::class)->name('legal-hold');
             Route::get('/support-agent', SupportAgent::class)->name('support-agent');
         });
 

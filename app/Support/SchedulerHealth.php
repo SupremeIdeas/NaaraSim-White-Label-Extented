@@ -3,26 +3,24 @@
 namespace App\Support;
 
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 /**
  * Scheduler + queue health (HOTFIX §2). Turns the invisible "is the cron actually
  * running on the live host" question into something an admin can see at a glance.
  *
- * Each scheduled task records its own last-successful-run timestamp (via a
- * ScheduledTaskFinished listener → record()); this reports, per task, the
- * expected cadence, the last actual run, and whether it's overdue. It also
+ * Each scheduled task's actual run is now recorded as a row in job_heartbeats
+ * (Tier 4 #10 Phase B1 — see App\Support\JobHeartbeats), which is the single
+ * source of truth for "did this run, and how did it go"; this class stays the
+ * cadence registry (label + expected interval per task, mirrors
+ * routes/console.php) and does the overdue math against that data — no
+ * job's health is computed a second, different way anywhere else. It also
  * surfaces the live QUEUE_CONNECTION and the queue backlog, so a stopped cron or
  * an undrained queue — the confirmed root cause behind "payment didn't credit"
  * and "provider health widget is empty" — is obvious instead of re-diagnosed.
  */
 class SchedulerHealth
 {
-    private const KEY = 'schedule:last_run:';
-
-    private const TTL_DAYS = 10; // outlast the weekly task so it never falsely reads "never"
-
     /**
      * The scheduled tasks we monitor: artisan command name => [label, expected
      * interval seconds]. Mirrors routes/console.php.
@@ -62,16 +60,15 @@ class SchedulerHealth
         'brand-subscriptions:bill' => ['Brand Directory subscription billing', 86400],
         // Prompt 21-EXT2 §6 — completes elapsed white-label deploy timelines.
         'whitelabel:intake-deploy-check' => ['White-label deploy timeline check', 86400],
+        // Erasure-fix Phase A stage 3 — permanently purges anonymized accounts
+        // whose admin-configured retention window has elapsed.
+        'account:purge-erased' => ['Account erasure retention purge', 86400],
     ];
 
-    /** Record a task's completion. Accepts the raw scheduler command string. */
+    /** Record a task's successful completion. Accepts the raw scheduler command string. */
     public static function record(string $rawCommand): void
     {
-        $name = self::commandName($rawCommand);
-        if ($name === null) {
-            return;
-        }
-        Cache::put(self::KEY.$name, now()->toIso8601String(), now()->addDays(self::TTL_DAYS));
+        JobHeartbeats::finished($rawCommand);
     }
 
     /** Extract the artisan command name (first token after "artisan"). */
@@ -86,23 +83,25 @@ class SchedulerHealth
         return $first !== false && $first !== '' ? $first : null;
     }
 
+    /** The last SUCCESSFUL run of a task — what overdue math is measured against. */
     public static function lastRun(string $name): ?Carbon
     {
-        $ts = Cache::get(self::KEY.$name);
-
-        return $ts ? Carbon::parse($ts) : null;
+        return JobHeartbeats::lastSuccessAt($name);
     }
 
     /**
-     * Per-task health report.
+     * Per-task health report. `outcome`/`detail`/`duration_ms` reflect the most
+     * recent ATTEMPT (any outcome), so a job that last succeeded two days ago
+     * but just failed shows as failed, not as a stale "OK".
      *
-     * @return list<array{name:string, label:string, expected:int, last_run:?string, ago:?string, overdue:bool}>
+     * @return list<array{name:string, label:string, expected:int, last_run:?string, ago:?string, overdue:bool, outcome:?string, detail:?string, duration_ms:?int}>
      */
     public static function report(): array
     {
         $rows = [];
         foreach (self::TASKS as $name => [$label, $expected]) {
             $last = self::lastRun($name);
+            $latest = JobHeartbeats::latest($name);
             $threshold = $expected + max((int) ($expected * 0.33), 300);
             $overdue = $last === null || now()->diffInSeconds($last) > $threshold;
 
@@ -113,6 +112,9 @@ class SchedulerHealth
                 'last_run' => $last?->toDateTimeString(),
                 'ago' => $last?->diffForHumans(),
                 'overdue' => $overdue,
+                'outcome' => $latest?->outcome,
+                'detail' => $latest?->detail,
+                'duration_ms' => $latest?->duration_ms,
             ];
         }
 

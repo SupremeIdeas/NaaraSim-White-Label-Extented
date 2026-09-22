@@ -166,3 +166,21 @@
     background-color: rgb(45 212 191 / 0.55);           /* bright teal on hover */
     background-clip: content-box;
 }
+
+/* Frontend-UX-fix blueprint Phase C — the ONE modal engine (x-ui.modal) locks
+   background scroll with `document.body.style.overflow = 'hidden'` while any
+   dialog is open. On a classic (non-overlay) scrollbar desktop browser that
+   removes the ~8px custom scrollbar's layout width the instant a modal opens
+   (and restores it on close), nudging every fixed-width section a few pixels
+   sideways — visible as a brief horizontal "jump" on open/close, worst on the
+   homepage where a banner-carousel or notification modal can open on load.
+   `scrollbar-gutter: stable` reserves that gutter whether or not a scrollbar
+   is actually painted, so toggling `overflow: hidden` never changes the
+   viewport's content width. No visible effect on overlay-scrollbar platforms
+   (macOS, mobile, this sandbox's headless Chromium) since they never
+   reserved that space to begin with — confirmed via Playwright that
+   `scrollbarWidth` reads 0 here even before this fix, so this is a
+   code-review-verified gap, not one this environment can screenshot. */
+html {
+    scrollbar-gutter: stable;
+}

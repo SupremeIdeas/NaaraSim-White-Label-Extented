@@ -174,4 +174,30 @@ class LinkPreviewSettingsTest extends TestCase
 
         $this->assertStringContainsString('home-banners', $html);
     }
+
+    /**
+     * Frontend-UX-fix blueprint Phase D — root-caused via Playwright: a fixed
+     * `h-56 sm:h-80` stage height stayed constant while the stage's own width
+     * swung from "full single column" (below `lg`) to "half a 2-column row"
+     * (at `lg`+), spiking its aspect ratio to ~2.68:1 in the 640-1023px
+     * range against the banners' genuine 16:9 — `object-fit: cover` cropped
+     * off ~34% of every banner there, cutting the bottom tagline band clean
+     * off (confirmed live: intact at 375px and 1440px, gone at 900px).
+     * `aspect-[16/9]` ties the stage's height to its own width at every
+     * breakpoint instead of guessing, so it always matches these banners'
+     * real ratio. A fitness guard: if this regresses back to a fixed height,
+     * the mid-viewport crop silently comes back.
+     */
+    public function test_the_banner_carousel_stage_uses_the_banners_own_aspect_ratio_not_a_fixed_height(): void
+    {
+        // Frontend-UX-fix blueprint Phase G moved the actual carousel markup
+        // out of this file and into the shared `partials.banner-carousel`
+        // (App\Support\BannerPlacements) that every placement now renders
+        // through — this homepage-specific file is just a thin `@include`
+        // wrapper today, so the aspect-ratio fix from Phase D lives there.
+        $html = file_get_contents(resource_path('views/partials/banner-carousel.blade.php'));
+
+        $this->assertStringContainsString('height="aspect-[16/9]"', $html);
+        $this->assertStringNotContainsString('height="h-56 sm:h-80"', $html);
+    }
 }

@@ -90,4 +90,17 @@ class ProviderModelsTest extends TestCase
         $this->assertStringContainsString('Naara Data', $esim);
         $this->assertStringNotContainsString('esimgo', $esim);
     }
+
+    public function test_provider_label_returns_the_real_supplier_name_for_admin_only_surfaces(): void
+    {
+        $this->assertSame('eSIM Go', ProviderModels::providerLabel('esimgo'));
+        $this->assertSame('5sim', ProviderModels::providerLabel('fivesim'));
+        $this->assertSame('HeroSMS', ProviderModels::providerLabel('herosms'));
+        $this->assertSame('Twilio', ProviderModels::providerLabel('twilio'));
+    }
+
+    public function test_provider_label_falls_back_to_a_capitalized_key_for_an_unknown_provider(): void
+    {
+        $this->assertSame('Newprovider', ProviderModels::providerLabel('newprovider'));
+    }
 }

@@ -38,6 +38,42 @@ class KycService
         return $this->manual();
     }
 
+    /**
+     * Tier 5 #11 Phase C: L3 (business/KYB) is routed separately from L2.
+     * Automated business verification only genuinely exists for Nigeria
+     * today (Dojah's documented CAC/RC lookup) — confirmed during this
+     * work that neither Dojah's nor Smile ID's existing integration covers
+     * business-registry checks anywhere else. Every other country's L3
+     * submission goes straight to manual review rather than being routed
+     * through a personal-ID endpoint that would silently misfire on a
+     * business registration number.
+     *
+     * This fork has no Stripe Identity / non-African global-KYC routing
+     * (that's the UX/localization/platform-reach blueprint's Phase F,
+     * master-only) — this only ever branches for L3.
+     */
+    public function resolveProvider(?string $country, int $level = KycVerification::L2): KycProviderInterface
+    {
+        $active = $this->activeProvider();
+
+        if ($active->name() === 'manual') {
+            return $active;
+        }
+
+        if ($level === KycVerification::L3) {
+            if (filled($country) && strtoupper($country) === 'NG') {
+                $dojah = $this->providerByName('dojah');
+                if ($dojah !== null && $dojah->available()) {
+                    return $dojah;
+                }
+            }
+
+            return $this->manual();
+        }
+
+        return $active;
+    }
+
     public function providerByName(?string $name): ?KycProviderInterface
     {
         foreach ($this->providers as $provider) {
@@ -98,7 +134,7 @@ class KycService
             return $existing;
         }
 
-        $provider = $this->activeProvider();
+        $provider = $this->resolveProvider($data['country'] ?? null, $level);
 
         return DB::transaction(function () use ($user, $level, $data, $provider) {
             $verification = KycVerification::create([

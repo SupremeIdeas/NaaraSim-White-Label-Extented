@@ -225,6 +225,46 @@ class NciScorer
         Cache::forget("nci:public_success_rate:{$providerKey}");
     }
 
+    /**
+     * Tier 5 #15 Phase A — a day-by-day success-rate series for the admin
+     * overview's per-provider sparkline. Reads the SAME outcome log and
+     * uses the exact same success/total definition as publicSuccessRate()
+     * — this is a different SHAPE of the same computation (a trend instead
+     * of a single scalar), never a second, independently-defined scoring
+     * mechanism. A day with zero outcomes gets a null rate rather than an
+     * invented 0% (a quiet day isn't a bad day).
+     *
+     * @return list<array{date: string, rate_pct: ?float}>
+     */
+    public function dailySuccessRateTrend(string $providerKey, int $days = 7): array
+    {
+        return Cache::remember(
+            "nci:daily_trend:{$providerKey}:{$days}",
+            now()->addMinutes(self::PUBLIC_RATE_TTL_MINUTES),
+            function () use ($providerKey, $days) {
+                $since = now()->subDays($days - 1)->startOfDay();
+
+                $rows = ProviderOutcome::where('provider_key', $providerKey)
+                    ->where('occurred_at', '>=', $since)
+                    ->get(['outcome', 'occurred_at'])
+                    ->groupBy(fn (ProviderOutcome $o) => $o->occurred_at->toDateString());
+
+                return collect(range($days - 1, 0))->map(function ($back) use ($rows) {
+                    $date = now()->subDays($back)->toDateString();
+                    $day = $rows->get($date);
+                    $total = $day?->count() ?? 0;
+
+                    return [
+                        'date' => $date,
+                        'rate_pct' => $total > 0
+                            ? round($day->where('outcome', ProviderOutcome::SUCCESS)->count() / $total * 100, 1)
+                            : null,
+                    ];
+                })->values()->all();
+            }
+        );
+    }
+
     /** Recompute every provider (nci:recompute, and the health-tick refresh). */
     public function recomputeAll(): void
     {

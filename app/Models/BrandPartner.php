@@ -28,6 +28,7 @@ class BrandPartner extends Model
         'owner_user_id', 'brand_name', 'short_description', 'category',
         'listing_status', 'is_featured', 'fallback_image', 'hero_image_path',
         'background_color', 'priority_score', 'current_plan_id', 'sort_order', 'is_active',
+        'naara_followers_count',
     ];
 
     protected $casts = [
@@ -35,6 +36,7 @@ class BrandPartner extends Model
         'is_featured' => 'boolean',
         'priority_score' => 'integer',
         'sort_order' => 'integer',
+        'naara_followers_count' => 'integer',
     ];
 
     public function handles(): HasMany
@@ -45,6 +47,23 @@ class BrandPartner extends Model
     public function videos(): HasMany
     {
         return $this->hasMany(BrandPartnerVideo::class);
+    }
+
+    /** Featured-image gallery shown on the Brand Profile page. */
+    public function images(): HasMany
+    {
+        return $this->hasMany(BrandPartnerImage::class);
+    }
+
+    /** Users who "Connected" to this brand on Naara (owner request, 2026-09-22). */
+    public function followers(): HasMany
+    {
+        return $this->hasMany(BrandPartnerFollower::class);
+    }
+
+    public function isFollowedBy(?User $user): bool
+    {
+        return $user && $this->followers()->where('user_id', $user->id)->exists();
     }
 
     public function owner(): BelongsTo

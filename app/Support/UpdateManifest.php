@@ -18,7 +18,10 @@ class UpdateManifest
     /** Behaves exactly as today: the package can be published or withheld via the ordinary admin toggle. */
     public const SCOPE_DISTRIBUTABLE = 'distributable';
 
-    /** Can NEVER be published to white label — enforced server-side in PackagePublisher, not just hidden in the UI (Naara Pro / master-only distribution lock). */
+    /** Can NEVER be published to white label — the master-only distribution lock,
+     *  enforced server-side on the master platform (the distributor side does not
+     *  exist on a white-label build). Carried in the DTO so a package this build
+     *  merely verifies still reports its scope honestly. */
     public const SCOPE_MASTER_ONLY = 'master_only';
 
     public const DISTRIBUTION_SCOPES = [self::SCOPE_DISTRIBUTABLE, self::SCOPE_MASTER_ONLY];

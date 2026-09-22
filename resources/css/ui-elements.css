@@ -412,6 +412,18 @@
 }
 .nx-hero__cta:hover { filter: brightness(1.06); }
 .nx-hero--error .nx-hero__cta { background-image: linear-gradient(135deg, #E8412A, #b91c1c); box-shadow: 0 8px 20px rgb(232 65 42 / 0.30); }
+/* Inline wired actions (Tier 5 #11 Phase B) — e.g. Accept/Decline a shared-
+   wallet invite without leaving the page. First action keeps the solid CTA
+   look; any further action (Decline) is a muted, secondary button beside it. */
+.nx-hero__actions { display: flex; gap: 0.6rem; width: 100%; margin-top: 1rem; }
+.nx-hero__actions .nx-hero__cta { margin-top: 0; flex: 1; border: none; cursor: pointer; }
+.nx-hero__cta--muted {
+    color: #475569; background-image: none; background-color: rgb(13 27 42 / 0.06);
+    box-shadow: none;
+}
+.dark .nx-hero__cta--muted { color: #cbd5e1; background-color: rgb(255 255 255 / 0.08); }
+.nx-hero__cta--muted:hover { filter: none; background-color: rgb(13 27 42 / 0.1); }
+.dark .nx-hero__cta--muted:hover { background-color: rgb(255 255 255 / 0.14); }
 .nx-hero__close {
     position: absolute; top: 0.75rem; right: 0.75rem; display: flex; align-items: center;
     justify-content: center; width: 1.75rem; height: 1.75rem; border-radius: 9999px;

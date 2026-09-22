@@ -10,7 +10,6 @@ use App\Events\ProviderOutcomeRecorded;
 use App\Listeners\RecordLoginDevice;
 use App\Listeners\ReturnMerchantEarnings;
 use App\Listeners\ReturnPartnerEarnings;
-use App\Listeners\ReturnPlatformEarnings;
 use App\Listeners\ReturnReferralEarnings;
 use App\Listeners\ReturnStaffEarnings;
 use App\Listeners\ReturnWithdrawnCredits;
@@ -90,6 +89,7 @@ use App\Support\GiftHeroBackground;
 use App\Support\HeroBackground;
 use App\Support\IconOverrides;
 use App\Support\Installer;
+use App\Support\JobHeartbeats;
 use App\Support\LegalContent;
 use App\Support\MailSettings;
 use App\Support\MediaStorage;
@@ -111,7 +111,10 @@ use App\Support\SupportSettings;
 use App\Support\TaxRates;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Console\Events\ScheduledTaskFailed;
 use Illuminate\Console\Events\ScheduledTaskFinished;
+use Illuminate\Console\Events\ScheduledTaskSkipped;
+use Illuminate\Console\Events\ScheduledTaskStarting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Event;
@@ -341,12 +344,9 @@ class AppServiceProvider extends ServiceProvider
             ReturnPartnerEarnings::class,
         );
 
-        // Same, for a reversed platform-earnings (white-label license sale
-        // proceeds) withdrawal — Prompt 21-EXT §5.4.
-        Event::listen(
-            PayoutReversed::class,
-            ReturnPlatformEarnings::class,
-        );
+        // NOTE: the platform-earnings (white-label license sale proceeds)
+        // reversal handler is master-only and was removed — a white-label build
+        // never books resale earnings (see docs/architecture/WHITE-LABEL-LICENSE-BOUNDARY.md).
 
         // Same, for a reversed referral margin-share payout (BUILD-22).
         Event::listen(
@@ -364,12 +364,24 @@ class AppServiceProvider extends ServiceProvider
         // one (Sept-14 owner request — 2FA/device-login alerts).
         Event::listen(Login::class, RecordLoginDevice::class);
 
-        // HOTFIX §2: record every scheduled task's last successful run, so the
-        // admin System Health panel can show whether the live cron is actually
-        // firing (the confirmed root cause behind "payment didn't credit" and
-        // "provider health widget is empty").
+        // HOTFIX §2, now backed by the job_heartbeats table (Tier 4 #10 Phase
+        // B1): every scheduled command gets a real heartbeat row on start and
+        // completion — success, failure (with the real exception message), or
+        // skipped (its ->when()/->skip() filter held it back this tick) — so
+        // "never ran" and "ran and failed" are never indistinguishable on the
+        // admin System Health panel, the confirmed root cause behind "payment
+        // didn't credit" and "provider health widget is empty".
+        Event::listen(function (ScheduledTaskStarting $event) {
+            JobHeartbeats::starting((string) $event->task->command);
+        });
         Event::listen(function (ScheduledTaskFinished $event) {
             SchedulerHealth::record((string) $event->task->command);
+        });
+        Event::listen(function (ScheduledTaskFailed $event) {
+            JobHeartbeats::failed((string) $event->task->command, $event->exception);
+        });
+        Event::listen(function (ScheduledTaskSkipped $event) {
+            JobHeartbeats::skipped((string) $event->task->command);
         });
 
         // NAARA-BUILD-16 — NCI (Layer 3) subscribes to the routing/health signals,

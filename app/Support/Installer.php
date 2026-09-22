@@ -248,11 +248,11 @@ class Installer
             'name' => $name,
             'email' => $email,
             'password' => Hash::make($password),
-            'role' => 'super_admin',
             'is_active' => true,
             'referral_code' => Str::upper(Str::random(8)),
             'email_verified_at' => now(),
         ]);
+        $user->setRole('super_admin');
         $user->assignRole('super_admin');
 
         return $user;

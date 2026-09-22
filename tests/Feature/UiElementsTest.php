@@ -62,7 +62,8 @@ class UiElementsTest extends TestCase
     public function test_the_toast_stack_is_mounted_globally(): void
     {
         // Any page rendered through the base layout carries the toast listener.
-        $this->get('/faq')->assertOk()->assertSee('nx-toast', false);
+        // /about, not /faq — the dedicated FAQ page is master-only on this fork.
+        $this->get('/about')->assertOk()->assertSee('nx-toast', false);
     }
 
     public function test_security_page_uses_branded_switches(): void
@@ -73,6 +74,65 @@ class UiElementsTest extends TestCase
         $this->actingAs($admin)->get('/adminmaster/security')
             ->assertOk()
             ->assertSee('nx-switch', false);
+    }
+
+    /**
+     * Frontend-UX-fix blueprint Phase A — root-caused via Playwright: any
+     * ancestor with a CSS `filter` (the sticky header applies `filter:
+     * drop-shadow(...)` to its direct children via `.nx-header-fade > *`)
+     * creates a new containing block for `position: fixed` descendants, so a
+     * modal triggered from inside the header rendered pinned to a tiny box
+     * near the trigger instead of covering the viewport. `x-teleport="body"`
+     * (the same fix `global-sidebar.blade.php`'s own panel already uses for
+     * the identical trap) moves the dialog out of that subtree at runtime.
+     * A fitness guard: if this ever regresses, EVERY modal on the platform
+     * silently breaks again the moment its trigger sits inside a filtered/
+     * transformed ancestor — not just the one that was visibly reported.
+     */
+    public function test_the_modal_engine_teleports_out_of_any_filtered_or_transformed_ancestor(): void
+    {
+        $html = file_get_contents(resource_path('views/components/ui/modal.blade.php'));
+
+        $this->assertStringContainsString('x-teleport="body"', $html);
+    }
+
+    /**
+     * Frontend-UX-fix blueprint Phase C — root-caused via Playwright at 375px:
+     * <x-flag-orbit>'s node positions are percentages of the hero section's
+     * own height, tuned for a short/wide desktop hero. On a narrow phone the
+     * same hero reflows much taller, so those percentages land the flag
+     * chips directly on top of the headline/paragraph/CTA/stat numbers
+     * (reproduced live — screenshot showed the chips scattered across all of
+     * that text). `hidden lg:block` keeps the effect only where the hero is
+     * short enough for it to have been designed for. A fitness guard: if
+     * this class is ever dropped, the overlap silently comes back on every
+     * phone visiting the homepage.
+     */
+    public function test_the_homepage_flag_orbit_is_hidden_below_the_desktop_breakpoint(): void
+    {
+        $html = file_get_contents(resource_path('views/marketing/home/hero.blade.php'));
+
+        $this->assertMatchesRegularExpression(
+            '/<x-flag-orbit[^>]*class="[^"]*hidden lg:block[^"]*"/',
+            $html,
+        );
+    }
+
+    /**
+     * Frontend-UX-fix blueprint Phase C — the ONE modal engine locks
+     * background scroll with `document.body.style.overflow = 'hidden'`
+     * (modal.blade.php) with no scrollbar-width compensation, so on a
+     * classic (non-overlay) scrollbar desktop browser every modal open/close
+     * nudges the page's fixed-width sections a few pixels sideways.
+     * `scrollbar-gutter: stable` reserves that gutter permanently so toggling
+     * `overflow: hidden` never changes the viewport's content width.
+     */
+    public function test_the_page_reserves_a_stable_scrollbar_gutter_so_modals_never_shift_layout(): void
+    {
+        $this->assertStringContainsString(
+            'scrollbar-gutter: stable',
+            file_get_contents(resource_path('css/app.css')),
+        );
     }
 
     public function test_elements_css_is_part_of_the_compiled_bundle(): void

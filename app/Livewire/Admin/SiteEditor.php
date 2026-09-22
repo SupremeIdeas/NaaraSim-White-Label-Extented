@@ -50,7 +50,7 @@ class SiteEditor extends Component
 
     private function loadPage(): void
     {
-        if (! in_array($this->page, SiteContent::PAGES, true)) {
+        if (! in_array($this->page, SiteContent::editablePages(), true)) {
             $this->page = 'home';
         }
         $this->sections = SiteContent::page($this->page, includeHidden: true);
@@ -215,6 +215,6 @@ class SiteEditor extends Component
 
     public function render()
     {
-        return view('livewire.admin.site-editor', ['pages' => SiteContent::PAGES]);
+        return view('livewire.admin.site-editor', ['pages' => SiteContent::editablePages()]);
     }
 }

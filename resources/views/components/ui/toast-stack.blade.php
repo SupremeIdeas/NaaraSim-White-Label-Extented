@@ -12,6 +12,19 @@
              message: 'Your eSIM is being provisioned.',
              cta: ['label' => 'View my eSIM', 'href' => route('dashboard')]);
 
+     • Hero toast with inline wired actions (Tier 5 #11 Phase B — a decision
+       that can't wait for a page visit, e.g. a shared-wallet invite). `cta`
+       is a passive link; `actions` are real buttons that call back into
+       whichever Livewire component is listening, via `Livewire.dispatch()`,
+       then dismiss the toast:
+         $this->dispatch('nx-toast', variant: 'hero', type: 'info', sticky: true,
+             title: 'Shared wallet invite', message: '…',
+             actions: [
+                 ['label' => 'Accept', 'event' => 'wallet-invite-respond', 'payload' => ['memberId' => 1, 'accept' => true]],
+                 ['label' => 'Decline', 'event' => 'wallet-invite-respond', 'payload' => ['memberId' => 1, 'accept' => false]],
+             ]);
+       `cta` and `actions` are mutually exclusive; a toast never needs both.
+
      Types: success | error | pending | info. Failures are sticky by default
      (reassuring "you were not charged" copy); success/info auto-dismiss.
      SVG glyphs only (no emoji). Accessible: role=alert for errors, role=status
@@ -39,11 +52,16 @@
                 title: detail.title || '',
                 message: detail.message || '',
                 cta: detail.cta || null,
+                actions: detail.actions || null,
                 sticky,
             };
             if (! sticky) this.heroTimer = setTimeout(() => this.dismissHero(), 5500);
         },
         dismissHero() { clearTimeout(this.heroTimer); this.hero = null; },
+        runAction(action) {
+            if (window.Livewire) Livewire.dispatch(action.event, action.payload || {});
+            this.dismissHero();
+        },
      }"
      x-on:nx-toast.window="push($event.detail)"
      x-on:keydown.escape.window="dismissHero()">
@@ -79,6 +97,14 @@
                 <p class="nx-hero__msg" x-text="hero.message" x-show="hero.message"></p>
                 <template x-if="hero.cta">
                     <a :href="hero.cta.href" class="nx-hero__cta" x-text="hero.cta.label"></a>
+                </template>
+                <template x-if="hero.actions">
+                    <div class="nx-hero__actions">
+                        <template x-for="(action, i) in hero.actions" :key="i">
+                            <button type="button" class="nx-hero__cta" :class="{ 'nx-hero__cta--muted': i > 0 }"
+                                    x-on:click="runAction(action)" x-text="action.label"></button>
+                        </template>
+                    </div>
                 </template>
             </div>
         </template>

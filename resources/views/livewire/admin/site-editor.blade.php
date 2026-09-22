@@ -11,7 +11,7 @@
                 <button wire:click="$set('page', '{{ $p }}')"
                         class="rounded-full px-4 py-1.5 text-sm font-semibold transition
                         {{ $page === $p ? 'bg-primary text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-[#243352] dark:text-slate-300 dark:hover:bg-[#2D4060]' }}">
-                    {{ ucwords(str_replace('-', ' ', $p)) }}
+                    {{ $p === 'faq' ? 'FAQ' : ucwords(str_replace('-', ' ', $p)) }}
                 </button>
             @endforeach
         </div>
@@ -121,7 +121,7 @@
                                     <option value="">Choose a page…</option>
                                     @foreach ($pages as $p)
                                         @continue($p === $page)
-                                        <option value="{{ $p }}">{{ ucfirst(str_replace('-', ' ', $p)) }}</option>
+                                        <option value="{{ $p }}">{{ $p === 'faq' ? 'FAQ' : ucfirst(str_replace('-', ' ', $p)) }}</option>
                                     @endforeach
                                 </select>
                                 <button type="button"

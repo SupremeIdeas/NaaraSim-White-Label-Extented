@@ -44,28 +44,21 @@ class FeatureEntitlements
     }
 
     /**
-     * The lock list in effect on THIS deployment. Empty on the master and on any
-     * fork that hasn't received a list yet. Never throws (a missing settings
-     * table on a fresh boot must not break a page — same posture as
-     * LinkPreviewSettings / NumbersBento).
+     * The lock list in effect on THIS deployment. On WHITE LABEL EXTENDED this
+     * is ALWAYS empty — nothing is ever per-feature locked (blueprint §0.4:
+     * "White Label Extended ships with zero feature locks — every feature is
+     * live from install"). Extended's only gate is whether its license is valid
+     * at all (the update/entitlement check-in against master); it never applies
+     * a per-feature lock, even if the master were to send one. This hard-empty
+     * return is deliberate defense-in-depth for that guarantee — do not restore
+     * the data-driven lock list here (that behavior belongs on the NORMAL
+     * white-label fork). Never throws.
      *
      * @return list<string>
      */
     public static function all(): array
     {
-        if (self::isMaster()) {
-            return [];
-        }
-
-        return Cache::rememberForever(self::CACHE_KEY, function () {
-            try {
-                $stored = Setting::getValue(self::STORE_KEY, []);
-            } catch (\Throwable) {
-                return [];
-            }
-
-            return is_array($stored) ? array_values(array_filter($stored, 'is_string')) : [];
-        });
+        return [];
     }
 
     /** Is this feature locked on this deployment right now? */

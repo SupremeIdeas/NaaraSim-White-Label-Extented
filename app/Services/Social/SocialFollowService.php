@@ -62,7 +62,7 @@ class SocialFollowService
                 return ['earned' => 0.0, 'already' => true];
             }
 
-            $reward = round((float) $handle->credit_reward, 2);
+            $reward = round($handle instanceof BrandPartnerHandle ? $handle->effectiveCreditReward() : (float) $handle->credit_reward, 2);
             if ($reward > 0) {
                 $this->credits->earn($user, $reward, $source, $reference, 'Followed '.$handle->handle_label);
             }

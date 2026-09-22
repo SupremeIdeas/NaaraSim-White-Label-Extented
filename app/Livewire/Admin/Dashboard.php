@@ -4,9 +4,12 @@ namespace App\Livewire\Admin;
 
 use App\Models\ApiOrder;
 use App\Models\EsimOrder;
+use App\Models\JobHeartbeat;
 use App\Models\SmsOrder;
 use App\Models\User;
 use App\Services\Analytics\PlatformAnalyticsService;
+use App\Services\NCI\NciScorer;
+use App\Services\Routing\CandidateOrdering;
 use App\Support\PaymentSandbox;
 use App\Support\ProviderModels;
 use App\Support\ProviderStatus;
@@ -119,6 +122,24 @@ class Dashboard extends Component
         $apiOrdersWeek = ApiOrder::where('created_at', '>=', $weekStart)->count();
         $apiRevenueWeek = round((float) ApiOrder::where('created_at', '>=', $weekStart)->sum('price_usd'), 2);
 
+        $providerCards = $this->providerCards($analytics, $health = Cache::get('providers:health', []));
+
+        // ── Tier 5 #15 Phase B: "supreme overview" additions ─────────────────
+        // Only the tiles buildable in THIS fork without inventing data: item 1
+        // (heartbeats) reuses infrastructure that already exists; item 3 (KYC
+        // automation) is buildable now that Tier 5 #11 Phase C landed real
+        // automated KYB. Item 4 (Hot Menu attention tile) is excluded here —
+        // this fork has no Hot Menu (Tier 3 #9 Phase G, master-only). Items
+        // 2/5/6 need a dependency that hasn't landed yet (a tracked
+        // provider-wallet-topup ledger, recurring white-label billing, a
+        // general fraud-signal service) — deferred rather than built against
+        // invented/fake data.
+        $hourAgo = now()->subHour();
+        $jobsThisHour = JobHeartbeat::where('created_at', '>=', $hourAgo)->get(['outcome']);
+        $jobsFailedThisHour = $jobsThisHour->where('outcome', 'failed')->count();
+
+        $kycAutomation = $analytics->kycAutomationResolutionRate('30d');
+
         return view('livewire.admin.dashboard', [
             'privileged' => true,
             'sandboxGateways' => PaymentSandbox::testGateways(),
@@ -130,8 +151,12 @@ class Dashboard extends Component
             'topModels' => $topModels,
             'apiOrdersWeek' => $apiOrdersWeek,
             'apiRevenueWeek' => $apiRevenueWeek,
-            'health' => Cache::get('providers:health', []),
+            'health' => $health,
             'statuses' => ProviderStatus::all(),
+            'providerCards' => $providerCards,
+            'jobsThisHourTotal' => $jobsThisHour->count(),
+            'jobsFailedThisHour' => $jobsFailedThisHour,
+            'kycAutomation' => $kycAutomation,
             'revenue' => $revenue,
             'cost' => $cost,
             'profit' => $profit,
@@ -143,5 +168,49 @@ class Dashboard extends Component
             'splitTotal' => $splitTotal,
             'splitGradient' => $splitGradient,
         ]);
+    }
+
+    /**
+     * Tier 5 #15 Phase A — one card per currently-configured provider
+     * (eSIM + number stacks alike). Reuses, never re-derives:
+     * `ProviderModels::providerConfigured()` for the isConfigured() filter
+     * (Tier 4 #10), `CandidateOrdering::order()` for display order (the
+     * SAME live-ranked order real purchases route through — never a second
+     * priority scheme), `NciScorer::dailySuccessRateTrend()` for the
+     * sparkline, and `PlatformAnalyticsService::providerOrderVolume()` for
+     * real order counts. An unconfigured provider never appears at all.
+     *
+     * @return list<array{provider: string, label: string, stack: string, trend: array, health: ?array, order_volume: int}>
+     */
+    private function providerCards(PlatformAnalyticsService $analytics, array $health): array
+    {
+        $ordering = app(CandidateOrdering::class);
+        $nci = app(NciScorer::class);
+
+        $lanes = [
+            'esim' => array_values(array_unique([
+                ...ProviderModels::MODELS['naara_data']['lane'],
+                ...ProviderModels::MODELS['naara_connect']['lane'],
+            ])),
+            'sms' => ProviderModels::MODELS['naara_verify']['lane'],
+            'permanent' => ProviderModels::MODELS['naara_line']['lane'],
+        ];
+
+        $cards = [];
+        foreach ($lanes as $stack => $lane) {
+            $configured = array_values(array_filter($lane, fn ($p) => ProviderModels::providerConfigured($p)));
+            foreach ($ordering->order($configured, $stack) as $provider) {
+                $cards[] = [
+                    'provider' => $provider,
+                    'label' => ProviderModels::providerLabel($provider),
+                    'stack' => $stack,
+                    'trend' => $nci->dailySuccessRateTrend($provider, 7),
+                    'health' => $health[$provider] ?? null,
+                    'order_volume' => $analytics->providerOrderVolume($stack, $provider, '30d'),
+                ];
+            }
+        }
+
+        return $cards;
     }
 }

@@ -48,6 +48,92 @@ class MarketingSiteTest extends TestCase
         $this->get('/contact')->assertOk()->assertSee('We Actually Respond');
     }
 
+    /**
+     * FAQ wiring: the dedicated /faq page is a real SiteContent page (like
+     * about/how-it-works/contact) with its own admin-editable hero, and its
+     * Q&A content is pulled LIVE from the homepage's own 'faq' section — a
+     * single source of truth, so the two never show different answers.
+     */
+    /**
+     * The dedicated /faq page itself is master-only (owner decision,
+     * 2026-09-21 — see the fork-specific tests below); this fork's default
+     * identity is 'naarasim-whitelabel', so the underlying page-rendering
+     * logic (still present and shared code) is exercised here under a
+     * temporary master identity, same as master's own test.
+     */
+    public function test_the_faq_page_renders_its_own_hero_and_the_homes_faq_content(): void
+    {
+        config()->set('updater.product_identifier', 'naarasim-core');
+
+        $this->get('/faq')->assertOk()
+            ->assertSee('Frequently Asked Questions')
+            ->assertSee('Does my phone support eSIM?') // home.faq's q1, proves it's the same source
+            ->assertSee('Questions We Hear a Lot');     // home.faq's own headline field
+
+        config()->set('updater.product_identifier', 'naarasim-whitelabel');
+    }
+
+    public function test_editing_the_homes_faq_from_the_admin_also_changes_the_dedicated_faq_page(): void
+    {
+        SiteContent::saveOverrides('home', [
+            'faq' => ['q1' => 'A brand new question only an admin could have written?'],
+        ]);
+
+        $this->get('/')->assertOk()->assertSee('A brand new question only an admin could have written?');
+
+        config()->set('updater.product_identifier', 'naarasim-core');
+        $this->get('/faq')->assertOk()->assertSee('A brand new question only an admin could have written?');
+        config()->set('updater.product_identifier', 'naarasim-whitelabel');
+    }
+
+    public function test_the_faq_page_is_a_registered_site_editor_page_with_its_own_hero_image(): void
+    {
+        $this->assertContains('faq', SiteContent::PAGES);
+
+        SiteContent::saveOverrides('faq', [
+            'hero' => ['image' => 'https://cdn.example.com/faq-hero.jpg'],
+        ]);
+
+        config()->set('updater.product_identifier', 'naarasim-core');
+        $this->get('/faq')->assertOk()
+            ->assertSee('https://cdn.example.com/faq-hero.jpg', false)
+            ->assertDontSee('data-webgl-hero="liquid"', false);
+        config()->set('updater.product_identifier', 'naarasim-whitelabel');
+    }
+
+    /**
+     * FAQ is master-only (owner decision, 2026-09-21) — a white-label fork
+     * never gets the dedicated page: the route 404s, the nav link
+     * disappears, and the admin's Pages editor drops its tab too.
+     */
+    public function test_the_faq_page_404s_on_a_white_label_fork(): void
+    {
+        config()->set('updater.product_identifier', 'naarasim-whitelabel');
+
+        $this->get('/faq')->assertNotFound();
+
+        config()->set('updater.product_identifier', 'naarasim-core');
+    }
+
+    public function test_the_faq_nav_link_is_hidden_on_a_white_label_fork(): void
+    {
+        config()->set('updater.product_identifier', 'naarasim-whitelabel');
+
+        $this->get('/')->assertOk()->assertDontSee('Answers to common questions');
+
+        config()->set('updater.product_identifier', 'naarasim-core');
+    }
+
+    public function test_the_faq_page_is_dropped_from_the_site_editors_page_list_on_a_white_label_fork(): void
+    {
+        config()->set('updater.product_identifier', 'naarasim-whitelabel');
+
+        $this->assertNotContains('faq', SiteContent::editablePages());
+        $this->assertContains('faq', SiteContent::PAGES); // the raw catalogue is unchanged
+
+        config()->set('updater.product_identifier', 'naarasim-core');
+    }
+
     public function test_an_admin_override_changes_the_public_page(): void
     {
         SiteContent::saveOverrides('home', [

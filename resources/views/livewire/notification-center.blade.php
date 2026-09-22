@@ -1,9 +1,23 @@
 <div class="relative">
-    {{-- Poll keeps the unread badge current without a websocket server. --}}
-    <div wire:poll.30s class="hidden"></div>
+    {{-- Poll keeps the unread badge current without a websocket server, and
+         (Tier 5 #11 Phase B) checks for a live shared-wallet invite to toast. --}}
+    <div wire:poll.30s="checkForWalletInvites" class="hidden"></div>
+
+    {{-- The modal `name` is keyed to THIS Livewire instance's own id (frontend-
+         UX-fix blueprint Phase A): the mobile and desktop headers each mount a
+         separate instance of this same component, and `open-modal`/`close-modal`
+         fire as GLOBAL window events matched by name — a shared literal name
+         meant BOTH instances' dialogs opened together. This went unnoticed
+         before the modal engine's own x-teleport fix, because the mobile
+         instance's dialog lived inside a `lg:hidden` header at desktop widths,
+         which happened to keep its (also-open) dialog invisible. Teleporting
+         removed that accidental masking, surfacing the real collision. --}}
+    @php
+        $modalName = 'notifications-'.$this->getId();
+    @endphp
 
     {{-- Bell --}}
-    <button type="button" @click="$dispatch('open-modal', { name: 'notifications' })" aria-label="Notifications"
+    <button type="button" @click="$dispatch('open-modal', { name: '{{ $modalName }}' })" aria-label="Notifications"
             class="relative flex h-10 w-10 items-center justify-center rounded-full text-slate-500 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-white/10">
         <x-icon name="bell" class="h-5 w-5" />
         @if ($unread > 0)
@@ -16,7 +30,7 @@
          mobile (centered dialog on desktop), not the generic pop that used to
          just fade/scale in. Same content as before, same "See all" hand-off
          to the full /notifications page. --}}
-    <x-ui.modal name="notifications" title="Notifications" max-width="md">
+    <x-ui.modal :name="$modalName" title="Notifications" max-width="md">
         @if ($unread > 0)
             <div class="mb-2 flex items-center justify-end">
                 <button wire:click="markAllRead" class="text-xs font-medium text-primary hover:underline">Mark all read</button>

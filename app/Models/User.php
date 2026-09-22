@@ -47,10 +47,22 @@ class User extends Authenticatable implements MustVerifyEmail
         'referred_by',
         'kyc_status',
         'is_active',
-        'role',
         'password',
         'deactivated_at',
         'deletion_requested_at',
+    ];
+
+    /**
+     * PII fields nulled/replaced on erasure (anonymize-and-retain). Kept as a
+     * single list so AccountService::erase() and any future export/audit code
+     * agree on exactly what "anonymized" means for a User row.
+     *
+     * @var list<string>
+     */
+    public const ANONYMIZED_FIELDS = [
+        'name', 'email', 'google_id', 'avatar', 'phone', 'whatsapp_number',
+        'country_code', 'bio', 'city', 'address_line', 'postal_code',
+        'date_of_birth',
     ];
 
     /**
@@ -84,6 +96,8 @@ class User extends Authenticatable implements MustVerifyEmail
             'data_export_ready_at' => 'datetime',
             'deletion_requested_at' => 'datetime',
             'deletion_approved_at' => 'datetime',
+            'anonymized_at' => 'datetime',
+            'retention_purge_due_at' => 'datetime',
             'merchant_enrollment_paid_at' => 'datetime',
             'merchant_margin_pct' => 'decimal:3', // referral-margin lock (§3.3)
         ];
@@ -131,6 +145,24 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return ! is_null($this->deletion_requested_at)
             && is_null($this->deletion_approved_at);
+    }
+
+    /** Deletion was approved and PII was anonymized (financial records retained). */
+    public function isAnonymized(): bool
+    {
+        return ! is_null($this->anonymized_at);
+    }
+
+    /**
+     * Set the display-role column (Tier 5 #16 mass-assignment fix). `role` is
+     * deliberately NOT in $fillable — it must never be settable from a plain
+     * array a request could shape (mass-assignment of the account-privilege
+     * column), only through this explicit call. This mirrors, but does not
+     * replace, the real authorization source: Spatie's assignRole()/roles.
+     */
+    public function setRole(string $role): void
+    {
+        $this->forceFill(['role' => $role])->save();
     }
 
     // -- Relationships -----------------------------------------------------

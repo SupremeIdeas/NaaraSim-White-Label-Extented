@@ -29,18 +29,24 @@ trait InApp
      */
     abstract public function inApp(object $notifiable): array;
 
-    /** Laravel `database` channel storage — the bell reads this. */
+    /**
+     * Laravel `database` channel storage — the bell/notifications page reads
+     * this. The 6 standard keys keep their exact defaulting behavior; any
+     * extra keys a notification's inApp() adds (e.g. Tier 5 #11's
+     * style/image_url/bullets for a styled announcement) pass through
+     * verbatim instead of being silently dropped.
+     */
     public function toArray(object $notifiable): array
     {
         $payload = $this->inApp($notifiable);
 
-        return [
+        return array_merge($payload, [
             'category' => $payload['category'] ?? 'system',
             'icon' => $payload['icon'] ?? 'bell',
             'title' => $payload['title'] ?? '',
             'body' => $payload['body'] ?? '',
             'action_url' => $payload['action_url'] ?? null,
             'action_label' => $payload['action_label'] ?? null,
-        ];
+        ]);
     }
 }

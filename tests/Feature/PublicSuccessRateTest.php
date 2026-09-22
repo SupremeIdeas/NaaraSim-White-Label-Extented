@@ -110,4 +110,44 @@ class PublicSuccessRateTest extends TestCase
         $this->assertNotNull($nigeria);
         $this->assertNull($nigeria['success']);
     }
+
+    // -------------------------- Tier 5 #15: dailySuccessRateTrend() --------------------------
+
+    public function test_daily_success_rate_trend_returns_one_entry_per_day_oldest_first(): void
+    {
+        $trend = app(NciScorer::class)->dailySuccessRateTrend('fivesim', 7);
+
+        $this->assertCount(7, $trend);
+        $this->assertSame(now()->subDays(6)->toDateString(), $trend[0]['date']);
+        $this->assertSame(now()->toDateString(), $trend[6]['date']);
+    }
+
+    public function test_daily_success_rate_trend_computes_the_real_per_day_success_percentage(): void
+    {
+        ProviderOutcome::create(['provider_key' => 'fivesim', 'stack' => 'sms', 'outcome' => 'success', 'occurred_at' => now()]);
+        ProviderOutcome::create(['provider_key' => 'fivesim', 'stack' => 'sms', 'outcome' => 'success', 'occurred_at' => now()]);
+        ProviderOutcome::create(['provider_key' => 'fivesim', 'stack' => 'sms', 'outcome' => 'success', 'occurred_at' => now()]);
+        ProviderOutcome::create(['provider_key' => 'fivesim', 'stack' => 'sms', 'outcome' => 'failure', 'occurred_at' => now()]);
+
+        $trend = app(NciScorer::class)->dailySuccessRateTrend('fivesim', 7);
+
+        $this->assertSame(75.0, $trend[6]['rate_pct']);
+    }
+
+    public function test_daily_success_rate_trend_has_a_null_rate_for_a_day_with_no_outcomes(): void
+    {
+        $trend = app(NciScorer::class)->dailySuccessRateTrend('quibity', 7);
+
+        $this->assertNull($trend[0]['rate_pct']);
+        $this->assertNull($trend[6]['rate_pct']);
+    }
+
+    public function test_daily_success_rate_trend_ignores_outcomes_outside_the_requested_window(): void
+    {
+        ProviderOutcome::create(['provider_key' => 'fivesim', 'stack' => 'sms', 'outcome' => 'success', 'occurred_at' => now()->subDays(10)]);
+
+        $trend = app(NciScorer::class)->dailySuccessRateTrend('fivesim', 7);
+
+        $this->assertTrue(collect($trend)->every(fn ($d) => $d['rate_pct'] === null));
+    }
 }

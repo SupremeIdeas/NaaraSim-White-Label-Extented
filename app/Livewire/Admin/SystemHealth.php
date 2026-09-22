@@ -5,6 +5,7 @@ namespace App\Livewire\Admin;
 use App\Support\Auditor;
 use App\Support\EnvironmentGuard;
 use App\Support\HostingGuide;
+use App\Support\JobHeartbeats;
 use App\Support\PendingMigrations;
 use App\Support\QueueHealth;
 use App\Support\SchedulerHealth;
@@ -132,6 +133,10 @@ class SystemHealth extends Component
             // Recent inbound webhook deliveries (readiness Domain 13/14) — lets an
             // operator confirm a provider (Paystack, Twilio…) is actually calling.
             'webhookDeliveries' => $this->webhookDeliveries(),
+            // Tier 4 #10 Phase B2: a genuinely live, timestamped feed of real
+            // executions (not a snapshot) — every scheduled command's most
+            // recent attempts, newest first.
+            'recentHeartbeats' => JobHeartbeats::recent(20),
         ]);
     }
 
@@ -139,19 +144,27 @@ class SystemHealth extends Component
      * BUILD-19 §7 — NCI Layer-3 health at a glance: how many queued listeners
      * have died, and whether the daily recompute is running (or gone stale).
      *
+     * Tier 4 #10 Phase B2.4 fix: this used to compute its OWN independent,
+     * hardcoded "overdue after 26h" window for nci:recompute — a daily job —
+     * which didn't match what SchedulerHealth::report() already computes for
+     * that exact same task from its own TASKS registry (expected 86400s ->
+     * threshold ~114912s, ~31.9h). Two different answers to "is this job
+     * overdue" for one job is exactly the class of bug this phase exists to
+     * catch, and directly violated the constraint that no job's health is
+     * computed a second, different way. Now reads SchedulerHealth's own
+     * report row for this task instead of recomputing anything.
+     *
      * @return array{failed:int, recompute_last:?string, recompute_ago:?string, recompute_overdue:bool}
      */
     private function nciHealth(): array
     {
-        $last = SchedulerHealth::lastRun('nci:recompute');
-        // Overdue if the daily recompute hasn't run in over 26h (24h + slack).
-        $overdue = $last === null || now()->diffInSeconds($last) > 26 * 3600;
+        $row = collect(SchedulerHealth::report())->firstWhere('name', 'nci:recompute');
 
         return [
             'failed' => QueueHealth::nciListenerFailedCount(),
-            'recompute_last' => $last?->toDateTimeString(),
-            'recompute_ago' => $last?->diffForHumans(),
-            'recompute_overdue' => $overdue,
+            'recompute_last' => $row['last_run'] ?? null,
+            'recompute_ago' => $row['ago'] ?? null,
+            'recompute_overdue' => $row['overdue'] ?? true,
         ];
     }
 

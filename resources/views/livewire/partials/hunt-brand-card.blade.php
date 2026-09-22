@@ -1,10 +1,9 @@
 {{-- Premium brand card — shared by the Featured band and the category
      sections below it, so both stay visually identical (BUILD-9 §8.1). --}}
 <div class="group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:shadow-md dark:border-white/10 dark:bg-[#16233d]"
-     x-intersect.threshold.40="bg = '{{ $brand->background_color }}1a'"
      wire:key="brand-{{ $brand->id }}">
     @php($hero = $brand->hero_image_path ?: $brand->fallback_image)
-    <div class="relative h-36 w-full overflow-hidden">
+    <a href="{{ route('rewards.hunt.profile', $brand) }}" wire:navigate class="relative block h-36 w-full overflow-hidden">
         @if ($hero)
             <img src="{{ $hero }}" alt="{{ $brand->brand_name }}" class="h-full w-full object-cover transition duration-500 group-hover:scale-105">
         @else
@@ -19,13 +18,31 @@
                 </span>
             @endif
         </div>
-    </div>
+    </a>
     <div class="p-5">
-        @if ($brand->category)
-            <span class="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-semibold text-slate-500 dark:bg-white/5 dark:text-slate-400">
-                <x-icon name="tag" class="h-3 w-3" /> {{ $brand->category }}
-            </span>
-        @endif
+        <div class="flex items-center justify-between gap-2">
+            @if ($brand->category)
+                <span class="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-semibold text-slate-500 dark:bg-white/5 dark:text-slate-400">
+                    <x-icon name="tag" class="h-3 w-3" /> {{ $brand->category }}
+                </span>
+            @else
+                <span></span>
+            @endif
+            {{-- Connect (owner request, 2026-09-22): a plain in-platform
+                 follow, distinct from the handle-follow-for-credits grid
+                 below — no reward, just a relationship + Naara follower
+                 count, toggling to "Connected" on click. --}}
+            @php($following = isset($followingBrandIds[$brand->id]))
+            <button type="button" wire:click="toggleConnect({{ $brand->id }})" wire:loading.attr="disabled" wire:target="toggleConnect({{ $brand->id }})"
+                    @class([
+                        'inline-flex shrink-0 items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold transition disabled:opacity-60',
+                        'bg-green-100 text-green-700 hover:bg-green-200 dark:bg-green-950/40 dark:text-green-300' => $following,
+                        'bg-primary/10 text-primary hover:bg-primary/15 dark:bg-primary/20 dark:text-teal-300' => ! $following,
+                    ])>
+                <x-icon :name="$following ? 'check' : 'user-plus'" class="h-3 w-3" />
+                {{ $following ? 'Connected' : 'Connect' }}
+            </button>
+        </div>
         @if ($brand->short_description)
             <p class="mt-2.5 text-sm leading-relaxed text-slate-600 dark:text-slate-300">{{ $brand->short_description }}</p>
         @endif

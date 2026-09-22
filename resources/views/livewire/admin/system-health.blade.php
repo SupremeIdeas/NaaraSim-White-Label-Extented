@@ -1,8 +1,8 @@
-<div class="mx-auto max-w-4xl">
+<div class="mx-auto max-w-4xl" wire:poll.10s>
     <div class="mb-6 flex items-start justify-between gap-4">
         <div>
             <h1 class="text-2xl font-bold text-slate-900 dark:text-slate-100">System health</h1>
-            <p class="text-sm text-slate-500 dark:text-slate-400">Is the live cron firing and the queue draining? If a task is overdue, fix the cPanel cron — not the code.</p>
+            <p class="text-sm text-slate-500 dark:text-slate-400">Is the live cron firing and the queue draining? If a task is overdue, fix the cPanel cron — not the code. This page refreshes itself every few seconds.</p>
         </div>
         <button type="button" wire:click="refreshHealth" class="rounded-lg border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-50 dark:border-[#2D4060] dark:text-slate-300 dark:hover:bg-[#243352]">
             <x-icon name="refresh" class="mr-1 inline h-4 w-4" /> Refresh
@@ -314,20 +314,31 @@
         @endforeach
     </div>
 
-    {{-- Scheduled tasks --}}
+    {{-- Scheduled tasks (Tier 4 #10 Phase B2): three real states, not two —
+         green (healthy), amber (its last attempt was skipped — e.g. a
+         provider with no API key configured, a legitimate neutral state,
+         never shown as an alarming red), or red (overdue or genuinely
+         failing). Each card's detail line is the actual heartbeat's proof of
+         the most recent real work, not just a light. --}}
     <div class="rounded-2xl border border-slate-200 bg-white dark:border-[#2D4060] dark:bg-[#1A2840]">
         <div class="border-b border-slate-100 p-4 dark:border-[#243352]">
             <h2 class="text-sm font-semibold text-slate-700 dark:text-slate-200">Scheduled tasks</h2>
-            <p class="text-xs text-slate-400">Last run is recorded when each task completes. "Never" or "overdue" means the cron isn't firing.</p>
+            <p class="text-xs text-slate-400">Each task's last successful run + its most recent attempt's outcome. "Never" or "overdue" means the cron isn't firing.</p>
         </div>
         <div class="divide-y divide-slate-100 dark:divide-[#243352]">
             @foreach ($tasks as $task)
+                @php
+                    $state = $task['outcome'] === 'skipped' ? 'skipped' : ($task['overdue'] || $task['outcome'] === 'failed' ? 'broken' : 'ok');
+                @endphp
                 <div class="flex items-center justify-between gap-3 p-4" wire:key="task-{{ $task['name'] }}">
-                    <div>
+                    <div class="min-w-0">
                         <p class="text-sm font-medium text-slate-900 dark:text-slate-100">{{ $task['label'] }}</p>
                         <p class="font-mono text-[11px] text-slate-400">{{ $task['name'] }} · every {{ \Illuminate\Support\Carbon::now()->subSeconds($task['expected'])->diffForHumans(null, true) }}</p>
+                        @if ($task['detail'])
+                            <p class="mt-1 truncate text-xs text-slate-500 dark:text-slate-400" title="{{ $task['detail'] }}">{{ $task['detail'] }}</p>
+                        @endif
                     </div>
-                    <div class="flex items-center gap-3 text-right">
+                    <div class="flex shrink-0 items-center gap-3 text-right">
                         <div>
                             <p class="text-xs text-slate-500 dark:text-slate-400">{{ $task['ago'] ?? 'never run' }}</p>
                             @if ($task['last_run'])
@@ -336,13 +347,53 @@
                         </div>
                         <span @class([
                             'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold',
-                            'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300' => $task['overdue'],
-                            'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300' => ! $task['overdue'],
-                        ])>{{ $task['overdue'] ? 'Overdue' : 'OK' }}</span>
+                            'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300' => $state === 'broken',
+                            'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300' => $state === 'skipped',
+                            'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300' => $state === 'ok',
+                        ])>{{ match ($state) { 'broken' => $task['overdue'] ? 'Overdue' : 'Failing', 'skipped' => 'Not configured', default => 'OK' } }}</span>
                     </div>
                 </div>
             @endforeach
         </div>
+    </div>
+
+    {{-- Live activity feed (Tier 4 #10 Phase B2.1): the most recent real
+         executions across every scheduled job, newest first — genuine proof
+         the platform is doing background work, not a static snapshot. This
+         panel (and the whole page, via wire:poll above) refreshes on its own. --}}
+    <div class="mt-6 rounded-2xl border border-slate-200 bg-white dark:border-[#2D4060] dark:bg-[#1A2840]">
+        <div class="border-b border-slate-100 p-4 dark:border-[#243352]">
+            <h2 class="text-sm font-semibold text-slate-700 dark:text-slate-200">Recent activity</h2>
+            <p class="text-xs text-slate-400">The last {{ $recentHeartbeats->count() }} scheduled-job runs, newest first — live proof-of-work, not a snapshot.</p>
+        </div>
+        @if ($recentHeartbeats->isEmpty())
+            <p class="p-5 text-sm text-slate-500 dark:text-slate-400">No job has recorded a heartbeat yet — one will appear here the moment the cron next fires.</p>
+        @else
+            <div class="divide-y divide-slate-100 dark:divide-[#243352]">
+                @foreach ($recentHeartbeats as $h)
+                    <div class="flex items-center justify-between gap-3 px-4 py-2.5" wire:key="heartbeat-{{ $h->id }}">
+                        <div class="min-w-0">
+                            <div class="flex items-center gap-2">
+                                <span class="truncate text-sm font-medium text-slate-800 dark:text-slate-100">{{ $h->job_name }}</span>
+                                <span @class([
+                                    'shrink-0 rounded-full px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide',
+                                    'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300' => $h->outcome === 'success',
+                                    'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300' => $h->outcome === 'skipped',
+                                    'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300' => $h->outcome === 'failed',
+                                ])>{{ $h->outcome }}</span>
+                                @if ($h->duration_ms !== null)
+                                    <span class="shrink-0 text-[11px] text-slate-400">{{ $h->duration_ms }}ms</span>
+                                @endif
+                            </div>
+                            @if ($h->detail)
+                                <p class="mt-0.5 truncate text-xs text-slate-500 dark:text-slate-400" title="{{ $h->detail }}">{{ $h->detail }}</p>
+                            @endif
+                        </div>
+                        <span class="shrink-0 text-[11px] text-slate-400">{{ $h->created_at->diffForHumans() }}</span>
+                    </div>
+                @endforeach
+            </div>
+        @endif
     </div>
 
     {{-- Inbound webhook deliveries (readiness Domain 13/14): proof a provider is
