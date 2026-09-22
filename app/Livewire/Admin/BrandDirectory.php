@@ -22,7 +22,7 @@ class BrandDirectory extends Component
     /** Plan edit rows, keyed by plan id, plus a 'new' row. */
     public array $plans = [];
 
-    public array $newPlan = ['name' => '', 'price_usd_per_month' => 19, 'handles_included' => 1, 'guaranteed_followers_per_handle_per_month' => 50, 'video_previews_allowed' => 0];
+    public array $newPlan = ['name' => '', 'price_usd_per_month' => 19, 'handles_included' => 1, 'guaranteed_followers_per_handle_per_month' => 50, 'video_previews_allowed' => 0, 'credit_reward_per_follow' => 5];
 
     public ?string $saved = null;
 
@@ -38,7 +38,9 @@ class BrandDirectory extends Component
                 'name' => $p->name, 'price_usd_per_month' => $p->price_usd_per_month,
                 'handles_included' => $p->handles_included,
                 'guaranteed_followers_per_handle_per_month' => $p->guaranteed_followers_per_handle_per_month,
-                'video_previews_allowed' => $p->video_previews_allowed, 'is_active' => $p->is_active,
+                'video_previews_allowed' => $p->video_previews_allowed,
+                'credit_reward_per_follow' => $p->credit_reward_per_follow,
+                'is_active' => $p->is_active,
             ];
         }
     }
@@ -51,6 +53,7 @@ class BrandDirectory extends Component
             "plans.{$id}.handles_included" => 'required|integer|min:1|max:50',
             "plans.{$id}.guaranteed_followers_per_handle_per_month" => 'required|integer|min:0|max:1000000',
             "plans.{$id}.video_previews_allowed" => 'required|integer|min:0|max:10',
+            "plans.{$id}.credit_reward_per_follow" => 'nullable|numeric|min:0|max:1000',
         ])['plans'][$id];
 
         BrandSubscriptionPlan::whereKey($id)->update($d + ['is_active' => (bool) ($this->plans[$id]['is_active'] ?? true)]);
@@ -73,11 +76,12 @@ class BrandDirectory extends Component
             'newPlan.handles_included' => 'required|integer|min:1|max:50',
             'newPlan.guaranteed_followers_per_handle_per_month' => 'required|integer|min:0|max:1000000',
             'newPlan.video_previews_allowed' => 'required|integer|min:0|max:10',
+            'newPlan.credit_reward_per_follow' => 'nullable|numeric|min:0|max:1000',
         ])['newPlan'];
 
         $plan = BrandSubscriptionPlan::create($d + ['is_active' => true, 'sort_order' => (int) BrandSubscriptionPlan::max('sort_order') + 1]);
         $this->plans[$plan->id] = $d + ['is_active' => true];
-        $this->newPlan = ['name' => '', 'price_usd_per_month' => 19, 'handles_included' => 1, 'guaranteed_followers_per_handle_per_month' => 50, 'video_previews_allowed' => 0];
+        $this->newPlan = ['name' => '', 'price_usd_per_month' => 19, 'handles_included' => 1, 'guaranteed_followers_per_handle_per_month' => 50, 'video_previews_allowed' => 0, 'credit_reward_per_follow' => 5];
         $this->saved = 'Plan added.';
     }
 

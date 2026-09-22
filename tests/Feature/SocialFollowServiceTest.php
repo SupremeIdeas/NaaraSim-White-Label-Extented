@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\BrandPartner;
 use App\Models\BrandPartnerHandle;
+use App\Models\BrandSubscriptionPlan;
 use App\Models\SocialFollowClaim;
 use App\Models\SocialFollowHandle;
 use App\Models\User;
@@ -95,5 +96,54 @@ class SocialFollowServiceTest extends TestCase
         $this->assertTrue($svc->hasClaimed($user, $brandHandle));
         // The two claim kinds don't collide.
         $this->assertSame(2, SocialFollowClaim::where('user_id', $user->id)->count());
+    }
+
+    /** Owner request (2026-09-22): admin sets the reward per plan tier, and it wins over the handle's own value. */
+    public function test_a_brand_on_a_plan_pays_the_plans_credit_rate_not_the_handles_own(): void
+    {
+        $user = User::factory()->create();
+        $plan = BrandSubscriptionPlan::create([
+            'name' => 'Spotlight', 'price_usd_per_month' => 99, 'handles_included' => 5,
+            'guaranteed_followers_per_handle_per_month' => 350, 'video_previews_allowed' => 2,
+            'credit_reward_per_follow' => 8.0, 'is_active' => true, 'sort_order' => 1,
+        ]);
+        $brand = BrandPartner::create([
+            'brand_name' => 'Plan Co', 'background_color' => '#123456', 'sort_order' => 1,
+            'is_active' => true, 'current_plan_id' => $plan->id,
+        ]);
+        $handle = BrandPartnerHandle::create([
+            'brand_partner_id' => $brand->id, 'platform' => 'x', 'handle_label' => 'Plan Co HQ',
+            'handle_url' => 'https://x.com/planco', 'credit_reward' => 2.0, // deliberately stale/wrong on the handle
+            'verification' => 'self', 'sort_order' => 1, 'is_active' => true,
+        ]);
+
+        $result = app(SocialFollowService::class)->claim($user, $handle);
+
+        $this->assertSame(8.0, $result['earned']); // the plan's rate, not the handle's own 2.0
+        $this->assertSame(8.0, app(CreditService::class)->balance($user->fresh()));
+    }
+
+    /** A plan with no rate set (null) leaves the handle's own value in charge — no silent zero-out. */
+    public function test_a_plan_with_no_credit_rate_set_falls_back_to_the_handles_own_value(): void
+    {
+        $user = User::factory()->create();
+        $plan = BrandSubscriptionPlan::create([
+            'name' => 'Starter Reach', 'price_usd_per_month' => 19, 'handles_included' => 1,
+            'guaranteed_followers_per_handle_per_month' => 50, 'video_previews_allowed' => 0,
+            'credit_reward_per_follow' => null, 'is_active' => true, 'sort_order' => 1,
+        ]);
+        $brand = BrandPartner::create([
+            'brand_name' => 'No Rate Co', 'background_color' => '#123456', 'sort_order' => 1,
+            'is_active' => true, 'current_plan_id' => $plan->id,
+        ]);
+        $handle = BrandPartnerHandle::create([
+            'brand_partner_id' => $brand->id, 'platform' => 'x', 'handle_label' => 'No Rate Co HQ',
+            'handle_url' => 'https://x.com/norateco', 'credit_reward' => 4.5,
+            'verification' => 'self', 'sort_order' => 1, 'is_active' => true,
+        ]);
+
+        $result = app(SocialFollowService::class)->claim($user, $handle);
+
+        $this->assertSame(4.5, $result['earned']);
     }
 }

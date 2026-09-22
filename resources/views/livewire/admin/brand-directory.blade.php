@@ -13,12 +13,13 @@
         <div class="space-y-3">
             @foreach ($planModels as $p)
                 <div wire:key="plan-{{ $p->id }}" class="rounded-lg border border-slate-100 p-3 dark:border-white/5">
-                    <div class="grid grid-cols-2 gap-2 sm:grid-cols-6">
+                    <div class="grid grid-cols-2 gap-2 sm:grid-cols-7">
                         <input wire:model="plans.{{ $p->id }}.name" class="{{ $input }} sm:col-span-2" placeholder="Name">
                         <input wire:model="plans.{{ $p->id }}.price_usd_per_month" type="number" step="1" class="{{ $input }}" placeholder="$/mo">
                         <input wire:model="plans.{{ $p->id }}.handles_included" type="number" class="{{ $input }}" placeholder="Handles">
                         <input wire:model="plans.{{ $p->id }}.guaranteed_followers_per_handle_per_month" type="number" class="{{ $input }}" placeholder="Guar./handle">
                         <input wire:model="plans.{{ $p->id }}.video_previews_allowed" type="number" class="{{ $input }}" placeholder="Videos">
+                        <input wire:model="plans.{{ $p->id }}.credit_reward_per_follow" type="number" step="0.5" class="{{ $input }}" placeholder="Credits/follow" title="NaaraCredits earned per handle-follow for brands on this plan">
                     </div>
                     <div class="mt-2 flex items-center gap-2">
                         <button wire:click="savePlan({{ $p->id }})" class="rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-white hover:bg-primary-dark">Save</button>
@@ -27,13 +28,14 @@
                 </div>
             @endforeach
         </div>
-        <div class="mt-4 grid grid-cols-2 gap-2 border-t border-slate-100 pt-4 sm:grid-cols-6 dark:border-white/5">
+        <div class="mt-4 grid grid-cols-2 gap-2 border-t border-slate-100 pt-4 sm:grid-cols-7 dark:border-white/5">
             <input wire:model="newPlan.name" class="{{ $input }} sm:col-span-2" placeholder="New plan name">
             <input wire:model="newPlan.price_usd_per_month" type="number" class="{{ $input }}" placeholder="$/mo">
             <input wire:model="newPlan.handles_included" type="number" class="{{ $input }}" placeholder="Handles">
             <input wire:model="newPlan.guaranteed_followers_per_handle_per_month" type="number" class="{{ $input }}" placeholder="Guar./handle">
             <input wire:model="newPlan.video_previews_allowed" type="number" class="{{ $input }}" placeholder="Videos">
-            <button wire:click="addPlan" class="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50 sm:col-span-6 dark:border-[#2D4060] dark:text-slate-200">Add plan</button>
+            <input wire:model="newPlan.credit_reward_per_follow" type="number" step="0.5" class="{{ $input }}" placeholder="Credits/follow">
+            <button wire:click="addPlan" class="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50 sm:col-span-7 dark:border-[#2D4060] dark:text-slate-200">Add plan</button>
         </div>
     </section>
 

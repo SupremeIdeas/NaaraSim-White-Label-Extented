@@ -1,27 +1,51 @@
-<div x-data="{ bg: '' }" :style="bg ? `background-color:${bg}` : ''" style="transition: background-color .7s ease">
+{{-- Owner request (2026-09-22): drop the per-brand scroll-tinted background
+     (each card nudged the page background toward its own brand colour on
+     intersect) — scrolling past several differently-coloured brands read as
+     uneven, inconsistent bands rather than a deliberate design. The page
+     just uses the dashboard's own plain background now, like every other
+     page. --}}
+<div>
 
-    {{-- Hero band — dark, distinct from the body below, closed with a rounded
-         "sheet" seam per the section-divider rule (no flat colour boundary). --}}
-    <div class="bg-gradient-to-br from-[#0D1B2A] to-[#0A6E6E] px-4 pb-10 pt-6 text-white">
-        <div class="mx-auto max-w-5xl">
-            <a href="{{ route('rewards') }}" wire:navigate class="inline-flex items-center gap-1 text-sm font-medium text-white/70 hover:text-white">
-                <x-icon name="chevron-right" class="h-4 w-4 rotate-180" /> Back to Rewards
-            </a>
-            <div class="mt-4 flex flex-wrap items-end justify-between gap-4">
-                <div>
-                    <p class="text-xs font-semibold uppercase tracking-[0.2em] text-white/60">Brand Partner Directory</p>
-                    <h1 class="mt-1.5 text-3xl font-bold sm:text-4xl">The Hunt</h1>
-                    <p class="mt-2 max-w-xl text-sm text-white/70">Follow real brands, earn surprise NaaraCredits. Every follow is a one-time reward, server-confirmed the moment you claim it.</p>
-                </div>
-                <div class="rounded-2xl border border-white/15 bg-white/10 px-5 py-3 text-center backdrop-blur">
-                    <p class="text-2xl font-bold tabular-nums">${{ number_format($dailyRemaining, 0) }}</p>
-                    <p class="text-[11px] font-medium uppercase tracking-wide text-white/60">left to earn today</p>
-                </div>
+    {{-- Hero — owner request (2026-09-22): drop the flat colour block (it
+         read as sharp/hard-edged against the dashboard) in favour of the
+         SAME transparent, no-card, no-border treatment as the dashboard
+         home hero and the Naara Gift storefront hero (nx-home-hero) — text
+         sits directly on the dashboard's own light/dark background, which
+         is "nice enough" on its own.
+
+         Layout is deliberately pre-shaped for a bleeding image later (owner:
+         "we will add image by the side"), matching the Gift storefront
+         hero's own proportions exactly (max-w-[70%]/[60%] — a feature-intro
+         hero, not the top-level dashboard one) rather than guessing at a
+         redesign once art exists: the copy column stays capped on every
+         breakpoint, including mobile, and the stat chip moved below the
+         description instead of sitting beside the title, clear of that
+         top-right corner. A future image slots in exactly like
+         `.nx-home-hero__media` in
+         resources/views/livewire/partials/gift-cards/_hero.blade.php: an
+         absolutely-positioned `<img>` with the same mask-fade, no other
+         markup here needs to change. No asset exists yet, so nothing is
+         wired to it today — this only reserves the shape. --}}
+    <section class="nx-home-hero mb-2">
+        <a href="{{ route('rewards') }}" wire:navigate class="relative z-10 inline-flex items-center gap-1 text-sm font-medium text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200">
+            <x-icon name="chevron-right" class="h-4 w-4 rotate-180" /> Back to Rewards
+        </a>
+        <div class="relative z-10 mt-4 max-w-[70%] sm:max-w-[60%]">
+            <p class="text-xs font-semibold uppercase tracking-[0.2em] text-primary dark:text-teal-300">Brand Partner Directory</p>
+            <h1 class="mt-1.5 font-display text-3xl font-extrabold tracking-[-0.025em] text-slate-900 sm:text-4xl dark:text-white">
+                The <span class="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">Hunt</span>
+            </h1>
+            <p class="mt-3.5 text-[15px] leading-relaxed text-slate-500 dark:text-slate-300 sm:text-base">Follow real brands, earn surprise NaaraCredits. Every follow is a one-time reward, server-confirmed the moment you claim it.</p>
+        </div>
+        <div class="relative z-10 mt-6">
+            <div class="inline-flex items-center gap-3 rounded-2xl border border-primary/15 bg-primary/5 px-5 py-3 dark:border-white/10 dark:bg-white/5">
+                <p class="text-2xl font-bold tabular-nums text-slate-900 dark:text-white">${{ number_format($dailyRemaining, 0) }}</p>
+                <p class="max-w-[6rem] text-[11px] font-medium uppercase leading-tight tracking-wide text-slate-500 dark:text-slate-400">left to earn today</p>
             </div>
         </div>
-    </div>
+    </section>
 
-    <div class="mx-auto -mt-6 max-w-5xl rounded-t-[30px] bg-slate-50 px-4 pb-10 pt-6 dark:bg-[#0F1D33]">
+    <div class="mx-auto mt-6 max-w-5xl px-4 pb-10">
         @if ($flash)
             <div class="mb-5 rounded-2xl border border-primary/20 bg-primary/5 px-4 py-3 text-sm font-semibold text-primary dark:border-primary/30 dark:bg-primary/10 dark:text-teal-200">{{ $flash }}</div>
         @endif

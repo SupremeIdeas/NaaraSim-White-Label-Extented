@@ -114,6 +114,7 @@ use App\Livewire\BecomeMerchant;
 use App\Livewire\Blog;
 use App\Livewire\BrandHunt;
 use App\Livewire\BrandManage;
+use App\Livewire\BrandProfile;
 use App\Livewire\CallForwarding;
 use App\Livewire\Catalogue;
 use App\Livewire\Checkout;
@@ -279,6 +280,10 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::get('/journey', Journey::class)->name('journey');
         // Brand Partner Hunt (BUILD-6 §C) — follow-to-earn NaaraCredits.
         Route::get('/rewards/hunt', BrandHunt::class)->name('rewards.hunt');
+        // Brand Profile (owner request, 2026-09-22) — the dedicated per-brand
+        // page reached from a Hunt card: full gallery, every handle's own
+        // "last post" teaser, same follow-to-earn claim.
+        Route::get('/rewards/hunt/{brandPartner}', BrandProfile::class)->name('rewards.hunt.profile');
         // Brand Directory self-service (BUILD-9) — get listed + manage a listing.
         Route::get('/brand/get-listed', GetListed::class)->name('brand.get-listed');
         Route::get('/brand/manage', BrandManage::class)->name('brand.manage');

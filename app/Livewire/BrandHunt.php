@@ -6,6 +6,7 @@ use App\Models\BrandPartner;
 use App\Models\BrandPartnerHandle;
 use App\Models\BrandPartnerVideo;
 use App\Models\SocialFollowHandle;
+use App\Services\Social\BrandFollowService;
 use App\Services\Social\SocialFollowService;
 use App\Services\Social\VideoWatchService;
 use Illuminate\Support\Facades\Auth;
@@ -50,6 +51,16 @@ class BrandHunt extends Component
             return;
         }
         $this->grant($svc->claim(Auth::user()->fresh(), $handle), $handle->handle_label);
+    }
+
+    /** "Connect" toggle from the directory card — same plain follow as the profile page. */
+    public function toggleConnect(int $brandId, BrandFollowService $svc): void
+    {
+        $brand = BrandPartner::listed()->find($brandId);
+        if (! $brand) {
+            return;
+        }
+        $svc->toggle(Auth::user(), $brand);
     }
 
     private function grant(array $result, string $label): void
@@ -138,6 +149,11 @@ class BrandHunt extends Component
             'claimedBrandHandles' => $svc->claimedBrandHandleIds($user),
             'dailyRemaining' => \App\Support\DailyCreditCap::remaining($user),
             'totalBrandCount' => $brands->count(),
+            // "Connect" state (owner request, 2026-09-22) — one query for every
+            // card on the page, not one per card.
+            'followingBrandIds' => \App\Models\BrandPartnerFollower::where('user_id', $user->id)
+                ->whereIn('brand_partner_id', $brands->pluck('id'))
+                ->pluck('brand_partner_id')->flip(),
         ]);
     }
 }
