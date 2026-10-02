@@ -47,3 +47,11 @@ Nothing in this list is optional. Do not enable live payouts until every box is 
 - [ ] Paystack sandbox: one `GET /transfer/verify/{our provider_reference}` call to confirm the response body shape; one `GET /balance` call (array of `{currency, balance}` in subunits is documented — confirm on your account before `auto_sync`).
 - [ ] Do NOT enable a Stripe corridor for recipients outside US/UK/EEA/CA/CH. Stripe -> African recipients needs Global Payouts (US/UK business + Treasury) — owner decision first.
 - [ ] Payoneer: partner approval + program integration guide before any code. Grey: API access + docs before any code.
+
+## Paystack sandbox pass (one command)
+Put your Paystack **test** secret key in `.env` (`PAYSTACK_SECRET_KEY=sk_test_...`), then:
+- `php artisan payouts:sandbox-check` — read-only: `/balance` shape and units, `/country` vs our list, what "unknown reference" returns from verify, bank list.
+- `php artisan payouts:sandbox-check --send` — also creates a test recipient, sends one NGN 100 TEST transfer, verifies it by our reference, and re-sends the same reference to prove Paystack dedupes.
+It refuses to run with an empty or live key. Paste the printed evidence table under this heading.
+
+**Already confirmed live (2026-10-02, unauthenticated `GET /country`):** the response shape matches what our reader expects (`data[].iso_code`). Paystack lists 7 operating countries: CI, EG, GH, KE, NG, RW, ZA. Our list has no RW. That list is where Paystack operates, not proof that transfers work there, so Rwanda stays off until you confirm it with Paystack and enable the corridor.
