@@ -75,6 +75,20 @@ class Withdraw extends Component
         }
     }
 
+    /** The guide (step 1) picked a rail: open the matching existing setup form. */
+    #[\Livewire\Attributes\On('payout-rail-chosen')]
+    public function railChosen(string $rail, string $country): void
+    {
+        $this->country = strtoupper($country);
+        $this->accountType = match ($rail) {
+            'stripe_connect' => 'stripe',
+            'paypal' => 'paypal',
+            default => 'bank',
+        };
+        $this->bankCode = '';
+        $this->loadBanks();
+    }
+
     public function updatedCountry(): void
     {
         $this->bankCode = '';
@@ -103,7 +117,7 @@ class Withdraw extends Component
                 'bank_name' => collect($this->banks)->firstWhere('code', $this->bankCode)['name'] ?? null,
                 'account_number' => $this->accountNumber,
             ]);
-        } catch (AccountResolutionException $e) {
+        } catch (AccountResolutionException|PayoutException $e) {
             $this->accountError = $e->getMessage();
 
             return;
@@ -128,7 +142,13 @@ class Withdraw extends Component
             return;
         }
 
-        $account = $accounts->addPaypalAccount(Auth::user(), $this->paypalEmail);
+        try {
+            $account = $accounts->addPaypalAccount(Auth::user(), $this->paypalEmail);
+        } catch (PayoutException $e) {
+            $this->accountError = $e->getMessage();
+
+            return;
+        }
 
         $this->reset('paypalEmail', 'paypalEmailConfirm');
         $this->accountId = $account->id;
@@ -138,7 +158,13 @@ class Withdraw extends Component
     /** Start (or resume) Stripe's hosted onboarding for a Connect account. */
     public function connectStripe(StripeConnectService $connect)
     {
-        $account = $connect->accountFor(Auth::user());
+        try {
+            $account = $connect->accountFor(Auth::user());
+        } catch (PayoutException $e) {
+            $this->accountError = $e->getMessage();
+
+            return null;
+        }
 
         $url = $connect->onboardingUrl(
             $account,
@@ -157,7 +183,13 @@ class Withdraw extends Component
 
     public function removeAccount(int $id, PayoutAccountService $accounts): void
     {
-        $accounts->remove(Auth::user(), PayoutAccount::findOrFail($id));
+        try {
+            $accounts->remove(Auth::user(), PayoutAccount::findOrFail($id));
+        } catch (PayoutException $e) {
+            $this->accountError = $e->getMessage();
+
+            return;
+        }
         if ($this->accountId === $id) {
             $this->accountId = null;
         }

@@ -9,6 +9,11 @@
 
 ## DONE
 
+### Global Payout system ported from master (2026-10-02, owner request)
+- Ported the whole payout extension (engine safety, corridors/FX, Payout Guardian, float/treasury, Funding Radar, Rail Guide, Addendum D hardening, schema-driven Payout settings, Payout health page, docs under `docs/payouts/`). Everything is OFF by default.
+- Left out on purpose (master-only / removed from this fork): `PlatformWithdrawalService` + the `platform_earnings` bucket.
+- Verified: full suite 2603 with 1 failure (`NiaGlowTest`, expects `border-slate-200/70` in a chat view) that is the same one that exists on the sibling fork without the port — not touched here.
+
 ### Starter blog: 5 evergreen posts + images (white-label) — 2026-10-02
 Owner direction: no master feature lands in white-labels; the master's 40-post series stays
 master-only. This repo gets a small brand-neutral starter blog: `BlogPostSeeder` seeds 5 guides

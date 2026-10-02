@@ -28,6 +28,10 @@ class StaffScopes
         'nci.override' => 'Override live routing (manual circuit + provider preference)',
         // Theme System (Batch 3 §6). Grants the admin Theme Picker so delegated
         // staff can switch the platform-wide visual skin without full admin.
+        // Payouts (Addendum D-3.19): reviewers decide requests, finance runs float/radar/reconciliation/exports.
+        // Neither can change settings, kill switches or trust overrides (super_admin only).
+        'payouts.review' => 'Review and approve/decline payout requests',
+        'payouts.finance' => 'Record float top-ups; view radar, reconciliation and accounting exports',
         'theme.manage' => 'Switch the platform-wide visual theme',
     ];
 

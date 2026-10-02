@@ -5,6 +5,7 @@ namespace App\Services\Payouts;
 use App\Models\PayoutAccount;
 use App\Models\User;
 use App\Support\Auditor;
+use App\Support\PayoutSettings;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -61,6 +62,8 @@ class PayoutAccountService
      */
     public function addAccount(User $user, array $data): PayoutAccount
     {
+        $this->guardAccountChange($user);
+
         $country = strtoupper(trim($data['country']));
         $resolver = $this->resolverFor($country);
         if ($resolver === null) {
@@ -100,6 +103,7 @@ class PayoutAccountService
                 'provider' => $resolver->name(),
                 'country' => $country,
             ]);
+            $this->noticeAccountChange($user);
 
             return $account;
         });
@@ -116,6 +120,7 @@ class PayoutAccountService
      */
     public function addPaypalAccount(User $user, string $email): PayoutAccount
     {
+        $this->guardAccountChange($user);
         $email = strtolower(trim($email));
 
         return DB::transaction(function () use ($user, $email) {
@@ -143,6 +148,7 @@ class PayoutAccountService
                 'provider' => 'paypal',
                 'type' => 'paypal',
             ]);
+            $this->noticeAccountChange($user);
 
             return $account;
         });
@@ -164,6 +170,12 @@ class PayoutAccountService
     {
         abort_unless($account->user_id === $user->id, 403);
 
+        // The destination of a request that has not been finalised is frozen; deleting the row
+        // under it would orphan the payout (Addendum D-3.1).
+        if (\App\Models\PayoutRequest::query()->where('payout_account_id', $account->id)->whereIn('status', \App\Models\PayoutRequest::OPEN)->exists()) {
+            throw new PayoutException('This account has a withdrawal in progress. You can remove it once that finishes.');
+        }
+
         DB::transaction(function () use ($user, $account) {
             $wasDefault = $account->is_default;
             $accountId = $account->id;
@@ -176,5 +188,31 @@ class PayoutAccountService
 
             Auditor::log('payout.account_removed', 'PayoutAccount', $accountId, ['user_id' => $user->id]);
         });
+    }
+
+    /**
+     * Adding a destination is the first move of an account takeover, so it is rate-limited and — when the
+     * owner has switched step-up on — needs a fresh 2FA/email-code check (Addendum D-3.5 / D-3.21).
+     *
+     * @throws PayoutException
+     */
+    private function guardAccountChange(User $user): void
+    {
+        if (Hardening\PayoutFreeze::isFrozen($user->id)) {
+            throw new PayoutException('Payouts on this account are paused for your protection. Please contact support.');
+        }
+        $limit = PayoutSettings::addAccountPerHour();
+        if ($limit > 0 && ! \Illuminate\Support\Facades\RateLimiter::attempt('payout-add-account:'.$user->id, $limit, fn () => true, 3600)) {
+            throw new PayoutException('You\'ve added several accounts in a short time. Please wait a while before adding another.');
+        }
+        app(Hardening\StepUpAuth::class)->assertFresh($user);
+    }
+
+    /** Email the owner that a destination changed, with the "This wasn't me" link. */
+    private function noticeAccountChange(User $user): void
+    {
+        if (PayoutSettings::notifyOnRequest()) {
+            $user->notify(new \App\Notifications\PayoutRequestedNotice(null, 'account'));
+        }
     }
 }

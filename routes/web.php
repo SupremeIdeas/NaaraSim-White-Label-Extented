@@ -82,6 +82,7 @@ use App\Livewire\Admin\NumbersBento;
 use App\Livewire\Admin\NumbersHero;
 use App\Livewire\Admin\PageBuilder;
 use App\Livewire\Admin\Partners;
+use App\Livewire\Admin\GlobalPayoutRail;
 use App\Livewire\Admin\Payouts;
 use App\Livewire\Admin\PlatformThemePage;
 use App\Livewire\Admin\Posts;
@@ -150,6 +151,7 @@ use App\Livewire\StatusPage;
 use App\Livewire\SupportChat;
 use App\Livewire\Wallet;
 use App\Livewire\WelcomeAurora;
+use App\Livewire\PayoutGuide;
 use App\Livewire\Withdraw;
 use App\Support\LegalContent;
 use App\Support\SiteContent;
@@ -296,6 +298,8 @@ Route::middleware(['auth', 'active'])->group(function () {
         // is only enforced once the unified free-payout threshold is spent
         // (WithdrawalService::request(), same as every other earner type).
         Route::get('/rewards/withdraw', Withdraw::class)->name('rewards.withdraw');
+        // Rail Guide (Addendum B): which payout rail should I use? (Not the /faq page.)
+        Route::get('/account/payout-guide', PayoutGuide::class)->name('payout-guide');
 
         // Data estimator (blueprint Section 32).
         Route::get('/data-estimator', DataEstimator::class)->name('data-estimator');
@@ -448,7 +452,7 @@ Route::middleware(['admin', 'throttle:admin'])
             // Naara Gift storefront hero — same system as the dashboard home hero.
             Route::get('/gift-hero', GiftHero::class)->name('gift-hero');
             Route::get('/developer-api', DeveloperApi::class)->name('developer-api');
-            Route::get('/payouts', Payouts::class)->name('payouts');
+            Route::get('/global-payout-rail', GlobalPayoutRail::class)->name('global-payout-rail');
             Route::get('/refunds', Refunds::class)->name('refunds');
             Route::get('/reconciliation', Reconciliation::class)->name('reconciliation');
             Route::get('/analytics', Analytics::class)->name('analytics');
@@ -474,6 +478,12 @@ Route::middleware(['admin', 'throttle:admin'])
 
         // Support ticket queue (Module 25) — staff with the tickets.manage scope,
         // plus admin/super_admin (who hold every scope / bypass).
+        // Payouts: admins/super admins (all scopes) and staff granted a payouts scope (Addendum D-3.19).
+        Route::middleware('permission:payouts.review|payouts.finance')->group(function () {
+            Route::get('/payouts', Payouts::class)->name('payouts');
+            Route::get('/payouts/health', App\Livewire\Admin\PayoutHealth::class)->name('payout-health');
+        });
+
         Route::middleware('permission:tickets.manage')->group(function () {
             Route::get('/tickets', SupportQueue::class)->name('tickets');
         });
@@ -497,6 +507,8 @@ Route::middleware(['admin', 'throttle:admin'])
 
         // Staff, backups + maintenance loop — super_admin only (Sections 27–29).
         Route::middleware('role:super_admin')->group(function () {
+            // Every payout knob in one schema-driven screen (Addendum D, "easy and not hard-coded").
+            Route::get('/payout-settings', App\Livewire\Admin\PayoutSettingsPage::class)->name('payout-settings');
             Route::get('/staff', Staff::class)->name('staff');
             Route::get('/api-keys', ProviderKeys::class)->name('api-keys');
             Route::get('/email', EmailSettings::class)->name('email');
@@ -549,6 +561,11 @@ Route::post('/webhooks/payments/{gateway}', PaymentWebhookController::class)
 // idempotent payout-request settlement.
 Route::post('/webhooks/payouts/{provider}', PayoutWebhookController::class)
     ->name('webhooks.payouts');
+
+// "This wasn't me" (Addendum D-3.5): signed link in the payout notice emails. Freezes payouts, no login needed.
+Route::get('/payouts/not-me/{user}', \App\Http\Controllers\Payouts\NotMeController::class)
+    ->middleware(['signed', 'throttle:10,1'])
+    ->name('payouts.not-me');
 
 // Stripe Connect account webhooks (ROADMAP §Layer 0.2 — Stripe payout rail):
 // a separate endpoint/secret from the above, since it carries account.updated

@@ -36,15 +36,6 @@ class ReferralWithdrawalService
         return round($this->earnings->balance($user), 2);
     }
 
-    private function localAmount(float $usd, string $currency): float
-    {
-        return match (strtoupper($currency)) {
-            'USD' => round($usd, 2),
-            'NGN' => round($usd * $this->currency->getUsdToNgn(), 2),
-            default => throw new PayoutException("Withdrawals to {$currency} aren't available yet."),
-        };
-    }
-
     /**
      * Request a cash-out of `$usd` referral earnings to the user's verified
      * account. Holds the earnings, then creates a payout_request on the
@@ -77,19 +68,20 @@ class ReferralWithdrawalService
         }
 
         $currency = strtoupper($account->currency);
-        $local = $this->localAmount($usd, $currency);
+        $quote = app(\App\Services\Payouts\PayoutQuoter::class)->quote($usd, $currency, $account);
+        $local = $quote['local_amount'];
         $reference = 'rwd:'.Str::uuid();
 
-        return DB::transaction(function () use ($user, $usd, $account, $local, $currency, $reference, $autoSend) {
+        return DB::transaction(function () use ($user, $usd, $account, $quote, $local, $currency, $reference, $autoSend) {
             // HOLD the earnings before any money is promised (idempotent).
             $this->earnings->hold($user, $usd, 'earn-hold:'.$reference, 'Referral cash withdrawal');
 
-            $request = $this->payouts->createRequest($user, $local, $currency, 'referral_earnings', $account, $reference);
+            $request = $this->payouts->createRequest($user, $local, $currency, 'referral_earnings', $account, $reference, $quote['quote']);
             $request->forceFill(['payee_type' => 'referral', 'credit_amount' => $usd])->save();
 
-            if ($autoSend || PayoutSettings::autopilot()) {
-                $this->payouts->send($request);
-            }
+            // No provider call here — ever. createRequest() queued the Payout Guardian
+            // (afterCommit); it approves only when auto mode is on and every gate passes,
+            // and the send itself runs in SendPayoutJob on the `payouts` queue.
 
             return $request;
         });

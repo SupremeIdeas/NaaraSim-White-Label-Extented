@@ -77,17 +77,21 @@
         <div class="rounded-2xl border border-slate-200 bg-white p-5 dark:border-white/10 dark:bg-slate-900/60">
             <h3 class="mb-3 text-sm font-semibold text-slate-700 dark:text-slate-200">Recent payouts</h3>
             @foreach ($payouts as $p)
-                @php $tone = match($p->status){
-                    'paid' => 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300',
-                    'failed','reversed' => 'bg-red-100 text-red-700 dark:bg-red-500/15 dark:text-red-300',
-                    'processing','approved' => 'bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300',
+                @php $tone = match(\App\Support\PayoutStatusText::tone($p)){
+                    'success' => 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300',
+                    'danger' => 'bg-red-100 text-red-700 dark:bg-red-500/15 dark:text-red-300',
+                    'warn' => 'bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300',
                     default => 'bg-slate-100 text-slate-600 dark:bg-white/10 dark:text-slate-300',
                 }; @endphp
                 <div class="flex items-center justify-between border-b border-slate-100 py-2 text-sm last:border-0 dark:border-white/5">
                     <span class="tabular-nums text-slate-700 dark:text-slate-200">${{ number_format((float) $p->amount, 2) }} {{ $p->currency }}</span>
                     <div class="flex items-center gap-3">
                         <span class="text-[11px] text-slate-400">{{ $p->created_at->format('M j, Y') }}</span>
-                        <span class="rounded-full px-2.5 py-0.5 text-xs font-semibold {{ $tone }}">{{ ucfirst($p->status) }}</span>
+                        <span class="rounded-full px-2.5 py-0.5 text-xs font-semibold {{ $tone }}">{{ \App\Support\PayoutStatusText::text($p) }}</span>
+                        @if (in_array($p->status, [\App\Models\PayoutRequest::PENDING, \App\Models\PayoutRequest::AWAITING_FUNDS, \App\Models\PayoutRequest::APPROVED], true))
+                            <button type="button" wire:click="cancelPayout({{ $p->id }})" wire:confirm="{{ __('payouts.cancel.confirm') }}" wire:loading.attr="disabled" wire:target="cancelPayout({{ $p->id }})"
+                                class="text-xs font-semibold text-red-600 hover:underline disabled:opacity-50 dark:text-red-400">{{ __('payouts.cancel.button') }}</button>
+                        @endif
                     </div>
                 </div>
             @endforeach

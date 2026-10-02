@@ -35,6 +35,13 @@
         </p>
     @endif
 
+    <div class="mt-6"><livewire:payout-step-up /></div>
+
+    {{-- Step 1 — Choose how to get paid (Rail Guide). Choosing a rail opens the matching setup below. --}}
+    <div class="mt-8">
+        <livewire:payout-guide :embedded="true" />
+    </div>
+
     {{-- Payout accounts --}}
     <h2 class="mt-8 text-sm font-semibold text-slate-900 dark:text-slate-100">Your payout accounts</h2>
     <div class="mt-3 space-y-2">

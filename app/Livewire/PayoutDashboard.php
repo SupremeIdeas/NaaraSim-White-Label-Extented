@@ -34,6 +34,15 @@ class PayoutDashboard extends Component
         $this->earnerType = $type;
     }
 
+    /** The payee cancels a withdrawal that has not reached the provider yet (Addendum D-3.5). */
+    public function cancelPayout(int $id): void
+    {
+        $request = PayoutRequest::where('user_id', Auth::id())->findOrFail($id);
+        $ok = app(\App\Services\Payouts\PayoutService::class)->cancelByUser($request, Auth::user());
+        $this->dispatch('nx-toast', type: $ok ? 'success' : 'error',
+            message: $ok ? __('payouts.cancel.done') : __('payouts.cancel.too_late'));
+    }
+
     /** Staff are exempt from the free-payout / KYC threshold (BUILD-23 §4). */
     private function isExempt(): bool
     {

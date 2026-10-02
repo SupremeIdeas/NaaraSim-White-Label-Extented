@@ -55,6 +55,7 @@
         $more[] = ['heading' => 'Money & partners'];
         $more[] = ['route' => 'admin.analytics', 'label' => 'Analytics', 'icon' => 'signal'];
         $more[] = ['route' => 'admin.payouts', 'label' => 'Payouts', 'icon' => 'credit-card'];
+        $more[] = ['route' => 'admin.global-payout-rail', 'label' => 'Global payout rail', 'icon' => 'signal'];
         $more[] = ['route' => 'admin.refunds', 'label' => 'Refunds & Disputes', 'icon' => 'refresh'];
         $more[] = ['route' => 'admin.reconciliation', 'label' => 'Reconciliation', 'icon' => 'wallet'];
         $more[] = ['route' => 'admin.exchange-rates', 'label' => 'Exchange rate (NGN)', 'icon' => 'refresh'];
