@@ -40,6 +40,7 @@ class SchedulerHealth
         'payouts:radar-alerts' => ['Funding Radar alerts', 300],
         'payouts:guide-audit' => ['Payout rail registry audit', 2678400],
         'payouts:radar-prune' => ['Funding Radar prune', 86400],
+        'payouts:peer-expire' => ['Member transfer expiry', 600],
         'payouts:stuck-watchdog' => ['Payout stuck watchdog', 600],
         'payouts:guard-metrics' => ['Payout Guardian metrics', 3600],
         'payouts:trust-recompute' => ['Payout trust tiers', 86400],

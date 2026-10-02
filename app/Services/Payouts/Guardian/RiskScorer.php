@@ -40,6 +40,7 @@ class RiskScorer
         }
 
         $out[] = $this->freshEarnings($ctx, $w['fresh_earnings']);
+        $out[] = $this->receivedFunds($ctx, $w['peer_funds']);
 
         if ($r->source_bucket === 'referral_earnings') {
             $out[] = $this->referralConcentration($ctx, $w['referral_concentration']);
@@ -95,6 +96,20 @@ class RiskScorer
         $share = min(1.0, $young / $held);
 
         return $share > 0.5 ? GateResult::warn('S_fresh_earnings', ['share' => round($share, 2), 'maturity_days' => $days], (int) round($weight * $share)) : null;
+    }
+
+    /** Mostly money another member sent: the classic way to move funds through someone, so a person looks first. */
+    private function receivedFunds(GuardianContext $ctx, int $weight): ?GateResult
+    {
+        $r = $ctx->request;
+        $held = (float) $r->credit_amount;
+        if (! PayoutSettings::peerReviewReceived() || $r->source_bucket !== 'referral_earnings' || $held <= 0) {
+            return null;
+        }
+        $received = (float) ReferralEarning::where('user_id', $r->user_id)->where('type', ReferralEarning::TRANSFER_IN)->where('created_at', '>=', now()->subDays(30))->sum('amount');
+        $share = min(1.0, $received / $held);
+
+        return $share > 0.5 ? GateResult::warn('S_peer_funds', ['share' => round($share, 2)], $weight) : null;
     }
 
     /** Earnings dominated by a couple of referred accounts, or referred accounts sharing the referrer's device/IP. */

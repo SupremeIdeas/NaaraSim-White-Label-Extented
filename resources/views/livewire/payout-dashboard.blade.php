@@ -12,6 +12,11 @@
             <div>
                 <p class="text-xs font-medium uppercase tracking-wide text-slate-400">{{ $label }} earnings balance</p>
                 <p class="mt-1 text-3xl font-bold text-slate-900 dark:text-white">${{ number_format($balance, 2) }}</p>
+                @if (($debt ?? 0) > 0)
+                    <p class="mt-2 rounded-lg bg-amber-50 p-2 text-xs text-amber-800 dark:bg-amber-500/10 dark:text-amber-200" role="status">
+                        <x-icon name="alert-triangle" class="mr-1 inline h-3.5 w-3.5" />An adjustment of ${{ number_format($debt, 2) }} (a refunded or disputed sale) is being repaid from your future earnings. Withdrawals resume once it is cleared.
+                    </p>
+                @endif
                 @if ($enabled)
                     <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
                         <x-icon name="refresh" class="mr-1 inline h-3.5 w-3.5" />Payouts run automatically to your verified account.
@@ -57,12 +62,12 @@
         @forelse ($history as $row)
             <div class="flex items-center justify-between border-b border-slate-100 py-2 text-sm last:border-0 dark:border-white/5">
                 <div>
-                    <span class="font-medium text-slate-700 dark:text-slate-200">{{ ucfirst($row->type) }}</span>
+                    <span class="font-medium text-slate-700 dark:text-slate-200">{{ match ($row->type) { 'clawback' => 'Adjustment', 'transfer_out' => 'Sent to a member', 'transfer_in' => 'Received from a member', default => ucfirst($row->type) } }}</span>
                     <span class="text-slate-400">{{ $row->description ?? '' }}</span>
                 </div>
                 <div class="text-right">
                     <span class="tabular-nums font-semibold {{ (float) $row->amount >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-500' }}">
-                        {{ (float) $row->amount >= 0 ? '+' : '' }}${{ number_format((float) $row->amount, 2) }}
+                        {{ (float) $row->amount >= 0 ? '+' : '−' }}${{ number_format(abs((float) $row->amount), 2) }}
                     </span>
                     <span class="block text-[11px] text-slate-400">{{ $row->created_at->format('M j, Y') }}</span>
                 </div>

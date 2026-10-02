@@ -16,6 +16,59 @@
     @if ($message)<div class="flex items-center gap-2 rounded-lg bg-green-50 p-3 text-sm text-green-700 dark:bg-green-950/40 dark:text-green-300" role="status"><x-icon name="check" class="h-4 w-4" /> {{ $message }}</div>@endif
     @if ($error)<div class="rounded-lg bg-red-50 p-3 text-sm text-red-700 dark:bg-red-950/40 dark:text-red-300" role="alert">{{ $error }}</div>@endif
 
+    {{-- Automation status --}}
+    <section class="{{ $card }}" aria-labelledby="h-auto">
+        <div class="flex items-start gap-3">
+            <x-icon :name="$automation['automatic'] ? 'check' : 'alert-triangle'" class="mt-0.5 h-5 w-5 shrink-0 {{ $automation['automatic'] ? 'text-emerald-500' : 'text-amber-500' }}" />
+            <div class="min-w-0">
+                <h2 id="h-auto" class="text-base font-bold text-slate-900 dark:text-slate-100">
+                    {{ $automation['automatic'] ? 'Payouts are automatic' : 'Payouts are NOT fully automatic yet' }}
+                </h2>
+                <p class="text-xs text-slate-500 dark:text-slate-400">
+                    @if ($automation['automatic']) Low-risk requests on {{ implode(', ', array_map('ucfirst', $automation['rails'])) }} are approved and sent by the system. Unusual or large ones still wait for a person.
+                    @else Fix the red items below and supported payouts will run by themselves. @endif
+                </p>
+                <ul class="mt-2 space-y-1 text-sm">
+                    @foreach ($automation['checks'] as $c)
+                        <li class="flex items-start gap-2">
+                            <x-icon :name="$c['ok'] ? 'check' : 'x'" class="mt-0.5 h-4 w-4 shrink-0 {{ $c['ok'] ? 'text-emerald-500' : 'text-red-500' }}" />
+                            <span class="text-slate-800 dark:text-slate-200">{{ $c['label'] }}@if ($c['fix']) <span class="block text-xs text-red-700 dark:text-red-300">{{ $c['fix'] }}</span>@endif</span>
+                        </li>
+                    @endforeach
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    {{-- Rails delivered later by the Platform Updater --}}
+    <section class="{{ $card }}" aria-labelledby="h-rails">
+        <h2 id="h-rails" class="text-base font-bold text-slate-900 dark:text-slate-100">Rails coming through the Platform Updater</h2>
+        <p class="text-xs text-slate-500 dark:text-slate-400">These need a provider account first. Until their package is installed they show as "coming soon" to users and nothing else is affected: Paystack, Flutterwave and Stripe keep paying out as normal.</p>
+        <ul class="mt-3 divide-y divide-slate-100 text-sm dark:divide-white/10">
+            @foreach ($rails as $r)
+                <li class="flex flex-wrap items-start justify-between gap-2 py-2">
+                    <div class="min-w-0">
+                        <span class="font-semibold text-slate-900 dark:text-slate-100">{{ $r['label'] }}</span>
+                        @if ($r['version'])<span class="ml-1 text-xs text-slate-500 dark:text-slate-400">v{{ $r['version'] }}</span>@endif
+                        @if ($r['note'])<span class="block text-xs text-slate-500 dark:text-slate-400">{{ $r['note'] }}</span>@endif
+                    </div>
+                    @php
+                        $badge = match ($r['status']) {
+                            'installed' => 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300',
+                            'problem' => 'bg-red-50 text-red-700 dark:bg-red-950/40 dark:text-red-300',
+                            'disabled' => 'bg-slate-100 text-slate-600 dark:bg-white/10 dark:text-slate-300',
+                            default => 'bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300',
+                        };
+                    @endphp
+                    <span class="rounded-full px-2.5 py-0.5 text-xs font-semibold {{ $badge }}">{{ ['installed' => 'Installed', 'problem' => 'Needs attention', 'disabled' => 'Switched off', 'coming_soon' => 'Coming soon'][$r['status']] ?? $r['status'] }}</span>
+                </li>
+            @endforeach
+        </ul>
+        @if ($railProblems !== [])
+            <p class="mt-2 text-xs text-red-700 dark:text-red-300">Skipped extensions: {{ collect($railProblems)->map(fn ($p) => $p['slug'].' ('.$p['message'].')')->implode('; ') }}</p>
+        @endif
+    </section>
+
     {{-- Money invariants --}}
     <section class="{{ $card }}" aria-labelledby="h-inv">
         <div class="flex flex-wrap items-center justify-between gap-2">
@@ -162,6 +215,30 @@
                 <input type="month" wire:model="exportMonth" class="{{ $inp }} w-44" aria-label="Month">
                 <button type="button" wire:click="exportAccounting" wire:loading.attr="disabled" wire:target="exportAccounting" class="{{ $btn }}">Download CSV</button>
             </div>
+        </section>
+    @endif
+
+    @if ($canFinance)
+        <section class="{{ $card }}" aria-labelledby="h-claw">
+            <h2 id="h-claw" class="text-base font-bold text-slate-900 dark:text-slate-100">Reverse earnings after a refund or lost chargeback</h2>
+            <p class="text-xs text-slate-500 dark:text-slate-400">Always a person's decision. Find the sale by the buyer's email or the order reference, pick the earnings it created, and reverse them. If the earner already withdrew the money their balance goes below zero as an <em>adjustment</em> that their next earnings repay; nothing is taken from them in cash, and they cannot withdraw until it is cleared.</p>
+            <div class="mt-3 grid gap-2 sm:grid-cols-[1fr_auto]">
+                <input type="text" wire:model="clawQuery" wire:keydown.enter="findEarnings" placeholder="Buyer email or order reference" class="{{ $inp }}" aria-label="Buyer email or order reference">
+                <button type="button" wire:click="findEarnings" wire:loading.attr="disabled" wire:target="findEarnings" class="{{ $btn }}">Find earnings</button>
+            </div>
+            @if ($clawResults !== [])
+                <input type="text" wire:model="clawReason" placeholder="Reason (shown to the earner) — required" class="{{ $inp }} mt-3" aria-label="Reason">
+                @foreach ($clawResults as $c)
+                    <div class="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 pt-3 text-sm dark:border-white/5" wire:key="claw-{{ $c['kind'] }}-{{ $c['id'] }}">
+                        <span class="min-w-0 text-slate-800 dark:text-slate-200">{{ $c['owner'] }} @if ($c['owner_email'])({{ $c['owner_email'] }})@endif · ${{ number_format($c['amount'], 2) }} · {{ $c['source'] }} · {{ $c['at'] }}</span>
+                        @if ($c['reversed'])
+                            <span class="text-xs font-semibold text-emerald-600 dark:text-emerald-400">Already reversed</span>
+                        @else
+                            <button type="button" wire:click="reverseEarnings('{{ $c['kind'] }}', {{ $c['id'] }})" wire:confirm="Reverse ${{ number_format($c['amount'], 2) }} of this earner's earnings?" wire:loading.attr="disabled" class="{{ $btn2 }}">Reverse ${{ number_format($c['amount'], 2) }}</button>
+                        @endif
+                    </div>
+                @endforeach
+            @endif
         </section>
     @endif
 

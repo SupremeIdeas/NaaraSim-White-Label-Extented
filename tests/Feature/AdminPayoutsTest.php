@@ -154,6 +154,7 @@ class AdminPayoutsTest extends TestCase
 
     public function test_a_plain_admin_cannot_switch_settlement_to_auto(): void
     {
+        Setting::setValue(PayoutSettings::MODE, 'manual');
         Livewire::actingAs($this->admin())->test(Payouts::class)
             ->set('enabled', true)->set('mode', 'auto')->call('save')
             ->assertForbidden();
@@ -199,13 +200,14 @@ class AdminPayoutsTest extends TestCase
             ->call('saveGuardian')->assertForbidden();
         $this->assertFalse(PayoutSettings::autoApprovalEnabled());
 
+        Setting::setValue(PayoutSettings::AUTO_SHADOW, true);
         Livewire::actingAs($this->superAdmin())->test(Payouts::class)
             ->set('autoApproval', true)->set('shadow', false)->set('providerAuto.paystack', true)->set('tierNew', 25)
             ->call('saveGuardian')->assertHasNoErrors();
         $this->assertTrue(PayoutSettings::autoApprovalEnabled());
         $this->assertFalse(PayoutSettings::shadowMode());
         $this->assertTrue(PayoutSettings::providerAutoApprove('paystack'));
-        $this->assertFalse(PayoutSettings::providerAutoApprove('stripe'));
+        $this->assertFalse(PayoutSettings::providerAutoApprove('paypal'), 'only the well-tested rails are automatic by default');
         $this->assertSame(25.0, PayoutSettings::tierLimitUsd('new'));
     }
 

@@ -48,6 +48,14 @@ class PayoutGuardianTest extends TestCase
         $this->guardianJobsRunning();
     }
 
+    /** The pre-automation baseline some tests describe: the Guardian only watches and records. */
+    private function advisoryMode(): void
+    {
+        Setting::setValue(PayoutSettings::MODE, 'manual');
+        Setting::setValue(PayoutSettings::AUTO_APPROVAL, false);
+        Setting::setValue(PayoutSettings::AUTO_SHADOW, true);
+    }
+
     /** The Guardian fails closed unless its sweeper + metrics jobs have run recently (Addendum D-3.20). */
     private function guardianJobsRunning(): void
     {
@@ -103,8 +111,9 @@ class PayoutGuardianTest extends TestCase
 
     // ---- shadow vs acting ----
 
-    public function test_default_is_advisory_it_records_would_approve_and_changes_nothing(): void
+    public function test_shadow_mode_records_would_approve_and_changes_nothing(): void
     {
+        $this->advisoryMode();
         $r = $this->scenario();
         $d = $this->evaluate($r);
 
@@ -167,6 +176,7 @@ class PayoutGuardianTest extends TestCase
 
     public function test_decisions_are_append_only_and_attempts_increment(): void
     {
+        $this->advisoryMode();
         $r = $this->scenario();
         $a = $this->evaluate($r);
         $r->forceFill(['status' => PayoutRequest::PENDING])->save();
@@ -670,6 +680,7 @@ class PayoutGuardianTest extends TestCase
 
     public function test_metrics_and_digest(): void
     {
+        $this->advisoryMode();
         $this->evaluate($this->scenario());
         $m = app(\App\Services\Payouts\Guardian\GuardianMetrics::class)->roll();
 

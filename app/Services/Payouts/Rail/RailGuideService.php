@@ -116,7 +116,7 @@ class RailGuideService
     public function globalProviderFor(string $country): ?string
     {
         return PayoutCorridor::query()->enabled()->where('country', strtoupper($country))
-            ->whereIn('provider', RailEnrollmentService::globalProviders())->orderBy('priority')->value('provider');
+            ->whereIn('provider', RailEnrollmentService::offeredGlobalProviders())->orderBy('priority')->value('provider');
     }
 
     private function stateOf(User $user, string $rail, string $country): string

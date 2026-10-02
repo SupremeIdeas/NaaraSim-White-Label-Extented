@@ -34,7 +34,7 @@ class PayoutRailRegistry
     {
         return match ($rail) {
             'stripe_connect' => ['stripe'],
-            'global' => RailEnrollmentService::globalProviders(),
+            'global' => RailEnrollmentService::offeredGlobalProviders(),
             default => [$rail],
         };
     }

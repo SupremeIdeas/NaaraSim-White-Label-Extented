@@ -35,7 +35,7 @@ class MerchantWithdrawalService
 
     public function availableUsd(Merchant $merchant): float
     {
-        return round($this->earnings->balance($merchant), 2);
+        return max(0.0, round($this->earnings->balance($merchant), 2)); // a clawback debt is never "available"
     }
 
     /**

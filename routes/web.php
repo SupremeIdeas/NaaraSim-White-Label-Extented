@@ -300,6 +300,8 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::get('/rewards/withdraw', Withdraw::class)->name('rewards.withdraw');
         // Rail Guide (Addendum B): which payout rail should I use? (Not the /faq page.)
         Route::get('/account/payout-guide', PayoutGuide::class)->name('payout-guide');
+        // Member-to-member earnings transfer for people whose country has no payout rail yet.
+        Route::get('/account/send-earnings', \App\Livewire\SendEarnings::class)->name('send-earnings');
 
         // Data estimator (blueprint Section 32).
         Route::get('/data-estimator', DataEstimator::class)->name('data-estimator');

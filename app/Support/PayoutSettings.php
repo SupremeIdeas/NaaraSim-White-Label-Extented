@@ -24,21 +24,34 @@ class PayoutSettings
     // and audited; the defaults are the owner-safe ones from the blueprint (§11).
     public const AUTO_APPROVAL = 'payouts.auto_approval.enabled';      // default OFF
     public const AUTO_SHADOW = 'payouts.auto_approval.shadow';         // default ON
-    public const MAX_OPEN = 'payouts.max_open_requests_per_user';      // default 3
+    public const MAX_OPEN = 'payouts.max_open_requests_per_user';      // default 7
     public const COOLING_OFF_HOURS = 'payouts.cooling_off_hours';      // default 48
-    public const FX_TOLERANCE_PCT = 'payouts.fx_tolerance_pct';        // default 3
-    public const MATURITY_DAYS = 'payouts.maturity_days';              // default 3
+    public const FX_TOLERANCE_PCT = 'payouts.fx_tolerance_pct';        // default 7
+    public const MATURITY_DAYS = 'payouts.maturity_days';              // default 7
     public const NEW_ACCOUNT_DAYS = 'payouts.new_account_days';        // default 7
     public const DAILY_CAP_USD = 'payouts.auto_approval.daily_cap_usd';// default 5000
-    public const QA_SAMPLE_PCT = 'payouts.auto_approval.qa_sample_pct';// default 3
+    public const QA_SAMPLE_PCT = 'payouts.auto_approval.qa_sample_pct';// default 7
     public const NAME_MATCH = 'payouts.name_match_threshold';          // default 0.85
-    public const LOOKUP_GRACE_MIN = 'payouts.lookup_grace_minutes';    // default 30
+    public const LOOKUP_GRACE_MIN = 'payouts.lookup_grace_minutes';    // default 70
     public const QUOTE_HOURS = 'payouts.quote_lock_hours';             // default 24
 
     // Guardian gates, scoring bands and tier limits (Addendum C §4). 0 = "off" for caps.
+    // Member-to-member earnings transfer ("send to a member who can cash out")
+    public const PEER_ENABLED = 'payouts.peer.enabled';                // default ON (still needs payouts enabled)
+    public const PEER_MIN_USD = 'payouts.peer.min_usd';                // default 5
+    public const PEER_MAX_USD = 'payouts.peer.max_usd';                // default 200 per transfer
+    public const PEER_SENDER_30D = 'payouts.peer.sender_30d_usd';      // default 500 sent per sender per 30 days
+    public const PEER_RECIPIENT_30D = 'payouts.peer.recipient_30d_usd'; // default 1000 received per member per 30 days
+    public const PEER_EXPIRY_HOURS = 'payouts.peer.expiry_hours';      // default 72
+    public const PEER_RECIPIENT_KYC = 'payouts.peer.recipient_kyc';    // default 2 (identity-verified)
+    public const PEER_SENDER_AGE_DAYS = 'payouts.peer.sender_min_age_days'; // default 7
+    public const PEER_MAX_PENDING = 'payouts.peer.max_pending';        // default 3 open per sender
+    public const PEER_ONLY_UNSUPPORTED = 'payouts.peer.only_when_unsupported'; // default ON: only members we cannot pay out may send
+    public const PEER_REVIEW_RECEIVED = 'payouts.peer.review_received'; // default ON: payouts mostly made of received money get a person's look
+    public const DISABLED_EXTENSIONS = 'payouts.disabled_extensions';   // csv of extension slugs switched off, default none
     public const DENIED_COUNTRIES = 'payouts.denied_countries';        // csv of ISO-2, default none
     public const TIER_LIMIT_PREFIX = 'payouts.auto_approval.tier_limit.'; // .new/.trusted/.vip  (100/500/2000)
-    public const BAND_APPROVE = 'payouts.guardian.band_approve';       // default 30
+    public const BAND_APPROVE = 'payouts.guardian.band_approve';       // default 70
     public const BAND_HOLD = 'payouts.guardian.band_hold';             // default 60
     public const WEIGHTS = 'payouts.guardian.weights';                 // json override of the signal weights
     public const USER_CAP_PREFIX = 'payouts.user_cap_usd.';            // .daily/.weekly/.monthly (0 = off)
@@ -50,7 +63,7 @@ class PayoutSettings
     public const HTTP_TIMEOUT = 'payouts.http_timeout_seconds';                // default 25
     public const HTTP_CONNECT_TIMEOUT = 'payouts.http_connect_timeout_seconds';// default 5
     public const WEBHOOK_PAYLOAD_DAYS = 'payouts.webhook_payload_retention_days'; // default 90
-    public const WEBHOOK_TOLERANCE = 'payouts.webhook_timestamp_tolerance_seconds'; // default 300
+    public const WEBHOOK_TOLERANCE = 'payouts.webhook_timestamp_tolerance_seconds'; // default 700
 
     public const MAX_FEE_RATIO = 'payouts.max_fee_ratio_pct';                  // default 5 (%)
     public const FX_BAND = 'payouts.fx_sanity_band_pct';                       // default 15 (%)
@@ -98,7 +111,7 @@ class PayoutSettings
     }
 
     public const ADD_ACCOUNT_PER_HOUR = 'payouts.limits.add_account_per_hour';  // default 5 (0 = off)
-    public const WITHDRAW_PER_MINUTE = 'payouts.limits.withdraw_per_minute';   // default 3  (0 = off)
+    public const WITHDRAW_PER_MINUTE = 'payouts.limits.withdraw_per_minute';   // default 7  (0 = off)
     public const WITHDRAW_PER_DAY = 'payouts.limits.withdraw_per_day';         // default 10 (0 = off)
 
     public static function addAccountPerHour(): int
@@ -192,7 +205,7 @@ class PayoutSettings
      */
     public static function mode(): string
     {
-        return in_array(Setting::getValue(self::MODE, 'manual'), ['auto', 'autopilot'], true) ? 'auto' : 'manual';
+        return in_array(Setting::getValue(self::MODE, 'auto'), ['auto', 'autopilot'], true) ? 'auto' : 'manual';
     }
 
     /** True when the Guardian is allowed to approve (kept under its old name for callers/tests). */
@@ -203,13 +216,13 @@ class PayoutSettings
 
     public static function autoApprovalEnabled(): bool
     {
-        return (bool) Setting::getValue(self::AUTO_APPROVAL, false);
+        return (bool) Setting::getValue(self::AUTO_APPROVAL, true);
     }
 
     /** Shadow mode: evaluate and log decisions but change nothing. ON until an admin graduates it. */
     public static function shadowMode(): bool
     {
-        return (bool) Setting::getValue(self::AUTO_SHADOW, true);
+        return (bool) Setting::getValue(self::AUTO_SHADOW, false);
     }
 
     public static function maxOpenRequests(): int
@@ -229,7 +242,7 @@ class PayoutSettings
 
     public static function maturityDays(): int
     {
-        return max(0, (int) Setting::getValue(self::MATURITY_DAYS, 3));
+        return max(0, (int) Setting::getValue(self::MATURITY_DAYS, 7));
     }
 
     public static function newAccountDays(): int
@@ -260,6 +273,70 @@ class PayoutSettings
     public static function quoteLockHours(): int
     {
         return max(1, (int) Setting::getValue(self::QUOTE_HOURS, 24));
+    }
+
+    public static function peerEnabled(): bool
+    {
+        return (bool) Setting::getValue(self::PEER_ENABLED, true);
+    }
+
+    public static function peerMinUsd(): float
+    {
+        return max(0.0, (float) Setting::getValue(self::PEER_MIN_USD, 5));
+    }
+
+    public static function peerMaxUsd(): float
+    {
+        return max(0.0, (float) Setting::getValue(self::PEER_MAX_USD, 200));
+    }
+
+    public static function peerSender30dUsd(): float
+    {
+        return max(0.0, (float) Setting::getValue(self::PEER_SENDER_30D, 500));
+    }
+
+    public static function peerRecipient30dUsd(): float
+    {
+        return max(0.0, (float) Setting::getValue(self::PEER_RECIPIENT_30D, 1000));
+    }
+
+    public static function peerExpiryHours(): int
+    {
+        return max(1, (int) Setting::getValue(self::PEER_EXPIRY_HOURS, 72));
+    }
+
+    public static function peerRecipientKyc(): int
+    {
+        return min(3, max(1, (int) Setting::getValue(self::PEER_RECIPIENT_KYC, 2)));
+    }
+
+    public static function peerSenderAgeDays(): int
+    {
+        return max(0, (int) Setting::getValue(self::PEER_SENDER_AGE_DAYS, 7));
+    }
+
+    public static function peerMaxPending(): int
+    {
+        return max(1, (int) Setting::getValue(self::PEER_MAX_PENDING, 3));
+    }
+
+    public static function peerOnlyWhenUnsupported(): bool
+    {
+        return (bool) Setting::getValue(self::PEER_ONLY_UNSUPPORTED, true);
+    }
+
+    public static function peerReviewReceived(): bool
+    {
+        return (bool) Setting::getValue(self::PEER_REVIEW_RECEIVED, true);
+    }
+
+    /** @return list<string> slugs of updater-delivered rails an admin has switched off */
+    public static function disabledExtensions(): array
+    {
+        return array_values(array_filter(array_map(
+            fn ($c) => strtolower(trim($c)),
+            explode(',', (string) Setting::getValue(self::DISABLED_EXTENSIONS, '')),
+        )));
     }
 
     /** @return list<string> upper-case ISO-2 codes payouts are never sent to */
@@ -294,7 +371,7 @@ class PayoutSettings
     {
         $defaults = [
             'new_account' => 15, 'first_withdrawal' => 10, 'fresh_earnings' => 25, 'referral_concentration' => 20,
-            'velocity' => 15, 'recent_failures' => 15, 'trusted_tier' => -10, 'vip_tier' => -20, 'recent_incident' => 15,
+            'velocity' => 15, 'recent_failures' => 15, 'trusted_tier' => -10, 'vip_tier' => -20, 'recent_incident' => 15, 'peer_funds' => 35,
         ];
         $override = json_decode((string) Setting::getValue(self::WEIGHTS, '{}'), true);
 
@@ -313,11 +390,19 @@ class PayoutSettings
         return max(1.0, (float) Setting::getValue(self::LARGEST_MULT, 5));
     }
 
-    /** Per-provider switch for system approval. OFF until an admin enables the rail. */
+    /**
+     * Per-provider switch for system approval. The well-built, tested rails (config `payouts.auto_approve_default_providers`:
+     * Paystack, Flutterwave, Stripe) are automatic out of the box; every other rail stays manual until an admin turns it on.
+     * An explicit admin choice always wins.
+     */
     public static function providerAutoApprove(?string $provider): bool
     {
-        return $provider !== null
-            && (bool) Setting::getValue(self::PROVIDER_AUTO_PREFIX.$provider.'.auto_approve', false);
+        if ($provider === null) {
+            return false;
+        }
+        $default = in_array($provider, (array) config('payouts.auto_approve_default_providers', []), true);
+
+        return (bool) Setting::getValue(self::PROVIDER_AUTO_PREFIX.$provider.'.auto_approve', $default);
     }
 
     public static function breakerHourlyFloor(): int

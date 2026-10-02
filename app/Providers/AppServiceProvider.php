@@ -217,14 +217,14 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton('payout.cryptomus', CryptomusPayoutGateway::class);
         $this->app->singleton('payout.stripe', StripePayoutGateway::class);
         $this->app->singleton('payout.manual_external', \App\Services\Payouts\ManualExternalPayoutGateway::class);
-        $this->app->singleton(PayoutService::class, fn ($app) => new PayoutService([
+        $this->app->singleton(PayoutService::class, fn ($app) => new PayoutService(array_merge([
             $app->make(PaystackPayoutGateway::class),
             $app->make(FlutterwavePayoutGateway::class),
             $app->make(PayPalPayoutGateway::class),      // international → PayPal email
             $app->make(CryptomusPayoutGateway::class),   // crypto payout rail
             $app->make(StripePayoutGateway::class),      // Stripe Connect transfer
             $app->make(\App\Services\Payouts\ManualExternalPayoutGateway::class), // Plan B: admin pays outside, records proof
-        ]));
+        ], \App\Services\Payouts\Extensions\PayoutRailExtensions::gateways($app)))); // updater-delivered rails (never fatal)
 
         // Payout Guardian collaborators (Addendum C). Funding (G9) reads the real float (an untracked rail passes);
         // the ledger verifier reads each bucket's own ledger.

@@ -9,9 +9,24 @@ return [
     // simply have no accounts/enrollments; listing them here costs nothing.
     'global_rail_providers' => ['payoneer', 'grey', 'stripe_global', 'manual_external'],
 
+    // Where updater-delivered rails live (one folder per rail with a rail.json). See PayoutRailExtensions.
+    'extensions_path' => app_path('PayoutRails'),
+
+    // Rails we plan to deliver through the Platform Updater once the provider accounts exist. Until a matching extension is
+    // installed they are shown as "coming soon" and are never offered to users. Core payouts never depend on them.
+    'planned_rails' => [
+        'payoneer' => ['label' => 'Payoneer', 'note' => 'Needs a Payoneer partner/mass-payout account and API access.'],
+        'grey' => ['label' => 'Grey', 'note' => 'Needs Grey business API access (no public API yet).'],
+        'stripe_global' => ['label' => 'Stripe Global Payouts', 'note' => 'Needs a US-registered entity with Stripe Treasury and Global Payouts access.'],
+    ],
+
     // Providers that debit float at SUBMIT time (so in-flight is already out of float and is
     // excluded from the recommended top-up). Others debit later, so in-flight still needs funding.
     'debits_float_at_submit' => ['payoneer' => true, 'grey' => true, 'stripe_global' => false, 'manual_external' => false],
+
+    // Rails that approve automatically (via the Payout Guardian) as soon as payouts are switched on. Everything else needs
+    // an explicit admin switch. A rail only belongs here once it is built AND tested.
+    'auto_approve_default_providers' => ['paystack', 'flutterwave', 'stripe'],
 
     // Minor-unit digits per currency (ISO 4217). Anything not listed uses `default`. The admin can
     // override single currencies in Admin -> Payouts -> Controls without a deploy.

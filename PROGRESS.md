@@ -9,6 +9,10 @@
 
 ## DONE
 
+### Payouts follow-up ported from master — 2026-10-02
+- Automatic-by-default payouts + Automation status checklist, clawback policy (admin-triggered, debt repaid by future earnings), maturity 7 days, updater-delivered rail extension point (Payoneer/Grey/Stripe Global show "Coming soon"), member-to-member earnings transfer for countries with no rail. Platform-withdrawal/license pieces stay master-only and were NOT ported.
+- Known pre-existing failure (not payout-related): `NiaGlowTest::test_the_input_has_appearance_none_and_a_subtle_border`.
+
 ### Global Payout system ported from master (2026-10-02, owner request)
 - Ported the whole payout extension (engine safety, corridors/FX, Payout Guardian, float/treasury, Funding Radar, Rail Guide, Addendum D hardening, schema-driven Payout settings, Payout health page, docs under `docs/payouts/`). Everything is OFF by default.
 - Left out on purpose (master-only / removed from this fork): `PlatformWithdrawalService` + the `platform_earnings` bucket.

@@ -17,10 +17,10 @@ Nothing here is code. Tick each before the matching go-live gate in `GO-LIVE-CHE
 
 ## Decisions (each has a safe default in Admin → All payout settings)
 - [ ] Tier limits for the Guardian (new / trusted / VIP) and the daily auto-approval cap.
-- [ ] Earnings maturity days (default 3; the blueprint suggests 7 for card-funded earnings).
+- [x] Earnings maturity days: default is now **7** (as recommended for card-funded earnings). Change in Admin → All payout settings.
 - [ ] Whether to switch on the security-code step (recommended before any global rail goes live).
 - [ ] Send delay for new destinations (default 10 minutes on global rails).
-- [ ] Clawback policy (see `D-COVERAGE.md` open item 1).
+- [x] Clawback policy: decided (human-triggered reversal from Payout health; the earner may go into debt that future earnings repay; withdrawals blocked while in debt). See `D-COVERAGE.md` G-11.
 - [ ] Who holds which role: `payouts.review` (decide requests) and `payouts.finance` (float, reconciliation, exports) are staff scopes you grant in Admin → Staff. Settings, kill switches and trust overrides stay super-admin.
 - [ ] Returned-payout policy (default: money returns to the user's balance, account flagged, locked on the second return).
 
@@ -28,3 +28,11 @@ Nothing here is code. Tick each before the matching go-live gate in `GO-LIVE-CHE
 - [ ] Restore drill once (`RUNBOOKS.md` §Restore).
 - [ ] Kill-switch drill once (Admin → Payouts → pause auto-approvals; payouts enabled off).
 - [ ] Forced low-float test so the alert is seen.
+
+## Rails that arrive later (Payoneer, Grey, Stripe Global)
+- [ ] Keep `blueprints/E-Rail-Extension-Blueprint.md` safe. When provider access exists, give it back to Claude with the provider docs: each rail is built on its own branch and shipped as a signed zip through the Platform Updater. Until then they show as "Coming soon" and nothing else is affected.
+- [ ] US LLC -> Stripe account with Treasury + Global Payouts approval; Payoneer partner approval + integration guide; Grey API docs.
+
+## Automatic payouts: what must be true
+- [ ] `payouts.enabled` switched on (the one switch), a Paystack key in `.env`, the Laravel scheduler running (`php artisan schedule:run` every minute), and Paystack transfer OTP off. Admin → Payouts → Payout health shows a live checklist of exactly these.
+- [ ] Member-to-member transfer (for countries with no rail) is on by default with strict limits: see `PEER-TRANSFER.md`.

@@ -87,7 +87,8 @@ class PayoutDashboard extends Component
         $exempt = $this->isExempt();
 
         return view('livewire.payout-dashboard', [
-            'balance' => round($this->balance(), 2),
+            'balance' => max(0.0, round($this->balance(), 2)),
+            'debt' => max(0.0, -round($this->balance(), 2)),   // a refund/chargeback adjustment that future earnings repay
             'history' => $this->history(),
             'payouts' => PayoutRequest::where('user_id', $user->id)->latest('id')->limit(10)->get(),
             'enabled' => PayoutSettings::enabled(),

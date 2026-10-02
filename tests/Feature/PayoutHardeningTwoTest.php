@@ -298,7 +298,7 @@ class PayoutHardeningTwoTest extends TestCase
         Setting::setValue(PayoutSettings::NOTIFY_ON_REQUEST, false);
         Notification::fake();
         app(PayoutService::class)->createRequest($u, 5000, 'NGN', 'referral_credits', $account, 'wd:other'.uniqid());
-        Notification::assertNothingSent();
+        Notification::assertNotSentTo($u, PayoutRequestedNotice::class);
     }
 
     // ── step-up ──

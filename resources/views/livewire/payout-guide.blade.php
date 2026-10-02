@@ -29,6 +29,12 @@
             <x-icon :name="in_array($advice['verdict'], ['fast_available']) ? 'check' : (in_array($advice['verdict'], ['global_only', 'fast_unavailable_global', 'fast_unavailable']) ? 'clock' : 'alert-triangle')" class="mt-0.5 h-5 w-5 shrink-0" />
             <p>{{ __('payout_guide.verdict_'.$advice['verdict'], $verdictParams) }}</p>
         </div>
+        @if ($advice['verdict'] === 'none_available' && \App\Support\PayoutSettings::peerEnabled())
+            <div class="mt-3 rounded-xl border border-slate-200 p-3 text-sm dark:border-white/10">
+                <p class="text-slate-700 dark:text-slate-200">{{ __('payouts.peer.cta') }}</p>
+                <a href="{{ route('send-earnings') }}" wire:navigate class="mt-1 inline-block font-semibold text-primary hover:underline">{{ __('payouts.peer.cta_button') }}</a>
+            </div>
+        @endif
         @if (in_array($advice['verdict'], ['none_available', 'blocked']))
             <button type="button" wire:click="notifyMe" wire:loading.attr="disabled" wire:target="notifyMe" class="mt-3 text-sm font-semibold text-primary hover:underline">{{ __('payout_guide.notify_me') }}</button>
         @endif

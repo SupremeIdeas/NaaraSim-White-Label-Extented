@@ -45,6 +45,7 @@ class FundingRadarTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        Setting::setValue(PayoutSettings::MODE, 'manual'); // these tests describe the manual baseline; automatic is the product default
         $this->seed(RoleSeeder::class);
         Setting::setValue(PayoutSettings::FLAG, true);
         Setting::setValue(PayoutSettings::MIN, 5);

@@ -98,10 +98,21 @@ class PayoutSettingsAndHealthTest extends TestCase
             PayoutSettings::ADD_ACCOUNT_PER_HOUR => fn () => PayoutSettings::addAccountPerHour(),
             PayoutSettings::WITHDRAW_PER_MINUTE => fn () => PayoutSettings::withdrawPerMinute(),
             PayoutSettings::WITHDRAW_PER_DAY => fn () => PayoutSettings::withdrawPerDay(),
+            PayoutSettings::PEER_ENABLED => fn () => PayoutSettings::peerEnabled() ? 1 : 0,
+            PayoutSettings::PEER_ONLY_UNSUPPORTED => fn () => PayoutSettings::peerOnlyWhenUnsupported() ? 1 : 0,
+            PayoutSettings::PEER_MIN_USD => fn () => PayoutSettings::peerMinUsd(),
+            PayoutSettings::PEER_MAX_USD => fn () => PayoutSettings::peerMaxUsd(),
+            PayoutSettings::PEER_SENDER_30D => fn () => PayoutSettings::peerSender30dUsd(),
+            PayoutSettings::PEER_RECIPIENT_30D => fn () => PayoutSettings::peerRecipient30dUsd(),
+            PayoutSettings::PEER_EXPIRY_HOURS => fn () => PayoutSettings::peerExpiryHours(),
+            PayoutSettings::PEER_RECIPIENT_KYC => fn () => PayoutSettings::peerRecipientKyc(),
+            PayoutSettings::PEER_SENDER_AGE_DAYS => fn () => PayoutSettings::peerSenderAgeDays(),
+            PayoutSettings::PEER_MAX_PENDING => fn () => PayoutSettings::peerMaxPending(),
+            PayoutSettings::PEER_REVIEW_RECEIVED => fn () => PayoutSettings::peerReviewReceived() ? 1 : 0,
         ];
 
         foreach (PayoutSettingsSchema::flat() as $key => $field) {
-            if (in_array($key, [PayoutSettings::DENIED_COUNTRIES, 'payouts.currency_decimals'], true)) {
+            if (in_array($key, [PayoutSettings::DENIED_COUNTRIES, 'payouts.currency_decimals', PayoutSettings::DISABLED_EXTENSIONS], true)) {
                 continue; // free-text fields: default ''/'{}' by construction
             }
             $this->assertArrayHasKey($key, $accessors, "{$key} has a schema entry but no accessor comparison");
@@ -156,15 +167,15 @@ class PayoutSettingsAndHealthTest extends TestCase
     {
         $slot = fn ($k) => 'values.'.PayoutSettingsPage::slot($k);
         $c = Livewire::actingAs($this->sa())->test(PayoutSettingsPage::class)
-            ->set($slot(PayoutSettings::AUTO_SHADOW), false)
+            ->set($slot(PayoutSettings::AUTO_SHADOW), true)          // switch to learning mode: money flow changes
             ->call('save')->assertHasErrors('confirmed');
-        $this->assertTrue(PayoutSettings::shadowMode(), 'not saved without the tick');
+        $this->assertFalse(PayoutSettings::shadowMode(), 'not saved without the tick');
 
         $c->set('confirmed', true)->call('save')->assertHasNoErrors();
-        $this->assertFalse(PayoutSettings::shadowMode());
+        $this->assertTrue(PayoutSettings::shadowMode());
 
         $c->call('resetField', PayoutSettingsPage::slot(PayoutSettings::AUTO_SHADOW));
-        $this->assertTrue(PayoutSettings::shadowMode(), 'reset puts back the safe default');
+        $this->assertFalse(PayoutSettings::shadowMode(), 'reset puts back the default (automatic)');
         $this->assertNull(Setting::where('key', PayoutSettings::AUTO_SHADOW)->first(), 'the stored override is removed, so future default changes apply');
     }
 

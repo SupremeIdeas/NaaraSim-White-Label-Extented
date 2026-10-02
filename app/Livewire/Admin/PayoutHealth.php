@@ -62,6 +62,13 @@ class PayoutHealth extends Component
 
     public string $releaseNote = '';
 
+    public string $clawQuery = '';
+
+    public string $clawReason = '';
+
+    /** @var list<array<string, mixed>> */
+    public array $clawResults = [];
+
     public ?string $message = null;
 
     public ?string $error = null;
@@ -228,6 +235,26 @@ class PayoutHealth extends Component
         }, "payout-accounting-{$month}.csv", ['Content-Type' => 'text/csv']);
     }
 
+    public function findEarnings(): void
+    {
+        $this->finance();
+        $this->clawResults = app(\App\Services\Payouts\Hardening\EarningsClawback::class)->candidates($this->clawQuery);
+        if ($this->clawResults === []) {
+            $this->error = 'No earnings found for that buyer email or order reference.';
+        }
+    }
+
+    public function reverseEarnings(string $kind, int $id): void
+    {
+        $this->finance();
+        $this->run(function () use ($kind, $id) {
+            $amt = app(\App\Services\Payouts\Hardening\EarningsClawback::class)->reverse($kind, $id, Auth::user(), $this->clawReason);
+            $this->clawResults = app(\App\Services\Payouts\Hardening\EarningsClawback::class)->candidates($this->clawQuery);
+
+            return 'Reversed $'.number_format($amt, 2).'. If the earner has already withdrawn it, their balance now shows an adjustment that future earnings repay.';
+        }, 'Reversed.');
+    }
+
     public function acceptFx(): void
     {
         abort_unless(Auth::user()?->hasRole('super_admin'), 403);
@@ -246,6 +273,9 @@ class PayoutHealth extends Component
         $manual = PayoutRequest::query()->where('provider', 'manual_external')->where('status', PayoutRequest::PROCESSING)->with('user:id,name,email')->oldest('id')->limit(100)->get();
 
         return view('livewire.admin.payout-health', [
+            'rails' => \App\Services\Payouts\Extensions\PayoutRailExtensions::catalogue(),
+            'railProblems' => \App\Services\Payouts\Extensions\PayoutRailExtensions::problems(),
+            'automation' => app(\App\Services\Payouts\Hardening\AutomationStatus::class)->report(),
             'run' => PayoutInvariantRun::latest('id')->first(),
             'held' => $held, 'unknown' => $unknown, 'manual' => $manual,
             'freezes' => PayoutUserFreeze::whereNull('released_at')->latest('frozen_at')->limit(50)->get(),

@@ -21,6 +21,17 @@ class RailEnrollmentService
         return (array) config('payouts.global_rail_providers', []);
     }
 
+    /**
+     * Global providers a user can actually be routed to right now: built into the core (manual_external) or an installed,
+     * enabled updater-delivered rail. Payoneer/Grey/Stripe Global stay "coming soon" until their extension is installed.
+     *
+     * @return list<string>
+     */
+    public static function offeredGlobalProviders(): array
+    {
+        return array_values(array_filter(self::globalProviders(), fn ($p) => \App\Services\Payouts\Extensions\PayoutRailExtensions::offerable($p)));
+    }
+
     public static function isGlobal(?string $provider): bool
     {
         return $provider !== null && in_array($provider, self::globalProviders(), true);

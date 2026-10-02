@@ -43,7 +43,7 @@ class PayoutWebhookController extends Controller
 
     public function __invoke(Request $request, string $provider, PayoutService $payouts): JsonResponse
     {
-        if (! in_array($provider, self::PROVIDERS, true)) {
+        if (! in_array($provider, self::PROVIDERS, true) && ! \App\Services\Payouts\Extensions\PayoutRailExtensions::installed($provider)) {
             throw new NotFoundHttpException;
         }
 

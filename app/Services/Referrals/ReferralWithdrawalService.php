@@ -33,7 +33,7 @@ class ReferralWithdrawalService
 
     public function availableUsd(User $user): float
     {
-        return round($this->earnings->balance($user), 2);
+        return max(0.0, round($this->earnings->balance($user), 2)); // a clawback debt is never "available"
     }
 
     /**

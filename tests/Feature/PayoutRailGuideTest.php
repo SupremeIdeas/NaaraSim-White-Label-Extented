@@ -29,10 +29,18 @@ use Tests\TestCase;
 class PayoutRailGuideTest extends TestCase
 {
     use RefreshDatabase;
+    use \Tests\Concerns\InstallsFakeRail;
+
+    protected function tearDown(): void
+    {
+        $this->removeFakeRails();
+        parent::tearDown();
+    }
 
     protected function setUp(): void
     {
         parent::setUp();
+        $this->installFakeRail('payoneer'); // the real Payoneer rail is delivered later; stand in for it
         $this->seed(RoleSeeder::class);
         Cache::flush();
         config([

@@ -27,10 +27,18 @@ use Tests\TestCase;
 class PayoutGuideUiTest extends TestCase
 {
     use RefreshDatabase;
+    use \Tests\Concerns\InstallsFakeRail;
+
+    protected function tearDown(): void
+    {
+        $this->removeFakeRails();
+        parent::tearDown();
+    }
 
     protected function setUp(): void
     {
         parent::setUp();
+        $this->installFakeRail('payoneer'); // the real Payoneer rail is delivered later; stand in for it
         $this->seed(RoleSeeder::class);
         Cache::flush();
         config(['services.paystack.secret_key' => 'sk_p', 'services.flutterwave.secret_key' => 'sk_f']);

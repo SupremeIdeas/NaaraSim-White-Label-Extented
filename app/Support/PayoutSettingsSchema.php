@@ -22,7 +22,7 @@ class PayoutSettingsSchema
                 'blurb' => 'The master switches. Payouts are OFF until you turn them on.',
                 'fields' => [
                     self::f(PayoutSettings::FLAG, 'Payouts enabled', 'Master switch. When off, nobody can request or receive a withdrawal.', 'bool', false, danger: true),
-                    self::f(PayoutSettings::MODE, 'Settlement mode', 'Manual = a person approves every request. Auto = the Guardian may approve low-risk ones (it still needs its own switches below).', 'select', 'manual', options: ['manual' => 'Manual — approve each request', 'auto' => 'Auto — Guardian may approve'], danger: true),
+                    self::f(PayoutSettings::MODE, 'Settlement mode', 'Auto = the Guardian approves low-risk requests by itself and sends them (recommended). Manual = a person approves every request.', 'select', 'auto', options: ['manual' => 'Manual — approve each request', 'auto' => 'Auto — Guardian may approve'], danger: true),
                     self::f(PayoutSettings::MIN, 'Minimum withdrawal', 'Smallest amount a user can withdraw.', 'float', 5.0, min: 0, max: 100000, unit: 'USD'),
                     self::f(PayoutSettings::FREE_COUNT, 'Free payouts before identity check', 'How many payouts a user can take before identity verification (KYC level 2) is required.', 'int', 5, min: 0, max: 1000),
                     self::f(PayoutSettings::MAX_OPEN, 'Open requests per user', 'How many withdrawals one user can have in progress at the same time.', 'int', 3, min: 1, max: 50),
@@ -33,10 +33,10 @@ class PayoutSettingsSchema
             ],
             'autoapproval' => [
                 'title' => 'Auto-approval (Guardian)',
-                'blurb' => 'The Guardian only acts when auto-approval is ON, shadow mode is OFF, mode is Auto and the provider switch is ON. Keep shadow mode on for 14 days / 100 payouts first.',
+                'blurb' => 'Defaults: automatic. The Guardian approves low-risk payouts on Paystack, Flutterwave and Stripe by itself; anything unusual goes to a person. Check Payout health -> Automation status to see exactly what is on.',
                 'fields' => [
-                    self::f(PayoutSettings::AUTO_APPROVAL, 'Auto-approval', 'Allow the Guardian to approve payouts that pass every check.', 'bool', false, danger: true),
-                    self::f(PayoutSettings::AUTO_SHADOW, 'Shadow mode', 'The Guardian evaluates and records what it WOULD do, but changes nothing. Turn off only after reviewing its decisions.', 'bool', true, danger: true),
+                    self::f(PayoutSettings::AUTO_APPROVAL, 'Auto-approval', 'Allow the Guardian to approve payouts that pass every check, so supported rails pay out with no manual work. Risky or large requests still go to a person.', 'bool', true, danger: true),
+                    self::f(PayoutSettings::AUTO_SHADOW, 'Learning (shadow) mode', 'Turn ON only if you want the Guardian to just watch and record what it would do, with a person approving everything. Off = automatic payouts.', 'bool', false, danger: true),
                     self::f(PayoutSettings::TIER_LIMIT_PREFIX.'new', 'Limit — new payees', 'Largest payout the Guardian may approve for a new payee.', 'float', 100.0, min: 0, max: 1000000, unit: 'USD'),
                     self::f(PayoutSettings::TIER_LIMIT_PREFIX.'trusted', 'Limit — trusted payees', 'Same, once a payee has a good track record.', 'float', 500.0, min: 0, max: 1000000, unit: 'USD'),
                     self::f(PayoutSettings::TIER_LIMIT_PREFIX.'vip', 'Limit — VIP payees', 'Same, for payees you have marked VIP.', 'float', 2000.0, min: 0, max: 1000000, unit: 'USD'),
@@ -48,12 +48,36 @@ class PayoutSettingsSchema
                     self::f(PayoutSettings::FAIL_CLOSED_HEARTBEAT, 'Stop if the Guardian\'s own jobs stall', 'If the sweeper or metrics job stops running, send everything to manual review instead of approving.', 'bool', true),
                 ],
             ],
+            'peer' => [
+                'title' => 'Send earnings to a member',
+                'blurb' => 'For people whose country has no payout rail yet: they can send their withdrawable earnings to an identity-verified member who can be paid out, who accepts and cashes out normally. Money is held until the member accepts; if they decline or it expires it goes straight back.',
+                'fields' => [
+                    self::f(PayoutSettings::PEER_ENABLED, 'Member-to-member transfers', 'Turn the feature on or off. It also needs payouts switched on.', 'bool', true),
+                    self::f(PayoutSettings::PEER_ONLY_UNSUPPORTED, 'Only members we cannot pay out may send', 'When on, someone who already has a working payout rail in their country must cash out themselves. This keeps the feature for the people it was built for.', 'bool', true),
+                    self::f(PayoutSettings::PEER_MIN_USD, 'Minimum transfer', 'Smallest amount one member can send another.', 'float', 5.0, min: 0, max: 100000, unit: 'USD'),
+                    self::f(PayoutSettings::PEER_MAX_USD, 'Largest single transfer', 'Per transfer.', 'float', 200.0, min: 1, max: 1000000, unit: 'USD'),
+                    self::f(PayoutSettings::PEER_SENDER_30D, 'Sender limit (30 days)', 'Most one member can send out in any 30 days.', 'float', 500.0, min: 1, max: 1000000, unit: 'USD'),
+                    self::f(PayoutSettings::PEER_RECIPIENT_30D, 'Receiver limit (30 days)', 'Most one member can receive from others in any 30 days. Stops one account collecting for many.', 'float', 1000.0, min: 1, max: 1000000, unit: 'USD'),
+                    self::f(PayoutSettings::PEER_EXPIRY_HOURS, 'Accept within', 'An unanswered transfer is returned to the sender after this long.', 'int', 72, min: 1, max: 720, unit: 'hours'),
+                    self::f(PayoutSettings::PEER_RECIPIENT_KYC, 'Receiver identity level', 'The receiver must hold at least this verification level (2 = ID check).', 'int', 2, min: 1, max: 3),
+                    self::f(PayoutSettings::PEER_SENDER_AGE_DAYS, 'Sender account age', 'Accounts younger than this cannot send.', 'int', 7, min: 0, max: 365, unit: 'days'),
+                    self::f(PayoutSettings::PEER_MAX_PENDING, 'Open transfers per sender', 'How many unanswered transfers one member can have.', 'int', 3, min: 1, max: 50),
+                    self::f(PayoutSettings::PEER_REVIEW_RECEIVED, 'Review payouts of received money', 'When most of a withdrawal is money another member sent, send it for a person to check before it is paid (recommended: this is the main money-laundering route).', 'bool', true),
+                ],
+            ],
+            'extensions' => [
+                'title' => 'Rail extensions',
+                'blurb' => 'Rails delivered later through the Platform Updater (Payoneer, Grey, Stripe Global). They stay "coming soon" until installed. Core payouts never depend on them.',
+                'fields' => [
+                    self::f(PayoutSettings::DISABLED_EXTENSIONS, 'Switched-off extensions', 'Comma-separated slugs (e.g. payoneer) of installed extension rails to switch off without deleting them. Empty = all installed rails active.', 'csv', ''),
+                ],
+            ],
             'protection' => [
                 'title' => 'Fraud & safety rules',
                 'blurb' => 'Hard checks that run before money moves.',
                 'fields' => [
                     self::f(PayoutSettings::COOLING_OFF_HOURS, 'Cooling-off for new destinations', 'A newly added payout account must wait this long before its first payout.', 'int', 48, min: 0, max: 720, unit: 'hours'),
-                    self::f(PayoutSettings::MATURITY_DAYS, 'Earnings maturity', 'Earnings must be at least this old before they can be withdrawn (protects against refunds/chargebacks).', 'int', 3, min: 0, max: 90, unit: 'days'),
+                    self::f(PayoutSettings::MATURITY_DAYS, 'Earnings maturity', 'Earnings must be at least this old before they can be withdrawn — a safety window for refunds and chargebacks (the default of 7 days was recommended for card-funded earnings).', 'int', 7, min: 0, max: 90, unit: 'days'),
                     self::f(PayoutSettings::NEW_ACCOUNT_DAYS, '"New account" period', 'Accounts younger than this are treated as higher risk.', 'int', 7, min: 0, max: 365, unit: 'days'),
                     self::f(PayoutSettings::NAME_MATCH, 'Name-match strictness', 'How closely the bank account name must match the user\'s verified name (0–1; higher = stricter).', 'float', 0.85, min: 0, max: 1),
                     self::f(PayoutSettings::LARGEST_MULT, 'Unusually large payout', 'A payout bigger than this many times the user\'s largest previous one needs identity verification.', 'float', 5.0, min: 1, max: 1000, unit: '×'),
