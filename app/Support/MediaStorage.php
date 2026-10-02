@@ -201,6 +201,21 @@ class MediaStorage
     }
 
     /**
+     * Store already-in-memory bytes (e.g. a transcoded voice note — there's no
+     * UploadedFile to hand storePublic() once ffmpeg has run) to the public
+     * disk and return its URL. No image-compression pass — that's only ever
+     * relevant to storePublic()'s raster-image path.
+     */
+    public static function storePublicBytes(string $bytes, string $extension, string $dir = 'media'): string
+    {
+        $disk = self::disk();
+        $path = trim($dir, '/').'/'.Str::uuid()->toString().'.'.trim($extension, '.');
+        Storage::disk($disk)->put($path, $bytes, 'public');
+
+        return Storage::disk($disk)->url($path);
+    }
+
+    /**
      * The storage-relative path of a LOCAL public URL (…/storage/<path>), or
      * null if the URL isn't a local public asset (already on Wasabi/a CDN, or
      * an external URL we don't own).

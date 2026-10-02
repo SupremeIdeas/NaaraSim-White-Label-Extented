@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use App\Models\SupportConversation;
 use App\Models\SupportMessage;
+use App\Services\Support\AudioTranscoder;
 use App\Services\Support\Contracts\VoiceSynthesizer;
 use App\Services\Support\NaaraCareAgent;
 use App\Services\Support\SupportReply;
@@ -164,18 +165,30 @@ class SupportChat extends Component
      * Send a recorded/uploaded voice note. Stored privately; transcribed
      * best-effort so the AI can read it; the audio stays attached for staff.
      */
-    public function sendVoice(NaaraCareAgent $agent, VoiceSynthesizer $voice): void
+    public function sendVoice(NaaraCareAgent $agent, VoiceSynthesizer $voice, AudioTranscoder $transcoder): void
     {
         $this->validate([
-            'voiceNote' => ['required', 'file', 'mimetypes:audio/mpeg,audio/wav,audio/webm,audio/ogg,audio/mp4,audio/x-m4a', 'max:10240'],
+            // Broadened past the originally-tested formats (Marketing/Chat
+            // blueprint Phase A) — real Android/iOS devices and browsers
+            // commonly produce audio/3gpp, audio/amr, audio/aac, and a
+            // video/webm container wrapping an audio-only recording, none
+            // of which the narrower original list covered.
+            'voiceNote' => ['required', 'file', 'mimetypes:audio/mpeg,audio/wav,audio/webm,audio/ogg,audio/mp4,audio/x-m4a,audio/aac,audio/3gpp,audio/amr,video/webm', 'max:10240'],
         ]);
         if (! $this->throttleOk()) {
             return;
         }
 
-        $bytes = file_get_contents($this->voiceNote->getRealPath());
-        $mime = $this->voiceNote->getMimeType();
-        $path = 'support-voice/'.$this->conversation->id.'/'.Str::uuid()->toString().'.'.$this->voiceNote->extension();
+        $rawBytes = file_get_contents($this->voiceNote->getRealPath());
+        $rawMime = $this->voiceNote->getMimeType();
+        // Normalize to one canonical format before storage/AI processing —
+        // a device format nobody's tested against yet degrades gracefully
+        // (ffmpeg unavailable = stored/transcribed as-is) instead of ever
+        // silently failing the upload again the next time a new phone model
+        // ships a MIME type this list doesn't cover.
+        [$bytes, $mime] = $transcoder->toCanonical($rawBytes, $rawMime, $this->voiceNote->extension());
+        $extension = $mime === 'audio/mpeg' ? $transcoder->canonicalExtension() : $this->voiceNote->extension();
+        $path = 'support-voice/'.$this->conversation->id.'/'.Str::uuid()->toString().'.'.$extension;
         Storage::disk(MediaStorage::privateDisk())->put($path, $bytes);
 
         $transcript = $voice->transcribe($bytes, $mime);

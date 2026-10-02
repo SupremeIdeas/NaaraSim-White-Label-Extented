@@ -12,6 +12,14 @@
     --nia-glow-3: #2dd4bf;
 }
 
+/* Animate the gradient ANGLE, not the element: rotating a wide, short pseudo-
+   element (the chat bar) swept its corners far outside the bar as a big slab. */
+@property --nia-angle {
+    syntax: "<angle>";
+    initial-value: 0deg;
+    inherits: false;
+}
+
 .nia-glow {
     position: relative;
     isolation: isolate;
@@ -19,27 +27,26 @@
 
 /* The halo sits just behind the element, inheriting its rounded corners. It is
    invisible until `.nia-glow--on` is added (focus / input / Nia typing), then
-   fades in over 300ms. Transform-only rotation keeps it 60fps on low-end
-   devices; `will-change: transform` hints the compositor. */
+   fades in over 300ms. The angle animation stays inside the element's own
+   bounds. */
 .nia-glow::before {
     content: "";
     position: absolute;
-    inset: -3px;
+    inset: -2px;
     z-index: -1;
     border-radius: inherit;
-    background: conic-gradient(from 0deg,
+    background: conic-gradient(from var(--nia-angle),
         var(--nia-glow-1), var(--nia-glow-2), var(--nia-glow-3), var(--nia-glow-1));
-    filter: blur(12px);
+    filter: blur(8px);
     opacity: 0;
     transition: opacity 300ms ease;
-    will-change: transform;
     animation: nia-glow-spin 4s linear infinite;
     animation-play-state: paused; /* resumed only while visible + on-screen */
     pointer-events: none;
 }
 
 .nia-glow.nia-glow--on::before {
-    opacity: 1;
+    opacity: 0.75;
     animation-play-state: running;
 }
 
@@ -49,10 +56,10 @@
 }
 
 @keyframes nia-glow-spin {
-    to { transform: rotate(360deg); }
+    to { --nia-angle: 360deg; }
 }
 
 @media (prefers-reduced-motion: reduce) {
     .nia-glow::before { animation: none; }
-    .nia-glow.nia-glow--on::before { opacity: 0.85; }
+    .nia-glow.nia-glow--on::before { opacity: 0.6; }
 }

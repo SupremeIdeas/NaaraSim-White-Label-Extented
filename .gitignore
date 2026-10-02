@@ -50,6 +50,10 @@ Homestead.yaml
 # `graphify update .`; large + volatile, never committed). Also in .claudeignore.
 /graphify-out/
 
+# Playwright/manual QA screenshot artifacts — throwaway verification output,
+# never a build input.
+/test-results/
+
 # App Export — native Capacitor platform projects. Generated fresh by CI on
 # every build (`npx cap add android|ios` — idempotent, see android-build.yml /
 # codemagic.yaml) from capacitor.config.json + the compiled web assets. Unlike
