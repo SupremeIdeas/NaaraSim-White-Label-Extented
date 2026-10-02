@@ -27,6 +27,7 @@ class PayoutSettingsSchema
                     self::f(PayoutSettings::FREE_COUNT, 'Free payouts before identity check', 'How many payouts a user can take before identity verification (KYC level 2) is required.', 'int', 5, min: 0, max: 1000),
                     self::f(PayoutSettings::MAX_OPEN, 'Open requests per user', 'How many withdrawals one user can have in progress at the same time.', 'int', 3, min: 1, max: 50),
                     self::f(PayoutSettings::QUOTE_HOURS, 'Quote lock', 'How long the exchange rate shown to the user is honoured.', 'int', 24, min: 1, max: 168, unit: 'hours'),
+                    self::f(PayoutSettings::STRIPE_GLOBAL, 'Stripe Global Payouts available', 'Turn on ONLY if your Stripe account is US/UK-based with Treasury and Global Payouts access. Without it, Stripe payouts are limited to recipients in the US, UK, EEA, Canada and Switzerland (Stripe\'s own rule).', 'bool', false, danger: true),
                     self::f(PayoutSettings::MANUAL_EXTERNAL, 'Manual rail (Plan B)', 'Lets you pay people yourself (bank/app) and record proof in Payout health. No provider is called. Use until a real provider is live.', 'bool', false),
                 ],
             ],

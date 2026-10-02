@@ -36,6 +36,7 @@ class CorridorRouter
         return $query->orderBy('priority')->orderBy('id')->get()
             ->filter(fn (PayoutCorridor $c) => $this->payouts->gatewayFor($c->provider)?->available() === true)
             ->reject(fn (PayoutCorridor $c) => \App\Services\Payouts\Rail\RadarAlerts::isUnhealthy($c->provider)) // failure-rate breaker
+            ->reject(fn (PayoutCorridor $c) => $c->provider === 'stripe' && ! \App\Services\Payouts\Rail\StripeRegions::allows($c->country)) // Stripe cannot pay there (docs)
             ->filter(fn (PayoutCorridor $c) => $usd === null || $c->allows($usd))
             ->values();
     }

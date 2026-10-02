@@ -3,8 +3,9 @@
 Nothing here is code. Tick each before the matching go-live gate in `GO-LIVE-CHECKLIST.md`.
 
 ## Providers (blocks real money)
-- [ ] Paystack: sandbox keys in `.env`; confirm in the sandbox the transfer reference rules, `GET /transfer/verify/{reference}`, `GET /balance` (units) and `GET /country`.
+- [ ] Paystack: switch OFF transfer OTP in the dashboard; sandbox keys in `.env`; confirm in the sandbox the transfer reference rules, `GET /transfer/verify/{reference}`, `GET /balance` (units) and `GET /country`.
 - [ ] Flutterwave, PayPal, Cryptomus: sandbox keys and a note of each provider's real minimum, fee, settlement time and webhook behaviour.
+- [ ] **Stripe entity decision:** is the paying Stripe account US- or UK-based and approved for Treasury? Global Payouts (the only Stripe route to Nigeria/Ghana/Kenya/South Africa recipients) requires both, and Stripe says it suits businesses that already hold a money-transmitter licence. Connect cross-border payouts only reach US/UK/EEA/CA/CH. See PROVIDER-RESEARCH.md.
 - [ ] Stripe: written confirmation that Global Payouts / Treasury and the collect-then-pay model are fine for the account.
 - [ ] Payoneer: partner/API access + sandbox. Grey: API access + docs. Raenest: destination only unless they grant an API.
 - [ ] Until a provider is live, the **Manual rail** (Admin → All payout settings → Manual rail) lets you pay by hand and record proof.

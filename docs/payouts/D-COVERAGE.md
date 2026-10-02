@@ -38,6 +38,6 @@ Settings named below are all editable in **Admin → Payouts → All payout sett
 
 ## Open items (need you, not code)
 1. **Clawback policy (G-11)** — decide: negative balance as debt offsetting future earnings (recommended by D) vs. block withdrawals until the dispute window closes. Then the five earnings ledgers need a `clawback` entry type and a hook from the refund/chargeback flow.
-2. **Provider facts (Part 7)** — nothing was guessed. Paystack: confirm `GET /transfer/verify/{reference}`, `GET /balance` units, `GET /country`, and the allowed reference charset/length. Flutterwave/PayPal/Cryptomus/Stripe: no verified status lookup exists, so an unknown outcome there always goes to a human (by design).
+2. **Provider facts (Part 7)** — researched on 2026-10-02, results in `PROVIDER-RESEARCH.md`: Paystack reference/verify/balance/country now confirmed from its docs (one sandbox body-shape call left); Stripe, Payoneer and Grey stay blocked for the reasons listed there. Nothing was guessed. Paystack: confirm `GET /transfer/verify/{reference}`, `GET /balance` units, `GET /country`, and the allowed reference charset/length. Flutterwave/PayPal/Cryptomus/Stripe: no verified status lookup exists, so an unknown outcome there always goes to a human (by design).
 3. **Payoneer / Grey / Stripe corridors** — still blocked on your account access and the real docs.
 4. Decisions listed in `OWNER-CHECKLIST.md`.

@@ -138,6 +138,14 @@ class PayoutSettings
         return max(0.0, (float) Setting::getValue(self::TAX_FORM_OVER_USD, 0));
     }
 
+    public const STRIPE_GLOBAL = 'payouts.stripe_global_payouts';             // default OFF
+
+    /** Owner confirms the Stripe account can use Global Payouts (US/UK business + Treasury) — lifts the region limit. */
+    public static function stripeGlobalPayouts(): bool
+    {
+        return (bool) Setting::getValue(self::STRIPE_GLOBAL, false);
+    }
+
     /** A corridor's fixed provider fee may not exceed this share of the payout (0 = guard off). Stored as %. */
     public static function maxFeeRatio(): float
     {

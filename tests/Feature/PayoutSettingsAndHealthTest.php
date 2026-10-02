@@ -60,6 +60,7 @@ class PayoutSettingsAndHealthTest extends TestCase
             PayoutSettings::MAX_OPEN => fn () => PayoutSettings::maxOpenRequests(),
             PayoutSettings::QUOTE_HOURS => fn () => PayoutSettings::quoteLockHours(),
             PayoutSettings::MANUAL_EXTERNAL => fn () => PayoutSettings::manualExternalEnabled(),
+            PayoutSettings::STRIPE_GLOBAL => fn () => PayoutSettings::stripeGlobalPayouts(),
             PayoutSettings::AUTO_APPROVAL => fn () => PayoutSettings::autoApprovalEnabled(),
             PayoutSettings::AUTO_SHADOW => fn () => PayoutSettings::shadowMode(),
             PayoutSettings::TIER_LIMIT_PREFIX.'new' => fn () => PayoutSettings::tierLimitUsd('new'),

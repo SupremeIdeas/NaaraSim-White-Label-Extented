@@ -64,11 +64,22 @@ class PaystackPayoutGateway implements PayoutGatewayInterface, ReportsBalance, S
         $status = (string) data_get($response, 'data.status', 'pending');
         $ref = (string) data_get($response, 'data.transfer_code', '');
 
+        // Paystack docs (Managing Transfers): with transfer OTP enabled the response is `otp` and the transfer
+        // WAITS for a Finalize Transfer call. It is NOT failed (so we must not refund it — someone could still
+        // finalize it and pay), and it will not complete by itself: tell the admin once, loudly.
+        if ($status === 'otp') {
+            \App\Jobs\AlertAdminJob::dispatch(
+                code: 'paystack_transfer_needs_otp',
+                message: "Paystack is holding transfer {$request->wireReference()} for an OTP and will not send it until it is finalized. Automated payouts need transfer OTP switched off in your Paystack dashboard settings; finalize or cancel this one there. Do not refund it blindly.",
+                context: ['payout_id' => $request->id, 'reference' => $request->wireReference()],
+            );
+        }
+
         return new PayoutTransferResult(
             status: match ($status) {
                 'success' => 'paid',
-                'failed', 'abandoned', 'reversed' => 'failed',
-                default => 'processing', // pending / otp — webhook confirms
+                'failed', 'abandoned', 'reversed', 'rejected', 'blocked' => 'failed',
+                default => 'processing', // pending / otp / received — the webhook (or a verify lookup) confirms
             },
             providerRef: $ref !== '' ? $ref : null,
         );
@@ -76,9 +87,10 @@ class PaystackPayoutGateway implements PayoutGatewayInterface, ReportsBalance, S
 
     /**
      * Paystack "Verify Transfer": GET /transfer/verify/:reference — keyed by the same
-     * reference we sent. NOTE: confirm against the Paystack sandbox before go-live
-     * (docs/payouts/GO-LIVE-CHECKLIST.md); until then reconcile-unknown is only as
-     * trustworthy as this call, which is why a single "not found" never reverses.
+     * reference we sent (path and status enum confirmed from Paystack's OpenAPI spec:
+     * pending, success, failed, otp, abandoned, reversed, blocked, rejected, received;
+     * see docs/payouts/PROVIDER-RESEARCH.md). The response BODY shape is still to be
+     * confirmed once on the sandbox, which is why a single "not found" never reverses.
      */
     public function lookupTransfer(PayoutRequest $request): LookupResult
     {
@@ -106,9 +118,10 @@ class PaystackPayoutGateway implements PayoutGatewayInterface, ReportsBalance, S
     }
 
     /**
-     * The platform's own Paystack balance per currency. Paystack reports minor units
-     * (kobo/pesewas), so they are divided by 100. Sandbox-verify before trusting for
-     * auto-sync (GO-LIVE-CHECKLIST); a non-answer returns [] and syncs nothing.
+     * The platform's own Paystack balance per currency: `GET /balance` returns an array of
+     * {currency, balance} in the currency's subunit (kobo/pesewas) per Paystack's docs, so
+     * ÷100. One sandbox call is still owed before enabling auto_sync (GO-LIVE-CHECKLIST);
+     * a non-answer returns [] and syncs nothing.
      */
     public function balances(): array
     {

@@ -41,3 +41,9 @@ Nothing in this list is optional. Do not enable live payouts until every box is 
 - [ ] `PAYOUT_ENV=live` only on the production box, with live keys; test keys are refused in live mode.
 - [ ] Step-up (security code) decision made; Manual rail decision made.
 - [ ] `OWNER-CHECKLIST.md` fully ticked.
+
+## Provider research follow-ups (see PROVIDER-RESEARCH.md)
+- [ ] Paystack dashboard: **transfer OTP switched OFF** (otherwise every transfer waits for a manual Finalize and raises `paystack_transfer_needs_otp`).
+- [ ] Paystack sandbox: one `GET /transfer/verify/{our provider_reference}` call to confirm the response body shape; one `GET /balance` call (array of `{currency, balance}` in subunits is documented — confirm on your account before `auto_sync`).
+- [ ] Do NOT enable a Stripe corridor for recipients outside US/UK/EEA/CA/CH. Stripe -> African recipients needs Global Payouts (US/UK business + Treasury) — owner decision first.
+- [ ] Payoneer: partner approval + program integration guide before any code. Grey: API access + docs before any code.

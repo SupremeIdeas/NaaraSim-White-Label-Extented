@@ -32,6 +32,10 @@ class StripeEligibility
             return ['eligible' => false, 'reason' => self::ONBOARDING_DECLINED];
         }
 
+        if (! StripeRegions::allows($country)) {
+            return ['eligible' => false, 'reason' => self::COUNTRY_NOT_SUPPORTED]; // Stripe's own reach, per its docs
+        }
+
         $enabled = PayoutCorridor::query()->enabled()->where('provider', 'stripe')->where('country', $country)->exists();
 
         return $enabled

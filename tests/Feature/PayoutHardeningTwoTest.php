@@ -509,4 +509,87 @@ class PayoutHardeningTwoTest extends TestCase
         $this->assertFalse($byName['paystack']->capabilities()['confirms_synchronously']);
         $this->assertFalse($byName['manual_external']->capabilities()['webhook']);
     }
+
+    // ── Paystack facts confirmed from its documentation ──
+
+    public function test_our_provider_reference_meets_paystacks_published_rules_and_is_reused_on_retry(): void
+    {
+        Queue::fake();
+        for ($i = 0; $i < 25; $i++) {
+            $r = $this->request();
+            $ref = $r->provider_reference;
+            // Paystack: lowercase alphanumeric plus '-' and '_' only; >= 16 chars (or a UUID); <= 100.
+            $this->assertMatchesRegularExpression('/^[a-z0-9_-]+$/', $ref);
+            $this->assertGreaterThanOrEqual(16, strlen($ref));
+            $this->assertLessThanOrEqual(100, strlen($ref));
+            // Paystack: re-submitting the SAME reference is a safe retry; a new one is a new transfer.
+            $this->assertSame($ref, PayoutReference::ensure($r->fresh()));
+        }
+    }
+
+    public function test_a_paystack_transfer_waiting_for_an_otp_is_neither_refunded_nor_ignored(): void
+    {
+        Queue::fake();
+        $r = $this->request();
+        $r->account->forceFill(['provider_recipient_ref' => 'RCP_1'])->save();
+        Http::fake(['*' => Http::response(['status' => true, 'data' => ['status' => 'otp', 'transfer_code' => 'TRF_9']], 200)]);
+
+        app(PayoutService::class)->send($r->fresh());
+
+        $this->assertSame(PayoutRequest::PROCESSING, $r->fresh()->status, 'not failed: someone could still finalize it');
+        $this->assertCount(1, Queue::pushed(\App\Jobs\AlertAdminJob::class, fn ($j) => $j->code === 'paystack_transfer_needs_otp'));
+    }
+
+    public function test_paystack_rejected_and_blocked_transfers_are_definitive_failures(): void
+    {
+        foreach (['rejected', 'blocked'] as $status) {
+            Http::swap(new \Illuminate\Http\Client\Factory);
+            Queue::fake();
+            $r = $this->request();
+            $r->account->forceFill(['provider_recipient_ref' => 'RCP_1'])->save();
+            Http::fake(['*' => Http::response(['status' => true, 'data' => ['status' => $status, 'transfer_code' => 'T']], 200)]);
+
+            app(PayoutService::class)->send($r->fresh());
+
+            $this->assertSame(PayoutRequest::FAILED, $r->fresh()->status, $status);
+        }
+    }
+
+    public function test_the_paystack_lookup_maps_every_documented_status(): void
+    {
+        $r = $this->request();
+        $gw = app(\App\Services\Payouts\PaystackPayoutGateway::class);
+        $expect = ['success' => 'paid', 'failed' => 'failed', 'abandoned' => 'failed', 'reversed' => 'failed', 'rejected' => 'failed', 'blocked' => 'failed',
+            'pending' => 'processing', 'otp' => 'processing', 'received' => 'processing'];
+        foreach ($expect as $paystack => $ours) {
+            Http::swap(new \Illuminate\Http\Client\Factory);   // a fresh fake each time: the first stub would win otherwise
+            Http::fake(['*' => Http::response(['status' => true, 'data' => ['status' => $paystack, 'transfer_code' => 'T']], 200)]);
+            $res = $gw->lookupTransfer($r);
+            $this->assertSame($ours, $res->status, $paystack);
+        }
+        Http::assertSent(fn ($req) => str_contains($req->url(), '/transfer/verify/'.$r->provider_reference));
+    }
+
+    public function test_the_paystack_balance_is_read_as_subunits(): void
+    {
+        config(['services.paystack.secret_key' => 'sk_test', 'services.paystack.base_url' => 'https://api.paystack.co']);
+        Http::fake(['*' => Http::response(['status' => true, 'data' => [['currency' => 'NGN', 'balance' => 5000000], ['currency' => 'KES', 'balance' => 250000]]], 200)]);
+
+        $this->assertSame(['NGN' => 50000.0, 'KES' => 2500.0], app(\App\Services\Payouts\PaystackPayoutGateway::class)->balances());
+    }
+
+    // ── Stripe's documented reach ──
+
+    public function test_stripe_corridors_outside_stripes_cross_border_regions_are_unavailable_until_the_owner_confirms_global_payouts(): void
+    {
+        config(['services.stripe.secret_key' => 'sk_test_x']);
+        foreach (['NG' => false, 'GH' => false, 'KE' => false, 'ZA' => false, 'US' => true, 'GB' => true, 'DE' => true, 'CA' => true, 'CH' => true, 'NO' => true] as $cc => $ok) {
+            PayoutCorridor::updateOrCreate(['country' => $cc, 'currency' => 'USD', 'provider' => 'stripe', 'method' => 'stripe_connect'], ['enabled' => true]);
+            $this->assertSame($ok, app(\App\Services\Payouts\Rail\StripeEligibility::class)->check($cc)['eligible'], $cc);
+        }
+        $this->assertNull(app(\App\Services\Payouts\CorridorRouter::class)->pick('NG', 'USD'), 'the router must not offer Stripe for Nigeria');
+
+        Setting::setValue(PayoutSettings::STRIPE_GLOBAL, true);   // the owner confirmed Global Payouts access
+        $this->assertTrue(app(\App\Services\Payouts\Rail\StripeEligibility::class)->check('NG')['eligible']);
+    }
 }
