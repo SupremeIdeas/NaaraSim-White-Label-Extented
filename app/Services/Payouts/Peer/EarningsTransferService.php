@@ -239,6 +239,9 @@ class EarningsTransferService
                     $n++;
                 } catch (PayoutException) {
                     // answered a moment ago by someone else: nothing to do
+                } catch (\Throwable $e) {
+                    // One bad transfer (e.g. the sender's merchant account was removed) must never stop the rest from being returned.
+                    report($e);
                 }
             });
 

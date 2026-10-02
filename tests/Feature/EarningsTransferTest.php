@@ -362,4 +362,19 @@ class EarningsTransferTest extends TestCase
         $this->artisan('payouts:peer-expire')->expectsOutput('returned=1')->assertSuccessful();
         $this->assertSame(100.0, $this->bal($sender));
     }
+
+    public function test_one_unreturnable_transfer_does_not_stop_the_others_being_returned(): void
+    {
+        $this->receiver();
+        $a = $this->sender(100);
+        $b = $this->sender(100);
+        $bad = $this->svc()->send($a, 'ada@example.com', 10.0, 'referral');
+        $good = $this->svc()->send($b, 'ada@example.com', 10.0, 'referral');
+        $bad->forceFill(['source_bucket' => 'merchant', 'expires_at' => now()->subMinute()])->save(); // no merchant account: cannot be returned
+        $good->forceFill(['expires_at' => now()->subMinute()])->save();
+
+        $this->assertSame(1, $this->svc()->expireDue());
+        $this->assertSame(100.0, $this->bal($b));
+        $this->assertSame(EarningsTransfer::PENDING, $bad->fresh()->status); // rolled back, will be retried / reviewed
+    }
 }
