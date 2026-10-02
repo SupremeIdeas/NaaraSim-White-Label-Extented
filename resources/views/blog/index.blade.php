@@ -23,7 +23,7 @@
             <div class="mt-10 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
                 @foreach ($posts as $post)
                     <a href="{{ route('blog.show', $post) }}" wire:key="post-{{ $post->id }}" class="group flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white transition hover:shadow-lg dark:border-[var(--brand-card-border-dark)] dark:bg-[var(--brand-card-dark)]">
-                        <div class="aspect-[16/9] overflow-hidden bg-slate-100 dark:bg-[#243352]">
+                        <div class="aspect-[1200/896] overflow-hidden bg-slate-100 dark:bg-[#243352]">
                             @if ($post->cover_image_url)
                                 <img src="{{ $post->cover_image_url }}" alt="{{ $post->title }}" loading="lazy" class="h-full w-full object-cover transition group-hover:scale-105">
                             @else

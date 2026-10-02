@@ -9,6 +9,18 @@
 
 ## DONE
 
+### Starter blog: 5 evergreen posts + images (white-label) — 2026-10-02
+Owner direction: no master feature lands in white-labels; the master's 40-post series stays
+master-only. This repo gets a small brand-neutral starter blog: `BlogPostSeeder` seeds 5 guides
+(install an eSIM, eSIM vs physical SIM, device compatibility, "no service" troubleshooting,
+verification numbers explained) with their covers in `public/images/blog/` (+ one inline image),
+wired into `DatabaseSeeder`. Brand mentions are `{brand}` tokens resolved from `brand.name`; no
+master/competitor/supplier names appear (test-locked). Also ported the small blog-render support the
+images need (relative cover paths via `Post::cover_image_url`, a safe image line in `<x-prose>`,
+uncropped cover containers). NOTE: the cover images carry baked-in master branding ("Naara" logo +
+www.naara.app) — swap them per install from Admin -> Blog when a real brand is set.
+
+
 ### 📊 Tier 5 #15: Admin Overview Analytics — ported from master — 2026-09-21
 
 Ported Phase A (per-provider live analytics cards), Phase B items 1
