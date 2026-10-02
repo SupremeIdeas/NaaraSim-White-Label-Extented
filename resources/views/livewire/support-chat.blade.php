@@ -145,7 +145,7 @@
 
         <form wire:submit="send" class="flex items-center gap-2"
               x-on:message-added.window="$nextTick(() => { const i = $el.querySelector('textarea'); i && i.focus(); })">
-            <x-nia-glow-wrapper interactive class="flex-1 rounded-full">
+            <x-nia-glow-wrapper interactive class="flex-1 rounded-3xl">
             {{-- Marketing/Chat blueprint Phase B: elastic growth (auto-resizing,
                  capped, internal scroll beyond that) + contextual reveal — the
                  mic is the resting default (WhatsApp's own behaviour); the send
@@ -155,7 +155,7 @@
                  (same pattern already used in send-message.blade.php's char
                  counter) so the reveal is instant with zero extra network
                  round-trips. --}}
-            <div class="flex items-end gap-1 rounded-3xl border border-slate-200/70 bg-white px-2 py-1 focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/40 dark:border-white/10 dark:bg-[#243352]"
+            <div class="flex items-end gap-1 rounded-3xl bg-white px-2 py-1 shadow-sm dark:bg-[#243352]"
                  x-data="{
                     autoGrow(el) { el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight, 120) + 'px'; },
                     get hasContent() { return (($wire.draft || '').trim() !== '') || !!$wire.evidence; },
@@ -173,7 +173,7 @@
                 <textarea rows="1" wire:model="draft" autocomplete="off" placeholder="Type your message…"
                           x-show="state !== 'recording' && state !== 'uploading'"
                           x-init="autoGrow($el)" x-on:input="autoGrow($el)"
-                          class="min-w-0 flex-1 resize-none appearance-none overflow-y-auto border-0 bg-transparent px-2 py-2 text-sm text-slate-900 focus:ring-0 dark:text-slate-100"
+                          class="min-w-0 flex-1 resize-none appearance-none overflow-y-auto border-0 bg-transparent px-2 py-2 text-sm text-slate-900 outline-none focus:outline-none focus:ring-0 focus:shadow-none dark:text-slate-100"
                           wire:loading.attr="disabled" wire:target="send,sendVoice"></textarea>
 
                 <label x-show="(state !== 'recording' && state !== 'uploading') && hasContent"
