@@ -139,6 +139,48 @@ class ChatComposerTest extends TestCase
         $this->assertContains('poll', $cfg['attachKinds']);
     }
 
+    public function test_recent_photos_are_scoped_to_the_signed_in_account(): void
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user);
+        $this->assertSame((string) $user->id, $this->config(Blade::render('<x-composer />'))['scope']);
+
+        auth()->logout();
+        $this->assertSame('', $this->config(Blade::render('<x-composer />'))['scope']);
+    }
+
+    public function test_recent_photos_are_real_never_placeholders(): void
+    {
+        $src = file_get_contents(resource_path('js/composer/composer.js'));
+        $this->assertStringNotContainsString('RECENT_IMAGE_MOCK', $src);
+        $this->assertStringNotContainsString('linear-gradient(135deg', $src);
+        // Sources: the native app bridge, the member's own backend, then this device's own history (per account).
+        foreach (['NaaraNative', 'Capacitor', 'recentEndpoint', 'recordRecent', 'scopeKey'] as $needle) {
+            $this->assertStringContainsString($needle, $src);
+        }
+    }
+
+    public function test_the_staff_reply_box_is_the_composer_with_text_and_emoji_only(): void
+    {
+        $this->seed(\Database\Seeders\RoleSeeder::class);
+        $staff = User::factory()->create();
+        $staff->assignRole('super_admin');
+        $customer = User::factory()->create();
+        $ticket = \App\Models\SupportConversation::create(['user_id' => $customer->id, 'status' => 'assigned', 'escalated' => true, 'escalated_at' => now()]);
+
+        $html = Livewire::actingAs($staff)->test(\App\Livewire\Admin\SupportQueue::class)->call('select', $ticket->id)->html();
+        $cfg = $this->config($html);
+
+        $this->assertSame(['emoji'], $cfg['features']);
+        $this->assertSame('staff-'.$ticket->id, $cfg['convoId']);
+        $this->assertStringContainsString('$wire.sendReply()', $html);
+
+        config(['composer.surfaces.staff_reply' => false]);
+        $legacy = Livewire::actingAs($staff)->test(\App\Livewire\Admin\SupportQueue::class)->call('select', $ticket->id)->html();
+        $this->assertStringNotContainsString('<naara-composer', $legacy);
+        $this->assertStringContainsString('wire:submit="sendReply"', $legacy);
+    }
+
     public function test_the_permissions_policy_lets_the_page_use_the_microphone_for_voice_notes(): void
     {
         // With `microphone=()` every in-browser voice recording is blocked by the browser before the permission prompt ever appears.

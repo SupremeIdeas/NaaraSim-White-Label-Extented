@@ -17,7 +17,7 @@ const DEFAULTS = {
     placeholder: '', rows: 1, maxRows: 7, maxChars: 0,
     maxFiles: 10, maxFileMb: 25, maxRawMb: 25, compressOver: 1048576,
     undoMs: 3000, sendOnEnter: true,
-    convoId: 'default', endpoint: '', headers: {}, credentials: 'same-origin',
+    convoId: 'default', scope: '', endpoint: '', headers: {}, credentials: 'same-origin',
     gifEndpoint: '', gifSearchEndpoint: '', recentEndpoint: '', historyEndpoint: '',
     micPrimer: true, lang: '', labels: {}, draft: true, autoFocus: false, bare: false,
 };
@@ -444,7 +444,7 @@ export class Composer {
         await this.addFiles(files);
     }
 
-    async addFiles(files) {
+    async addFiles(files, { skipRecord = false } = {}) {
         const o = this.o; const sent = ls.get(`cc_sent_${o.convoId}`, {});
         for (const f of files) {
             if (this.atts.filter((a) => a.kind === 'file').length >= o.maxFiles) { this.say(this.t('tooMany', { n: o.maxFiles })); break; }
@@ -461,6 +461,7 @@ export class Composer {
             else if (sent[key]) this.say(this.t('sentBefore', { name: f.name, when: this.ago(sent[key]) }), this.L.remove, drop, 8000);
             this.renderAtts(); this.updateSend(); this.changed();
             if (compressible && f.size > o.compressOver) await this.compress(a);
+            if (!skipRecord && this.atts.includes(a) && this.has('attach')) this.recordRecent(a.file);
             if (a.file.size > o.maxFileMb * 1048576) { this.removeAtt(a.id); this.say(this.t('tooBig', { name: f.name, mb: o.maxFileMb })); }
         }
     }
@@ -583,31 +584,88 @@ export class Composer {
     clearSchedule(announce) { this.sched = 0; this.refs.schedBtn?.classList.remove('cc-active'); if (this.refs.schedInput) this.refs.schedInput.value = ''; if (announce) { this.closePanels(); this.say(this.L.scheduleCleared); } }
     when(t) { return new Date(t).toLocaleString([], { weekday: 'short', hour: '2-digit', minute: '2-digit' }); }
 
-    /* recent photos (only with a recentEndpoint — never fake thumbnails) */
+    /* ------------------------------------------------- recent photos
+       REAL images only (never placeholders). Sources, first that yields photos wins:
+         1. native app bridge  window.NaaraNative.recentPhotos({limit}) or the Capacitor Media plugin — the device gallery itself
+            (installed app builds only: a web page is not allowed to list a phone's photo library);
+         2. `recentEndpoint` — the member's recent uploads, served by our own backend;
+         3. this device's own history — photos the member attached/pasted here recently, kept on this device only, per account.
+       The first tile is always "Browse" (the OS photo picker, which on phones itself opens on the newest photos). */
+    scopeKey() { return `recents:${this.o.scope || 'guest'}`; }
+
+    async nativeRecents(limit) {
+        try {
+            if (window.NaaraNative?.recentPhotos) return await window.NaaraNative.recentPhotos({ limit });
+            const M = window.Capacitor?.isNativePlatform?.() && window.Capacitor?.Plugins?.Media;
+            if (!M?.getMedias) return [];
+            const res = await M.getMedias({ quantity: limit, types: 'photos', sort: [{ key: 'creationDate', ascending: false }] });
+            return (res.medias || []).map((m) => ({
+                id: `n-${m.identifier}`, tags: '',
+                thumb: m.data ? (String(m.data).startsWith('data:') ? m.data : `data:image/jpeg;base64,${m.data}`) : '',
+                file: async () => { const r = await M.getMediaByIdentifier({ identifier: m.identifier }); const blob = await (await fetch(window.Capacitor.convertFileSrc(r.path))).blob(); return new File([blob], `photo-${m.identifier}.jpg`, { type: blob.type || 'image/jpeg' }); },
+            })).filter((x) => x.thumb);
+        } catch { return []; }
+    }
+
+    async serverRecents() {
+        const o = this.o; if (!o.recentEndpoint) return [];
+        try {
+            const list = await (await fetch(o.recentEndpoint, { headers: o.headers, credentials: o.credentials })).json();
+            return list.map((x) => ({ id: `u-${x.id}`, tags: x.tags || '', thumb: x.thumb || x.url, file: async () => { const b = await (await fetch(x.url, { credentials: o.credentials })).blob(); return new File([b], `${x.id}.jpg`, { type: b.type || 'image/jpeg' }); } }));
+        } catch { return []; }
+    }
+
+    async localRecents() {
+        const list = (await kv.get(this.scopeKey())) || []; const cutoff = Date.now() - 30 * 864e5;
+        return list.filter((x) => x.at > cutoff).map((x) => ({ id: x.id, tags: x.tags || '', thumb: x.thumb, local: true, file: async () => new File([x.blob], x.name, { type: x.type }) }));
+    }
+
+    /** Remember a photo the member just attached (thumbnail + the real file) so it is one tap away next time. Never keeps GIF/video/docs. */
+    async recordRecent(file) {
+        if (!file.type.startsWith('image/') || file.size > 3 * 1048576) return;
+        try {
+            const im = await loadImage(file); const sc = Math.min(1, 160 / Math.max(im.naturalWidth, im.naturalHeight));
+            const c = document.createElement('canvas'); c.width = Math.round(im.naturalWidth * sc); c.height = Math.round(im.naturalHeight * sc);
+            c.getContext('2d').drawImage(im, 0, 0, c.width, c.height); URL.revokeObjectURL(im.src);
+            const id = `${file.name}|${file.size}`; const key = this.scopeKey();
+            const list = ((await kv.get(key)) || []).filter((x) => x.id !== id);
+            list.unshift({ id, name: file.name, type: file.type, blob: file, thumb: c.toDataURL('image/jpeg', 0.7), at: Date.now(), tags: file.name.replace(/\.\w+$/, '').replace(/[^a-z0-9]+/gi, ' ').toLowerCase() });
+            await kv.set(key, list.slice(0, 12));
+        } catch { /* a recents failure must never block attaching */ }
+    }
+
     async renderRecent() {
-        const o = this.o; const strip = this.refs.recentStrip; const label = this.refs.recentLabel;
-        if (!o.recentEndpoint) { strip.hidden = true; label.hidden = true; return; }
-        if (!this.recentCache) {
-            try { this.recentCache = await (await fetch(o.recentEndpoint, { headers: o.headers, credentials: o.credentials })).json(); } catch { this.recentCache = []; }
-        }
+        const strip = this.refs.recentStrip; const label = this.refs.recentLabel; const o = this.o;
+        if (!this.o.attachKinds.includes('media')) { strip.hidden = true; label.hidden = true; return; }
+        const my = this.recentSeq = (this.recentSeq || 0) + 1;
+        let list = await this.nativeRecents(12); let source = 'native';
+        if (!list.length) { list = await this.serverRecents(); source = 'server'; }
+        if (!list.length) { list = await this.localRecents(); source = 'local'; }
+        if (my !== this.recentSeq) return;
         const t = this.refs.text.value.toLowerCase();
-        const list = (this.recentCache || []).map((x, i) => ({ ...x, i, hit: String(x.tags || '').split(' ').filter((w) => w.length > 2 && t.includes(w.toLowerCase())).length })).sort((a, b) => b.hit - a.hit || a.i - b.i);
-        strip.hidden = label.hidden = !list.length; strip.replaceChildren(); this.recentSel ||= new Set();
+        list = list.map((x, i) => ({ ...x, i, hit: String(x.tags || '').split(' ').filter((w) => w.length > 2 && t.includes(w)).length })).sort((a, b) => b.hit - a.hit || a.i - b.i);
+        this.recentSel ||= new Set(); strip.replaceChildren(); strip.hidden = label.hidden = false;
+        label.replaceChildren(el('span', '', this.L.recentPhotos));
+        if (source === 'local' && list.length) { const clr = el('button', 'cc-link', this.L.clearRecents); clr.type = 'button'; clr.onclick = async () => { await kv.set(this.scopeKey(), []); this.renderRecent(); }; label.append(clr); }
+        const browse = el('button', 'cc-rthumb cc-rbrowse'); browse.type = 'button'; browse.innerHTML = ICONS.image; browse.append(el('span', '', this.L.browse));
+        browse.onclick = () => this.pickKind('media'); strip.append(browse);
         list.forEach((img) => {
             const c = el('button', `cc-rthumb${this.recentSel.has(img.id) ? ' cc-sel' : ''}${img.hit ? ' cc-hit' : ''}`); c.type = 'button';
-            c.style.backgroundImage = `url("${String(img.url).replace(/"/g, '%22')}")`; c.setAttribute('aria-pressed', this.recentSel.has(img.id) ? 'true' : 'false'); c.setAttribute('aria-label', String(img.tags || '').split(' ')[0] || this.L.recentPhotos);
+            c.style.backgroundImage = `url("${String(img.thumb).replace(/"/g, '%22')}")`; c.setAttribute('aria-pressed', this.recentSel.has(img.id) ? 'true' : 'false'); c.setAttribute('aria-label', String(img.tags || '').split(' ')[0] || this.L.recentPhotos);
             c.onclick = () => this.toggleRecent(img, c); strip.append(c);
         });
+        if (!list.length) { const hint = el('div', 'cc-rempty', this.L.recentEmpty); strip.append(hint); }
     }
 
     async toggleRecent(img, node) {
         this.recentSel ||= new Set();
-        if (this.recentSel.has(img.id)) { this.recentSel.delete(img.id); const a = this.atts.find((x) => x.recentId === img.id); if (a) this.removeAtt(a.id); node.classList.remove('cc-sel'); return; }
+        if (this.recentSel.has(img.id)) { this.recentSel.delete(img.id); const a = this.atts.find((x) => x.recentId === img.id); if (a) this.removeAtt(a.id); node.classList.remove('cc-sel'); node.setAttribute('aria-pressed', 'false'); return; }
+        if (this.atts.filter((a) => a.kind === 'file').length >= this.o.maxFiles) { this.say(this.t('tooMany', { n: this.o.maxFiles })); return; }
         try {
-            const b = await (await fetch(img.url, { credentials: this.o.credentials })).blob();
-            this.recentSel.add(img.id); node.classList.add('cc-sel');
-            const a = { id: uid(), recentId: img.id, kind: 'file', file: new File([b], `${img.id}.jpg`, { type: b.type || 'image/jpeg' }), url: URL.createObjectURL(b) };
-            this.atts.push(a); this.renderAtts(); this.updateSend(); this.changed();
+            const f = await img.file();
+            this.recentSel.add(img.id); node.classList.add('cc-sel'); node.setAttribute('aria-pressed', 'true');
+            const before = this.atts.length; await this.addFiles([f], { skipRecord: true });
+            const a = this.atts[before]; if (a) a.recentId = img.id; else { this.recentSel.delete(img.id); node.classList.remove('cc-sel'); }
         } catch { this.say(this.t('failed', { err: 'photo' })); }
     }
 

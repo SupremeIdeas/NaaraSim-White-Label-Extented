@@ -9,6 +9,11 @@
 
 ## DONE
 
+### Chat Composer Pro follow-up (2026-10-03): real recent photos + staff reply
+- The attach sheet's **Recent photos** strip shows REAL images only (no placeholders): the native app bridge / Capacitor Media plugin when running as the installed app (a browser cannot list a phone's gallery), else the member's backend recents, else photos attached on this device (per account, 12 max / 30 days, Clear button). First tile = Browse (OS photo picker). See docs/chat-composer-plan.md.
+- The staff ticket reply box (Admin -> Tickets) now uses the composer (text + emoji; the server takes text only). Flag: `COMPOSER_STAFF_REPLY`.
+
+
 ### Ported from master (2026-10-03): Chat Composer Pro + mic permission fix
 - **Chat Composer Pro (`<naara-composer>`)** replaces the NaaraCare support composer and the Naara Line "New message" body/attachment controls (the latter in `field` mode: it only collects text + photo + voice; the paid Send button, live quote and MMS rules are unchanged). Transport-agnostic (`cc:transmit`): Livewire surfaces keep `$wire.upload()` + their existing actions, so server validation/throttle/transcoding are untouched. Features limited to what the server accepts (text, emoji, ONE image/PDF, voice); GIF/schedule/location/contact/poll are implemented but off. Rollout flags `config('composer.surfaces.*')` restore the previous markup (`partials/legacy-*`). Labels en/fr/sw/ar. See `docs/chat-composer-*.md`.
 - **Fork bug fixed:** `Permissions-Policy` was `microphone=()`, which made the browser block EVERY in-page voice recording before the permission prompt could appear (master already had `microphone=(self)`). Now `microphone=(self)`, with a test.

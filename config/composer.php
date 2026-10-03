@@ -8,5 +8,6 @@ return [
     'surfaces' => [
         'support_chat' => (bool) env('COMPOSER_SUPPORT_CHAT', true),
         'send_message' => (bool) env('COMPOSER_SEND_MESSAGE', true),
+        'staff_reply' => (bool) env('COMPOSER_STAFF_REPLY', true),
     ],
 ];

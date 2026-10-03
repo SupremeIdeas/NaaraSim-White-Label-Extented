@@ -4,7 +4,7 @@ export const LABELS = {
     send: 'Send', undo: 'Undo send', attach: 'Attach', emoji: 'Emoji', gif: 'GIF', schedule: 'Schedule send', record: 'Record a voice note',
     searchEmoji: 'Search emojis…', recent: 'Recent', noEmoji: 'No emoji found',
     gallery: 'Gallery', camera: 'Camera', video: 'Video', document: 'Document', audio: 'Audio', location: 'Location', contact: 'Contact', poll: 'Poll',
-    recentPhotos: 'Recent photos',
+    recentPhotos: 'Recent photos', browse: 'Browse', clearRecents: 'Clear', recentEmpty: 'Photos you attach will show up here.',
     searchGifs: 'Search my GIFs by name', imagesToGif: 'Images → GIF', videoToGif: 'Video clip → GIF',
     noGifs: 'No saved GIFs yet. Make one from 2–7 images or a video clip.', noGifNamed: 'No GIF named “{q}”', fromWeb: 'From the web',
     gifNeedImages: 'Choose 2 to 7 images. You chose {n}.', timePerImage: 'Time per image', saveGif: 'Save to my GIFs', nameGif: 'Name it, e.g. thank you dance',

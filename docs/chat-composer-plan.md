@@ -22,3 +22,10 @@
 
 ## Verification bar
 Unit/feature tests for the Blade wrapper + flags + glue contract; Playwright matrix (Chromium: mobile 430 + desktop 1280, light + dark, two composers on one page, keyboard-only, offline queue via `endpoint` mode). Real-browser limits are reported honestly (mic/camera/geolocation need a real device).
+
+## Recent photos (attach sheet) — what is and is not possible
+A web page is **not allowed** to list a phone's photo library; no browser API does it. So the strip only ever shows real images, from the first source that has any:
+1. **Native app bridge** — `window.NaaraNative.recentPhotos({limit})` (returns `[{id, thumb, file(): Promise<File>}]`) or the Capacitor `Media` plugin (`@capacitor-community/media`, `getMedias`/`getMediaByIdentifier`). This is the real "device gallery" path and works only in the installed Android/iOS builds, which must add that plugin and the photo-library permission (`iosPhotoLibraryUsageDescription` is already emitted by AppStudio when Camera is enabled; the CI does not yet `npm i` the plugin — one line in `android-build.yml` / `codemagic.yaml` when you want it).
+2. **`recentEndpoint`** — a member's recent uploads from our own backend.
+3. **This device's own history** — photos the member attached/pasted here, stored on this device only (IndexedDB thumbnail + the file), per account, 12 max, 30 days, with a Clear button.
+The first tile is always **Browse** (the OS photo picker — on phones it opens on the newest photos).

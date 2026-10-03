@@ -34,6 +34,7 @@
         'maxChars' => $maxChars,
         'undoMs' => $undoMs,
         'convoId' => (string) $convoId,
+        'scope' => (string) (auth()->id() ?? ''),
         'endpoint' => $endpoint,
         'bare' => $bare,
         'micPrimer' => $micPrimer,

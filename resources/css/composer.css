@@ -57,7 +57,12 @@ naara-composer { display: block; min-width: 0; }
 .cc-egrid button { background: none; border: 0; font-size: 20px; height: 34px; border-radius: 8px; cursor: pointer; padding: 0; }
 .cc-egrid button:hover { background: var(--cc-hover); }
 .cc-empty { grid-column: 1 / -1; text-align: center; color: var(--cc-muted); font-size: 12px; padding: 14px 0; }
-.cc-label { font-size: 11px; color: var(--cc-muted); margin: 0 0 8px 2px; display: block; }
+.cc-label { font-size: 11px; color: var(--cc-muted); margin: 0 0 8px 2px; display: flex; justify-content: space-between; align-items: center; }
+.cc-link { border: 0; background: none; color: var(--cc-accent); font-size: 11px; cursor: pointer; padding: 0 2px; }
+.cc-rbrowse { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; border: 1px dashed var(--cc-border); color: var(--cc-muted); font-size: 10px; }
+.cc-rbrowse span { font-size: 10px; }
+.cc-rbrowse svg { width: 20px; height: 20px; }
+.cc-rempty { align-self: center; font-size: 12px; color: var(--cc-muted); padding: 0 6px; white-space: nowrap; }
 
 /* attach sheet */
 .cc-recent { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 12px; margin-bottom: 12px; border-bottom: 1px solid var(--cc-border); }
