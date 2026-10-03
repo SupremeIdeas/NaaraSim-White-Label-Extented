@@ -9,6 +9,9 @@
 
 ## DONE
 
+### Ported from master (2026-10-03): Naara Gift hero looping reveal
+- With no hero image uploaded, the Naara Gift storefront plays a pure-CSS loop (card wall -> golden iris opens the gift box -> shimmer, halo, sparks -> closes). Transparent WebP cut-outs in `public/images/themes/shared/gift-hero-{box,tiles}.webp`. An uploaded hero or the hero switched off always wins; reduced-motion shows the finished box still. `GiftHeroBackground::showsSpecial()`; 2 new tests.
+
 ### Skins ported from master + licence-gated (Prompt 22, 2026-10-03)
 - The 35-skin engine, `x-nx.*` components, tokens and the member-page conversions are now in this fork. **Master is the only authority for how many skins this licence unlocks** (default 5 for Extended; its zero-feature-locks rule is untouched, the limit is a quota); this fork stores the number it receives (`skins.allowance` in the entitlement refresh) and obeys it via `App\Support\Appearance\LicensedSkins`. Before activation exactly one skin (the platform default) is offered.
 - Licensee screen: **Admin -> Your skins** (`admin.skins`): pick up to the allowance, first pick is the default, audited. Hidden skins are refused server-side (`AppearanceResolver::platform()` + `UpdateUserAppearance`); a member's saved hidden skin resolves to the default and the row is never rewritten. Allowance shown on the Updater panel. `php artisan skins:verify` ports the master proof command.

@@ -1593,3 +1593,145 @@
 /* File inputs: the native "Choose file" button must stay legible in dark mode wherever a page styled it with a dark brand tint. */
 .dark input[type="file"]::file-selector-button { color: #CCFBF1; background-color: rgb(45 212 191 / .2); }
 .dark input[type="file"]::-webkit-file-upload-button { color: #CCFBF1; background-color: rgb(45 212 191 / .2); }
+
+/* ============================================================================
+ * Naara Gift hero: the looping "special" reveal (default art, until the admin uploads their own).
+ * One 10s loop: card wall (0-34%) -> a golden ring wipes open the gift box (34-46%) -> the box floats and a
+ * shimmer crosses it (46-88%) -> the box closes back into the wall (88-100%). Three layers share one clock so
+ * they can never drift. Images are cut-outs, so the same art works on light and dark pages.
+ * ========================================================================== */
+.nx-gift-stage {
+  position: absolute;
+  top: -0.25rem;
+  right: -0.75rem;
+  width: 60%;
+  max-width: 27rem;
+  height: calc(100% + 0.5rem);
+  min-height: 13.5rem;
+  pointer-events: none;
+  z-index: 0;
+  --gift-t: 10s;
+}
+/* The default hero carries art that needs real height (the plain hero is just a headline). */
+.nx-gift-hero { min-height: 13.5rem; }
+@media (min-width: 640px) { .nx-gift-hero { min-height: 15rem; } }
+@media (max-width: 639px) { .nx-gift-stage { width: 47%; right: -1rem; } }
+.nx-gift-stage__tiles,
+.nx-gift-stage__reveal {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  height: 100%;
+}
+.nx-gift-stage__tiles {
+  width: auto;
+  max-width: 62%;
+  object-fit: contain;
+  object-position: right center;
+  transform-origin: 85% 55%;
+  /* the wall dissolves toward the left, under the headline, like the other heroes */
+  -webkit-mask-image: linear-gradient(to left, #000 55%, transparent 100%);
+  mask-image: linear-gradient(to left, #000 55%, transparent 100%);
+  animation: nx-gift-wall var(--gift-t) cubic-bezier(.65, 0, .35, 1) infinite;
+}
+.nx-gift-stage__reveal {
+  width: 100%;
+  clip-path: circle(0% at 62% 68%);
+  animation: nx-gift-open var(--gift-t) cubic-bezier(.65, 0, .35, 1) infinite;
+}
+.nx-gift-stage__box {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: right center;
+  filter: drop-shadow(0 14px 22px rgb(0 0 0 / .22));
+  /* the ribbon tail on the left melts away so it never fights the description text */
+  -webkit-mask-image: linear-gradient(to left, #000 80%, transparent 100%);
+  mask-image: linear-gradient(to left, #000 80%, transparent 100%);
+  animation: nx-gift-float 5s ease-in-out infinite;
+}
+.dark .nx-gift-stage__box { filter: drop-shadow(0 0 26px rgb(212 160 23 / .28)) drop-shadow(0 14px 22px rgb(0 0 0 / .5)); }
+/* a bright band that only paints where the box is (the box image is its own mask) */
+.nx-gift-stage__shine {
+  position: absolute;
+  inset: 0;
+  -webkit-mask-image: var(--gift-box);
+  mask-image: var(--gift-box);
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: right center;
+  mask-position: right center;
+  background: linear-gradient(105deg, transparent 38%, rgb(255 244 200 / .75) 50%, transparent 62%) -140% 0 / 60% 100% no-repeat;
+  mix-blend-mode: soft-light;
+  animation: nx-gift-shine var(--gift-t) linear infinite;
+}
+/* warm halo that blooms behind the box as it opens */
+.nx-gift-stage__halo {
+  position: absolute;
+  right: 4%;
+  bottom: 6%;
+  width: 78%;
+  aspect-ratio: 1;
+  border-radius: 9999px;
+  background: radial-gradient(closest-side, rgb(212 160 23 / .45), rgb(212 160 23 / .12) 55%, transparent 72%);
+  opacity: 0;
+  animation: nx-gift-halo var(--gift-t) ease-in-out infinite;
+}
+.nx-gift-stage__spark {
+  position: absolute;
+  width: .5rem;
+  height: .5rem;
+  border-radius: 9999px;
+  background: rgb(255 226 140);
+  box-shadow: 0 0 10px 3px rgb(255 200 80 / .7);
+  opacity: 0;
+  animation: nx-gift-spark var(--gift-t) ease-out infinite;
+}
+.nx-gift-stage__spark--a { left: 48%; top: 22%; }
+.nx-gift-stage__spark--b { left: 66%; top: 12%; animation-delay: .25s; }
+.nx-gift-stage__spark--c { left: 56%; top: 30%; animation-delay: .5s; width: .35rem; height: .35rem; }
+
+@keyframes nx-gift-wall {
+  0%, 30%   { opacity: 1; transform: translateY(0) scale(1); }
+  4%        { transform: translateY(-.35rem) scale(1); }
+  17%       { transform: translateY(.25rem) scale(1.01); }
+  36%, 90%  { opacity: 0; transform: translateY(0) scale(.94); }
+  100%      { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes nx-gift-open {
+  0%, 33%   { clip-path: circle(0% at 62% 68%); opacity: 0; }
+  38%       { opacity: 1; }
+  47%       { clip-path: circle(78% at 62% 68%); opacity: 1; }
+  87%       { clip-path: circle(78% at 62% 68%); opacity: 1; }
+  93%       { opacity: 1; }
+  98%, 100% { clip-path: circle(0% at 62% 68%); opacity: 0; }
+}
+@keyframes nx-gift-float {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50%      { transform: translateY(-.4rem) rotate(.6deg); }
+}
+@keyframes nx-gift-shine {
+  0%, 52%   { background-position: -140% 0; }
+  72%, 100% { background-position: 240% 0; }
+}
+@keyframes nx-gift-halo {
+  0%, 33%   { opacity: 0; transform: scale(.6); }
+  44%       { opacity: 1; transform: scale(1.05); }
+  60%, 84%  { opacity: .55; transform: scale(1); }
+  96%, 100% { opacity: 0; transform: scale(.7); }
+}
+@keyframes nx-gift-spark {
+  0%, 38%   { opacity: 0; transform: translateY(.6rem) scale(.4); }
+  44%       { opacity: 1; transform: translateY(0) scale(1); }
+  58%       { opacity: 0; transform: translateY(-1.2rem) scale(.6); }
+  100%      { opacity: 0; }
+}
+/* Reduced motion: no loop. Show the finished box, still, with its halo. */
+@media (prefers-reduced-motion: reduce) {
+  .nx-gift-stage__tiles, .nx-gift-stage__spark, .nx-gift-stage__shine { display: none; }
+  .nx-gift-stage__reveal { animation: none; clip-path: none; }
+  .nx-gift-stage__box { animation: none; }
+  .nx-gift-stage__halo { animation: none; opacity: .5; }
+}
