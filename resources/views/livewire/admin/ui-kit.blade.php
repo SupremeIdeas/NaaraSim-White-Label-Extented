@@ -132,5 +132,19 @@
                 </button>
             </div>
         </section>
+
+        {{-- Chat Composer Pro — every feature switched on, events only (nothing is delivered). The real surfaces enable the subset their
+             server accepts: see docs/chat-composer-plan.md. --}}
+        <section class="rounded-2xl border border-slate-200 bg-white p-6 dark:border-[#2D4060] dark:bg-[#1A2840] lg:col-span-2"
+                 x-data="{ last: null, ev: [] }"
+                 x-on:cc:transmit="$event.detail.wait(Promise.resolve($event.detail.payload).then(p => { last = { text: p.text, files: p.files.map(f => f.name), items: p.items.map(i => i.type), voice: p.voice ? Math.round(p.voice.duration) + 's' : null, scheduledAt: p.scheduledAt }; }))"
+                 x-on:cc:typing="ev = ['typing', ...ev].slice(0, 4)" x-on:cc:queued="ev = ['queued', ...ev].slice(0, 4)" x-on:cc:sent="ev = ['sent', ...ev].slice(0, 4)">
+            <h2 class="mb-1 text-sm font-semibold text-slate-800 dark:text-slate-100">Chat Composer Pro</h2>
+            <p class="mb-3 text-xs text-slate-500 dark:text-slate-400">The one composer for every chat surface (<code>&lt;naara-composer&gt;</code>). All features on here; Enter sends, Shift+Enter is a new line.</p>
+            <x-composer convo-id="ui-kit-demo" :features="['emoji', 'attach', 'voice', 'gif', 'schedule', 'hints', 'snippets', 'captions']"
+                        :attach-kinds="['media', 'camera', 'video', 'document', 'audio', 'contact', 'poll']" placeholder="Message" />
+            <p class="mt-3 text-[11px] text-slate-400">Events: <span x-text="ev.join(' · ') || '—'"></span></p>
+            <pre class="mt-1 overflow-x-auto rounded-lg bg-slate-50 p-3 text-[11px] text-slate-600 dark:bg-white/5 dark:text-slate-300" x-text="last ? JSON.stringify(last, null, 2) : 'Last payload will appear here.'"></pre>
+        </section>
     </div>
 </div>

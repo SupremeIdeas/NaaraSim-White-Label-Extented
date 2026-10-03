@@ -27,7 +27,12 @@ class SecurityHeaders
             'X-Frame-Options' => 'SAMEORIGIN',
             'Referrer-Policy' => 'strict-origin-when-cross-origin',
             'X-Permitted-Cross-Domain-Policies' => 'none',
-            'Permissions-Policy' => 'geolocation=(), microphone=(), camera=()',
+            // microphone=(self): the support-chat voice-note feature
+            // (resources/js/support-voice.js, getUserMedia({audio: true}))
+            // needs it for same-origin content. camera/geolocation stay
+            // locked at () — confirmed unused anywhere in this codebase, so
+            // there is no reason to open either permission surface.
+            'Permissions-Policy' => 'geolocation=(), microphone=(self), camera=()',
         ];
 
         // CSP + HSTS are admin-toggleable at runtime (config is the default).

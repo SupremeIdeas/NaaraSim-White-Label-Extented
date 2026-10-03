@@ -67,98 +67,55 @@
                         @endif
                     </div>
 
-                    {{-- Body --}}
-                    <div x-data="{ get len() { return ($wire.body || '').length; } }">
-                        <label class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">Message</label>
-                        <textarea wire:model.live.debounce.400ms="body" rows="4" maxlength="918" placeholder="Type your message…"
-                                  class="w-full resize-none rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm dark:border-white/10 dark:bg-[#243352] dark:text-slate-100"></textarea>
-                        <div class="mt-1 flex items-center justify-between text-[11px] text-slate-400">
-                            <span x-text="len + ' chars'"></span>
-                            @if ($quote)
-                                <span>{{ $quote['segments'] }} {{ Str::plural('part', $quote['segments']) }}</span>
+{{-- Body + attachments: Chat Composer Pro in `field` mode. It only COLLECTS text / one photo / a voice note; this modal keeps its own
+                         explicit, wallet-charging Send button, live quote and server rules (a money action never gets an undo timer or a
+                         background retry). Changes are mirrored into the existing `body` / `attachment` / `voiceNote` properties. --}}
+                    @if (config('composer.surfaces.send_message'))
+                        <div x-data="{
+                                t: null, img: null, vb: null,
+                                len: 0,
+                                up(prop, file) { return new Promise((resolve, reject) => $wire.upload(prop, file, resolve, reject)); },
+                                sync(d) {
+                                    this.len = (d.text || '').length;
+                                    clearTimeout(this.t);
+                                    this.t = setTimeout(async () => {
+                                        if (($wire.body || '') !== d.text) await $wire.$set('body', d.text);
+                                        const photo = d.files[0] || null;
+                                        if (photo && photo !== this.img) { this.img = photo; await this.up('attachment', photo); }
+                                        else if (!photo && this.img) { this.img = null; await $wire.$set('attachment', null); }
+                                        if (d.voice && d.voice.blob !== this.vb) { this.vb = d.voice.blob; await this.up('voiceNote', new File([d.voice.blob], 'voice-note.' + d.voice.ext, { type: d.voice.mime })); }
+                                        else if (! d.voice && this.vb) { this.vb = null; await $wire.$set('voiceNote', null); }
+                                    }, 350);
+                                },
+                             }"
+                             x-on:cc:change="sync($event.detail)">
+                            <label class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">Message</label>
+                            @if ($open)
+                                <x-composer mode="field" :rows="4" :max-chars="918" convo-id="send-message"
+                                            :features="$canAttach ? ['emoji', 'attach', 'voice'] : ['emoji']" :attach-kinds="['media']"
+                                            :accept="['media' => 'image/jpeg,image/png,image/gif']" :max-files="1" :max-file-mb="1"
+                                            placeholder="Type your message…" />
                             @endif
-                        </div>
-                        @error('to') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
-                    </div>
-
-                    {{-- Attachment (MMS) — only offered on an MMS-capable line
-                         (Marketing/Chat blueprint Phase B3: provider-aware, not
-                         just US/CA — see VirtualNumber::supportsMms()). Reuses
-                         the SAME recorder component as NaaraCare chat, wired to
-                         this component's own `send()` method instead of
-                         `sendVoice()`. --}}
-                    @if ($canAttach)
-                        <div class="mt-3" x-data="voiceRecorder({ sendMethod: 'send' })">
-                            @if ($attachment)
-                                <div class="flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 dark:border-white/10 dark:bg-white/5">
-                                    <span class="flex min-w-0 items-center gap-2 text-sm text-slate-700 dark:text-slate-200">
-                                        <x-icon name="image" class="h-4 w-4 shrink-0 text-primary" />
-                                        <span class="truncate">{{ method_exists($attachment, 'getClientOriginalName') ? $attachment->getClientOriginalName() : 'Image' }}</span>
-                                    </span>
-                                    <button type="button" wire:click="$set('attachment', null)" aria-label="Remove attachment" class="shrink-0 text-slate-400 hover:text-red-600"><x-icon name="x" class="h-4 w-4" /></button>
-                                </div>
-                                <div wire:loading wire:target="attachment" class="mt-1 text-[11px] text-slate-400">Uploading…</div>
-                            @elseif ($voiceNote)
-                                <div class="flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 dark:border-white/10 dark:bg-white/5">
-                                    <span class="flex min-w-0 items-center gap-2 text-sm text-slate-700 dark:text-slate-200">
-                                        <x-icon name="mic" class="h-4 w-4 shrink-0 text-primary" /> Voice note
-                                    </span>
-                                    <button type="button" wire:click="$set('voiceNote', null)" aria-label="Remove voice note" class="shrink-0 text-slate-400 hover:text-red-600"><x-icon name="x" class="h-4 w-4" /></button>
-                                </div>
-                                <div wire:loading wire:target="voiceNote,send" class="mt-1 text-[11px] text-slate-400">Uploading…</div>
-                            @else
-                                {{-- Recording controls (fill the row while recording/uploading). --}}
-                                <div x-show="state === 'recording' || state === 'uploading'" x-cloak class="flex items-center gap-2 rounded-xl border border-slate-200 px-3 py-2 dark:border-white/10">
-                                    <span class="relative flex h-2.5 w-2.5 shrink-0">
-                                        <span class="absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75 motion-safe:animate-ping"></span>
-                                        <span class="relative inline-flex h-2.5 w-2.5 rounded-full bg-red-600"></span>
-                                    </span>
-                                    <span class="font-mono text-sm tabular-nums text-slate-700 dark:text-slate-200" x-text="timeLabel">0:00</span>
-                                    <span class="flex-1 truncate text-xs text-slate-400" x-text="state === 'uploading' ? 'Sending…' : 'Recording…'"></span>
-                                    <button type="button" @click="cancel()" x-show="state === 'recording'" class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-slate-400 hover:bg-slate-100 hover:text-red-600 dark:hover:bg-white/10" title="Cancel"><x-icon name="x" class="h-4 w-4" /></button>
-                                    <button type="button" @click="stop()" x-show="state === 'recording'" class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary text-white hover:bg-primary-dark" title="Stop &amp; use"><x-icon name="check" class="h-4 w-4" /></button>
-                                </div>
-
-                                <div x-show="state !== 'recording' && state !== 'uploading'" class="flex flex-wrap gap-2">
-                                    <label class="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-dashed border-slate-300 px-3 py-2 text-xs font-medium text-slate-500 transition hover:border-primary/40 hover:text-primary dark:border-white/10 dark:text-slate-400">
-                                        <x-icon name="image" class="h-4 w-4" /> Add a photo
-                                        <input type="file" wire:model="attachment" accept="image/jpeg,image/png,image/gif" class="hidden">
-                                    </label>
-                                    <button type="button" @click="promptMic()" class="inline-flex items-center gap-2 rounded-xl border border-dashed border-slate-300 px-3 py-2 text-xs font-medium text-slate-500 transition hover:border-primary/40 hover:text-primary dark:border-white/10 dark:text-slate-400">
-                                        <x-icon name="mic" class="h-4 w-4" /> Add a voice note
-                                    </button>
-                                </div>
-
-                                <div x-show="state === 'priming'" x-cloak class="mt-2 flex items-start gap-2 rounded-xl border border-primary/20 bg-primary/5 p-3 text-xs dark:border-primary/30 dark:bg-primary/10">
-                                    <x-icon name="mic" class="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                                    <div class="flex-1">
-                                        Allow microphone access to record a voice note.
-                                        <div class="mt-1.5 flex gap-2">
-                                            <button type="button" @click="requestMic()" class="rounded-lg bg-primary px-2.5 py-1 text-xs font-semibold text-white hover:bg-primary-dark">Allow</button>
-                                            <button type="button" @click="reset()" class="rounded-lg border border-slate-300 px-2.5 py-1 text-xs font-medium text-slate-500 hover:bg-slate-50 dark:border-white/10 dark:text-slate-300">Not now</button>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div x-show="state === 'denied' || state === 'unsupported' || state === 'error'" x-cloak class="mt-2 flex items-start gap-2 rounded-xl bg-amber-50 p-3 text-xs text-amber-800 dark:bg-amber-950/40 dark:text-amber-200">
-                                    <x-icon name="shield" class="mt-0.5 h-4 w-4 shrink-0" />
-                                    <div class="flex-1">
-                                        <span x-show="state === 'denied'">Microphone access is blocked — enable it for this site to record a voice note.</span>
-                                        <span x-show="state === 'unsupported'">Recording isn't supported in this browser.</span>
-                                        <span x-show="state === 'error'">Something went wrong recording. Please try again.</span>
-                                        <button type="button" @click="reset()" class="ml-1 font-semibold underline">Dismiss</button>
-                                    </div>
-                                </div>
-                            @endif
+                            <div class="mt-1 flex items-center justify-between text-[11px] text-slate-400">
+                                <span x-text="len + ' chars'"></span>
+                                <span wire:loading wire:target="attachment,voiceNote">Uploading…</span>
+                                @if ($quote)
+                                    <span>{{ $quote['segments'] }} {{ Str::plural('part', $quote['segments']) }}</span>
+                                @endif
+                            </div>
+                            @error('to') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
                             @error('attachment') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
                             @error('voiceNote') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
                         </div>
+                        @unless ($canAttach)
+                            {{-- §6.3: explain the MMS scope rather than silently hiding it. --}}
+                            <p class="mt-3 flex items-center gap-1.5 text-[11px] text-slate-400">
+                                <x-icon name="image" class="h-3.5 w-3.5" /> Photo and voice-note attachments (MMS) are available on US &amp; Canada numbers.
+                            </p>
+                        @endunless
                     @else
-                        {{-- §6.3: explain the MMS scope rather than silently hiding it. --}}
-                        <p class="mt-3 flex items-center gap-1.5 text-[11px] text-slate-400">
-                            <x-icon name="image" class="h-3.5 w-3.5" /> Photo and voice-note attachments (MMS) are available on US &amp; Canada numbers.
-                        </p>
+                        @include('livewire.partials.legacy-send-message-body')
                     @endif
-
                     @if ($error)
                         <div class="mt-3 flex items-start gap-2 rounded-xl bg-red-50 p-3 text-sm text-red-700 dark:bg-red-950/40 dark:text-red-300">
                             <x-icon name="x" class="mt-0.5 h-4 w-4 shrink-0" /> <span>{{ $error }}</span>

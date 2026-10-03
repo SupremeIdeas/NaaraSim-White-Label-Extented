@@ -3,6 +3,7 @@ import './lottie';
 import { initImageCompression } from './image-compress';
 import { registerVoiceRecorder } from './support-voice';
 import { registerNiaChat } from './nia-chat';
+import { registerComposer } from './composer/index.js';
 import { registerStorytellingCarousel } from './storytelling-carousel';
 import { registerUsageCharts } from './usage-chart';
 import { registerLinesAnalyticsCharts } from './lines-analytics-charts';
@@ -20,6 +21,9 @@ registerVoiceRecorder();
 
 // Nia 3-phase human-conversation pacing for NaaraCare chat (BUILD-3 §5).
 registerNiaChat();
+
+// Chat Composer Pro (<naara-composer>) — the one composer for every chat/message surface.
+registerComposer();
 
 // Storytelling Carousel (BLUEPRINT-batch1-sections §3) — Alpine component +
 // shared section-nav store, registered on alpine:init before Livewire boots it.

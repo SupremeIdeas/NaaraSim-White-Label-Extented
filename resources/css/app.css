@@ -1,5 +1,8 @@
 /* Branded UI elements adapted from the hand-picked Uiverse set (Module 32).
    Vite resolves and inlines this at build time — one bundle, CSP-safe. */
+/* Chat Composer Pro (<naara-composer>) — the one composer for every chat/message surface. */
+@import './composer.css';
+
 @import './ui-elements.css';
 
 /* Section Builder — hero + preview styling (universal page builder). */

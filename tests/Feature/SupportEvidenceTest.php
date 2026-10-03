@@ -93,7 +93,8 @@ class SupportEvidenceTest extends TestCase
         $html = Livewire::actingAs(User::factory()->create())->test(SupportChat::class)
             ->html();
 
-        $this->assertStringContainsString('voiceRecorder()', $html);
+        // Chat Composer Pro owns the recorder now (resources/js/composer/voice.js); the explain-first copy is passed in as a label.
+        $this->assertStringContainsString('<naara-composer', $html);
         $this->assertStringContainsString('needs microphone access', $html);
         $this->assertStringNotContainsString('accept="audio/*"', $html);
     }

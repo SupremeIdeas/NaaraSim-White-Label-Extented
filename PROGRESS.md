@@ -9,6 +9,13 @@
 
 ## DONE
 
+### Ported from master (2026-10-03): Chat Composer Pro + mic permission fix
+- **Chat Composer Pro (`<naara-composer>`)** replaces the NaaraCare support composer and the Naara Line "New message" body/attachment controls (the latter in `field` mode: it only collects text + photo + voice; the paid Send button, live quote and MMS rules are unchanged). Transport-agnostic (`cc:transmit`): Livewire surfaces keep `$wire.upload()` + their existing actions, so server validation/throttle/transcoding are untouched. Features limited to what the server accepts (text, emoji, ONE image/PDF, voice); GIF/schedule/location/contact/poll are implemented but off. Rollout flags `config('composer.surfaces.*')` restore the previous markup (`partials/legacy-*`). Labels en/fr/sw/ar. See `docs/chat-composer-*.md`.
+- **Fork bug fixed:** `Permissions-Policy` was `microphone=()`, which made the browser block EVERY in-page voice recording before the permission prompt could appear (master already had `microphone=(self)`). Now `microphone=(self)`, with a test.
+- **CSP:** `img-src` gains `blob:` (attachment previews). `resources/js/data/emojis.json` (the shared MIT emoji dataset) added for the composer's emoji panel. `NiaGlowTest` brought in line with the new composer (it was stale and failing here).
+- Verified: full suite green; Chromium run of the support chat on this fork (text + undo, evidence file, wrong-type refusal, voice with a fake mic).
+
+
 ### Ported from master (2026-10-03): custom preloaders, admin Security reachability, NaaraCredits coin
 - **Preloader Studio — your own animation:** upload a GIF, animated WebP or Lottie JSON separately for light and dark mode (one file serves both if only one is uploaded). Content-sniffed (never trusts the extension), 1 MB image / 512 KB Lottie caps, Lottie with expressions or remote asset URLs rejected, random file names, Lottie served from our own origin (`/preloader-asset/{uuid}.json`; the CSP only lets scripts fetch from `'self'`). Works with the Studio's existing per-page-type assignment, enabled and inherit-from-default; the background follows light/dark when no colour is set. Fixes `lottie.js` hydrating a node twice. NOT ported: minimum display time / max-per-day (they belong to the master-only UX/localization/platform-reach blueprint, Phase D — say the word if you want them here too).
 - **Admin Security was invisible on phones:** the admin bottom bar shows 4 items and the 5th primary (Security) silently dropped; Security now takes a bottom-bar slot, any overflow leads the More sheet, "My account" moved to its own More group, payout health/settings are in the nav, legible dark file buttons; `AdminNavReachabilityTest` fails the build if an admin page has no nav entry.
