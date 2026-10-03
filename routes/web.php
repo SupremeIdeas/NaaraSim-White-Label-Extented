@@ -302,6 +302,9 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::get('/rewards/withdraw', Withdraw::class)->name('rewards.withdraw');
         // Rail Guide (Addendum B): which payout rail should I use? (Not the /faq page.)
         Route::get('/account/payout-guide', PayoutGuide::class)->name('payout-guide');
+        // Per-account appearance (skins x accent x mode x dials). Only YOUR dashboard changes (Prompt 20 §18).
+        Route::get('/account/appearance', \App\Livewire\Account\Appearance::class)->name('account.appearance');
+        Route::post('/account/appearance/mode', \App\Http\Controllers\Account\AppearanceModeController::class)->middleware('throttle:60,1')->name('account.appearance.mode');
         // Member-to-member earnings transfer for people whose country has no payout rail yet.
         Route::get('/account/send-earnings', \App\Livewire\SendEarnings::class)->name('send-earnings');
 
@@ -396,6 +399,8 @@ Route::middleware(['admin', 'throttle:admin'])
         Route::get('/security', Security::class)->name('security');
         // Personal account (any panel user manages their own name/email/password).
         Route::get('/account', App\Livewire\Admin\Account::class)->name('account');
+        // The admin's OWN appearance for the admin panel (same preference as any member; Prompt 20 §26).
+        Route::get('/my-appearance', App\Livewire\Admin\MyAppearance::class)->name('my-appearance');
 
         // Admin configuration — super_admin & admin only (staff excluded).
         Route::middleware('role:super_admin|admin')->group(function () {
@@ -419,6 +424,10 @@ Route::middleware(['admin', 'throttle:admin'])
             // Marketing Copy Studio — Claude-assisted copy population for CMS pages.
             Route::get('/copy-studio', MarketingCopyStudio::class)->name('copy-studio');
             Route::get('/dashboard-theme', PlatformThemePage::class)->name('dashboard-theme');
+            // What members may choose for THEIR dashboards: default skin/accent, enabled presets, lock (Prompt 20 §19).
+            Route::get('/user-appearance', App\Livewire\Admin\UserAppearance::class)->name('user-appearance');
+            // Your skins — the licensee chooses which skins their licence fills (Prompt 22). White-label builds only (404 on master).
+            Route::get('/skins', App\Livewire\Admin\SkinSelection::class)->name('skins');
             // Theme picker — switch the platform-wide visual skin (Theme Batch 2 §4).
             Route::get('/theme', ThemePicker::class)->name('theme');
             Route::get('/branding', Branding::class)->name('branding');

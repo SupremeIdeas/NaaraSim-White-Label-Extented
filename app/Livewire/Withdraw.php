@@ -56,8 +56,12 @@ class Withdraw extends Component
 
     public ?string $withdrawError = null;
 
-    public function mount(StripeConnectService $connect): void
+    /** Rendered inside another skin page (the Wallet's Payout tab): no page canvas of its own. */
+    public bool $embedded = false;
+
+    public function mount(StripeConnectService $connect, bool $embedded = false): void
     {
+        $this->embedded = $embedded;
         $this->loadBanks();
         $this->accountId = PayoutAccount::where('user_id', Auth::id())->where('is_default', true)->value('id');
 

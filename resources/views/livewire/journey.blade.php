@@ -1,66 +1,44 @@
-<div class="mx-auto max-w-2xl">
-    <div class="mb-5">
-        <h1 class="text-2xl font-bold text-slate-900 dark:text-white">My Journey</h1>
-        <p class="text-sm text-slate-500 dark:text-slate-400">Your rewards path and your connectivity history — built from your own activity.</p>
-    </div>
+{{-- My Journey on the skin system (S3 Batch 3): milestones as a timeline of nodes + cards, goals with progress bars, travel stamps. Same data,
+     tabs and rules as before. --}}
+<x-nx.page class="ns-narrow">
+    <h1 class="ns-h1" style="margin-top:6px">My Journey</h1>
+    <p class="ns-sub">Your rewards path and your connectivity history — built from your own activity.</p>
 
     {{-- Tabs --}}
-    <div class="mb-6 inline-flex w-full rounded-full border border-slate-200 bg-slate-100 p-1 dark:border-white/10 dark:bg-white/5">
-        <button type="button" wire:click="setTab('milestones')"
-                class="flex-1 rounded-full px-3 py-2 text-sm font-semibold transition {{ $tab === 'milestones' ? 'bg-white text-primary shadow-sm dark:bg-[#243352] dark:text-teal-300' : 'text-slate-500 dark:text-slate-400' }}">
-            <x-icon name="gift" class="mr-1 inline h-4 w-4" /> Milestones
-        </button>
-        <button type="button" wire:click="setTab('goals')"
-                class="flex-1 rounded-full px-3 py-2 text-sm font-semibold transition {{ $tab === 'goals' ? 'bg-white text-primary shadow-sm dark:bg-[#243352] dark:text-teal-300' : 'text-slate-500 dark:text-slate-400' }}">
-            <x-icon name="star" class="mr-1 inline h-4 w-4" /> Goals
-        </button>
-        <button type="button" wire:click="setTab('travel')"
-                class="flex-1 rounded-full px-3 py-2 text-sm font-semibold transition {{ $tab === 'travel' ? 'bg-white text-primary shadow-sm dark:bg-[#243352] dark:text-teal-300' : 'text-slate-500 dark:text-slate-400' }}">
-            <x-icon name="globe" class="mr-1 inline h-4 w-4" /> Travel
-        </button>
+    <div class="ns-seg" style="margin-top:16px" role="tablist">
+        @foreach (['milestones' => ['gift', 'Milestones'], 'goals' => ['star', 'Goals'], 'travel' => ['globe', 'Travel']] as $key => [$icon, $text])
+            <button type="button" role="tab" wire:click="setTab('{{ $key }}')" class="{{ $tab === $key ? 'is-on' : '' }}" aria-selected="{{ $tab === $key ? 'true' : 'false' }}"><x-nx.icon :name="$icon" /> {{ $text }}</button>
+        @endforeach
     </div>
 
     @if ($tab === 'milestones')
         @if (! $creditsEnabled)
-            <div class="rounded-2xl border border-dashed border-slate-300 py-12 text-center text-sm text-slate-400 dark:border-white/10">NaaraCredits isn't enabled right now.</div>
+            <x-nx.empty text="NaaraCredits isn't enabled right now." style="margin-top:18px" />
         @else
-            <div class="relative space-y-0">
+            <div class="ns-jlist">
                 @foreach ($milestones as $i => $m)
-                    @php
-                        $dot = match ($m['status']) {
-                            'done' => 'bg-emerald-500 text-white',
-                            'ongoing' => 'bg-primary text-white',
-                            default => 'bg-slate-200 text-slate-400 dark:bg-white/10 dark:text-slate-500',
-                        };
-                    @endphp
-                    <div class="relative flex gap-4 pb-8 last:pb-0" wire:key="ms-{{ $m['key'] }}">
-                        {{-- Connector line --}}
-                        @unless ($loop->last)
-                            <span class="absolute left-[19px] top-10 h-full w-px {{ $m['status'] === 'locked' ? 'bg-slate-200 dark:bg-white/10' : 'bg-primary/30' }}"></span>
-                        @endunless
-                        <span class="relative z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full {{ $dot }}">
-                            @if ($m['status'] === 'done')<x-icon name="check" class="h-5 w-5" />@else<x-icon name="{{ $m['icon'] }}" class="h-4 w-4" />@endif
-                        </span>
-                        <div class="min-w-0 flex-1 rounded-2xl border border-slate-200 nx-glass-tile p-4 dark:border-white/10 {{ $m['status'] === 'locked' ? 'opacity-60' : '' }}">
-                            <div class="flex items-center justify-between gap-2">
-                                <p class="font-semibold text-slate-900 dark:text-white">{{ $m['title'] }}</p>
-                                @if ($m['status'] === 'ongoing')<span class="shrink-0 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase text-primary dark:bg-primary/20 dark:text-teal-300">Ongoing</span>@endif
-                            </div>
-                            <p class="mt-0.5 text-sm text-slate-500 dark:text-slate-400">{{ $m['description'] }}</p>
-                            @if ($m['meta'])<p class="mt-1.5 text-xs font-medium text-emerald-600 dark:text-emerald-400">{{ $m['meta'] }}</p>@endif
+                    <div class="ns-jnode ns-jnode--{{ $m['status'] }}" wire:key="ms-{{ $m['key'] }}">
+                        <span class="ns-jdot">@if ($m['status'] === 'done')<x-nx.icon name="check" />@else<x-nx.icon :name="$m['icon']" />@endif</span>
+                        <div class="ns-card ns-ring ns-jcard">
+                            <span style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+                                <b>{{ $m['title'] }}</b>
+                                @if ($m['status'] === 'ongoing')<x-nx.pill variant="best">Ongoing</x-nx.pill>@endif
+                            </span>
+                            <p>{{ $m['description'] }}</p>
+                            @if ($m['meta'])<small style="color:rgb(var({{ $m['status'] === 'done' ? '--nx-ok' : '--nx-text-2' }}));font-weight:600">{{ $m['meta'] }}</small>@endif
                         </div>
                     </div>
                 @endforeach
             </div>
-            <a href="{{ route('rewards') }}" wire:navigate class="mt-2 block text-center text-sm font-semibold text-primary hover:underline dark:text-teal-300">Go earn more on Rewards →</a>
+            <a href="{{ route('rewards') }}" wire:navigate class="ns-btn" style="margin-top:6px;display:flex;justify-content:center">Go earn more on Rewards <x-nx.icon name="chevron-right" /></a>
         @endif
     @elseif ($tab === 'goals')
         @if (! $creditsEnabled)
-            <div class="rounded-2xl border border-dashed border-slate-300 py-12 text-center text-sm text-slate-400 dark:border-white/10">NaaraCredits isn't enabled right now.</div>
+            <x-nx.empty text="NaaraCredits isn't enabled right now." style="margin-top:18px" />
         @elseif (empty($goals))
-            <div class="rounded-2xl border border-dashed border-slate-300 py-12 text-center text-sm text-slate-400 dark:border-white/10">No goals are live yet — check back soon.</div>
+            <x-nx.empty text="No goals are live yet — check back soon." style="margin-top:18px" />
         @else
-            <div class="space-y-3">
+            <div style="margin-top:14px">
                 @foreach ($goals as $row)
                     @php
                         $goal = $row['goal']; $p = $row['progress'];
@@ -70,33 +48,25 @@
                             'campaign' => 'Limited time', default => 'Lifetime',
                         };
                     @endphp
-                    <div wire:key="goal-{{ $goal->id }}" class="rounded-2xl border border-slate-200 nx-glass-tile p-4 dark:border-white/10">
-                        <div class="flex items-start justify-between gap-3">
-                            @if ($goal->image_path && ! $p['claimed'])
-                                <img src="{{ $goal->image_path }}" alt="" class="h-10 w-10 shrink-0 rounded-full object-cover">
-                            @else
-                                <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full {{ $p['claimed'] ? 'bg-emerald-500 text-white' : 'bg-primary/10 text-primary dark:bg-primary/20 dark:text-teal-300' }}">
-                                    <x-icon name="{{ $p['claimed'] ? 'check' : ($goal->icon ?: 'star') }}" class="h-5 w-5" />
-                                </span>
-                            @endif
-                            <div class="min-w-0 flex-1">
-                                <div class="flex items-center justify-between gap-2">
-                                    <p class="font-semibold text-slate-900 dark:text-white">{{ $goal->title }}</p>
-                                    <span class="shrink-0 rounded-full bg-accent/15 px-2 py-0.5 text-[10px] font-bold uppercase text-accent-dark dark:text-accent">+{{ rtrim(rtrim(number_format((float) $goal->reward_credits, 2), '0'), '.') }}</span>
-                                </div>
-                                <p class="mt-0.5 text-sm text-slate-500 dark:text-slate-400">{{ $goal->description }}</p>
-                                <div class="mt-2.5">
-                                    <div class="h-2 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-white/10">
-                                        <div class="h-full rounded-full {{ $p['claimed'] ? 'bg-emerald-500' : 'bg-primary' }}" style="width: {{ $pct }}%"></div>
-                                    </div>
-                                    <p class="mt-1 text-xs text-slate-400">
-                                        {{ $periodLabel }} ·
-                                        @if ($p['claimed']) Reached — {{ $p['claimed_at']?->format('M j, Y') }}
-                                        @else {{ rtrim(rtrim(number_format($p['current'], 2), '0'), '.') }} / {{ rtrim(rtrim(number_format($p['target'], 2), '0'), '.') }}
-                                        @endif
-                                    </p>
-                                </div>
-                            </div>
+                    <div wire:key="goal-{{ $goal->id }}" class="ns-card ns-ring ns-goal">
+                        @if ($goal->image_path && ! $p['claimed'])
+                            <img src="{{ $goal->image_path }}" alt="" class="ns-goal__img">
+                        @else
+                            <span class="ns-tile" @if ($p['claimed']) style="--nx-tone:var(--nx-ok);color:rgb(var(--nx-ok))" @endif><x-nx.icon :name="$p['claimed'] ? 'check' : ($goal->icon ?: 'star')" /></span>
+                        @endif
+                        <div style="min-width:0;flex:1">
+                            <span style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+                                <b style="font-size:16px;font-weight:600">{{ $goal->title }}</b>
+                                <x-nx.pill variant="gold"><x-naara-coin class="h-3.5 w-3.5" /> +{{ rtrim(rtrim(number_format((float) $goal->reward_credits, 2), '0'), '.') }}</x-nx.pill>
+                            </span>
+                            <p class="ns-sub" style="font-size:14px;margin:4px 0 0">{{ $goal->description }}</p>
+                            <div class="ns-progress" role="progressbar" aria-valuenow="{{ $pct }}" aria-valuemin="0" aria-valuemax="100"><i style="width:{{ $pct }}%"></i></div>
+                            <small class="ns-small" style="display:block;margin-top:6px">
+                                {{ $periodLabel }} ·
+                                @if ($p['claimed']) Reached — {{ $p['claimed_at']?->format('M j, Y') }}
+                                @else {{ rtrim(rtrim(number_format($p['current'], 2), '0'), '.') }} / {{ rtrim(rtrim(number_format($p['target'], 2), '0'), '.') }}
+                                @endif
+                            </small>
                         </div>
                     </div>
                 @endforeach
@@ -104,44 +74,35 @@
         @endif
     @else
         @if ($orders->isEmpty())
-            <div class="rounded-2xl border border-dashed border-slate-300 py-12 text-center text-sm text-slate-400 dark:border-white/10">
-                No eSIMs yet — your first purchase will show up here as a stamp on your journey.
-                <a href="{{ route('catalogue') }}" wire:navigate class="mt-2 block font-semibold text-primary hover:underline dark:text-teal-300">Browse eSIM plans →</a>
-            </div>
+            <x-nx.empty text="No eSIMs yet — your first purchase will show up here as a stamp on your journey." style="margin-top:18px">
+                <a href="{{ route('catalogue') }}" wire:navigate class="ns-btn ns-btn--solid" style="margin-top:12px;display:inline-flex">Browse eSIM plans</a>
+            </x-nx.empty>
         @else
-            <div class="relative space-y-0">
+            <div class="ns-jlist">
                 @foreach ($orders as $order)
                     @php
                         $country = $order->plan?->countries[0] ?? null;
                         $isActive = $order->status === 'active' && (! $order->expires_at || $order->expires_at->isFuture());
                         $isExpired = $order->expires_at && $order->expires_at->isPast();
-                        $tone = $isExpired ? 'bg-slate-200 text-slate-500 dark:bg-white/10 dark:text-slate-400' : ($isActive ? 'bg-emerald-500 text-white' : 'bg-amber-400 text-white');
                     @endphp
-                    <div class="relative flex gap-4 pb-8 last:pb-0" wire:key="ord-{{ $order->id }}">
-                        @unless ($loop->last)
-                            <span class="absolute left-[19px] top-10 h-full w-px bg-primary/30"></span>
-                        @endunless
-                        <span class="relative z-10 flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full ring-2 ring-white dark:ring-[#0D1B2A]">
-                            <x-country-flag :country="$country" class="h-10 w-10 rounded-full" />
-                        </span>
-                        <div class="min-w-0 flex-1 rounded-2xl border border-slate-200 nx-glass-tile p-4 dark:border-white/10">
-                            <div class="flex items-start justify-between gap-2">
-                                <div class="min-w-0">
-                                    <p class="truncate font-semibold text-slate-900 dark:text-white">{{ $order->plan?->name ?? 'eSIM plan' }}</p>
-                                    <p class="text-xs text-slate-400">Purchased {{ $order->created_at->format('M j, Y') }}</p>
-                                </div>
-                                <span class="shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase {{ $tone }}">{{ $isExpired ? 'Expired' : ($isActive ? 'Active' : ucfirst($order->status)) }}</span>
-                            </div>
-                            <div class="mt-2 flex flex-wrap items-center gap-3 text-xs text-slate-500 dark:text-slate-400">
-                                @if ($order->plan?->data_mb)<span><x-icon name="wifi" class="mr-1 inline h-3.5 w-3.5" />{{ number_format($order->plan->data_mb / 1024, 1) }} GB</span>@endif
-                                @if ($order->expires_at)
-                                    <span><x-icon name="info" class="mr-1 inline h-3.5 w-3.5" />{{ $isExpired ? 'Expired '.$order->expires_at->diffForHumans() : 'Valid until '.$order->expires_at->format('M j, Y') }}</span>
-                                @endif
-                            </div>
+                    <div class="ns-jnode ns-jnode--{{ $isExpired ? 'locked' : 'done' }}" wire:key="ord-{{ $order->id }}">
+                        <span class="ns-jdot ns-jdot--flag"><x-country-flag :country="$country" class="h-10 w-10 rounded-full" /></span>
+                        <div class="ns-card ns-ring ns-jcard">
+                            <span style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px">
+                                <span style="min-width:0">
+                                    <b style="display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ $order->plan?->name ?? 'eSIM plan' }}</b>
+                                    <small class="ns-small">Purchased {{ $order->created_at->format('M j, Y') }}</small>
+                                </span>
+                                <x-nx.pill :variant="$isExpired ? 'out' : ($isActive ? 'rec' : 'best')">{{ $isExpired ? 'Expired' : ($isActive ? 'Active' : ucfirst($order->status)) }}</x-nx.pill>
+                            </span>
+                            <span style="display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;margin-top:8px;font-size:13px;color:rgb(var(--nx-text-2))">
+                                @if ($order->plan?->data_mb)<span style="display:inline-flex;align-items:center;gap:4px"><x-nx.icon name="bars" />{{ number_format($order->plan->data_mb / 1024, 1) }} GB</span>@endif
+                                @if ($order->expires_at)<span style="display:inline-flex;align-items:center;gap:4px"><x-nx.icon name="info" />{{ $isExpired ? 'Expired '.$order->expires_at->diffForHumans() : 'Valid until '.$order->expires_at->format('M j, Y') }}</span>@endif
+                            </span>
                         </div>
                     </div>
                 @endforeach
             </div>
         @endif
     @endif
-</div>
+</x-nx.page>

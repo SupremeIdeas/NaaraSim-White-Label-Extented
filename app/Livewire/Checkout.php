@@ -75,6 +75,9 @@ class Checkout extends Component
      *  your own, via an ACCEPTED WalletGroupMember row. Null = pay normally. */
     public ?int $payFromGroupMemberId = null;
 
+    /** True after a purchase failed ONLY because the member's own wallet is short: the page then offers a Top up link. */
+    public bool $needsTopUp = false;
+
     public function mount(EsimPlan $plan): void
     {
         $this->plan = $plan;
@@ -145,6 +148,7 @@ class Checkout extends Component
     public function purchase(WalletService $wallet, ProviderRouter $router, CouponEngine $coupons, CreditService $credits, PricingEngine $pricing, MerchantEarningsService $earnings, WalletGroupService $groups): void
     {
         $user = auth()->user();
+        $this->needsTopUp = false;
 
         // Device-compatibility gate: never sell an eSIM to a phone that can't use
         // it (blueprint Section 32 — the check runs BEFORE purchase).
@@ -285,6 +289,7 @@ class Checkout extends Component
                     message: "That shared plan's wallet balance is too low — you were not charged.");
             } else {
                 $this->error = 'Your wallet balance is too low. Please top up and try again.';
+                $this->needsTopUp = true;
                 $this->dispatch('nx-toast', variant: 'hero', type: 'error',
                     title: 'Payment failed',
                     message: 'Your wallet balance is too low — you were not charged. Top up and try again.',

@@ -1,30 +1,29 @@
 <div>
     @if ($needed)
-        <div class="rounded-2xl border border-amber-200 bg-amber-50 p-4 dark:border-amber-500/30 dark:bg-amber-500/10" role="group" aria-labelledby="stepup-title">
-            <div class="flex items-start gap-3">
-                <x-icon name="shield" class="mt-0.5 h-5 w-5 shrink-0 text-amber-600 dark:text-amber-300" />
-                <div class="min-w-0 flex-1 text-sm">
-                    <p id="stepup-title" class="font-semibold text-amber-900 dark:text-amber-200">{{ __('payouts.step_up.title') }}</p>
-                    <p class="mt-0.5 text-amber-800 dark:text-amber-300/90">{{ __('payouts.step_up.body') }}</p>
+        <div class="ns-note ns-note--warn" style="display:block" role="group" aria-labelledby="stepup-title">
+            <div style="display:flex;gap:12px;align-items:flex-start">
+                <x-nx.icon name="shield" />
+                <div style="min-width:0;flex:1">
+                    <b id="stepup-title" style="display:block;color:rgb(var(--nx-text));font-weight:600">{{ __('payouts.step_up.title') }}</b>
+                    <p style="margin:4px 0 0">{{ __('payouts.step_up.body') }}</p>
 
-                    @if ($error)<p class="mt-2 text-red-700 dark:text-red-300" role="alert">{{ $error }}</p>@endif
-                    @if ($message)<p class="mt-2 text-emerald-700 dark:text-emerald-300" role="status">{{ $message }}</p>@endif
+                    @if ($error)<p style="margin:8px 0 0;color:rgb(var(--nx-bad))" role="alert">{{ $error }}</p>@endif
+                    @if ($message)<p style="margin:8px 0 0;color:rgb(var(--nx-ok))" role="status">{{ $message }}</p>@endif
 
-                    <div class="mt-3 flex flex-wrap items-center gap-2">
+                    <div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:12px">
                         @if (! $authenticator)
-                            <button type="button" wire:click="send" wire:loading.attr="disabled" wire:target="send"
-                                class="rounded-lg border border-amber-300 bg-white px-3 py-1.5 text-xs font-semibold text-amber-900 disabled:opacity-50 dark:border-amber-500/40 dark:bg-slate-900 dark:text-amber-200">{{ __('payouts.step_up.send') }}</button>
+                            <button type="button" class="ns-btn" style="margin:0;height:40px" wire:click="send" wire:loading.attr="disabled" wire:target="send">{{ __('payouts.step_up.send') }}</button>
                         @endif
-                        <input type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="8" wire:model="code" wire:keydown.enter="verify"
-                            placeholder="{{ __('payouts.step_up.enter') }}" aria-label="{{ __('payouts.step_up.enter') }}"
-                            class="w-44 rounded-lg border border-amber-300 bg-white px-3 py-1.5 text-sm text-slate-900 dark:border-amber-500/40 dark:bg-slate-900 dark:text-slate-100">
-                        <button type="button" wire:click="verify" wire:loading.attr="disabled" wire:target="verify"
-                            class="rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-50">{{ __('payouts.step_up.verify') }}</button>
+                        <label class="ns-search" style="margin:0;height:40px;width:11rem">
+                            <input type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="8" wire:model="code" wire:keydown.enter="verify"
+                                   placeholder="{{ __('payouts.step_up.enter') }}" aria-label="{{ __('payouts.step_up.enter') }}">
+                        </label>
+                        <button type="button" class="ns-btn ns-btn--solid" style="margin:0;height:40px" wire:click="verify" wire:loading.attr="disabled" wire:target="verify">{{ __('payouts.step_up.verify') }}</button>
                     </div>
                 </div>
             </div>
         </div>
     @elseif ($message)
-        <p class="rounded-xl bg-emerald-50 p-3 text-sm text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300" role="status">{{ $message }}</p>
+        <x-nx.note icon="check" role="status">{{ $message }}</x-nx.note>
     @endif
 </div>

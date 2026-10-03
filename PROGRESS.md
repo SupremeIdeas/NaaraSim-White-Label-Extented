@@ -9,6 +9,13 @@
 
 ## DONE
 
+### Skins ported from master + licence-gated (Prompt 22, 2026-10-03)
+- The 35-skin engine, `x-nx.*` components, tokens and the member-page conversions are now in this fork. **Master is the only authority for how many skins this licence unlocks** (default 5 for Extended; its zero-feature-locks rule is untouched, the limit is a quota); this fork stores the number it receives (`skins.allowance` in the entitlement refresh) and obeys it via `App\Support\Appearance\LicensedSkins`. Before activation exactly one skin (the platform default) is offered.
+- Licensee screen: **Admin -> Your skins** (`admin.skins`): pick up to the allowance, first pick is the default, audited. Hidden skins are refused server-side (`AppearanceResolver::platform()` + `UpdateUserAppearance`); a member's saved hidden skin resolves to the default and the row is never rewritten. Allowance shown on the Updater panel. `php artisan skins:verify` ports the master proof command.
+- Not ported on purpose: N2N (permanently master-only), Naara Pro, sounds library, Prompt 21 access layer, `SkinAllowance`/`EntitlementPayload`/`config/white_label_skins.php`. Fitness test guards all of it.
+- Tests: `LicensedSkinsTest` (15), appearance fixtures licence-aware, boundary fitness extended. Evidence: `docs/audits/SKINS-WL-AUDIT.md`, `SKINS-WL-PARITY-REPORT.md`, screenshots in `docs/audits/skins-wl/`.
+- Pending by owner decision: admin sub-page skin conversion, other locales beyond en/ar/fr/sw.
+
 ### Chat Composer Pro follow-up (2026-10-03): real recent photos + staff reply
 - The attach sheet's **Recent photos** strip shows REAL images only (no placeholders): the native app bridge / Capacitor Media plugin when running as the installed app (a browser cannot list a phone's gallery), else the member's backend recents, else photos attached on this device (per account, 12 max / 30 days, Clear button). First tile = Browse (OS photo picker). See docs/chat-composer-plan.md.
 - The staff ticket reply box (Admin -> Tickets) now uses the composer (text + emoji; the server takes text only). Flag: `COMPOSER_STAFF_REPLY`.

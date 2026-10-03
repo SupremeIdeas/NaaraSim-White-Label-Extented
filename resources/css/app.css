@@ -14,6 +14,15 @@
 /* Preloader Studio presets (brand-aware, compiled — never inline). */
 @import './preloaders.css';
 
+/* Skin system (Prompt 20): per-user appearance. Tokens first, then accents (they override tokens), the shared component hooks,
+   the personalisation dials and one stylesheet per skin. Wireframes in docs/appearance/ are the visual contract. */
+@import './nx-tokens.css';
+@import './nx-accents.css';
+@import './nx-components.css';
+@import './nx-layout.css';
+@import './nx-dials.css';
+@import './nx-skins.css';
+
 /* Theme Toggle Studio presets (brand-aware, compiled — never inline). */
 @import './theme-toggle.css';
 

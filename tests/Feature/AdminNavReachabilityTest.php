@@ -54,6 +54,6 @@ class AdminNavReachabilityTest extends TestCase
         $this->assertMatchesRegularExpression("/\\\$primary\[\]\s*=\s*\['route' => 'admin\.security'/", $layout);
         // And whatever overflows the 4 slots leads the More sheet rather than vanishing.
         $this->assertStringContainsString('$moreForSheet', $shell);
-        $this->assertStringContainsString('@foreach ($moreForSheet as $item)', $shell);
+        $this->assertStringContainsString('<x-more-sheet :more="$moreForSheet"', $shell);
     }
 }

@@ -182,11 +182,35 @@ class CustomerUiTest extends TestCase
             $delegates = ! str_contains($contents, 'dark:')
                 && str_contains($contents, "@include('livewire.partials");
             $haystack = $delegates ? $partialBlob : $contents;
-            $this->assertStringContainsString('dark:', $haystack, basename($view).' (or its partials) must have dark: variants');
+            // A view converted to the skin system (Prompt 20 §23) is built from x-nx.* components / ns-* hooks whose colours are tokens that flip
+            // with the mode (`.dark`), so it carries no per-element dark: classes; its dark mode is proven by the contrast scan instead.
+            $tokenDriven = str_contains($haystack, '<x-nx.') || str_contains($haystack, 'class="ns-') || str_contains($haystack, 'nx:converted');
+            if (! $tokenDriven) {
+                $this->assertStringContainsString('dark:', $haystack, basename($view).' (or its partials) must have dark: variants');
+            }
 
             if (in_array(pathinfo($view, PATHINFO_FILENAME), $actionViews, true)) {
                 $this->assertStringContainsString('wire:loading', $contents, basename($view).' must show a loading state');
             }
         }
+    }
+
+    public function test_wallet_balance_is_one_parent_card_housing_the_ngn_row_and_quick_actions(): void
+    {
+        // Owner direction: the wallet widget is ONE premium parent container (balance + NGN equivalent + Top up / Withdraw / Spending),
+        // not loose parts, so every skin treats the whole widget as one surface.
+        $user = User::factory()->create();
+
+        $html = Livewire::actingAs($user)->test(WalletComponent::class)->html();
+
+        $card = strpos($html, 'ns-wallet-hero');
+        $sub = strpos($html, 'ns-balance__sub');
+        $actions = strpos($html, 'ns-balance__actions');
+        $tabs = strpos($html, 'role="tablist"');
+        $this->assertNotFalse($card);
+        $this->assertTrue($card < $sub && $sub < $actions && $actions < $tabs, 'NGN row and quick actions sit inside the balance card, above the tabs');
+        $this->assertStringContainsString('Top up', $html);
+        $this->assertStringContainsString('Withdraw', $html);
+        $this->assertStringContainsString('Spending', $html);
     }
 }

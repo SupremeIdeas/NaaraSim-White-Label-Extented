@@ -27,7 +27,7 @@ class NumbersBento
 
     /**
      * Fixed order — the bento rhythm (on a 6-column grid):
-     *   Row 1: Verify (span 4) + Rent (span 2)
+     *   Row 1: Verify (span 3) + Rent (span 3)
      *   Row 2: Naara Line — FULL WIDTH (span 6, the featured hero card)
      *   Row 3: Internet Calls (span 3) + Call Forwarding (span 3)
      *   Row 4: Contact Management — FULL WIDTH (span 6)
@@ -36,8 +36,8 @@ class NumbersBento
 
     /** key => [span (of 6), tall (taller hero height)]. */
     public const LAYOUT = [
-        'verify' => ['span' => 4, 'tall' => true],
-        'rent' => ['span' => 2, 'tall' => true],
+        'verify' => ['span' => 3, 'tall' => true],
+        'rent' => ['span' => 3, 'tall' => true],
         'line' => ['span' => 6, 'tall' => true],
         'internet_calls' => ['span' => 3, 'tall' => false],
         'call_forwarding' => ['span' => 3, 'tall' => false],

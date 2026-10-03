@@ -1,0 +1,24 @@
+/* Personalisation dials (Prompt 20 §37), lifted from the V9 wireframe. Applied as <html data-nx-*> attributes, which the
+   server only renders inside the signed-in dashboard, so marketing and auth pages never see them. */
+html[data-nx-round=sharp] { --nx-rs: .35; }
+html[data-nx-round=round] { --nx-rs: 1.35; }
+/* Text size: root font-size scales anything rem-sized (platform chrome); the px-built ns-* components inside .ns-app__body scale with CSS zoom via --nx-ts, exactly as the wireframe does. */
+html[data-nx-ts=s] { --nx-ts: .92; font-size: 92%; }
+html[data-nx-ts=l] { --nx-ts: 1.12; font-size: 112%; }
+html[data-nx-depth=flat] { --nx-e1: none; --nx-e2: none; }
+html[data-nx-depth=deep] { --nx-e1: 0 22px 44px -18px rgb(0 0 0 / .9); --nx-e2: 0 -30px 70px -20px rgb(0 0 0 / .85); }
+html:not(.dark)[data-nx-depth=deep] { --nx-e1: 0 22px 40px -18px rgb(10 36 49 / .45); --nx-e2: 0 -26px 60px -20px rgb(10 36 49 / .4); }
+/* Typeface: system stacks only (no web fonts, no FOUT). `naara` keeps the bundled fonts. */
+html[data-nx-font=system] { --nx-font-display: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; --nx-font-num: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; }
+html[data-nx-font=serif] { --nx-font-display: Georgia, 'Times New Roman', serif; }
+html[data-nx-font=mono] { --nx-font-num: ui-monospace, 'SF Mono', Menlo, Consolas, monospace; }
+html[data-nx-dens=compact] .ns-row { height: 48px; margin-top: 8px; }
+html[data-nx-dens=compact] .ns-list__row { min-height: 48px; }
+html[data-nx-dens=compact] .ns-field { padding: 9px 12px; }
+html[data-nx-dens=compact] .ns-grid, html[data-nx-dens=compact] .ns-stack { gap: 8px; }
+html[data-nx-dens=compact] .ns-card { padding: 11px 12px 10px; }
+html[data-nx-dens=compact] .ns-step { margin: 14px 0 8px; }
+html[data-nx-dens=compact] .ns-note { padding: 9px 12px; margin-top: 9px; }
+/* Motion: off everywhere (spinners keep turning so a loading state is never a frozen icon). */
+html[data-nx-motion=reduced] *:not(.animate-spin) { animation: none !important; transition: none !important; }
+@media (prefers-reduced-motion: reduce) { .ns-card, .ns-row, .ns-list__row, .ns-len button { transition: none !important; } }

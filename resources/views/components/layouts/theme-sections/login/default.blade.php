@@ -42,7 +42,7 @@
                 <x-flag-orbit tone="dark" />
             @endif
 
-            <div class="relative flex h-full flex-col justify-between p-8 lg:p-12">
+            <div class="relative flex h-full flex-col justify-between p-8 pb-[calc(2rem+30px)] lg:p-12">
                 <a href="{{ route('home') }}" class="inline-flex">
                     <x-brand-logo variant="family" theme="dark" size="lg" fallback-icon="signal" />
                 </a>
@@ -57,7 +57,9 @@
         {{-- Form column. `relative overflow-hidden` hosts the optional
              decorative login_bg layer (dot-grid/mesh-grain/aurora/none)
              behind the card, without affecting any other login style. --}}
-        <div class="relative flex flex-1 items-center justify-center overflow-hidden bg-[#F8F9FA] px-4 py-10 dark:bg-navy lg:w-1/2">
+        {{-- Mobile: the form sits on a 30px-rounded "sheet" that rides up over the banner (owner request, 2026-10-03), so the two
+             different-coloured sections meet in a curve, not a flat line. Desktop keeps the straight two-column split. --}}
+        <div class="relative z-10 -mt-[30px] flex flex-1 items-center justify-center overflow-hidden rounded-t-[30px] bg-[#F8F9FA] px-4 pb-10 pt-12 shadow-[0_-12px_32px_-18px_rgba(0,0,0,0.45)] dark:bg-navy lg:z-auto lg:mt-0 lg:w-1/2 lg:rounded-none lg:py-10 lg:shadow-none">
             <x-theme-sections.login-bg :effect="\App\Support\ThemePreset::sectionStyle('login_bg')" />
             <div class="relative z-10 w-full max-w-sm">
                 <div class="mb-6 flex items-center justify-between lg:hidden">

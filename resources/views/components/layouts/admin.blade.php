@@ -96,6 +96,8 @@
         $more[] = ['route' => 'admin.welcome-settings', 'label' => 'Welcome animation', 'icon' => 'zap'];
         $more[] = ['route' => 'admin.theme', 'label' => 'Theme', 'icon' => 'star'];
         $more[] = ['route' => 'admin.dashboard-theme', 'label' => 'Dashboard theme', 'icon' => 'image'];
+        $more[] = ['route' => 'admin.user-appearance', 'label' => 'User appearance', 'icon' => 'sparkles'];
+        $more[] = ['route' => 'admin.skins', 'label' => 'Your skins', 'icon' => 'sparkles'];
         $more[] = ['route' => 'admin.service-icons', 'label' => 'Service icons', 'icon' => 'grid'];
         $more[] = ['route' => 'admin.integrations', 'label' => 'Integrations', 'icon' => 'link'];
         $more[] = ['route' => 'admin.features', 'label' => 'Features', 'icon' => 'zap'];
@@ -153,6 +155,7 @@
     $more[] = ['route' => 'admin.account', 'label' => 'My account', 'icon' => 'id-card'];
     // Everyone in the panel can hop back to the end-user app.
     $more[] = ['heading' => 'Shortcuts'];
+    $more[] = ['route' => 'admin.my-appearance', 'label' => 'My appearance', 'icon' => 'sparkles'];
     $more[] = ['route' => 'dashboard', 'label' => 'Storefront', 'icon' => 'globe'];
     // Admin-assignable "Download the app" slot (App Export §1).
     if (\App\Support\AppExport::placementActive('admin_menu')) {

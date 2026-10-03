@@ -346,7 +346,7 @@ class CouponsAndBannersTest extends TestCase
             ->assertSee('My spending')
             ->assertSee('$12.50')            // this-month spend
             ->assertSee('Topped up (USD)')
-            ->assertSee('nx-aurora', false)  // aurora card present
+            ->assertSee('ns-balance', false)   // the skin system's balance hero card is present
             ->assertSee('Quick amounts');    // collapsible top-up card
     }
 

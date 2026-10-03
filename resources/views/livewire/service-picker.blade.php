@@ -1,3 +1,4 @@
+{{-- nx:converted (skin tokens only; see docs/appearance/SKIN-CONTRACT.md) --}}
 <div>
     @if ($open)
         <div class="fixed inset-0 z-[70] flex items-end justify-center sm:items-center"
@@ -13,13 +14,13 @@
              role="dialog" aria-modal="true" aria-label="Choose a service">
             <div class="absolute inset-0 bg-black/60" wire:click="close"></div>
 
-            <div class="relative flex max-h-[85vh] w-full max-w-md flex-col overflow-hidden rounded-t-3xl bg-white shadow-2xl dark:bg-[#0D1B2A] sm:rounded-3xl">
-                <div class="flex items-center justify-between border-b border-slate-100 px-5 py-4 dark:border-white/10">
-                    <h2 class="flex items-center gap-2 text-base font-bold text-slate-900 dark:text-white">
+            <div class="relative flex max-h-[85vh] w-full max-w-md flex-col overflow-hidden rounded-t-3xl bg-[rgb(var(--nx-surface))] shadow-2xl sm:rounded-3xl">
+                <div class="flex items-center justify-between border-b border-[rgb(var(--nx-line))] px-5 py-4">
+                    <h2 class="flex items-center gap-2 text-base font-bold text-[rgb(var(--nx-text))]">
                         <x-icon name="grid" class="h-5 w-5" gradient /> {{ $title ?? 'Choose a service' }}
                     </h2>
                     <button type="button" wire:click="close" aria-label="Close"
-                            class="flex h-8 w-8 items-center justify-center rounded-full text-slate-400 hover:bg-slate-100 dark:hover:bg-white/10">
+                            class="flex h-8 w-8 items-center justify-center rounded-full text-[rgb(var(--nx-text-2))] hover:bg-[rgb(var(--nx-surface-3))]">
                         <x-icon name="x" class="h-5 w-5" />
                     </button>
                 </div>
@@ -39,23 +40,23 @@
                                     x-show="matches($el)"
                                     :style="{ order: isFav('{{ $opt['slug'] }}') ? 0 : 1 }"
                                     x-bind:class="view === 'grid'
-                                        ? 'relative flex flex-col items-center gap-1.5 rounded-xl p-3 text-center hover:bg-slate-50 dark:hover:bg-white/5'
-                                        : 'flex items-center gap-3 rounded-xl px-3 py-2.5 text-left hover:bg-slate-50 dark:hover:bg-white/5'">
+                                        ? 'relative flex flex-col items-center gap-1.5 rounded-xl p-3 text-center hover:bg-[rgb(var(--nx-surface-2))]'
+                                        : 'flex items-center gap-3 rounded-xl px-3 py-2.5 text-left hover:bg-[rgb(var(--nx-surface-2))]'">
                                 <x-service-icon :slug="$opt['slug']" class="h-8 w-8 shrink-0" />
-                                <span class="flex-1 truncate text-sm font-medium text-slate-800 dark:text-slate-100"
+                                <span class="flex-1 truncate text-sm font-medium text-[rgb(var(--nx-text))]"
                                       :class="view === 'grid' && 'flex-none w-full text-xs'">{{ $opt['name'] }}</span>
                                 <button type="button" @click.stop="toggleFav('{{ $opt['slug'] }}')"
                                         aria-label="Favourite {{ $opt['name'] }}"
                                         class="shrink-0 rounded-full p-1"
                                         :class="view === 'grid' && 'absolute top-1 right-1'">
                                     <x-icon name="star" class="h-4 w-4"
-                                            ::class="isFav('{{ $opt['slug'] }}') ? 'text-accent-dark fill-accent-dark dark:text-accent dark:fill-accent' : 'text-slate-300 dark:text-slate-600'" />
+                                            ::class="isFav('{{ $opt['slug'] }}') ? 'text-[rgb(var(--nx-gold-ink))] fill-[rgb(var(--nx-gold-ink))]' : 'text-[rgb(var(--nx-text-3))]'" />
                                 </button>
                             </button>
                         @endforeach
                     </div>
 
-                    <p class="hidden px-3 py-8 text-center text-sm text-slate-500 dark:text-slate-400"
+                    <p class="hidden px-3 py-8 text-center text-sm text-[rgb(var(--nx-text-2))]"
                        x-show="q !== '' && ![...$root.querySelectorAll('[data-name]')].some(el => el.dataset.name.includes(q.toLowerCase().trim()))"
                        x-cloak>
                         No service matches “<span x-text="q"></span>”.
