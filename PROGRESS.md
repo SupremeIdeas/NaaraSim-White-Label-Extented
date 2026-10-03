@@ -2037,6 +2037,11 @@ conflicts by hand, with the full suite green before `main` moved:
 - Remaining ~25 themes are deferred ("revisited to be built later after
   other features are wired") — see the blueprint + `## NEXT`.
 
+### PARKED by owner (2026-10-03), do not start until asked
+- **Port the extra languages to the forks.** Master has 14 locales (Beta, AI-drafted outside en/fr/ar/sw); both forks carry only en/ar/fr/sw. Port method: copy `lang/{locale}/*` (minus any master-only groups) and `Locale` registry entries, then re-run `LocaleTest`.
+- Admin sub-page skin conversion (about 90 pages) and the merchant white-label skin conversion.
+- N2N (master-only, permanent): blocked until the owner supplies the original N2N Batch 1 to 4 plan.
+
 ### 🎨 Theme visual rebuild batch 3 (5 brand-new themes, built from scratch) — 2026-09-07
 Continuation of the batch-by-batch arc, per "let us move to the Next batch
 after you have finished batch 2." Unlike batches 1-2 (which mixed
