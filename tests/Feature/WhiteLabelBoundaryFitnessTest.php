@@ -82,4 +82,43 @@ class WhiteLabelBoundaryFitnessTest extends TestCase
         $this->assertTrue(class_exists('App\\Livewire\\Admin\\WhiteLabelUpdater'), 'the consumer updater screen must exist');
         $this->assertTrue(Route::has('admin.updater'), 'the consumer updater route must exist');
     }
+
+    /**
+     * PERMANENTLY MASTER-ONLY MODULES (owner decision 2026-10-03, same standing as the license boundary):
+     * N2N (Naara-to-Naara) must never exist in a white-label build — no class, route, table, migration, view,
+     * language file, config or test. If this fails, something N2N was ported or synced here: remove it, do not
+     * relax this test. See docs/architecture/WHITE-LABEL-LICENSE-BOUNDARY.md section 6 and CLAUDE.md.
+     */
+    public function test_no_master_only_module_files_exist_on_this_fork(): void
+    {
+        $roots = ['app', 'routes', 'database', 'resources', 'lang', 'config', 'tests', 'public/js', 'public/images'];
+        $found = [];
+        foreach ($roots as $root) {
+            $dir = base_path($root);
+            if (! is_dir($dir)) {
+                continue;
+            }
+            $it = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($dir, \FilesystemIterator::SKIP_DOTS));
+            foreach ($it as $file) {
+                $rel = str_replace('\\', '/', substr($file->getPathname(), strlen(base_path()) + 1));
+                if ($rel === 'tests/Feature/WhiteLabelBoundaryFitnessTest.php') {
+                    continue;
+                }
+                if (preg_match('#(^|[/_.\-])n2n([/_.\-]|[a-z]|$)#i', $rel) === 1) {
+                    $found[] = $rel;
+                }
+            }
+        }
+        $this->assertSame([], $found, 'N2N is permanently master-only and must not exist on a white-label build: '.implode(', ', array_slice($found, 0, 8)));
+    }
+
+    public function test_no_n2n_route_name_or_table_exists_on_this_fork(): void
+    {
+        foreach (Route::getRoutes() as $route) {
+            $this->assertStringStartsNotWith('n2n.', (string) $route->getName(), 'a route named n2n.* must not exist on a white-label build');
+        }
+        foreach (\Illuminate\Support\Facades\Schema::getTableListing() as $table) {
+            $this->assertDoesNotMatchRegularExpression('/(^|\.)n2n_/i', $table, 'a table named n2n_* must not exist on a white-label build');
+        }
+    }
 }

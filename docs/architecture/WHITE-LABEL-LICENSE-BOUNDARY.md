@@ -149,3 +149,21 @@ makes sense on the issuer (master), which books revenue from selling licenses.
 1. `composer dump-autoload` clean.
 2. Grep the whole app for every deleted class name → zero remaining references.
 3. Full `vendor/bin/phpunit` green.
+
+---
+
+## 6. Permanently master-only product modules (N2N and any future module of the same standing)
+
+Owner decision 2026-10-03, recorded with the same weight as the license boundary above.
+
+| Module | Master | White Label | White Label Extended |
+|---|:--:|:--:|:--:|
+| **N2N (Naara-to-Naara)**: in-network calling and messaging between Naara IDs, NaaraCredit-vs-Wallet funding choice, chat themes, conversation list/search, block-and-report, system-message bubbles | **Yes** | **Never** | **Never** |
+
+Rules:
+
+1. Everything for such a module lives under a path that contains its token (`N2N`/`n2n`): classes under `...\N2N\`, views under `*/n2n/*`, migrations `*n2n*`, tables `n2n_*`, routes `n2n.*`, `lang/*/n2n.php`, `config/n2n.php`, tests `*N2N*`. The tokens are listed in `App\Support\MasterOnlyModules::TOKENS` (master only); a new module is added by appending a token, never by removing one.
+2. Master refuses to ship it: `PackageBuilder` will not build, and `PackagePublisher` will not store or publish, a distributable package containing a matching path.
+3. The forks refuse to hold it: `WhiteLabelBoundaryFitnessTest` fails the build if any matching class, route, table, migration, view, language file or config file exists in the fork.
+4. Shared files (layouts, skins, i18n, appearance) may be ported to a fork; a file whose purpose is the module may not, not even inert, flagged off, or stubbed.
+5. Nobody re-asks the owner. If a task seems to need the module inside a fork, stop and report.
