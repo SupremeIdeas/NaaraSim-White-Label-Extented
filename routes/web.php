@@ -218,6 +218,8 @@ Route::get('/get-started', OnboardingController::class)->name('onboarding');
 
 // Public, unauthenticated system status page (for users + Developer API integrators).
 Route::get('/status', StatusPage::class)->name('status');
+// Admin-uploaded Lottie preloader, served from our own origin (random-UUID filename, validated at upload).
+Route::get('/preloader-asset/{id}.json', \App\Http\Controllers\PreloaderAssetController::class)->where('id', '[0-9a-f\-]{36}')->name('preloader.asset');
 
 // Public blog (Module 30 · Blog overhaul). Index is a Livewire component so the
 // SAME hero/carousel/infinite-feed serves marketing + the in-app floating nav.

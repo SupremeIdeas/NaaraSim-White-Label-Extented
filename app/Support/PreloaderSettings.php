@@ -57,6 +57,9 @@ class PreloaderSettings
      */
     public const LEGACY_STYLES = ['pulse-logo', 'spinner', 'bars', 'progress'];
 
+    /** The admin's own uploaded animation (GIF / WebP / Lottie JSON, per light + dark mode) — see CustomPreloader. */
+    public const CUSTOM = 'custom';
+
     /** Blur intensities — shared vocabulary with the glass-header control. */
     public const BLUR_STYLES = ['light' => 6, 'medium' => 12, 'heavy' => 20];
 
@@ -135,6 +138,8 @@ class PreloaderSettings
             'blur_style' => 'medium',
             'loading_text' => 'Loading',
             'colors' => [], // manual --nx-pl-c* overrides when use_brand_color=false
+            // Custom animation per mode (only used when preset === 'custom'): ['light' => meta, 'dark' => meta].
+            'custom' => [],
         ];
     }
 
@@ -222,8 +227,11 @@ class PreloaderSettings
 
         $cfg = array_merge(self::safeDefault(), $row);
 
-        // Defend the preset slug: must be a known legacy style or catalog preset.
-        if (! in_array($cfg['preset'], self::LEGACY_STYLES, true) && ! isset(self::PRESETS[$cfg['preset']])) {
+        $cfg['custom'] = CustomPreloader::clean($cfg['custom'] ?? []);
+
+        // Defend the preset slug: must be a known legacy style, catalog preset, or a custom animation that actually has a file.
+        $isCustom = $cfg['preset'] === self::CUSTOM && $cfg['custom'] !== [];
+        if (! $isCustom && ! in_array($cfg['preset'], self::LEGACY_STYLES, true) && ! isset(self::PRESETS[$cfg['preset']])) {
             $cfg['preset'] = self::safeDefault()['preset'];
         }
 

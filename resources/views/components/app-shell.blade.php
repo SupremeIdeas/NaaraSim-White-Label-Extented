@@ -12,6 +12,11 @@
     $allItems = array_merge($primary, $more);
     // Pad primary to 4 so the bottom bar stays balanced around the centre button.
     $slots = array_pad(array_slice($primary, 0, 4), 4, null);
+    // Only 4 primary items fit the bottom bar. Anything beyond that must not silently disappear on phones (the More sheet used to receive
+    // only `$more`, so a 5th primary item — the admin's Security — was reachable on desktop and nowhere on mobile): the overflow leads the
+    // More sheet instead.
+    $overflow = array_slice($primary, 4);
+    $moreForSheet = $overflow ? array_merge($overflow, $more) : $more;
     // Header brand: the umbrella Naara family mark everywhere, EXCEPT a product's
     // own surface (eSIM/numbers → NaaraSim, gifts → Naara Gift), so each stands
     // out (owner request). Chrome, not content — see App\Support\BrandContext.
@@ -250,7 +255,7 @@
                  More sheet). The active item keeps its brand-tinted highlight;
                  icons render white on dark for contrast against the solid card. --}}
             <div :class="moreLayout === 'list' ? 'flex flex-col gap-2' : 'grid grid-cols-4 gap-3'">
-                @foreach ($more as $item)
+                @foreach ($moreForSheet as $item)
                     @continue(! empty($item['heading'])) {{-- headings are desktop-sidebar only --}}
                     <a href="{{ route($item['route']) }}" wire:navigate @click="moreOpen = false"
                        :class="moreLayout === 'list' ? 'flex-row items-center gap-3 p-3 text-left' : 'flex-col items-center gap-1.5 p-3 text-center'"

@@ -9,6 +9,13 @@
 
 ## DONE
 
+### Ported from master (2026-10-03): custom preloaders, admin Security reachability, NaaraCredits coin
+- **Preloader Studio — your own animation:** upload a GIF, animated WebP or Lottie JSON separately for light and dark mode (one file serves both if only one is uploaded). Content-sniffed (never trusts the extension), 1 MB image / 512 KB Lottie caps, Lottie with expressions or remote asset URLs rejected, random file names, Lottie served from our own origin (`/preloader-asset/{uuid}.json`; the CSP only lets scripts fetch from `'self'`). Works with the Studio's existing per-page-type assignment, enabled and inherit-from-default; the background follows light/dark when no colour is set. Fixes `lottie.js` hydrating a node twice. NOT ported: minimum display time / max-per-day (they belong to the master-only UX/localization/platform-reach blueprint, Phase D — say the word if you want them here too).
+- **Admin Security was invisible on phones:** the admin bottom bar shows 4 items and the 5th primary (Security) silently dropped; Security now takes a bottom-bar slot, any overflow leads the More sheet, "My account" moved to its own More group, payout health/settings are in the nav, legible dark file buttons; `AdminNavReachabilityTest` fails the build if an admin page has no nav entry.
+- **NaaraCredits coin:** owner artwork as a light self-hosted WebP (4 KB / 10 KB) behind `x-naara-coin`.
+- Master-only and NOT ported: skin system (S1-S3), Naara Pro brand badge, anything license/oversight.
+
+
 ### Payouts follow-up ported from master — 2026-10-02
 - Automatic-by-default payouts + Automation status checklist, clawback policy (admin-triggered, debt repaid by future earnings), maturity 7 days, updater-delivered rail extension point (Payoneer/Grey/Stripe Global show "Coming soon"), member-to-member earnings transfer for countries with no rail. Platform-withdrawal/license pieces stay master-only and were NOT ported.
 - Known pre-existing failure (not payout-related): `NiaGlowTest::test_the_input_has_appearance_none_and_a_subtle_border`.

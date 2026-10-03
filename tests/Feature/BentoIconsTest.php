@@ -73,4 +73,22 @@ class BentoIconsTest extends TestCase
         $this->assertNull(BentoIcons::icon('not-a-card'));
         $this->assertSame(100, BentoIcons::opacity('not-a-card'));
     }
+
+    public function test_the_naara_credits_coin_is_a_light_self_hosted_asset_with_a_size_appropriate_file(): void
+    {
+        // Owner artwork, committed (never hot-linked) and kept very light: ~4 KB for small inline uses, ~10 KB for larger ones.
+        $small = public_path('images/brand/naara-coin-64.webp');
+        $large = public_path('images/brand/naara-coin-128.webp');
+        $this->assertFileExists($small);
+        $this->assertFileExists($large);
+        $this->assertLessThan(8 * 1024, filesize($small));
+        $this->assertLessThan(16 * 1024, filesize($large));
+
+        $inline = \Illuminate\Support\Facades\Blade::render('<x-naara-coin class="h-4 w-4" />');
+        $this->assertStringContainsString('images/brand/naara-coin-64.webp', $inline);
+        $this->assertStringContainsString('aria-hidden="true"', $inline);
+
+        $big = \Illuminate\Support\Facades\Blade::render('<x-naara-coin class="h-9 w-9" />');
+        $this->assertStringContainsString('images/brand/naara-coin-128.webp', $big);
+    }
 }

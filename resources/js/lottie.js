@@ -18,9 +18,12 @@ const REGISTRY = {
 };
 
 function mount(lottie, el) {
-    const loader = REGISTRY[el.dataset.lottie];
-    if (!loader) return;
-    el.setAttribute('data-lottie-ready', '');
+    // A bundled animation (REGISTRY) or an admin-uploaded one served from our own origin (`data-lottie-src`, e.g. the custom preloader).
+    const src = el.dataset.lottieSrc;
+    const loader = src
+        ? () => fetch(src, { credentials: 'omit' }).then((r) => (r.ok ? r.json() : Promise.reject(new Error('lottie ' + r.status)))).then((json) => ({ default: json }))
+        : REGISTRY[el.dataset.lottie];
+    if (!loader) { el.removeAttribute('data-lottie-ready'); return; }
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     loader().then((mod) => {
@@ -36,12 +39,14 @@ function mount(lottie, el) {
             anim.addEventListener('DOMLoaded', () => anim.goToAndStop(Math.max(0, anim.totalFrames - 1), true));
         }
         el.__lottie = anim; // handle for teardown
-    });
+    }).catch(() => { el.removeAttribute('data-lottie-ready'); });
 }
 
 export function initLottie() {
     const nodes = document.querySelectorAll('[data-lottie]:not([data-lottie-ready])');
     if (!nodes.length) return;
+    // Claim the nodes now: the runtime import is async, and a second trigger (DOMContentLoaded + nx:lottie-init) must not hydrate them again.
+    nodes.forEach((el) => el.setAttribute('data-lottie-ready', ''));
     // Pull the runtime once, lazily, then hydrate every pending node.
     import('lottie-web').then(({ default: lottie }) => nodes.forEach((el) => mount(lottie, el)));
 }
@@ -49,3 +54,5 @@ export function initLottie() {
 // Run on first paint and after every Livewire SPA navigation.
 document.addEventListener('DOMContentLoaded', initLottie);
 document.addEventListener('livewire:navigated', initLottie);
+// The custom preloader picks its light/dark file in an inline script, then asks for a hydrate.
+document.addEventListener('nx:lottie-init', initLottie);
