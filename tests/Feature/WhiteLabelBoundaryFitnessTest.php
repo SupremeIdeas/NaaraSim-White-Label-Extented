@@ -107,6 +107,10 @@ class WhiteLabelBoundaryFitnessTest extends TestCase
                 if (preg_match('#(^|[/_.\-])n2n([/_.\-]|[a-z]|$)#i', $rel) === 1) {
                     $found[] = $rel;
                 }
+                // Naara Widgets (merchant embed + WordPress loader) is master-only too: long distinctive tokens, matched anywhere.
+                if (preg_match('#merchant[_-]?widget#i', $rel) === 1) {
+                    $found[] = $rel;
+                }
             }
         }
         $this->assertSame([], $found, 'N2N is permanently master-only and must not exist on a white-label build: '.implode(', ', array_slice($found, 0, 8)));
@@ -116,9 +120,11 @@ class WhiteLabelBoundaryFitnessTest extends TestCase
     {
         foreach (Route::getRoutes() as $route) {
             $this->assertStringStartsNotWith('n2n.', (string) $route->getName(), 'a route named n2n.* must not exist on a white-label build');
+            $this->assertStringStartsNotWith('merchant-widget', (string) $route->getName(), 'Naara Widgets routes are master-only');
         }
         foreach (\Illuminate\Support\Facades\Schema::getTableListing() as $table) {
             $this->assertDoesNotMatchRegularExpression('/(^|\.)n2n_/i', $table, 'a table named n2n_* must not exist on a white-label build');
+            $this->assertDoesNotMatchRegularExpression('/merchant_widget/i', $table, 'Naara Widgets tables are master-only');
         }
     }
 

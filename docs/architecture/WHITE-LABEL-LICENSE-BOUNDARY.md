@@ -159,6 +159,7 @@ Owner decision 2026-10-03, recorded with the same weight as the license boundary
 | Module | Master | White Label | White Label Extended |
 |---|:--:|:--:|:--:|
 | **N2N (Naara-to-Naara)**: in-network calling and messaging between Naara IDs, NaaraCredit-vs-Wallet funding choice, chat themes, conversation list/search, block-and-report, system-message bubbles | **Yes** | **Never** | **Never** |
+| **Naara Widgets** (merchant embed + WordPress loader): widget keys, `v1/merchant-widget/*` API, hosted checkout, guest checkout, `merchant_widget_*` tables, plugin, dashboard tab, admin controls | yes | **never** | **never** |
 
 Rules:
 

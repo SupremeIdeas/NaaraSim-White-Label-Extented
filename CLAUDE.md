@@ -59,6 +59,16 @@ on the assumption that "it's probably fine" — check first.
   appears). A skin/i18n/appearance change that touches shared files is fine; a file whose purpose is N2N is not. Do
   not ask the owner to re-confirm this; apply it, and if a task seems to need N2N in a fork, stop and say so.
 
+- **Naara Widgets (merchant embed + WordPress loader) — PERMANENTLY MASTER-ONLY (owner decision 2026-10-03, same standing as
+  N2N and the License Surgery boundary).** The merchant distribution channel: widget keys (`merchant_widget_keys`), the
+  `v1/merchant-widget/*` API, the hosted checkout (`/widget/checkout/*`, the ONLY page the app lets a third party frame), guest
+  checkout, `merchant_widget_orders`/`merchant_widget_events`, the WordPress plugin, its dashboard tab and admin controls. **It must
+  NEVER be ported, packaged, synced or "reconciled" into `NaaraSim-WhiteLabel` or `NaaraSim-White-Label-Extented` — not partly, not
+  inert, not behind a flag, not as a stub.** Every file carries `MerchantWidget`/`merchant_widget`/`merchant-widget` in its path so the
+  guards can see it (`App\Support\MasterOnlyModules::SUBSTRING_TOKENS`; both forks' `WhiteLabelBoundaryFitnessTest`). Shared files that
+  carry a hook (`CreditWalletJob`, `routes/*.php`) guard it with `class_exists` so a stray copy can never half-register it. Do not ask
+  the owner to re-confirm this; apply it.
+
 **What DOES belong here:** generic platform reliability, security, and
 consumer-facing fixes with zero license/oversight content — e.g. the
 role-mass-assignment fix, session/`DecryptException` resilience,
