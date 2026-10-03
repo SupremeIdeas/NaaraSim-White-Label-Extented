@@ -2199,7 +2199,7 @@
     "src": "node_modules/flag-icons/flags/4x3/zw.svg"
   },
   "resources/css/app.css": {
-    "file": "assets/app-sY_8OFq9.css",
+    "file": "assets/app-Ckt94L9M.css",
     "src": "resources/css/app.css",
     "isEntry": true
   },
@@ -2246,7 +2246,7 @@
     "isDynamicEntry": true
   },
   "resources/js/app.js": {
-    "file": "assets/app-Cch0yUOQ.js",
+    "file": "assets/app-CZep9Cuv.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
@@ -2259,6 +2259,7 @@
       "resources/js/animations/merchant-v2-badge.json",
       "resources/js/animations/merchant-hero.json",
       "_lottie-DG5NakNH.js",
+      "resources/js/composer/composer.js",
       "node_modules/chart.js/dist/chart.js",
       "node_modules/chart.js/dist/chart.js",
       "resources/js/webgl/login-scene.js",
@@ -2266,8 +2267,26 @@
       "resources/js/dialer.js"
     ]
   },
+  "resources/js/composer/composer.js": {
+    "file": "assets/composer-CA3sBmNc.js",
+    "name": "composer",
+    "src": "resources/js/composer/composer.js",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/app.js"
+    ],
+    "dynamicImports": [
+      "resources/js/data/emojis.json"
+    ]
+  },
+  "resources/js/data/emojis.json": {
+    "file": "assets/emojis-fXcYXHyB.js",
+    "name": "emojis",
+    "src": "resources/js/data/emojis.json",
+    "isDynamicEntry": true
+  },
   "resources/js/dialer.js": {
-    "file": "assets/dialer-C_9bp2hv.js",
+    "file": "assets/dialer-CJYM4WQJ.js",
     "name": "dialer",
     "src": "resources/js/dialer.js",
     "isDynamicEntry": true,

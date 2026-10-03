@@ -136,12 +136,10 @@ class EarningsPayoutRunCommand extends Command
         return self::SUCCESS;
     }
 
+    /** Shared with the Funding Radar so "due at next sweep" can never disagree with this run. */
     private function verifiedAccount(User $user): ?PayoutAccount
     {
-        return PayoutAccount::where('user_id', $user->id)
-            ->where('is_verified', true)
-            ->latest('id')
-            ->first();
+        return app(\App\Services\Payouts\PayoutEligibility::class)->verifiedAccount($user);
     }
 
     /**

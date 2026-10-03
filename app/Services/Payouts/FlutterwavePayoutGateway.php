@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Http;
  * returns a stable marker. The transfer.completed webhook — verified with the
  * same verif-hash secret as the collection side — is the source of truth.
  */
-class FlutterwavePayoutGateway implements PayoutGatewayInterface
+class FlutterwavePayoutGateway implements PayoutGatewayInterface, DeclaresCapabilities
 {
     public function name(): string
     {
@@ -39,14 +39,14 @@ class FlutterwavePayoutGateway implements PayoutGatewayInterface
 
     public function sendTransfer(PayoutRequest $request, PayoutAccount $account): PayoutTransferResult
     {
-        $response = Http::withToken(config('services.flutterwave.secret_key'))
+        $response = Http::connectTimeout(\App\Support\PayoutSettings::httpConnectTimeout())->timeout(\App\Support\PayoutSettings::httpTimeout())->withToken(config('services.flutterwave.secret_key'))
             ->acceptJson()
             ->post($this->base().'/transfers', [
                 'account_bank' => $account->bank_code,
                 'account_number' => $account->account_number,
                 'amount' => (float) $request->amount,
                 'currency' => strtoupper($request->currency),
-                'reference' => $request->reference,
+                'reference' => $request->wireReference(),
                 'narration' => 'NaaraSim payout',
             ])->json();
 
@@ -93,5 +93,10 @@ class FlutterwavePayoutGateway implements PayoutGatewayInterface
             },
             providerRef: ($id = data_get($data, 'id')) !== null ? (string) $id : null,
         );
+    }
+
+    public function capabilities(): array
+    {
+        return ['confirms_synchronously' => false, 'webhook' => true, 'lookup' => false, 'cancel' => false];
     }
 }

@@ -148,6 +148,6 @@ class MyJourneyTest extends TestCase
         $user = User::factory()->create();
 
         Livewire::actingAs($user)->test(Journey::class)
-            ->assertSee("NaaraCredits isn't enabled", false);
+            ->assertSee("NaaraCredits isn't enabled");
     }
 }

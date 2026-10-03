@@ -79,7 +79,7 @@ class BrandHunt extends Component
         if ($result['earned'] > 0) {
             $this->flash = "+{$result['earned']} NaaraCredits for following {$label}!";
             $this->dispatch('nx-toast', variant: 'hero', type: 'success',
-                title: 'Reward unlocked', message: "+{$result['earned']} NaaraCredits added to your balance.");
+                title: 'Reward unlocked', message: "+{$result['earned']} NaaraCredits added to your balance.", sound: 'reward.default');
             $this->dispatch('reward-claimed');
         } else {
             $this->flash = "Thanks for following {$label}!";
@@ -113,7 +113,7 @@ class BrandHunt extends Component
             $this->flash = \App\Support\DailyCreditCap::MESSAGE;
         } elseif ($r['claimed'] && $r['earned'] > 0) {
             $this->flash = "+{$r['earned']} NaaraCredits for watching!";
-            $this->dispatch('nx-toast', variant: 'hero', type: 'success', title: 'Reward unlocked', message: "+{$r['earned']} NaaraCredits added.");
+            $this->dispatch('nx-toast', variant: 'hero', type: 'success', title: 'Reward unlocked', message: "+{$r['earned']} NaaraCredits added.", sound: 'reward.default');
             $this->dispatch('reward-claimed');
         }
 
@@ -126,7 +126,7 @@ class BrandHunt extends Component
         $user = Auth::user();
 
         $brandQuery = BrandPartner::listed()->directoryOrder()
-            ->with(['handles' => fn ($q) => $q->active()->ordered(), 'videos' => fn ($q) => $q->ordered()]);
+            ->with(['handles' => fn ($q) => $q->active()->ordered(), 'videos' => fn ($q) => $q->ordered(), 'subscription']);
         if ($this->category) {
             $brandQuery->where('category', $this->category);
         }

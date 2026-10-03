@@ -149,3 +149,57 @@ makes sense on the issuer (master), which books revenue from selling licenses.
 1. `composer dump-autoload` clean.
 2. Grep the whole app for every deleted class name → zero remaining references.
 3. Full `vendor/bin/phpunit` green.
+
+---
+
+## 6. Permanently master-only product modules (N2N and any future module of the same standing)
+
+Owner decision 2026-10-03, recorded with the same weight as the license boundary above.
+
+| Module | Master | White Label | White Label Extended |
+|---|:--:|:--:|:--:|
+| **N2N (Naara-to-Naara)**: in-network calling and messaging between Naara IDs, NaaraCredit-vs-Wallet funding choice, chat themes, conversation list/search, block-and-report, system-message bubbles | **Yes** | **Never** | **Never** |
+| **Naara Widgets** (merchant embed + WordPress loader): widget keys, `v1/merchant-widget/*` API, hosted checkout, guest checkout, `merchant_widget_*` tables, plugin, dashboard tab, admin controls | yes | **never** | **never** |
+
+Rules:
+
+1. Everything for such a module lives under a path that contains its token (`N2N`/`n2n`): classes under `...\N2N\`, views under `*/n2n/*`, migrations `*n2n*`, tables `n2n_*`, routes `n2n.*`, `lang/*/n2n.php`, `config/n2n.php`, tests `*N2N*`. The tokens are listed in `App\Support\MasterOnlyModules::TOKENS` (master only); a new module is added by appending a token, never by removing one.
+2. Master refuses to ship it: `PackageBuilder` will not build, and `PackagePublisher` will not store or publish, a distributable package containing a matching path.
+3. The forks refuse to hold it: `WhiteLabelBoundaryFitnessTest` fails the build if any matching class, route, table, migration, view, language file or config file exists in the fork.
+4. Shared files (layouts, skins, i18n, appearance) may be ported to a fork; a file whose purpose is the module may not, not even inert, flagged off, or stubbed.
+5. Nobody re-asks the owner. If a task seems to need the module inside a fork, stop and report.
+
+---
+
+## 7. Skin allowance: master is the only authority (Prompt 22, owner decision 2026-10-03)
+
+How many skins a white-label licence unlocks is decided **only on master**. A fork is a consumer: it stores one number and obeys it.
+
+| Capability | Master | White Label | White Label Extended |
+|---|:--:|:--:|:--:|
+| Tier-to-count map (`config/white_label_skins.php`), `SkinAllowance`, `EntitlementPayload`, per-instance override, registry controls | yes | **never** | **never** |
+| `LicensedSkins` consumer (stores `skins.allowance`, licensee picks skins, `available()` is the only list the app may use) | inert (no limit) | yes | yes |
+| "Your skins" licensee screen (`admin.skins`) | 404 | yes | yes |
+
+Defaults: normal White Label = **2** skins, White Label Extended = **5**, unknown/missing tier = 1. An operator override on master replaces the default and is audited.
+
+**Payload (§4.2 addendum).** The entitlement block master already returns (`level`, `locks[]`) gains `skins: {allowance: int}`. A fork ignores a missing or malformed `skins` block and a failed refresh (last-known value stays, never wiped, never invented).
+
+**Decision D2 (record this so nobody "fixes" it).** Extended still has **zero feature locks**: `FeatureEntitlements::all()` returns `[]` on Extended no matter what. Its 5-skin limit is a **quota in a separate field** (`skins.allowance`), not a feature lock.
+
+Decisions D1 to D8 as built (all "default used"; the owner can flip any):
+
+| # | Decision | Built as |
+|---|---|---|
+| D1 | Licence key entry | Existing `.env` token flow; "activated" = first successful entitlement response. No paste-key UI. |
+| D2 | Extended quota vs zero locks | Separate `skins.allowance` field; locks stay empty (above). |
+| D3 | Before activation | One skin, the platform default. Fails closed to one, not to all. |
+| D4 | Licensee changes selection later | Yes, any time, audited (`skins.selection_updated`). |
+| D5 | Prompt 21 (Pro locks, trials, journeys) in forks | No. Not ported; every licensed skin is free to every end user. |
+| D6 | Accents, dials, mode | Unchanged by the licence. Only skins are capped. |
+| D7 | Suspended / revoked / master unreachable | Last-known allowance and selection stay; nothing is wiped. |
+| D8 | `clarity` (high-contrast) counts against the cap | Yes, literally. Flagged: hiding a high-contrast skin can be an accessibility issue; the owner may want to exempt it. |
+
+Honest trust model: a fork runs on the licensee's own server, so a determined licensee with code access can edit the number locally. The server-side enforcement stops end users, forged requests and casual tampering; it is not DRM. The real control is that updates and the entitlement refresh come from master.
+
+Enforcement in the forks: `WhiteLabelBoundaryFitnessTest` fails the build if `SkinAllowance`, `EntitlementPayload` or `config/white_label_skins.php` exist there, or if a tier-to-count map appears in `LicensedSkins`.

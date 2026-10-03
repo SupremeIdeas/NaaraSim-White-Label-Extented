@@ -12,7 +12,7 @@
            {{ $attributes->merge(['class' => 'pr-10']) }}>
     <button type="button" @click="show = ! show" tabindex="-1"
             :aria-label="show ? 'Hide password' : 'Show password'" :aria-pressed="show.toString()"
-            class="absolute inset-y-0 right-0 flex items-center px-3 text-slate-400 transition-colors hover:text-slate-600 focus:outline-none focus-visible:text-primary dark:hover:text-slate-200">
+            class="nx-pw-toggle absolute inset-y-0 right-0 flex items-center px-3 text-slate-400 transition-colors hover:text-slate-600 focus:outline-none focus-visible:text-primary dark:hover:text-slate-200">
         <span x-show="! show"><x-icon name="eye" class="h-5 w-5" /></span>
         <span x-show="show" x-cloak><x-icon name="eye-off" class="h-5 w-5" /></span>
     </button>

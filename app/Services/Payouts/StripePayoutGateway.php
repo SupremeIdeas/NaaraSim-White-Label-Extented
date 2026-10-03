@@ -20,7 +20,7 @@ use Illuminate\Support\Facades\Http;
  * The connected account is created and onboarded by StripeConnectService —
  * this gateway only sends money to one that already exists and is enabled.
  */
-class StripePayoutGateway implements PayoutGatewayInterface
+class StripePayoutGateway implements PayoutGatewayInterface, DeclaresCapabilities
 {
     private const TOLERANCE_SECONDS = 300;
 
@@ -48,13 +48,13 @@ class StripePayoutGateway implements PayoutGatewayInterface
     public function sendTransfer(PayoutRequest $request, PayoutAccount $account): PayoutTransferResult
     {
         try {
-            $response = Http::withToken((string) config('services.stripe.secret_key'))->asForm()
+            $response = Http::connectTimeout(\App\Support\PayoutSettings::httpConnectTimeout())->timeout(\App\Support\PayoutSettings::httpTimeout())->withToken((string) config('services.stripe.secret_key'))->asForm()
                 ->post($this->base().'/transfers', [
                     'amount' => (int) round((float) $request->amount * 100),
                     'currency' => strtolower($account->currency ?: 'usd'),
                     'destination' => $account->account_number,
-                    'transfer_group' => $request->reference,
-                    'metadata' => ['reference' => $request->reference],
+                    'transfer_group' => $request->wireReference(),
+                    'metadata' => ['reference' => $request->wireReference()],
                 ])->json();
         } catch (\Throwable $e) {
             throw $e; // infra error — let the engine retry
@@ -122,5 +122,10 @@ class StripePayoutGateway implements PayoutGatewayInterface
             status: 'reversed',
             providerRef: (string) data_get($object, 'id', ''),
         );
+    }
+
+    public function capabilities(): array
+    {
+        return ['confirms_synchronously' => true, 'webhook' => true, 'lookup' => false, 'cancel' => false];
     }
 }

@@ -1,0 +1,82 @@
+<?php
+
+return [
+    'menu' => 'Apparence',
+    'back' => 'Retour',
+    'title' => 'Apparence',
+    'subtitle' => 'Choisissez l\'apparence de Naara pour vous. Seul votre compte change.',
+    'only_you' => 'Enregistré uniquement sur votre compte. Personne d\'autre n\'est concerné.',
+    'locked' => 'L\'apparence est gérée par votre opérateur.',
+    'saved' => 'Enregistré sur votre compte',
+    'default' => 'Par défaut',
+    'mode_label' => 'Mode',
+    'mode' => [
+        'light' => 'Clair',
+        'dark' => 'Sombre',
+        'system' => 'Système',
+    ],
+    'skin_label' => 'Thème (:count disponibles)',
+    'accent_label' => 'Couleur d\'accent',
+    'custom' => 'Personnalisée',
+    'pick_colour' => 'Choisir une couleur',
+    'hex_label' => 'Couleur hexadécimale',
+    'reset_accent' => 'Réinitialiser',
+    'custom_ok' => 'Lisible sur les boutons et le texte.',
+    'custom_adjusted' => 'Légèrement ajustée pour que les boutons et le texte restent lisibles.',
+    'custom_hint' => 'Choisissez n\'importe quelle couleur. Nous la gardons lisible automatiquement. La réinitialisation revient à :default.',
+    'accent_note' => 'L\'accent recolore les boutons, sélections et surlignages. L\'or (argent), les couleurs d\'état et les drapeaux ne changent jamais.',
+    'personalise' => 'Personnaliser',
+    'reset_all' => 'Tout réinitialiser',
+    'preview' => [
+        'verify' => 'Vérifier',
+        'verify_text' => 'Recevez des codes OTP.',
+        'rent' => 'Louer',
+        'rent_text' => 'Numéros temporaires.',
+        'cta' => 'Obtenir mon code',
+    ],
+    'dial' => [
+        'round' => 'Arrondi des angles',
+        'dens' => 'Densité',
+        'ts' => 'Taille du texte',
+        'depth' => 'Profondeur des cartes',
+        'font' => 'Police',
+        'motion' => 'Animations',
+    ],
+    'dial_option' => [
+        'round' => [
+            'def' => 'Par défaut',
+            'sharp' => 'Anguleux',
+            'round' => 'Arrondi',
+        ],
+        'dens' => [
+            'comf' => 'Confortable',
+            'compact' => 'Compact',
+        ],
+        'ts' => [
+            'def' => 'Par défaut',
+            's' => 'Petit',
+            'l' => 'Grand',
+        ],
+        'depth' => [
+            'soft' => 'Doux',
+            'flat' => 'Plat',
+            'deep' => 'Profond',
+        ],
+        'font' => [
+            'naara' => 'Naara',
+            'system' => 'Système',
+            'serif' => 'Titres à empattements',
+            'mono' => 'Chiffres monospace',
+        ],
+        'motion' => [
+            'full' => 'Complètes',
+            'reduced' => 'Réduites',
+        ],
+    ],
+    'err' => [
+        'locked' => 'L\'apparence est gérée par votre opérateur.',
+        'slow_down' => 'Trop de changements. Patientez un instant.',
+        'invalid' => 'Ce choix n\'est pas disponible.',
+        'hex' => 'Utilisez une couleur hexadécimale comme #8b5cf6.',
+    ],
+];

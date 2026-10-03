@@ -82,6 +82,7 @@ use App\Livewire\Admin\NumbersBento;
 use App\Livewire\Admin\NumbersHero;
 use App\Livewire\Admin\PageBuilder;
 use App\Livewire\Admin\Partners;
+use App\Livewire\Admin\GlobalPayoutRail;
 use App\Livewire\Admin\Payouts;
 use App\Livewire\Admin\PlatformThemePage;
 use App\Livewire\Admin\Posts;
@@ -150,6 +151,7 @@ use App\Livewire\StatusPage;
 use App\Livewire\SupportChat;
 use App\Livewire\Wallet;
 use App\Livewire\WelcomeAurora;
+use App\Livewire\PayoutGuide;
 use App\Livewire\Withdraw;
 use App\Support\LegalContent;
 use App\Support\SiteContent;
@@ -216,6 +218,8 @@ Route::get('/get-started', OnboardingController::class)->name('onboarding');
 
 // Public, unauthenticated system status page (for users + Developer API integrators).
 Route::get('/status', StatusPage::class)->name('status');
+// Admin-uploaded Lottie preloader, served from our own origin (random-UUID filename, validated at upload).
+Route::get('/preloader-asset/{id}.json', \App\Http\Controllers\PreloaderAssetController::class)->where('id', '[0-9a-f\-]{36}')->name('preloader.asset');
 
 // Public blog (Module 30 · Blog overhaul). Index is a Livewire component so the
 // SAME hero/carousel/infinite-feed serves marketing + the in-app floating nav.
@@ -296,6 +300,13 @@ Route::middleware(['auth', 'active'])->group(function () {
         // is only enforced once the unified free-payout threshold is spent
         // (WithdrawalService::request(), same as every other earner type).
         Route::get('/rewards/withdraw', Withdraw::class)->name('rewards.withdraw');
+        // Rail Guide (Addendum B): which payout rail should I use? (Not the /faq page.)
+        Route::get('/account/payout-guide', PayoutGuide::class)->name('payout-guide');
+        // Per-account appearance (skins x accent x mode x dials). Only YOUR dashboard changes (Prompt 20 §18).
+        Route::get('/account/appearance', \App\Livewire\Account\Appearance::class)->name('account.appearance');
+        Route::post('/account/appearance/mode', \App\Http\Controllers\Account\AppearanceModeController::class)->middleware('throttle:60,1')->name('account.appearance.mode');
+        // Member-to-member earnings transfer for people whose country has no payout rail yet.
+        Route::get('/account/send-earnings', \App\Livewire\SendEarnings::class)->name('send-earnings');
 
         // Data estimator (blueprint Section 32).
         Route::get('/data-estimator', DataEstimator::class)->name('data-estimator');
@@ -388,6 +399,8 @@ Route::middleware(['admin', 'throttle:admin'])
         Route::get('/security', Security::class)->name('security');
         // Personal account (any panel user manages their own name/email/password).
         Route::get('/account', App\Livewire\Admin\Account::class)->name('account');
+        // The admin's OWN appearance for the admin panel (same preference as any member; Prompt 20 §26).
+        Route::get('/my-appearance', App\Livewire\Admin\MyAppearance::class)->name('my-appearance');
 
         // Admin configuration — super_admin & admin only (staff excluded).
         Route::middleware('role:super_admin|admin')->group(function () {
@@ -411,6 +424,10 @@ Route::middleware(['admin', 'throttle:admin'])
             // Marketing Copy Studio — Claude-assisted copy population for CMS pages.
             Route::get('/copy-studio', MarketingCopyStudio::class)->name('copy-studio');
             Route::get('/dashboard-theme', PlatformThemePage::class)->name('dashboard-theme');
+            // What members may choose for THEIR dashboards: default skin/accent, enabled presets, lock (Prompt 20 §19).
+            Route::get('/user-appearance', App\Livewire\Admin\UserAppearance::class)->name('user-appearance');
+            // Your skins — the licensee chooses which skins their licence fills (Prompt 22). White-label builds only (404 on master).
+            Route::get('/skins', App\Livewire\Admin\SkinSelection::class)->name('skins');
             // Theme picker — switch the platform-wide visual skin (Theme Batch 2 §4).
             Route::get('/theme', ThemePicker::class)->name('theme');
             Route::get('/branding', Branding::class)->name('branding');
@@ -448,7 +465,7 @@ Route::middleware(['admin', 'throttle:admin'])
             // Naara Gift storefront hero — same system as the dashboard home hero.
             Route::get('/gift-hero', GiftHero::class)->name('gift-hero');
             Route::get('/developer-api', DeveloperApi::class)->name('developer-api');
-            Route::get('/payouts', Payouts::class)->name('payouts');
+            Route::get('/global-payout-rail', GlobalPayoutRail::class)->name('global-payout-rail');
             Route::get('/refunds', Refunds::class)->name('refunds');
             Route::get('/reconciliation', Reconciliation::class)->name('reconciliation');
             Route::get('/analytics', Analytics::class)->name('analytics');
@@ -474,6 +491,12 @@ Route::middleware(['admin', 'throttle:admin'])
 
         // Support ticket queue (Module 25) — staff with the tickets.manage scope,
         // plus admin/super_admin (who hold every scope / bypass).
+        // Payouts: admins/super admins (all scopes) and staff granted a payouts scope (Addendum D-3.19).
+        Route::middleware('permission:payouts.review|payouts.finance')->group(function () {
+            Route::get('/payouts', Payouts::class)->name('payouts');
+            Route::get('/payouts/health', App\Livewire\Admin\PayoutHealth::class)->name('payout-health');
+        });
+
         Route::middleware('permission:tickets.manage')->group(function () {
             Route::get('/tickets', SupportQueue::class)->name('tickets');
         });
@@ -497,6 +520,8 @@ Route::middleware(['admin', 'throttle:admin'])
 
         // Staff, backups + maintenance loop — super_admin only (Sections 27–29).
         Route::middleware('role:super_admin')->group(function () {
+            // Every payout knob in one schema-driven screen (Addendum D, "easy and not hard-coded").
+            Route::get('/payout-settings', App\Livewire\Admin\PayoutSettingsPage::class)->name('payout-settings');
             Route::get('/staff', Staff::class)->name('staff');
             Route::get('/api-keys', ProviderKeys::class)->name('api-keys');
             Route::get('/email', EmailSettings::class)->name('email');
@@ -549,6 +574,11 @@ Route::post('/webhooks/payments/{gateway}', PaymentWebhookController::class)
 // idempotent payout-request settlement.
 Route::post('/webhooks/payouts/{provider}', PayoutWebhookController::class)
     ->name('webhooks.payouts');
+
+// "This wasn't me" (Addendum D-3.5): signed link in the payout notice emails. Freezes payouts, no login needed.
+Route::get('/payouts/not-me/{user}', \App\Http\Controllers\Payouts\NotMeController::class)
+    ->middleware(['signed', 'throttle:10,1'])
+    ->name('payouts.not-me');
 
 // Stripe Connect account webhooks (ROADMAP §Layer 0.2 — Stripe payout rail):
 // a separate endpoint/secret from the above, since it carries account.updated

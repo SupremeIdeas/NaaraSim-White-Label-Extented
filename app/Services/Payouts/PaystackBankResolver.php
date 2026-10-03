@@ -28,8 +28,14 @@ class PaystackBankResolver implements BankResolverInterface
         return filled(config('services.paystack.secret_key'));
     }
 
+    /** Reads the rail registry (single source of truth); the constant is the fallback until it is seeded. */
     public function supports(string $country): bool
     {
+        $registry = app(\App\Services\Payouts\Rail\PayoutRailRegistry::class);
+        if ($registry->seeded()) {
+            return $registry->providerCovers($country, 'paystack') && isset(self::COUNTRIES[strtoupper($country)]);
+        }
+
         return isset(self::COUNTRIES[strtoupper($country)]);
     }
 

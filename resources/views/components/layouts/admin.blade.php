@@ -55,6 +55,11 @@
         $more[] = ['heading' => 'Money & partners'];
         $more[] = ['route' => 'admin.analytics', 'label' => 'Analytics', 'icon' => 'signal'];
         $more[] = ['route' => 'admin.payouts', 'label' => 'Payouts', 'icon' => 'credit-card'];
+        $more[] = ['route' => 'admin.payout-health', 'label' => 'Payout health', 'icon' => 'signal'];
+        if ($isSuper) {
+            $more[] = ['route' => 'admin.payout-settings', 'label' => 'Payout settings', 'icon' => 'settings'];
+        }
+        $more[] = ['route' => 'admin.global-payout-rail', 'label' => 'Global payout rail', 'icon' => 'signal'];
         $more[] = ['route' => 'admin.refunds', 'label' => 'Refunds & Disputes', 'icon' => 'refresh'];
         $more[] = ['route' => 'admin.reconciliation', 'label' => 'Reconciliation', 'icon' => 'wallet'];
         $more[] = ['route' => 'admin.exchange-rates', 'label' => 'Exchange rate (NGN)', 'icon' => 'refresh'];
@@ -91,6 +96,8 @@
         $more[] = ['route' => 'admin.welcome-settings', 'label' => 'Welcome animation', 'icon' => 'zap'];
         $more[] = ['route' => 'admin.theme', 'label' => 'Theme', 'icon' => 'star'];
         $more[] = ['route' => 'admin.dashboard-theme', 'label' => 'Dashboard theme', 'icon' => 'image'];
+        $more[] = ['route' => 'admin.user-appearance', 'label' => 'User appearance', 'icon' => 'sparkles'];
+        $more[] = ['route' => 'admin.skins', 'label' => 'Your skins', 'icon' => 'sparkles'];
         $more[] = ['route' => 'admin.service-icons', 'label' => 'Service icons', 'icon' => 'grid'];
         $more[] = ['route' => 'admin.integrations', 'label' => 'Integrations', 'icon' => 'link'];
         $more[] = ['route' => 'admin.features', 'label' => 'Features', 'icon' => 'zap'];
@@ -141,10 +148,14 @@
         $more[] = ['route' => 'admin.ui-kit', 'label' => 'UI Kit', 'icon' => 'grid'];
     }
 
-    $primary[] = ['route' => 'admin.account', 'label' => 'My account', 'icon' => 'id-card'];
+    // Security is a first-class admin destination: it takes the 4th bottom-bar slot (never hidden behind a fifth item that phones can't
+    // show), and "My account" sits beside it in its own More group.
     $primary[] = ['route' => 'admin.security', 'label' => 'Security', 'icon' => 'shield'];
+    $more[] = ['heading' => 'My account'];
+    $more[] = ['route' => 'admin.account', 'label' => 'My account', 'icon' => 'id-card'];
     // Everyone in the panel can hop back to the end-user app.
     $more[] = ['heading' => 'Shortcuts'];
+    $more[] = ['route' => 'admin.my-appearance', 'label' => 'My appearance', 'icon' => 'sparkles'];
     $more[] = ['route' => 'dashboard', 'label' => 'Storefront', 'icon' => 'globe'];
     // Admin-assignable "Download the app" slot (App Export §1).
     if (\App\Support\AppExport::placementActive('admin_menu')) {

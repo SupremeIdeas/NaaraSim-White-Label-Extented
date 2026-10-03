@@ -34,6 +34,7 @@
         hero: null,
         heroTimer: null,
         push(detail) {
+            if (detail.sound && window.NaaraSound) window.NaaraSound.play(detail.sound);   // optional: dispatch('nx-toast', ..., sound: 'credit_alert.default')
             if ((detail.variant || 'toast') === 'hero') return this.showHero(detail);
             const t = { id: Date.now() + Math.random(), type: detail.type || 'info', message: detail.message || '' };
             this.toasts.push(t);

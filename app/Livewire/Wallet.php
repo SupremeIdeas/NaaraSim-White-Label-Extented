@@ -177,7 +177,7 @@ class Wallet extends Component
     {
         $this->dispatch('nx-toast', variant: 'hero', type: 'success',
             title: 'Top-up successful',
-            message: 'Your wallet has been credited — funds are ready to spend.');
+            message: 'Your wallet has been credited — funds are ready to spend.', sound: 'credit_alert.default');
     }
 
     /** Switch the display currency (persists to session + profile). */
@@ -457,6 +457,8 @@ class Wallet extends Component
             - (float) $month->where('type', 'refund')->where('currency', 'USD')->sum('amount');
         $topupUsd = (float) $month->where('type', 'credit')->where('currency', 'USD')->sum('amount');
         $topupNgn = (float) $month->where('type', 'credit')->where('currency', 'NGN')->sum('amount');
+        // Purchases this month (every debit is an order: eSIM, number, gift card ...), shown beside the spend figure.
+        $ordersThisMonth = $month->where('type', 'debit')->count();
 
         $daily = collect(range(13, 0))->map(function ($back) use ($recent) {
             $day = now()->subDays($back)->toDateString();
@@ -500,6 +502,7 @@ class Wallet extends Component
             'ownGroup', 'pendingInvites', 'joinedPlans', 'memberSpendUsd', 'memberSpendNgn'
         ) + [
             'hasSpendData' => $daily->sum() > 0,
+            'ordersThisMonth' => $ordersThisMonth,
             // Part B §3.6: only gateways that accept the CURRENTLY selected
             // top-up currency — never a pairing the gateway doesn't support.
             'gateways' => $this->payGateways(),

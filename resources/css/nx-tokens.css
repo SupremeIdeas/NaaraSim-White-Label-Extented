@@ -1,0 +1,63 @@
+/* ============ NAARA SURFACE TOKENS v3 (Prompt 20 §14) ============
+   Channel triples ("R G B") so `rgb(var(--nx-x) / .5)` and Tailwind /opacity utilities work. Light values live on :root,
+   dark values on `.dark` (the platform's existing class strategy). Values lifted from the V9 wireframe.
+   Rules: three neutral steps (canvas < surface < surface-2) + one line. Colour is spent in three places only: teal = the
+   primary action, gold = money committed, one tone tint per card. Nothing here changes a view until that view uses the
+   tokens, so existing pages are untouched. */
+:root {
+    --nx-canvas: 235 242 244; --nx-canvas-2: 244 248 249;
+    --nx-surface: 255 255 255; --nx-surface-2: 244 248 249; --nx-surface-3: 230 239 242;
+    --nx-line: 213 227 231; --nx-line-strong: 160 195 203; --nx-hi: 255 255 255;
+    --nx-text: 10 36 49; --nx-text-2: 70 96 109; --nx-text-3: 87 113 126;
+    --nx-teal: 10 155 148; --nx-cta-a: 12 158 150; --nx-cta-b: 5 118 114; --nx-teal-ink: 0 123 117;
+    --nx-gold: 242 185 59; --nx-gold-2: 226 152 8; --nx-gold-ink: 115 79 0; --nx-on-gold: 38 28 0;
+    --nx-ok: 4 120 87; --nx-warn: 133 92 0; --nx-bad: 185 28 28;
+    --nx-acc-a: 15 169 164; --nx-acc-b: 6 118 128; --nx-acc-c: 4 84 99;
+    --nx-e1: 0 10px 26px -18px rgb(10 36 49 / .3); --nx-e2: 0 -14px 44px -18px rgb(10 36 49 / .3);
+    --nx-r-card: 24px; --nx-r-sheet: 30px; --nx-r-row: 18px;
+    --nx-rs: 1;            /* corner-roundness dial multiplier */
+    --nx-ts: 1;            /* text-size dial multiplier (the px-built components scale with CSS zoom, as in the wireframe) */
+    --nx-frost: 255 255 255; --nx-frost-a: .62;   /* Glass skin */
+    /* Typeface dial. `naara` = the platform's own bundled fonts; the other stops are system stacks (no web fonts). */
+    --nx-font-display: var(--font-display), 'Figtree', system-ui, sans-serif;
+    --nx-font-num: var(--font-sans), 'Figtree', system-ui, sans-serif;
+}
+.dark {
+    --nx-canvas: 3 17 30; --nx-canvas-2: 4 25 40;
+    --nx-surface: 8 32 47; --nx-surface-2: 11 41 58; --nx-surface-3: 16 54 72;
+    --nx-line: 23 68 82; --nx-line-strong: 36 110 122;
+    --nx-text: 234 244 248; --nx-text-2: 158 184 199; --nx-text-3: 118 147 165;
+    --nx-teal: 16 181 174; --nx-cta-a: 15 165 157; --nx-cta-b: 6 128 124; --nx-teal-ink: 61 219 208;
+    --nx-gold-ink: 242 185 59;
+    --nx-ok: 52 211 153; --nx-warn: 242 185 59; --nx-bad: 248 113 113;
+    --nx-e1: 0 14px 30px -20px rgb(0 0 0 / .75); --nx-e2: 0 -24px 60px -24px rgb(0 0 0 / .7);
+    --nx-frost-a: .07;
+}
+@supports not (backdrop-filter: blur(1px)) {
+    html.dark { --nx-frost-a: .16; }
+    html:not(.dark) { --nx-frost-a: .88; }
+}
+
+/* ---- base hooks every skin builds on ---- */
+/* Wireframe icons are 1em stroke icons (stroke 1.8, round caps) sized by font-size. */
+.ns-i { width: 1em; height: 1em; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+/* `cqw` units in the components need a container ancestor; pages wrap their content in .ns-page. */
+.ns-page { container-type: inline-size; }
+
+/* The app surface: canvas gradient + text colour (the wireframe's `.app`, minus the phone frame). Pages migrated to the
+   skin system sit inside one of these; skins that repaint the whole app (Glass, Halo...) hook here. */
+.ns-app {
+    color: rgb(var(--nx-text));
+    border-radius: 34px; border: 1px solid rgb(var(--nx-line));
+    background: radial-gradient(120% 40% at 50% 0, rgb(var(--nx-teal) / .1), transparent 70%), linear-gradient(rgb(var(--nx-canvas-2)), rgb(var(--nx-canvas)) 320px);
+    container-type: inline-size;
+    line-height: normal;    /* the wireframe body sets none; Tailwind's 1.5 would inflate every component */
+}
+.ns-app__body { padding: 14px 16px 22px; zoom: var(--nx-ts); }
+
+/* Wireframe buttons are left-aligned and pointer-cursor; Tailwind's reset leaves them centred. */
+.ns-card, .ns-skin-card, .ns-row, .ns-list__row, .ns-note, .ns-swatch, .ns-field, .ns-btn, .ns-seg button, .ns-chips-filter button, .ns-len button { text-align: start; cursor: pointer; }
+.ns-seg button, .ns-swatch, .ns-skin-card { font: inherit; color: inherit; }
+.ns-seg button { color: rgb(var(--nx-text-2)); }
+.ns-custom .ns-row-inline { flex-wrap: wrap; }
+.ns-custom input[type=text] { min-width: 7.5rem; }

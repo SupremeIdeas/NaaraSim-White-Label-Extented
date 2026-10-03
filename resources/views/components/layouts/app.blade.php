@@ -1,6 +1,12 @@
-@props(['pageType' => 'default'])
+@props(['pageType' => 'default', 'skin' => false])
+@php
+    // Per-account appearance (skins x accent x mode x dials). ONLY the signed-in dashboard (customer + admin layouts set
+    // $bodyClass) carries it; marketing, auth, emails and PDFs always render the platform look. Attributes are rendered
+    // server-side on every response so a wire:navigate morph of <html> never drops them (Prompt 20 §31).
+    $nx = (isset($bodyClass) || ($skin && auth()->check())) ? \App\Support\Appearance\AppearanceResolver::for(auth()->user()) : null;
+@endphp
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="scroll-smooth">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="scroll-smooth" @if ($nx) {!! \App\Support\Appearance\AppearanceResolver::htmlAttributes($nx) !!} @endif>
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -78,12 +84,35 @@
                     var wantsDark = stored
                         ? stored === 'dark'
                         : window.matchMedia('(prefers-color-scheme: dark)').matches;
+                    // A signed-in member's saved mode (their account's appearance) wins over this browser's memory.
+                    var saved = document.documentElement.getAttribute('data-nx-mode');
+                    if (saved === 'dark' || saved === 'light') {
+                        wantsDark = saved === 'dark';
+                    } else if (saved === 'system') {
+                        wantsDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                    }
                     document.documentElement.classList.toggle('dark', wantsDark);
                 } catch (e) { /* localStorage unavailable — default to light */ }
             };
             window.applyStoredTheme();
             // Re-assert the choice after each SPA navigation (see comment above).
             document.addEventListener('livewire:navigated', window.applyStoredTheme);
+            // The header day/night toggles dispatch `theme-changed`; for a signed-in member, remember it on their ACCOUNT
+            // so it follows them across browsers (best effort, never blocks the toggle).
+            window.addEventListener('theme-changed', function (e) {
+                try {
+                    var h = document.documentElement;
+                    if (h.getAttribute('data-nx-user') !== '1' || !e.detail) { return; }
+                    var mode = e.detail.dark ? 'dark' : 'light';
+                    h.setAttribute('data-nx-mode', mode);
+                    var t = document.querySelector('meta[name=csrf-token]');
+                    fetch(@json(route('account.appearance.mode')), {
+                        method: 'POST', credentials: 'same-origin', keepalive: true,
+                        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': t ? t.content : '' },
+                        body: JSON.stringify({ mode: mode })
+                    });
+                } catch (err) { /* offline or blocked: the local choice still applies */ }
+            });
         })();
     </script>
 
@@ -126,6 +155,12 @@
          the shipped Naara fonts (Supreme Display / Didact Gothic) are untouched. --}}
     @php($fontCss = \App\Support\BrandSettings::fontCss())
     @if ($fontCss)<style id="brand-font-vars">{!! $fontCss !!}</style>@endif
+    {{-- Member's custom accent colour (both mode variants; the `.dark` class picks one). Empty unless they chose Custom. --}}
+    @if ($nx && ! empty($nx['tod']))
+        {{-- Golden Hour (§45): correct the server's default time of day from the device clock before first paint. --}}
+        <script>(function(){var h=new Date().getHours();document.documentElement.setAttribute('data-nx-tod',h>=5&&h<8?'dawn':h>=8&&h<17?'day':h>=17&&h<20?'dusk':'night');})();</script>
+    @endif
+    @if ($nx && ($nxCss = \App\Support\Appearance\AppearanceResolver::customAccentCss($nx)))<style id="nx-accent-vars">{!! $nxCss !!}</style>@endif
     @stack('head')
     @include('partials.tracking')
 </head>
@@ -141,6 +176,7 @@
 <body class="min-h-screen text-[#0F172A] antialiased dark:text-slate-100 {{ \App\Support\ThemePreset::bodyClass() }} {{ $bodyClass ?? 'bg-[#F8F9FA] dark:bg-navy' }} {{ request()->is(config('admin.path'), config('admin.path').'/*') ? 'is-admin-surface' : '' }}">
     @include('partials.icon-sprite')
     @include('partials.service-icon-sprite')
+    @include('partials.nx-icon-sprite')
     <x-brand-preloader :page-type="$pageType" />
     <x-splash />
     <x-ui.toast-stack />

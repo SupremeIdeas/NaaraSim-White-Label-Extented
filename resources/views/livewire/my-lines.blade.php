@@ -1,52 +1,45 @@
 <div class="mx-auto max-w-5xl">
     <div class="mb-5 flex items-center justify-between gap-3">
         <div>
-            <h1 class="text-2xl font-bold text-slate-900 dark:text-white">My Lines</h1>
-            <p class="text-sm text-slate-500 dark:text-slate-400">Everything you own — eSIMs and numbers, active and archived.</p>
+            <h1 class="ns-h1">My Lines</h1>
+            <p class="ns-sub">Everything you own — eSIMs and numbers, active and archived.</p>
         </div>
         <div class="hidden items-center gap-2 sm:flex">
             <a href="{{ route('catalogue') }}" wire:navigate
-               class="inline-flex items-center gap-1.5 rounded-full border border-slate-200 px-3.5 py-2 text-sm font-semibold text-slate-600 transition hover:border-primary/40 hover:text-primary dark:border-[var(--brand-card-border-dark)] dark:text-slate-300 dark:hover:text-teal-300">
-                <x-icon name="package" class="h-4 w-4" /> Buy eSIM
+               class="ns-cta ns-cta--pill ns-cta--ghost ns-cta--sm">
+                <x-nx.icon name="package" /> Buy eSIM
             </a>
             <a href="{{ route('numbers') }}" wire:navigate
-               class="inline-flex items-center gap-1.5 rounded-full bg-primary px-3.5 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-primary-dark">
-                <x-icon name="hash" class="h-4 w-4" /> Get number
+               class="ns-cta ns-cta--pill ns-cta--sm">
+                <x-nx.icon name="hash" /> Get number
             </a>
         </div>
     </div>
 
-    {{-- Port-in entry (Prompt 11): bring an existing US/Canada number to Naara.
-         Honest — a multi-day carrier process, surfaced where numbers are managed. --}}
-    <a href="{{ route('numbers.port-in') }}" wire:navigate
-       class="mb-5 flex items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm shadow-sm transition hover:border-primary/40 dark:border-[var(--brand-card-border-dark)] dark:bg-[var(--brand-card-dark)]">
-        <span class="flex items-center gap-2 text-slate-600 dark:text-slate-300">
-            <x-icon name="phone-forwarded" class="h-4 w-4 shrink-0 text-primary" />
-            Already have a US or Canada number? <span class="font-semibold text-primary">Bring it to Naara</span>
-        </span>
-        <x-icon name="chevron-right" class="h-4 w-4 shrink-0 text-slate-400" />
-    </a>
+    {{-- Port-in entry (Prompt 11): bring an existing US/Canada number to Naara. Honest: a multi-day carrier process, surfaced where numbers are managed. --}}
+    <x-nx.feature-link :href="route('numbers.port-in')" icon="phone-forwarded"
+        :kicker="__('numbers.portin_card.kicker')" :title="\App\Support\BrandSettings::rebrand(__('numbers.portin_card.title'))"
+        :text="__('numbers.portin_card.text')" :cta="__('numbers.portin_card.cta')"
+        :chips="[__('numbers.portin_card.chip_keep'), __('numbers.portin_card.chip_days'), __('numbers.portin_card.chip_voice')]" />
 
     @if ($hasAny)
         @include('partials.my-connectivity')
         @include('partials.my-lines-analytics')
     @else
-        <div class="rounded-3xl border border-dashed border-slate-300 p-10 text-center dark:border-[var(--brand-card-border-dark)]">
-            <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary dark:bg-primary/20 dark:text-teal-300">
-                <x-icon name="signal" class="h-7 w-7" />
-            </div>
-            <h2 class="mt-4 text-lg font-bold text-slate-900 dark:text-white">Nothing here yet</h2>
-            <p class="mx-auto mt-1 max-w-sm text-sm text-slate-500 dark:text-slate-400">
+        <div class="ns-card" style="padding:40px 24px;text-align:center">
+            <span class="ns-tile" style="width:56px;height:56px;font-size:28px;margin:0 auto"><x-nx.icon name="signal" /></span>
+            <h2 class="ns-h1" style="margin-top:16px;font-size:20px">Nothing here yet</h2>
+            <p class="ns-sub" style="margin:4px auto 0;max-width:360px">
                 Buy an eSIM for data abroad or get a virtual number — they’ll all show up here to manage.
             </p>
             <div class="mt-5 flex items-center justify-center gap-2">
                 <a href="{{ route('catalogue') }}" wire:navigate
-                   class="inline-flex items-center gap-1.5 rounded-full border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:border-primary/40 hover:text-primary dark:border-[var(--brand-card-border-dark)] dark:text-slate-300">
-                    <x-icon name="package" class="h-4 w-4" /> Browse eSIM plans
+                   class="ns-cta ns-cta--pill ns-cta--ghost">
+                    <x-nx.icon name="package" /> Browse eSIM plans
                 </a>
                 <a href="{{ route('numbers') }}" wire:navigate
-                   class="inline-flex items-center gap-1.5 rounded-full bg-primary px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-primary-dark">
-                    <x-icon name="hash" class="h-4 w-4" /> Get a number
+                   class="ns-cta ns-cta--pill">
+                    <x-nx.icon name="hash" /> Get a number
                 </a>
             </div>
         </div>

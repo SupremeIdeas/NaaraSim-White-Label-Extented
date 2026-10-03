@@ -33,7 +33,7 @@ class Rewards extends Component
             // Hero toast — dispatched only after the credits are committed.
             $this->dispatch('nx-toast', variant: 'hero', type: 'success',
                 title: 'Reward earned',
-                message: "+{$earned} NaaraCredits added to your balance. Come back tomorrow for more!");
+                message: "+{$earned} NaaraCredits added to your balance. Come back tomorrow for more!", sound: 'reward.default');
             // Celebratory confetti (self-hosted Lottie), only on a real earn.
             $this->dispatch('reward-claimed');
             // My Journey goals (loyalty expansion) — a streak goal can unlock

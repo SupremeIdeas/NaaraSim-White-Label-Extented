@@ -22,6 +22,19 @@ class Post extends Model
     ];
 
     /**
+     * Seeded covers are shipped as relative `/images/blog/...` paths (so the
+     * seed is host-independent); admin uploads are already absolute URLs.
+     */
+    public function getCoverImageUrlAttribute(?string $value): ?string
+    {
+        if ($value === null || $value === '') {
+            return $value;
+        }
+
+        return preg_match('#^(https?:)?//#', $value) === 1 ? $value : asset(ltrim($value, '/'));
+    }
+
+    /**
      * The accent colour driving the scroll-tint (Blog overhaul §5). Graceful
      * fallback: the admin-set colour, else a stable colour derived from the
      * category, else the brand teal — so it always looks intentional.

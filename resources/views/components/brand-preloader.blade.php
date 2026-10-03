@@ -26,7 +26,8 @@
     @php($nxPreFavicon = \App\Support\BrandSettings::favicon())
     @php($vars = \App\Support\PreloaderSettings::resolveCssVars($cfg))
     @php($bgRgb = ! empty($cfg['bg_color']) ? \App\Support\BrandSettings::hexToChannels($cfg['bg_color']) : null)
-    @php($bg = $bgRgb ? 'rgb('.$bgRgb.' / '.($cfg['bg_opacity'] ?? 1).')' : 'rgb(var(--brand-navy))')
+    {{-- A custom (uploaded) animation was drawn for one mode, so with no explicit background it follows the visitor's mode (white / navy). --}}
+    @php($bg = $bgRgb ? 'rgb('.$bgRgb.' / '.($cfg['bg_opacity'] ?? 1).')' : (($cfg['preset'] ?? '') === \App\Support\PreloaderSettings::CUSTOM ? 'var(--nx-pl-custom-bg)' : 'rgb(var(--brand-navy))'))
     <div id="nx-preloader" role="status" aria-label="Loading"
          style="position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;background:{{ $bg }};transition:opacity .4s ease;{{ $isLegacy ? '' : $vars.'backdrop-filter:blur(var(--nx-pl-blur,0));-webkit-backdrop-filter:blur(var(--nx-pl-blur,0));' }}">
 

@@ -25,8 +25,22 @@
     corner with no card/border, dissolving into the page background via a mask.
     No image set degrades cleanly to the headline + description with no gap.
 --}}
-<section class="nx-home-hero mb-6">
-    @if ($heroImg)
+<section class="nx-home-hero mb-6 {{ \App\Support\GiftHeroBackground::showsSpecial() ? 'nx-gift-hero' : '' }}">
+    @if (\App\Support\GiftHeroBackground::showsSpecial())
+        {{-- Default hero: a looping reveal. A wall of brand cards dissolves into the opened gift box, the box catches a shimmer, then it
+             closes and the wall returns. Pure CSS (no JS, no layout shift); reduced-motion users get the finished box, still. --}}
+        <div class="nx-gift-stage" aria-hidden="true" style="--gift-box: url('{{ asset(\App\Support\GiftHeroBackground::SPECIAL_BOX) }}')">
+            <span class="nx-gift-stage__halo"></span>
+            <img class="nx-gift-stage__tiles" src="{{ asset(\App\Support\GiftHeroBackground::SPECIAL_TILES) }}" alt="" width="460" height="618" loading="eager" decoding="async">
+            <div class="nx-gift-stage__reveal">
+                <img class="nx-gift-stage__box" src="{{ asset(\App\Support\GiftHeroBackground::SPECIAL_BOX) }}" alt="" width="1000" height="694" loading="eager" decoding="async">
+                <span class="nx-gift-stage__shine"></span>
+            </div>
+            <span class="nx-gift-stage__spark nx-gift-stage__spark--a"></span>
+            <span class="nx-gift-stage__spark nx-gift-stage__spark--b"></span>
+            <span class="nx-gift-stage__spark nx-gift-stage__spark--c"></span>
+        </div>
+    @elseif ($heroImg)
         <div class="nx-home-hero__media" aria-hidden="true">
             <img src="{{ $heroImg }}" alt="" loading="eager" decoding="async"
                  class="nx-home-hero__img {{ ($heroImgDark && $heroImgDark !== $heroImg) ? 'dark:hidden' : '' }}">

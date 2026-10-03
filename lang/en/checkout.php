@@ -42,4 +42,5 @@ return [
     'pay_from_heading' => 'Pay from',
     'pay_from_own_wallet' => 'My wallet',
     'pay_from_shared_plan' => ':name\'s shared plan',
+    'top_up_wallet' => 'Top up wallet',
 ];

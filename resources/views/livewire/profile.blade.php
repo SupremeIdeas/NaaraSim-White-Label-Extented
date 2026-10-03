@@ -1,134 +1,111 @@
-<div class="mx-auto max-w-2xl">
-    <h1 class="mb-1 text-2xl font-bold text-slate-900 dark:text-slate-100">{{ __('account.profile_title') }}</h1>
-    <p class="mb-6 text-sm text-slate-500 dark:text-slate-400">{{ __('account.profile_subtitle') }}</p>
+{{-- Profile on the skin system (S3 Batch 6): same fields, photo upload, completeness meter, localisation selectors. --}}
+<div>
+<x-nx.page class="ns-pg ns-pg--mid">
+    <h1 class="ns-h1" style="margin-top:6px">{{ __('account.profile_title') }}</h1>
+    <p class="ns-sub">{{ __('account.profile_subtitle') }}</p>
 
     {{-- Completeness meter --}}
     @php($pct = $user->profileCompleteness())
-    <div class="mb-6 rounded-2xl border border-slate-200 nx-glass-tile p-5 dark:border-[var(--brand-card-border-dark)]">
-        <div class="mb-2 flex items-center justify-between text-sm">
-            <span class="font-semibold text-slate-700 dark:text-slate-200">{{ __('account.profile_strength') }}</span>
-            <span class="font-bold {{ $pct >= 80 ? 'text-green-600 dark:text-green-400' : 'text-primary dark:text-teal-300' }}">{{ $pct }}%</span>
-        </div>
-        <div class="h-2 overflow-hidden rounded-full bg-slate-100 dark:bg-[#243352]">
-            <div class="h-full rounded-full transition-all {{ $pct >= 80 ? 'bg-green-500' : 'bg-primary' }}" style="width: {{ $pct }}%"></div>
-        </div>
-        <p class="mt-2 text-xs text-slate-400 dark:text-slate-500">{{ $pct >= 80 ? __('account.profile_strength_high') : __('account.profile_strength_low') }}</p>
+    <div class="ns-pg__card ns-ring">
+        <div class="ns-pg__metarow"><span>{{ __('account.profile_strength') }}</span><span style="font-weight:800;color:{{ $pct >= 80 ? 'color-mix(in srgb, rgb(var(--nx-ok)) 72%, rgb(var(--nx-text)))' : 'color-mix(in srgb, rgb(var(--nx-teal-ink)) 62%, rgb(var(--nx-text)))' }}">{{ $pct }}%</span></div>
+        <div class="ns-pg__meter" style="height:9px;margin-top:10px"><i style="width: {{ $pct }}%;{{ $pct >= 80 ? 'background:rgb(var(--nx-ok))' : '' }}"></i></div>
+        <p class="ns-pg__hint">{{ $pct >= 80 ? __('account.profile_strength_high') : __('account.profile_strength_low') }}</p>
     </div>
 
-    <div class="space-y-6">
-        {{-- Avatar + identity --}}
-        <div class="rounded-2xl border border-slate-200 nx-glass-tile p-6 dark:border-[var(--brand-card-border-dark)]">
-            <div class="flex items-center gap-4">
-                @if ($user->avatar)
-                    <img src="{{ $user->avatar }}" alt="{{ $user->name }}" class="h-16 w-16 rounded-full object-cover ring-1 ring-black/5 dark:ring-white/10">
-                @else
-                    <span class="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-lg font-bold uppercase text-primary dark:bg-primary/20 dark:text-teal-300">{{ \Illuminate\Support\Str::of($user->name)->trim()->substr(0, 2) }}</span>
-                @endif
+    {{-- Avatar + identity --}}
+    <div class="ns-pg__card ns-ring">
+        <div style="display:flex;align-items:center;gap:16px">
+            @if ($user->avatar)
+                <img src="{{ $user->avatar }}" alt="{{ $user->name }}" style="width:64px;height:64px;border-radius:50%;object-fit:cover;flex:none">
+            @else
+                <span class="ns-avatar" style="width:64px;height:64px;font-size:20px;text-transform:uppercase;background:rgb(var(--nx-surface-3));color:rgb(var(--nx-text))">{{ \Illuminate\Support\Str::of($user->name)->trim()->substr(0, 2) }}</span>
+            @endif
+            <div style="min-width:0">
+                <label class="ns-pg__lbl" for="pf-photo">{{ __('account.profile_photo') }}</label>
+                <input id="pf-photo" type="file" wire:model="avatar" accept="image/*" class="ns-ct__file">
+                @error('avatar') <span class="ns-pg__fielderr">{{ $message }}</span> @enderror
+                <div wire:loading wire:target="avatar" class="ns-pg__hint">{{ __('account.uploading') }}</div>
+            </div>
+        </div>
+
+        <div class="ns-pg__form" style="margin-top:12px">
+            <div class="ns-pg__two">
                 <div>
-                    <label class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">{{ __('account.profile_photo') }}</label>
-                    <input type="file" wire:model="avatar" accept="image/*"
-                           class="block text-xs text-slate-600 file:mr-3 file:rounded-lg file:border-0 file:bg-primary/10 file:px-3 file:py-2 file:text-xs file:font-semibold file:text-primary hover:file:bg-primary/20 dark:text-slate-300 dark:file:bg-primary/20 dark:file:text-teal-300">
-                    @error('avatar') <span class="text-xs text-red-600">{{ $message }}</span> @enderror
-                    <div wire:loading wire:target="avatar" class="mt-1 text-xs text-slate-400">{{ __('account.uploading') }}</div>
+                    <label class="ns-pg__lbl" for="pf-name">{{ __('account.display_name') }}</label>
+                    <input id="pf-name" type="text" wire:model="name" class="ns-input">
+                    @error('name') <span class="ns-pg__fielderr">{{ $message }}</span> @enderror
+                </div>
+                <div>
+                    <label class="ns-pg__lbl" for="pf-phone">{{ __('account.phone') }}</label>
+                    <input id="pf-phone" type="tel" wire:model="phone" placeholder="+2348012345678" class="ns-input">
+                    @error('phone') <span class="ns-pg__fielderr">{{ $message }}</span> @enderror
                 </div>
             </div>
 
-            <div class="mt-5 grid gap-4 sm:grid-cols-2">
-                <div>
-                    <label class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">{{ __('account.display_name') }}</label>
-                    <input type="text" wire:model="name" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 dark:border-[var(--brand-card-border-dark)] dark:bg-[#243352] dark:text-slate-100">
-                    @error('name') <span class="text-xs text-red-600">{{ $message }}</span> @enderror
-                </div>
-                <div>
-                    <label class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">{{ __('account.phone') }}</label>
-                    <input type="tel" wire:model="phone" placeholder="+2348012345678" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 dark:border-[var(--brand-card-border-dark)] dark:bg-[#243352] dark:text-slate-100">
-                    @error('phone') <span class="text-xs text-red-600">{{ $message }}</span> @enderror
-                </div>
-            </div>
-
-            {{-- WhatsApp Autopilot opt-in (§7). Only surfaced once the operator
-                 has WhatsApp live; entirely opt-in, and the user can leave any
-                 time (here, or by replying STOP on WhatsApp). --}}
+            {{-- WhatsApp Autopilot opt-in (§7). Only surfaced once the operator has WhatsApp live; entirely opt-in, and the user can leave any time. --}}
             @if (\App\Support\ProviderStatus::isActive('whatsapp'))
-                <div class="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-[var(--brand-card-border-dark)] dark:bg-[#141F33]">
-                    <label class="flex items-start gap-3">
-                        <input type="checkbox" wire:model="whatsappOptIn" class="mt-0.5 rounded border-slate-300 text-primary focus:ring-primary dark:border-[var(--brand-card-border-dark)]">
-                        <span class="text-sm">
-                            <span class="flex items-center gap-1.5 font-medium text-slate-800 dark:text-slate-100">
-                                <x-icon name="message-circle" class="h-4 w-4 text-primary" /> {{ __('account.whatsapp_updates') }}
-                            </span>
-                            <span class="mt-0.5 block text-xs text-slate-500 dark:text-slate-400">{{ __('account.whatsapp_updates_body') }}</span>
+                <div class="ns-pg__kv" style="display:block;margin-top:8px">
+                    <label class="ns-pg__check" style="align-items:flex-start">
+                        <input type="checkbox" wire:model="whatsappOptIn" style="margin-top:3px">
+                        <span>
+                            <span style="display:flex;align-items:center;gap:6px;font-weight:600;color:rgb(var(--nx-text))"><x-nx.icon name="message-circle" /> {{ __('account.whatsapp_updates') }}</span>
+                            <span class="ns-pg__hint" style="display:block">{{ __('account.whatsapp_updates_body') }}</span>
                         </span>
                     </label>
-                    <div class="mt-3" x-data x-show="$wire.whatsappOptIn" x-cloak>
-                        <label class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">{{ __('account.whatsapp_number') }} <span class="font-normal text-slate-400">{{ __('account.optional_defaults_to_phone') }}</span></label>
-                        <input type="tel" wire:model="whatsappNumber" placeholder="+2348012345678" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 dark:border-[var(--brand-card-border-dark)] dark:bg-[#243352] dark:text-slate-100">
-                        @error('whatsappNumber') <span class="text-xs text-red-600">{{ $message }}</span> @enderror
+                    <div style="margin-top:12px" x-data x-show="$wire.whatsappOptIn" x-cloak>
+                        <label class="ns-pg__lbl" for="pf-wa">{{ __('account.whatsapp_number') }} <span style="font-weight:400">{{ __('account.optional_defaults_to_phone') }}</span></label>
+                        <input id="pf-wa" type="tel" wire:model="whatsappNumber" placeholder="+2348012345678" class="ns-input">
+                        @error('whatsappNumber') <span class="ns-pg__fielderr">{{ $message }}</span> @enderror
                     </div>
                 </div>
             @endif
-            <div class="mt-4">
-                <label class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">{{ __('account.bio') }} <span class="font-normal text-slate-400">{{ __('account.optional') }}</span></label>
-                <textarea wire:model="bio" rows="3" maxlength="400" placeholder="{{ __('account.bio_placeholder') }}" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 dark:border-[var(--brand-card-border-dark)] dark:bg-[#243352] dark:text-slate-100"></textarea>
-                @error('bio') <span class="text-xs text-red-600">{{ $message }}</span> @enderror
-            </div>
-        </div>
 
-        {{-- Location + preferences --}}
-        <div class="rounded-2xl border border-slate-200 nx-glass-tile p-6 dark:border-[var(--brand-card-border-dark)]">
-            <h2 class="mb-4 text-sm font-semibold text-slate-700 dark:text-slate-200">{{ __('account.location_preferences') }}</h2>
-            <div class="grid gap-4 sm:grid-cols-2">
-                <div>
-                    <label class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">{{ __('account.city') }}</label>
-                    <input type="text" wire:model="city" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 dark:border-[var(--brand-card-border-dark)] dark:bg-[#243352] dark:text-slate-100">
-                </div>
-                <div>
-                    <label class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">{{ __('account.country_code') }} <span class="font-normal text-slate-400">{{ __('account.country_code_hint') }}</span></label>
-                    <input type="text" wire:model="countryCode" maxlength="2" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm uppercase text-slate-900 dark:border-[var(--brand-card-border-dark)] dark:bg-[#243352] dark:text-slate-100">
-                    @error('countryCode') <span class="text-xs text-red-600">{{ $message }}</span> @enderror
-                </div>
-                <div>
-                    <label class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">{{ __('account.address') }}</label>
-                    <input type="text" wire:model="addressLine" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 dark:border-[var(--brand-card-border-dark)] dark:bg-[#243352] dark:text-slate-100">
-                </div>
-                <div>
-                    <label class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">{{ __('account.postal_code') }}</label>
-                    <input type="text" wire:model="postalCode" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 dark:border-[var(--brand-card-border-dark)] dark:bg-[#243352] dark:text-slate-100">
-                </div>
-                <div>
-                    <label class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">{{ __('account.date_of_birth') }}</label>
-                    <input type="date" wire:model="dateOfBirth" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 dark:border-[var(--brand-card-border-dark)] dark:bg-[#243352] dark:text-slate-100">
-                    @error('dateOfBirth') <span class="text-xs text-red-600">{{ $message }}</span> @enderror
-                </div>
-                <div>
-                    <label class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">{{ __('account.preferred_currency') }}</label>
-                    <select wire:model="displayCurrency" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 dark:border-[var(--brand-card-border-dark)] dark:bg-[#243352] dark:text-slate-100">
-                        @foreach ($currencyOptions as $code => $meta)
-                            <option value="{{ $code }}">{{ $meta[1] }} ({{ $meta[0] }} {{ $code }})</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div>
-                    {{-- Localization Phase A: the switcher lists the full language
-                         roadmap honestly — only real, reviewed translations are
-                         selectable; the rest show as "coming soon" until Phase C/D
-                         ships them (Arabic also needs RTL verification first). --}}
-                    <label class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">{{ __('account.language') }}</label>
-                    <select wire:model="language" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 dark:border-[var(--brand-card-border-dark)] dark:bg-[#243352] dark:text-slate-100">
-                        @foreach ($languageOptions as $code => $meta)
-                            <option value="{{ $code }}" @disabled(! $meta['available'])>
-                                {{ $meta['available'] ? $meta['native'] : __('account.language_coming_soon', ['name' => $meta['native']]) }}
-                            </option>
-                        @endforeach
-                    </select>
-                    @error('language') <span class="text-xs text-red-600">{{ $message }}</span> @enderror
-                </div>
-            </div>
+            <label class="ns-pg__lbl" for="pf-bio" style="margin-top:8px">{{ __('account.bio') }} <span style="font-weight:400">{{ __('account.optional') }}</span></label>
+            <textarea id="pf-bio" wire:model="bio" rows="3" maxlength="400" placeholder="{{ __('account.bio_placeholder') }}" class="ns-input"></textarea>
+            @error('bio') <span class="ns-pg__fielderr">{{ $message }}</span> @enderror
         </div>
-
-        <button type="button" wire:click="save" wire:loading.attr="disabled" wire:target="save,avatar"
-                class="flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-primary-dark disabled:opacity-60">
-            <x-icon name="check" class="h-4 w-4" /> {{ __('account.save_profile') }}
-        </button>
     </div>
+
+    {{-- Location + preferences --}}
+    <div class="ns-pg__card ns-ring">
+        <h2 class="ns-pg__h2" style="margin-bottom:6px">{{ __('account.location_preferences') }}</h2>
+        <div class="ns-pg__form">
+            <div class="ns-pg__two">
+                <div><label class="ns-pg__lbl" for="pf-city">{{ __('account.city') }}</label><input id="pf-city" type="text" wire:model="city" class="ns-input"></div>
+                <div>
+                    <label class="ns-pg__lbl" for="pf-cc">{{ __('account.country_code') }} <span style="font-weight:400">{{ __('account.country_code_hint') }}</span></label>
+                    <input id="pf-cc" type="text" wire:model="countryCode" maxlength="2" class="ns-input" style="text-transform:uppercase">
+                    @error('countryCode') <span class="ns-pg__fielderr">{{ $message }}</span> @enderror
+                </div>
+                <div><label class="ns-pg__lbl" for="pf-addr">{{ __('account.address') }}</label><input id="pf-addr" type="text" wire:model="addressLine" class="ns-input"></div>
+                <div><label class="ns-pg__lbl" for="pf-zip">{{ __('account.postal_code') }}</label><input id="pf-zip" type="text" wire:model="postalCode" class="ns-input"></div>
+                <div>
+                    <label class="ns-pg__lbl" for="pf-dob">{{ __('account.date_of_birth') }}</label>
+                    <input id="pf-dob" type="date" wire:model="dateOfBirth" class="ns-input">
+                    @error('dateOfBirth') <span class="ns-pg__fielderr">{{ $message }}</span> @enderror
+                </div>
+                <div>
+                    <label class="ns-pg__lbl" for="pf-cur">{{ __('account.preferred_currency') }}</label>
+                    <select id="pf-cur" wire:model="displayCurrency" class="ns-input">
+                        @foreach ($currencyOptions as $code => $meta)<option value="{{ $code }}">{{ $meta[1] }} ({{ $meta[0] }} {{ $code }})</option>@endforeach
+                    </select>
+                </div>
+                <div>
+                    {{-- Localization Phase A: the switcher lists the full language roadmap honestly; only real, reviewed translations are selectable. --}}
+                    <label class="ns-pg__lbl" for="pf-lang">{{ __('account.language') }}</label>
+                    <select id="pf-lang" wire:model="language" class="ns-input">
+                        @foreach ($languageOptions as $code => $meta)
+                            <option value="{{ $code }}" @disabled(! $meta['available'])>{{ $meta['available'] ? $meta['native'] : __('account.language_coming_soon', ['name' => $meta['native']]) }}</option>
+                        @endforeach
+                    </select>
+                    @error('language') <span class="ns-pg__fielderr">{{ $message }}</span> @enderror
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <button type="button" wire:click="save" wire:loading.attr="disabled" wire:target="save,avatar" class="ns-cta" style="margin-top:20px">
+        <span class="ns-cta__label"><x-nx.icon name="check" /> {{ __('account.save_profile') }}</span>
+    </button>
+</x-nx.page>
 </div>

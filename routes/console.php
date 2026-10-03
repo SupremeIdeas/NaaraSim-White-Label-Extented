@@ -24,11 +24,35 @@ if (config('queue.default') === 'database') {
     // --tries=1 is the safe floor: money jobs never blind-retry (money rule 7).
     // Jobs that DO want retries opt in via their own $tries (e.g. the catalogue
     // sync), which takes precedence over this worker default.
-    Schedule::command('queue:work --stop-when-empty --tries=1 --max-time=50')
+    // Queues in priority order: money sends first, then Payout Guardian evaluations, then the rest.
+    Schedule::command('queue:work --queue=payouts,payout-guard,default --stop-when-empty --tries=1 --max-time=50')
         ->everyMinute()
         ->withoutOverlapping()
         ->runInBackground();
 }
+
+// Payout engine safety (Addendum C fix A): resolve payouts whose provider outcome is
+// unknown by asking the PROVIDER — never by guessing. Cheap when idle.
+Schedule::command('payouts:reconcile-unknown')->everyTwoMinutes()->withoutOverlapping();
+
+// Payout Guardian (Addendum C §6). The sweeper only CLAIMS and DISPATCHES; evaluation
+// runs on the `payout-guard` queue so a slow evaluation never blocks a scheduler tick.
+Schedule::command('payouts:guard-sweep')->everyMinute()->withoutOverlapping();
+Schedule::command('payouts:float-retry')->everyFiveMinutes()->withoutOverlapping();
+Schedule::command('payouts:float-sync')->everyThirtyMinutes()->withoutOverlapping();
+// Funding Radar (Addendum A): snapshot + hourly stats every 5 minutes, prune nightly.
+Schedule::command('payouts:radar-snapshot')->everyFiveMinutes()->withoutOverlapping();
+Schedule::command('payouts:stats-hourly')->everyFiveMinutes()->withoutOverlapping();
+Schedule::command('payouts:radar-alerts')->everyFiveMinutes()->withoutOverlapping();
+Schedule::command('payouts:guide-audit')->monthlyOn(1, '04:10')->withoutOverlapping();
+Schedule::command('payouts:radar-prune')->dailyAt('03:40')->withoutOverlapping();
+Schedule::command('payouts:peer-expire')->everyTenMinutes()->withoutOverlapping();
+Schedule::command('payouts:stuck-watchdog')->everyTenMinutes()->withoutOverlapping();
+Schedule::command('payouts:guard-metrics')->hourly()->withoutOverlapping();
+Schedule::command('payouts:trust-recompute')->dailyAt('03:20')->withoutOverlapping();
+Schedule::command('payouts:invariants-check')->dailyAt('03:40')->withoutOverlapping();
+Schedule::command('payouts:webhook-prune')->dailyAt('03:55')->withoutOverlapping();
+Schedule::command('payouts:guard-digest')->dailyAt('07:30')->withoutOverlapping();
 
 // Ping provider wallets and alert on low balance (Section 17.2).
 Schedule::command('providers:health-check')->everyFifteenMinutes()->withoutOverlapping();

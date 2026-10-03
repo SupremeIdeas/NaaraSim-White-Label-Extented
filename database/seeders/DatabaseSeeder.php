@@ -22,9 +22,11 @@ class DatabaseSeeder extends Seeder
             EsimImageSeeder::class,     // eSIM country/region navigation imagery (BUILD-8)
             NumbersBentoSeeder::class,  // six Numbers landing bento cards
             BrandPlanSeeder::class,     // brand-directory subscription starter plans (BUILD-9)
+            BlogPostSeeder::class,      // 5 evergreen starter guides + images (white-label starter blog)
             BrandPartnerSeeder::class,  // Brand Hunt directory demo brands + handles/images (owner request, 2026-09-22)
             ProviderRegistrySeeder::class, // provider registry metadata + URLs (BUILD-14)
             ProviderExpansionSeeder::class, // new adapters, enabled=false (BUILD-18)
+            AppearancePresetSeeder::class,  // per-user skins/accents (admin-governed presets)
             ThemePresetSeeder::class,       // switchable visual skins — built-in naara-official (Theme Batch 1)
         ]);
     }

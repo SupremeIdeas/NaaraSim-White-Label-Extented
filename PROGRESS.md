@@ -9,6 +9,56 @@
 
 ## DONE
 
+### Ported from master (2026-10-03): Naara Gift hero looping reveal
+- With no hero image uploaded, the Naara Gift storefront plays a pure-CSS loop (card wall -> golden iris opens the gift box -> shimmer, halo, sparks -> closes). Transparent WebP cut-outs in `public/images/themes/shared/gift-hero-{box,tiles}.webp`. An uploaded hero or the hero switched off always wins; reduced-motion shows the finished box still. `GiftHeroBackground::showsSpecial()`; 2 new tests.
+
+### Skins ported from master + licence-gated (Prompt 22, 2026-10-03)
+- The 35-skin engine, `x-nx.*` components, tokens and the member-page conversions are now in this fork. **Master is the only authority for how many skins this licence unlocks** (default 5 for Extended; its zero-feature-locks rule is untouched, the limit is a quota); this fork stores the number it receives (`skins.allowance` in the entitlement refresh) and obeys it via `App\Support\Appearance\LicensedSkins`. Before activation exactly one skin (the platform default) is offered.
+- Licensee screen: **Admin -> Your skins** (`admin.skins`): pick up to the allowance, first pick is the default, audited. Hidden skins are refused server-side (`AppearanceResolver::platform()` + `UpdateUserAppearance`); a member's saved hidden skin resolves to the default and the row is never rewritten. Allowance shown on the Updater panel. `php artisan skins:verify` ports the master proof command.
+- Not ported on purpose: N2N (permanently master-only), Naara Pro, sounds library, Prompt 21 access layer, `SkinAllowance`/`EntitlementPayload`/`config/white_label_skins.php`. Fitness test guards all of it.
+- Tests: `LicensedSkinsTest` (15), appearance fixtures licence-aware, boundary fitness extended. Evidence: `docs/audits/SKINS-WL-AUDIT.md`, `SKINS-WL-PARITY-REPORT.md`, screenshots in `docs/audits/skins-wl/`.
+- Pending by owner decision: admin sub-page skin conversion, other locales beyond en/ar/fr/sw.
+
+### Chat Composer Pro follow-up (2026-10-03): real recent photos + staff reply
+- The attach sheet's **Recent photos** strip shows REAL images only (no placeholders): the native app bridge / Capacitor Media plugin when running as the installed app (a browser cannot list a phone's gallery), else the member's backend recents, else photos attached on this device (per account, 12 max / 30 days, Clear button). First tile = Browse (OS photo picker). See docs/chat-composer-plan.md.
+- The staff ticket reply box (Admin -> Tickets) now uses the composer (text + emoji; the server takes text only). Flag: `COMPOSER_STAFF_REPLY`.
+
+
+### Ported from master (2026-10-03): Chat Composer Pro + mic permission fix
+- **Chat Composer Pro (`<naara-composer>`)** replaces the NaaraCare support composer and the Naara Line "New message" body/attachment controls (the latter in `field` mode: it only collects text + photo + voice; the paid Send button, live quote and MMS rules are unchanged). Transport-agnostic (`cc:transmit`): Livewire surfaces keep `$wire.upload()` + their existing actions, so server validation/throttle/transcoding are untouched. Features limited to what the server accepts (text, emoji, ONE image/PDF, voice); GIF/schedule/location/contact/poll are implemented but off. Rollout flags `config('composer.surfaces.*')` restore the previous markup (`partials/legacy-*`). Labels en/fr/sw/ar. See `docs/chat-composer-*.md`.
+- **Fork bug fixed:** `Permissions-Policy` was `microphone=()`, which made the browser block EVERY in-page voice recording before the permission prompt could appear (master already had `microphone=(self)`). Now `microphone=(self)`, with a test.
+- **CSP:** `img-src` gains `blob:` (attachment previews). `resources/js/data/emojis.json` (the shared MIT emoji dataset) added for the composer's emoji panel. `NiaGlowTest` brought in line with the new composer (it was stale and failing here).
+- Verified: full suite green; Chromium run of the support chat on this fork (text + undo, evidence file, wrong-type refusal, voice with a fake mic).
+
+
+### Ported from master (2026-10-03): custom preloaders, admin Security reachability, NaaraCredits coin
+- **Preloader Studio — your own animation:** upload a GIF, animated WebP or Lottie JSON separately for light and dark mode (one file serves both if only one is uploaded). Content-sniffed (never trusts the extension), 1 MB image / 512 KB Lottie caps, Lottie with expressions or remote asset URLs rejected, random file names, Lottie served from our own origin (`/preloader-asset/{uuid}.json`; the CSP only lets scripts fetch from `'self'`). Works with the Studio's existing per-page-type assignment, enabled and inherit-from-default; the background follows light/dark when no colour is set. Fixes `lottie.js` hydrating a node twice. NOT ported: minimum display time / max-per-day (they belong to the master-only UX/localization/platform-reach blueprint, Phase D — say the word if you want them here too).
+- **Admin Security was invisible on phones:** the admin bottom bar shows 4 items and the 5th primary (Security) silently dropped; Security now takes a bottom-bar slot, any overflow leads the More sheet, "My account" moved to its own More group, payout health/settings are in the nav, legible dark file buttons; `AdminNavReachabilityTest` fails the build if an admin page has no nav entry.
+- **NaaraCredits coin:** owner artwork as a light self-hosted WebP (4 KB / 10 KB) behind `x-naara-coin`.
+- Master-only and NOT ported: skin system (S1-S3), Naara Pro brand badge, anything license/oversight.
+
+
+### Payouts follow-up ported from master — 2026-10-02
+- Automatic-by-default payouts + Automation status checklist, clawback policy (admin-triggered, debt repaid by future earnings), maturity 7 days, updater-delivered rail extension point (Payoneer/Grey/Stripe Global show "Coming soon"), member-to-member earnings transfer for countries with no rail. Platform-withdrawal/license pieces stay master-only and were NOT ported.
+- Known pre-existing failure (not payout-related): `NiaGlowTest::test_the_input_has_appearance_none_and_a_subtle_border`.
+
+### Global Payout system ported from master (2026-10-02, owner request)
+- Ported the whole payout extension (engine safety, corridors/FX, Payout Guardian, float/treasury, Funding Radar, Rail Guide, Addendum D hardening, schema-driven Payout settings, Payout health page, docs under `docs/payouts/`). Everything is OFF by default.
+- Left out on purpose (master-only / removed from this fork): `PlatformWithdrawalService` + the `platform_earnings` bucket.
+- Verified: full suite 2603 with 1 failure (`NiaGlowTest`, expects `border-slate-200/70` in a chat view) that is the same one that exists on the sibling fork without the port — not touched here.
+
+### Starter blog: 5 evergreen posts + images (white-label) — 2026-10-02
+Owner direction: no master feature lands in white-labels; the master's 40-post series stays
+master-only. This repo gets a small brand-neutral starter blog: `BlogPostSeeder` seeds 5 guides
+(install an eSIM, eSIM vs physical SIM, device compatibility, "no service" troubleshooting,
+verification numbers explained) with their covers in `public/images/blog/` (+ one inline image),
+wired into `DatabaseSeeder`. Brand mentions are `{brand}` tokens resolved from `brand.name`; no
+master/competitor/supplier names appear (test-locked). Also ported the small blog-render support the
+images need (relative cover paths via `Post::cover_image_url`, a safe image line in `<x-prose>`,
+uncropped cover containers). NOTE: the cover images carry baked-in master branding ("Naara" logo +
+www.naara.app) — swap them per install from Admin -> Blog when a real brand is set.
+
+
 ### 📊 Tier 5 #15: Admin Overview Analytics — ported from master — 2026-09-21
 
 Ported Phase A (per-provider live analytics cards), Phase B items 1
@@ -1986,6 +2036,11 @@ conflicts by hand, with the full suite green before `main` moved:
   continuing theme batches 4–8 with the same discipline.
 - Remaining ~25 themes are deferred ("revisited to be built later after
   other features are wired") — see the blueprint + `## NEXT`.
+
+### PARKED by owner (2026-10-03), do not start until asked
+- **Port the extra languages to the forks.** Master has 14 locales (Beta, AI-drafted outside en/fr/ar/sw); both forks carry only en/ar/fr/sw. Port method: copy `lang/{locale}/*` (minus any master-only groups) and `Locale` registry entries, then re-run `LocaleTest`.
+- Admin sub-page skin conversion (about 90 pages) and the merchant white-label skin conversion.
+- N2N (master-only, permanent): blocked until the owner supplies the original N2N Batch 1 to 4 plan.
 
 ### 🎨 Theme visual rebuild batch 3 (5 brand-new themes, built from scratch) — 2026-09-07
 Continuation of the batch-by-batch arc, per "let us move to the Next batch

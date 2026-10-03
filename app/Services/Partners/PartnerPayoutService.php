@@ -96,38 +96,28 @@ class PartnerPayoutService
             return null;
         }
 
-        $account = PayoutAccount::where('user_id', $partner->owner_user_id)
-            ->where('is_verified', true)->latest('id')->first();
+        $account = app(\App\Services\Payouts\PayoutEligibility::class)->verifiedAccount((int) $partner->owner_user_id);
         if ($account === null) {
             return null; // owed — paid on the next run once an account is verified
         }
 
         $currency = strtoupper($account->currency);
-        $local = $this->localAmount($balance, $currency);
+        $quote = app(\App\Services\Payouts\PayoutQuoter::class)->quote($balance, $currency, $account);
+        $local = $quote['local_amount'];
         $reference = 'ppo:'.Str::uuid();
 
-        return DB::transaction(function () use ($partner, $balance, $account, $local, $currency, $reference) {
+        return DB::transaction(function () use ($partner, $balance, $account, $quote, $local, $currency, $reference) {
             // Hold the earnings before any money is promised (idempotent).
             $this->earnings->hold($partner, $balance, 'earn-hold:'.$reference, 'Partner payout');
 
-            $request = $this->payouts->createRequest($partner->owner, $local, $currency, 'partner_earnings', $account, $reference);
+            $request = $this->payouts->createRequest($partner->owner, $local, $currency, 'partner_earnings', $account, $reference, $quote['quote']);
             $request->forceFill(['credit_amount' => $balance])->save();
 
-            // Auto mode transfers immediately; manual mode waits for admin approval.
-            if ($partner->payout_mode === Partner::MODE_AUTO) {
-                $this->payouts->send($request);
-            }
+            // No provider call here — ever. createRequest() queued the Payout Guardian
+            // (afterCommit); it approves only when auto mode is on and every gate passes,
+            // and the send itself runs in SendPayoutJob on the `payouts` queue.
 
             return $request->refresh();
         });
-    }
-
-    private function localAmount(float $usd, string $currency): float
-    {
-        return match (strtoupper($currency)) {
-            'USD' => round($usd, 2),
-            'NGN' => round($usd * $this->currency->getUsdToNgn(), 2),
-            default => throw new PayoutException("Payouts to {$currency} aren't available yet."),
-        };
     }
 }

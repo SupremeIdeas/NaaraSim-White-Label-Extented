@@ -15,7 +15,7 @@
         </p>
 
         @if ($post->cover_image_url)
-            <img src="{{ $post->cover_image_url }}" alt="{{ $post->title }}" class="mt-8 aspect-[16/9] w-full rounded-2xl object-cover">
+            <img src="{{ $post->cover_image_url }}" alt="{{ $post->title }}" class="mt-8 h-auto w-full rounded-2xl">
         @endif
 
         @if ($post->excerpt)

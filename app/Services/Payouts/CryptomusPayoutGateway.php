@@ -19,7 +19,7 @@ use Illuminate\Support\Facades\Http;
  * synchronous response is provisional; the signed webhook confirms settlement
  * (money-safety rule 9: verify BEFORE trusting the payload).
  */
-class CryptomusPayoutGateway implements PayoutGatewayInterface
+class CryptomusPayoutGateway implements PayoutGatewayInterface, DeclaresCapabilities
 {
     public function name(): string
     {
@@ -62,13 +62,13 @@ class CryptomusPayoutGateway implements PayoutGatewayInterface
             'amount' => number_format((float) $request->amount, 8, '.', ''),
             'currency' => strtoupper($account->currency ?: 'USDT'),
             'network' => strtoupper((string) $account->bank_code) ?: 'TRON',
-            'order_id' => $request->reference,
+            'order_id' => $request->wireReference(),
             'address' => (string) $account->account_number,
             'is_subtract' => '1', // fee taken from the amount, never added on top
             'url_callback' => route('webhooks.payouts', ['provider' => $this->name()]),
         ];
 
-        $response = Http::withHeaders([
+        $response = Http::connectTimeout(\App\Support\PayoutSettings::httpConnectTimeout())->timeout(\App\Support\PayoutSettings::httpTimeout())->withHeaders([
             'merchant' => (string) config('services.cryptomus.merchant_id'),
             'sign' => $this->sign($payload),
         ])->acceptJson()->post($this->base().'/v1/payout', $payload)->json();
@@ -124,5 +124,10 @@ class CryptomusPayoutGateway implements PayoutGatewayInterface
             },
             providerRef: (string) $request->input('uuid', '') ?: null,
         );
+    }
+
+    public function capabilities(): array
+    {
+        return ['confirms_synchronously' => false, 'webhook' => true, 'lookup' => false, 'cancel' => false];
     }
 }

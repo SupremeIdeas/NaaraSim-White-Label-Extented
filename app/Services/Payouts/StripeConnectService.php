@@ -3,6 +3,7 @@
 namespace App\Services\Payouts;
 
 use App\Models\PayoutAccount;
+use App\Models\PayoutCorridor;
 use App\Models\User;
 use App\Support\Auditor;
 use Illuminate\Support\Facades\Http;
@@ -51,13 +52,26 @@ class StripeConnectService
             return $existing;
         }
 
-        $response = $this->client()->post($this->base().'/accounts', [
+        $country = strtoupper((string) $user->country_code);
+        $hasCountry = (bool) preg_match('/^[A-Z]{2}$/', $country) && $country !== 'ZZ';
+
+        // Once Stripe corridors are configured (Phase 3b) the corridor table decides
+        // where Stripe may be used; until any exist, behaviour is unchanged.
+        if (PayoutCorridor::query()->where('provider', 'stripe')->exists()
+            && ! ($hasCountry && PayoutCorridor::query()->enabled()->where('provider', 'stripe')->where('country', $country)->exists())) {
+            throw new PayoutException("Stripe payouts aren't available in your country yet.");
+        }
+
+        $response = $this->client()->post($this->base().'/accounts', array_filter([
             'type' => 'express',
             'email' => $user->email,
+            // Stripe fixes the account's country at creation and it cannot be changed
+            // later — never let it silently default to the platform's country.
+            'country' => $hasCountry ? $country : null,
             'capabilities' => [
                 'transfers' => ['requested' => 'true'],
             ],
-        ])->throw()->json();
+        ], fn ($v) => $v !== null))->throw()->json();
 
         $accountId = (string) $response['id'];
 
@@ -118,6 +132,10 @@ class StripeConnectService
             'charges_enabled' => (bool) ($stripeAccount['charges_enabled'] ?? false),
             'payouts_enabled' => $payoutsEnabled,
             'is_verified' => $payoutsEnabled,
+            // A rejected Connect account is recorded so the guide/enrollment can stop offering Stripe.
+            'provider_status' => str_starts_with((string) data_get($stripeAccount, 'requirements.disabled_reason', ''), 'rejected')
+                ? 'rejected'
+                : ($payoutsEnabled ? 'active' : $account->provider_status),
         ])->save();
 
         return $account;
@@ -127,6 +145,10 @@ class StripeConnectService
     public function findByAccountId(string $stripeAccountId): ?PayoutAccount
     {
         return PayoutAccount::query()
-            ->where('provider', 'stripe')->where('account_number', $stripeAccountId)->first();
+            ->where('provider', 'stripe')
+            // account_number is encrypted, so match the mirrored ref or the blind index.
+            ->where(fn ($q) => $q->where('provider_recipient_ref', $stripeAccountId)
+                ->orWhere('lookup_hash', PayoutAccount::lookupHashFor($stripeAccountId)))
+            ->first();
     }
 }

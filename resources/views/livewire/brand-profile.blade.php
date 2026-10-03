@@ -29,15 +29,17 @@
          so left unconstrained a full-bleed photo bleeds straight through
          it — stopping the cover at the sidebar's own edge avoids that
          without touching the sidebar itself. --}}
+    {{-- nx:allow:start the cover is a photo under a fixed dark scrim with fixed light ink: brand artwork, identical in every skin --}}
     @php($hero = $brandPartner->hero_image_path ?: $brandPartner->fallback_image)
     @php($coverHeight = \App\Support\MailSettings::shouldNudge(auth()->user()) ? 'h-[32rem] lg:h-[36rem]' : 'h-[22rem] lg:h-[27rem]')
-    <div class="absolute inset-x-0 top-0 -z-10 w-full overflow-hidden lg:left-72 lg:w-auto {{ $coverHeight }}"
-         :class="navCollapsed ? 'lg:!left-24' : 'lg:!left-72'">
+    <div class="absolute inset-x-0 top-0 -z-10 w-full overflow-hidden lg:hidden {{ $coverHeight }}">
         @if ($hero)
             <img src="{{ $hero }}" alt="{{ $brandPartner->brand_name }}" class="h-full w-full object-cover">
         @else
             <div class="h-full w-full" style="background: linear-gradient(135deg, {{ $brandPartner->background_color }}, {{ $brandPartner->background_color }}99)"></div>
         @endif
+        {{-- ONE scrim, on the photo itself, so it can never stop short of the photo's edges. --}}
+        <div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-black/5"></div>
     </div>
 
     {{-- Overlay content sits in normal flow — same box the cover used to be,
@@ -46,76 +48,61 @@
          raw photo behind it moved to the full-bleed layer above. The
          darkening scrim lives here (not on the photo layer) so it always
          lines up with the readable band regardless of what's stacked above. --}}
-    <div class="relative h-64 w-full lg:h-80">
-        <div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-black/5"></div>
-
+    <div class="relative -mx-4 h-64 lg:mx-0 lg:mt-2 lg:h-[22rem]">
+        {{-- Desktop: a contained cover card with a deep top-left / top-right curve (no photo behind the header, no sharp corners); the sheet below curves up into it. --}}
+        <div class="absolute inset-0 hidden overflow-hidden rounded-t-[30px] lg:block">
+            @if ($hero)
+                <img src="{{ $hero }}" alt="" loading="lazy" class="h-full w-full object-cover">
+            @else
+                <div class="h-full w-full" style="background: linear-gradient(135deg, {{ $brandPartner->background_color }}, {{ $brandPartner->background_color }}99)"></div>
+            @endif
+            <div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-black/5"></div>
+        </div>
         <a href="{{ route('rewards.hunt') }}" wire:navigate
-           class="absolute left-4 top-4 inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-black/30 px-3 py-1.5 text-xs font-semibold text-white backdrop-blur-md transition hover:bg-black/45 lg:left-8 lg:top-6">
+           class="absolute left-4 top-4 inline-flex items-center gap-1.5 rounded-full border border-white/25 bg-black/35 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-black/50 lg:left-6 lg:top-6">
             <x-icon name="chevron-right" class="h-3.5 w-3.5 rotate-180" /> The Hunt
         </a>
 
         @if ($brandPartner->is_featured)
-            <span class="absolute right-4 top-4 flex shrink-0 items-center gap-1 rounded-full bg-accent px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-wide text-white shadow lg:right-8 lg:top-6">
+            <span class="absolute right-4 top-4 flex shrink-0 items-center gap-1 rounded-full bg-accent px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-wide text-white shadow lg:right-6 lg:top-6">
                 <x-icon name="badge-check" class="h-3 w-3" /> Featured
             </span>
         @endif
 
-        {{-- Name + description sit on a frosted glass panel, not directly on
-             the gradient — owner request: readable "no matter the colour of
-             the image in cover" (a busy/light photo can beat a plain
-             gradient's contrast in places; a semi-opaque backdrop can't). --}}
-        <div class="absolute inset-x-4 bottom-5 rounded-2xl bg-black/35 px-4 py-3.5 backdrop-blur-md lg:inset-x-8 lg:px-5">
+        <div class="absolute inset-x-4 bottom-10 lg:inset-x-6 lg:bottom-12">
             @if ($brandPartner->category)
-                <span class="inline-flex items-center gap-1 rounded-full bg-white/15 px-2.5 py-1 text-[11px] font-semibold text-white">
+                <span class="inline-flex items-center gap-1 rounded-full bg-black/35 px-2.5 py-1 text-[11px] font-semibold text-white ring-1 ring-white/20">
                     <x-icon name="tag" class="h-3 w-3" /> {{ $brandPartner->category }}
                 </span>
             @endif
-            <h1 class="mt-2 font-display text-2xl font-extrabold leading-tight text-white drop-shadow-sm sm:text-3xl">{{ $brandPartner->brand_name }}</h1>
+            <h1 class="mt-2 flex flex-wrap items-center gap-2 font-display text-3xl font-extrabold leading-tight text-white sm:text-4xl" style="text-shadow:0 2px 12px rgb(0 0 0 / .55)">
+                {{ $brandPartner->brand_name }}
+            </h1>
             @if ($brandPartner->short_description)
-                <p class="mt-1.5 max-w-lg text-sm leading-relaxed text-white/90">{{ $brandPartner->short_description }}</p>
+                <p class="mt-1.5 max-w-lg text-[15px] leading-relaxed text-white" style="text-shadow:0 1px 8px rgb(0 0 0 / .6)">{{ $brandPartner->short_description }}</p>
             @endif
         </div>
     </div>
+    {{-- nx:allow:end --}}
 
-    {{-- Sheet "climbs" the cover with a deep, symmetric top-corner curve on
-         both sides — no flat/sharp seam anywhere (CLAUDE.md §5) — pulled up
-         further than the platform's usual -mt-6 so the curve reads
-         deliberately, not incidental. --}}
-    <div class="relative -mt-8 rounded-t-[30px] bg-white pt-7 dark:bg-[#0F1D33]">
-        @if ($flash)
-            <div class="mb-5 rounded-2xl border border-primary/20 bg-primary/5 px-4 py-3 text-sm font-semibold text-primary dark:border-primary/30 dark:bg-primary/10 dark:text-teal-200">{{ $flash }}</div>
-        @endif
+    {{-- Sheet "climbs" the cover with a deep, symmetric top-corner curve on both sides: no flat seam anywhere. Skin tokens from here down. --}}
+    <div class="ns-pg__sheet -mx-4 lg:mx-0" style="padding:0">
+    <x-nx.page class="ns-pg ns-pg--wide" style="padding:28px 16px 0">
+        @if ($flash)<div class="ns-bh__flash" role="status" style="margin-top:0">{{ $flash }}</div>@endif
 
-        {{-- Connect — a plain in-platform follow (owner request, 2026-09-22),
-             distinct from following an external handle for a credit reward:
-             no reward here, just a relationship + a Naara follower count. --}}
-        <div class="flex items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 dark:border-white/10 dark:bg-white/5">
-            <p class="flex items-center gap-1.5 text-sm font-semibold text-slate-700 dark:text-slate-200">
-                <x-icon name="users" class="h-4 w-4 text-accent-dark dark:text-accent" />
-                {{ number_format($brandPartner->naara_followers_count) }} Naara {{ \Illuminate\Support\Str::plural('follower', $brandPartner->naara_followers_count) }}
-            </p>
-            <button type="button" wire:click="toggleConnect" wire:loading.attr="disabled" wire:target="toggleConnect"
-                    @class([
-                        'inline-flex shrink-0 items-center gap-1.5 rounded-full px-4 py-2 text-xs font-semibold transition disabled:opacity-60',
-                        'bg-green-100 text-green-700 hover:bg-green-200 dark:bg-green-950/40 dark:text-green-300 dark:hover:bg-green-950/60' => $isFollowing,
-                        'bg-primary text-white hover:bg-primary-dark' => ! $isFollowing,
-                    ])>
-                <x-icon :name="$isFollowing ? 'check' : 'user-plus'" class="h-3.5 w-3.5" />
-                {{ $isFollowing ? 'Connected' : 'Connect' }}
+        {{-- Connect: a plain in-platform follow (owner request, 2026-09-22), distinct from following an external handle for a credit reward. --}}
+        <div class="ns-pg__kv" style="padding:12px 16px;margin-top:{{ $flash ? '16px' : '0' }}">
+            <span style="display:flex;align-items:center;gap:8px;font-weight:600;color:rgb(var(--nx-text))"><x-nx.icon name="users" /> {{ number_format($brandPartner->naara_followers_count) }} Naara {{ \Illuminate\Support\Str::plural('follower', $brandPartner->naara_followers_count) }}</span>
+            <button type="button" wire:click="toggleConnect" wire:loading.attr="disabled" wire:target="toggleConnect" class="ns-bh__connect {{ $isFollowing ? 'is-on' : '' }}" aria-pressed="{{ $isFollowing ? 'true' : 'false' }}" style="padding:7px 16px;font-size:13.5px">
+                <x-nx.icon :name="$isFollowing ? 'check' : 'plus'" style="font-size:14px" /> {{ $isFollowing ? 'Connected' : 'Connect' }}
             </button>
         </div>
 
-        {{-- Follow everywhere — every active handle, same open-then-confirm
-             claim as the directory card (server-granted, never trusted from
-             the client). Wrapped in its own card (matching the platform
-             band's own treatment on the Hunt directory) so it doesn't feel
-             like a bare grid floating in white space. --}}
+        {{-- Follow everywhere: every active handle, same open-then-confirm claim as the directory card (server-granted, never trusted from the client). --}}
         @if ($brandPartner->handles->isNotEmpty())
-            <section class="mt-6 rounded-2xl border border-slate-200 bg-white p-5 dark:border-white/10 dark:bg-[#16233d]">
-                <h2 class="mb-3 flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide text-slate-400 dark:text-slate-500">
-                    <x-icon name="sparkles" class="h-3.5 w-3.5 text-accent-dark dark:text-accent" /> Follow {{ $brandPartner->brand_name }}
-                </h2>
-                <div class="grid gap-2.5 sm:grid-cols-2">
+            <section class="ns-pg__card ns-ring" style="margin-top:24px">
+                <h2 class="ns-bh__h"><x-nx.icon name="star" /> Follow {{ $brandPartner->brand_name }}</h2>
+                <div class="ns-bh__grid">
                     @foreach ($brandPartner->handles as $h)
                         @include('livewire.partials.hunt-handle-card', ['handle' => $h, 'claimed' => isset($claimedBrandHandles[$h->id]), 'action' => 'followBrandHandle'])
                     @endforeach
@@ -123,43 +110,21 @@
             </section>
         @endif
 
-        {{-- Last post per handle — an admin-curated teaser (thumbnail +
-             caption), never a live API pull, so it can't silently break when
-             a platform changes its API. "View post" sends the visitor
-             straight out to the brand's own handle, on their platform of
-             choice, exactly like the owner asked. --}}
+        {{-- Last post per handle: an admin-curated teaser (thumbnail + caption), never a live API pull, so it can't silently break when a platform changes its API. --}}
         @php($withPosts = $brandPartner->handles->filter->hasLastPost())
         @if ($withPosts->isNotEmpty())
-            <section class="mt-8">
-                <h2 class="mb-3 flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide text-slate-400 dark:text-slate-500">
-                    <x-icon name="message-circle" class="h-3.5 w-3.5 text-accent-dark dark:text-accent" /> Latest from {{ $brandPartner->brand_name }}
-                </h2>
-                <div class="grid gap-4 sm:grid-cols-2">
+            <section class="ns-bh__section">
+                <h2 class="ns-bh__h"><x-nx.icon name="chat" /> Latest from {{ $brandPartner->brand_name }}</h2>
+                <div class="ns-bh__cards">
                     @foreach ($withPosts as $h)
-                        <a href="{{ $h->last_post_url ?: $h->handle_url }}" target="_blank" rel="noopener"
-                           class="group overflow-hidden rounded-2xl border border-slate-200 bg-white transition hover:shadow-md dark:border-white/10 dark:bg-[#16233d]">
-                            @if ($h->last_post_image_path)
-                                <div class="h-40 w-full overflow-hidden">
-                                    <img src="{{ $h->last_post_image_path }}" alt="" class="h-full w-full object-cover transition duration-500 group-hover:scale-105">
-                                </div>
-                            @endif
-                            <div class="flex items-start gap-3 p-4">
-                                <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 dark:bg-white/10">
-                                    <x-service-icon :slug="$h->platform" class="h-4 w-4" />
-                                </span>
-                                <div class="min-w-0 flex-1">
-                                    <p class="truncate text-xs font-semibold text-slate-500 dark:text-slate-400">
-                                        {{ $h->handle_label }}
-                                        @if ($h->last_post_at)
-                                            <span class="text-slate-400 dark:text-slate-500">· {{ $h->last_post_at->diffForHumans() }}</span>
-                                        @endif
-                                    </p>
-                                    @if ($h->last_post_caption)
-                                        <p class="mt-1 text-sm leading-relaxed text-slate-700 dark:text-slate-200">{{ $h->last_post_caption }}</p>
-                                    @endif
-                                    <span class="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-primary dark:text-teal-300">
-                                        View post <x-icon name="chevron-right" class="h-3 w-3" />
-                                    </span>
+                        <a href="{{ $h->last_post_url ?: $h->handle_url }}" target="_blank" rel="noopener" class="ns-bh__post ns-ring">
+                            @if ($h->last_post_image_path)<img src="{{ $h->last_post_image_path }}" alt="">@endif
+                            <div class="ns-bh__postbody">
+                                <span class="ns-bh__icon" style="width:32px;height:32px;border-radius:9px"><x-service-icon :slug="$h->platform" class="h-4 w-4" /></span>
+                                <div style="min-width:0;flex:1">
+                                    <small class="ns-small" style="display:block;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ $h->handle_label }}@if ($h->last_post_at) · {{ $h->last_post_at->diffForHumans() }}@endif</small>
+                                    @if ($h->last_post_caption)<p style="margin:4px 0 0;font-size:15px;line-height:1.45;color:rgb(var(--nx-text))">{{ $h->last_post_caption }}</p>@endif
+                                    <span class="ns-pg__act ns-pg__act--link" style="margin-top:8px">View post <x-nx.icon name="chev" style="font-size:13px" /></span>
                                 </div>
                             </div>
                         </a>
@@ -168,26 +133,20 @@
             </section>
         @endif
 
-        {{-- Featured images — a small curated gallery, separate from the
-             single card-listing hero above. --}}
+        {{-- Featured images: a small curated gallery, separate from the single card-listing hero above. --}}
         @if ($brandPartner->images->isNotEmpty())
-            <section class="mb-2 mt-8">
-                <h2 class="mb-3 flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide text-slate-400 dark:text-slate-500">
-                    <x-icon name="image" class="h-3.5 w-3.5 text-accent-dark dark:text-accent" /> Featured
-                </h2>
-                <div class="grid grid-cols-2 gap-2.5 sm:grid-cols-3">
+            <section class="ns-bh__section">
+                <h2 class="ns-bh__h"><x-nx.icon name="globe" /> Featured</h2>
+                <div class="ns-bh__gallery">
                     @foreach ($brandPartner->images as $img)
-                        <figure class="group relative overflow-hidden rounded-2xl" wire:key="img-{{ $img->id }}">
-                            <img src="{{ $img->image_path }}" alt="{{ $img->caption }}" class="aspect-square w-full object-cover transition duration-500 group-hover:scale-105">
-                            @if ($img->caption)
-                                <figcaption class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent px-3 py-2 text-xs font-medium text-white opacity-0 transition group-hover:opacity-100">
-                                    {{ $img->caption }}
-                                </figcaption>
-                            @endif
+                        <figure wire:key="img-{{ $img->id }}">
+                            <img src="{{ $img->image_path }}" alt="{{ $img->caption }}">
+                            @if ($img->caption)<figcaption>{{ $img->caption }}</figcaption>@endif
                         </figure>
                     @endforeach
                 </div>
             </section>
         @endif
+    </x-nx.page>
     </div>
 </div>

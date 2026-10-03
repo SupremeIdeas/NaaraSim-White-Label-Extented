@@ -55,6 +55,38 @@ class ReferralEarningsService
         ]);
     }
 
+    /**
+     * Reverse an earlier accrual after a refund or a lost chargeback (admin-triggered — disputes are never automated).
+     * May take the balance negative: a debt that future earnings repay; withdrawals are blocked while it exists.
+     */
+    public function clawback(User $referrer, float $amount, string $reference, string $reason): ReferralEarning
+    {
+        $amount = round($amount, self::SCALE);
+        if ($amount <= 0) {
+            throw new RuntimeException('Clawback amount must be positive.');
+        }
+
+        return $this->apply($referrer, ReferralEarning::CLAWBACK, -$amount, $reference, ['description' => 'Adjustment: '.$reason]);
+    }
+
+    /** Debit for a member-to-member transfer (escrow). Throws if it would overdraw. Idempotent on the reference. */
+    public function transferOut(User $sender, float $amount, string $reference, string $description): ReferralEarning
+    {
+        return $this->apply($sender, ReferralEarning::TRANSFER_OUT, -round($amount, self::SCALE), $reference, ['description' => $description]);
+    }
+
+    /** Credit a transfer the member accepted. Not an accrual. Idempotent on the reference. */
+    public function transferIn(User $recipient, float $amount, string $reference, string $description, ?User $from = null): ReferralEarning
+    {
+        return $this->apply($recipient, ReferralEarning::TRANSFER_IN, round($amount, self::SCALE), $reference, ['description' => $description, 'source_type' => 'transfer', 'source_user_id' => $from?->id]);
+    }
+
+    /** Money the referrer owes back (0 when the balance is not negative). */
+    public function debt(User $referrer): float
+    {
+        return round(max(0.0, -$this->balance($referrer)), self::SCALE);
+    }
+
     public function balance(User $referrer): float
     {
         $last = ReferralEarning::where('user_id', $referrer->id)->latest('id')->first();
@@ -75,7 +107,7 @@ class ReferralEarningsService
                     ->latest('id')->value('balance_after') ?? 0);
                 $after = round($before + $delta, self::SCALE);
 
-                if ($after < 0) {
+                if ($delta < 0 && $after < 0 && $type !== ReferralEarning::CLAWBACK) { // a debit may not overdraw; a credit may still leave a debt partly repaid
                     throw new RuntimeException('Amount exceeds the referrer’s available earnings.');
                 }
 
