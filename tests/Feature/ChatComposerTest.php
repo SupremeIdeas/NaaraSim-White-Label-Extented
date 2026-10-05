@@ -181,9 +181,9 @@ class ChatComposerTest extends TestCase
         $this->assertStringContainsString('wire:submit="sendReply"', $legacy);
     }
 
-    public function test_the_permissions_policy_lets_the_page_use_the_microphone_for_voice_notes(): void
+    public function test_the_permissions_policy_lets_the_page_use_the_microphone_and_location_but_not_the_camera(): void
     {
-        // With `microphone=()` every in-browser voice recording is blocked by the browser before the permission prompt ever appears.
-        $this->get('/login')->assertHeader('Permissions-Policy', 'geolocation=(), microphone=(self), camera=()');
+        // With `microphone=()` every in-browser voice recording is blocked by the browser before the permission prompt ever appears; with `geolocation=()` the composer's Location button silently does nothing.
+        $this->get('/login')->assertHeader('Permissions-Policy', 'geolocation=(self), microphone=(self), camera=()');
     }
 }
