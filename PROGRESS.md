@@ -9,6 +9,13 @@
 
 ## DONE
 
+### Engineering v3 Phase 1: shared UI primitives (2026-10-11)
+- **Liquid-fill upload progress** (`resources/js/nx-upload.js` + `nx-upload.css`): one card for every upload surface. Livewire uploads are picked up automatically from the `livewire-upload-*` events (about 50 `WithFileUploads` components covered with no per-component change); XHR/chunked uploaders call `window.nxUpload.track()`. States preparing, uploading, processing, done, failed, cancelled; Cancel and Retry; `role=progressbar`, 25/50/75/100 announcements, plain bar under reduced motion. The master chunked video uploader is wired to it.
+- **Layer manager** (`nx-layers.js`/`nx-layers.css`): `--nx-dock-h` and `--nx-header-h` measured live; the app shell reserves the real dock height instead of a fixed `pb-28`; floating buttons hide while a text field has the keyboard; one documented z-index scale (modal 80, toast 100, call 120; modals no longer sit above toasts); `window.nxLayers.audit()` lists text covered by a fixed layer.
+- **Fixed:** the skinned pages (aurora background) scrolled sideways on phones (dashboard 377px wide at 360px): clipped at the viewport with `overflow-x: clip`. Sticky header band made more solid (alpha .94/.92).
+- Toast bus already existed (`nx-toast`, corner + hero); secret-field hygiene was done earlier (Phase 1F). `docs/livewire-hang-playbook.md` added. Tests: NxLayersAssetsTest.
+- **Next:** Phase 2 (payouts honest health, probes), Phase 3 (wallet/rewards).
+
 ### Platform favicon (2026-10-11)
 - Default favicon replaced with the new Naara logo: `public/brand/naarasim-favicon.png` (512px, 256-colour compressed, 34 KB) and `public/favicon.ico` (16 to 128 px). An admin-uploaded favicon (Branding) still overrides it.
 

@@ -7,7 +7,7 @@
 .ns-app--flush > .ns-app__body { padding-bottom: 28px; }
 
 /* Sheet as a real modal: bottom sheet on phones, centred dialog from `sm` up. Same .ns-sheet the wireframe styles. */
-.ns-modal { position: fixed; inset: 0; z-index: 60; display: flex; align-items: flex-end; justify-content: center; }
+.ns-modal { position: fixed; inset: 0; z-index: 80; display: flex; align-items: flex-end; justify-content: center; }
 .ns-modal > .ns-scrim { position: absolute; inset: 0; z-index: 0; }
 .ns-modal .ns-sheet { position: relative; z-index: 1; inset: auto; width: 100%; max-width: 32rem; height: auto; max-height: 92vh; container-type: inline-size; }
 @media (min-width: 640px) {
@@ -139,7 +139,7 @@ html[data-nx-skin] .nx-header-fade { position: sticky; isolation: isolate; backg
 html[data-nx-skin] .nx-header-fade::before {
     content: ""; position: absolute; z-index: -1; inset: 0 0 -14px; pointer-events: none;
     /* Held fairly solid behind the logo/icon row (so scrolled content never collides with them), feathered to nothing below. */
-    background: linear-gradient(to bottom, rgb(var(--nx-canvas) / .86), rgb(var(--nx-canvas) / .8) 62%, transparent);
+    background: linear-gradient(to bottom, rgb(var(--nx-canvas) / .94), rgb(var(--nx-canvas) / .92) 62%, transparent);
     -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px);
     -webkit-mask-image: linear-gradient(to bottom, #000 66%, transparent); mask-image: linear-gradient(to bottom, #000 66%, transparent);
 }

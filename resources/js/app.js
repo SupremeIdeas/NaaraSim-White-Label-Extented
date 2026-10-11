@@ -1,6 +1,10 @@
 import './bootstrap';
 import './field-glow';
+import { registerNxUpload } from './nx-upload';
+import { registerNxLayers } from './nx-layers';
 import './lottie';
+registerNxUpload();
+registerNxLayers();
 import { initImageCompression } from './image-compress';
 import { registerVoiceRecorder } from './support-voice';
 import { registerNiaChat } from './nia-chat';

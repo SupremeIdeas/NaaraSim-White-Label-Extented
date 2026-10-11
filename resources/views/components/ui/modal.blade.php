@@ -56,7 +56,7 @@
     x-effect="document.body.style.overflow = open ? 'hidden' : ''; if (open) $nextTick(() => $refs.panel?.focus())"
     x-show="open"
     x-cloak
-    class="fixed inset-0 z-[9998] flex items-end justify-center sm:items-center"
+    class="fixed inset-0 z-[80] flex items-end justify-center sm:items-center"
     role="dialog" aria-modal="true" aria-labelledby="{{ $id }}-title"
     style="display:none;"
 >
