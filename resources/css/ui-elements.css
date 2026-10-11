@@ -1396,7 +1396,11 @@
 /* --- Hero flag orbit (premium "connections across borders" overlay) ---------
    Floating flag/comms nodes over the WebGL hero, joined by faint gold "signal"
    lines whose dash flows to feel alive. Static for reduced-motion. */
-.nx-orbit__line { stroke-dasharray: 5 9; animation: nx-signal 2.6s linear infinite; }
+.nx-orbit__line { stroke-dasharray: 12 9; stroke-linecap: round; stroke-width: 2.2px; opacity: .8; animation: nx-signal 2.6s linear infinite; }
+/* Visible connective lines: deep teal on a light page, the light mint scent colour (with a soft glow) on a dark one and on the always-dark login panel. */
+.nx-orbit__line--ink { stroke: #0b5c5c; }
+.dark .nx-orbit__line--ink { stroke: #5eead4; filter: drop-shadow(0 0 5px rgb(94 234 212 / .65)); }
+.nx-orbit__line--lite { stroke: #5eead4; filter: drop-shadow(0 0 5px rgb(94 234 212 / .65)); }
 .nx-orbit__node { animation: nx-float-a 6s ease-in-out infinite; }
 .nx-orbit__node:nth-child(3n) { animation-name: nx-float-b; animation-duration: 7.5s; }
 .nx-orbit__node:nth-child(3n+1) { animation-name: nx-float-c; animation-duration: 8.5s; }
