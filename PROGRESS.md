@@ -9,6 +9,9 @@
 
 ## DONE
 
+### Platform favicon (2026-10-11)
+- Default favicon replaced with the new Naara logo: `public/brand/naarasim-favicon.png` (512px, 256-colour compressed, 34 KB) and `public/favicon.ico` (16 to 128 px). An admin-uploaded favicon (Branding) still overrides it.
+
 ### Ported from master (2026-10-03): Naara Gift hero looping reveal
 - With no hero image uploaded, the Naara Gift storefront plays a pure-CSS loop (card wall -> golden iris opens the gift box -> shimmer, halo, sparks -> closes). Transparent WebP cut-outs in `public/images/themes/shared/gift-hero-{box,tiles}.webp`. An uploaded hero or the hero switched off always wins; reduced-motion shows the finished box still. `GiftHeroBackground::showsSpecial()`; 2 new tests.
 
