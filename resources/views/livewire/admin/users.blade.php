@@ -81,7 +81,7 @@
                                             class="inline-flex items-center gap-1 rounded-lg border border-primary/30 bg-primary/5 px-2.5 py-1.5 text-xs font-semibold text-primary hover:bg-primary/10 dark:border-primary/40 dark:text-teal-300">
                                         <x-icon name="zap" class="h-3.5 w-3.5" /> Promote
                                     </button>
-                                    <div x-show="open" x-cloak x-transition class="absolute right-0 top-8 z-10 w-40 overflow-hidden rounded-lg border border-slate-200 bg-white text-left shadow-lg dark:border-[#2D4060] dark:bg-[#1A2840]">
+                                    <div x-show="open" x-cloak class="mt-1 flex w-full flex-col overflow-hidden rounded-lg border border-slate-200 bg-white text-left shadow-lg dark:border-[#2D4060] dark:bg-[#1A2840]">
                                         <button wire:click="promote({{ $u->id }}, 'v1')" @click="open = false" wire:confirm="Promote {{ $u->name }} to Merchant V1 (free, no application)?"
                                                 class="block w-full px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-[#243352]">Merchant V1</button>
                                         <button wire:click="promote({{ $u->id }}, 'v2')" @click="open = false" wire:confirm="Promote {{ $u->name }} to Merchant V2 (client management)?"
