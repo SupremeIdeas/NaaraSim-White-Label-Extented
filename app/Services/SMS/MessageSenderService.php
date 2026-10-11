@@ -117,6 +117,9 @@ class MessageSenderService
         if (! preg_match('/^\+[1-9]\d{6,14}$/', $to)) {
             throw new SmsException('Enter a valid destination in international format, e.g. +2348012345678.');
         }
+        if (app(SmsOptOuts::class)->isOptedOut((int) $line->id, $to)) {
+            throw new SmsException('This person replied STOP, so you can’t text them from this number until they reply START.');
+        }
         $body = trim($body);
         // An attachment can stand alone; a plain SMS needs text.
         if ($body === '' && ! $hasMedia) {
