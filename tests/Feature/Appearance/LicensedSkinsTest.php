@@ -173,6 +173,35 @@ class LicensedSkinsTest extends AppearanceTestCase
         $this->assertSame(['neo', 'glass'], LicensedSkins::chosen());
     }
 
+    public function test_picked_skins_are_permanent_and_an_upgrade_adds_only_the_extra_three(): void
+    {
+        config(['appearance.built' => ['surface', 'glass', 'neo', 'passport', 'calm', 'vivid', 'ledger', 'noir']]);
+        $this->allowance(2);
+        $this->assertTrue(LicensedSkins::saveSelection(['glass', 'neo'])['ok']);
+
+        // Basic: swapping a locked pick for another skin is refused, the selection is untouched.
+        $swap = LicensedSkins::saveSelection(['glass', 'passport']);
+        $this->assertFalse($swap['ok']);
+        $this->assertSame(['glass', 'neo'], LicensedSkins::chosen());
+
+        // The screen refuses to untick a locked pick too.
+        Livewire::actingAs($this->admin())->test(SkinSelection::class)
+            ->call('toggle', 'neo')->assertSet('error', 'This skin is already yours permanently. Skins you have picked cannot be swapped out.')
+            ->assertSet('picked', ['glass', 'neo']);
+
+        // Upgrade to Extended: allowance 5, the two stay, three more can be added, the rest stay hidden.
+        $this->allowance(5);
+        $this->assertSame(['glass', 'neo'], LicensedSkins::chosen());
+        $this->assertFalse(LicensedSkins::saveSelection(['glass', 'neo', 'passport', 'calm', 'vivid', 'ledger'])['ok'], 'a sixth is over the allowance');
+        $this->assertFalse(LicensedSkins::saveSelection(['neo', 'passport', 'calm', 'vivid'])['ok'], 'dropping glass is refused');
+        $cat = LicensedSkins::catalogue();
+        $extra = array_values(array_diff($cat, ['glass', 'neo']));
+        $this->assertTrue(LicensedSkins::saveSelection(['neo', 'glass', $extra[0], $extra[1], $extra[2]])['ok']);
+        $this->assertCount(5, LicensedSkins::available());
+        $this->assertNotContains($extra[3], LicensedSkins::available(), 'every other skin stays hidden');
+        $this->assertSame('neo', LicensedSkins::default(), 'reordering the default is still allowed');
+    }
+
     public function test_the_selection_screen_cannot_pick_anything_before_activation(): void
     {
         Livewire::actingAs($this->admin())->test(SkinSelection::class)

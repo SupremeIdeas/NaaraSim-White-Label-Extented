@@ -13,7 +13,7 @@
             <x-nx.stat label="Hidden from members" :value="$hiddenCount" />
         </div>
         @if ($canAddMore > 0 && count($saved) > 0)
-            <x-nx.note icon="info" style="margin-top:10px">You can add {{ $canAddMore }} more {{ \Illuminate\Support\Str::plural('skin', $canAddMore) }} to your selection.</x-nx.note>
+            <x-nx.note icon="info" style="margin-top:10px">Your {{ count($saved) }} saved {{ \Illuminate\Support\Str::plural('skin', count($saved)) }} stay yours permanently. You can add {{ $canAddMore }} more {{ \Illuminate\Support\Str::plural('skin', $canAddMore) }} to your selection.</x-nx.note>
         @endif
         @if (count($saved) === 0)
             <x-nx.banner icon="sparkles" title="Choose your skins" text="Nothing is saved yet, so your members see the standard skin only. Pick your skins below and save." style="margin-top:10px" />
@@ -54,6 +54,9 @@
                         </button>
                         @if ($on)
                             <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:8px">
+                                @if (in_array($key, $locked, true))
+                                    <span class="ns-pill" title="Permanently yours">Locked in</span>
+                                @endif
                                 @if ($picked[0] === $key)
                                     <span class="ns-pill ns-pill--best">Default</span>
                                 @else

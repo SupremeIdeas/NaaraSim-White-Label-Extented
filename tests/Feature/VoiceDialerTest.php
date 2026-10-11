@@ -183,4 +183,33 @@ class VoiceDialerTest extends TestCase
 
         $this->assertSame('10.0000', (string) $user->wallet->fresh()->usd_balance);
     }
+
+    public function test_a_configured_twilio_account_refuses_to_quote_when_the_live_price_is_unavailable(): void
+    {
+        \Illuminate\Support\Facades\Http::fake(['pricing.twilio.com/*' => \Illuminate\Support\Facades\Http::response(['message' => 'denied'], 401)]);
+        $this->expectException(\App\Exceptions\SmsException::class);
+        app(\App\Services\SMS\Numbers\TwilioService::class)->voiceRate('+2522222222');
+    }
+
+    public function test_worldwide_destinations_are_priced_from_the_live_lookup_using_the_highest_published_rate(): void
+    {
+        \Illuminate\Support\Facades\Http::fake(['pricing.twilio.com/*' => \Illuminate\Support\Facades\Http::response(['outbound_call_prices' => [
+            ['current_price' => '0.0130'], ['current_price' => '0.0420'],
+        ]], 200)]);
+        $this->assertSame(0.042, app(\App\Services\SMS\Numbers\TwilioService::class)->voiceRate('+447700900123'));
+    }
+
+    public function test_the_callee_sees_the_callers_own_twilio_line_else_the_platform_default(): void
+    {
+        config(['services.twilio.caller_id' => '+15005550006']);
+        $user = User::factory()->create();
+        $call = new VoiceCall(['user_id' => $user->id]);
+        $this->assertSame('+15005550006', app(VoiceDialerService::class)->callerIdFor($call));
+
+        \App\Models\VirtualNumber::create(['user_id' => $user->id, 'provider' => 'telnyx', 'phone_number' => '+447700900111', 'sid' => 'x1', 'status' => 'active', 'capabilities' => ['voice' => true]]);
+        $this->assertSame('+15005550006', app(VoiceDialerService::class)->callerIdFor($call), 'another provider’s number is never presented');
+
+        \App\Models\VirtualNumber::create(['user_id' => $user->id, 'provider' => 'twilio', 'phone_number' => '+447700900222', 'sid' => 'x2', 'status' => 'active', 'capabilities' => ['voice' => true]]);
+        $this->assertSame('+447700900222', app(VoiceDialerService::class)->callerIdFor($call));
+    }
 }

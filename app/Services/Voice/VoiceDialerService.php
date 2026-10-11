@@ -128,6 +128,24 @@ class VoiceDialerService
     }
 
     /**
+     * The number the callee sees. The caller's own active Naara line (Twilio-owned, voice-capable) comes first so a user in the
+     * US/UK/anywhere shows their own number, not a shared platform one; otherwise the platform default. Twilio only lets us present
+     * numbers the account owns or has verified, so a number from another provider is never offered here.
+     */
+    public function callerIdFor(VoiceCall $call): string
+    {
+        $own = \App\Models\VirtualNumber::query()
+            ->where('user_id', $call->user_id)
+            ->where('provider', 'twilio')
+            ->where('status', 'active')
+            ->orderBy('id')
+            ->get()
+            ->first(fn ($n) => ($n->capabilities['voice'] ?? true) !== false && preg_match('/^\+[1-9]\d{6,14}$/', (string) $n->phone_number));
+
+        return $own ? (string) $own->phone_number : (string) config('services.twilio.caller_id');
+    }
+
+    /**
      * The funded ceiling in SECONDS — what the TwiML <Dial timeLimit> is set to
      * so Twilio hard-stops the call at exactly what the hold covers.
      */

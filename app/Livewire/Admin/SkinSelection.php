@@ -50,6 +50,11 @@ class SkinSelection extends Component
             return;
         }
         if (in_array($key, $this->picked, true)) {
+            if (in_array($key, LicensedSkins::locked(), true)) {
+                $this->error = 'This skin is already yours permanently. Skins you have picked cannot be swapped out.';
+
+                return;
+            }
             $this->picked = array_values(array_diff($this->picked, [$key]));
 
             return;
@@ -132,6 +137,7 @@ class SkinSelection extends Component
             'activated' => LicensedSkins::activated(),
             'allowance' => LicensedSkins::allowance(),
             'saved' => $saved,
+            'locked' => LicensedSkins::locked(),
             'groups' => $groups,
             'allGroups' => config('appearance.groups'),
             'hiddenCount' => max(0, count(LicensedSkins::catalogue()) - count($this->picked)),

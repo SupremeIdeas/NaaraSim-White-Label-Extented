@@ -74,6 +74,15 @@ class LicensedSkins
         return array_slice($clean, 0, self::allowance());
     }
 
+    /**
+     * Picks that are permanent. Once a selection is saved the licensee keeps those skins forever: a later save may add skins (an
+     * upgrade raises the allowance) and may reorder the default, but can never swap or drop a skin already picked.
+     */
+    public static function locked(): array
+    {
+        return self::chosen();
+    }
+
     /** What end users may use. The ONLY list the rest of the app consults. */
     public static function available(): array
     {
@@ -106,6 +115,10 @@ class LicensedSkins
         }
         if (count($keys) > self::allowance()) {
             $errors[] = 'Your licence unlocks '.self::allowance().' skin(s); you chose '.count($keys).'.';
+        }
+        $dropped = array_values(array_diff(self::locked(), $keys));
+        if ($dropped !== []) {
+            $errors[] = 'Skins you already picked are yours permanently and cannot be swapped out: '.implode(', ', $dropped).'.';
         }
         foreach ($keys as $k) {
             if (! in_array($k, self::catalogue(), true)) {
