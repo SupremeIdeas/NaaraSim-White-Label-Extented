@@ -3,7 +3,7 @@
      behavior as the NaaraSim Wizard, positioned just in front of it (the
      slot directly above Wizard) for fast, on-demand navigation to activity
      progress + rewards without going through the menu. --}}
-<div class="fixed bottom-40 right-4 z-50 print:hidden lg:bottom-24"
+<div class="nx-fab fixed bottom-40 right-4 z-50 print:hidden lg:bottom-24"
      wire:key="naara-journey-launcher"
      x-data="{ jlHidden: localStorage.getItem('nx_journey_hidden') === '1' }"
      x-effect="localStorage.setItem('nx_journey_hidden', jlHidden ? '1' : '0')">

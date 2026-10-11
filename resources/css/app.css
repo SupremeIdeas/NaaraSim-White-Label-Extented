@@ -3,6 +3,8 @@
 /* Chat Composer Pro (<naara-composer>) — the one composer for every chat/message surface. */
 @import './composer.css';
 @import './field-glow.css';
+@import './nx-upload.css';
+@import './nx-layers.css';
 
 @import './ui-elements.css';
 

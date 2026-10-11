@@ -1,0 +1,17 @@
+/* One z-index scale and the dock/header measurements (Engineering v3 Phase 1E). resources/js/nx-layers.js keeps --nx-dock-h and
+   --nx-header-h current; every scroll container reserves --nx-dock-h so the last row is never covered.
+   content 1 < header 30 < dock 40 < fab 45 < dropdown 50 < modal 80 < upload 85 < toast 90/100 < call overlay 120.
+   Full-screen interstitials (splash, welcome) keep 9999 on purpose: they replace the page, they do not float over it. */
+:root {
+  --nx-z-header: 30; --nx-z-dock: 40; --nx-z-fab: 45; --nx-z-dropdown: 50; --nx-z-modal: 80; --nx-z-upload: 85; --nx-z-toast: 100; --nx-z-call: 120;
+  --nx-dock-h: 0px; --nx-header-h: 0px;
+}
+/* Floating action buttons step aside while a text field has the keyboard, so they never sit on the field being typed in. */
+@media (max-width: 1023px) {
+  html.nx-kbd .nx-fab, html.nx-kbd .brn-fab, html.nx-kbd .nn-fab { opacity: 0; pointer-events: none; transform: translateY(8px); transition: opacity .15s ease, transform .15s ease; }
+}
+.nx-fab, .brn-fab, .nn-fab { transition: opacity .15s ease, transform .15s ease; }
+
+/* The skinned background effects (aurora, glows) deliberately bleed past their box; clip that bleed at the viewport so a page can never
+   scroll sideways. `clip` (unlike `hidden`) does not create a scroll container, so sticky headers keep working. */
+html, body { overflow-x: clip; }

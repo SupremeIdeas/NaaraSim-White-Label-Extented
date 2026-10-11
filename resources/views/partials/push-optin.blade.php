@@ -4,7 +4,7 @@
          Nothing renders/prompts unless VAPID keys are configured. --}}
     <div x-data="naaraPush(@js(\App\Support\WebPushConfig::publicKey()))" x-init="init()" x-cloak>
         <div x-show="showPrompt" x-transition
-             class="fixed bottom-24 left-1/2 z-40 w-[92vw] max-w-sm -translate-x-1/2 rounded-2xl border border-slate-200 bg-white p-4 shadow-xl lg:bottom-6 lg:left-auto lg:right-6 lg:translate-x-0 dark:border-[var(--brand-card-border-dark)] dark:bg-[#1B2A44]">
+             class="nx-fab fixed bottom-24 left-1/2 z-40 w-[92vw] max-w-sm -translate-x-1/2 rounded-2xl border border-slate-200 bg-white p-4 shadow-xl lg:bottom-6 lg:left-auto lg:right-6 lg:translate-x-0 dark:border-[var(--brand-card-border-dark)] dark:bg-[#1B2A44]">
             <div class="flex items-start gap-3">
                 <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary dark:bg-primary/20">
                     <x-icon name="bell" class="h-4 w-4" />
