@@ -52,6 +52,9 @@ class SmsInboundWebhookController extends Controller
             return response()->json(['ok' => true, 'matched' => false]);
         }
 
+        // STOP / START from the other party: honoured on this line from now on (the message is still recorded in the thread).
+        app(\App\Services\SMS\SmsOptOuts::class)->apply((int) $line->id, $this->normalise($from), $body);
+
         RecordInboundMessageJob::dispatch(
             userId: $line->user_id,
             virtualNumberId: $line->id,
