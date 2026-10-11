@@ -1,4 +1,4 @@
-/* Sign-in field feedback: calm at rest, a soft brand glow on focus, and the accent colour while the person is actually typing.
+/* Sign-in field feedback: calm at rest, a soft brand glow on focus, and while the person is actually typing the whole field (border AND the fill inside it) turns accent.
    Stop typing for a moment and it eases back to the focus look; keep typing and it returns to the accent.
    Opt in with `data-glow-fields` on a form (the JS in resources/js/field-glow.js adds `.is-typing`). Colours are tokens, so the member's accent
    and light/dark follow automatically; nothing is hard-coded. */
@@ -8,7 +8,7 @@
 [data-glow-fields] :is(input[type=text], input[type=email], input[type=password], input[type=tel], input[type=number], input[type=search], input:not([type])):focus {
     outline: none;
     border-color: rgb(var(--brand-primary));
-    box-shadow: 0 0 0 3px rgb(var(--brand-primary) / .20), 0 8px 20px -10px rgb(var(--brand-primary) / .55);
+    box-shadow: 0 0 0 3px rgb(var(--brand-primary) / .20), 0 8px 20px -10px rgb(var(--brand-primary) / .55), inset 0 0 0 100px rgb(var(--brand-primary) / .10);
 }
 [data-glow-fields] :is(input[type=text], input[type=email], input[type=password], input[type=tel], input[type=number], input[type=search], input:not([type])).is-typing {
     border-color: rgb(var(--nx-teal, var(--brand-accent)));
@@ -16,7 +16,7 @@
         0 0 0 3px rgb(var(--nx-teal, var(--brand-accent)) / .30),
         0 0 26px -4px rgb(var(--nx-teal, var(--brand-accent)) / .50),
         0 0 40px -14px rgb(var(--brand-accent) / .55),
-        inset 0 0 0 100px rgb(var(--nx-teal, var(--brand-accent)) / .07);
+        inset 0 0 0 100px rgb(var(--nx-teal, var(--brand-accent)) / .30);
 }
 @media (prefers-reduced-motion: reduce) {
     [data-glow-fields] input { transition: none; }
