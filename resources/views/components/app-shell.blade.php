@@ -163,7 +163,7 @@
                 {{ $headerActionsDesktop }}
             </div>
         @endisset
-        <main class="mx-auto w-full max-w-6xl px-4 py-6 pb-[calc(var(--nx-dock-h,5rem)+2rem)] lg:px-8 lg:py-10 lg:pb-10">
+        <main data-nx-page class="mx-auto w-full max-w-6xl px-4 py-6 pb-[calc(var(--nx-dock-h,5rem)+2rem)] lg:px-8 lg:py-10 lg:pb-10">
             {{ $slot }}
         </main>
         {{-- Near-footer sentinel (BLUEPRINT-batch1-sections §6): reveals the global
