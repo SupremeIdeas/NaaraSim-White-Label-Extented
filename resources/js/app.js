@@ -1,4 +1,5 @@
 import './bootstrap';
+import './field-glow';
 import './lottie';
 import { initImageCompression } from './image-compress';
 import { registerVoiceRecorder } from './support-voice';
