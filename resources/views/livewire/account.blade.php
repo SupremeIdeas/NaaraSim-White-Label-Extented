@@ -1,4 +1,5 @@
 {{-- Account & privacy on the skin system (S3 Batch 2). Every action, confirm and Livewire target is unchanged. --}}
+<div>
 <x-nx.page class="ns-narrow">
     <h1 class="ns-h1" style="margin-top:6px">{{ __('account.title') }}</h1>
     <p class="ns-sub">{{ __('account.subtitle') }}</p>
@@ -116,3 +117,4 @@
         @endif
     </div>
 </x-nx.page>
+</div>

@@ -40,6 +40,7 @@ return [
     'reason_no_fast_rail_in_country' => 'Hakuna njia ya haraka inayofunika nchi yako.',
     'reason_global_payout_available' => 'Malipo ya Kimataifa yako wazi kwa nchi yako.',
     'reason_temporarily_unavailable' => 'Haipatikani kwa muda.',
+    'reason_not_open_yet' => 'Bado haijafunguliwa.',
     'reason_coming_soon' => 'Mtoa huduma anafunika nchi yako; bado hatujaiwasha.',
     'reason_not_supported' => 'Haifunikwi nchini kwako.',
     'reason_blocked' => 'Haipatikani.',

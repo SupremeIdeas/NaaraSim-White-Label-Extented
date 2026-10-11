@@ -117,7 +117,7 @@ class PayoutAccountTest extends TestCase
         $service = $this->service();
 
         $first = $service->addAccount($user, $this->data());
-        $second = $service->addAccount($user, $this->data(['make_default' => true]));
+        $second = $service->addAccount($user, $this->data(['make_default' => true, 'bank_code' => '057']));
 
         $this->assertFalse($first->fresh()->is_default);
         $this->assertTrue($second->fresh()->is_default);
@@ -130,7 +130,7 @@ class PayoutAccountTest extends TestCase
         $service = $this->service();
 
         $first = $service->addAccount($user, $this->data());
-        $second = $service->addAccount($user, $this->data());
+        $second = $service->addAccount($user, $this->data(['bank_code' => '057']));
         $this->assertTrue($first->fresh()->is_default);
 
         $service->remove($user, $first->fresh());

@@ -12,3 +12,7 @@ A control that "stops responding until I refresh" is almost never a server probl
 8. **Only then change code**, and add a regression: click each tab or quick amount 20 times rapidly and assert state and no console errors (`scripts/responsive/audit.mjs` is the place to extend).
 
 Layers: the z-index scale and the dock/header measurements live in `resources/css/nx-layers.css` and `resources/js/nx-layers.js`. `window.nxLayers.audit()` lists every visible text element a fixed layer is covering.
+
+## Worked example: Wallet tabs and quick amounts (2026-10-11)
+
+Symptom: after one quick-amount tap every tab lost its selected state and the console showed "Could not find Livewire component in DOM tree". Root cause: the Livewire view began with `<x-nx.page x-data="{ tab }">`. That component starts with a Livewire block marker, so Livewire put `wire:id` on the INNER div; the outer div holding the Alpine state was outside the component and was wiped by the first update. Fix: a single plain `<div>` root with `<x-nx.page>` inside it (12 views had the same shape, three of them with Alpine state: wallet, referrals, sound settings). `tests/Feature/LivewireRootsTest` fails the build if a Livewire view starts with `<x-nx.page` again. Check 3 in the list above ("Keys and roots") now includes "the first element of the view is a plain root".

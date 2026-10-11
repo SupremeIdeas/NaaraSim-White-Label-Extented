@@ -2,6 +2,8 @@
 
 namespace App\Services\Payouts\Hardening;
 
+use App\Services\Payouts\Health\GatewayStatus;
+use App\Services\Payouts\Health\GatewayStatusResolver;
 use App\Services\Payouts\PayoutService;
 use App\Support\JobHeartbeats;
 use App\Support\PayoutSettings;
@@ -30,21 +32,28 @@ class AutomationStatus
         $add(PayoutSettings::autoApprovalEnabled(), 'Auto-approval is on', 'Turn on "Auto-approval" in All payout settings.');
         $add(! PayoutSettings::shadowMode(), 'Learning (shadow) mode is off', 'Turn off "Learning (shadow) mode" — while it is on a person approves everything.');
 
+        // The provider list comes from the gateway registry (core rails AND updater-delivered ones), never a hand-kept array.
+        $resolver = new GatewayStatusResolver($this->payouts);
         $rails = [];
-        foreach (['paystack', 'flutterwave', 'stripe', 'paypal', 'cryptomus'] as $p) {
-            if (! $this->payouts->knowsProvider($p)) {
-                continue;
+        $why = [];
+        foreach ($resolver->all() as $status) {
+            if ($status->provider === 'manual_external') {
+                continue; // the admin-pays-outside rail is never "automatic"
             }
-            $configured = $this->payouts->gatewayFor($p) !== null;
-            if (! $configured) {
-                continue; // a rail with no keys is simply not in play
+            if (! $status->usable()) {
+                if ($status->reason !== GatewayStatus::R_NOT_INSTALLED) {
+                    $why[] = $status->adminMessage;
+                }
+
+                continue; // a rail that is not in play is simply not counted
             }
+            $p = $status->provider;
             $on = PayoutSettings::providerAutoApprove($p);
-            $add($on, ucfirst($p).' pays out automatically', 'Turn on automatic approval for '.ucfirst($p).' in Payouts -> Guardian.');
+            $add($on, $status->label.' pays out automatically', 'Turn on automatic approval for '.$status->label.' in Payouts -> Guardian.');
             $on && $rails[] = $p;
         }
         if ($rails === [] && ! collect($checks)->contains(fn ($c) => str_contains($c['label'], 'pays out automatically'))) {
-            $add(false, 'At least one payout provider is configured', 'Add a provider key (e.g. Paystack) in Admin -> API keys; only configured rails can pay.');
+            $add(false, 'At least one payout provider is ready', ($why !== [] ? implode(' ', array_slice($why, 0, 3)).' ' : '').'Add a provider key (e.g. Paystack) in Admin -> Provider Keys; only ready rails can pay.');
         }
 
         foreach (['payouts:guard-sweep' => 'The Guardian sweeper', 'payouts:guard-metrics' => 'The Guardian metrics job'] as $job => $label) {

@@ -57,6 +57,24 @@ class PayoutService
         return null;
     }
 
+    /** The registered gateway for a provider whether or not it is available (for health reporting; never use it to send). */
+    public function gateway(?string $provider): ?PayoutGatewayInterface
+    {
+        foreach ($this->gateways as $gateway) {
+            if ($gateway->name() === $provider) {
+                return $gateway;
+            }
+        }
+
+        return null;
+    }
+
+    /** @return list<string> every registered gateway name, available or not */
+    public function providerNames(): array
+    {
+        return array_values(array_map(fn (PayoutGatewayInterface $g) => $g->name(), $this->gateways));
+    }
+
     /** Is this provider registered at all (whether or not it is currently configured/available)? */
     public function knowsProvider(?string $provider): bool
     {

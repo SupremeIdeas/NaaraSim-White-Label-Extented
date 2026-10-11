@@ -36,6 +36,8 @@ class Rewards extends Component
                 message: "+{$earned} NaaraCredits added to your balance. Come back tomorrow for more!", sound: 'reward.default');
             // Celebratory confetti (self-hosted Lottie), only on a real earn.
             $this->dispatch('reward-claimed');
+            // The same fact in the bell, so it is still there after the toast fades.
+            $user->notify(new \App\Notifications\RewardClaimedNotification((float) $earned, 'Daily check-in'));
             // My Journey goals (loyalty expansion) — a streak goal can unlock
             // the instant today's check-in lands.
             EvaluateJourneyGoalsJob::dispatch($user->id);

@@ -1,4 +1,5 @@
 {{-- Data estimator on the skin system (S3 Batch 3): same radios + slider + estimate, now with a suggested-data hero and a matching-plans CTA. --}}
+<div>
 <x-nx.page class="ns-narrow">
     <a href="{{ route('catalogue') }}" wire:navigate class="ns-back"><x-nx.icon name="chevron-left" /> {{ __('esim.back') }}</a>
     <h1 class="ns-h1" style="margin-top:6px">Data estimator</h1>
@@ -23,3 +24,4 @@
     <a href="{{ route('catalogue') }}" wire:navigate class="ns-cta" style="margin-top:18px"><x-nx.icon name="globe" /> Find a plan <x-nx.icon name="chevron-right" /></a>
     <p class="ns-sub" style="font-size:13px;text-align:center">Estimates only — real usage varies with apps and video quality.</p>
 </x-nx.page>
+</div>

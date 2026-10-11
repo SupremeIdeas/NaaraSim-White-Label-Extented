@@ -15,3 +15,6 @@
 /* The skinned background effects (aurora, glows) deliberately bleed past their box; clip that bleed at the viewport so a page can never
    scroll sideways. `clip` (unlike `hidden`) does not create a scroll container, so sticky headers keep working. */
 html, body { overflow-x: clip; }
+
+/* Touch targets: the segmented tab buttons (wallet tabs and the like) meet the 44px minimum on touch screens. */
+@media (pointer: coarse), (max-width: 1023px) { .ns-seg button { min-height: 44px; } }

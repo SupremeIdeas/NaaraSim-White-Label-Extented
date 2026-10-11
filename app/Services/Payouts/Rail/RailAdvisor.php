@@ -77,7 +77,7 @@ class RailAdvisor
                 $options[] = $this->option($rail, $i === 0 ? 'recommended' : 'available', $reasons, $counts[$rail] ?? 0);
             }
             foreach ($unhealthy as $rail) {
-                $options[] = $this->option($rail, 'unavailable', ['temporarily_unavailable']);
+                $options[] = $this->option($rail, 'unavailable', [$this->whyUnavailable($rail)]);
             }
 
             // Global is never an equal choice while a fast rail exists.
@@ -90,7 +90,7 @@ class RailAdvisor
             $options[] = $this->option('global', 'global_fallback', ['no_fast_rail_in_country', 'global_payout_available']);
             $verdict = $unhealthy !== [] ? 'fast_unavailable_global' : 'global_only';
             foreach ($unhealthy as $rail) {
-                $options[] = $this->option($rail, 'unavailable', ['temporarily_unavailable']);
+                $options[] = $this->option($rail, 'unavailable', [$this->whyUnavailable($rail)]);
             }
         } else {
             // A rail that IS enabled here but unhealthy/unconfigured is "temporarily unavailable",
@@ -98,7 +98,7 @@ class RailAdvisor
             $verdict = $unhealthy !== [] ? 'fast_unavailable' : 'none_available';
             foreach (array_unique(array_merge(self::FAST_RAILS, $unhealthy, ['global'])) as $rail) {
                 $options[] = in_array($rail, $unhealthy, true)
-                    ? $this->option($rail, 'unavailable', ['temporarily_unavailable'])
+                    ? $this->option($rail, 'unavailable', [$this->whyUnavailable($rail)])
                     : $this->option($rail, $states[$rail] === 'coming_soon' ? 'coming_soon' : 'not_supported', [$states[$rail]]);
             }
         }
@@ -113,6 +113,22 @@ class RailAdvisor
         }
 
         return ['country' => $country, 'verdict' => $verdict, 'options' => $options, 'current' => $this->current($user)];
+    }
+
+    /**
+     * The calm, truthful user-facing reason a rail is unavailable. Only a tripped failure breaker is "temporarily unavailable"; a rail that is
+     * simply not set up yet is "not open yet". Admins see the full cause in Payout Health; members never see keys, modes or internals.
+     */
+    private function whyUnavailable(string $rail): string
+    {
+        $resolver = new \App\Services\Payouts\Health\GatewayStatusResolver($this->payouts);
+        foreach (PayoutRailRegistry::providersFor($rail) as $provider) {
+            if ($resolver->statusOf($provider)->userReason() === 'temporarily_unavailable') {
+                return 'temporarily_unavailable';
+            }
+        }
+
+        return 'not_open_yet';
     }
 
     /** Healthy = the payout gateway is configured AND the failure-rate breaker has not pulled it. */

@@ -1,5 +1,6 @@
 {{-- nx:converted (skin tokens only; see docs/appearance/SKIN-CONTRACT.md) --}}
 {{-- Your skins (Prompt 22): the licensee picks which skins their licence fills; every other skin is hidden from their members. --}}
+<div>
 <x-nx.page :bleed="false" class="ns-adm">
     <h1 class="ns-adm__title">Your skins</h1>
     <p class="ns-sub">Your licence unlocks a set number of dashboard skins. Pick which ones your members can use, and which is the default. Every other skin stays hidden.</p>
@@ -90,3 +91,4 @@
         </div>
     @endif
 </x-nx.page>
+</div>

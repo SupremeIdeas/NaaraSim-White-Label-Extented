@@ -70,6 +70,13 @@ class PayoutAccountService
             throw new AccountResolutionException("Payouts to {$country} aren't available yet.");
         }
 
+        // The same destination twice is a friendly answer, not a second row (and it spares a needless provider call).
+        $existing = PayoutAccount::query()->where('user_id', $user->id)->where('provider', $resolver->name())
+            ->where('bank_code', $data['bank_code'])->where('lookup_hash', PayoutAccount::lookupHashFor((string) $data['account_number']))->exists();
+        if ($existing) {
+            throw new AccountResolutionException('You have already saved that account.');
+        }
+
         $resolved = $resolver->resolve($country, $data['bank_code'], $data['account_number']);
         if ($resolved === null) {
             throw new AccountResolutionException(

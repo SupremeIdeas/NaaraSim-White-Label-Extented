@@ -1,5 +1,6 @@
 {{-- Rewards on the skin system (S3 Batch 3). Credits carry the NaaraCredits coin; every action (check-in, hunt, rewards wall, withdraw) and every
      server rule is unchanged. --}}
+<div>
 <x-nx.page class="ns-narrow">
     {{-- One-shot celebratory confetti, fired by the `reward-claimed` event on a
          successful check-in. The node stays mounted (so lottie.js hydrates it);
@@ -125,3 +126,4 @@
         </div>
     @endunless
 </x-nx.page>
+</div>

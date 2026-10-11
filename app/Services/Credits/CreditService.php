@@ -156,16 +156,22 @@ class CreditService
             return 0.0;
         }
 
-        $wallet = $user->wallet ?? UserWallet::create(['user_id' => $user->id]);
         $cooldown = (int) CreditSettings::get('checkin_cooldown_hours', 24);
-        if ($wallet->last_checkin_at && $wallet->last_checkin_at->diffInHours(now()) < $cooldown) {
-            return 0.0; // still on cooldown
-        }
+        $user->wallet ?? UserWallet::create(['user_id' => $user->id]);
 
-        $this->earn($user, $amount, 'checkin', 'checkin:'.$user->id.':'.now()->format('Y-m-d-H'), 'Daily check-in reward');
-        $wallet->forceFill(['last_checkin_at' => now()])->save();
+        // Two taps (or two tabs) at once must credit exactly once: the cooldown is re-checked while the wallet row is locked, so the
+        // second request sees the first one's check-in time and earns nothing (and therefore shows no "you earned" message).
+        return DB::transaction(function () use ($user, $amount, $cooldown): float {
+            $wallet = UserWallet::where('user_id', $user->id)->lockForUpdate()->first();
+            if ($wallet->last_checkin_at && $wallet->last_checkin_at->diffInHours(now()) < $cooldown) {
+                return 0.0; // still on cooldown
+            }
 
-        return $amount;
+            $this->earn($user, $amount, 'checkin', 'checkin:'.$user->id.':'.now()->format('Y-m-d-H'), 'Daily check-in reward');
+            $wallet->forceFill(['last_checkin_at' => now()])->save();
+
+            return $amount;
+        });
     }
 
     /** Whether the user may check in right now. */
