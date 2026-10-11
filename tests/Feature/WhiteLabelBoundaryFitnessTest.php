@@ -147,4 +147,38 @@ class WhiteLabelBoundaryFitnessTest extends TestCase
         $this->assertDoesNotMatchRegularExpression('/\b(extended|normal|basic|standard|premium)\b\s*=>\s*\d/i', $src, 'no tier => count map in the consumer');
         $this->assertStringNotContainsString('white_label_skins', $src);
     }
+
+    /** Owner rule: NaaraBusiness Suite and NaaraBrain are master-only too (with N2N / NaaraChat, tested above). Nothing of them may exist on a white label. */
+    public function test_no_business_suite_or_brain_files_exist_on_this_fork(): void
+    {
+        $roots = ['app', 'routes', 'database', 'resources', 'lang', 'config', 'public/js', 'public/images'];
+        $patterns = '#(business-suite|business_suite|businesssuite|app/support/business/|app/services/business/|controllers/business/|controllers/api/v1/business|app/livewire/business|app/livewire/admin/business|views/business/|layouts/business|views/livewire/business|views/livewire/admin/business|marketing/business|ensurebusiness|commands/business|add_business_|create_business_|call-flow-builder|callflowbuilder|images/business/|gifs/business|naarabrain|app/support/brain/|app/livewire/brain|config/brain\.php|views/brain/|brain_)#i';
+        $found = [];
+        foreach ($roots as $root) {
+            $dir = base_path($root);
+            if (! is_dir($dir)) {
+                continue;
+            }
+            foreach (new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($dir, \FilesystemIterator::SKIP_DOTS)) as $file) {
+                $rel = str_replace('\\', '/', substr($file->getPathname(), strlen(base_path()) + 1));
+                if (preg_match($patterns, $rel) === 1) {
+                    $found[] = $rel;
+                }
+            }
+        }
+        $this->assertSame([], $found, 'NaaraBusiness Suite and NaaraBrain are master-only and must not exist on a white-label build: '.implode(', ', array_slice($found, 0, 8)));
+    }
+
+    public function test_no_business_suite_or_brain_route_is_registered_on_this_fork(): void
+    {
+        $bad = [];
+        foreach (app('router')->getRoutes() as $route) {
+            $name = (string) $route->getName();
+            $uri = $route->uri();
+            if (preg_match('#^(business|brain)(\.|$)#', $name) === 1 || preg_match('#^(business|brain)(/|$)#', $uri) === 1 || str_contains($name, 'call-flow')) {
+                $bad[] = $name !== '' ? $name : $uri;
+            }
+        }
+        $this->assertSame([], $bad, 'Business Suite / NaaraBrain routes must not exist on a white label: '.implode(', ', array_slice($bad, 0, 8)));
+    }
 }
