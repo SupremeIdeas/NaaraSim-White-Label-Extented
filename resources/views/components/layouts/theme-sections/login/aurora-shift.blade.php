@@ -42,8 +42,8 @@
                      class="absolute inset-0 h-full w-full object-cover opacity-30">
             @endif
 
-            <div class="relative flex items-center justify-between">
-                <a href="{{ route('home') }}" class="inline-flex">
+            <div class="relative flex min-h-[7rem] items-center justify-between lg:min-h-0">
+                <a href="{{ route('home') }}" class="hidden lg:inline-flex">
                     <x-brand-logo variant="family" theme="dark" size="lg" fallback-icon="signal" />
                 </a>
                 <span class="hidden items-center gap-1.5 rounded-[0.625rem] border border-accent/40 bg-accent/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-accent lg:inline-flex">
