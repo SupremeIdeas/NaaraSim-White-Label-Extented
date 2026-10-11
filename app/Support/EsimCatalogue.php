@@ -367,4 +367,28 @@ class EsimCatalogue
         Cache::forget(self::IMG_COUNTRY.'.photo');
         Cache::forget(self::IMG_REGION);
     }
+
+    /**
+     * Customer-facing plan subtitle (blueprint 5.3): the provider string "eSIM, 1GB, 7 Days, Aaland Islands, V2" becomes "Aaland Islands".
+     * The data size and validity are already the row's headline, and provider/internal tokens (the "eSIM" prefix, "V2", SKU-ish codes) never reach a customer.
+     */
+    public static function cleanPlanName(?string $name): string
+    {
+        $parts = array_map('trim', explode(',', (string) $name));
+        $keep = array_filter($parts, function (string $p) {
+            if ($p === '') {
+                return false;
+            }
+            if (preg_match('/^esim$/i', $p) || preg_match('/^v\d+$/i', $p)) {
+                return false;                                   // provider/internal tokens
+            }
+            if (preg_match('/^\d+(\.\d+)?\s*(mb|gb|tb)$/i', $p) || preg_match('/^\d+\s*(day|days|d)$/i', $p) || preg_match('/^unlimited$/i', $p)) {
+                return false;                                   // shown as the headline already
+            }
+
+            return true;
+        });
+
+        return implode(', ', $keep) !== '' ? implode(', ', $keep) : trim((string) $name);
+    }
 }

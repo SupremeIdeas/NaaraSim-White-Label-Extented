@@ -17,7 +17,7 @@
             @endif
         </div>
         <div class="mt-1 flex items-center gap-1.5">
-            <p class="truncate text-xs text-slate-500 dark:text-slate-400">{{ $plan->name }}</p>
+            <p class="truncate text-xs text-slate-500 dark:text-slate-400">{{ \App\Support\EsimCatalogue::cleanPlanName($plan->name) }}</p>
             @if ($plan->display_tooltip)
                 <span x-data="{ open: false }" class="relative" @click.stop>
                     <button type="button" @click="open = !open" @click.outside="open = false" aria-label="What is this plan?"
