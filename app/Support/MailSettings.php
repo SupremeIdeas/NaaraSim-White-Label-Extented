@@ -169,9 +169,9 @@ class MailSettings
         if ($value === '') {
             return null;
         }
-        $len = strlen($value);
 
-        return $len <= 4 ? str_repeat('•', $len) : str_repeat('•', min($len - 2, 10)).substr($value, -2);
+        // The SMTP password is a secret: a fixed mask, never a character of it and never its length.
+        return str_repeat('•', 8);
     }
 
     /** True once a real, sending mailer is configured (not log/array no-ops). */

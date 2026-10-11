@@ -75,15 +75,15 @@ class ProviderKeysTest extends TestCase
         $this->assertStringNotContainsString('sk_live_topsecret_value', (string) $raw);
     }
 
-    public function test_preview_is_masked_and_reveals_only_the_last_four(): void
+    public function test_a_secret_preview_is_a_fixed_mask_with_no_character_of_the_key(): void
     {
         ProviderKeys::save(['paystack_secret_key' => 'sk_live_1234ABCD']);
         ProviderKeys::applyToConfig();
 
         $preview = ProviderKeys::preview('paystack_secret_key');
-        $this->assertStringEndsWith('ABCD', $preview);
+        $this->assertSame(str_repeat('•', 8), $preview);
+        $this->assertStringNotContainsString('ABCD', $preview);
         $this->assertStringNotContainsString('1234', $preview);
-        $this->assertStringContainsString('•', $preview);
     }
 
     public function test_the_admin_page_saves_keys_and_never_echoes_them_back(): void
