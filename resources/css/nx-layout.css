@@ -1,0 +1,1047 @@
+/* Production layout for the skin components. The wireframe draws everything inside a 430px phone frame (absolute-positioned
+   sheet, scrim and review bar); these rules place the same components in the real page. Hand-written, not generated. */
+
+/* Page wrapper (<x-nx.page>): the skin's canvas for a dashboard page. Edge-to-edge on phones, a bordered panel from `sm` up. */
+.ns-app--flush { border-radius: 0; border-width: 0; min-height: 60vh; }
+@media (min-width: 640px) { .ns-app--flush { border-radius: 28px; border-width: 1px; } }
+.ns-app--flush > .ns-app__body { padding-bottom: 28px; }
+
+/* Sheet as a real modal: bottom sheet on phones, centred dialog from `sm` up. Same .ns-sheet the wireframe styles. */
+.ns-modal { position: fixed; inset: 0; z-index: 60; display: flex; align-items: flex-end; justify-content: center; }
+.ns-modal > .ns-scrim { position: absolute; inset: 0; z-index: 0; }
+.ns-modal .ns-sheet { position: relative; z-index: 1; inset: auto; width: 100%; max-width: 32rem; height: auto; max-height: 92vh; container-type: inline-size; }
+@media (min-width: 640px) {
+    .ns-modal { align-items: center; padding: 16px; }
+    .ns-modal .ns-sheet { border-radius: calc(var(--nx-r-sheet) * var(--nx-rs)); max-height: 88vh; }
+    .ns-modal .ns-handle { display: none; }
+}
+.ns-sheet__body { flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: 0 16px 20px; overscroll-behavior: contain; }
+.ns-sheet__foot { flex: none; }
+.ns-sheet__foot .ns-pricebar { padding-bottom: max(26px, env(safe-area-inset-bottom)); }
+.ns-sheet__head .ns-tile { width: 38px; height: 38px; border-radius: 13px; font-size: 20px; }
+.ns-sheet__head button { color: rgb(var(--nx-text-2)); }
+/* Dedicated-page mode: the sheet is just the page, so nothing scrolls inside it and the footer sits in flow. */
+.ns-flow--page .ns-sheet { overflow: visible; container-type: inline-size; }
+.ns-flow--page .ns-sheet__body { overflow: visible; padding: 0 16px 8px; }
+.ns-flow--page .ns-sheet__head .ns-tile { display: none; }
+
+/* Buttons are left-aligned/pointer in the wireframe; the field/row text must not inherit Tailwind's centred reset. */
+.ns-field, .ns-row, .ns-note--link, .ns-card { text-align: start; }
+.ns-flag-slot { display: contents; }
+.ns-row__label { display: flex; align-items: center; gap: 8px; min-width: 0; flex: 0 1 auto; }
+.ns-row__label + .ns-pill { margin-left: 2px; }
+.ns-row .ns-row__price { white-space: nowrap; }
+.ns-banner .ns-text b, .ns-banner .ns-text small { display: block; }
+/* Admin-managed bento illustration (transparent PNG/WebP): hidden on phones, a quiet accent from `sm` up. */
+.ns-card__art { display: none; pointer-events: none; }
+@media (min-width: 640px) {
+    .ns-card__art { display: block; height: 64px; width: auto; max-width: 100%; object-fit: contain; object-position: left; margin-top: 8px; }
+    .ns-card.ns-full .ns-card__art { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); height: 78%; max-width: 24%; margin: 0; object-position: right; }
+    .ns-card.ns-full:has(.ns-card__art) .ns-card__row { padding-right: 24%; }
+}
+
+/* Dot/ring loading state on any skin button: Livewire sets `disabled` while a call is in flight. */
+.ns-cta:disabled, .ns-btn:disabled { opacity: .6; cursor: progress; }
+
+/* Result / success panels (reserved number, OTP, active line) */
+.ns-done { text-align: center; padding: 18px 0 4px; }
+.ns-done > b { display: block; font-size: 20px; font-weight: 600; margin-top: 10px; }
+.ns-done > p { color: rgb(var(--nx-text-2)); font-size: 14px; margin: 4px 0 0; }
+.ns-done__tile { margin: 0 auto; width: 56px; height: 56px; font-size: 28px; --nx-tone: var(--nx-ok); }
+.ns-done__actions { display: flex; gap: 10px; margin-top: 18px; }
+.ns-done__actions .ns-btn { flex: 1; justify-content: center; height: 46px; }
+.ns-result { display: block; text-align: center; padding: 14px; border-radius: calc(var(--nx-r-card) * var(--nx-rs)); background: rgb(var(--nx-surface)); margin: 16px auto 0; max-width: 20rem; }
+.ns-result small { display: block; font-size: 12px; color: rgb(var(--nx-text-2)); margin-top: 8px; }
+.ns-result small:first-child { margin-top: 0; }
+.ns-result__num, .ns-result__code { display: block; font-family: var(--nx-font-num); font-variant-numeric: tabular-nums; user-select: all; }
+.ns-result__num { font-size: 20px; font-weight: 600; margin-top: 2px; }
+.ns-result__code { font-size: 28px; font-weight: 700; color: rgb(var(--nx-teal-ink)); letter-spacing: 1px; }
+.ns-result__wait { display: inline-flex; align-items: center; gap: 8px; margin-top: 10px; font-size: 14px; color: rgb(var(--nx-text-2)); }
+.ns-btn--solid { background: linear-gradient(180deg, rgb(var(--nx-cta-a)), rgb(var(--nx-cta-b)) 8px); color: #fff; box-shadow: inset 0 1px 0 rgb(255 255 255 / .25); font-weight: 600; justify-content: center; text-decoration: none; }
+.ns-icon-btn { font-size: 22px; padding: 4px; color: rgb(var(--nx-text-2)); border-radius: 99px; display: inline-flex; }
+.ns-cta__label { display: inline-flex; align-items: center; justify-content: center; gap: 10px; }
+.ns-check-input { width: 22px; height: 22px; flex: none; accent-color: rgb(var(--nx-cta-b)); margin-top: 2px; }
+.ns-card.ns-full .ns-card__row { display: flex; gap: 14px; align-items: center; }
+.ns-card.ns-full .ns-card__row .ns-card__text { min-width: 0; flex: 1; }
+/* `.ns-small` is both the small-text helper and the compact segmented control; keep the control a flex row. */
+
+.ns-price b.ns-price__text { font-size: 17px; font-weight: 500; line-height: 1.2; margin-top: 4px; }
+
+/* More sheet (inside a fixed full-screen container): the sheet hugs its content up to the viewport. */
+.ns-more.ns-sheet { max-height: 88dvh; }
+.ns-more .ns-sheet__body { padding-bottom: calc(env(safe-area-inset-bottom) + 20px); }
+.ns-more__logout { margin-top: 18px; }
+.ns-list__row > span:not(.ns-tile) { text-align: start; }
+.ns-select { width: 100%; height: 54px; margin-top: 8px; padding: 0 14px; border-radius: calc(var(--nx-r-row) * var(--nx-rs)); background: rgb(var(--nx-surface-3)); box-shadow: inset 0 0 0 1px rgb(var(--nx-line)); color: rgb(var(--nx-text)); font-size: 16px; }
+.ns-note a.ns-btn { text-decoration: none; }
+/* Inputs inside skin fields are bare: the field draws the surface, the input only holds text (global form styles must not paint it). */
+.ns-search input, .ns-field input, .ns-select-bare {
+    background: transparent !important; border: 0 !important; box-shadow: none !important; outline: 0; padding: 0 !important; color: inherit;
+    font: inherit; -webkit-appearance: none; appearance: none;
+}
+.ns-search:focus-within { box-shadow: inset 0 0 0 2px rgb(var(--nx-teal-ink)); }
+.ns-search input::placeholder { color: rgb(var(--nx-text-3)); opacity: 1; }
+.ns-select:focus-visible { outline: 2px solid rgb(var(--nx-teal-ink)); outline-offset: 2px; }
+/* The "pick any colour" swatch: a colour wheel, not a brand colour. */
+.ns-swatch i.ns-swatch__wheel { background: conic-gradient(#f43f5e, #f59e0b, #22c55e, #06b6d4, #8b5cf6, #f43f5e); }
+
+/* Balance hero / stat tones / cta pill / spark lines */
+.ns-balance { padding: 16px; }
+.ns-balance__row { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; position: relative; z-index: 1; }
+.ns-balance__text { display: block; min-width: 0; }
+.ns-balance__text small { display: block; }
+.ns-balance__action { flex: none; display: inline-flex; }
+.ns-stat--bad b { color: rgb(var(--nx-bad)); }
+.ns-stat--ok b { color: rgb(var(--nx-ok)); }
+.ns-stat small { display: block; }
+a.ns-card, a.ns-list__row, a.ns-stat { text-decoration: none; color: inherit; }
+.ns-cta--pill { width: auto; display: inline-flex; height: 46px; padding: 0 22px; font-size: 16px; flex: none; text-decoration: none; }
+.ns-cta--pill.ns-cta--sm { height: 38px; padding: 0 16px; font-size: 14px; }
+.ns-cta--pill.ns-cta--lg { height: 54px; padding: 0 28px; font-size: 18px; }
+.ns-spark { display: block; width: 100%; height: 48px; }
+.ns-spark__line { fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+.ns-spark__line--teal { stroke: rgb(var(--nx-teal-ink)); }
+.ns-spark__line--gold { stroke: rgb(var(--nx-gold)); }
+.ns-spark__fill { fill: rgb(var(--nx-teal) / .25); stroke: none; }
+.ns-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+.ns-dot--teal { color: rgb(var(--nx-teal-ink)); }
+.ns-dot--gold { color: rgb(var(--nx-gold)); }
+.ns-text-muted { color: rgb(var(--nx-text-2)); }   /* text-3 is for chrome (chevrons, hints), not sentences: it fell to 3.2:1 on neo/prism */
+.ns-avatar img { display: block; }
+.ns-cta--ghost { background: rgb(var(--nx-surface)); color: rgb(var(--nx-text)); box-shadow: inset 0 0 0 1px rgb(var(--nx-line-strong)); }
+.ns-code { font-family: var(--nx-font-num); font-weight: 700; letter-spacing: .08em; padding: 6px 12px; border-radius: 10px; box-shadow: inset 0 0 0 1px rgb(var(--nx-gold) / .6); color: rgb(var(--nx-gold-ink)); }
+.ns-stat-cell { display: block; text-align: center; padding: 10px 4px; border-radius: calc(var(--nx-r-row) * var(--nx-rs)); background: rgb(var(--nx-surface-3)); }
+.ns-stat-cell b { display: block; font-size: 22px; font-weight: 600; font-variant-numeric: tabular-nums; color: rgb(var(--nx-text)); }
+.ns-stat-cell small { display: block; font-size: 11px; color: rgb(var(--nx-text-2)); margin-top: 2px; }
+.ns-stat-cell--muted b { color: rgb(var(--nx-text-2)); }
+.ns-spark-figure { display: block; font-size: 22px; font-weight: 600; margin: 4px 0 8px; font-variant-numeric: tabular-nums; }
+.ns-greet--popup { border-radius: 22px; padding: 4px; background: rgb(var(--nx-surface-2)); box-shadow: var(--nx-e1); }
+
+/* ---- The skin owns the whole page (owner direction, S3) ------------------------------------------------------------------
+   Inside the signed-in app a skin transforms the entire interface, so the platform's dashboard wallpaper (the brand-colour bloom
+   painted by `.dashboard-bg::before`, ui-elements.css) must not show around or beneath it. Under a skin: the wallpaper is off, the
+   page (<body>) paints the skin's canvas pinned to the viewport (each skin's own `.ns-app` background is mirrored onto the page by
+   scripts/nx_port.py), and the content panel is transparent so canvas, panel and chrome read as one surface from edge to edge.
+   Pages that deliberately frame a panel (`.ns-app` without `--flush`, e.g. Appearance) keep their frame. */
+html[data-nx-skin] body[class] {
+    background: radial-gradient(120% 40% at 50% 0, rgb(var(--nx-teal) / .1), transparent 70%), linear-gradient(rgb(var(--nx-canvas-2)), rgb(var(--nx-canvas)) 320px), rgb(var(--nx-canvas));
+    background-attachment: fixed;
+    color: rgb(var(--nx-text));
+}
+html[data-nx-skin] body.dashboard-bg::before { content: none; display: none; animation: none; }
+html[data-nx-skin] .ns-app.ns-app--flush:where(:not([data-nx-preview] *)) {
+    background: none; border-width: 0; border-radius: 0; box-shadow: none;
+}
+/* The sticky header strip (mobile bar and the desktop strip beside the side menu) must never read as a cut-out. Under a skin it has no
+   fill of its own: a soft blur of whatever scrolls beneath, tinted only faintly with the skin canvas and feathered out on all four
+   edges, so it takes the colour of the page behind it (gradient, pattern or wash) instead of laying a flat band over it. */
+html[data-nx-skin] .nx-header-fade { position: sticky; isolation: isolate; background: none; }
+html[data-nx-skin] .nx-header-fade::before {
+    content: ""; position: absolute; z-index: -1; inset: 0 0 -14px; pointer-events: none;
+    /* Held fairly solid behind the logo/icon row (so scrolled content never collides with them), feathered to nothing below. */
+    background: linear-gradient(to bottom, rgb(var(--nx-canvas) / .86), rgb(var(--nx-canvas) / .8) 62%, transparent);
+    -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px);
+    -webkit-mask-image: linear-gradient(to bottom, #000 66%, transparent); mask-image: linear-gradient(to bottom, #000 66%, transparent);
+}
+/* Beside the desktop side menu the strip also feathers out at its left and right ends, so there is no vertical cut either. */
+@media (min-width: 1024px) {
+    html[data-nx-skin] .nx-header-fade::before {
+        -webkit-mask-image: linear-gradient(to bottom, #000 62%, transparent), linear-gradient(to right, transparent, #000 40px, #000 calc(100% - 40px), transparent);
+        mask-image: linear-gradient(to bottom, #000 62%, transparent), linear-gradient(to right, transparent, #000 40px, #000 calc(100% - 40px), transparent);
+        -webkit-mask-composite: source-in; mask-composite: intersect;
+    }
+}
+@supports not (backdrop-filter: blur(1px)) { html[data-nx-skin] .nx-header-fade::before { background: linear-gradient(to bottom, rgb(var(--nx-canvas) / .9), transparent); } }
+/* The bottom-nav centre button's ring matches the page; under a skin that is the skin canvas. */
+html[data-nx-skin] .ring-4.ring-\[\#F8F9FA\], html[data-nx-skin] .ring-4.dark\:ring-navy { --tw-ring-color: rgb(var(--nx-canvas)); }
+
+/* The desktop side menu is part of the interface the skin transforms: a skin surface over the skin canvas, not platform navy/slate. */
+html[data-nx-skin] .nx-sidebar { background: rgb(var(--nx-surface) / .72); background-image: none; border-color: rgb(var(--nx-line)); box-shadow: var(--nx-e1); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); }
+
+/* Data table (payout country matrix): tokens only, so every skin and accent reaches it. */
+.ns-table { width: 100%; border-collapse: collapse; font-size: 14px; color: rgb(var(--nx-text)); }
+.ns-table th { padding: 8px 6px; font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: rgb(var(--nx-text-2)); border-bottom: 1px solid rgb(var(--nx-line)); }
+.ns-table td { padding: 10px 6px; border-bottom: 1px solid rgb(var(--nx-line) / .6); }
+.ns-table tr.is-pinned td { background: rgb(var(--nx-teal) / .1); font-weight: 600; }
+
+/* Home product showcase: separate, generously spaced cards (not one compact list). The product image is the admin's (Admin → Bento
+   icons) with the admin's opacity/size, placed behind the text on the right; the text keeps clear of it so it stays fully legible. */
+.ns-showcase-grid, .ns-cards-grid { display: grid; gap: 16px; margin: 22px 0 8px; }
+@container (min-width: 620px) { .ns-showcase-grid, .ns-cards-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; } }
+.ns-cards-grid { margin-top: 14px; }
+.ns-card.ns-showcase { gap: 0; min-height: 156px; padding: 20px 22px; justify-content: flex-start; text-decoration: none; color: inherit; transition: transform .2s ease, box-shadow .2s ease; }
+.ns-card.ns-showcase:hover { transform: translateY(-2px); }
+.ns-showcase > :not(.ns-deco):not(.ns-showcase__art) { position: relative; z-index: 1; }
+.ns-card.ns-showcase > .ns-showcase__art { position: absolute; z-index: 0; right: 6px; bottom: 4px; width: 34%; max-width: 150px; aspect-ratio: 1; object-fit: contain; object-position: bottom right; pointer-events: none; user-select: none;
+    transform: scale(var(--nx-art-scale, 1)); transform-origin: bottom right; }
+.ns-showcase__head { display: flex; align-items: center; gap: 14px; padding-inline-end: 30%; }
+.ns-card.ns-showcase h3 { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 0; font-size: 19px; line-height: 1.2; }
+.ns-card.ns-showcase p { margin: 12px 0 0; padding-inline-end: min(48%, calc(min(34%, 150px) * var(--nx-art-scale, 1) + 10px)); font-size: 14px; line-height: 1.5; -webkit-line-clamp: 3; }
+.ns-showcase__cta { display: inline-flex; align-items: center; gap: 4px; margin-top: auto; padding-top: 14px; font-size: 14px; font-weight: 600; color: rgb(var(--nx-teal-ink)); }
+.ns-showcase__cta .ns-i { font-size: 16px; transition: transform .2s ease; }
+.ns-showcase:hover .ns-showcase__cta .ns-i { transform: translateX(3px); }
+[dir=rtl] .ns-card.ns-showcase > .ns-showcase__art { right: auto; left: 6px; transform-origin: bottom left; }
+@media (prefers-reduced-motion: reduce) { .ns-card.ns-showcase, .ns-showcase__cta .ns-i { transition: none; } .ns-card.ns-showcase:hover { transform: none; } }
+
+/* Wallet widget: the balance card is the parent container; its child components (sub-balance row, quick actions) sit INSIDE it on a
+   translucent scrim, so every skin that restyles the primary card restyles the whole widget — one premium surface, not loose parts. */
+.ns-balance__footer { position: relative; z-index: 1; margin-top: 22px; display: grid; gap: 12px; }
+.ns-balance__sub { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 48px; padding: 0 16px; border-radius: calc(var(--nx-r-row) * var(--nx-rs));
+    background: color-mix(in srgb, currentColor 14%, transparent); box-shadow: inset 0 0 0 1px color-mix(in srgb, currentColor 22%, transparent); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); color: inherit; font-size: 15px; }
+.ns-balance__sub > span { display: inline-flex; align-items: center; gap: 8px; min-width: 0; }
+.ns-balance__sub b { font-variant-numeric: tabular-nums; font-weight: 700; flex: none; }
+.ns-balance__sub--quiet { min-height: 40px; font-size: 12.5px; background: color-mix(in srgb, currentColor 9%, transparent); }
+.ns-balance__actions { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.ns-balance__actions button { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; min-height: 84px; padding: 12px 6px; border-radius: calc(var(--nx-r-row) * var(--nx-rs));
+    background: color-mix(in srgb, currentColor 14%, transparent); box-shadow: inset 0 0 0 1px color-mix(in srgb, currentColor 22%, transparent); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+    color: inherit; font-size: 14px; font-weight: 600; text-align: center; cursor: pointer; transition: background .15s, transform .15s; }
+.ns-balance__actions button .ns-i { font-size: 22px; }
+.ns-balance__actions button:hover { background: color-mix(in srgb, currentColor 24%, transparent); }
+.ns-balance__actions button:active { transform: scale(.97); }
+.ns-balance__actions button:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
+.ns-wallet-hero { padding: 22px 20px 20px; }
+.ns-wallet-hero .ns-balance__text small:first-child { text-transform: uppercase; letter-spacing: .12em; font-size: 12.5px; font-weight: 600; }
+.ns-wallet-hero .ns-amount { display: block; margin: 8px 0 4px; }
+.ns-wallet-hero .ns-amount { font-size: clamp(34px, 11cqw, 44px); }
+@media (prefers-reduced-motion: reduce) { .ns-balance__actions button { transition: none; } .ns-balance__actions button:active { transform: none; } }
+
+/* Segmented controls / tab switchers: uniform, never stacked against each other. Equal-width segments on a grid with a real gap and
+   padding inside the track, one height, no segment touching the track edge or its neighbour (the wireframe's 2px gap let them butt
+   together). `ns-small` = a compact inline switcher (More: grid/list); `ns-seg--wrap` keeps wrapping rows (Appearance dials). */
+.ns-seg:not(.ns-seg--wrap) { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 6px; padding: 5px; width: 100%; }
+.ns-seg:not(.ns-seg--wrap) button { flex: none; height: 42px; padding: 0 12px; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.ns-seg.ns-small:not(.ns-seg--wrap) { display: inline-grid; width: auto; font-size: inherit; color: inherit; }
+.ns-seg.ns-small:not(.ns-seg--wrap) button { height: 36px; min-width: 52px; padding: 0 14px; font-size: 14px; }
+.ns-seg--wrap { gap: 6px; padding: 5px; }
+.ns-seg--wrap button { flex: 1 1 auto; height: 38px; padding: 0 14px; }
+.ns-sheet__head .ns-seg.ns-small { flex: none; margin-inline-start: auto; }
+/* Form-style pages keep a comfortable reading width on large screens (the Wallet was max-w-2xl before the skin system). */
+.ns-app.ns-narrow > .ns-app__body { max-width: 720px; margin-inline: auto; }
+/* More menu grid: the wireframe's 4px gutters packed the tiles together; real breathing room between tiles and to the container edge. */
+.ns-list.ns-list--grid { gap: 10px; padding: 14px; }
+.ns-list.ns-list--grid .ns-list__row { min-height: 96px; padding: 12px 4px; }
+.ns-list.ns-list--grid .ns-list__row > span:not(.ns-tile) { text-align: center; width: 100%; line-height: 1.25; }
+/* Banner dismiss: a small quiet control, visually distinct from a sheet's own close button. */
+.ns-banner__dismiss { flex: none; display: grid; place-items: center; width: 32px; height: 32px; border-radius: 99px; font-size: 16px; color: rgb(var(--nx-text-3)); }
+.ns-banner__dismiss:hover { background: rgb(var(--nx-surface-3)); color: rgb(var(--nx-text)); }
+.ns-banner .ns-text b { font-weight: 600; font-size: 15px; line-height: 1.35; }
+
+/* ---- eSIM storefront (S3 Batch 2) ---- */
+.ns-eyebrow { display: block; font-size: 11.5px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: color-mix(in srgb, rgb(var(--nx-teal-ink)) 60%, rgb(var(--nx-text))); }
+.ns-cards-grid--rows { gap: 10px; margin-top: 8px; }
+@container (min-width: 620px) { .ns-cards-grid--rows { gap: 12px; } }
+.ns-plan { height: auto; min-height: 68px; padding: 12px 16px; margin-top: 0; cursor: pointer; text-align: start; }
+.ns-plan:focus-visible, .ns-place:focus-visible, .ns-dest:focus-visible { outline: 2px solid rgb(var(--nx-teal-ink)); outline-offset: 2px; }
+.ns-plan .ns-row__price { font-size: 17px; }
+.ns-plan__info { display: grid; place-items: center; width: 24px; height: 24px; border-radius: 99px; color: rgb(var(--nx-text-3)); font-size: 15px; }
+.ns-plan__info:hover { color: rgb(var(--nx-teal-ink)); }
+.ns-plan__tip { position: absolute; z-index: 20; left: 0; top: 30px; width: 15rem; padding: 12px 14px; border-radius: 14px; text-align: start; font-size: 13px; line-height: 1.45; color: rgb(var(--nx-text-2));
+    background: rgb(var(--nx-surface)); box-shadow: inset 0 0 0 1px rgb(var(--nx-line)), var(--nx-e1); }
+.ns-place { height: auto; min-height: 76px; padding: 10px 16px; margin-top: 0; text-align: start; cursor: pointer; }
+.ns-place__art { flex: none; display: grid; place-items: center; width: 96px; height: 64px; margin-inline-start: auto; }
+.ns-place__art img { width: 96px; height: 64px; object-fit: contain; }
+.ns-place__thumb { flex: none; display: grid; place-items: center; width: 56px; height: 56px; border-radius: 16px; overflow: hidden; background: rgb(var(--nx-surface-3)); box-shadow: inset 0 0 0 1px rgb(var(--nx-line)); }
+.ns-place__thumb img { width: 100%; height: 100%; object-fit: cover; }
+.ns-place .ns-row__label { flex: 1; }
+/* Popular destinations: a horizontal rail of photo cards (the admin's per-country photo; flag + price card when there is none). */
+.ns-dests { display: flex; gap: 12px; overflow-x: auto; padding: 4px 2px 8px; scrollbar-width: none; scroll-snap-type: x proximity; }
+.ns-dests::-webkit-scrollbar { display: none; }
+.ns-dest { position: relative; flex: none; width: 140px; height: 180px; overflow: hidden; border-radius: calc(var(--nx-r-card) * var(--nx-rs)); background: rgb(var(--nx-surface)); text-align: start; cursor: pointer; scroll-snap-align: start; transition: transform .2s ease; }
+.ns-dest:hover { transform: translateY(-2px); }
+.ns-dest__photo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.ns-dest.has-photo::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to top, rgb(0 0 0 / .9) 0, rgb(0 0 0 / .78) 34%, rgb(0 0 0 / .18) 68%, transparent); }   /* pale photos (sky, sand) kept white labels at 2.5:1 */
+.ns-dest__flag { position: absolute; z-index: 2; top: 10px; right: 10px; padding: 4px; border-radius: 99px; background: rgb(0 0 0 / .4); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); line-height: 0; }
+.ns-dest__text { position: absolute; z-index: 2; left: 0; right: 0; bottom: 0; padding: 12px; display: grid; gap: 2px; }
+.ns-dest__text b { font-size: 15px; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: rgb(var(--nx-text)); }
+.ns-dest__text small { font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: rgb(var(--nx-text-2)); }
+.ns-dest__tag { display: inline-flex; align-items: center; gap: 4px; margin-top: 6px; width: fit-content; padding: 3px 8px; border-radius: 99px; font-size: 10.5px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: rgb(var(--nx-teal-ink)); background: rgb(var(--nx-teal) / .14); }
+.ns-dest.has-photo .ns-dest__text b { color: #fff; }
+.ns-dest.has-photo .ns-dest__text small { color: rgb(255 255 255 / .86); }
+.ns-dest.has-photo .ns-dest__tag { color: #fff; background: rgb(255 255 255 / .22); }
+/* Trust strip */
+.ns-features { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 14px; margin-top: 28px; padding: 18px; }
+@container (min-width: 620px) { .ns-features { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.ns-feature { display: flex; align-items: flex-start; gap: 10px; min-width: 0; }
+.ns-feature .ns-tile { width: 38px; height: 38px; border-radius: 13px; font-size: 19px; }
+.ns-feature b { display: block; font-size: 13.5px; font-weight: 600; line-height: 1.25; }
+.ns-feature small { display: block; margin-top: 2px; font-size: 12px; line-height: 1.3; color: rgb(var(--nx-text-2)); }
+/* Global hero card */
+.ns-card.ns-global { gap: 4px; padding: 20px; margin: 18px 0 8px; min-height: 130px; }
+.ns-global h2 { font-size: 24px; font-weight: 600; margin: 4px 0 0; max-width: 70%; }
+.ns-card.ns-global p { max-width: 70%; font-size: 14px; -webkit-line-clamp: 3; }
+.ns-global__art { position: absolute !important; z-index: 0; right: 4px; top: 6px; width: 38%; max-width: 170px; object-fit: contain; opacity: .8; pointer-events: none; }
+.ns-global__art--icon { font-size: 110px; width: 110px; height: 110px; opacity: .25; color: rgb(var(--nx-teal-ink)); }
+/* Region photo banner (admin photo + a fixed scrim so the name stays legible on any image) */
+.ns-banner-photo { position: relative; margin-top: 14px; height: 150px; overflow: hidden; border-radius: calc(var(--nx-r-card) * var(--nx-rs)); box-shadow: inset 0 0 0 1px rgb(var(--nx-line)); }
+.ns-banner-photo img { width: 100%; height: 100%; object-fit: cover; }
+.ns-banner-photo::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to top, rgb(0 0 0 / .8), rgb(0 0 0 / .2) 55%, transparent); }
+.ns-banner-photo__text { position: absolute; z-index: 1; left: 18px; bottom: 14px; right: 18px; color: #fff; }
+.ns-banner-photo__text h1 { font-size: 22px; font-weight: 700; margin: 0; }
+.ns-banner-photo__text p { font-size: 13px; margin: 2px 0 0; opacity: .88; }
+/* Loading skeleton: tonal shimmer built from tokens */
+.ns-skel { background: linear-gradient(100deg, rgb(var(--nx-surface-3)) 30%, rgb(var(--nx-surface-2)) 50%, rgb(var(--nx-surface-3)) 70%); background-size: 200% 100%; animation: ns-skel 1.4s linear infinite; }
+@keyframes ns-skel { to { background-position: -200% 0; } }
+@media (prefers-reduced-motion: reduce) { .ns-skel { animation: none; } .ns-dest { transition: none; } .ns-dest:hover { transform: none; } }
+.ns-plan .ns-row__label, .ns-place .ns-row__label { display: block; }
+.ns-row .ns-pill .ns-i:first-child { font-size: 13px; color: inherit; }
+
+/* Collapsed side menu: the platform favicon as a square tile (the wordmark does not fit a 96px rail). Skin tokens drive the tile so every
+   skin gives it the same premium surface as the rest of the menu; the plain-theme fallback keeps a neutral tile. */
+.nx-rail-mark { display: grid; place-items: center; width: 52px; height: 52px; border-radius: 16px; background: rgb(255 255 255 / .9); box-shadow: 0 0 0 1px rgb(15 23 42 / .08), 0 6px 16px -10px rgb(15 23 42 / .4); transition: transform .2s ease; }
+.dark .nx-rail-mark { background: rgb(255 255 255 / .06); box-shadow: 0 0 0 1px rgb(255 255 255 / .12), 0 8px 20px -12px rgb(0 0 0 / .7); }
+html[data-nx-skin] .nx-rail-mark { background: rgb(var(--nx-surface-3)); box-shadow: inset 0 0 0 1px rgb(var(--nx-line)), var(--nx-e1); }
+.nx-rail-mark:hover { transform: translateY(-1px); }
+.nx-rail-mark img { width: 32px; height: 32px; object-fit: contain; }
+@media (prefers-reduced-motion: reduce) { .nx-rail-mark { transition: none; } .nx-rail-mark:hover { transform: none; } }
+/* Danger zone (delete account): the standard note surface with a bad-tone ring. */
+.ns-note.ns-danger { box-shadow: inset 0 0 0 1px rgb(var(--nx-bad) / .5); }
+
+/* Range slider (data estimator): track + thumb from the skin's tokens. */
+.ns-range { width: 100%; height: 28px; margin-top: 8px; background: transparent; accent-color: rgb(var(--nx-cta-b)); cursor: pointer; }
+.ns-range::-webkit-slider-runnable-track { height: 8px; border-radius: 99px; background: rgb(var(--nx-surface-3)); box-shadow: inset 0 0 0 1px rgb(var(--nx-line)); }
+.ns-range::-moz-range-track { height: 8px; border-radius: 99px; background: rgb(var(--nx-surface-3)); box-shadow: inset 0 0 0 1px rgb(var(--nx-line)); }
+.ns-range::-webkit-slider-thumb { -webkit-appearance: none; width: 24px; height: 24px; margin-top: -8px; border-radius: 50%; background: rgb(var(--nx-cta-b)); box-shadow: 0 0 0 4px rgb(var(--nx-teal) / .25); border: 0; }
+.ns-range::-moz-range-thumb { width: 24px; height: 24px; border-radius: 50%; background: rgb(var(--nx-cta-b)); box-shadow: 0 0 0 4px rgb(var(--nx-teal) / .25); border: 0; }
+/* Small text-style action inside a row (e.g. "Email me"). */
+.ns-link { display: block; margin: 2px 0 0 auto; font-size: 12.5px; font-weight: 600; color: rgb(var(--nx-teal-ink)); }
+.ns-link:hover { text-decoration: underline; }
+/* Referral link card: the read-only link sits in the translucent row. */
+.ns-linkcard .ns-amount:empty { display: none; }
+.ns-linkcard__input { width: 100%; min-width: 0; background: transparent; border: 0; padding: 0; color: #fff; font-size: 15px; text-overflow: ellipsis; outline: none; box-shadow: none; }
+.ns-linkcard__input:focus { box-shadow: none; }
+
+/* Credits: the coin sits before the figure; earn cards breathe. */
+.ns-amount__mark { display: inline-flex; vertical-align: middle; margin-inline-end: 10px; }
+.ns-balance__act { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 52px; padding: 0 12px; border-radius: calc(var(--nx-r-row) * var(--nx-rs)); background: color-mix(in srgb, currentColor 14%, transparent); box-shadow: inset 0 0 0 1px color-mix(in srgb, currentColor 22%, transparent); color: inherit; font-size: 15px; font-weight: 600; text-decoration: none; }
+.ns-balance__act:hover { background: color-mix(in srgb, currentColor 24%, transparent); }
+.ns-card.ns-earn { padding: 20px; gap: 0; text-decoration: none; color: inherit; }
+.ns-card.ns-earn h3 { margin-top: 16px; font-size: 19px; }
+.ns-card.ns-earn p { margin-top: 6px; font-size: 14px; line-height: 1.5; -webkit-line-clamp: 4; }
+.ns-cards-grid > .ns-full { grid-column: 1 / -1; }
+
+/* My Journey: a timeline of round nodes joined by a connector, each node beside a card (milestones, travel stamps), and goal cards. */
+.ns-jlist { margin-top: 20px; }
+.ns-jnode { position: relative; display: flex; gap: 14px; padding-bottom: 16px; }
+.ns-jnode:not(:last-child)::before { content: ""; position: absolute; left: 19px; top: 44px; bottom: -2px; width: 2px; border-radius: 2px; background: rgb(var(--nx-line-strong) / .6); }
+.ns-jnode--done:not(:last-child)::before, .ns-jnode--ongoing:not(:last-child)::before { background: rgb(var(--nx-teal) / .55); }
+.ns-jdot { position: relative; z-index: 1; flex: none; display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; font-size: 19px; overflow: hidden;
+    background: rgb(var(--nx-surface-3)); color: rgb(var(--nx-text-3)); box-shadow: inset 0 0 0 1px rgb(var(--nx-line-strong)); }
+.ns-jnode--done .ns-jdot { background: rgb(var(--nx-cta-b)); color: #fff; box-shadow: none; }
+.ns-jnode--ongoing .ns-jdot { background: rgb(var(--nx-surface)); color: rgb(var(--nx-teal-ink)); box-shadow: inset 0 0 0 2px rgb(var(--nx-teal-ink)); }
+.ns-jdot--flag { background: transparent; box-shadow: 0 0 0 2px rgb(var(--nx-surface)); }
+.ns-jnode--locked .ns-jcard { opacity: .86; }   /* .72 pushed the card's small copy under 4.5:1 on neo/pop/vivid light; the lock icon + dashed edge carry the locked state */
+.ns-card.ns-jcard { flex: 1; min-width: 0; padding: 14px 16px; gap: 0; }
+.ns-jcard b { font-size: 16px; font-weight: 600; color: rgb(var(--nx-text)); }
+.ns-card.ns-jcard p { margin: 4px 0 0; font-size: 14px; -webkit-line-clamp: 3; }
+.ns-card.ns-goal { flex-direction: row; align-items: flex-start; gap: 14px; padding: 16px; margin-bottom: 10px; }
+.ns-goal__img { flex: none; width: 44px; height: 44px; border-radius: 50%; object-fit: cover; }
+
+/* Gradient headline words: the stops are the skin's vetted ink tokens (4.5:1 on that skin's canvas in both modes), not the raw brand
+   colours - brand gold at the end of a teal->gold run read as pale yellow on light skins. */
+.ns-app .ns-gradtext { background-image: linear-gradient(90deg, color-mix(in srgb, rgb(var(--nx-teal-ink)) 62%, rgb(var(--nx-text))) 0%, color-mix(in srgb, rgb(var(--nx-teal-ink)) 62%, rgb(var(--nx-text))) 45%, color-mix(in srgb, rgb(var(--nx-gold-ink)) 70%, rgb(var(--nx-text))) 100%); -webkit-background-clip: text; background-clip: text; }
+
+/* Small link-ish / emphasised text that sits on a skin canvas or card. --nx-teal-ink is tuned for fills and large display type; at 12-15px it
+   fell to 2.3-4.4:1 on 20+ light skins. Pulling it toward the skin's own text ink keeps the brand tint but clears 4.5:1 (verified by contrast-pages). */
+.ns-linkink, .ns-link { color: color-mix(in srgb, rgb(var(--nx-teal-ink)) 40%, rgb(var(--nx-text))); }
+
+/* Dashboard hero ghost CTA sits over the hero artwork edge: give it a solid skin surface so the label never depends on the photo behind it. */
+html .nx-home-hero .ns-cta.ns-cta--ghost { background: rgb(var(--nx-surface-2)); background-image: none; color: rgb(var(--nx-text)); box-shadow: inset 0 0 0 1px rgb(var(--nx-line-strong)); }
+/* Legacy ui-element ghost button that still appears inside converted pages (payout card): skin ink, skin hairline. */
+.ns-app .nx-btn--ghost, .dark .ns-app .nx-btn--ghost { color: rgb(var(--nx-text)); background: rgb(var(--nx-surface)); box-shadow: inset 0 0 0 1.5px rgb(var(--nx-line-strong)); }
+.ns-app .nx-btn--ghost:hover:not(:disabled), .dark .ns-app .nx-btn--ghost:hover:not(:disabled) { background: rgb(var(--nx-surface-3)); }
+
+/* The balance hero sublabel sits on a saturated gradient; the .9 opacity it inherited cost it its last 0.1:1 on glass light. */
+.ns-app .ns-card.ns-balance .ns-balance__text small { opacity: 1; }
+
+/* Premium feature link (x-nx.feature-link): the skin's primary card, laid out as tile | copy | action. On narrow screens the action drops under the copy. */
+.ns-featlink { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 14px 16px; padding: 18px 18px 18px 16px; text-decoration: none; margin-bottom: 20px; color: inherit; overflow: hidden; }
+.ns-featlink__tile { width: 52px; height: 52px; display: grid; place-items: center; border-radius: 16px; font-size: 26px; background: color-mix(in srgb, currentColor 16%, transparent); box-shadow: inset 0 0 0 1px color-mix(in srgb, currentColor 30%, transparent), 0 10px 24px -12px rgb(0 0 0 / .5); position: relative; z-index: 1; }
+.ns-featlink__body { display: grid; gap: 3px; min-width: 0; position: relative; z-index: 1; }
+.ns-featlink__kicker { font-size: 11px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; opacity: 1; color: inherit; }
+.ns-featlink__body > b { font-size: 18px; font-weight: 700; line-height: 1.2; color: inherit; }
+.ns-featlink__text { font-size: 14px; line-height: 1.4; color: inherit; }
+.ns-featlink__chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.ns-featlink__chip { display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px 3px 8px; border-radius: 99px; font-size: 12px; font-weight: 600; background: color-mix(in srgb, currentColor 14%, transparent); box-shadow: inset 0 0 0 1px color-mix(in srgb, currentColor 26%, transparent); }
+.ns-featlink__go { position: relative; z-index: 1; display: inline-flex; align-items: center; gap: 6px; height: 42px; padding: 0 16px; border-radius: 99px; font-size: 14px; font-weight: 700; white-space: nowrap; background: color-mix(in srgb, currentColor 18%, transparent); box-shadow: inset 0 0 0 1px color-mix(in srgb, currentColor 34%, transparent); transition: transform .18s ease, background .18s ease; }
+.ns-featlink:hover .ns-featlink__go { transform: translateX(2px); background: color-mix(in srgb, currentColor 26%, transparent); }
+@media (max-width: 520px) { .ns-featlink { grid-template-columns: auto minmax(0, 1fr); } .ns-featlink__go { grid-column: 1 / -1; justify-content: center; } }
+@media (prefers-reduced-motion: reduce) { .ns-featlink__go { transition: none; } .ns-featlink:hover .ns-featlink__go { transform: none; } }
+
+/* Account -> Sounds: switch rows, tone preview buttons, selected tick. Tokens only, so every skin restyles it. */
+.ns-sounds__switch { cursor: pointer; }
+.ns-sounds__check { position: absolute; opacity: 0; pointer-events: none; }
+.ns-sounds__track { margin-left: auto; flex: none; width: 46px; height: 26px; border-radius: 99px; display: flex; align-items: center; padding: 2px; background: rgb(var(--nx-surface-3)); box-shadow: inset 0 0 0 1px rgb(var(--nx-line-strong)); transition: background .18s ease; }
+.ns-sounds__track b { width: 22px; height: 22px; border-radius: 50%; background: rgb(var(--nx-text-2)); transition: transform .18s ease, background .18s ease; }
+.ns-sounds__check:checked + .ns-sounds__track { background: rgb(var(--nx-cta-b)); }
+.ns-sounds__check:checked + .ns-sounds__track b { transform: translateX(20px); background: #fff; }
+.ns-sounds__check:focus-visible + .ns-sounds__track { outline: 2px solid rgb(var(--nx-teal-ink)); outline-offset: 2px; }
+.ns-sounds__tick { flex: none; font-size: 20px; color: color-mix(in srgb, rgb(var(--nx-teal-ink)) 40%, rgb(var(--nx-text))); }
+.ns-sounds__list .ns-list__row { text-align: left; }
+@media (prefers-reduced-motion: reduce) { .ns-sounds__track, .ns-sounds__track b { transition: none; } }
+
+/* Tone preview button: a true circle (fixed square + 50% radius, never stretched by the row's flex rules) in the skin's action colour, with a
+   solid white play glyph, so it reads as THE play control and is not confused with the neutral tile icons or the selected tick. */
+.ns-list__row > span.ns-sounds__play:not(.ns-tile):not(.ns-pill):not(.ns-avatar) {
+    flex: none; width: 38px; height: 38px; min-width: 38px; aspect-ratio: 1 / 1; padding: 0; margin-left: auto; border-radius: 50%;
+    display: grid; place-items: center; font-size: 18px; cursor: pointer; color: #fff;
+    background: linear-gradient(180deg, rgb(var(--nx-cta-a)), rgb(var(--nx-cta-b)));
+    box-shadow: 0 6px 14px -6px rgb(var(--nx-cta-b) / .8), inset 0 1px 0 rgb(255 255 255 / .28);
+    transition: transform .15s ease, filter .15s ease;
+}
+.ns-sounds__play .ns-i { fill: currentColor; stroke: currentColor; stroke-width: 1.2; margin-left: 2px; }
+.ns-sounds__play:hover { transform: scale(1.07); filter: brightness(1.08); }
+.ns-sounds__play:active { transform: scale(.96); }
+.ns-sounds__play:focus-visible { outline: 2px solid rgb(var(--nx-text)); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { .ns-sounds__play { transition: none; } }
+.ns-sounds__tickslot { flex: none; width: 22px; display: grid; place-items: center; }
+
+/* Bottom nav under a skin: the nav keeps its structure (items, centre button, floating/docked modes) and takes the skin's depth: skin
+   surface + hairline + elevation + the skin's own `ns-ring` flourish (outline, glow, band...), tab states from skin tokens. */
+html[data-nx-skin] .nx-bottomnav {
+    background: color-mix(in srgb, rgb(var(--nx-surface)) 94%, transparent); border-color: rgb(var(--nx-line));
+    box-shadow: inset 0 1px 0 rgb(var(--nx-hi) / .10), var(--nx-e2);
+    -webkit-backdrop-filter: blur(14px) saturate(140%); backdrop-filter: blur(14px) saturate(140%);
+}
+html[data-nx-skin] .nx-bottomnav a.nx-tab:not(.is-on) { color: rgb(var(--nx-text-2)); margin: 2px 1px; font-weight: 600; }
+html[data-nx-skin] .nx-bottomnav .nx-grad-icon { stroke: currentColor; }
+/* Active tab = the skin's own primary-button look (ns-cta recipe: gradient / ink block / glow / outline / puffy, whatever the skin defines),
+   shrunk to tab size. The centre button is the same recipe, so the whole bar always matches the page's buttons. */
+html[data-nx-skin] .nx-bottomnav a.nx-tab.is-on { width: auto; height: auto; flex-direction: column; justify-content: center; gap: 2px; padding: 8px 0; margin: 2px 3px; font-size: 11px; font-weight: 800; }
+html[data-nx-skin] .nx-bottomnav a.nx-tab.is-on svg { transform: translateY(-1px) scale(1.08); }
+html[data-nx-skin] .nx-bottomnav a.nx-tab svg { transition: transform .18s ease; }
+html[data-nx-skin] .nx-bottomnav .nx-bn-more { width: 56px; height: 56px; padding: 0; flex: none; }
+@media (prefers-reduced-motion: reduce) { html[data-nx-skin] .nx-bottomnav a svg { transition: none; } }
+html[data-nx-skin] .nx-bottomnav.bottom-3 { border-radius: max(10px, calc(var(--nx-r-card) * var(--nx-rs) * 1.7)); }
+html[data-nx-skin] .nx-bottomnav:not(.bottom-3) { border-radius: max(8px, calc(var(--nx-r-sheet) * var(--nx-rs))) max(8px, calc(var(--nx-r-sheet) * var(--nx-rs))) 0 0; }
+
+/* NaaraCare / Nia support chat under a member's skin. The page BACKGROUND stays Nia's own (owner exception); everything on it - header,
+   transcript card, bubbles, links, banners and the composer - takes the skin. */
+html[data-nx-skin] .ns-nia__title { color: rgb(var(--nx-text)); }
+html[data-nx-skin] .ns-nia__sub { color: rgb(var(--nx-text-2)); }
+html[data-nx-skin] .ns-nia__transcript {
+    background: rgb(var(--nx-surface) / .94); border-color: rgb(var(--nx-line)); border-radius: max(14px, calc(var(--nx-r-card) * var(--nx-rs) * 1.3));
+    box-shadow: inset 0 1px 0 rgb(var(--nx-hi) / .08), var(--nx-e1); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+}
+html[data-nx-skin] .ns-bubble { color: rgb(var(--nx-text)); border-radius: max(12px, calc(var(--nx-r-row) * var(--nx-rs) * 1.5)); }
+html[data-nx-skin] .ns-bubble--bot { background: rgb(var(--nx-surface-3)); box-shadow: inset 0 0 0 1px rgb(var(--nx-line)); }
+html[data-nx-skin] .ns-bubble--staff { background: rgb(var(--nx-teal) / .16); box-shadow: inset 0 0 0 1px rgb(var(--nx-teal) / .32); }
+html[data-nx-skin] .ns-bubble--user { color: #fff; background: linear-gradient(180deg, rgb(var(--nx-cta-a)), rgb(var(--nx-cta-b)) 70%); box-shadow: 0 8px 18px -10px rgb(var(--nx-cta-b) / .8), inset 0 1px 0 rgb(255 255 255 / .22); }
+html[data-nx-skin] .ns-nia__nav { color: color-mix(in srgb, rgb(var(--nx-teal-ink)) 40%, rgb(var(--nx-text))); background: rgb(var(--nx-teal) / .12); border-color: rgb(var(--nx-teal) / .35); }
+html[data-nx-skin] .ns-nia__banner { color: rgb(var(--nx-text)); background: rgb(var(--nx-warn) / .14); box-shadow: inset 0 0 0 1px rgb(var(--nx-warn) / .35); }
+
+/* ===== Messages: three resizable panels (conversations | thread | contact info) ===== */
+.ns-msg-page { padding-bottom: 0; }
+.ns-msg { display: grid; gap: 0; grid-template-columns: minmax(0, 1fr); height: calc(100dvh - 190px); min-height: 460px; }
+.ns-msg__panel { display: none; flex-direction: column; min-height: 0; min-width: 0; background: rgb(var(--nx-surface)); border-radius: calc(var(--nx-r-card) * var(--nx-rs)); box-shadow: inset 0 0 0 1px rgb(var(--nx-line)), var(--nx-e1); overflow: hidden; }
+.ns-msg--list .ns-msg__list, .ns-msg--thread .ns-msg__thread, .ns-msg--info .ns-msg__info { display: flex; }
+.ns-msg__grip { display: none; }
+@media (min-width: 1024px) {
+    .ns-msg { height: calc(100dvh - 150px); grid-template-columns: var(--msg-l, 310px) 12px minmax(0, 1fr) 12px var(--msg-r, 280px); }
+    .ns-msg--noinfo { grid-template-columns: var(--msg-l, 310px) 12px minmax(0, 1fr); }
+    .ns-msg .ns-msg__panel { display: flex; }
+    .ns-msg__grip { display: block; position: relative; cursor: col-resize; touch-action: none; }
+    .ns-msg__grip i { position: absolute; top: 18%; bottom: 18%; left: 50%; width: 4px; margin-left: -2px; border-radius: 4px; background: rgb(var(--nx-line-strong) / .0); transition: background .15s ease; }
+    .ns-msg__grip:hover i, .ns-msg__grip:focus-visible i, body.ns-msg-dragging .ns-msg__grip i { background: rgb(var(--nx-teal) / .7); }
+    .ns-msg__grip:focus-visible { outline: none; }
+    .ns-msg__back { display: none; }
+    .ns-msg__infobtn { display: grid; }
+}
+.ns-msg__infobtn { display: none; }
+body.ns-msg-dragging { cursor: col-resize; user-select: none; }
+.ns-msg__head { display: flex; align-items: center; gap: 10px; padding: 14px 14px 10px; }
+.ns-msg__head h1 { flex: 1; min-width: 0; }
+.ns-msg__head--thread { padding: 10px 12px; box-shadow: inset 0 -1px 0 rgb(var(--nx-line)); }
+.ns-msg__iconbtn { width: 40px; height: 40px; flex: none; border-radius: 50%; display: grid; place-items: center; font-size: 20px; color: rgb(var(--nx-text)); background: rgb(var(--nx-surface-3)); box-shadow: inset 0 0 0 1px rgb(var(--nx-line)); cursor: pointer; text-decoration: none; }
+.ns-msg__iconbtn:hover, .ns-msg__iconbtn.is-on { background: rgb(var(--nx-teal) / .18); }
+.ns-msg__iconbtn:focus-visible, .ns-msg__row:focus-visible, .ns-msg__who:focus-visible, .ns-msg__replybar:focus-visible { outline: 2px solid rgb(var(--nx-teal-ink)); outline-offset: 2px; }
+.ns-msg__scroll { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; }
+.ns-msg__list > .ns-seg:not(.ns-seg--wrap) { width: auto; }
+.ns-msg__panel { overflow: clip; }
+.ns-msg__row { width: 100%; display: flex; align-items: center; gap: 12px; padding: 11px 14px; text-align: start; cursor: pointer; box-shadow: inset 0 -1px 0 rgb(var(--nx-line) / .6); color: rgb(var(--nx-text)); }
+.ns-msg__row:hover { background: rgb(var(--nx-surface-2)); }
+.ns-msg__row.is-on { background: rgb(var(--nx-teal) / .14); box-shadow: inset 3px 0 0 rgb(var(--nx-teal)), inset 0 -1px 0 rgb(var(--nx-line) / .6); }
+.ns-msg__avatar { width: 42px; height: 42px; flex: none; border-radius: 50%; display: grid; place-items: center; font-size: 16px; font-weight: 700; color: rgb(var(--nx-text)); background: rgb(var(--nx-teal) / .22); box-shadow: inset 0 0 0 1px rgb(var(--nx-teal) / .4); }
+.ns-msg__avatar--xl { width: 84px; height: 84px; font-size: 32px; }
+.ns-msg__main { flex: 1; min-width: 0; display: grid; gap: 3px; }
+.ns-msg__line { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-width: 0; }
+.ns-msg__line b { font-size: 15px; font-weight: 600; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ns-msg__line small { flex: none; font-size: 11.5px; color: rgb(var(--nx-text-2)); }
+.ns-msg__preview { font-size: 13.5px; color: rgb(var(--nx-text-2)); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ns-msg__preview i { font-style: normal; font-weight: 600; }
+.ns-msg__badge { flex: none; min-width: 20px; height: 20px; padding: 0 6px; border-radius: 99px; display: grid; place-items: center; font-style: normal; font-size: 11.5px; font-weight: 700; color: #fff; background: rgb(var(--nx-cta-b)); }
+.ns-msg__fav { font-size: 14px; color: rgb(var(--nx-gold-ink)); }
+.ns-msg__go { flex: none; font-size: 18px; color: rgb(var(--nx-text-2)); }
+.ns-msg__who { flex: 1; min-width: 0; display: flex; align-items: center; gap: 10px; text-align: start; color: rgb(var(--nx-text)); cursor: pointer; }
+.ns-msg__who b { display: block; font-size: 16px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ns-msg__who small { display: block; font-size: 12.5px; color: rgb(var(--nx-text-2)); }
+.ns-msg__timeline { display: flex; flex-direction: column; gap: 8px; padding: 16px 14px; }
+.ns-msg__bubblerow { display: flex; justify-content: flex-start; }
+.ns-msg__bubblerow.is-out { justify-content: flex-end; }
+.ns-msg__bubble { max-width: min(78%, 34rem); padding: 9px 13px; font-size: 14.5px; line-height: 1.4; }
+.ns-msg__time { display: block; margin-top: 3px; font-size: 10.5px; opacity: .85; text-align: end; }
+.ns-msg__reply { padding: 10px 12px; box-shadow: inset 0 1px 0 rgb(var(--nx-line)); }
+.ns-msg__replybar { width: 100%; height: 48px; padding: 0 16px; display: flex; align-items: center; justify-content: space-between; gap: 10px; border-radius: 99px; text-align: start; font-size: 15px; color: rgb(var(--nx-text-2)); background: rgb(var(--nx-surface-3)); box-shadow: inset 0 0 0 1px rgb(var(--nx-line-strong) / .5); cursor: text; }
+.ns-msg__replybar .ns-i { font-size: 20px; color: color-mix(in srgb, rgb(var(--nx-teal-ink)) 40%, rgb(var(--nx-text))); }
+.ns-msg__hero { display: grid; justify-items: center; gap: 8px; padding: 18px 0 12px; text-align: center; }
+.ns-msg__hero b { font-size: 19px; overflow-wrap: anywhere; }
+.ns-msg__hero small { color: rgb(var(--nx-text-2)); }
+.ns-msg__actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.ns-msg__actions .ns-btn { height: 44px; justify-content: center; text-decoration: none; }
+.ns-msg__facts { margin-top: 16px; display: grid; gap: 0; }
+.ns-msg__facts > div { display: flex; justify-content: space-between; gap: 12px; padding: 11px 2px; box-shadow: inset 0 -1px 0 rgb(var(--nx-line) / .7); }
+.ns-msg__facts dt { color: rgb(var(--nx-text-2)); font-size: 13.5px; }
+.ns-msg__facts dd { font-size: 14px; font-weight: 600; text-align: end; overflow-wrap: anywhere; }
+@media (prefers-reduced-motion: reduce) { .ns-msg__grip i { transition: none; } }
+
+/* ===== Contacts (S3 Batch 3): tokens only, so every skin and mode applies ===== */
+.ns-ct__top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.ns-ct__add { flex: none; width: 46px; height: 46px; margin-top: 6px; border-radius: 50%; display: grid; place-items: center; font-size: 22px; color: #fff; background: linear-gradient(180deg, rgb(var(--nx-cta-a)), rgb(var(--nx-cta-b))); box-shadow: var(--nx-e1); }
+.ns-ct__tools { display: flex; align-items: center; gap: 10px; margin-top: 14px; }
+.ns-ct__search { flex: 1; min-width: 0; margin-top: 0; height: 48px; position: relative; }
+.ns-ct__spin { color: rgb(var(--nx-teal-ink)); display: inline-flex; }
+.ns-ct__view { flex: none; }
+.ns-ct__view button { min-width: 44px; padding: 0 12px; }
+.ns-ct__favs { display: flex; gap: 10px; overflow-x: auto; padding: 4px 2px 8px; margin: 0 -2px; scrollbar-width: none; }
+.ns-ct__favs::-webkit-scrollbar { display: none; }
+.ns-ct__fav { flex: none; width: 100px; display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 12px 8px; border-radius: calc(var(--nx-r-row) * var(--nx-rs)); background: rgb(var(--nx-surface)); }
+.ns-ct__favname { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; font-weight: 600; color: rgb(var(--nx-text)); }
+.ns-ct__acts { display: inline-flex; align-items: center; gap: 4px; flex: none; }
+.ns-ct__act { width: 36px; height: 36px; border-radius: 50%; display: inline-grid; place-items: center; font-size: 18px; cursor: pointer; transition: background .15s, color .15s; }
+.ns-ct__act--call { color: rgb(var(--nx-ok)); background: rgb(var(--nx-ok) / .13); }
+.ns-ct__act--msg { color: rgb(var(--nx-teal-ink)); background: rgb(var(--nx-teal) / .14); }
+.ns-ct__act--star { color: rgb(var(--nx-text-2)); }
+.ns-ct__act--star.is-on { color: rgb(var(--nx-gold-ink)); }
+.ns-ct__act--star.is-on svg { fill: currentColor; }
+.ns-ct__act--spam { color: rgb(var(--nx-text-2)); }
+.ns-ct__act--spam:hover { color: rgb(var(--nx-bad)); background: rgb(var(--nx-bad) / .12); }
+.ns-ct__act--call:hover, .ns-ct__act--msg:hover { filter: brightness(1.08); }
+.ns-ct__act:focus-visible, .ns-ct__who:focus-visible, .ns-ct__cardbody:focus-visible, .ns-ct__add:focus-visible, .ns-ct__az a:focus-visible { outline: 2px solid rgb(var(--nx-teal-ink)); outline-offset: 2px; }
+.ns-ct__list { margin-top: 6px; position: relative; }
+@media (min-width: 1024px) { .ns-ct__list { columns: 2; column-gap: 20px; } .ns-ct__group { break-inside: avoid; } }
+.ns-ct__group { scroll-margin-top: 16px; margin-top: 12px; }
+.ns-ct__rows { overflow: hidden; border-radius: calc(var(--nx-r-row) * var(--nx-rs)); background: rgb(var(--nx-surface)); }
+.ns-ct__row { position: relative; user-select: none; touch-action: pan-y; box-shadow: 0 1px 0 rgb(var(--nx-line)); }
+.ns-ct__row.is-last { box-shadow: none; }
+.ns-ct__del { position: absolute; inset: 0 0 0 auto; width: 88px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; font-size: 11.5px; font-weight: 700; color: #fff; background: rgb(var(--nx-bad)); }
+:where(html).dark .ns-ct__del { color: rgb(var(--nx-canvas)); }
+.ns-ct__front { position: relative; display: flex; align-items: center; gap: 10px; padding: 10px 10px 10px 14px; background: rgb(var(--nx-surface)); transition: transform .2s; }
+.ns-ct__who { flex: 1; min-width: 0; display: flex; align-items: center; gap: 12px; text-align: start; color: rgb(var(--nx-text)); }
+.ns-ct__name { min-width: 0; display: block; }
+.ns-ct__name b, .ns-ct__cardbody b { display: block; font-size: 15.5px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ns-ct__name small, .ns-ct__cardbody small { display: block; font-size: 13px; color: rgb(var(--nx-text-2)); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ns-ct__avatar { color: #fff; position: relative; overflow: hidden; }
+.ns-ct__avatar::before { content: ""; position: absolute; inset: 0; background: rgb(0 0 0 / .28); }
+.ns-ct__avatar > span { position: relative; }
+.ns-ct__az { position: fixed; right: 4px; top: 50%; transform: translateY(-50%); z-index: 20; display: flex; flex-direction: column; align-items: center; gap: 1px; padding: 6px 3px; border-radius: 99px; background: rgb(var(--nx-surface) / .85); }
+@media (min-width: 1024px) { .ns-ct__az { right: 16px; } }
+.ns-ct__az a { padding: 0 4px; font-size: 11px; font-weight: 700; line-height: 1.35; color: rgb(var(--nx-text-2)); }
+.ns-ct__az a:hover { color: rgb(var(--nx-teal-ink)); }
+.ns-ct__grid { margin-top: 14px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+@media (min-width: 640px) { .ns-ct__grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (min-width: 1024px) { .ns-ct__grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.ns-ct__card { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 16px 12px; text-align: center; border-radius: calc(var(--nx-r-card) * var(--nx-rs)); background: rgb(var(--nx-surface)); }
+.ns-ct__cardbody { width: 100%; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 6px; color: rgb(var(--nx-text)); }
+.ns-ct__empty { grid-column: 1 / -1; padding: 40px 20px; text-align: center; }
+.ns-ct__form { display: flex; flex-direction: column; gap: 6px; }
+.ns-ct__lbl { font-size: 13px; font-weight: 600; color: rgb(var(--nx-text-2)); margin-top: 8px; }
+.ns-ct__input { width: 100%; height: 50px; padding: 0 14px; font-size: 16px; color: rgb(var(--nx-text)); background: rgb(var(--nx-surface-3)); border-radius: calc(var(--nx-r-row) * var(--nx-rs)); box-shadow: inset 0 0 0 1px rgb(var(--nx-line)); outline: 0; }
+.ns-ct__input::placeholder { color: rgb(var(--nx-text-3)); opacity: 1; }
+.ns-ct__input:focus { box-shadow: inset 0 0 0 2px rgb(var(--nx-teal-ink)); }
+.ns-ct__err { font-size: 13px; color: rgb(var(--nx-bad)); }
+.ns-ct__danger { color: rgb(var(--nx-bad)); }
+.ns-ct__import { margin-top: 22px; padding: 16px; border-radius: calc(var(--nx-r-row) * var(--nx-rs)); box-shadow: inset 0 0 0 1.5px rgb(var(--nx-line-strong)); border: 0; background: rgb(var(--nx-surface-2)); }
+.ns-ct__importhead { display: flex; align-items: center; gap: 8px; font-size: 15px; color: rgb(var(--nx-text)); }
+.ns-ct__import .ns-small { margin: 4px 0 12px; }
+.ns-ct__importrow { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.ns-ct__file { max-width: 100%; flex: 1; min-width: 0; font-size: 13px; color: rgb(var(--nx-text-2)); }
+.ns-ct__file::file-selector-button { margin-inline-end: 10px; padding: 8px 12px; border: 0; border-radius: 10px; font-weight: 600; color: rgb(var(--nx-teal-ink)); background: rgb(var(--nx-teal) / .14); cursor: pointer; }
+.ns-ct__pick { margin-top: 12px; }
+
+/* ===== Notifications (S3 Batch 3) ===== */
+.ns-nt__top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.ns-nt__top .ns-cta { margin-top: 8px; flex: none; }
+.ns-nt__filters { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+.ns-nt__chip { height: 36px; padding: 0 14px; border-radius: 99px; font-size: 14px; font-weight: 600; color: rgb(var(--nx-text-2)); background: rgb(var(--nx-surface-3)); box-shadow: inset 0 0 0 1px rgb(var(--nx-line)); transition: background .15s, color .15s; }
+.ns-nt__chip:hover { color: rgb(var(--nx-text)); }
+.ns-nt__chip.is-on { color: rgb(var(--nx-teal-ink)); background: rgb(var(--nx-surface)); box-shadow: inset 0 0 0 2px rgb(var(--nx-teal-ink)); }
+.ns-nt__chip:focus-visible, .ns-nt__link:focus-visible { outline: 2px solid rgb(var(--nx-teal-ink)); outline-offset: 2px; }
+.ns-nt__list { margin-top: 16px; display: flex; flex-direction: column; gap: 10px; }
+.ns-nt__card { border-radius: calc(var(--nx-r-card) * var(--nx-rs)); background: rgb(var(--nx-surface)); overflow: hidden; position: relative; }
+.ns-nt__card.is-unread.ns-ring { box-shadow: inset 0 0 0 1.5px rgb(var(--nx-teal) / .55), var(--nx-e1); }
+.ns-nt__card--row { display: flex; align-items: flex-start; gap: 12px; padding: 14px; }
+.ns-nt__main { min-width: 0; flex: 1; }
+.ns-nt__title { display: block; font-size: 15.5px; font-weight: 600; color: rgb(var(--nx-text)); }
+.ns-nt__title--lg { font-size: 17px; font-weight: 700; }
+.ns-nt__text { margin: 3px 0 0; font-size: 14.5px; line-height: 1.45; color: rgb(var(--nx-text-2)); }
+.ns-nt__meta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; margin-top: 10px; }
+.ns-nt__link { font-size: 13px; font-weight: 600; color: rgb(var(--nx-text-2)); }
+.ns-nt__link:hover { color: rgb(var(--nx-text)); text-decoration: underline; }
+.ns-nt__link--strong { color: rgb(var(--nx-teal-ink)); }
+.ns-nt__dot { flex: none; width: 9px; height: 9px; margin-top: 6px; border-radius: 50%; background: rgb(var(--nx-gold)); box-shadow: 0 0 0 2px rgb(var(--nx-surface)); }
+.ns-nt__titlerow { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+.ns-nt__hero { display: block; width: 100%; aspect-ratio: 2 / 1; object-fit: cover; }
+.ns-nt__body { padding: 14px; }
+/* The "dark feature" offer is a deliberate dark brand card in every skin and mode: its own fixed ink pair, like the primary card. */
+.ns-nt__card--dark { padding: 14px; background: rgb(8 20 34); box-shadow: inset 0 0 0 1px rgb(255 255 255 / .1), var(--nx-e1); color: rgb(238 246 250); }
+.ns-nt__card--dark.is-unread { box-shadow: inset 0 0 0 1.5px rgb(var(--nx-teal) / .7), var(--nx-e1); }
+.ns-nt__card--dark .ns-nt__title { color: rgb(255 255 255); }
+.ns-nt__card--dark .ns-nt__text, .ns-nt__card--dark .ns-nt__bullets li { color: rgb(203 218 228); }
+.ns-nt__card--dark .ns-small, .ns-nt__card--dark .ns-nt__link { color: rgb(176 196 208); }
+.ns-nt__card--dark .ns-nt__link:hover { color: #fff; }
+.ns-nt__card--dark .ns-nt__dot { box-shadow: 0 0 0 2px rgb(8 20 34); }
+.ns-nt__darkrow { display: flex; align-items: flex-start; gap: 14px; }
+.ns-nt__darkmain { min-width: 0; flex: 1; }
+.ns-nt__thumb { width: 64px; height: 64px; flex: none; border-radius: 12px; object-fit: cover; }
+.ns-nt__bullets { margin: 10px 0 0; padding: 0; list-style: none; display: grid; gap: 4px; }
+.ns-nt__bullets li { display: flex; align-items: flex-start; gap: 6px; font-size: 13.5px; }
+.ns-nt__bullets .ns-i { flex: none; margin-top: 2px; font-size: 14px; color: rgb(110 220 210); }
+.ns-nt__pages { margin-top: 16px; }
+.ns-nt__pages nav { display: flex; justify-content: center; }
+.ns-nt__pages a, .ns-nt__pages span[aria-current] > span, .ns-nt__pages span[aria-disabled] > span { color: rgb(var(--nx-text-2)); }
+
+/* ===== Shared text input (skin-aware) ===== */
+.ns-input { width: 100%; height: 50px; padding: 0 14px; font-size: 16px; color: rgb(var(--nx-text)); background: rgb(var(--nx-surface-3)); border-radius: calc(var(--nx-r-row) * var(--nx-rs)); box-shadow: inset 0 0 0 1px rgb(var(--nx-line)); outline: 0; }
+.ns-input::placeholder { color: rgb(var(--nx-text-3)); opacity: 1; }
+.ns-input:focus { box-shadow: inset 0 0 0 2px rgb(var(--nx-teal-ink)); }
+select.ns-input { appearance: none; padding-inline-end: 34px; background-image: linear-gradient(45deg, transparent 50%, rgb(var(--nx-text-2)) 50%), linear-gradient(135deg, rgb(var(--nx-text-2)) 50%, transparent 50%); background-position: calc(100% - 20px) 21px, calc(100% - 15px) 21px; background-size: 5px 5px; background-repeat: no-repeat; }
+.ns-input + .ns-input { margin-top: 8px; }
+
+/* ===== Naara Gift (S3 Batch 3) ===== */
+.ns-gf__preload { position: fixed; inset: 0; z-index: 60; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; background: rgb(var(--nx-canvas)); }
+.ns-gf__soon { margin: 18px auto 0; max-width: 32rem; padding: 32px 24px; text-align: center; }
+.ns-gf__tools { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 18px; }
+.ns-gf__search { flex: 1 1 200px; min-width: 0; margin-top: 0; height: 48px; }
+.ns-gf__country { width: auto; flex: none; height: 48px; max-width: 100%; }
+.ns-gf__brands { margin-top: 16px; display: grid; gap: 12px; }
+.ns-gf__brands.is-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+@media (min-width: 640px) { .ns-gf__brands.is-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (min-width: 1024px) { .ns-gf__brands.is-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.ns-gf__brands.is-list { grid-template-columns: minmax(0, 1fr); gap: 10px; }
+.ns-gf__brand { display: flex; overflow: hidden; text-align: start; color: rgb(var(--nx-text)); border-radius: calc(var(--nx-r-card) * var(--nx-rs)); background: rgb(var(--nx-surface)); transition: transform .15s; }
+.ns-gf__brand:hover { transform: translateY(-2px); }
+.ns-gf__brand:focus-visible, .ns-gf__amt:focus-visible { outline: 2px solid rgb(var(--nx-teal-ink)); outline-offset: 2px; }
+.is-grid .ns-gf__brand { flex-direction: column; }
+.is-list .ns-gf__brand { flex-direction: row; align-items: center; }
+.ns-gf__logo { flex: none; display: grid; place-items: center; overflow: hidden; background: linear-gradient(135deg, color-mix(in srgb, var(--gf-tint) 18%, rgb(var(--nx-surface-2))), color-mix(in srgb, var(--gf-tint) 38%, rgb(var(--nx-surface-2)))); }
+.is-grid .ns-gf__logo { width: 100%; aspect-ratio: 4 / 3; }
+.is-list .ns-gf__logo { width: 64px; height: 64px; }
+.ns-gf__logo img { width: 100%; height: 100%; object-fit: contain; padding: 12px; }
+.ns-gf__logo b { font-size: 22px; font-weight: 700; color: rgb(var(--nx-text)); }
+.ns-gf__logo--sm { width: 48px; height: 48px; border-radius: 14px; }
+.ns-gf__brandtext { min-width: 0; flex: 1; padding: 12px; }
+.ns-gf__brandtext b { display: block; font-size: 15px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ns-gf__brandtext small { display: block; font-size: 12.5px; color: rgb(var(--nx-text-2)); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ns-gf__pages { margin-top: 16px; }
+.ns-gf__amts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.ns-gf__amt { padding: 12px 6px; text-align: center; color: rgb(var(--nx-text)); border-radius: calc(var(--nx-r-row) * var(--nx-rs)); background: rgb(var(--nx-surface-2)); box-shadow: inset 0 0 0 1px rgb(var(--nx-line)); }
+.ns-gf__amt b { display: block; font-size: 15px; font-weight: 700; }
+.ns-gf__amt small { display: block; font-size: 12px; color: rgb(var(--nx-text-2)); }
+.ns-gf__amt.is-on { background: rgb(var(--nx-surface)); box-shadow: inset 0 0 0 2px rgb(var(--nx-teal-ink)); }
+.ns-gf__fields { display: flex; flex-direction: column; gap: 8px; }
+.ns-gf__redeem { margin-top: 16px; padding: 14px; border-radius: calc(var(--nx-r-row) * var(--nx-rs)); background: rgb(var(--nx-surface-2)); font-size: 13.5px; line-height: 1.5; color: rgb(var(--nx-text-2)); }
+.ns-gf__redeem summary { cursor: pointer; font-weight: 600; color: rgb(var(--nx-text)); }
+.ns-gf__bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px; }
+.ns-gf__bar .ns-cta { flex: 1; min-width: 160px; }
+.ns-gf__price { display: block; font-size: 24px; font-weight: 800; color: rgb(var(--nx-text)); font-variant-numeric: tabular-nums; }
+
+/* ===== Call abroad / Dialer (S3 Batch 3) ===== */
+.ns-dl { max-width: 64rem; margin-inline: auto; }
+.ns-dl__nav { display: flex; align-items: center; justify-content: space-between; margin: 14px 0 18px; }
+.ns-dl__nav .ns-linkink { display: inline-flex; align-items: center; gap: 6px; font-size: 14.5px; font-weight: 600; }
+.ns-dl__grid { display: grid; gap: 22px; }
+@media (min-width: 1024px) { .ns-dl__grid { grid-template-columns: minmax(0, 24rem) minmax(0, 1fr); align-items: start; gap: 32px; } }
+.ns-dl__card { padding: 22px 20px; border-radius: calc(var(--nx-r-card) * var(--nx-rs)); background: rgb(var(--nx-surface)); }
+.ns-dl__err { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 14px; padding: 12px; border-radius: 12px; font-size: 14px; color: rgb(var(--nx-bad)); background: rgb(var(--nx-bad) / .12); box-shadow: inset 0 0 0 1px rgb(var(--nx-bad) / .35); }
+.ns-dl__top { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 12px; }
+.ns-dl__ccwrap { position: relative; }
+.ns-dl__cc { display: inline-flex; align-items: center; gap: 8px; height: 38px; padding: 0 12px 0 10px; border-radius: 99px; font-size: 14.5px; font-weight: 600; color: rgb(var(--nx-text)); background: rgb(var(--nx-surface-3)); box-shadow: inset 0 0 0 1px rgb(var(--nx-line)); }
+.ns-dl__chev { display: inline-flex; font-size: 14px; color: rgb(var(--nx-text-2)); transform: rotate(90deg); transition: transform .15s; }
+.ns-dl__chev.is-open { transform: rotate(-90deg); }
+.ns-dl__menu { position: absolute; left: 0; z-index: 30; margin-top: 8px; width: 18rem; max-width: calc(100vw - 48px); overflow: hidden; border-radius: 16px; background: rgb(var(--nx-surface)); box-shadow: inset 0 0 0 1px rgb(var(--nx-line-strong)), 0 18px 40px -12px rgb(0 0 0 / .45); }
+.ns-dl__menusearch { padding: 8px; box-shadow: 0 1px 0 rgb(var(--nx-line)); }
+.ns-dl__menu ul { max-height: 16rem; overflow-y: auto; padding: 4px 0; margin: 0; list-style: none; }
+.ns-dl__opt { display: flex; align-items: center; gap: 10px; width: 100%; padding: 9px 14px; text-align: start; font-size: 15px; color: rgb(var(--nx-text)); }
+.ns-dl__opt:hover, .ns-dl__opt.is-on { background: rgb(var(--nx-surface-3)); }
+.ns-dl__optname { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ns-dl__optcode { flex: none; font-size: 13px; font-weight: 600; color: rgb(var(--nx-text-2)); }
+.ns-dl__wallet { display: none; align-items: center; gap: 6px; height: 36px; padding: 0 14px; border-radius: 99px; font-size: 14px; font-weight: 700; color: rgb(var(--nx-teal-ink)); background: rgb(var(--nx-teal) / .14); }
+@media (min-width: 1024px) { .ns-dl__wallet { display: inline-flex; } }
+.ns-dl__display { position: relative; display: flex; align-items: center; justify-content: center; min-height: 52px; padding: 0 40px; }
+.ns-dl__num { width: 100%; text-align: center; font-size: 28px; font-weight: 600; letter-spacing: .02em; color: rgb(var(--nx-text)); background: transparent; border: 0; outline: 0; padding: 0; font-variant-numeric: tabular-nums; }
+.ns-dl__num::placeholder { color: rgb(var(--nx-text-3)); opacity: 1; }
+.ns-dl__bs { position: absolute; right: 0; width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; font-size: 22px; color: rgb(var(--nx-text-2)); }
+.ns-dl__bs:hover { background: rgb(var(--nx-surface-3)); }
+.ns-dl__quote { margin-top: 8px; min-height: 22px; display: flex; justify-content: center; font-size: 13.5px; color: rgb(var(--nx-text-2)); }
+.ns-dl__quote p { margin: 0; }
+.ns-dl__quote b { color: rgb(var(--nx-teal-ink)); }
+.ns-dl__rate { font-size: 13.5px; font-weight: 600; color: rgb(var(--nx-teal-ink)); }
+.ns-dl__rate:disabled { opacity: .55; }
+.ns-dl__rate:not(:disabled):hover { text-decoration: underline; }
+.ns-dl__pad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px 24px; max-width: 19rem; margin: 18px auto 0; }
+.ns-dl__key { width: 66px; height: 66px; margin-inline: auto; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1; color: rgb(var(--nx-text)); background: rgb(var(--nx-surface-3)); box-shadow: inset 0 0 0 1px rgb(var(--nx-line)); transition: transform .1s, background .1s; user-select: none; touch-action: manipulation; }
+.ns-dl__key b { font-size: 26px; font-weight: 600; }
+.ns-dl__key small { margin-top: 3px; font-size: 9.5px; font-weight: 700; letter-spacing: .18em; color: rgb(var(--nx-text-2)); }
+.ns-dl__key:active { transform: scale(.92); background: rgb(var(--nx-surface-2)); }
+.ns-dl__callrow { display: flex; justify-content: center; margin-top: 22px; }
+.ns-dl__call { width: 68px; height: 68px; border-radius: 50%; display: grid; place-items: center; font-size: 30px; color: #fff; background: rgb(var(--nx-ok)); box-shadow: 0 10px 24px -8px rgb(var(--nx-ok) / .7); transition: transform .1s, filter .15s; }
+:where(html).dark .ns-dl__call { color: rgb(var(--nx-canvas)); }
+.ns-dl__call:hover:not(:disabled) { filter: brightness(1.08); }
+.ns-dl__call:active:not(:disabled) { transform: scale(.92); }
+.ns-dl__call:disabled { cursor: not-allowed; background: rgb(var(--nx-surface-3)); color: rgb(var(--nx-text-3)); box-shadow: inset 0 0 0 1px rgb(var(--nx-line)); }
+.ns-dl__key:focus-visible, .ns-dl__call:focus-visible, .ns-dl__cc:focus-visible, .ns-dl__chip:focus-visible, .ns-dl__opt:focus-visible, .ns-dl__bs:focus-visible { outline: 2px solid rgb(var(--nx-teal-ink)); outline-offset: 2px; }
+.ns-dl__railhead { display: flex; align-items: baseline; justify-content: space-between; }
+.ns-dl__chips { display: flex; gap: 8px; overflow-x: auto; padding: 4px 2px 8px; scrollbar-width: none; }
+.ns-dl__chips::-webkit-scrollbar { display: none; }
+@media (min-width: 1024px) { .ns-dl__chips { flex-wrap: wrap; overflow: visible; } }
+.ns-dl__chip { flex: none; display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 10px 12px; border-radius: 14px; background: rgb(var(--nx-surface)); color: rgb(var(--nx-text)); }
+.ns-dl__chip span { max-width: 4.8rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; font-weight: 600; }
+.ns-dl__recent { margin-top: 24px; }
+.ns-dl__calls { overflow: hidden; border-radius: calc(var(--nx-r-row) * var(--nx-rs)); background: rgb(var(--nx-surface)); }
+.ns-dl__call-row { display: flex; align-items: center; gap: 10px; padding: 12px 14px; font-size: 15px; box-shadow: 0 1px 0 rgb(var(--nx-line)); }
+.ns-dl__call-row:last-child { box-shadow: none; }
+.ns-dl__dest { flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; color: rgb(var(--nx-text)); }
+.ns-dl__dest .ns-i { flex: none; color: rgb(var(--nx-text-2)); }
+.ns-dl__dest b { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ns-dl__amt { flex: none; text-align: end; color: rgb(var(--nx-text)); }
+.ns-dl__amt b { font-weight: 700; }
+.ns-dl__amt small { font-size: 12.5px; color: rgb(var(--nx-text-2)); }
+
+/* ===== Page kit for tool pages (Batches 4-6): head, card, key/value strip, chips, text actions. Tokens only. ===== */
+.ns-pg { max-width: 48rem; margin-inline: auto; }
+.ns-pg--wide { max-width: 64rem; }
+.ns-pg__head { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 14px; }
+.ns-pg__actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 8px; }
+.ns-pg__card { margin-top: 16px; padding: 18px; border-radius: calc(var(--nx-r-card) * var(--nx-rs)); background: rgb(var(--nx-surface)); }
+.ns-pg__card--tight { padding: 14px; }
+.ns-pg__stack { display: flex; flex-direction: column; gap: 12px; }
+.ns-pg__stack--sm { gap: 8px; }
+.ns-pg__h2 { margin: 0; font-size: 16px; font-weight: 700; color: rgb(var(--nx-text)); }
+.ns-pg__lbl { display: block; margin: 0 0 6px; font-size: 12.5px; font-weight: 600; color: rgb(var(--nx-text-2)); }
+.ns-pg__kv { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 11px 14px; border-radius: calc(var(--nx-r-row) * var(--nx-rs)); background: rgb(var(--nx-surface-2)); box-shadow: inset 0 0 0 1px rgb(var(--nx-line)); font-size: 14.5px; color: rgb(var(--nx-text-2)); }
+.ns-pg__kv b { font-weight: 700; color: rgb(var(--nx-text)); font-variant-numeric: tabular-nums; }
+.ns-pg__kv b.is-accent { color: color-mix(in srgb, rgb(var(--nx-teal-ink)) 62%, rgb(var(--nx-text))); }
+.ns-pg__row { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 10px; }
+.ns-pg__row > .is-grow { flex: 1; min-width: 140px; }
+.ns-pg__chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.ns-pg__chip { display: inline-flex; align-items: center; gap: 6px; padding: 7px 13px; border-radius: 99px; font-size: 13px; font-weight: 600; color: rgb(var(--nx-text-2)); background: rgb(var(--nx-surface-3)); box-shadow: inset 0 0 0 1px rgb(var(--nx-line)); cursor: pointer; }
+.ns-pg__chip.is-on { color: rgb(var(--nx-teal-ink)); background: rgb(var(--nx-surface)); box-shadow: inset 0 0 0 2px rgb(var(--nx-teal-ink)); }
+.ns-pg__chip:focus-within { outline: 2px solid rgb(var(--nx-teal-ink)); outline-offset: 2px; }
+.ns-pg__tag { display: inline-block; padding: 2px 8px; border-radius: 6px; font-size: 11.5px; font-weight: 600; color: rgb(var(--nx-text-2)); background: rgb(var(--nx-surface-3)); }
+.ns-pg__mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12.5px; color: rgb(var(--nx-text-2)); }
+.ns-pg__sep { display: flex; flex-wrap: wrap; align-items: center; gap: 16px; margin-top: 12px; padding-top: 12px; box-shadow: inset 0 1px 0 rgb(var(--nx-line)); }
+.ns-pg__act { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: rgb(var(--nx-text-2)); }
+.ns-pg__act:hover { color: rgb(var(--nx-text)); text-decoration: underline; }
+.ns-pg__act--link { color: rgb(var(--nx-teal-ink)); }
+.ns-pg__act--bad { color: rgb(var(--nx-bad)); }
+.ns-pg__act:focus-visible { outline: 2px solid rgb(var(--nx-teal-ink)); outline-offset: 2px; }
+.ns-pg__code { display: block; overflow-x: auto; padding: 11px 13px; border-radius: 10px; font: 12.5px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; color: rgb(226 238 244); background: rgb(8 20 34); }
+.ns-pg__reveal { margin-top: 16px; padding: 18px; border-radius: calc(var(--nx-r-card) * var(--nx-rs)); background: rgb(var(--nx-surface-2)); box-shadow: inset 0 0 0 2px rgb(var(--nx-teal-ink)); }
+.ns-pg__err { display: flex; align-items: flex-start; gap: 8px; margin-top: 14px; padding: 12px; border-radius: 12px; font-size: 14px; color: rgb(var(--nx-bad)); background: rgb(var(--nx-bad) / .12); box-shadow: inset 0 0 0 1px rgb(var(--nx-bad) / .35); }
+.ns-pg__fielderr { display: block; margin-top: 4px; font-size: 13px; color: rgb(var(--nx-bad)); }
+.ns-pg__hint { margin: 4px 0 0; font-size: 13px; color: rgb(var(--nx-text-2)); }
+.ns-pg__empty { margin-top: 12px; }
+.ns-st { display: inline-flex; align-items: center; padding: 2px 10px; border-radius: 99px; font-size: 12px; font-weight: 700; color: rgb(var(--nx-text-2)); background: rgb(var(--nx-surface-3)); }
+.ns-st--ok { color: color-mix(in srgb, rgb(var(--nx-ok)) 68%, rgb(var(--nx-text))); background: rgb(var(--nx-ok) / .14); }
+.ns-st--warn { color: color-mix(in srgb, rgb(var(--nx-warn)) 68%, rgb(var(--nx-text))); background: rgb(var(--nx-warn) / .16); }
+.ns-st--bad { color: color-mix(in srgb, rgb(var(--nx-bad)) 68%, rgb(var(--nx-text))); background: rgb(var(--nx-bad) / .13); }
+.ns-st--info { color: color-mix(in srgb, rgb(var(--nx-teal-ink)) 70%, rgb(var(--nx-text))); background: rgb(var(--nx-teal) / .15); }
+.ns-pg__stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 16px; }
+@media (min-width: 640px) { .ns-pg__stats { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.ns-pg__stat { padding: 14px; border-radius: calc(var(--nx-r-row) * var(--nx-rs)); background: rgb(var(--nx-surface)); }
+.ns-pg__stat small { display: block; font-size: 11.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: rgb(var(--nx-text-2)); }
+.ns-pg__stat b { display: block; margin-top: 4px; font-size: 21px; font-weight: 800; color: rgb(var(--nx-text)); font-variant-numeric: tabular-nums; }
+.ns-pg__stat b.is-bad { color: rgb(var(--nx-bad)); }
+.ns-pg__stat--hi { box-shadow: inset 0 0 0 1.5px rgb(var(--nx-teal) / .55); }
+.ns-pg__filters { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 16px; }
+.ns-pg__filters .ns-search { margin: 0 0 0 auto; height: 42px; flex: 1 1 10rem; max-width: 18rem; }
+.ns-pg__split { display: grid; gap: 16px; margin-top: 16px; }
+@media (min-width: 1024px) { .ns-pg__split { grid-template-columns: 1fr 1.2fr; align-items: start; } }
+.ns-pg__item { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px; text-align: start; color: rgb(var(--nx-text)); border-radius: calc(var(--nx-r-row) * var(--nx-rs)); background: rgb(var(--nx-surface)); }
+.ns-pg__item.is-on { box-shadow: inset 0 0 0 2px rgb(var(--nx-teal-ink)); }
+.ns-pg__item:focus-visible { outline: 2px solid rgb(var(--nx-teal-ink)); outline-offset: 2px; }
+.ns-pg__item b { display: block; font-size: 15px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ns-pg__item small { display: block; font-size: 12.5px; color: rgb(var(--nx-text-2)); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ns-pg__item .ns-pg__amount { font-size: 15px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.ns-pg__dl { margin: 14px 0 0; display: grid; gap: 8px; font-size: 14.5px; }
+.ns-pg__dl > div { display: flex; justify-content: space-between; gap: 10px; }
+.ns-pg__dl dt { color: rgb(var(--nx-text-2)); }
+.ns-pg__dl dd { margin: 0; font-weight: 600; color: rgb(var(--nx-text)); }
+.ns-pg__big { margin: 4px 0 0; font-size: 26px; font-weight: 800; color: rgb(var(--nx-text)); font-variant-numeric: tabular-nums; }
+.ns-pg__panelempty { min-height: 14rem; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; text-align: center; color: rgb(var(--nx-text-2)); font-size: 14.5px; }
+.ns-pg__panelempty .ns-i { font-size: 32px; }
+.ns-pg__form { display: flex; flex-direction: column; gap: 6px; }
+.ns-pg__form .ns-pg__lbl { margin-top: 8px; margin-bottom: 0; }
+.ns-pg__two { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.ns-pg__btns { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 18px; }
+.ns-pg__btns .ns-pg__act { margin-left: auto; }
+.ns-pg__sub { margin: 0 0 12px; font-size: 13.5px; color: rgb(var(--nx-text-2)); }
+.ns-pg__back { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 600; color: rgb(var(--nx-text-2)); }
+.ns-pg__back:hover { color: rgb(var(--nx-text)); }
+.ns-pg__stat b.is-warn, .ns-pg__kv b.is-warn { color: color-mix(in srgb, rgb(var(--nx-warn)) 70%, rgb(var(--nx-text))); }
+.ns-input--list { height: auto; padding: 6px; }
+.ns-input--list option { padding: 8px 10px; border-radius: 8px; }
+textarea.ns-input { height: auto; padding: 12px 14px; line-height: 1.4; resize: vertical; }
+.ns-pg__choices { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.ns-pg__choices--2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.ns-pg__choice { padding: 11px 6px; border-radius: calc(var(--nx-r-row) * var(--nx-rs)); text-align: center; font-size: 14px; font-weight: 600; color: rgb(var(--nx-text-2)); background: rgb(var(--nx-surface-2)); box-shadow: inset 0 0 0 1px rgb(var(--nx-line)); }
+.ns-pg__choice.is-on { color: rgb(var(--nx-teal-ink)); background: rgb(var(--nx-surface)); box-shadow: inset 0 0 0 2px rgb(var(--nx-teal-ink)); }
+.ns-pg__choice:disabled { opacity: .5; cursor: not-allowed; }
+.ns-pg__choice:focus-visible { outline: 2px solid rgb(var(--nx-teal-ink)); outline-offset: 2px; }
+.ns-pg__warnbox { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px; border-radius: calc(var(--nx-r-row) * var(--nx-rs)); background: rgb(var(--nx-warn) / .12); box-shadow: inset 0 0 0 1px rgb(var(--nx-warn) / .45); cursor: pointer; }
+.ns-pg__warnbox b { display: block; font-size: 15px; color: rgb(var(--nx-text)); }
+.ns-pg__warnbox small { display: block; font-size: 13px; color: rgb(var(--nx-text-2)); }
+.ns-pg__warnbox input { width: 20px; height: 20px; flex: none; accent-color: rgb(var(--nx-teal-ink)); }
+.ns-pg__pre { margin: 0; padding: 12px; white-space: pre-wrap; border-radius: 12px; font-size: 13px; line-height: 1.45; color: rgb(var(--nx-text-2)); background: rgb(var(--nx-surface-2)); box-shadow: inset 0 0 0 1px rgb(var(--nx-line)); }
+.ns-pg__qr { display: block; margin: 0 auto; width: 176px; height: 176px; border-radius: 14px; background: #fff; padding: 4px; }
+.ns-pg__note { font-size: 13px; color: color-mix(in srgb, rgb(var(--nx-warn)) 70%, rgb(var(--nx-text))); margin: 6px 0 0; }
+.ns-pg__check { display: flex; align-items: center; gap: 10px; font-size: 14px; color: rgb(var(--nx-text-2)); }
+.ns-pg__check input { width: 18px; height: 18px; accent-color: rgb(var(--nx-teal-ink)); }
+.ns-pg__stack .ns-pg__fielderr { margin-top: -2px; }
+.ns-pg__dim { opacity: .62; }
+select.ns-input.ns-input--list { background-image: none; padding-inline-end: 6px; appearance: auto; }
+/* Rich text from admin-edited guides / agreements: tokens only (the sanitised HTML carries no colour of its own). */
+.ns-pg__prose { font-size: 15px; line-height: 1.6; color: rgb(var(--nx-text-2)); }
+.ns-pg__prose > :first-child { margin-top: 0; }
+.ns-pg__prose p, .ns-pg__prose ul, .ns-pg__prose ol { margin: 0 0 .9em; }
+.ns-pg__prose ul { list-style: disc; padding-inline-start: 1.3em; }
+.ns-pg__prose ol { list-style: decimal; padding-inline-start: 1.4em; }
+.ns-pg__prose h1, .ns-pg__prose h2, .ns-pg__prose h3, .ns-pg__prose h4, .ns-pg__prose strong, .ns-pg__prose b { color: rgb(var(--nx-text)); font-weight: 700; }
+.ns-pg__prose h2, .ns-pg__prose h3, .ns-pg__prose h4 { margin: 1.1em 0 .4em; font-size: 1.05em; }
+.ns-pg__prose a { color: color-mix(in srgb, rgb(var(--nx-teal-ink)) 60%, rgb(var(--nx-text))); text-decoration: underline; }
+.ns-pg__prose code { padding: 1px 6px; border-radius: 6px; font-size: .9em; background: rgb(var(--nx-surface-3)); color: rgb(var(--nx-text)); }
+.ns-pg__prose img { max-width: 100%; border-radius: 12px; }
+.ns-pg__callout { display: flex; align-items: flex-start; gap: 12px; padding: 16px; border-radius: calc(var(--nx-r-card) * var(--nx-rs)); background: rgb(var(--nx-surface-2)); box-shadow: inset 0 0 0 1px rgb(var(--nx-line)); }
+.ns-pg__callout b { display: block; font-size: 16px; color: rgb(var(--nx-text)); }
+.ns-pg__callout p { margin: 2px 0 0; font-size: 14px; color: rgb(var(--nx-text-2)); }
+.ns-pg__callout--ok { box-shadow: inset 0 0 0 1.5px rgb(var(--nx-ok) / .55); }
+.ns-pg__callout--ok .ns-i { color: rgb(var(--nx-ok)); }
+.ns-pg__callout--warn { box-shadow: inset 0 0 0 1.5px rgb(var(--nx-warn) / .55); }
+.ns-pg__callout--bad { box-shadow: inset 0 0 0 1.5px rgb(var(--nx-bad) / .55); }
+.ns-pg__callout > .ns-i { flex: none; font-size: 24px; }
+.ns-pg--narrow { max-width: 36rem; }
+.ns-pg--mid { max-width: 42rem; }
+.ns-pg--read { max-width: 48rem; }
+.ns-pg__kicker { display: block; font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: color-mix(in srgb, rgb(var(--nx-teal-ink)) 60%, rgb(var(--nx-text))); }
+.ns-pg__figure { display: block; width: 100%; margin: 12px 0; border-radius: 14px; object-fit: cover; }
+.ns-pg__ledger { margin-top: 8px; overflow: hidden; border-radius: calc(var(--nx-r-row) * var(--nx-rs)); background: rgb(var(--nx-surface)); }
+.ns-pg__lrow { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 13px 14px; font-size: 15px; box-shadow: 0 1px 0 rgb(var(--nx-line)); }
+.ns-pg__lrow:last-child { box-shadow: none; }
+.ns-pg__lrow b { display: block; font-weight: 600; color: rgb(var(--nx-text)); }
+.ns-pg__lrow small { display: block; font-size: 12.5px; color: rgb(var(--nx-text-2)); }
+.ns-pg__lrow .is-pos { font-weight: 700; color: color-mix(in srgb, rgb(var(--nx-ok)) 72%, rgb(var(--nx-text))); }
+.ns-pg__lrow .is-neg { font-weight: 700; color: rgb(var(--nx-text-2)); }
+.ns-pg__bars { display: flex; align-items: flex-end; gap: 1px; height: 128px; margin-top: 18px; overflow: hidden; }
+.ns-pg__bars > div { flex: 1; height: 100%; position: relative; }
+.ns-pg__bars i { position: absolute; bottom: 0; left: 0; right: 0; border-radius: 3px 3px 0 0; background: rgb(var(--nx-teal) / .75); }
+.ns-pg__bars > div:hover i { background: rgb(var(--nx-teal)); }
+.ns-pg__meter { margin-top: 4px; height: 7px; overflow: hidden; border-radius: 99px; background: rgb(var(--nx-surface-3)); }
+.ns-pg__meter i { display: block; height: 100%; border-radius: 99px; background: rgb(var(--nx-teal)); }
+.ns-pg__bignum { margin: 4px 0 0; font-size: 32px; font-weight: 800; color: rgb(var(--nx-text)); font-variant-numeric: tabular-nums; }
+.ns-pg__metarow { display: flex; align-items: center; justify-content: space-between; gap: 10px; font-size: 13.5px; }
+.ns-pg__metarow span:first-child { font-weight: 600; color: rgb(var(--nx-text)); }
+.ns-pg__metarow span:last-child { color: rgb(var(--nx-text-2)); font-variant-numeric: tabular-nums; }
+.ns-pg__cols2 { display: grid; gap: 14px; margin-top: 16px; }
+@media (min-width: 640px) { .ns-pg__cols2 { grid-template-columns: 1fr 1fr; } }
+.ns-pg__cols3 { display: grid; gap: 14px; }
+@media (min-width: 640px) { .ns-pg__cols3 { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+/* Marketing-style hero for business pages: a deliberate dark brand panel in every skin and mode. */
+.ns-pg__hero { padding: 48px 20px 64px; text-align: center; color: rgb(238 246 250); background: linear-gradient(135deg, rgb(13 27 42), rgb(13 27 42) 45%, rgb(10 110 110)); }
+.ns-pg__hero h1 { margin: 12px auto 0; max-width: 46rem; font-size: clamp(28px, 6vw, 46px); line-height: 1.12; font-weight: 800; color: #fff; }
+.ns-pg__hero p { margin: 18px auto 0; max-width: 40rem; font-size: 16px; line-height: 1.6; color: rgb(214 228 236); }
+.ns-pg__hero .ns-pg__kicker { color: rgb(242 185 59); }
+.ns-pg__sheet { margin-top: -32px; padding: 32px 16px 48px; border-radius: 30px 30px 0 0; background: rgb(var(--nx-canvas)); position: relative; }
+.ns-pg__plans { display: grid; gap: 18px; margin-top: 24px; }
+@media (min-width: 640px) { .ns-pg__plans { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.ns-pg__plan { position: relative; display: flex; flex-direction: column; padding: 22px; border-radius: calc(var(--nx-r-card) * var(--nx-rs)); background: rgb(var(--nx-surface)); }
+.ns-pg__plan.is-pop { box-shadow: inset 0 0 0 2px rgb(var(--nx-teal-ink)), var(--nx-e1); }
+.ns-pg__plan .ns-pg__badge { position: absolute; top: -12px; left: 50%; transform: translateX(-50%); }
+.ns-pg__price { margin: 8px 0 0; font-size: 34px; font-weight: 800; color: rgb(var(--nx-text)); }
+.ns-pg__price small { font-size: 14px; font-weight: 500; color: rgb(var(--nx-text-2)); }
+.ns-pg__ticks { margin: 16px 0 0; padding: 0; list-style: none; display: grid; gap: 10px; flex: 1; font-size: 14.5px; color: rgb(var(--nx-text-2)); }
+.ns-pg__ticks li { display: flex; align-items: flex-start; gap: 8px; }
+.ns-pg__ticks .ns-i { flex: none; margin-top: 2px; font-size: 16px; color: rgb(var(--nx-teal-ink)); }
+.ns-pg__ticks strong { color: rgb(var(--nx-text)); }
+.ns-pg__card--warn { box-shadow: inset 0 0 0 1.5px rgb(var(--nx-warn) / .6), var(--nx-e1); }
+/* The shared password field (x-ui.password) inside a skin page: its show/hide toggle follows the skin ink. */
+.ns-app .nx-pw-toggle { color: rgb(var(--nx-text-2)); }
+.ns-app .nx-pw-toggle:hover, .ns-app .nx-pw-toggle:focus-visible { color: rgb(var(--nx-text)); }
+.ns-app .ns-input.pr-10 { padding-right: 44px; }
+.ns-pg__qrbox { flex: none; padding: 12px; border-radius: 12px; background: #fff; }
+
+/* ===== Brand Hunt / brand pages ===== */
+.ns-bh__handle { min-width: 0; display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: calc(var(--nx-r-row) * var(--nx-rs)); background: rgb(var(--nx-surface)); }
+.ns-bh__icon { flex: none; width: 40px; height: 40px; display: grid; place-items: center; border-radius: 12px; background: rgb(244 247 249); color: rgb(20 30 40); box-shadow: inset 0 0 0 1px rgb(0 0 0 / .08); }
+.ns-bh__handle b { display: block; font-size: 15px; font-weight: 600; color: rgb(var(--nx-text)); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ns-bh__handle small { display: block; font-size: 12px; font-weight: 600; color: rgb(var(--nx-text-2)); }
+.ns-bh__handle small.is-ver { color: color-mix(in srgb, rgb(var(--nx-teal-ink)) 62%, rgb(var(--nx-text))); }
+.ns-bh__grid { display: grid; gap: 10px; grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 640px) { .ns-bh__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+/* Brand cards are ~380px wide: their handle rows always stack. */
+.ns-bh__card .ns-bh__grid { grid-template-columns: minmax(0, 1fr); }
+.ns-bh__cards { display: grid; gap: 18px; }
+@media (min-width: 640px) { .ns-bh__cards { grid-template-columns: 1fr 1fr; } }
+.ns-bh__card { overflow: hidden; border-radius: calc(var(--nx-r-card) * var(--nx-rs)); background: rgb(var(--nx-surface)); }
+.ns-bh__cover { position: relative; display: block; height: 144px; overflow: hidden; }
+.ns-bh__cover img { width: 100%; height: 100%; object-fit: cover; transition: transform .5s; }
+.ns-bh__card:hover .ns-bh__cover img { transform: scale(1.04); }
+/* Text sits on a photo: a fixed dark scrim and fixed light ink, whatever the skin. */
+.ns-bh__cover::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to top, rgb(0 0 0 / .8), rgb(0 0 0 / .4) 55%, rgb(0 0 0 / .12)); }
+.ns-bh__covertext { position: absolute; z-index: 1; left: 0; right: 0; bottom: 0; display: flex; align-items: flex-end; justify-content: space-between; gap: 8px; padding: 14px; }
+.ns-bh__covertext h3 { margin: 0; display: flex; align-items: center; gap: 6px; min-width: 0; font-size: 18px; font-weight: 700; line-height: 1.15; color: #fff; }
+.ns-bh__covertext h3 span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ns-bh__feat { flex: none; display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 99px; font-size: 10.5px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: rgb(38 28 0); background: rgb(242 185 59); }
+.ns-bh__body { padding: 18px; }
+.ns-bh__meta { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.ns-bh__tag { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 99px; font-size: 12px; font-weight: 600; color: rgb(var(--nx-text-2)); background: rgb(var(--nx-surface-3)); }
+.ns-bh__connect { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 99px; font-size: 12.5px; font-weight: 700; color: color-mix(in srgb, rgb(var(--nx-teal-ink)) 62%, rgb(var(--nx-text))); background: rgb(var(--nx-teal) / .14); }
+.ns-bh__connect.is-on { color: color-mix(in srgb, rgb(var(--nx-ok)) 70%, rgb(var(--nx-text))); background: rgb(var(--nx-ok) / .14); }
+.ns-bh__connect:disabled { opacity: .6; }
+.ns-bh__connect:focus-visible { outline: 2px solid rgb(var(--nx-teal-ink)); outline-offset: 2px; }
+.ns-bh__desc { margin: 10px 0 0; font-size: 15px; line-height: 1.5; color: rgb(var(--nx-text-2)); }
+.ns-bh__video { margin-top: 14px; }
+.ns-bh__frame { aspect-ratio: 16 / 9; overflow: hidden; border-radius: 12px; background: #000; }
+.ns-bh__frame iframe { width: 100%; height: 100%; border: 0; }
+.ns-bh__strip { display: flex; gap: 14px; overflow-x: auto; scroll-snap-type: x mandatory; padding: 2px 2px 6px; margin: 0 -2px; }
+.ns-bh__strip > div { flex: none; width: 85%; scroll-snap-align: start; }
+@media (min-width: 640px) { .ns-bh__strip > div { width: 380px; } }
+.ns-bh__catrow { display: flex; align-items: center; justify-content: space-between; margin: 0 0 10px; }
+.ns-bh__catrow small { font-size: 12.5px; color: rgb(var(--nx-text-2)); }
+.ns-bh__cta { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 8px; padding: 18px; border-radius: calc(var(--nx-r-card) * var(--nx-rs)); color: #fff; background: rgb(13 27 42); }
+.ns-bh__cta b { display: block; font-size: 15px; }
+.ns-bh__cta small { display: block; margin-top: 2px; font-size: 13px; color: rgb(205 220 229); }
+.ns-bh__cta .ns-i { flex: none; font-size: 20px; }
+.ns-bh__post { display: block; overflow: hidden; border-radius: calc(var(--nx-r-card) * var(--nx-rs)); background: rgb(var(--nx-surface)); color: rgb(var(--nx-text)); }
+.ns-bh__post img { display: block; width: 100%; height: 160px; object-fit: cover; }
+.ns-bh__postbody { display: flex; align-items: flex-start; gap: 12px; padding: 14px; }
+.ns-bh__gallery { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+@media (min-width: 640px) { .ns-bh__gallery { grid-template-columns: repeat(3, 1fr); } }
+.ns-bh__gallery figure { position: relative; margin: 0; overflow: hidden; border-radius: 14px; }
+.ns-bh__gallery img { display: block; width: 100%; aspect-ratio: 1; object-fit: cover; }
+.ns-bh__gallery figcaption { position: absolute; inset: auto 0 0 0; padding: 8px 12px; font-size: 12.5px; font-weight: 600; color: #fff; background: linear-gradient(to top, rgb(0 0 0 / .8), transparent); opacity: 0; transition: opacity .2s; }
+.ns-bh__gallery figure:hover figcaption, .ns-bh__gallery figure:focus-within figcaption { opacity: 1; }
+.ns-bh__flash { margin-top: 16px; padding: 12px 14px; border-radius: 14px; font-size: 14.5px; font-weight: 600; color: color-mix(in srgb, rgb(var(--nx-teal-ink)) 62%, rgb(var(--nx-text))); background: rgb(var(--nx-teal) / .12); box-shadow: inset 0 0 0 1px rgb(var(--nx-teal) / .4); }
+.ns-bh__section { margin-top: 28px; }
+.ns-bh__h { display: flex; align-items: center; gap: 8px; margin: 0 0 12px; font-size: 12.5px; font-weight: 800; letter-spacing: .07em; text-transform: uppercase; color: rgb(var(--nx-text-2)); }
+.ns-bh__h .ns-i { font-size: 15px; color: rgb(var(--nx-gold-ink)); }
+.ns-pg__hero--left { text-align: start; padding: 28px 20px 44px; }
+.ns-pg__hero--left h1 { margin-inline: 0; font-size: clamp(24px, 5vw, 34px); }
+.ns-pg__hero--left .ns-pg__kicker { color: rgb(190 214 226); }
+.ns-pg__herometa { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin-top: 12px; font-size: 14px; color: rgb(205 220 229); }
+.ns-st--ondark { color: #fff; background: rgb(255 255 255 / .16); }
+.ns-st--ondark.is-ok { color: rgb(168 240 200); }
+.ns-st--ondark.is-warn { color: rgb(252 222 140); }
+@media (hover: none) { .ns-bh__gallery figcaption { opacity: 1; } }
+.ns-pg__steps { display: flex; align-items: center; gap: 10px; margin: 20px 0 0; padding: 0; list-style: none; font-size: 13.5px; font-weight: 700; color: rgb(var(--nx-text-2)); }
+.ns-pg__steps li { display: flex; align-items: center; gap: 8px; }
+.ns-pg__steps li.is-on { color: rgb(var(--nx-text)); }
+.ns-pg__steps li.is-done { color: color-mix(in srgb, rgb(var(--nx-teal-ink)) 62%, rgb(var(--nx-text))); }
+.ns-pg__steps b { width: 26px; height: 26px; display: grid; place-items: center; border-radius: 50%; font-size: 13px; color: rgb(var(--nx-text-2)); background: rgb(var(--nx-surface-3)); box-shadow: inset 0 0 0 1px rgb(var(--nx-line)); }
+.ns-pg__steps .is-done b { color: #fff; background: rgb(var(--nx-cta-b)); box-shadow: none; }
+.ns-pg__steps .is-on b { color: rgb(var(--nx-text)); box-shadow: inset 0 0 0 2px rgb(var(--nx-teal-ink)); }
+.ns-pg__steps hr { width: 24px; height: 1px; margin: 0; border: 0; background: rgb(var(--nx-line-strong)); }
+.ns-pg__path { display: flex; align-items: center; gap: 12px; padding: 14px; border-radius: calc(var(--nx-r-row) * var(--nx-rs)); background: rgb(var(--nx-surface)); }
+.ns-pg__path b { display: block; font-size: 15px; color: rgb(var(--nx-text)); }
+.ns-pg__path small { display: block; font-size: 13px; color: rgb(var(--nx-text-2)); }
+.ns-pg__path > div { flex: 1; min-width: 0; }
+.ns-pg__tier { padding: 18px; border-radius: calc(var(--nx-r-card) * var(--nx-rs)); background: rgb(var(--nx-surface)); }
+.ns-pg__tier.is-hi { box-shadow: inset 0 0 0 2px rgb(var(--nx-teal-ink)), var(--nx-e1); }
+.ns-pg__tier .ns-pg__ticks { margin-top: 12px; }
+.ns-pg__cols3--2 { grid-template-columns: 1fr; }
+@media (min-width: 640px) { .ns-pg__cols3--2 { grid-template-columns: 1fr 1fr; } }
+
+/* Language switcher (header chip + modal list): members get skin tokens; guests keep the neutral Tailwind look. */
+html[data-nx-skin] .nx-lang-chip { height: 36px; color: rgb(var(--nx-text-2)); border-color: rgb(var(--nx-line)); background: rgb(var(--nx-surface) / .72); }
+html[data-nx-skin] .nx-lang-chip:hover { color: rgb(var(--nx-text)); border-color: rgb(var(--nx-teal) / .6); }
+html[data-nx-skin] .nx-lang-chip:focus-visible, html[data-nx-skin] .nx-lang__opt:focus-visible { outline: 2px solid rgb(var(--nx-teal-ink)); outline-offset: 2px; }
+.nx-lang__opt:focus-visible { outline: 2px solid rgb(var(--color-primary, 10 110 110)); outline-offset: 2px; }
+
+/* ------------------------------------------------------------------ Admin overview (S3 Batch 5) */
+.ns-adm { padding-bottom: 24px; }
+.ns-adm__title { font-size: 26px; font-weight: 700; letter-spacing: -.02em; color: rgb(var(--nx-text)); margin: 4px 0 18px; }
+.ns-adm__alert { display: flex; gap: 12px; align-items: flex-start; padding: 14px 16px; margin-bottom: 14px; border-radius: calc(var(--nx-r-card, 20px) * var(--nx-rs, 1)); background: rgb(var(--nx-surface-2)); border: 1px solid rgb(var(--nx-line)); color: rgb(var(--nx-text)); }
+.ns-adm__alert > svg, .ns-adm__alert > .ns-i { flex: none; width: 20px; height: 20px; margin-top: 2px; }
+.ns-adm__alert b { display: block; font-size: 14px; font-weight: 700; }
+.ns-adm__alert small { display: block; margin-top: 4px; font-size: 12px; line-height: 1.5; color: rgb(var(--nx-text-2)); }
+.ns-adm__alert--warn { border-color: rgb(var(--nx-warn) / .55); background: linear-gradient(0deg, rgb(var(--nx-warn) / .10), rgb(var(--nx-warn) / .10)), rgb(var(--nx-surface-2)); }
+.ns-adm__alert--warn > svg { color: rgb(var(--nx-warn)); }
+.ns-adm__panel { padding: 18px; }
+.ns-adm__h { display: flex; align-items: center; gap: 8px; margin: 0 0 12px; font-size: 14px; font-weight: 600; color: rgb(var(--nx-text)); }
+.ns-adm__h svg { width: 16px; height: 16px; color: rgb(var(--nx-teal-ink)); }
+.ns-adm__h span { font-weight: 400; font-size: 12px; color: rgb(var(--nx-text-3)); }
+.ns-adm__h--cap { text-transform: uppercase; letter-spacing: .06em; font-size: 12px; color: rgb(var(--nx-text-2)); }
+.ns-adm__chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.ns-adm__grid { display: grid; gap: 14px; margin-bottom: 18px; grid-template-columns: minmax(0, 1fr); }
+.ns-adm__grid--tight { gap: 10px; margin-bottom: 0; }
+.ns-adm__grid--3 { grid-template-columns: repeat(3, minmax(0, 1fr)); margin-bottom: 6px; }
+.ns-adm__grid--4, .ns-adm__grid--2, .ns-adm__grid--cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.ns-adm__grid--tight.ns-adm__grid--2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+@media (min-width: 900px) {
+  .ns-adm__grid--hero { grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); }
+  .ns-adm__grid--4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .ns-adm__grid--cards { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (max-width: 640px) {
+  .ns-adm__grid--2:not(.ns-adm__grid--tight), .ns-adm__grid--cards { grid-template-columns: minmax(0, 1fr); }
+}
+.ns-adm__foot { margin: 0 0 20px; font-size: 12px; }
+.ns-adm__tier { margin-top: 22px; padding-top: 20px; border-top: 2px dashed rgb(var(--nx-line-strong, var(--nx-line))); }
+.ns-adm__stack { display: grid; gap: 8px; }
+.ns-adm__row { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 14px; }
+.ns-adm__row-name { display: flex; align-items: center; gap: 8px; min-width: 0; color: rgb(var(--nx-text)); }
+.ns-adm__row-name b { text-transform: capitalize; font-weight: 600; }
+.ns-adm__row-end { display: flex; align-items: center; gap: 10px; }
+.ns-adm__stack-tag { margin-inline-start: auto; font-size: 11px; text-transform: uppercase; }
+.ns-adm__status { display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 99px; font-size: 12px; font-weight: 600; background: rgb(var(--nx-surface-3)); color: rgb(var(--nx-text-2)); }
+.ns-adm__status.is-ok { background: rgb(var(--nx-ok) / .16); color: rgb(var(--nx-ok)); }
+.ns-adm__status.is-warn { background: rgb(var(--nx-warn) / .18); color: rgb(var(--nx-warn)); }
+.ns-adm__status.is-bad { background: rgb(var(--nx-bad) / .16); color: rgb(var(--nx-bad)); }
+.ns-adm__status.is-info { background: rgb(var(--nx-teal) / .16); color: rgb(var(--nx-teal-ink)); }
+.ns-adm__ok { color: rgb(var(--nx-ok)); } .ns-adm__bad { color: rgb(var(--nx-bad)); }
+.ns-adm__dot { width: 8px; height: 8px; border-radius: 99px; flex: none; background: rgb(var(--nx-text-3)); }
+.ns-adm__dot--ok { background: rgb(var(--nx-ok)); } .ns-adm__dot--warn { background: rgb(var(--nx-warn)); } .ns-adm__dot--bad { background: rgb(var(--nx-bad)); }
+.ns-adm__pcard { padding: 16px; display: grid; gap: 12px; }
+.ns-adm__spark { display: block; width: 100%; height: 20px; margin-top: 4px; color: rgb(var(--nx-teal-ink)); }
+.ns-adm__big { display: block; margin-top: 4px; font-size: 18px; font-weight: 700; font-variant-numeric: tabular-nums; color: rgb(var(--nx-text)); }
+.ns-adm__big--pad { padding-top: 24px; }
+.ns-adm__reach { margin: 0; padding-top: 10px; border-top: 1px solid rgb(var(--nx-line)); font-size: 11px; }
+.ns-adm__reach b { text-transform: capitalize; color: rgb(var(--nx-text-2)); font-weight: 600; }
+.ns-adm__meter { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+.ns-adm__meter em { width: 7rem; flex: none; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-style: normal; font-size: 14px; text-transform: capitalize; color: rgb(var(--nx-text)); }
+.ns-adm__meter span { flex: 1; height: 8px; border-radius: 99px; overflow: hidden; background: rgb(var(--nx-surface-3)); }
+.ns-adm__meter span i { display: block; height: 100%; border-radius: 99px; background: linear-gradient(90deg, rgb(var(--nx-cta-a)), rgb(var(--nx-cta-b))); }
+.ns-adm__meter b { width: 2rem; flex: none; text-align: end; font-size: 12px; color: rgb(var(--nx-text-2)); }
+/* revenue hero: its own dark scrim + explicit label colours, so it reads on every skin */
+.ns-adm__rev { position: relative; overflow: hidden; padding: 20px; color: #fff; border-radius: calc(var(--nx-r-card, 22px) * var(--nx-rs, 1)); background: linear-gradient(150deg, rgb(var(--nx-cta-b)) 0%, rgb(var(--nx-ink-bg, 13 27 42)) 78%); box-shadow: 0 18px 34px -22px rgb(var(--nx-teal) / .7); }
+.ns-adm__rev::after { content: ""; position: absolute; inset: 0; background: linear-gradient(0deg, rgb(0 0 0 / .28), rgb(0 0 0 / .28)); pointer-events: none; }
+.ns-adm__rev > * { position: relative; z-index: 1; }
+.ns-adm__rev-top { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 14px; }
+.ns-adm__rev-kicker { display: flex; align-items: center; gap: 8px; margin: 0; font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: rgb(255 255 255 / .85); }
+.ns-adm__rev-kicker svg { width: 16px; height: 16px; }
+.ns-adm__rev-value { margin: 8px 0 0; font-size: 38px; font-weight: 700; letter-spacing: -.02em; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.ns-adm__rev-note { margin: 8px 0 0; font-size: 12px; color: rgb(255 255 255 / .78); }
+.ns-adm__delta { display: inline-flex; align-items: center; gap: 4px; padding: 6px 12px; border-radius: 99px; font-size: 12px; font-weight: 700; background: rgb(255 255 255 / .16); color: #fff; }
+.ns-adm__delta svg { width: 14px; height: 14px; }
+.ns-adm__delta.is-up { background: rgb(74 222 128 / .22); color: #bbf7d0; }
+.ns-adm__delta.is-down { background: rgb(248 113 113 / .24); color: #fecaca; }
+.ns-adm__bars { display: flex; align-items: flex-end; gap: 8px; height: 96px; margin-top: 22px; }
+.ns-adm__bar { display: flex; flex: 1; flex-direction: column; align-items: center; justify-content: flex-end; gap: 6px; height: 100%; }
+.ns-adm__bar-val { font-size: 10px; font-weight: 600; opacity: 0; transition: opacity .15s; color: #fff; }
+.ns-adm__bar:hover .ns-adm__bar-val { opacity: 1; }
+.ns-adm__bar i { display: block; width: 100%; height: var(--bar-h, 8%); border-radius: 6px 6px 3px 3px; background: linear-gradient(180deg, rgb(255 255 255 / .95), rgb(255 255 255 / .35)); transform-origin: bottom; animation: ns-adm-grow .7s cubic-bezier(.22, 1, .36, 1) both; animation-delay: var(--bar-delay, 0ms); }
+.ns-adm__bar-lbl { font-size: 10px; font-weight: 500; color: rgb(255 255 255 / .78); }
+@keyframes ns-adm-grow { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+@media (prefers-reduced-motion: reduce) { .ns-adm__bar i { animation: none; } }
+.ns-adm__split { display: flex; align-items: center; gap: 20px; }
+.ns-adm__donut { width: 7rem; height: 7rem; flex: none; border-radius: 99px; display: grid; place-items: center; background: var(--donut, conic-gradient(rgb(var(--nx-surface-3)) 0% 100%)); }
+.ns-adm__donut-hole { width: 4.6rem; height: 4.6rem; border-radius: 99px; display: grid; place-content: center; text-align: center; background: rgb(var(--nx-surface)); }
+.ns-adm__donut-hole small { font-size: 10px; text-transform: uppercase; letter-spacing: .05em; color: rgb(var(--nx-text-3)); }
+.ns-adm__donut-hole b { font-size: 14px; color: rgb(var(--nx-text)); }
+.ns-adm__legend { list-style: none; margin: 0; padding: 0; flex: 1; min-width: 0; display: grid; gap: 10px; font-size: 14px; }
+.ns-adm__legend li { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.ns-adm__legend li span { display: flex; align-items: center; gap: 8px; min-width: 0; color: rgb(var(--nx-text-2)); }
+.ns-adm__legend li i { width: 10px; height: 10px; border-radius: 99px; flex: none; }
+.ns-adm__legend li em { font-style: normal; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ns-adm__legend li b { color: rgb(var(--nx-text)); }
+.ns-app .ns-adm__h { font-size: 14px; line-height: 1.3; letter-spacing: 0; flex-wrap: wrap; }
+.ns-app .ns-adm__h--cap { font-size: 12px; letter-spacing: .06em; }
+.ns-app .ns-adm__h span { display: inline; font-size: 12px; }

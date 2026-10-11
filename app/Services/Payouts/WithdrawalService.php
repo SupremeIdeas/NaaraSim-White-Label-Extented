@@ -46,11 +46,7 @@ class WithdrawalService
     /** Convert a USD amount to the destination account's currency (locked now). */
     public function localAmount(float $usd, string $currency): float
     {
-        return match (strtoupper($currency)) {
-            'USD' => round($usd, 2),
-            'NGN' => round($usd * $this->currency->getUsdToNgn(), 2),
-            default => throw new PayoutException("Withdrawals to {$currency} aren't available yet."),
-        };
+        return $this->currency->usdToLocal($usd, $currency);
     }
 
     /**
@@ -86,15 +82,16 @@ class WithdrawalService
         }
 
         $currency = strtoupper($account->currency);
-        $localAmount = $this->localAmount($usd, $currency);
+        $quote = app(\App\Services\Payouts\PayoutQuoter::class)->quote($usd, $currency, $account);
+        $localAmount = $quote['local_amount'];
         $reference = 'wd:'.Str::uuid();
 
-        return DB::transaction(function () use ($user, $credits, $account, $localAmount, $currency, $reference) {
+        return DB::transaction(function () use ($user, $credits, $account, $quote, $localAmount, $currency, $reference) {
             // HOLD the credits (spend from the withdrawable bucket) before any
             // money is promised. Idempotent on the hold reference.
             $this->credits->spendWithdrawable($user, $credits, 'withdraw', 'wd-hold:'.$reference, 'Cash withdrawal');
 
-            $request = $this->payouts->createRequest($user, $localAmount, $currency, 'referral_credits', $account, $reference);
+            $request = $this->payouts->createRequest($user, $localAmount, $currency, 'referral_credits', $account, $reference, $quote['quote']);
             $request->forceFill(['credit_amount' => $credits])->save();
 
             return $request;

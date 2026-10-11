@@ -20,6 +20,7 @@ class SyncFxRates extends Command
     public function handle(CurrencyService $currency): int
     {
         Cache::forget('fx.rates.usd');
+        Cache::forget('fx.rates.usd.strict');
         $rates = $currency->liveRates();
 
         $this->info('FX rates refreshed: '.collect($rates)->map(fn ($r, $c) => "$c=$r")->implode('  '));

@@ -54,6 +54,7 @@ class BottomNav
         'referrals' => ['label' => 'Referrals', 'icon' => 'users'],
         'data-estimator' => ['label' => 'Estimator', 'icon' => 'signal'],
         'profile' => ['label' => 'Profile', 'icon' => 'id-card'],
+        'account.appearance' => ['label' => 'Appearance', 'icon' => 'sparkles'],
         'account' => ['label' => 'Account', 'icon' => 'settings'],
         'security' => ['label' => 'Security', 'icon' => 'shield'],
         'merchant.apply' => ['label' => 'Become a Merchant', 'icon' => 'package'],
@@ -105,6 +106,7 @@ class BottomNav
             ['route' => 'referrals', 'label' => 'Referrals', 'icon' => 'users'],
             ['route' => 'data-estimator', 'label' => 'Estimator', 'icon' => 'signal'],
             ['route' => 'profile', 'label' => 'Profile', 'icon' => 'id-card'],
+            ['route' => 'account.appearance', 'label' => 'Appearance', 'icon' => 'sparkles'],
             ['route' => 'account', 'label' => 'Account', 'icon' => 'settings'],
             ['route' => 'security', 'label' => 'Security', 'icon' => 'shield'],
         ];

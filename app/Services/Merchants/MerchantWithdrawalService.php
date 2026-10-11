@@ -35,17 +35,7 @@ class MerchantWithdrawalService
 
     public function availableUsd(Merchant $merchant): float
     {
-        return round($this->earnings->balance($merchant), 2);
-    }
-
-    /** Convert a USD amount to the destination account's currency (locked now). */
-    private function localAmount(float $usd, string $currency): float
-    {
-        return match (strtoupper($currency)) {
-            'USD' => round($usd, 2),
-            'NGN' => round($usd * $this->currency->getUsdToNgn(), 2),
-            default => throw new PayoutException("Withdrawals to {$currency} aren't available yet."),
-        };
+        return max(0.0, round($this->earnings->balance($merchant), 2)); // a clawback debt is never "available"
     }
 
     /**
@@ -100,14 +90,15 @@ class MerchantWithdrawalService
         }
 
         $currency = strtoupper($account->currency);
-        $localAmount = $this->localAmount($usd, $currency);
+        $quote = app(\App\Services\Payouts\PayoutQuoter::class)->quote($usd, $currency, $account);
+        $localAmount = $quote['local_amount'];
         $reference = 'mwd:'.Str::uuid();
 
-        return DB::transaction(function () use ($merchant, $owner, $usd, $account, $localAmount, $currency, $reference) {
+        return DB::transaction(function () use ($merchant, $owner, $usd, $account, $quote, $localAmount, $currency, $reference) {
             // HOLD the earnings before any money is promised (idempotent).
             $this->earnings->hold($merchant, $usd, 'earn-hold:'.$reference, 'Cash withdrawal');
 
-            $request = $this->payouts->createRequest($owner, $localAmount, $currency, 'merchant_earnings', $account, $reference);
+            $request = $this->payouts->createRequest($owner, $localAmount, $currency, 'merchant_earnings', $account, $reference, $quote['quote']);
             // Record the USD earnings held so the reversal returns the exact bucket.
             $request->forceFill(['credit_amount' => $usd])->save();
 

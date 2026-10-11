@@ -14,6 +14,15 @@ class MerchantEarning extends Model
 
     public const RELEASE = 'release';
 
+    /** A reversal of an earlier accrual (refund / lost chargeback). May take the balance below zero: that is a debt. */
+    public const CLAWBACK = 'clawback';
+
+    /** Money sent to another member (member-to-member transfer). Never an accrual, so platform margin maths is untouched. */
+    public const TRANSFER_OUT = 'transfer_out';
+
+    /** Money received from another member. Only the referral ledger receives (it exists for every user). */
+    public const TRANSFER_IN = 'transfer_in';
+
     protected $fillable = [
         'merchant_id', 'type', 'amount', 'balance_after', 'currency',
         'reference', 'source_type', 'source_user_id', 'description',

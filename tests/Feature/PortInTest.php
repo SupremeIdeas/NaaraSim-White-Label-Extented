@@ -101,7 +101,7 @@ class PortInTest extends TestCase
     public function test_my_lines_links_to_the_port_in_page(): void
     {
         $this->actingAs($this->verified())->get('/numbers/lines')->assertOk()
-            ->assertSee('Bring it to Naara');
+            ->assertSee('Bring your number to Naara')->assertSee(route('numbers.port-in'));
     }
 
     public function test_completing_a_request_purges_the_carrier_secrets(): void

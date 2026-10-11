@@ -83,6 +83,11 @@ class AccountService
             abort(422, 'This account has no pending deletion request.');
         }
 
+        // Money still owed, or a payout in flight, must be settled first (Addendum D-3.10).
+        if (($blockers = \App\Services\Payouts\Hardening\PayoutErasureGuard::blockers($user)) !== []) {
+            abort(422, 'This account cannot be erased yet: '.implode('; ', $blockers).'.');
+        }
+
         $user->forceFill([
             'deletion_approved_at' => now(),
             'deletion_approved_by' => $approver->id,
@@ -153,6 +158,8 @@ class AccountService
             ))->save();
 
             $user->tokens()->delete();
+
+            \App\Services\Payouts\Hardening\PayoutErasureGuard::purgeDestinations($user);
         });
     }
 

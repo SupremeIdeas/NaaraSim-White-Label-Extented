@@ -264,3 +264,10 @@
   .nx-pl *, .nx-pl *::before, .nx-pl *::after,
   .nx-pl--simple-pulse, .nx-pl--heart-square, .nx-pl--goo-dots, .nx-pl--cube-pulse, .nx-pl--dot-grid { animation: none !important; }
 }
+
+/* Custom (admin-uploaded) preloader: GIF / WebP / Lottie. A fixed comfortable box that scales with the Studio's size control. */
+:root { --nx-pl-custom-bg: #ffffff; }
+.dark { --nx-pl-custom-bg: rgb(var(--brand-navy)); }
+.nx-pl--custom { display: flex; align-items: center; justify-content: center; }
+.nx-pl-custom { display: block; width: min(112px, 40vw); }
+.nx-pl-custom img, .nx-pl-custom svg { display: block; width: 100%; height: auto; max-height: 40vh; object-fit: contain; }

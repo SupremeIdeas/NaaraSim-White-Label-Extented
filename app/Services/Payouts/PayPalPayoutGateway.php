@@ -18,7 +18,7 @@ use Illuminate\Support\Facades\Http;
  * A PayPal payout account stores the payee email in `account_number` (type
  * 'paypal'); no PSP recipient object is needed, so createRecipient just returns it.
  */
-class PayPalPayoutGateway implements PayoutGatewayInterface
+class PayPalPayoutGateway implements PayoutGatewayInterface, DeclaresCapabilities
 {
     public function name(): string
     {
@@ -37,7 +37,7 @@ class PayPalPayoutGateway implements PayoutGatewayInterface
 
     private function token(): string
     {
-        return (string) Http::withBasicAuth(
+        return (string) Http::connectTimeout(\App\Support\PayoutSettings::httpConnectTimeout())->timeout(\App\Support\PayoutSettings::httpTimeout())->withBasicAuth(
             (string) config('services.paypal.client_id'),
             (string) config('services.paypal.client_secret'),
         )->asForm()->acceptJson()
@@ -54,17 +54,17 @@ class PayPalPayoutGateway implements PayoutGatewayInterface
     public function sendTransfer(PayoutRequest $request, PayoutAccount $account): PayoutTransferResult
     {
         try {
-            $response = Http::withToken($this->token())->acceptJson()
+            $response = Http::connectTimeout(\App\Support\PayoutSettings::httpConnectTimeout())->timeout(\App\Support\PayoutSettings::httpTimeout())->withToken($this->token())->acceptJson()
                 ->post($this->base().'/v1/payments/payouts', [
                     'sender_batch_header' => [
-                        'sender_batch_id' => $request->reference,
+                        'sender_batch_id' => $request->wireReference(),
                         'email_subject' => config('app.name').' payout',
                         'email_message' => 'Your '.config('app.name').' earnings payout.',
                     ],
                     'items' => [[
                         'recipient_type' => 'EMAIL',
                         'receiver' => (string) $account->account_number,
-                        'sender_item_id' => $request->reference,
+                        'sender_item_id' => $request->wireReference(),
                         'amount' => [
                             'value' => number_format((float) $request->amount, 2, '.', ''),
                             'currency' => strtoupper($account->currency ?: 'USD'),
@@ -99,7 +99,7 @@ class PayPalPayoutGateway implements PayoutGatewayInterface
         }
 
         try {
-            $status = Http::withToken($this->token())->acceptJson()
+            $status = Http::connectTimeout(\App\Support\PayoutSettings::httpConnectTimeout())->timeout(\App\Support\PayoutSettings::httpTimeout())->withToken($this->token())->acceptJson()
                 ->post($this->base().'/v1/notifications/verify-webhook-signature', [
                     'auth_algo' => $request->header('paypal-auth-algo'),
                     'cert_url' => $request->header('paypal-cert-url'),
@@ -137,5 +137,10 @@ class PayPalPayoutGateway implements PayoutGatewayInterface
             },
             providerRef: (string) data_get($resource, 'payout_item_id', '') ?: null,
         );
+    }
+
+    public function capabilities(): array
+    {
+        return ['confirms_synchronously' => false, 'webhook' => true, 'lookup' => false, 'cancel' => false];
     }
 }

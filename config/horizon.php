@@ -210,6 +210,30 @@ return [
             'timeout' => 60,
             'nice' => 0,
         ],
+
+        // Money-out sends: few processes, one try (never blind-retry), timeout above the
+        // slowest provider call. Payout Guardian evaluations: small fast jobs, 2 tries.
+        'supervisor-payouts' => [
+            'connection' => 'redis',
+            'queue' => ['payouts'],
+            'balance' => 'simple',
+            'maxProcesses' => 1,
+            'memory' => 128,
+            'tries' => 1,
+            'timeout' => 120,
+            'nice' => 0,
+        ],
+        'supervisor-payout-guard' => [
+            'connection' => 'redis',
+            'queue' => ['payout-guard'],
+            'balance' => 'simple',
+            'maxProcesses' => 2,
+            'memory' => 128,
+            'tries' => 2,
+            'backoff' => 30,
+            'timeout' => 60,
+            'nice' => 0,
+        ],
     ],
 
     'environments' => [
@@ -219,12 +243,16 @@ return [
                 'balanceMaxShift' => 1,
                 'balanceCooldown' => 3,
             ],
+            'supervisor-payouts' => ['maxProcesses' => 2],
+            'supervisor-payout-guard' => ['maxProcesses' => 4],
         ],
 
         'local' => [
             'supervisor-1' => [
                 'maxProcesses' => 3,
             ],
+            'supervisor-payouts' => ['maxProcesses' => 1],
+            'supervisor-payout-guard' => ['maxProcesses' => 1],
         ],
     ],
 

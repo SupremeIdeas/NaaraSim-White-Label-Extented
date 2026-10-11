@@ -1,20 +1,14 @@
+{{-- NaaraCredits coin (owner artwork). A self-hosted, ~4 KB / ~10 KB WebP with a clean alpha edge, so credits read as our own currency on
+     every skin, light or dark. Two committed sizes: the 64px file serves the small inline uses (up to ~20px, 3x-dense screens included),
+     the 128px file everything larger. Size comes from the class (h-*/w-*); the image is decorative (aria-hidden) because the number or
+     label beside it carries the meaning. --}}
 @props(['class' => 'h-5 w-5'])
-
 @php
-    // NaaraCredits' branded coin (owner request): the brand favicon in a warm-gold
-    // ring, so credits read as our own currency. Falls back to a drawn coin glyph
-    // when no favicon is set, so it always renders something on-brand.
-    $favicon = \App\Support\BrandSettings::favicon();
+    // Small inline uses (h-3 … h-5) get the 64px file; anything bigger gets the 128px one.
+    $small = preg_match('/(?:^|\s)h-(?:[0-4]|0\.5|1\.5|2\.5|3\.5)(?:\s|$)/', (string) $class) === 1 || preg_match('/(?:^|\s)h-5(?:\s|$)/', (string) $class) === 1;
+    $file = $small ? 'naara-coin-64.webp' : 'naara-coin-128.webp';
 @endphp
-
-<span {{ $attributes->merge(['class' => $class]) }}
-      style="display:inline-flex;align-items:center;justify-content:center;border-radius:9999px;overflow:hidden;background:linear-gradient(135deg,#E9C46A,#D4A017);box-shadow:inset 0 0 0 1.5px rgba(255,255,255,0.35),0 1px 2px rgba(0,0,0,0.15);"
-      aria-hidden="true">
-    @if ($favicon)
-        <img src="{{ $favicon }}" alt="" class="h-[68%] w-[68%] object-contain" style="filter:drop-shadow(0 0 1px rgba(0,0,0,0.15));">
-    @else
-        <svg viewBox="0 0 24 24" fill="none" class="h-[64%] w-[64%]" stroke="#0D1B2A" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="8" /><path d="M12 8v8M9.5 9.8a2.4 2.4 0 0 1 5 .2c0 1.4-1.2 1.9-2.5 2s-2.5.6-2.5 2a2.4 2.4 0 0 0 5 .2" />
-        </svg>
-    @endif
-</span>
+<img src="{{ asset('images/brand/'.$file) }}" alt="" aria-hidden="true" width="{{ $small ? 64 : 128 }}" height="{{ $small ? 64 : 128 }}"
+     loading="lazy" decoding="async" draggable="false"
+     {{ $attributes->merge(['class' => $class.' inline-block shrink-0 select-none object-contain align-middle']) }}
+     style="filter:drop-shadow(0 1px 1.5px rgb(0 0 0 / .22))">

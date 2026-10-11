@@ -3,10 +3,12 @@
 namespace App\Livewire\Admin;
 
 use App\Support\Auditor;
+use App\Support\CustomPreloader;
 use App\Support\PreloaderSettings;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
+use Livewire\WithFileUploads;
 
 /**
  * Admin → Preloader Studio (BLUEPRINT-preloader-studio §6). Assign any Studio
@@ -19,6 +21,8 @@ use Livewire\Component;
 #[Layout('components.layouts.admin')]
 class PreloaderStudio extends Component
 {
+    use WithFileUploads;
+
     /** The page type currently being edited. */
     public string $type = 'default';
 
@@ -52,6 +56,22 @@ class PreloaderStudio extends Component
     /** Manual colour overrides (hex), indexed 0..N — only used when brand off. */
     public array $colors = [];
 
+    /**
+     * The admin's own animation per mode (preset = 'custom'): ['light' => meta, 'dark' => meta]. Files are validated by content and stored the
+     * moment they are chosen; the assignment itself is only written on Save.
+     */
+    public array $custom = [];
+
+    /** Temporary Livewire uploads (one per mode). */
+    public $uploadLight = null;
+
+    public $uploadDark = null;
+
+    public ?string $customError = null;
+
+    /** Files uploaded in this session but never saved (deleted if replaced/removed, so the store does not collect orphans). */
+    public array $pendingFiles = [];
+
     public ?string $saved = null;
 
     public function booted(): void
@@ -82,7 +102,12 @@ class PreloaderStudio extends Component
         // The Studio edits the new preset catalog. A legacy/unconfigured value
         // maps to its closest Studio analog (simple-pulse) so the gallery has a
         // selection and the preview is populated; nothing is persisted until Save.
-        $this->preset = isset(PreloaderSettings::PRESETS[$cfg['preset']]) ? $cfg['preset'] : 'simple-pulse';
+        $this->custom = CustomPreloader::clean($cfg['custom'] ?? []);
+        $this->pendingFiles = [];
+        $this->customError = null;
+        $this->preset = ($cfg['preset'] === PreloaderSettings::CUSTOM && $this->custom !== [])
+            ? PreloaderSettings::CUSTOM
+            : (isset(PreloaderSettings::PRESETS[$cfg['preset']]) ? $cfg['preset'] : 'simple-pulse');
         $this->useBrandColor = (bool) ($cfg['use_brand_color'] ?? true);
         $this->useNeutral = (bool) ($cfg['use_neutral'] ?? false);
         $this->size = (string) ($cfg['size'] ?? 'md');
@@ -102,9 +127,68 @@ class PreloaderStudio extends Component
         // availablePresets() (not the raw PRESETS catalog) so a fork can't
         // select a master-only premium preset via a direct component call
         // that skips the picker UI where it's already hidden.
-        if (isset(PreloaderSettings::availablePresets()[$slug]) || in_array($slug, PreloaderSettings::LEGACY_STYLES, true)) {
+        if (isset(PreloaderSettings::availablePresets()[$slug]) || in_array($slug, PreloaderSettings::LEGACY_STYLES, true) || $slug === PreloaderSettings::CUSTOM) {
             $this->preset = $slug;
             $this->saved = null;
+        }
+    }
+
+    public function updatedUploadLight(): void
+    {
+        $this->receiveUpload('light', $this->uploadLight);
+        $this->uploadLight = null;
+    }
+
+    public function updatedUploadDark(): void
+    {
+        $this->receiveUpload('dark', $this->uploadDark);
+        $this->uploadDark = null;
+    }
+
+    /** Validate (by content) and store an upload for one mode, replacing that mode's previous file. */
+    private function receiveUpload(string $variant, $file): void
+    {
+        $this->customError = null;
+        if (! $file) {
+            return;
+        }
+        try {
+            $this->validate(['upload'.ucfirst($variant) => ['file', 'extensions:gif,webp,json', 'max:'.CustomPreloader::MAX_IMAGE_KB]]);
+            $meta = CustomPreloader::store($file);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            $this->customError = collect($e->errors())->flatten()->first();
+
+            return;
+        } catch (\InvalidArgumentException $e) {
+            $this->customError = $e->getMessage();
+
+            return;
+        }
+
+        $this->dropUnsaved($this->custom[$variant] ?? null);
+        $this->custom[$variant] = $meta;
+        $this->pendingFiles[] = $meta['path'];
+        $this->preset = PreloaderSettings::CUSTOM;
+        $this->saved = null;
+    }
+
+    public function removeCustom(string $variant): void
+    {
+        if (! in_array($variant, CustomPreloader::VARIANTS, true)) {
+            return;
+        }
+        $this->dropUnsaved($this->custom[$variant] ?? null);
+        unset($this->custom[$variant]);
+        $this->customError = null;
+        $this->saved = null;
+    }
+
+    /** Delete a file only if it was uploaded this session and never saved. */
+    private function dropUnsaved(?array $meta): void
+    {
+        if ($meta && in_array($meta['path'] ?? '', $this->pendingFiles, true)) {
+            CustomPreloader::delete($meta);
+            $this->pendingFiles = array_values(array_diff($this->pendingFiles, [$meta['path']]));
         }
     }
 
@@ -125,9 +209,15 @@ class PreloaderStudio extends Component
         // Same allow-list as selectPreset() — belt-and-suspenders against a
         // fork saving a master-only premium preset by any other path.
         abort_unless(
-            isset(PreloaderSettings::availablePresets()[$this->preset]) || in_array($this->preset, PreloaderSettings::LEGACY_STYLES, true),
+            isset(PreloaderSettings::availablePresets()[$this->preset]) || in_array($this->preset, PreloaderSettings::LEGACY_STYLES, true) || $this->preset === PreloaderSettings::CUSTOM,
             403,
         );
+        if ($this->preset === PreloaderSettings::CUSTOM && CustomPreloader::clean($this->custom) === []) {
+            $this->addError('preset', 'Upload a GIF, WebP or Lottie file first (for light mode, dark mode, or both).');
+
+            return;
+        }
+        $previous = CustomPreloader::clean(PreloaderSettings::forPageType($this->type)['custom'] ?? []);
 
         // Non-default types can inherit from default (everything else disabled).
         if ($this->type !== 'default' && $this->inherit) {
@@ -148,8 +238,18 @@ class PreloaderStudio extends Component
                 'blur_style' => $this->blurStyle,
                 'loading_text' => $this->loadingText ?: 'Loading',
                 'colors' => array_values(array_filter($this->colors, fn ($c) => filled($c))),
+                'custom' => CustomPreloader::clean($this->custom),
             ]);
         }
+
+        // The saved files are now referenced; free the ones this page type no longer uses.
+        $kept = collect(CustomPreloader::clean($this->custom))->pluck('path')->all();
+        foreach ($previous as $meta) {
+            if (! in_array($meta['path'], $kept, true) && ! $this->referencedElsewhere($meta['path'])) {
+                CustomPreloader::delete($meta);
+            }
+        }
+        $this->pendingFiles = [];
 
         Auditor::log('preloader.assignment_updated', null, null, ['type' => $this->type, 'preset' => $this->preset]);
         $this->saved = $this->type;
@@ -173,7 +273,30 @@ class PreloaderStudio extends Component
             'blur_style' => $this->blurStyle,
             'loading_text' => $this->loadingText ?: 'Loading',
             'colors' => array_values(array_filter($this->colors, fn ($c) => filled($c))),
+            'custom' => CustomPreloader::clean($this->custom),
         ]);
+    }
+
+    /** True if another page type's saved assignment still points at this file. */
+    private function referencedElsewhere(string $path): bool
+    {
+        try {
+            $all = \App\Models\Setting::getValue('brand.preloader.assignments', []);
+        } catch (\Throwable) {
+            return true; // unknown → never delete
+        }
+        foreach ((array) $all as $type => $row) {
+            if ($type === $this->type || ! is_array($row)) {
+                continue;
+            }
+            foreach (CustomPreloader::clean($row['custom'] ?? []) as $meta) {
+                if ($meta['path'] === $path) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     private function isInheriting(string $type): bool
@@ -196,6 +319,10 @@ class PreloaderStudio extends Component
             'presets' => PreloaderSettings::availablePresets(),
             'legacyStyles' => PreloaderSettings::LEGACY_STYLES,
             'selectedMeta' => PreloaderSettings::PRESETS[$this->preset] ?? null,
+            'isCustom' => $this->preset === PreloaderSettings::CUSTOM,
+            'customAccept' => CustomPreloader::ACCEPT,
+            'customMaxImageKb' => CustomPreloader::MAX_IMAGE_KB,
+            'customMaxLottieKb' => CustomPreloader::MAX_LOTTIE_KB,
         ]);
     }
 }

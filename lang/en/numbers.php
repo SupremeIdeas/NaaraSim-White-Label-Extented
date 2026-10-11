@@ -21,6 +21,14 @@ return [
     'back_to_numbers' => 'Back to Numbers',
     'close' => 'Close',
 
+    // active-line strip + landing heading
+    'your_naara' => \App\Support\BrandSettings::rebrand('Your Naara'),
+    'line_active' => 'Active',
+    'manage' => 'Manage',
+    'top_up' => 'Top up',
+    'what_today' => 'What do you need today?',
+    'what_today_sub' => 'Choose a service and get started in seconds.',
+
     // shared across verify/rent step partials
     'taxes_and_fees' => 'Taxes & fees',
     'you_pay' => 'You pay',
@@ -39,6 +47,8 @@ return [
         'manual_buy' => 'Manual Buy',
         'smart_buy' => 'Smart Buy',
         'smart_buy_hint' => 'Pick a service — we choose the best-priced country and network for you automatically.',
+        'banner_title' => \App\Support\BrandSettings::rebrand('Naara Verify'),
+        'banner_text' => 'Secure your network. Verify your identity.',
         'networks' => 'Networks',
         'prices_tab' => 'Prices',
         'stats_tab' => 'Statistics',
@@ -63,6 +73,13 @@ return [
         'any_service_note' => 'One number, :bold — receives SMS from every service for the rental period.',
         'any_service_bold' => 'any service',
         'rental_length' => 'Rental length',
+        'step_country' => '1. Select country',
+        'step_country_hint' => 'Choose the country for your number',
+        'step_service' => '2. Select service',
+        'step_service_hint' => 'What will you use this number for?',
+        'step_length_hint' => 'How long do you need the number for?',
+        'why_title' => 'Why rent a number?',
+        'why_text' => 'Keep your personal number private, verify accounts and reach global services.',
         'auto_renew' => 'Auto-renew when it expires',
         'short_term_note' => 'A short-term rental — receives SMS for a fixed period. For a longer rental, choose a US number.',
         'rent_this_number' => 'Rent this number',
@@ -88,5 +105,16 @@ return [
         'search_again' => 'Search again',
         'search_available' => 'Search available numbers',
         'searching' => 'Searching…',
+    ],
+
+    // my-lines.blade.php — port-in premium card
+    'portin_card' => [
+        'kicker' => 'Port-in · US & Canada',
+        'title' => 'Bring your number to Naara',
+        'text' => 'Already have a US or Canada number? Keep it. We run the carrier transfer for you.',
+        'cta' => 'Start transfer',
+        'chip_keep' => 'Keep your number',
+        'chip_days' => '5–15 business days',
+        'chip_voice' => 'Voice + SMS',
     ],
 ];

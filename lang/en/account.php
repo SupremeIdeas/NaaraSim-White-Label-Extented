@@ -26,6 +26,9 @@ return [
     'prepare_export' => 'Prepare my export',
     'requesting' => 'Requesting…',
     'download_ready' => 'Download (:when)',
+    'whats_new_heading' => "What's new",
+    'whats_new_body' => 'See the latest updates and improvements to the platform.',
+    'whats_new_cta' => "View what's new",
     'delete_heading' => 'Delete my account',
     'deletion_pending' => 'Your deletion request is :status. A super admin must approve it before anything is erased. You can still cancel.',
     'awaiting_review' => 'awaiting review',
@@ -63,4 +66,6 @@ return [
     'language_coming_soon' => ':name (coming soon)',
     'save_profile' => 'Save profile',
     'profile_saved' => 'Profile saved.',
+    'skin_link' => 'Your skin, accent and mode. Applies to your whole dashboard.',
+    'skin_link_title' => 'Skin & accent colour',
 ];

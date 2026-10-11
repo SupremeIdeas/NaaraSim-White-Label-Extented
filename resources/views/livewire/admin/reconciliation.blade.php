@@ -114,4 +114,38 @@
             </div>
         </div>
     </div>
+
+    {{-- Payout rails (money OUT, per provider + currency) --}}
+    <div class="mt-6 rounded-2xl border border-slate-200 bg-white p-5 dark:border-[#2D4060] dark:bg-[#1A2840]">
+        <h2 class="mb-1 text-sm font-semibold text-slate-700 dark:text-slate-200">Payout rails <span class="font-normal text-slate-400">(each in its own currency)</span></h2>
+        <p class="mb-3 text-xs text-slate-400">Sent, confirmed, pending and failed per provider, with the float ledger check. A flagged rail needs a human look.</p>
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead><tr class="border-b border-slate-100 text-left text-xs uppercase tracking-wide text-slate-400 dark:border-white/10">
+                    <th class="py-2 pr-3">Rail</th><th class="py-2 pr-3 text-right">Sent</th><th class="py-2 pr-3 text-right">Confirmed</th><th class="py-2 pr-3 text-right">Pending</th><th class="py-2 pr-3 text-right">Failed</th><th class="py-2 pr-3 text-right">Float</th><th class="py-2">Check</th>
+                </tr></thead>
+                <tbody>
+                    @forelse ($report['payout_rails'] as $rail)
+                        <tr class="border-b border-slate-50 dark:border-white/5">
+                            <td class="py-2 pr-3 font-medium capitalize text-slate-900 dark:text-slate-100">{{ $rail['provider'] }} <span class="text-slate-400">{{ $rail['currency'] }}</span></td>
+                            <td class="py-2 pr-3 text-right tabular-nums text-slate-600 dark:text-slate-300">{{ number_format($rail['sent'], 2) }}</td>
+                            <td class="py-2 pr-3 text-right tabular-nums text-slate-600 dark:text-slate-300">{{ number_format($rail['confirmed'], 2) }}</td>
+                            <td class="py-2 pr-3 text-right tabular-nums text-slate-600 dark:text-slate-300">{{ number_format($rail['pending'], 2) }}</td>
+                            <td class="py-2 pr-3 text-right tabular-nums text-slate-600 dark:text-slate-300">{{ number_format($rail['failed'], 2) }}</td>
+                            <td class="py-2 pr-3 text-right tabular-nums text-slate-600 dark:text-slate-300">{{ $rail['float_balance'] === null ? '—' : number_format($rail['float_balance'], 2) }}</td>
+                            <td class="py-2">
+                                @if ($rail['mismatches'])
+                                    <span class="rounded-full bg-red-100 px-2 py-0.5 text-[11px] font-semibold text-red-700 dark:bg-red-950/50 dark:text-red-300">{{ str_replace('_', ' ', implode(', ', $rail['mismatches'])) }}</span>
+                                @else
+                                    <span class="text-xs text-slate-400">ok</span>
+                                @endif
+                            </td>
+                        </tr>
+                    @empty
+                        <tr><td colspan="7" class="py-6 text-center text-sm text-slate-400">No payouts in this period.</td></tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>

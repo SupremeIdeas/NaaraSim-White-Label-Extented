@@ -223,7 +223,7 @@ class WithdrawPageTest extends TestCase
 
         $this->assertDatabaseHas('payout_accounts', [
             'user_id' => $user->id, 'type' => 'paypal', 'provider' => 'paypal',
-            'account_number' => 'jane@example.com', 'is_verified' => true,
+            'lookup_hash' => \App\Models\PayoutAccount::lookupHashFor('jane@example.com'), 'is_verified' => true,
         ]);
     }
 
@@ -246,10 +246,13 @@ class WithdrawPageTest extends TestCase
     {
         $user = $this->verifiedUser();
 
-        $this->actingAs($user)->get('/rewards/withdraw')->assertDontSee('Stripe');
+        // The Rail Guide (step 1) names every rail in its country list for transparency, so assert on
+        // the account-type TAB itself rather than on the word "Stripe" appearing anywhere.
+        $tab = "wire:click=\"\$set('accountType', 'stripe')\"";
+        $this->actingAs($user)->get('/rewards/withdraw')->assertDontSee($tab, false);
 
         config(['services.stripe.secret_key' => 'sk_test_stripe']);
-        $this->actingAs($user)->get('/rewards/withdraw')->assertSee('Stripe');
+        $this->actingAs($user)->get('/rewards/withdraw')->assertSee($tab, false);
     }
 
     public function test_connect_stripe_creates_an_account_and_redirects_to_onboarding(): void
@@ -267,7 +270,7 @@ class WithdrawPageTest extends TestCase
             ->assertRedirect('https://connect.stripe.com/setup/1');
 
         $this->assertDatabaseHas('payout_accounts', [
-            'user_id' => $user->id, 'type' => 'stripe', 'account_number' => 'acct_new', 'is_verified' => false,
+            'user_id' => $user->id, 'type' => 'stripe', 'lookup_hash' => \App\Models\PayoutAccount::lookupHashFor('acct_new'), 'is_verified' => false,
         ]);
     }
 

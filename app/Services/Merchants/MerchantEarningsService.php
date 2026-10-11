@@ -56,12 +56,44 @@ class MerchantEarningsService
         ]);
     }
 
+    /** Debit for a member-to-member transfer (escrow). Throws if it would overdraw. Idempotent on the reference. */
+    public function transferOut(Merchant $merchant, float $amount, string $reference, string $description): MerchantEarning
+    {
+        $amount = round($amount, self::SCALE);
+        if ($amount <= 0) {
+            throw new MerchantException('Transfer amount must be positive.');
+        }
+
+        return $this->apply($merchant, MerchantEarning::TRANSFER_OUT, -$amount, $reference, ['description' => $description]);
+    }
+
     /** Return held earnings after a failed/reversed payout (idempotent). */
     public function release(Merchant $merchant, float $amount, string $reference, ?string $description = null): MerchantEarning
     {
         return $this->apply($merchant, MerchantEarning::RELEASE, round($amount, self::SCALE), $reference, [
             'description' => $description ?? 'Withdrawal returned',
         ]);
+    }
+
+    /**
+     * Reverse an earlier accrual after a refund or a lost chargeback (admin-triggered — disputes are never automated).
+     * Unlike a hold this MAY take the balance negative: the shortfall is a debt that future earnings repay, and while
+     * it exists the balance cannot be withdrawn (a hold would overdraw). Idempotent on the reference.
+     */
+    public function clawback(Merchant $merchant, float $amount, string $reference, string $reason): MerchantEarning
+    {
+        $amount = round($amount, self::SCALE);
+        if ($amount <= 0) {
+            throw new MerchantException('Clawback amount must be positive.');
+        }
+
+        return $this->apply($merchant, MerchantEarning::CLAWBACK, -$amount, $reference, ['description' => 'Adjustment: '.$reason]);
+    }
+
+    /** Money the merchant owes back (0 when the balance is not negative). */
+    public function debt(Merchant $merchant): float
+    {
+        return round(max(0.0, -$this->balance($merchant)), self::SCALE);
     }
 
     /** Available earnings balance (USD). */
@@ -89,7 +121,7 @@ class MerchantEarningsService
                     ->latest('id')->value('balance_after') ?? 0);
                 $after = round($before + $delta, self::SCALE);
 
-                if ($after < 0) {
+                if ($delta < 0 && $after < 0 && $type !== MerchantEarning::CLAWBACK) { // a debit may not overdraw; a credit may still leave a debt partly repaid
                     throw new MerchantException('Amount exceeds the merchant’s available earnings.');
                 }
 

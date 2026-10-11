@@ -100,6 +100,67 @@ class FinancialReconciliation
             'gross_profit' => round((float) ($orders->profit ?? 0), 2),
             'outstanding_usd' => $outstandingUsd,
             'outstanding_ngn' => $outstandingNgn,
+            'payout_rails' => $this->payoutRails($from, $to),
         ];
+    }
+
+    /**
+     * Money OUT, per provider + currency (each in its OWN currency — never summed
+     * across currencies): what was sent, confirmed, is still pending, failed — and,
+     * where float is tracked, whether the float ledger agrees with reality.
+     *
+     * Mismatch flags (an admin must look):
+     *  - `float_ledger_drift`  : the stored balance != the sum of its movements
+     *  - `float_payout_drift`  : payouts debited from float != payouts that actually
+     *                            reached processing/paid (a debit with no live payout,
+     *                            or a live payout that never drew float)
+     *
+     * @return list<array<string, mixed>>
+     */
+    public function payoutRails(Carbon $from, Carbon $to): array
+    {
+        $rows = PayoutRequest::query()->whereBetween('created_at', [$from, $to])
+            ->selectRaw('provider, currency, status, COUNT(*) as n, SUM(amount) as total')
+            ->groupBy('provider', 'currency', 'status')->get()->groupBy(fn ($r) => $r->provider.'|'.$r->currency);
+
+        $rails = [];
+        foreach ($rows as $key => $group) {
+            [$provider, $currency] = explode('|', $key);
+            $sum = fn (array $statuses) => round((float) $group->whereIn('status', $statuses)->sum('total'), 2);
+            $rails[$key] = [
+                'provider' => $provider, 'currency' => $currency,
+                'sent' => $sum([PayoutRequest::PROCESSING, PayoutRequest::PAID, PayoutRequest::FAILED]),
+                'confirmed' => $sum([PayoutRequest::PAID]),
+                'pending' => $sum([PayoutRequest::PENDING, PayoutRequest::APPROVED, PayoutRequest::AWAITING_FUNDS, PayoutRequest::PROCESSING]),
+                'failed' => $sum([PayoutRequest::FAILED, PayoutRequest::REVERSED]),
+                'float_balance' => null, 'float_delta' => null, 'mismatches' => [],
+            ];
+        }
+
+        foreach (\App\Models\PayoutFloatBalance::all() as $float) {
+            $key = $float->provider.'|'.$float->currency;
+            $rails[$key] ??= ['provider' => $float->provider, 'currency' => $float->currency, 'sent' => 0.0, 'confirmed' => 0.0, 'pending' => 0.0, 'failed' => 0.0, 'mismatches' => []];
+
+            $moves = \App\Models\PayoutFloatMovement::where('provider', $float->provider)->where('currency', $float->currency);
+            $ledgerSum = round((float) (clone $moves)->sum('amount'), 4);
+            $rails[$key]['float_balance'] = round((float) $float->balance, 4);
+            $rails[$key]['float_delta'] = round((float) $float->balance - $ledgerSum, 4);
+
+            if (abs($rails[$key]['float_delta']) > 0.0001) {
+                $rails[$key]['mismatches'][] = 'float_ledger_drift';
+            }
+
+            // Every live (processing/paid) payout on this rail must have drawn float exactly once, and nothing else may have.
+            $live = PayoutRequest::where('provider', $float->provider)->where('currency', $float->currency)
+                ->whereIn('status', [PayoutRequest::PROCESSING, PayoutRequest::PAID])->pluck('id');
+            $drawn = (clone $moves)->where('type', 'payout')->whereNotNull('payout_request_id')->pluck('payout_request_id');
+            $reversed = (clone $moves)->where('type', 'payout_reversal')->pluck('payout_request_id');
+            $netDrawn = $drawn->diff($reversed);
+            if ($live->diff($netDrawn)->isNotEmpty() || $netDrawn->diff($live)->isNotEmpty()) {
+                $rails[$key]['mismatches'][] = 'float_payout_drift';
+            }
+        }
+
+        return array_values($rails);
     }
 }

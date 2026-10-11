@@ -122,7 +122,7 @@ class DeveloperPortal extends Component
 
         unset($this->topUp[$clientId]);
         $this->dispatch('nx-toast', variant: 'hero', type: 'success', title: 'API balance topped up',
-            message: '$'.number_format($amount, 2).' added to '.$client->name.'.');
+            message: '$'.number_format($amount, 2).' added to '.$client->name.'.', sound: 'credit_alert.default');
     }
 
     /** Dismiss the one-time token reveal. */

@@ -1,0 +1,82 @@
+<?php
+
+return [
+    'menu' => 'Appearance',
+    'back' => 'Back',
+    'title' => 'Appearance',
+    'subtitle' => 'Pick how Naara looks for you. Only your account changes.',
+    'only_you' => 'Saved to your account only. Nobody else is affected.',
+    'locked' => 'Appearance is managed by your operator.',
+    'saved' => 'Saved to your account',
+    'default' => 'Default',
+    'mode_label' => 'Mode',
+    'mode' => [
+        'light' => 'Light',
+        'dark' => 'Dark',
+        'system' => 'System',
+    ],
+    'skin_label' => 'Skin (:count available)',
+    'accent_label' => 'Accent colour',
+    'custom' => 'Custom',
+    'pick_colour' => 'Pick a colour',
+    'hex_label' => 'Hex colour',
+    'reset_accent' => 'Reset to default',
+    'custom_ok' => 'Readable on buttons and text.',
+    'custom_adjusted' => 'Adjusted slightly so buttons and text stay readable.',
+    'custom_hint' => 'Pick any colour. We keep it readable automatically. Reset returns to :default.',
+    'accent_note' => 'Accent recolours buttons, selections and highlights. Gold (money), status colours and flags never change.',
+    'personalise' => 'Personalise',
+    'reset_all' => 'Reset all personalisation',
+    'preview' => [
+        'verify' => 'Verify',
+        'verify_text' => 'Receive OTPs.',
+        'rent' => 'Rent',
+        'rent_text' => 'Temporary numbers.',
+        'cta' => 'Get my code',
+    ],
+    'dial' => [
+        'round' => 'Corner roundness',
+        'dens' => 'Density',
+        'ts' => 'Text size',
+        'depth' => 'Card depth',
+        'font' => 'Typeface',
+        'motion' => 'Motion',
+    ],
+    'dial_option' => [
+        'round' => [
+            'def' => 'Default',
+            'sharp' => 'Sharp',
+            'round' => 'Round',
+        ],
+        'dens' => [
+            'comf' => 'Comfortable',
+            'compact' => 'Compact',
+        ],
+        'ts' => [
+            'def' => 'Default',
+            's' => 'Small',
+            'l' => 'Large',
+        ],
+        'depth' => [
+            'soft' => 'Soft',
+            'flat' => 'Flat',
+            'deep' => 'Deep',
+        ],
+        'font' => [
+            'naara' => 'Naara',
+            'system' => 'System',
+            'serif' => 'Serif headings',
+            'mono' => 'Mono numbers',
+        ],
+        'motion' => [
+            'full' => 'Full',
+            'reduced' => 'Reduced',
+        ],
+    ],
+    'err' => [
+        'locked' => 'Appearance is managed by your operator.',
+        'slow_down' => 'Too many changes. Please wait a moment.',
+        'invalid' => 'That choice is not available.',
+        'hex' => 'Use a hex colour like #8b5cf6.',
+    ],
+];

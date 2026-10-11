@@ -100,14 +100,23 @@
                     @endforeach
                 </div>
 
-                <form wire:submit="sendReply" class="mt-4 flex items-center gap-2 border-t border-slate-100 pt-3 dark:border-[#2D4060]">
-                    <input type="text" wire:model="reply" placeholder="Type your reply…"
-                           class="flex-1 rounded-full border border-slate-300 bg-white px-4 py-2.5 text-sm dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
-                    <button type="submit" wire:loading.attr="disabled" wire:target="sendReply"
-                            class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary text-white hover:bg-primary-dark disabled:opacity-60">
-                        <x-icon name="send" class="h-5 w-5" />
-                    </button>
-                </form>
+                {{-- Staff reply: Chat Composer Pro (text + emoji; the server's sendReply() takes text only, so nothing else is offered). The
+                     wire:key remounts the composer per ticket so a draft never leaks into another customer's conversation. --}}
+                @if (config('composer.surfaces.staff_reply'))
+                    <div class="mt-4 border-t border-slate-100 pt-3 dark:border-[#2D4060]" wire:key="reply-composer-{{ $selectedId }}"
+                         x-data="{
+                            async send(p) {
+                                await $wire.set('reply', p.text, false);
+                                await $wire.sendReply();
+                                if (($wire.reply || '').trim() !== '') throw Object.assign(new Error(@js(__('composer.notSent'))), { fatal: true });
+                            },
+                         }"
+                         x-on:cc:transmit="$event.detail.wait(send($event.detail.payload))">
+                        <x-composer convo-id="staff-{{ $selectedId }}" :features="['emoji']" :attach-kinds="[]" :max-files="0" placeholder="Type your reply…" />
+                    </div>
+                @else
+                    @include('livewire.admin.partials.legacy-support-reply')
+                @endif
                 <p class="mt-2 text-[11px] text-slate-400">Replies to paying customers are also delivered as voice if ElevenLabs is configured.</p>
             @endif
         </div>

@@ -72,7 +72,7 @@ class TwilioDialerWebhookController extends Controller
             'call_sid' => $request->input('CallSid'),
         ]);
 
-        $callerId = (string) config('services.twilio.caller_id');
+        $callerId = app(\App\Services\Voice\VoiceDialerService::class)->callerIdFor($call);
         $timeLimit = max(60, $call->minutes_authorized * 60);
         $action = route('webhooks.twilio.dial-status').'?call='.$call->id;
 

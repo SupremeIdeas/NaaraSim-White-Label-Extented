@@ -70,7 +70,7 @@
                     <a href="{{ route('blog.show', $post) }}" wire:navigate wire:key="post-{{ $post->id }}"
                        data-post data-accent="{{ $post->accentColor() }}"
                        class="group flex flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white transition hover:shadow-lg dark:border-white/10 dark:bg-slate-900/60">
-                        <div class="aspect-[16/9] overflow-hidden bg-slate-100 dark:bg-white/5">
+                        <div class="aspect-[1200/896] overflow-hidden bg-slate-100 dark:bg-white/5">
                             @if ($post->cover_image_url)
                                 <img src="{{ $post->cover_image_url }}" alt="{{ $post->title }}" loading="lazy" class="h-full w-full object-cover transition group-hover:scale-105">
                             @else

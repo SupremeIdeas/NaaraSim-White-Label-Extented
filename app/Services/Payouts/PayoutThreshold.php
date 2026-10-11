@@ -22,7 +22,7 @@ class PayoutThreshold
 {
     public function __construct(private readonly KycService $kyc) {}
 
-    /** Successful payouts this user has already taken (all earner types). */
+    /** Successful payouts this user has already taken (all earner types). Display only. */
     public function payoutCount(User $user): int
     {
         return PayoutRequest::where('user_id', $user->id)
@@ -30,15 +30,28 @@ class PayoutThreshold
             ->count();
     }
 
+    /**
+     * Payouts the user has COMMITTED to: paid + every one still in flight (pending,
+     * approved, processing, awaiting funds). Counting only `paid` let a user on a
+     * slow rail (up to 14 days) file many requests before any settled and exceed the
+     * free limit. A reversed/failed request frees its slot automatically.
+     */
+    public function committedCount(User $user): int
+    {
+        return PayoutRequest::where('user_id', $user->id)
+            ->whereIn('status', PayoutRequest::COMMITTED)
+            ->count();
+    }
+
     public function remainingFree(User $user): int
     {
-        return max(0, PayoutSettings::freePayoutCount() - $this->payoutCount($user));
+        return max(0, PayoutSettings::freePayoutCount() - $this->committedCount($user));
     }
 
     /** True once the user has spent their free payouts — KYC-L2 now required. */
     public function requiresKyc(User $user): bool
     {
-        return $this->payoutCount($user) >= PayoutSettings::freePayoutCount();
+        return $this->committedCount($user) >= PayoutSettings::freePayoutCount();
     }
 
     /** True when the user may withdraw right now (free allowance left, or verified). */

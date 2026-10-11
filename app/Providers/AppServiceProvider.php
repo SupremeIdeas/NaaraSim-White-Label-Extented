@@ -216,13 +216,21 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton('payout.paypal', PayPalPayoutGateway::class);
         $this->app->singleton('payout.cryptomus', CryptomusPayoutGateway::class);
         $this->app->singleton('payout.stripe', StripePayoutGateway::class);
-        $this->app->singleton(PayoutService::class, fn ($app) => new PayoutService([
+        $this->app->singleton('payout.manual_external', \App\Services\Payouts\ManualExternalPayoutGateway::class);
+        $this->app->singleton(PayoutService::class, fn ($app) => new PayoutService(array_merge([
             $app->make(PaystackPayoutGateway::class),
             $app->make(FlutterwavePayoutGateway::class),
             $app->make(PayPalPayoutGateway::class),      // international → PayPal email
             $app->make(CryptomusPayoutGateway::class),   // crypto payout rail
             $app->make(StripePayoutGateway::class),      // Stripe Connect transfer
-        ]));
+            $app->make(\App\Services\Payouts\ManualExternalPayoutGateway::class), // Plan B: admin pays outside, records proof
+        ], \App\Services\Payouts\Extensions\PayoutRailExtensions::gateways($app)))); // updater-delivered rails (never fatal)
+
+        // Payout Guardian collaborators (Addendum C). Funding (G9) reads the real float (an untracked rail passes);
+        // the ledger verifier reads each bucket's own ledger.
+        $this->app->bind(\App\Services\Payouts\Guardian\FundingChecker::class, \App\Services\Payouts\Guardian\FloatFundingChecker::class);
+        $this->app->bind(\App\Services\Payouts\Guardian\SanctionsScreening::class, \App\Services\Payouts\Guardian\NullSanctionsScreening::class);
+        $this->app->bind(\App\Services\Payouts\Guardian\HoldVerifier::class, \App\Services\Payouts\Guardian\LedgerHoldVerifier::class);
 
         // KYC/identity providers, resolved by name via app("kyc.$provider"), and
         // the service that owns verification state (ROADMAP §Layer 0.3). Manual
@@ -322,6 +330,23 @@ class AppServiceProvider extends ServiceProvider
             'webpush',
             fn ($app) => new WebPushChannel,
         );
+
+        // Funding Radar: global-rail payout events refresh that rail's live numbers within seconds.
+        foreach ([\App\Events\PayoutRequested::class, \App\Events\PayoutSettled::class, PayoutReversed::class] as $event) {
+            Event::listen($event, \App\Listeners\BumpFundingRadar::class);
+        }
+
+        // Every payout event posts balanced double-entry accounting lines (Addendum D-3.11).
+        foreach ([\App\Events\PayoutRequested::class, \App\Events\PayoutSettled::class, PayoutReversed::class] as $event) {
+            Event::listen($event, \App\Listeners\PostPayoutAccounting::class);
+        }
+
+        // Requested → the payee is told, with a "This wasn't me" link (Addendum D-3.5).
+        Event::listen(\App\Events\PayoutRequested::class, \App\Listeners\NotifyPayoutRequested::class);
+
+        // Delivered / returned → the payee is told, in their language (PayoutStatusText).
+        Event::listen(\App\Events\PayoutSettled::class, \App\Listeners\NotifyPayoutStatus::class);
+        Event::listen(PayoutReversed::class, \App\Listeners\NotifyPayoutStatus::class);
 
         // A reversed/failed credit withdrawal returns the held credits
         // (ROADMAP §Layer 1). Registered explicitly so it fires regardless of

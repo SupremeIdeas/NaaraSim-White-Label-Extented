@@ -21,4 +21,12 @@ return [
     'global_kicker' => 'One plan, everywhere',
     'global_title' => 'Global eSIM',
     'global_body' => 'Stay connected across 190+ countries on a single eSIM.',
+
+    // plan detail spec list (Prompt 20 §4.5)
+    'spec_data' => 'Data',
+    'spec_validity' => 'Validity',
+    'spec_includes' => 'Includes',
+    'spec_coverage' => 'Coverage',
+    'estimator_title' => 'Not sure how much data?',
+    'estimator_cta' => 'Try the data estimator',
 ];

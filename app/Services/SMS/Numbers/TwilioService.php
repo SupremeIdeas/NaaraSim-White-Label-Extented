@@ -163,23 +163,33 @@ class TwilioService implements NumberProviderInterface, VoiceProviderInterface
     {
         $fallback = (float) config('services.twilio.default_voice_cost', 0.02);
         if (! $this->configured()) {
-            return $fallback;
+            return $fallback; // dev/sandbox with no Twilio keys only
         }
+        // Worldwide dialling: a flat default would sell Somalia/Cuba/satellite calls below cost, so a configured account that cannot
+        // return a live per-destination price refuses to quote rather than guessing (money-safety rule 3: live cost before quoting).
+        $unavailable = new \App\Exceptions\SmsException('We can’t price calls to this destination right now. You were not charged — please try again shortly.');
         try {
             $res = Http::withBasicAuth(
                 (string) config('services.twilio.account_sid'),
                 (string) config('services.twilio.auth_token'),
             )->connectTimeout(3)->timeout(20)->get('https://pricing.twilio.com/v2/Voice/Numbers/'.$destination);
-
-            $prices = collect($res->json('outbound_call_prices', []))
-                ->pluck('current_price')
-                ->filter(fn ($p) => $p !== null)
-                ->map(fn ($p) => (float) $p);
-
-            return $prices->isNotEmpty() ? (float) $prices->max() : $fallback;
         } catch (\Throwable) {
-            return $fallback;
+            throw $unavailable;
         }
+        if (! $res->successful()) {
+            throw $unavailable;
+        }
+
+        $prices = collect($res->json('outbound_call_prices', []))
+            ->pluck('current_price')
+            ->filter(fn ($p) => $p !== null && (float) $p > 0)
+            ->map(fn ($p) => (float) $p);
+
+        if ($prices->isEmpty()) {
+            throw $unavailable;
+        }
+
+        return (float) $prices->max();
     }
 
     private function base64url(string $data): string

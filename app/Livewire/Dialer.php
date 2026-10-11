@@ -71,7 +71,14 @@ class Dialer extends Component
             return;
         }
 
-        $quote = $dialer->quote(Auth::user(), $this->destination);
+        try {
+            $quote = $dialer->quote(Auth::user(), $this->destination);
+        } catch (SmsException $e) {
+            $this->error = $e->getMessage();
+            $this->quoted = false;
+
+            return;
+        }
         $this->ratePerMin = $quote['retail_per_min'];
         $this->fundedMinutes = $quote['funded_minutes'];
         $this->quoted = true;

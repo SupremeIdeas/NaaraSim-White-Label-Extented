@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Http;
  * only provisional — the transfer.success / transfer.failed webhook is the
  * source of truth (verified with the same HMAC-SHA512 as the collection side).
  */
-class PaystackPayoutGateway implements PayoutGatewayInterface
+class PaystackPayoutGateway implements PayoutGatewayInterface, ReportsBalance, SupportsStatusLookup, DeclaresCapabilities
 {
     public function name(): string
     {
@@ -32,7 +32,7 @@ class PaystackPayoutGateway implements PayoutGatewayInterface
 
     public function createRecipient(PayoutAccount $account): string
     {
-        $response = Http::withToken(config('services.paystack.secret_key'))
+        $response = Http::connectTimeout(\App\Support\PayoutSettings::httpConnectTimeout())->timeout(\App\Support\PayoutSettings::httpTimeout())->withToken(config('services.paystack.secret_key'))
             ->acceptJson()
             ->post($this->base().'/transferrecipient', [
                 'type' => $account->type === 'mobile_money' ? 'mobile_money' : 'nuban',
@@ -47,13 +47,13 @@ class PaystackPayoutGateway implements PayoutGatewayInterface
 
     public function sendTransfer(PayoutRequest $request, PayoutAccount $account): PayoutTransferResult
     {
-        $response = Http::withToken(config('services.paystack.secret_key'))
+        $response = Http::connectTimeout(\App\Support\PayoutSettings::httpConnectTimeout())->timeout(\App\Support\PayoutSettings::httpTimeout())->withToken(config('services.paystack.secret_key'))
             ->acceptJson()
             ->post($this->base().'/transfer', [
                 'source' => 'balance',
                 'amount' => (int) round((float) $request->amount * 100), // kobo
                 'recipient' => $account->provider_recipient_ref,
-                'reference' => $request->reference,
+                'reference' => $request->wireReference(),
                 'reason' => 'NaaraSim payout',
             ])->json();
 
@@ -64,14 +64,78 @@ class PaystackPayoutGateway implements PayoutGatewayInterface
         $status = (string) data_get($response, 'data.status', 'pending');
         $ref = (string) data_get($response, 'data.transfer_code', '');
 
+        // Paystack docs (Managing Transfers): with transfer OTP enabled the response is `otp` and the transfer
+        // WAITS for a Finalize Transfer call. It is NOT failed (so we must not refund it — someone could still
+        // finalize it and pay), and it will not complete by itself: tell the admin once, loudly.
+        if ($status === 'otp') {
+            \App\Jobs\AlertAdminJob::dispatch(
+                code: 'paystack_transfer_needs_otp',
+                message: "Paystack is holding transfer {$request->wireReference()} for an OTP and will not send it until it is finalized. Automated payouts need transfer OTP switched off in your Paystack dashboard settings; finalize or cancel this one there. Do not refund it blindly.",
+                context: ['payout_id' => $request->id, 'reference' => $request->wireReference()],
+            );
+        }
+
         return new PayoutTransferResult(
             status: match ($status) {
                 'success' => 'paid',
-                'failed', 'abandoned', 'reversed' => 'failed',
-                default => 'processing', // pending / otp — webhook confirms
+                'failed', 'abandoned', 'reversed', 'rejected', 'blocked' => 'failed',
+                default => 'processing', // pending / otp / received — the webhook (or a verify lookup) confirms
             },
             providerRef: $ref !== '' ? $ref : null,
         );
+    }
+
+    /**
+     * Paystack "Verify Transfer": GET /transfer/verify/:reference — keyed by the same
+     * reference we sent (path and status enum confirmed from Paystack's OpenAPI spec:
+     * pending, success, failed, otp, abandoned, reversed, blocked, rejected, received;
+     * see docs/payouts/PROVIDER-RESEARCH.md). The response BODY shape is still to be
+     * confirmed once on the sandbox, which is why a single "not found" never reverses.
+     */
+    public function lookupTransfer(PayoutRequest $request): LookupResult
+    {
+        $response = Http::connectTimeout(\App\Support\PayoutSettings::httpConnectTimeout())->timeout(\App\Support\PayoutSettings::httpTimeout())->withToken(config('services.paystack.secret_key'))
+            ->acceptJson()
+            ->get($this->base().'/transfer/verify/'.rawurlencode($request->wireReference()));
+
+        if ($response->status() === 404) {
+            return LookupResult::notFound();
+        }
+        $response->throw(); // 5xx / auth errors are NOT an answer — the reconciler retries later
+
+        $json = $response->json();
+        if (data_get($json, 'status') !== true) {
+            return LookupResult::notFound();
+        }
+
+        $ref = (string) data_get($json, 'data.transfer_code', '') ?: null;
+
+        return match ((string) data_get($json, 'data.status', '')) {
+            'success' => LookupResult::found('paid', $ref),
+            'failed', 'abandoned', 'reversed', 'rejected', 'blocked' => LookupResult::found('failed', $ref, (string) data_get($json, 'data.reason', 'failed')),
+            default => LookupResult::found('processing', $ref), // pending / otp / received
+        };
+    }
+
+    /**
+     * The platform's own Paystack balance per currency: `GET /balance` returns an array of
+     * {currency, balance} in the currency's subunit (kobo/pesewas) per Paystack's docs, so
+     * ÷100. One sandbox call is still owed before enabling auto_sync (GO-LIVE-CHECKLIST);
+     * a non-answer returns [] and syncs nothing.
+     */
+    public function balances(): array
+    {
+        $response = Http::connectTimeout(\App\Support\PayoutSettings::httpConnectTimeout())->timeout(\App\Support\PayoutSettings::httpTimeout())->withToken(config('services.paystack.secret_key'))->acceptJson()->get($this->base().'/balance');
+        $response->throw();
+
+        $out = [];
+        foreach ((array) data_get($response->json(), 'data', []) as $row) {
+            if (isset($row['currency'], $row['balance']) && is_numeric($row['balance'])) {
+                $out[strtoupper((string) $row['currency'])] = round(((float) $row['balance']) / 100, 4);
+            }
+        }
+
+        return $out;
     }
 
     public function verifyWebhook(Request $request): bool
@@ -113,5 +177,10 @@ class PaystackPayoutGateway implements PayoutGatewayInterface
             },
             providerRef: (string) data_get($data, 'transfer_code', '') ?: null,
         );
+    }
+
+    public function capabilities(): array
+    {
+        return ['confirms_synchronously' => false, 'webhook' => true, 'lookup' => true, 'cancel' => false];
     }
 }

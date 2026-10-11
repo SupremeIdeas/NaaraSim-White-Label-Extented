@@ -3,6 +3,7 @@
 namespace App\Services\Pricing;
 
 use App\Models\Setting;
+use App\Services\Payouts\PayoutException;
 use Illuminate\Support\Facades\Cache;
 
 /**
@@ -127,6 +128,57 @@ class CurrencyService
         $rates = $this->liveRates();
 
         return (float) ($rates[$currency] ?? $fallback);
+    }
+
+
+    /**
+     * USD→currency rate for MONEY MOVEMENT (payout quotes). Unlike rate() this
+     * NEVER falls back to a hard-coded table or "treat unknown as USD": a payout
+     * priced off a stale/made-up rate loses money or short-pays a user. NGN
+     * reuses the single authoritative rate (getUsdToNgn); USD/USDT are 1:1; any
+     * other currency needs a live rate from the feed, else the payout is refused.
+     *
+     * @throws PayoutException when no trustworthy rate exists
+     */
+    public function usdTo(string $currency): float
+    {
+        $currency = strtoupper(trim($currency));
+        if ($currency === 'USD' || $currency === 'USDT') {
+            return 1.0;
+        }
+        if ($currency === 'NGN') {
+            $ngn = $this->getUsdToNgn();
+            if ($ngn > 0) {
+                return $ngn;
+            }
+        } else {
+            $rates = Cache::remember('fx.rates.usd.strict', 3600, fn () => $this->fetchFeedRates());
+            $rate = is_array($rates) ? (float) ($rates[$currency] ?? 0) : 0.0;
+            if ($rate > 0) {
+                return $rate;
+            }
+        }
+
+        throw new PayoutException("Withdrawals to {$currency} aren't available yet.");
+    }
+
+    /** Convert a USD amount into a payout currency at the strict rate (2 dp — the engine's money precision). */
+    public function usdToLocal(float $usd, string $currency): float
+    {
+        return round($usd * $this->usdTo($currency), 2);
+    }
+
+    /** All USD→code rates from the feed, or null when it is unreachable / malformed. */
+    private function fetchFeedRates(): ?array
+    {
+        try {
+            $res = \Illuminate\Support\Facades\Http::timeout(10)->get('https://open.er-api.com/v6/latest/USD');
+            $rates = $res->json('rates');
+
+            return (is_array($rates) && $res->json('result') === 'success') ? $rates : null;
+        } catch (\Throwable $e) {
+            return null;
+        }
     }
 
     /** All USD→code rates for the supported set (for a rate table / switcher). */

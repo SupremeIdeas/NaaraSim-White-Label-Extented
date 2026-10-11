@@ -1,0 +1,25 @@
+/* GENERATED from config/appearance.php by scripts/nx_accents.py. Do not edit by hand.
+ Accents recolour ONLY the interactive tokens; non-default accents also drive the existing `primary` utilities so un-migrated
+ views follow the member's accent. They never touch gold (money), status colours, the logo or flags. */
+[data-nx-accent=teal]{--nx-teal:16 181 174;--nx-cta-a:15 165 157;--nx-cta-b:6 128 124;--nx-teal-ink:61 219 208;--nx-acc-a:15 169 164;--nx-acc-b:6 118 128;--nx-acc-c:4 84 99}
+html:not(.dark)[data-nx-accent=teal],html:not(.dark) [data-nx-accent=teal]{--nx-teal:10 155 148;--nx-cta-a:12 158 150;--nx-cta-b:5 118 114;--nx-teal-ink:0 123 117}
+[data-nx-accent=ocean]{--nx-teal:40 150 235;--nx-cta-a:36 132 220;--nx-cta-b:22 96 184;--nx-teal-ink:125 194 255;--nx-acc-a:38 140 226;--nx-acc-b:22 96 176;--nx-acc-c:14 64 128}
+html:not(.dark)[data-nx-accent=ocean],html:not(.dark) [data-nx-accent=ocean]{--nx-teal-ink:16 96 176;--nx-cta-a:30 120 208;--nx-cta-b:18 88 170}
+html[data-nx-accent=ocean]{--brand-primary:22 96 184;--brand-primary-dark:14 64 128}
+html:not(.dark)[data-nx-accent=ocean]{--brand-primary:18 88 170;--brand-primary-dark:14 64 128}
+[data-nx-accent=violet]{--nx-teal:140 110 240;--nx-cta-a:134 104 232;--nx-cta-b:98 68 200;--nx-teal-ink:190 170 255;--nx-acc-a:128 98 232;--nx-acc-b:92 64 190;--nx-acc-c:58 40 130}
+html:not(.dark)[data-nx-accent=violet],html:not(.dark) [data-nx-accent=violet]{--nx-teal-ink:94 62 192;--nx-cta-a:112 80 214;--nx-cta-b:84 56 178}
+html[data-nx-accent=violet]{--brand-primary:98 68 200;--brand-primary-dark:58 40 130}
+html:not(.dark)[data-nx-accent=violet]{--brand-primary:84 56 178;--brand-primary-dark:58 40 130}
+[data-nx-accent=emerald]{--nx-teal:34 197 94;--nx-cta-a:20 150 76;--nx-cta-b:10 110 54;--nx-teal-ink:110 231 160;--nx-acc-a:24 150 80;--nx-acc-b:14 110 60;--nx-acc-c:8 76 42}
+html:not(.dark)[data-nx-accent=emerald],html:not(.dark) [data-nx-accent=emerald]{--nx-teal-ink:10 112 55;--nx-cta-a:18 140 70;--nx-cta-b:10 106 52}
+html[data-nx-accent=emerald]{--brand-primary:10 110 54;--brand-primary-dark:8 76 42}
+html:not(.dark)[data-nx-accent=emerald]{--brand-primary:10 106 52;--brand-primary-dark:8 76 42}
+[data-nx-accent=rose]{--nx-teal:240 84 120;--nx-cta-a:226 70 108;--nx-cta-b:182 38 76;--nx-teal-ink:255 150 176;--nx-acc-a:220 64 102;--nx-acc-b:170 36 72;--nx-acc-c:116 24 52}
+html:not(.dark)[data-nx-accent=rose],html:not(.dark) [data-nx-accent=rose]{--nx-teal-ink:178 30 68;--nx-cta-a:206 54 90;--nx-cta-b:166 34 70}
+html[data-nx-accent=rose]{--brand-primary:182 38 76;--brand-primary-dark:116 24 52}
+html:not(.dark)[data-nx-accent=rose]{--brand-primary:166 34 70;--brand-primary-dark:116 24 52}
+[data-nx-accent=graphite]{--nx-teal:130 150 170;--nx-cta-a:104 124 146;--nx-cta-b:66 84 104;--nx-teal-ink:190 206 220;--nx-acc-a:96 116 138;--nx-acc-b:62 80 100;--nx-acc-c:40 54 68}
+html:not(.dark)[data-nx-accent=graphite],html:not(.dark) [data-nx-accent=graphite]{--nx-teal-ink:50 72 90;--nx-cta-a:84 104 126;--nx-cta-b:56 74 94}
+html[data-nx-accent=graphite]{--brand-primary:66 84 104;--brand-primary-dark:40 54 68}
+html:not(.dark)[data-nx-accent=graphite]{--brand-primary:56 74 94;--brand-primary-dark:40 54 68}

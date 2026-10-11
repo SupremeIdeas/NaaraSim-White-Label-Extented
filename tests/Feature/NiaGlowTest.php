@@ -75,12 +75,21 @@ class NiaGlowTest extends TestCase
         $this->assertStringContainsString("A.data('niaChatLayout'", $js);
     }
 
-    public function test_the_input_has_appearance_none_and_a_subtle_border(): void
+    public function test_the_input_has_appearance_none_and_no_outline_or_focus_ring(): void
     {
         $html = Livewire::actingAs(User::factory()->create())->test(SupportChat::class)->html();
 
-        $this->assertStringContainsString('appearance-none', $html);
-        $this->assertStringContainsString('border-slate-200/70', $html);
+        // The composer is Chat Composer Pro, rendered `bare`: the glow is the only focus treatment (no extra border/ring).
+        $this->assertStringContainsString('<naara-composer', $html);
+        $this->assertStringContainsString('&quot;bare&quot;:true', $html);
+        $this->assertStringContainsString('nia-glow', $html);
+        $this->assertStringNotContainsString('border-slate-200/70', $html);
+        $this->assertStringNotContainsString('focus-within:ring', $html);
+
+        $css = file_get_contents(resource_path('css/composer.css'));
+        $this->assertStringContainsString('appearance: none', $css);
+        $this->assertMatchesRegularExpression('/\.cc-text:focus\s*\{[^}]*outline:\s*none/', $css);
+        $this->assertMatchesRegularExpression('/\.cc-bare \.cc-box:focus-within[^{]*\{[^}]*box-shadow:\s*none/', $css);
     }
 
     public function test_the_brand_glow_colours_are_defined(): void

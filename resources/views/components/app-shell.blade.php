@@ -12,6 +12,11 @@
     $allItems = array_merge($primary, $more);
     // Pad primary to 4 so the bottom bar stays balanced around the centre button.
     $slots = array_pad(array_slice($primary, 0, 4), 4, null);
+    // Only 4 primary items fit the bottom bar. Anything beyond that must not silently disappear on phones (the More sheet used to receive
+    // only `$more`, so a 5th primary item — the admin's Security — was reachable on desktop and nowhere on mobile): the overflow leads the
+    // More sheet instead.
+    $overflow = array_slice($primary, 4);
+    $moreForSheet = $overflow ? array_merge($overflow, $more) : $more;
     // Header brand: the umbrella Naara family mark everywhere, EXCEPT a product's
     // own surface (eSIM/numbers → NaaraSim, gifts → Naara Gift), so each stands
     // out (owner request). Chrome, not content — see App\Support\BrandContext.
@@ -47,13 +52,22 @@
     <aside class="hidden lg:fixed lg:inset-y-0 lg:left-0 lg:z-40 lg:flex lg:w-72 lg:flex-col lg:p-3 lg:transition-[width] lg:duration-300"
            :class="navCollapsed ? 'lg:!w-24' : ''">
         <div @class([
-                'flex h-full flex-col rounded-3xl border border-slate-200/70 bg-gradient-to-b from-primary/5 via-slate-50 to-slate-100 shadow-sm dark:border-white/10',
+                'nx-sidebar flex h-full flex-col rounded-3xl border border-slate-200/70 bg-gradient-to-b from-primary/5 via-slate-50 to-slate-100 shadow-sm dark:border-white/10',
                 'dark:from-[#16233d] dark:via-[#141f36] dark:to-[#111a2e]' => \App\Support\ThemePreset::slug() === \App\Support\ThemePreset::DEFAULT_SLUG,
                 'dark:bg-none dark:bg-navy' => \App\Support\ThemePreset::slug() !== \App\Support\ThemePreset::DEFAULT_SLUG,
              ])>
-            <div class="flex items-center py-5" :class="navCollapsed ? 'justify-center px-3' : 'justify-between px-5'">
+            <div class="flex items-center py-5" :class="navCollapsed ? 'flex-col justify-center gap-3 px-3' : 'justify-between px-5'">
                 <a href="{{ $brandRoute ?? '#' }}" wire:navigate class="flex items-center" x-show="!navCollapsed">
                     <x-brand-logo :variant="$headerBrand['variant']" :label="$headerBrand['label']" size="lg" :fallback-icon="$brandIcon" />
+                </a>
+                {{-- Collapsed rail: the wide wordmark can't fit, so the platform favicon (Admin → Branding, else the shipped mark) stands in
+                     for it as a tidy square tile above the expand control. --}}
+                <a href="{{ $brandRoute ?? '#' }}" wire:navigate x-show="navCollapsed" x-cloak class="nx-rail-mark" aria-label="{{ \App\Support\BrandSettings::name() }}">
+                    @if ($__favicon = \App\Support\BrandSettings::favicon())
+                        <img src="{{ $__favicon }}" alt="" width="32" height="32" loading="eager" decoding="async">
+                    @else
+                        <x-icon name="{{ $brandIcon }}" class="h-6 w-6 text-primary" />
+                    @endif
                 </a>
                 <button type="button" @click="navCollapsed = !navCollapsed"
                         :aria-label="navCollapsed ? 'Expand menu' : 'Collapse menu'" :aria-expanded="(!navCollapsed).toString()"
@@ -170,13 +184,15 @@
          mutual-exclusivity gate stays right here, unchanged, so no style
          family can ever show alongside the Numbers nav below. --}}
     @unless ($inNumbers)
-        @include('components.theme-sections.bottom-nav.'.\App\Support\ThemePreset::sectionStyle('bottom_nav'))
+        {{-- A signed-in member always runs under a skin (Naara Surface by default), and the skin owns the nav's look (tab states, centre
+             button = the skin's own primary-button style) so it stays uniform with the page. The legacy theme nav families stay for guests. --}}
+        @include('components.theme-sections.bottom-nav.'.(auth()->check() ? 'default' : \App\Support\ThemePreset::sectionStyle('bottom_nav')))
     @endunless
 
     {{-- Numbers section nav (Numbers overhaul §2) — shown ONLY on /numbers/*,
          mutually exclusive with the global nav above via the same $inNumbers. --}}
     @if ($inNumbers)
-    <nav class="fixed inset-x-3 bottom-3 z-40 rounded-[1.75rem] border border-slate-200/70 bg-white shadow-[0_10px_40px_rgba(13,27,42,0.16)] lg:hidden dark:border-white/10 dark:bg-navy dark:shadow-[0_10px_40px_rgba(0,0,0,0.5)]"
+    <nav class="nx-bottomnav ns-ring fixed inset-x-3 bottom-3 z-40 rounded-[1.75rem] border border-slate-200/70 bg-white shadow-[0_10px_40px_rgba(13,27,42,0.16)] lg:hidden dark:border-white/10 dark:bg-navy dark:shadow-[0_10px_40px_rgba(0,0,0,0.5)]"
          style="padding-bottom: env(safe-area-inset-bottom);">
         <div class="mx-auto grid max-w-md grid-cols-5 items-center px-1 pt-1.5">
             @foreach ([$numbersNav[0], $numbersNav[1]] as $item)
@@ -186,7 +202,7 @@
                  everything you own). Elevated like the global "More" button. --}}
             <div class="flex justify-center">
                 <a href="{{ route('numbers.lines') }}" wire:navigate aria-label="My Lines"
-                   class="-mt-6 flex h-14 w-14 flex-col items-center justify-center rounded-full text-white shadow-lg shadow-primary/30 ring-4 ring-[#F8F9FA] transition active:scale-95 dark:ring-navy {{ request()->routeIs('numbers.lines') ? 'bg-gradient-to-br from-accent to-primary' : 'bg-gradient-to-br from-primary to-primary-dark' }}">
+                   class="nx-bn-more ns-cta {{ request()->routeIs('numbers.lines') ? 'ns-cta--gold' : '' }} -mt-6 flex h-14 w-14 flex-col items-center justify-center rounded-full text-white ring-4 ring-[#F8F9FA] transition active:scale-95 dark:ring-navy">
                     <x-icon name="signal" class="h-6 w-6" />
                 </a>
             </div>
@@ -197,82 +213,9 @@
     </nav>
     @endif
 
-    {{-- ============ MOBILE: "More" sheet ============ --}}
-    <div x-show="moreOpen" x-cloak class="fixed inset-0 z-50 lg:hidden" style="display:none;">
-        {{-- HOTFIX §6: no backdrop-blur here — animating blur alongside the
-             sheet's slide-up transform causes GPU-compositing artifacts on many
-             Android builds. The dim alone is enough; the sheet is already opaque. --}}
-        <div x-show="moreOpen" x-transition.opacity @click="moreOpen = false" class="absolute inset-0 bg-black/40"></div>
-        <div x-show="moreOpen"
-             x-transition:enter="transition ease-out duration-200" x-transition:enter-start="translate-y-full" x-transition:enter-end="translate-y-0"
-             x-transition:leave="transition ease-in duration-150" x-transition:leave-start="translate-y-0" x-transition:leave-end="translate-y-full"
-             class="absolute inset-x-0 bottom-0 max-h-[85dvh] overflow-y-auto overscroll-contain rounded-t-3xl border-t border-slate-200/70 bg-white p-5 pb-9 shadow-2xl dark:border-white/10 dark:bg-navy"
-             style="padding-bottom: calc(env(safe-area-inset-bottom) + 1.5rem); -webkit-overflow-scrolling: touch;">
-            <div class="mx-auto mb-4 h-1.5 w-10 rounded-full bg-slate-300 dark:bg-white/20"></div>
-            <div class="mb-4 flex items-center justify-between">
-                <h2 class="text-sm font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">More</h2>
-                <div class="flex items-center gap-1">
-                    {{-- Grid / list display toggle, persisted per-user (BUILD-3 §6.7). --}}
-                    <div class="mr-1 flex items-center gap-0.5 rounded-lg bg-slate-100 p-0.5 dark:bg-white/5">
-                        <button type="button" @click="moreLayout = 'grid'" aria-label="Grid view"
-                                :class="moreLayout === 'grid' ? 'bg-white text-primary shadow-sm dark:bg-white/15' : 'text-slate-400'"
-                                class="rounded-md p-1.5 transition"><x-icon name="grid" class="h-4 w-4" /></button>
-                        <button type="button" @click="moreLayout = 'list'" aria-label="List view"
-                                :class="moreLayout === 'list' ? 'bg-white text-primary shadow-sm dark:bg-white/15' : 'text-slate-400'"
-                                class="rounded-md p-1.5 transition"><x-icon name="list" class="h-4 w-4" /></button>
-                    </div>
-                    <button type="button" @click="moreOpen = false" class="rounded-lg p-1 text-slate-400 hover:bg-slate-100 dark:hover:bg-white/10"><x-icon name="x" class="h-5 w-5" /></button>
-                </div>
-            </div>
-
-            @if ($promo)
-                @php($menuBanners = \App\Support\Banners::for('menu_sheet'))
-                @if ($menuBanners->isNotEmpty())
-                    <x-banner-zone placement="menu_sheet" class="mb-4" />
-                @else
-                    {{-- Default promo (Module 32 pick — ayman-ashine floating-light
-                         card, rebuilt on brand): shown until the admin publishes a
-                         banner for this zone. --}}
-                    <div class="nx-float-card mb-4" aria-hidden="true">
-                        <span class="nx-float-card__light"></span>
-                        <span class="nx-float-card__ring"></span>
-                        <div class="relative">
-                            <p class="text-[11px] font-semibold uppercase tracking-[0.2em] text-accent">{{ \App\Support\BrandSettings::name() }}</p>
-                            <p class="mt-1.5 font-display text-lg font-bold leading-snug text-white">Stay Connected. No&nbsp;Borders. No&nbsp;Swaps.</p>
-                            <p class="mt-1 text-xs text-slate-300">eSIM data + numbers for 190+ countries, in one wallet.</p>
-                        </div>
-                    </div>
-                @endif
-            @endif
-
-            {{-- Grid (4-col cards) or list (stacked rows), per the §6.7 toggle.
-                 SOLID cards in both themes (owner request: no glass/blur on the
-                 More sheet). The active item keeps its brand-tinted highlight;
-                 icons render white on dark for contrast against the solid card. --}}
-            <div :class="moreLayout === 'list' ? 'flex flex-col gap-2' : 'grid grid-cols-4 gap-3'">
-                @foreach ($more as $item)
-                    @continue(! empty($item['heading'])) {{-- headings are desktop-sidebar only --}}
-                    <a href="{{ route($item['route']) }}" wire:navigate @click="moreOpen = false"
-                       :class="moreLayout === 'list' ? 'flex-row items-center gap-3 p-3 text-left' : 'flex-col items-center gap-1.5 p-3 text-center'"
-                       @class([
-                           'flex rounded-2xl border transition',
-                           'border-primary/30 bg-primary/10 dark:border-primary/40 dark:bg-primary/15' => $isActive($item['route']),
-                           'border-slate-200 bg-slate-50 hover:bg-slate-100 dark:border-[var(--brand-card-border-dark)] dark:bg-[var(--brand-card-inner-dark)] dark:hover:bg-[var(--brand-card-hover-dark)]' => ! $isActive($item['route']),
-                       ])>
-                        {{-- Icon: brand teal in light mode; white on dark for contrast. --}}
-                        <x-icon :name="$item['icon']" class="h-6 w-6 shrink-0 text-primary dark:text-white" />
-                        <span class="font-medium leading-tight text-slate-600 dark:text-slate-300"
-                              :class="moreLayout === 'list' ? 'text-sm' : 'text-[11px]'">{{ $item['label'] }}</span>
-                    </a>
-                @endforeach
-            </div>
-
-            <form method="POST" action="{{ route('logout') }}" class="mt-5">
-                @csrf
-                <button type="submit" class="flex w-full items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-slate-50 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-100 dark:border-white/10 dark:bg-white/5 dark:text-slate-300 dark:hover:bg-white/10">
-                    <x-icon name="log-out" class="h-5 w-5" /> Sign out
-                </button>
-            </form>
-        </div>
-    </div>
+    {{-- ============ MOBILE: "More" sheet ============
+         Extracted to a shared component (owner request) so the Help Center's
+         own header can open the exact same sheet, the same way the Numbers
+         section header does — see resources/views/components/more-sheet.blade.php. --}}
+    <x-more-sheet :more="$moreForSheet" :promo="$promo" />
 </div>

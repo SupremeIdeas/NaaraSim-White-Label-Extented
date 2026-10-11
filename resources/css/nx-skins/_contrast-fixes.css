@@ -1,0 +1,140 @@
+/* HAND-WRITTEN (not generated). Where a wireframe skin fails the contrast contract (Prompt 20 §42) the fix lives here, after the
+   generated skins, so regenerating them never loses it. Every entry is recorded in docs/appearance/CONTRAST-DEVIATIONS.md. */
+
+/* Handset: the wireframe inverts the primary card ("dark pixels on the LCD") but computes its fill from --nx-text on the same
+   element that re-points --nx-text at the canvas, so fill and label end up the same colour (1.0:1, an invisible card). The fill
+   now reads a separate ink token that the inversion does not touch. */
+html[data-nx-skin=handset], [data-nx-preview=handset] { --nx-hs-ink: 22 34 16; }
+:where(html).dark[data-nx-skin=handset], :where(html).dark [data-nx-preview=handset] { --nx-hs-ink: 160 230 120; }
+html[data-nx-skin=handset] .ns-card.ns-card--primary:where(:not([data-nx-preview] *)),
+[data-nx-preview=handset] .ns-card.ns-card--primary { background: rgb(var(--nx-hs-ink)); }
+
+/* Boarding Pass: in light mode the primary card is a dark accent gradient but its labels kept the dark light-mode text colour
+   (1.75:1). It now gets the same on-fill token set every other filled card uses. */
+html[data-nx-skin=boarding] .ns-card.ns-card--primary:where(:not([data-nx-preview] *)),
+[data-nx-preview=boarding] .ns-card.ns-card--primary {
+    --nx-text: 255 255 255; --nx-text-2: 235 247 250; --nx-text-3: 222 241 245; --nx-teal-ink: 255 255 255;
+    --nx-gold-ink: 255 232 160; --nx-line-strong: 255 255 255; --nx-bad: 255 200 200; --nx-ok: 170 245 210; --nx-warn: 255 224 140;
+    color: rgb(var(--nx-text));
+}
+
+/* Glass: the colour washes behind the frosted cards pushed secondary text under 4.5:1 (dark: card copy 4.1:1; light: the Back link
+   over the top-left accent wash, 3.9:1 for rose/violet/ocean). Dark secondary text is lifted, and the light wash is thinned. */
+:where(html).dark[data-nx-skin=glass], :where(html).dark [data-nx-preview=glass] { --nx-text-2: 198 216 228; --nx-text-3: 168 192 207; }
+html:where(:not(.dark))[data-nx-skin=glass] .ns-app:where(:not([data-nx-preview] *)),
+:where(html):not(.dark) [data-nx-preview=glass] .ns-app {
+    background: radial-gradient(60% 38% at 12% 0, rgb(var(--nx-acc-a) / .18), transparent 62%), radial-gradient(50% 34% at 100% 18%, rgb(var(--nx-acc-b) / .16), transparent 62%),
+        radial-gradient(70% 40% at 40% 100%, rgb(var(--nx-gold) / .10), transparent 62%), linear-gradient(rgb(var(--nx-canvas-2)), rgb(var(--nx-canvas)));
+}
+
+html:where(:not(.dark))[data-nx-skin=glass] body[class] {
+    background: radial-gradient(60% 38% at 12% 0, rgb(var(--nx-acc-a) / .18), transparent 62%), radial-gradient(50% 34% at 100% 18%, rgb(var(--nx-acc-b) / .16), transparent 62%),
+        radial-gradient(70% 40% at 40% 100%, rgb(var(--nx-gold) / .10), transparent 62%), linear-gradient(rgb(var(--nx-canvas-2)), rgb(var(--nx-canvas)));
+    background-attachment: fixed;
+}
+
+/* Pills (found on the real pages, S3): the neutral/"best" pill in light mode (teal ink on a teal tint) measured 3.4 to 4.1:1, so it
+   uses the CTA's darker end with a lighter tint. Specificity matches the base rule so any skin that restyles the pill still wins. */
+:where(html):not(.dark) .ns-pill--best { color: rgb(var(--nx-cta-b)); color: color-mix(in srgb, rgb(var(--nx-cta-b)) 70%, rgb(var(--nx-text))); background: rgb(var(--nx-teal) / .12); }
+/* Pills on a saturated filled card (the Verify card): the card colour varies by accent, so the pill carries its own dark scrim and
+   white text, like the tile on the same card (3.6:1 before). */
+.ns-card--primary .ns-pill { background: rgb(2 20 32 / .6); color: #fff; box-shadow: inset 0 0 0 1px rgb(255 255 255 / .35); }
+
+/* Vault (and any skin that restyles `.ns-pill` wholesale): the money-gold "Popular" pill must keep its gold fill and dark label. The
+   wireframe's Vault pill rule recoloured the label to secondary text, leaving it 1.07:1 on the gold. */
+html .ns-pill.ns-pill--gold { background: rgb(var(--nx-gold)); color: rgb(var(--nx-on-gold)); box-shadow: none; }
+
+/* Neon Lagos: the wireframe restyles every CTA with the teal gradient, so the gold (money) CTA rendered teal with a dark gold label
+   (3.1:1). The gold CTA stays gold; only its glow comes from the skin. */
+html[data-nx-skin=neon] .ns-cta.ns-cta--gold:where(:not([data-nx-preview] *)),
+[data-nx-preview=neon] .ns-cta.ns-cta--gold { background: linear-gradient(180deg, rgb(var(--nx-gold)), rgb(var(--nx-gold-2))); color: rgb(var(--nx-on-gold)); }
+
+/* Handset (light): the "best" pill's teal ink has no contrast on the LCD green; it uses the LCD ink instead. */
+html:where(:not(.dark))[data-nx-skin=handset] .ns-pill--best:where(:not([data-nx-preview] *)),
+:where(html:not(.dark)) [data-nx-preview=handset] .ns-pill--best { color: rgb(var(--nx-text)); }
+
+/* Glass + More sheet (owner direction 2026-10-03): the More menu is NOT frosted in the glass skin. Frosted cards inside a 94% sheet
+   let the page behind bleed through the title and tile labels, and stacked backdrop blurs also cost low-end Android GPUs. In glass the
+   sheet is a solid panel, the grid/list sit on it as quiet solid tiles with a hairline, and every label/icon reads on a flat fill. */
+html[data-nx-skin=glass] .ns-more.ns-sheet {
+    background: rgb(var(--nx-surface-2)); -webkit-backdrop-filter: none; backdrop-filter: none;
+    box-shadow: inset 0 1px 0 rgb(var(--nx-hi) / .10), 0 -14px 44px rgb(0 0 0 / .38);
+}
+html[data-nx-skin=glass] .ns-more .ns-scrim, html[data-nx-skin=glass] .ns-more ~ .ns-scrim { -webkit-backdrop-filter: none; backdrop-filter: none; }
+html[data-nx-skin=glass] .ns-more .ns-list,
+html[data-nx-skin=glass] .ns-more .ns-list.ns-list--grid,
+html[data-nx-skin=glass] .ns-more .ns-list__row,
+html[data-nx-skin=glass] .ns-more .ns-list.ns-list--grid .ns-list__row,
+html[data-nx-skin=glass] .ns-more .ns-seg,
+html[data-nx-skin=glass] .ns-more .ns-btn { -webkit-backdrop-filter: none; backdrop-filter: none; }
+html[data-nx-skin=glass] .ns-more .ns-list,
+html[data-nx-skin=glass] .ns-more .ns-list.ns-list--grid { background: none; box-shadow: none; padding-left: 0; padding-right: 0; }
+html[data-nx-skin=glass] .ns-more .ns-list:not(.ns-list--grid) { background: rgb(var(--nx-surface-3)); box-shadow: inset 0 0 0 1px rgb(var(--nx-line)); }
+html[data-nx-skin=glass] .ns-more .ns-list.ns-list--grid .ns-list__row {
+    background: rgb(var(--nx-surface-3)); box-shadow: inset 0 0 0 1px rgb(var(--nx-line)); color: rgb(var(--nx-text));
+}
+html[data-nx-skin=glass] .ns-more .ns-list.ns-list--grid .ns-list__row.is-on { box-shadow: inset 0 0 0 1.5px rgb(var(--nx-teal-ink)); }
+html[data-nx-skin=glass] .ns-more .ns-list__row .ns-tile { background: rgb(var(--nx-surface-2)); box-shadow: inset 0 0 0 1px rgb(var(--nx-line-strong) / .35); color: rgb(var(--nx-teal-ink)); }
+html[data-nx-skin=glass] .ns-more .ns-seg { background: rgb(var(--nx-surface-3)); box-shadow: inset 0 0 0 1px rgb(var(--nx-line)); }
+html[data-nx-skin=glass] .ns-more .ns-btn { background: rgb(var(--nx-surface-3)); box-shadow: inset 0 0 0 1px rgb(var(--nx-line-strong) / .5); color: rgb(var(--nx-text)); }
+
+/* Handset (light LCD): the status inks (ok / bad / warn) come from the global light palette, which is pale against the green LCD canvas
+   (live badge 3.4:1, delete link 4.0:1). Darker inks, same hues. */
+html:where(:not(.dark))[data-nx-skin=handset], :where(html):not(.dark) [data-nx-preview=handset] { --nx-ok: 16 62 16; --nx-bad: 128 22 22; --nx-warn: 112 72 0; --nx-gold-ink: 92 60 0; }
+
+/* Vivid: cards are saturated gradients with white copy in BOTH modes, but the stat cells inside them kept the light-mode pale surface
+   (white on near-white, 1.1:1). They sit on the gradient as a dark glass chip instead. */
+html[data-nx-skin=vivid] .ns-stat-cell:where(:not([data-nx-preview] *)), [data-nx-preview=vivid] .ns-stat-cell { background: rgb(2 20 32 / .5); }
+html[data-nx-skin=vivid] .ns-stat-cell b, html[data-nx-skin=vivid] .ns-stat-cell small { color: #fff; }
+
+/* Glass (light): secondary copy on the frosted balance hero was 4.4:1. */
+html:where(:not(.dark))[data-nx-skin=glass], :where(html):not(.dark) [data-nx-preview=glass] { --nx-text-2: 52 78 92; }
+
+/* Vivid: a ghost button inside a saturated card is white-on-gradient, like every other control in that card. */
+html[data-nx-skin=vivid] .ns-card .nx-btn--ghost { background: rgb(2 20 32 / .42); color: #fff; box-shadow: inset 0 0 0 1.5px rgb(255 255 255 / .7); }
+
+/* Glass: the primary (balance) card is an accent gradient at 92%/80% alpha over the frosted canvas; the bright accent under its white
+   sublabels read 2.7-4.4:1. The fill is now the accent deepened toward the navy (same recipe vivid uses), still a hint translucent. */
+html[data-nx-skin=glass] .ns-card.ns-card--primary:where(:not([data-nx-preview] *)) {
+    background: linear-gradient(145deg, color-mix(in srgb, rgb(var(--nx-acc-a)) 64%, rgb(2 18 30)), color-mix(in srgb, rgb(var(--nx-acc-c)) 56%, rgb(2 18 30)));
+}
+
+/* Receipt (light): the thermal-paper canvas is a touch darker than the global light status ink assumes (live badge 4.39:1). */
+html:where(:not(.dark))[data-nx-skin=receipt], :where(html):not(.dark) [data-nx-preview=receipt] { --nx-ok: 3 92 64; }
+html[data-nx-skin=vivid] .ns-card .nx-btn--ghost:hover:not(:disabled) { background: rgb(2 20 32 / .62); color: #fff; }
+
+/* Glass (dark), owner 2026-10-03: "the dark looks funny". Frosted cards need colour to refract, and the dark canvas was a near-black
+   teal with one dim blob and a muddy gold stain at the bottom, so the cards read as grey patches. The dark mesh now carries three
+   saturated accent blobs spread down the page (the canvas is viewport-fixed, so they sit behind every scroll position), and the stain
+   is gone. Text contrast is re-verified by contrast-pages (glass x dark). */
+:where(html).dark[data-nx-skin=glass] body[class] {
+    background:
+        radial-gradient(70% 42% at 6% 6%, rgb(var(--nx-acc-a) / .55), transparent 66%),
+        radial-gradient(60% 40% at 104% 34%, rgb(var(--nx-acc-b) / .46), transparent 64%),
+        radial-gradient(75% 42% at 14% 82%, rgb(var(--nx-acc-c) / .42), transparent 66%),
+        radial-gradient(55% 34% at 96% 104%, rgb(var(--nx-acc-a) / .28), transparent 64%),
+        linear-gradient(rgb(var(--nx-canvas-2)), rgb(var(--nx-canvas)));
+    background-attachment: fixed;
+}
+
+/* Glass (dark): the destructive text link on the frosted card read 4.2-4.4:1. */
+:where(html).dark[data-nx-skin=glass], :where(html).dark [data-nx-preview=glass] { --nx-bad: 255 163 163; }
+/* Vivid: the "best" pill sits on a saturated card in either mode; a dark scrim + white label (like every other control there). */
+html[data-nx-skin=vivid] .ns-pill.ns-pill--best:where(:not([data-nx-preview] *)) { background: rgb(2 20 32 / .6); color: #fff; box-shadow: inset 0 0 0 1px rgb(255 255 255 / .28); }
+
+/* Nebula orbs: the glow faded to 25% at the rim, so a white icon sat on near-nothing in light mode (1.5:1) and on a pale orange in dark.
+   Keep the orb solid enough for its icon: dark ink on the bright orb in light mode, a deepened orb under a white icon in dark mode. */
+html[data-nx-skin=nebula] .ns-card:not(.ns-card--primary) .ns-tile:where(:not([data-nx-preview] *)) { background: radial-gradient(circle at 32% 30%, rgb(var(--nx-tone)), rgb(var(--nx-tone) / .66) 78%); color: rgb(var(--nx-text)); }
+:where(html).dark[data-nx-skin=nebula] .ns-card:not(.ns-card--primary) .ns-tile:where(:not([data-nx-preview] *)) { background: radial-gradient(circle at 32% 30%, color-mix(in srgb, rgb(var(--nx-tone)) 62%, rgb(8 14 30)), color-mix(in srgb, rgb(var(--nx-tone)) 40%, rgb(8 14 30)) 80%); color: #fff; }
+
+/* Handset (light): teal ink on the olive LCD canvas read 2.2-2.9:1 on ghost buttons and tiles; a deeper teal (same hue) clears 4.5:1.
+   The accent rule sets the ink at (0,2,1); this must out-rank it. */
+html:not(.dark)[data-nx-skin=handset][data-nx-accent=teal], :where(html):not(.dark) [data-nx-preview=handset][data-nx-accent=teal] { --nx-teal-ink: 0 80 76; }
+/* Nebula: the "primary" card's tile is a white wash on teal; a dark glass centre keeps its white icon at 3:1+. */
+html[data-nx-skin=nebula] .ns-card.ns-card--primary .ns-tile:where(:not([data-nx-preview] *)) { background: radial-gradient(circle at 32% 30%, rgb(2 20 32 / .6), rgb(2 20 32 / .38) 78%); color: #fff; }
+
+/* Ankara: the ring pattern ran right through the icon (2.7:1). Keep the rings on the outer edge and a clear surface disc behind the glyph. */
+html[data-nx-skin=ankara] .ns-card:not(.ns-card--primary) .ns-tile:where(:not([data-nx-preview] *)) { background: radial-gradient(circle, rgb(var(--nx-surface)) 0 13px, rgb(var(--nx-tone) / .9) 13.5px 16.5px, rgb(var(--nx-surface)) 17px 19px, rgb(var(--nx-tone) / .55) 19.5px 22px, rgb(var(--nx-surface)) 22.5px); }
+
+/* Ghost buttons: these skins restyle every `.ns-cta` with a solid fill, which also repainted the ghost variant (dark ink on a dark fill). */
+html:is([data-nx-skin=noir], [data-nx-skin=neon], [data-nx-skin=ledger], [data-nx-skin=blueprint]) .ns-cta.ns-cta--ghost:where(:not([data-nx-preview] *)) { background: rgb(var(--nx-surface)); background-image: none; color: rgb(var(--nx-text)); box-shadow: inset 0 0 0 1px rgb(var(--nx-line-strong)); }

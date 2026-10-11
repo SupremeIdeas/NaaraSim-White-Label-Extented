@@ -2,137 +2,106 @@
     // Deterministic brand tint when a logo/colour isn't available (graceful).
     $tint = fn ($p) => $p->brand_color ?: '#'.substr(md5($p->brand_key), 0, 6);
 @endphp
-<div class="mx-auto max-w-5xl" x-data="{ view: localStorage.getItem('nx_gift_view') || 'grid', detail: @entangle('selectedId') }"
+<div>
+<x-nx.page class="ns-gf" x-data="{ view: localStorage.getItem('nx_gift_view') || 'grid' }"
      x-effect="localStorage.setItem('nx_gift_view', view)">
     {{-- Store entry preloader (self-hosted Lottie). Only while the store is live. --}}
     @if ($live)
         <div x-data="{ loading: true }" x-init="setTimeout(() => loading = false, 1300)"
-             x-show="loading" x-transition:leave.opacity.duration.500ms
-             class="fixed inset-0 z-[60] flex flex-col items-center justify-center gap-3 bg-white/98 dark:bg-[#0D1B2A]/98"
-             role="status" aria-live="polite">
+             x-show="loading" x-transition:leave.opacity.duration.500ms class="ns-gf__preload" role="status" aria-live="polite">
             <x-lottie name="gift-preloader" label="Loading gift store" class="h-44 w-44" />
-            <p class="text-sm font-medium text-slate-500 dark:text-slate-400">Opening your gift store…</p>
+            <p class="ns-sub">Opening your gift store…</p>
         </div>
     @endif
 
-    {{-- The Naara Gift mark now lives in the header (App\Support\BrandContext) —
-         this is the gift surface, so the header already wears it. The hero
-         below is the same admin-customisable system as the dashboard home
-         hero, its own independent setting namespace (owner request). --}}
+    {{-- The Naara Gift mark lives in the header (App\Support\BrandContext). The hero is the admin-customisable system, its own setting namespace. --}}
     @include('livewire.partials.gift-cards._hero')
 
     @if (! $live)
-        {{-- Coming Soon — the store flips live automatically the moment the API
-             keys are saved (no manual editing). --}}
-        <div class="mx-auto max-w-lg rounded-3xl border border-slate-200/70 bg-white p-8 text-center shadow-sm dark:border-white/10 dark:bg-slate-900/60">
-            <span class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-primary/15 to-accent/15 text-primary dark:text-teal-300">
-                <x-icon name="gift" class="h-8 w-8" />
-            </span>
-            <h2 class="text-xl font-bold text-slate-900 dark:text-white">Naara Gift is coming soon</h2>
-            <p class="mt-2 text-sm leading-relaxed text-slate-500 dark:text-slate-400">
-                Send gift cards for the brands people love — shopping, airtime, streaming and games — delivered instantly by email or WhatsApp. We're putting the finishing touches on the store. Check back shortly.
+        {{-- Coming Soon: the store flips live the moment the API keys are saved. --}}
+        <div class="ns-card ns-gf__soon">
+            <span class="ns-tile" style="width:64px;height:64px;font-size:32px;margin:0 auto 16px"><x-nx.icon name="gift" /></span>
+            <h2 class="ns-h1" style="font-size:22px">Naara Gift is coming soon</h2>
+            <p class="ns-sub" style="margin-top:8px">
+                Send gift cards for the brands people love (shopping, airtime, streaming and games), delivered instantly by email or WhatsApp. We're putting the finishing touches on the store. Check back shortly.
             </p>
-            <a href="{{ route('catalogue') }}" wire:navigate class="mt-6 inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-primary-dark">
-                <x-icon name="globe" class="h-4 w-4" /> Explore eSIM plans meanwhile
-            </a>
+            <a href="{{ route('catalogue') }}" wire:navigate class="ns-cta ns-cta--pill" style="margin:22px auto 0"><x-nx.icon name="globe" /> Explore eSIM plans meanwhile</a>
         </div>
     @else
 
     {{-- Search + country + grid/list toggle --}}
-    <div class="mb-5 flex flex-wrap items-center gap-3">
-        <div class="relative min-w-[200px] flex-1">
-            <x-icon name="search" class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-            <input type="text" wire:model.live.debounce.300ms="search" placeholder="Search brands…"
-                   class="w-full rounded-full border border-slate-200 bg-slate-50 py-2.5 pl-9 pr-4 text-sm dark:border-white/10 dark:bg-white/5 dark:text-slate-100">
-        </div>
+    <div class="ns-gf__tools">
+        <label class="ns-search ns-gf__search">
+            <x-nx.icon name="search" />
+            <input type="text" wire:model.live.debounce.300ms="search" placeholder="Search brands…" aria-label="Search brands">
+        </label>
         @if ($countries->isNotEmpty())
-            <select wire:model.live="country" class="rounded-full border border-slate-200 bg-white px-3 py-2.5 text-sm dark:border-white/10 dark:bg-white/5 dark:text-slate-100">
+            <select wire:model.live="country" class="ns-input ns-gf__country" aria-label="Country">
                 <option value="">All countries</option>
                 @foreach ($countries as $c)<option value="{{ $c }}">{{ $c }}</option>@endforeach
             </select>
         @endif
-        <div class="flex gap-1 rounded-full bg-slate-100 p-1 dark:bg-white/5">
-            <button type="button" @click="view = 'list'" :class="view === 'list' ? 'bg-white text-primary shadow-sm dark:bg-white/15 dark:text-teal-300' : 'text-slate-400'" class="rounded-full p-1.5"><x-icon name="list" class="h-4 w-4" /></button>
-            <button type="button" @click="view = 'grid'" :class="view === 'grid' ? 'bg-white text-primary shadow-sm dark:bg-white/15 dark:text-teal-300' : 'text-slate-400'" class="rounded-full p-1.5"><x-icon name="grid" class="h-4 w-4" /></button>
+        <div class="ns-seg ns-small" role="group" aria-label="View">
+            <button type="button" @click="view = 'list'" :class="view === 'list' ? 'is-on' : ''" :aria-pressed="view === 'list'" aria-label="List view"><x-nx.icon name="list" /></button>
+            <button type="button" @click="view = 'grid'" :class="view === 'grid' ? 'is-on' : ''" :aria-pressed="view === 'grid'" aria-label="Grid view"><x-nx.icon name="grid" /></button>
         </div>
     </div>
 
     {{-- Brand catalogue --}}
     @if ($products->isEmpty())
-        <div class="rounded-2xl border border-dashed border-slate-300 py-16 text-center text-sm text-slate-400 dark:border-white/10">No gift cards available yet.</div>
+        <x-nx.empty text="No gift cards available yet." style="margin-top:16px" />
     @else
-        <div :class="view === 'grid' ? 'grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4' : 'space-y-2'">
+        <div class="ns-gf__brands" :class="view === 'grid' ? 'is-grid' : 'is-list'">
             @foreach ($products as $product)
-                <button type="button" wire:click="select({{ $product->id }})" wire:key="gc-{{ $product->id }}"
-                        class="group flex overflow-hidden rounded-2xl border border-slate-200 bg-white text-left transition hover:shadow-lg dark:border-white/10 dark:bg-slate-900/60"
-                        :class="view === 'grid' ? 'flex-col' : 'flex-row items-center'">
-                    <div class="flex shrink-0 items-center justify-center overflow-hidden"
-                         :class="view === 'grid' ? 'aspect-[4/3] w-full' : 'h-16 w-16'"
-                         style="background: linear-gradient(135deg, {{ $tint($product) }}22, {{ $tint($product) }}55);">
+                <button type="button" wire:click="select({{ $product->id }})" wire:key="gc-{{ $product->id }}" class="ns-gf__brand ns-ring">
+                    <span class="ns-gf__logo" style="--gf-tint: {{ $tint($product) }}">
                         @if ($product->logo_url)
-                            <img src="{{ $product->logo_url }}" alt="{{ $product->brand_name }}" loading="lazy" class="h-full w-full object-contain p-3">
+                            <img src="{{ $product->logo_url }}" alt="{{ $product->brand_name }}" loading="lazy">
                         @else
-                            <span class="text-lg font-bold text-white" style="text-shadow: 0 1px 2px rgba(0,0,0,.3)">{{ \Illuminate\Support\Str::substr($product->brand_name, 0, 1) }}</span>
+                            <b>{{ \Illuminate\Support\Str::substr($product->brand_name, 0, 1) }}</b>
                         @endif
-                    </div>
-                    <div class="min-w-0 flex-1 p-3">
-                        <p class="truncate text-sm font-semibold text-slate-900 dark:text-white">{{ $product->brand_name }}</p>
-                        <p class="text-xs text-slate-400">{{ $product->country }}@if ($product->category) · {{ $product->category }}@endif</p>
-                    </div>
+                    </span>
+                    <span class="ns-gf__brandtext">
+                        <b>{{ $product->brand_name }}</b>
+                        <small>{{ $product->country }}@if ($product->category) · {{ $product->category }}@endif</small>
+                    </span>
                 </button>
             @endforeach
         </div>
-        <div class="mt-5">{{ $products->links() }}</div>
+        <div class="ns-gf__pages">{{ $products->links() }}</div>
     @endif
 
-    {{-- Brand detail sheet — modernized to match the eSIM plan-detail card
-         treatment (owner request): bordered rounded-3xl panel, a compact logo
-         thumbnail beside the name instead of a full banner, a category pill,
-         fact-tile denomination buttons, and a bordered price+CTA bar. --}}
+    {{-- Brand detail sheet: logo thumbnail beside the name, category pill, fact-tile amounts, price + CTA bar. --}}
     @if ($selected)
-        <div class="fixed inset-0 z-[60] flex items-end justify-center sm:items-center" @keydown.escape.window="$wire.close()" role="dialog" aria-modal="true">
-            <div class="absolute inset-0 bg-black/60" wire:click="close"></div>
-            <div class="relative w-full max-w-md overflow-hidden rounded-t-3xl border border-slate-200 bg-white shadow-2xl dark:border-[var(--brand-card-border-dark)] dark:bg-[var(--brand-card-dark)] sm:rounded-3xl">
-                <button type="button" wire:click="close" class="absolute right-3 top-3 z-10 rounded-full bg-black/30 p-1.5 text-white hover:bg-black/45"><x-icon name="x" class="h-4 w-4" /></button>
+        <div class="ns-modal" x-data x-trap.noscroll="true" @keydown.escape.window="$wire.close()" role="dialog" aria-modal="true" aria-label="{{ $selected->brand_name }}">
+            <div class="ns-scrim" wire:click="close"></div>
+            <div class="ns-sheet">
+                <div class="ns-handle"></div>
+                <div class="ns-sheet__head">
+                    <span class="ns-gf__logo ns-gf__logo--sm" style="--gf-tint: {{ $tint($selected) }}">
+                        @if ($selected->logo_url)
+                            <img src="{{ $selected->logo_url }}" alt="">
+                        @else
+                            <b>{{ \Illuminate\Support\Str::substr($selected->brand_name, 0, 1) }}</b>
+                        @endif
+                    </span>
+                    <div class="ns-text"><b>{{ $selected->brand_name }}</b><small>{{ $selected->country }} · {{ $selected->currency }}</small></div>
+                    <button type="button" class="ns-sheet__close" wire:click="close" aria-label="Close"><x-nx.icon name="x" /></button>
+                </div>
+                <div class="ns-sheet__body">
+                    <div style="margin-bottom:4px"><x-nx.pill variant="best"><x-nx.icon name="gift" /> {{ $selected->category ?: 'Gift Card' }}</x-nx.pill></div>
 
-                <div class="max-h-[80vh] overflow-y-auto p-6">
-                    {{-- Logo thumbnail beside the name — never a full-bleed banner. --}}
-                    <div class="flex items-start gap-4">
-                        <span class="relative flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-2xl sm:h-24 sm:w-24"
-                              style="background: linear-gradient(135deg, {{ $tint($selected) }}22, {{ $tint($selected) }}55);">
-                            @if ($selected->logo_url)
-                                <img src="{{ $selected->logo_url }}" alt="{{ $selected->brand_name }}" class="h-full w-full object-contain p-3">
-                            @else
-                                <span class="text-2xl font-bold text-slate-700 dark:text-white">{{ \Illuminate\Support\Str::substr($selected->brand_name, 0, 1) }}</span>
-                            @endif
-                        </span>
-                        <div class="min-w-0 pt-1">
-                            <span class="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary-dark dark:bg-primary/20 dark:text-primary">
-                                <x-icon name="gift" class="h-3.5 w-3.5" /> {{ $selected->category ?: 'Gift Card' }}
-                            </span>
-                            <h2 class="mt-2 text-lg font-bold text-slate-900 dark:text-white">{{ $selected->brand_name }}</h2>
-                            <p class="text-xs text-slate-400">{{ $selected->country }} · {{ $selected->currency }}</p>
-                        </div>
-                    </div>
-
-                    {{-- Denomination selector, as fact tiles matching the eSIM spec grid. --}}
-                    <p class="mb-2 mt-5 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Choose an amount</p>
+                    <span class="ns-lbl" style="margin-top:18px">Choose an amount</span>
                     @if (($denominations['type'] ?? '') === 'RANGE')
                         <input type="number" wire:model="amount" min="{{ $denominations['min'] }}" max="{{ $denominations['max'] }}"
-                               placeholder="{{ $denominations['min'] }} – {{ $denominations['max'] }} {{ $selected->currency }}"
-                               class="w-full rounded-2xl border border-slate-200 bg-slate-50/70 px-3 py-2.5 text-sm dark:border-[#243352] dark:bg-[var(--brand-card-inner-dark)] dark:text-slate-100">
-                        <p class="mt-1 text-xs text-slate-400">You pay retail; the exact charge is shown at checkout.</p>
+                               placeholder="{{ $denominations['min'] }} – {{ $denominations['max'] }} {{ $selected->currency }}" class="ns-input" aria-label="Amount">
+                        <p class="ns-small" style="margin-top:6px">You pay retail; the exact charge is shown at checkout.</p>
                     @else
-                        <div class="grid grid-cols-3 gap-2">
+                        <div class="ns-gf__amts">
                             @foreach (($denominations['options'] ?? []) as $opt)
-                                <button type="button" wire:click="$set('amount', {{ $opt['face'] }})"
-                                        @class([
-                                            'rounded-2xl border p-3 text-center transition',
-                                            'border-primary bg-primary/5 dark:bg-primary/10' => (float) $amount === $opt['face'],
-                                            'border-slate-100 bg-slate-50/70 hover:border-slate-200 dark:border-[#243352] dark:bg-[var(--brand-card-inner-dark)] dark:hover:border-[#2D4060]' => (float) $amount !== $opt['face'],
-                                        ])>
-                                    <span class="block text-sm font-bold text-slate-900 dark:text-white">{{ $selected->currency }} {{ number_format($opt['face'], 0) }}</span>
-                                    <span class="block text-[11px] text-slate-400">pay ${{ number_format($opt['retail'], 2) }}</span>
+                                <button type="button" wire:click="$set('amount', {{ $opt['face'] }})" class="ns-gf__amt {{ (float) $amount === $opt['face'] ? 'is-on' : '' }}" aria-pressed="{{ (float) $amount === $opt['face'] ? 'true' : 'false' }}">
+                                    <b>{{ $selected->currency }} {{ number_format($opt['face'], 0) }}</b>
+                                    <small>pay ${{ number_format($opt['retail'], 2) }}</small>
                                 </button>
                             @endforeach
                         </div>
@@ -140,53 +109,42 @@
 
                     {{-- Dynamic required fields --}}
                     @if (! empty($selected->required_fields))
-                        <p class="mb-2 mt-5 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Recipient details</p>
-                        <div class="space-y-2">
+                        <span class="ns-lbl" style="margin-top:18px">Recipient details</span>
+                        <div class="ns-gf__fields">
                             @foreach ($selected->required_fields as $field)
                                 @php $k = $field['key'] ?? 'field'; @endphp
-                                <input type="{{ $field['type'] ?? 'text' }}" wire:model="fields.{{ $k }}"
-                                       placeholder="{{ $field['label'] ?? ucfirst($k) }}"
-                                       class="w-full rounded-2xl border border-slate-200 bg-slate-50/70 px-3 py-2.5 text-sm dark:border-[#243352] dark:bg-[var(--brand-card-inner-dark)] dark:text-slate-100">
+                                <input type="{{ $field['type'] ?? 'text' }}" wire:model="fields.{{ $k }}" placeholder="{{ $field['label'] ?? ucfirst($k) }}" aria-label="{{ $field['label'] ?? ucfirst($k) }}" class="ns-input">
                             @endforeach
                         </div>
                     @endif
 
-                    {{-- Redemption note --}}
                     @if ($selected->redeem_instruction)
-                        <details class="mt-4 rounded-2xl bg-slate-50 p-4 text-xs leading-relaxed text-slate-600 dark:bg-[var(--brand-card-inner-dark)] dark:text-slate-300">
-                            <summary class="cursor-pointer font-semibold">How to redeem</summary>
-                            <p class="mt-1">{{ \Illuminate\Support\Str::limit(strip_tags($selected->redeem_instruction), 400) }}</p>
+                        <details class="ns-gf__redeem">
+                            <summary>How to redeem</summary>
+                            <p>{{ \Illuminate\Support\Str::limit(strip_tags($selected->redeem_instruction), 400) }}</p>
                         </details>
                     @endif
+                </div>
 
-                    {{-- Sticky-feel price + CTA bar, matching the eSIM detail screen. --}}
-                    @php
-                        $selectedRetail = null;
-                        if (($denominations['type'] ?? '') !== 'RANGE' && $amount) {
-                            $selectedOpt = collect($denominations['options'] ?? [])->firstWhere('face', (float) $amount);
-                            $selectedRetail = $selectedOpt['retail'] ?? null;
-                        }
-                    @endphp
-                    <div class="mt-6 flex flex-wrap items-center justify-between gap-4 border-t border-slate-200 pt-5 dark:border-[var(--brand-card-border-dark)]">
-                        <div>
-                            <p class="text-xs uppercase tracking-wide text-slate-400">You pay</p>
-                            <div class="text-2xl font-extrabold text-slate-900 dark:text-slate-100">
-                                {{ $selectedRetail !== null ? '$'.number_format((float) $selectedRetail, 2) : '—' }}
-                            </div>
-                            @if (($denominations['type'] ?? '') === 'RANGE' && $amount)
-                                <p class="text-xs text-slate-400">Exact charge shown at checkout</p>
-                            @endif
-                        </div>
-                        <button type="button" wire:click="buy" wire:loading.attr="disabled" wire:target="buy" @disabled(! $amount)
-                                class="inline-flex flex-1 items-center justify-center gap-1.5 rounded-2xl bg-gradient-to-br from-primary via-primary-dark to-navy px-5 py-3.5 text-sm font-bold text-white shadow-lg shadow-primary/25 transition hover:-translate-y-0.5 hover:shadow-xl disabled:pointer-events-none disabled:opacity-50 sm:flex-none">
-                            <span wire:loading.remove wire:target="buy" class="inline-flex items-center gap-1.5"><x-icon name="gift" class="h-4 w-4" /> Buy gift card</span>
-                            <span wire:loading wire:target="buy" class="inline-flex items-center gap-2"><x-ui.spinner class="h-4 w-4" /> Processing…</span>
+                @php
+                    $selectedRetail = null;
+                    if (($denominations['type'] ?? '') !== 'RANGE' && $amount) {
+                        $selectedOpt = collect($denominations['options'] ?? [])->firstWhere('face', (float) $amount);
+                        $selectedRetail = $selectedOpt['retail'] ?? null;
+                    }
+                @endphp
+                <div class="ns-sheet__foot">
+                    <x-nx.price-bar :pay-label="__('numbers.you_pay')" :total="$selectedRetail !== null ? '$'.number_format((float) $selectedRetail, 2) : '—'" :local="(($denominations['type'] ?? '') === 'RANGE' && $amount) ? 'Exact charge shown at checkout' : null">
+                        <button type="button" wire:click="buy" wire:loading.attr="disabled" wire:target="buy" @disabled(! $amount) class="ns-cta">
+                            <span wire:loading.remove wire:target="buy" class="ns-cta__label"><x-nx.icon name="gift" /> Buy gift card</span>
+                            <span wire:loading wire:target="buy" class="ns-cta__label"><x-ui.spinner class="h-4 w-4" /> Processing…</span>
                         </button>
-                    </div>
-                    <p class="mt-2 text-center text-[11px] text-slate-400">Gift cards are final — no refunds once delivered.</p>
+                        <p class="ns-small" style="text-align:center;margin:0">Gift cards are final. No refunds once delivered.</p>
+                    </x-nx.price-bar>
                 </div>
             </div>
         </div>
     @endif
     @endif {{-- /$live --}}
+</x-nx.page>
 </div>

@@ -43,7 +43,7 @@
         <div class="flex items-center justify-between gap-4 rounded-lg border border-slate-200 p-3 dark:border-[#2D4060]">
             <span>
                 <span class="block text-sm font-medium text-slate-800 dark:text-slate-100">Show hero image</span>
-                <span class="mt-0.5 block text-xs text-slate-500 dark:text-slate-400">Turn the image off without removing the uploaded art.</span>
+                <span class="mt-0.5 block text-xs text-slate-500 dark:text-slate-400">Turn the image off without removing the uploaded art. With no image uploaded, the storefront shows the built-in looping gift-box reveal; uploading your own image replaces it.</span>
             </span>
             <x-ui.switch wire:model="enabled" label="Show hero image" />
         </div>

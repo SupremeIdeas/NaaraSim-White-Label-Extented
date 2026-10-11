@@ -1,141 +1,130 @@
+{{-- Brand dashboard on the skin system (S3 Batch 6): plan/status header, delivery vs guarantee, profile, handles, videos, plan + cancel. --}}
 <div>
-    @php($input = 'w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-[var(--brand-card-border-dark)] dark:bg-[#243352] dark:text-slate-100')
-    @php($statusColor = match ($brand->listing_status) { 'active' => 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300', 'paused_billing' => 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300', default => 'bg-slate-100 text-slate-600 dark:bg-white/10 dark:text-slate-300' })
-
-    {{-- Dashboard header — plan, status and next billing at a glance. --}}
-    <div class="bg-gradient-to-br from-[#0D1B2A] to-[#0A6E6E] px-4 pb-10 pt-6 text-white">
-        <div class="mx-auto max-w-2xl">
-            <p class="text-xs font-semibold uppercase tracking-[0.2em] text-white/60">Brand dashboard</p>
-            <h1 class="mt-1.5 text-2xl font-bold sm:text-3xl">{{ $brand->brand_name ?: 'My brand listing' }}</h1>
-            <div class="mt-3 flex flex-wrap items-center gap-2">
-                <span class="rounded-full px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide {{ $statusColor }}">{{ ucwords(str_replace('_', ' ', $brand->listing_status)) }}</span>
-                <span class="text-sm text-white/70">{{ $brand->plan?->name ?? 'No plan' }}</span>
-                @if ($subscription)
-                    <span class="text-sm text-white/50">· Next billing {{ $subscription->next_billing_at?->format('d M Y') }}</span>
-                @endif
+<x-nx.page>
+    {{-- Dashboard header: plan, status and next billing at a glance. A deliberate dark brand panel in every skin and mode. --}}
+    @php($statusTone = match ($brand->listing_status) { 'active' => 'is-ok', 'paused_billing' => 'is-warn', default => '' })
+    <div class="ns-pg__hero ns-pg__hero--left">
+        <div style="max-width:42rem;margin-inline:auto">
+            <span class="ns-pg__kicker">Brand dashboard</span>
+            <h1 style="display:flex;flex-wrap:wrap;align-items:center;gap:8px">
+                {{ $brand->brand_name ?: 'My brand listing' }}
+            </h1>
+            <div class="ns-pg__herometa">
+                <span class="ns-st ns-st--ondark {{ $statusTone }}">{{ ucwords(str_replace('_', ' ', $brand->listing_status)) }}</span>
+                <span>{{ $brand->plan?->name ?? 'No plan' }}</span>
+                @if ($subscription)<span>· Next billing {{ $subscription->next_billing_at?->format('d M Y') }}</span>@endif
             </div>
         </div>
     </div>
 
-    <div class="mx-auto -mt-6 max-w-2xl rounded-t-[30px] bg-slate-50 px-4 pb-10 pt-6 dark:bg-[#0F1D33]">
+    <div class="ns-pg__sheet">
+    <div class="ns-pg ns-pg--mid" style="padding:0">
 
-        @if ($flash)<div class="mb-4 rounded-xl border border-green-200 bg-green-50 px-4 py-2.5 text-sm text-green-800 dark:border-green-900/40 dark:bg-green-950/30 dark:text-green-300">{{ $flash }}</div>@endif
-        @if ($error)<div class="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-2.5 text-sm text-red-700 dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-300">{{ $error }}</div>@endif
+        @if ($flash)<div class="ns-pg__callout ns-pg__callout--ok" role="status"><x-nx.icon name="check" /><div><p style="margin:0;color:rgb(var(--nx-text))">{{ $flash }}</p></div></div>@endif
+        @if ($error)<div class="ns-pg__err" role="alert" style="margin-top:0">{{ $error }}</div>@endif
 
         @unless ($setupComplete)
-            <div class="mb-5 flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3.5 text-sm text-amber-800 dark:border-amber-900/40 dark:bg-amber-950/20 dark:text-amber-200">
-                <x-icon name="alert-triangle" class="mt-0.5 h-4 w-4 shrink-0" />
-                <p><strong>Finish your setup</strong> to go live: add a brand name, category, a hero image and at least one handle. Your listing appears in the directory once these are complete.</p>
-            </div>
+            <div class="ns-pg__callout ns-pg__callout--warn" style="margin-top:16px"><x-nx.icon name="info" /><div><b>Finish your setup to go live</b><p>Add a brand name, category, a hero image and at least one handle. Your listing appears in the directory once these are complete.</p></div></div>
         @endunless
 
         {{-- Delivery vs guarantee (transparency) --}}
         @if ($delivery->isNotEmpty())
-            <div class="mb-5 rounded-2xl border border-slate-200 bg-white p-5 dark:border-white/10 dark:bg-[#16233d]">
-                <h2 class="mb-3 flex items-center gap-1.5 text-sm font-bold text-slate-900 dark:text-white">
-                    <x-icon name="trending-up" class="h-4 w-4 text-primary dark:text-teal-300" /> Follows delivered this cycle
-                </h2>
+            <div class="ns-pg__card ns-ring">
+                <h2 class="ns-bh__h"><x-nx.icon name="bars" /> Follows delivered this cycle</h2>
                 @foreach ($delivery as $row)
-                    <div class="mb-2.5">
-                        <div class="flex items-center justify-between text-xs">
-                            <span class="font-medium text-slate-600 dark:text-slate-300">{{ $row['handle']->handle_label }}</span>
-                            <span class="tabular-nums text-slate-500 dark:text-slate-400">{{ $row['actual'] }} / {{ $row['guaranteed'] }} guaranteed</span>
-                        </div>
-                        @php($pct = $row['guaranteed'] > 0 ? min(100, (int) round($row['actual'] / $row['guaranteed'] * 100)) : 0)
-                        <div class="mt-1 h-1.5 overflow-hidden rounded-full bg-slate-100 dark:bg-white/10"><div class="h-full rounded-full {{ $pct >= 100 ? 'bg-green-500' : 'bg-primary' }}" style="width: {{ $pct }}%"></div></div>
+                    @php($pct = $row['guaranteed'] > 0 ? min(100, (int) round($row['actual'] / $row['guaranteed'] * 100)) : 0)
+                    <div style="margin-bottom:12px">
+                        <div class="ns-pg__metarow"><span>{{ $row['handle']->handle_label }}</span><span>{{ $row['actual'] }} / {{ $row['guaranteed'] }} guaranteed</span></div>
+                        <div class="ns-pg__meter"><i style="width: {{ $pct }}%;{{ $pct >= 100 ? 'background:rgb(var(--nx-ok))' : '' }}"></i></div>
                     </div>
                 @endforeach
-                <p class="mt-1 text-[11px] text-slate-400">Under-delivered handles boost your placement next cycle automatically.</p>
+                <p class="ns-pg__hint">Under-delivered handles boost your placement next cycle automatically.</p>
             </div>
         @endif
 
         {{-- Profile --}}
-        <div class="mb-5 rounded-2xl border border-slate-200 bg-white p-5 dark:border-white/10 dark:bg-[#16233d]">
-            <h2 class="mb-3 flex items-center gap-1.5 text-sm font-bold text-slate-900 dark:text-white">
-                <x-icon name="edit" class="h-4 w-4 text-primary dark:text-teal-300" /> Profile
-            </h2>
-            <div class="space-y-3">
-                <input wire:model="profile.brand_name" placeholder="Brand name" class="{{ $input }}">
-                @error('profile.brand_name')<p class="text-xs text-red-600">{{ $message }}</p>@enderror
-                <select wire:model="profile.category" class="{{ $input }}">
+        <div class="ns-pg__card ns-ring">
+            <h2 class="ns-bh__h"><x-nx.icon name="cog" /> Profile</h2>
+            <div class="ns-pg__form">
+                <input wire:model="profile.brand_name" placeholder="Brand name" aria-label="Brand name" class="ns-input">
+                @error('profile.brand_name')<span class="ns-pg__fielderr">{{ $message }}</span>@enderror
+                <select wire:model="profile.category" aria-label="Category" class="ns-input" style="margin-top:8px">
                     <option value="">Choose a category…</option>
                     @foreach ($categories as $c)<option value="{{ $c }}">{{ $c }}</option>@endforeach
                 </select>
-                @error('profile.category')<p class="text-xs text-red-600">{{ $message }}</p>@enderror
-                <textarea wire:model="profile.short_description" rows="2" placeholder="Short description" class="{{ $input }}"></textarea>
-                <div class="flex flex-wrap items-center gap-3">
-                    <label class="text-xs text-slate-500 dark:text-slate-400">Card colour</label>
-                    <input type="color" wire:model="profile.background_color" class="h-9 w-14 rounded border border-slate-300 dark:border-[var(--brand-card-border-dark)]">
-                    <label class="text-xs text-slate-500 dark:text-slate-400">Hero image (1280×720)</label>
-                    <input type="file" wire:model="heroImage" accept="image/*" class="text-xs">
+                @error('profile.category')<span class="ns-pg__fielderr">{{ $message }}</span>@enderror
+                <textarea wire:model="profile.short_description" rows="2" placeholder="Short description" aria-label="Short description" class="ns-input" style="margin-top:8px"></textarea>
+                <div class="ns-pg__row" style="margin-top:10px;align-items:center">
+                    <label class="ns-pg__lbl" style="margin:0" for="bm-color">Card colour</label>
+                    <input id="bm-color" type="color" wire:model="profile.background_color" style="width:56px;height:38px;border-radius:8px;border:1px solid rgb(var(--nx-line-strong));background:transparent">
+                    <label class="ns-pg__lbl" style="margin:0" for="bm-hero">Hero image (1280×720)</label>
+                    <input id="bm-hero" type="file" wire:model="heroImage" accept="image/*" class="ns-ct__file">
                 </div>
-                @error('heroImage')<p class="text-xs text-red-600">{{ $message }}</p>@enderror
-                @if ($brand->hero_image_path)<img src="{{ $brand->hero_image_path }}" class="mt-1 h-28 w-full rounded-xl object-cover">@endif
-                <button wire:click="saveProfile" class="rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-primary-dark">Save profile</button>
+                @error('heroImage')<span class="ns-pg__fielderr">{{ $message }}</span>@enderror
+                @if ($brand->hero_image_path)<img src="{{ $brand->hero_image_path }}" alt="" class="ns-pg__figure" style="height:112px">@endif
+                <button type="button" wire:click="saveProfile" wire:loading.attr="disabled" wire:target="saveProfile" class="ns-cta ns-cta--pill" style="align-self:flex-start;margin-top:12px">Save profile</button>
             </div>
         </div>
 
         {{-- Handles --}}
-        <div class="mb-5 rounded-2xl border border-slate-200 bg-white p-5 dark:border-white/10 dark:bg-[#16233d]">
-            <h2 class="mb-1 flex items-center gap-1.5 text-sm font-bold text-slate-900 dark:text-white">
-                <x-icon name="hash" class="h-4 w-4 text-primary dark:text-teal-300" /> Social handles
-            </h2>
-            <p class="mb-3 text-xs text-slate-400">{{ $brand->handles->count() }} / {{ $brand->plan?->handles_included ?? 1 }} used</p>
-            @foreach ($brand->handles as $h)
-                <div class="mb-1.5 flex items-center gap-2 rounded-lg bg-slate-50 px-3 py-2 text-sm dark:bg-white/5">
-                    <x-service-icon :slug="$h->platform" class="h-4 w-4" />
-                    <span class="flex-1 truncate text-slate-700 dark:text-slate-200">{{ $h->handle_label }} <span class="text-xs text-slate-400">· {{ $h->handle_url }}</span></span>
-                    <button wire:click="removeHandle({{ $h->id }})" class="text-slate-400 hover:text-red-500"><x-icon name="x" class="h-4 w-4" /></button>
+        <div class="ns-pg__card ns-ring">
+            <h2 class="ns-bh__h" style="margin-bottom:4px"><x-nx.icon name="hash" /> Social handles</h2>
+            <p class="ns-pg__hint" style="margin:0 0 12px">{{ $brand->handles->count() }} / {{ $brand->plan?->handles_included ?? 1 }} used</p>
+            <div class="ns-pg__stack ns-pg__stack--sm">
+                @foreach ($brand->handles as $h)
+                    <div class="ns-pg__kv" style="gap:10px">
+                        <span class="ns-bh__icon" style="width:32px;height:32px;border-radius:9px"><x-service-icon :slug="$h->platform" class="h-4 w-4" /></span>
+                        <span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:rgb(var(--nx-text))">{{ $h->handle_label }} <span class="ns-small">· {{ $h->handle_url }}</span></span>
+                        <button type="button" wire:click="removeHandle({{ $h->id }})" aria-label="Remove {{ $h->handle_label }}" class="ns-ct__act ns-ct__act--spam" style="width:32px;height:32px"><x-nx.icon name="x" /></button>
+                    </div>
+                @endforeach
+            </div>
+            <div x-data="{ p: @entangle('newHandle.platform') }" class="ns-pg__form" style="margin-top:12px">
+                <div class="ns-pg__two">
+                    <select wire:model="newHandle.platform" x-model="p" aria-label="Platform" class="ns-input">@foreach ($platforms as $slug => $label)<option value="{{ $slug }}">{{ $label }}</option>@endforeach</select>
+                    <input wire:model="newHandle.handle_label" placeholder="Label" aria-label="Handle label" class="ns-input">
                 </div>
-            @endforeach
-            <div x-data="{ p: @entangle('newHandle.platform') }" class="mt-3 grid gap-2 sm:grid-cols-4">
-                <select wire:model="newHandle.platform" x-model="p" class="{{ $input }}">@foreach ($platforms as $slug => $label)<option value="{{ $slug }}">{{ $label }}</option>@endforeach</select>
-                <input wire:model="newHandle.handle_label" placeholder="Label" class="{{ $input }}">
-                <input wire:model="newHandle.handle_url" placeholder="Profile URL" class="{{ $input }} sm:col-span-2">
-                <div class="sm:col-span-4">
-                    @error('newHandle.handle_url')<p class="text-xs text-red-600">{{ $message }}</p>@enderror
-                    <button wire:click="addHandle" class="mt-1 rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 dark:border-[var(--brand-card-border-dark)] dark:text-slate-200">Add handle</button>
-                </div>
+                <input wire:model="newHandle.handle_url" placeholder="Profile URL" aria-label="Profile URL" class="ns-input" style="margin-top:8px">
+                @error('newHandle.handle_url')<span class="ns-pg__fielderr">{{ $message }}</span>@enderror
+                <button type="button" wire:click="addHandle" class="ns-cta ns-cta--pill ns-cta--ghost ns-cta--sm" style="align-self:flex-start;margin-top:10px">Add handle</button>
             </div>
         </div>
 
         {{-- Videos (only if the plan allows) --}}
         @if (($brand->plan?->video_previews_allowed ?? 0) > 0)
-            <div class="mb-5 rounded-2xl border border-slate-200 bg-white p-5 dark:border-white/10 dark:bg-[#16233d]">
-                <h2 class="mb-1 flex items-center gap-1.5 text-sm font-bold text-slate-900 dark:text-white">
-                    <x-icon name="play" class="h-4 w-4 text-primary dark:text-teal-300" /> Video previews
-                </h2>
-                <p class="mb-3 text-xs text-slate-400">{{ $brand->videos->count() }} / {{ $brand->plan->video_previews_allowed }} used</p>
-                @foreach ($brand->videos as $v)
-                    <div class="mb-1.5 flex items-center gap-2 rounded-lg bg-slate-50 px-3 py-2 text-sm dark:bg-white/5">
-                        <x-icon name="play" class="h-4 w-4 text-slate-400" />
-                        <span class="flex-1 truncate text-slate-700 dark:text-slate-200">{{ $v->platform }} · {{ $v->video_url }}</span>
-                        <button wire:click="removeVideo({{ $v->id }})" class="text-slate-400 hover:text-red-500"><x-icon name="x" class="h-4 w-4" /></button>
+            <div class="ns-pg__card ns-ring">
+                <h2 class="ns-bh__h" style="margin-bottom:4px"><x-nx.icon name="play" /> Video previews</h2>
+                <p class="ns-pg__hint" style="margin:0 0 12px">{{ $brand->videos->count() }} / {{ $brand->plan->video_previews_allowed }} used</p>
+                <div class="ns-pg__stack ns-pg__stack--sm">
+                    @foreach ($brand->videos as $v)
+                        <div class="ns-pg__kv" style="gap:10px">
+                            <x-nx.icon name="play" />
+                            <span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:rgb(var(--nx-text))">{{ $v->platform }} · {{ $v->video_url }}</span>
+                            <button type="button" wire:click="removeVideo({{ $v->id }})" aria-label="Remove video" class="ns-ct__act ns-ct__act--spam" style="width:32px;height:32px"><x-nx.icon name="x" /></button>
+                        </div>
+                    @endforeach
+                </div>
+                <div class="ns-pg__form" style="margin-top:12px">
+                    <div class="ns-pg__two">
+                        <select wire:model="newVideo.platform" aria-label="Video platform" class="ns-input"><option value="youtube">YouTube</option><option value="vimeo">Vimeo</option></select>
+                        <input wire:model="newVideo.video_url" placeholder="Video URL" aria-label="Video URL" class="ns-input">
                     </div>
-                @endforeach
-                <div class="mt-3 grid gap-2 sm:grid-cols-4">
-                    <select wire:model="newVideo.platform" class="{{ $input }}"><option value="youtube">YouTube</option><option value="vimeo">Vimeo</option></select>
-                    <input wire:model="newVideo.video_url" placeholder="Video URL" class="{{ $input }} sm:col-span-2">
-                    <button wire:click="addVideo" class="rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 dark:border-[var(--brand-card-border-dark)] dark:text-slate-200">Add video</button>
+                    <button type="button" wire:click="addVideo" class="ns-cta ns-cta--pill ns-cta--ghost ns-cta--sm" style="align-self:flex-start;margin-top:10px">Add video</button>
                 </div>
             </div>
         @endif
 
         {{-- Plan + cancel --}}
-        <div class="rounded-2xl border border-slate-200 bg-white p-5 dark:border-white/10 dark:bg-[#16233d]">
-            <h2 class="mb-3 flex items-center gap-1.5 text-sm font-bold text-slate-900 dark:text-white">
-                <x-icon name="credit-card" class="h-4 w-4 text-primary dark:text-teal-300" /> Plan
-            </h2>
-            <div class="flex flex-wrap gap-2">
+        <div class="ns-pg__card ns-ring">
+            <h2 class="ns-bh__h"><x-nx.icon name="cards" /> Plan</h2>
+            <div class="ns-pg__chips">
                 @foreach ($plans as $plan)
-                    <button wire:click="changePlan({{ $plan->id }})"
-                            class="rounded-full border px-3.5 py-1.5 text-xs font-semibold transition {{ $brand->current_plan_id === $plan->id ? 'border-primary bg-primary/10 text-primary dark:text-teal-300' : 'border-slate-200 text-slate-600 hover:bg-slate-50 dark:border-[var(--brand-card-border-dark)] dark:text-slate-300' }}">
-                        {{ $plan->name }} · ${{ number_format($plan->price_usd_per_month, 0) }}/mo
-                    </button>
+                    <button type="button" wire:click="changePlan({{ $plan->id }})" class="ns-pg__chip {{ $brand->current_plan_id === $plan->id ? 'is-on' : '' }}" aria-pressed="{{ $brand->current_plan_id === $plan->id ? 'true' : 'false' }}">{{ $plan->name }} · ${{ number_format($plan->price_usd_per_month, 0) }}/mo</button>
                 @endforeach
             </div>
-            <button wire:click="cancel" wire:confirm="Cancel your listing? It will be removed from the directory. You can resubscribe later."
-                    class="mt-4 text-xs font-semibold text-red-500 hover:underline">Cancel listing</button>
+            <button type="button" wire:click="cancel" wire:confirm="Cancel your listing? It will be removed from the directory. You can resubscribe later." class="ns-pg__act ns-pg__act--bad" style="margin-top:16px">Cancel listing</button>
         </div>
     </div>
+    </div>
+</x-nx.page>
 </div>

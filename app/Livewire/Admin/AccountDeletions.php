@@ -22,7 +22,16 @@ class AccountDeletions extends Component
     public function approve(int $userId, AccountService $service): void
     {
         $user = User::whereKey($userId)->firstOrFail();
-        $service->approveDeletion($user, Auth::user());
+        try {
+            $service->approveDeletion($user, Auth::user());
+        } catch (\Symfony\Component\HttpKernel\Exception\HttpExceptionInterface $e) {
+            if ($e->getStatusCode() !== 422) {
+                throw $e;
+            }
+            $this->status = $e->getMessage();
+
+            return;
+        }
         $this->status = 'Account #'.$userId.' was approved and anonymized. Financial/order records remain retained until the retention window elapses.';
     }
 

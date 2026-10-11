@@ -94,7 +94,7 @@ class WhiteLabelUpdateClient
      *   transient failure leaves the last-known list untouched — never wiped
      *   (no accidental unlock) and never invented (no surprise hard-lock).
      *
-     * @return array{ok:bool, level:?string, locks:array<int,string>, error:?string}
+     * @return array{ok:bool, level:?string, locks:array<int,string>, skins_allowance?:?int, error:?string}
      */
     public function refreshEntitlement(): array
     {
@@ -128,7 +128,15 @@ class WhiteLabelUpdateClient
 
         $level = $response->json('level');
 
-        return ['ok' => true, 'level' => is_string($level) ? $level : null, 'locks' => $locks, 'error' => null];
+        // Skin allowance (Prompt 22): master alone decides how many skins this licence unlocks; we store the number and obey it. A missing
+        // or malformed `skins` block (an older master) changes nothing, and a failure above never reaches here, so the last-known value stays.
+        $skins = $response->json('skins');
+        $allowance = null;
+        if (is_array($skins) && \App\Support\Appearance\LicensedSkins::storeAllowance($skins['allowance'] ?? null)) {
+            $allowance = \App\Support\Appearance\LicensedSkins::allowance();
+        }
+
+        return ['ok' => true, 'level' => is_string($level) ? $level : null, 'locks' => $locks, 'skins_allowance' => $allowance, 'error' => null];
     }
 
     /**

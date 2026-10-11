@@ -25,9 +25,14 @@ class FlutterwaveBankResolver implements BankResolverInterface
         return filled(config('services.flutterwave.secret_key'));
     }
 
+    /** Reads the rail registry (single source of truth); the constant is the fallback until it is seeded. */
     public function supports(string $country): bool
     {
-        return in_array(strtoupper($country), self::COUNTRIES, true);
+        $registry = app(\App\Services\Payouts\Rail\PayoutRailRegistry::class);
+
+        return $registry->seeded()
+            ? $registry->providerCovers($country, 'flutterwave')
+            : in_array(strtoupper($country), self::COUNTRIES, true);
     }
 
     public function banks(string $country): array

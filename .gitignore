@@ -62,3 +62,4 @@ Homestead.yaml
 # generated native-project boilerplate here.
 /android
 /ios
+scripts/__pycache__/

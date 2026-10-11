@@ -154,4 +154,30 @@ class GiftHeroBackgroundTest extends TestCase
         // Setting the dashboard hero title never touches the gift hero.
         $this->assertSame(GiftHeroBackground::DEFAULT_TITLE, GiftHeroBackground::title());
     }
+
+    public function test_with_no_upload_the_default_looping_reveal_shows_and_its_committed_art_exists(): void
+    {
+        $this->assertTrue(GiftHeroBackground::showsSpecial());
+        $this->assertFileExists(public_path(GiftHeroBackground::SPECIAL_BOX));
+        $this->assertFileExists(public_path(GiftHeroBackground::SPECIAL_TILES));
+
+        Livewire::actingAs(User::factory()->create())->test(\App\Livewire\GiftCards::class)
+            ->assertSeeHtml('nx-gift-stage')
+            ->assertSeeHtml('gift-hero-box.webp');
+    }
+
+    public function test_an_uploaded_hero_replaces_the_reveal_and_switching_the_hero_off_hides_it(): void
+    {
+        \App\Models\Setting::setValue(GiftHeroBackground::LIGHT_KEY, 'https://example.test/own-hero.webp');
+        GiftHeroBackground::flush();
+        $this->assertFalse(GiftHeroBackground::showsSpecial());
+        Livewire::actingAs(User::factory()->create())->test(\App\Livewire\GiftCards::class)
+            ->assertDontSeeHtml('nx-gift-stage')
+            ->assertSeeHtml('own-hero.webp');
+
+        \App\Models\Setting::setValue(GiftHeroBackground::LIGHT_KEY, '');
+        \App\Models\Setting::setValue(GiftHeroBackground::ENABLED_KEY, false);
+        GiftHeroBackground::flush();
+        $this->assertFalse(GiftHeroBackground::showsSpecial());
+    }
 }

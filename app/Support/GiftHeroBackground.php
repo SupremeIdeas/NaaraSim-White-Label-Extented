@@ -43,6 +43,11 @@ class GiftHeroBackground
 
     public const DEFAULT_TITLE_SIZE = 'md';
 
+    /** Committed starter artwork (transparent WebP cut-outs) for the looping "special" reveal shown until the admin uploads their own hero. */
+    public const SPECIAL_TILES = 'images/themes/shared/gift-hero-tiles.webp';
+
+    public const SPECIAL_BOX = 'images/themes/shared/gift-hero-box.webp';
+
     /** Same preset keys as the dashboard hero — literal classes live in the
      *  gift-cards hero partial (Tailwind only scans resources/**\/*.blade.php). */
     public const TITLE_SIZES = HeroBackground::TITLE_SIZES;
@@ -126,6 +131,15 @@ class GiftHeroBackground
     public static function showsImage(): bool
     {
         return self::isSet() && self::enabled();
+    }
+
+    /**
+     * The default hero: a looping reveal (card wall -> gift box opens) built from the committed cut-outs. It shows while the hero is
+     * switched on and the admin has NOT uploaded an image of their own; an upload always wins and renders the plain static hero.
+     */
+    public static function showsSpecial(): bool
+    {
+        return self::enabled() && ! self::isSet();
     }
 
     public static function flush(): void

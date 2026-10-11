@@ -1,239 +1,149 @@
+@php
+    $__cur = \App\Support\LocaleCurrency::resolve(auth()->user());
+    $__fx = app(\App\Services\Pricing\CurrencyService::class);
+    $__countries = array_values(array_filter((array) $plan->countries));
+    // What the member will actually be charged, and its local-currency line (live FX; the charge itself is always USD).
+    $__due = $couponPrice ?? (float) $plan->final_retail_usd;
+    $__total = $couponPrice !== null ? '$'.number_format($couponPrice, 2) : $plan->display_price['usd'];
+    $__local = $__cur !== 'USD'
+        ? '≈ '.$__fx->format($__due, $__cur)
+        : ($couponPrice === null ? $plan->display_price['ngn'] : null);
+@endphp
 <div class="mx-auto max-w-lg">
-    <a href="{{ route('catalogue') }}" class="mb-4 inline-flex items-center gap-1 text-sm text-slate-500 hover:text-primary dark:text-slate-400">
-        <x-icon name="chevron-right" class="h-4 w-4 rotate-180" /> {{ __('checkout.back_to_catalogue') }}
-    </a>
+<x-nx.page>
+    <a href="{{ route('catalogue') }}" wire:navigate class="ns-back"><x-nx.icon name="chevron-left" /> {{ __('checkout.back_to_catalogue') }}</a>
 
-    <div class="relative rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-[var(--brand-card-border-dark)] dark:bg-[var(--brand-card-dark)]">
-        {{-- Scoped action loader (audit §7) — pulsing logo over the card while the
-             purchase is in flight; dismisses the instant the action resolves. --}}
+    <div style="position:relative">
+        {{-- Scoped action loader (audit §7): pulsing logo over the page while the purchase is in flight; dismisses when it resolves. --}}
         <x-brand-loader target="purchase" :overlay="true" :label="__('checkout.processing_order')" />
 
-        <div class="flex items-center gap-2">
-            <span class="flex h-9 w-9 items-center justify-center rounded-2xl bg-primary/10 text-primary dark:bg-primary/20 dark:text-teal-300">
-                <x-icon name="shield-check" class="h-5 w-5" />
+        <h1 class="ns-h1" style="margin-top:6px">{{ __('checkout.title') }}</h1>
+        <p class="ns-sub">{{ __('checkout.subtitle') }}</p>
+
+        {{-- Order card: the plan, its real synced facts (data, validity, calls) and where it works. --}}
+        <div class="ns-card ns-card--rent ns-ring ns-full" style="margin-top:16px;padding:16px">
+            <span class="ns-card__row" style="justify-content:space-between;align-items:flex-start">
+                <span class="ns-card__text"><h3 style="font-size:19px">{{ $plan->name }}</h3></span>
+                <x-nx.pill variant="best">{{ $plan->type ?? __('checkout.data_type') }}</x-nx.pill>
             </span>
-            <div>
-                <h1 class="text-xl font-bold leading-tight text-slate-900 dark:text-slate-100">{{ __('checkout.title') }}</h1>
-                <p class="text-xs text-slate-500 dark:text-slate-400">{{ __('checkout.subtitle') }}</p>
-            </div>
-        </div>
-
-        <div class="mt-4 rounded-xl bg-slate-50 p-4 dark:bg-[#243352]">
-            <div class="flex items-center justify-between gap-3">
-                <span class="font-semibold text-slate-900 dark:text-slate-100">{{ $plan->name }}</span>
-                <span class="inline-flex shrink-0 items-center gap-1 text-xs text-slate-500 dark:text-slate-400">
-                    <x-icon name="globe" class="h-3.5 w-3.5" /> {{ $plan->type ?? __('checkout.data_type') }}
-                </span>
-            </div>
-
-            {{-- Real synced plan facts (esim_upgrade Part 2): data, validity, and
-                 — for Naara Connect — a calls + data badge. --}}
-            <div class="mt-3 flex flex-wrap gap-2">
-                <span class="inline-flex items-center gap-1.5 rounded-lg bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 dark:bg-[#1B2A44] dark:text-slate-200">
-                    <x-icon name="signal" class="h-3.5 w-3.5 text-primary" />
-                    {{ $plan->data_mb ? number_format($plan->data_mb / 1024, 1).' GB' : __('checkout.unlimited_data') }}
-                </span>
-                <span class="inline-flex items-center gap-1.5 rounded-lg bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 dark:bg-[#1B2A44] dark:text-slate-200">
-                    <x-icon name="refresh" class="h-3.5 w-3.5 text-primary" />
-                    {{ $plan->validity_days ? __('checkout.days', ['days' => $plan->validity_days]) : __('checkout.flexible_validity') }}
-                </span>
-                @if ($plan->has_voice)
-                    <span class="inline-flex items-center gap-1.5 rounded-lg bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary-dark dark:bg-primary/20 dark:text-teal-300">
-                        <x-icon name="phone" class="h-3.5 w-3.5" /> {{ __('checkout.calls_and_data') }}
-                    </span>
-                @endif
-            </div>
-
-            {{-- Fair-usage disclosure (Prompt 10): only an unlimited plan carries
-                 one — the accessor returns null for a data-capped plan. --}}
-            @if ($plan->display_fair_usage_note)
-                <p class="mt-3 flex items-start gap-2 rounded-lg bg-amber-50 p-2.5 text-[11px] leading-relaxed text-amber-800 dark:bg-amber-500/10 dark:text-amber-300">
-                    <x-icon name="info" class="mt-0.5 h-3.5 w-3.5 shrink-0" />
-                    <span>{{ $plan->display_fair_usage_note }}</span>
-                </p>
-            @endif
-
-            {{-- Coverage: flags for the countries this plan reaches. --}}
-            @php($__countries = array_values(array_filter((array) $plan->countries)))
+            <span class="ns-chips">
+                <span><x-nx.icon name="bars" />{{ $plan->data_mb ? number_format($plan->data_mb / 1024, 1).' GB' : __('checkout.unlimited_data') }}</span>
+                <span><x-nx.icon name="cal" />{{ $plan->validity_days ? __('checkout.days', ['days' => $plan->validity_days]) : __('checkout.flexible_validity') }}</span>
+                @if ($plan->has_voice)<span><x-nx.icon name="phone" />{{ __('checkout.calls_and_data') }}</span>@endif
+            </span>
             @if (! empty($__countries))
-                <div class="mt-3 flex items-center gap-1.5">
-                    <span class="text-xs text-slate-400 dark:text-slate-500">{{ __('checkout.works_in') }}</span>
-                    <span class="flex flex-wrap items-center gap-1">
-                        @foreach (array_slice($__countries, 0, 6) as $__iso)
-                            <x-country-flag :country="$__iso" class="h-4 w-6" />
-                        @endforeach
-                        @if (count($__countries) > 6)
-                            <span class="text-xs font-medium text-slate-500 dark:text-slate-400">{{ __('checkout.more_countries', ['count' => count($__countries) - 6]) }}</span>
-                        @elseif (count($__countries) === 1)
-                            <span class="text-xs font-medium text-slate-500 dark:text-slate-400">{{ \App\Support\CountryNames::name($__countries[0]) }}</span>
-                        @endif
-                    </span>
-                </div>
+                <span class="ns-chips" style="margin-top:0;border-top:0;padding-top:6px;align-items:center">
+                    <span>{{ __('checkout.works_in') }}</span>
+                    @foreach (array_slice($__countries, 0, 6) as $__iso)<x-country-flag :country="$__iso" class="h-4 w-6" />@endforeach
+                    @if (count($__countries) > 6)<span>{{ __('checkout.more_countries', ['count' => count($__countries) - 6]) }}</span>
+                    @elseif (count($__countries) === 1)<span>{{ \App\Support\CountryNames::name($__countries[0]) }}</span>@endif
+                </span>
             @endif
-            {{-- Localized price (owner request): USD default + the viewer's
-                 local-currency equivalent (live FX; charge is always in USD). --}}
-            @php($__cur = \App\Support\LocaleCurrency::resolve(auth()->user()))
-            @php($__fx = app(\App\Services\Pricing\CurrencyService::class))
-            {{-- Taxes & fees (Prompt 10): NaaraSim charges no separate tax or fee
-                 on top of the retail price shown — the line itself is the trust
-                 signal, so the customer is never left wondering whether
-                 something will be added before Pay. --}}
-            <div class="mt-3 flex items-center justify-between border-t border-slate-200 pt-3 text-xs text-slate-500 dark:border-[var(--brand-card-border-dark)] dark:text-slate-400">
-                <span>{{ __('checkout.taxes_and_fees') }}</span>
-                <span class="font-medium text-slate-700 dark:text-slate-300">$0.00</span>
-            </div>
-            <div class="mt-2 flex items-end justify-between">
-                <span class="text-sm text-slate-500 dark:text-slate-400">{{ __('checkout.you_pay') }}</span>
-                <div class="text-right">
-                    @if ($couponPrice !== null)
-                        <div class="text-xs text-slate-400 line-through dark:text-slate-500">{{ $plan->display_price['usd'] }}</div>
-                        <div class="text-2xl font-bold text-primary dark:text-teal-300">${{ number_format($couponPrice, 2) }}</div>
-                        @if ($__cur !== 'USD')<div class="text-xs text-slate-400 dark:text-slate-500">≈ {{ $__fx->format($couponPrice, $__cur) }}</div>@endif
-                        <div class="text-xs font-medium text-green-600 dark:text-green-400">{{ __('checkout.you_save', ['amount' => '$'.number_format($couponSaved, 2)]) }}</div>
-                    @else
-                        <div class="text-2xl font-bold text-slate-900 dark:text-slate-100">{{ $plan->display_price['usd'] }}</div>
-                        @if ($__cur !== 'USD')
-                            <div class="text-xs text-slate-500 dark:text-slate-400">≈ {{ $__fx->format((float) $plan->final_retail_usd, $__cur) }}</div>
-                        @else
-                            <div class="text-xs text-slate-500 dark:text-slate-400">{{ $plan->display_price['ngn'] }}</div>
-                        @endif
-                    @endif
-                </div>
-            </div>
         </div>
 
-        {{-- Coupon code (Module 31) — discount is margin-guarded server-side. --}}
-        @unless ($done)
-            <div class="mt-4 rounded-xl border border-dashed border-slate-300 p-3 dark:border-[var(--brand-card-border-dark)]">
-                @if ($couponPrice !== null)
-                    <div class="flex items-center justify-between gap-2 text-sm">
-                        <span class="inline-flex items-center gap-2 font-medium text-green-700 dark:text-green-400">
-                            <x-icon name="badge-check" class="h-4 w-4" /> {{ __('checkout.coupon_applied', ['code' => $coupon]) }}
-                        </span>
-                        <button type="button" wire:click="removeCoupon" class="text-xs text-slate-400 underline hover:text-slate-600 dark:hover:text-slate-300">{{ __('checkout.remove') }}</button>
-                    </div>
-                @else
-                    <div class="flex gap-2">
-                        <input wire:model="coupon" wire:keydown.enter="applyCoupon" type="text" placeholder="{{ __('checkout.coupon_placeholder') }}" autocomplete="off"
-                               class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm uppercase tracking-wider dark:border-[var(--brand-card-border-dark)] dark:bg-[#243352] dark:text-slate-100">
-                        <button type="button" wire:click="applyCoupon" wire:loading.attr="disabled" wire:target="applyCoupon"
-                                class="shrink-0 rounded-lg border border-primary/40 px-3 py-2 text-sm font-semibold text-primary hover:bg-primary/10 disabled:opacity-60 dark:text-teal-300">
-                            <span wire:loading.remove wire:target="applyCoupon">{{ __('checkout.apply') }}</span>
-                            <span wire:loading wire:target="applyCoupon" class="inline-flex items-center gap-1"><x-ui.spinner class="h-3.5 w-3.5" /> {{ __('checkout.checking') }}</span>
-                        </button>
-                    </div>
-                    @if ($couponError)
-                        <p class="mt-2 text-xs text-red-600 dark:text-red-400">{{ $couponError }}</p>
-                    @endif
-                @endif
-            </div>
+        {{-- Fair-usage disclosure (Prompt 10): only an unlimited plan carries one; the accessor returns null for a data-capped plan. --}}
+        @if ($plan->display_fair_usage_note)
+            <x-nx.note icon="info" variant="warn">{{ $plan->display_fair_usage_note }}</x-nx.note>
+        @endif
 
-            {{-- NaaraCredits redemption (loyalty) — margin-capped server-side. --}}
+        @unless ($done)
+            {{-- Coupon code (Module 31): the discount is margin-guarded server-side. --}}
+            <div class="ns-lbl" style="margin-top:20px">{{ __('checkout.coupon_placeholder') }}</div>
+            @if ($couponPrice !== null)
+                <div class="ns-note ns-note--dash" style="align-items:center;justify-content:space-between">
+                    <span style="display:flex;gap:8px;align-items:center;color:rgb(var(--nx-ok))"><x-nx.icon name="check" /> {{ __('checkout.coupon_applied', ['code' => $coupon]) }}</span>
+                    <button type="button" class="ns-btn" wire:click="removeCoupon" wire:loading.attr="disabled" wire:target="removeCoupon">{{ __('checkout.remove') }}</button>
+                </div>
+            @else
+                <div style="display:flex;gap:8px;align-items:center">
+                    <label class="ns-search" style="flex:1;min-width:0">
+                        <x-nx.icon name="gift" />
+                        <input wire:model="coupon" wire:keydown.enter="applyCoupon" type="text" placeholder="{{ __('checkout.coupon_placeholder') }}" autocomplete="off" style="text-transform:uppercase;letter-spacing:.06em" aria-label="{{ __('checkout.coupon_placeholder') }}">
+                    </label>
+                    <button type="button" class="ns-btn" style="margin-top:8px;height:54px" wire:click="applyCoupon" wire:loading.attr="disabled" wire:target="applyCoupon">
+                        <span wire:loading.remove wire:target="applyCoupon">{{ __('checkout.apply') }}</span>
+                        <span wire:loading wire:target="applyCoupon" class="ns-cta__label"><x-ui.spinner class="h-3.5 w-3.5" /> {{ __('checkout.checking') }}</span>
+                    </button>
+                </div>
+                @if ($couponError)<x-nx.note icon="info" variant="warn" role="alert">{{ $couponError }}</x-nx.note>@endif
+            @endif
+
+            {{-- NaaraCredits redemption (loyalty): margin-capped server-side. --}}
             @if ($creditsEnabled && $creditBalance > 0 && $creditQuote['usd'] > 0)
-                <label class="mt-3 flex cursor-pointer items-start gap-3 rounded-xl border border-dashed border-primary/40 bg-primary/5 p-3 dark:border-primary/40 dark:bg-primary/10">
-                    <input type="checkbox" wire:model.live="useCredits" class="mt-0.5 rounded text-primary focus:ring-primary/40">
-                    <span class="min-w-0 flex-1">
-                        <span class="flex items-center gap-1.5 text-sm font-semibold text-slate-900 dark:text-slate-100">
-                            <x-naara-coin class="h-4 w-4" /> {{ __('checkout.use_naaracredits') }}
-                        </span>
-                        <span class="mt-0.5 block text-xs text-slate-600 dark:text-slate-300">
-                            {{ __('checkout.credits_balance', [
-                                'balance' => number_format($creditBalance, 0),
-                                'credits' => number_format($creditQuote['credits'], 0),
-                                'amount' => '$'.number_format($creditQuote['usd'], 2),
-                            ]) }}
-                        </span>
+                <label class="ns-note ns-note--dash" style="cursor:pointer">
+                    <input type="checkbox" wire:model.live="useCredits" class="ns-check-input">
+                    <span>
+                        <b style="display:flex;align-items:center;gap:6px;color:rgb(var(--nx-text));font-weight:600"><x-naara-coin class="h-4 w-4" /> {{ __('checkout.use_naaracredits') }}</b>
+                        {{ __('checkout.credits_balance', ['balance' => number_format($creditBalance, 0), 'credits' => number_format($creditQuote['credits'], 0), 'amount' => '$'.number_format($creditQuote['usd'], 2)]) }}
                     </span>
                 </label>
                 @if ($useCredits)
-                    <div class="mt-2 flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2 text-sm dark:bg-[#243352]">
-                        <span class="text-slate-500 dark:text-slate-400">{{ __('checkout.charged_after_credits') }}</span>
-                        <span class="font-bold text-primary dark:text-teal-300">${{ number_format(($couponPrice ?? (float) $plan->final_retail_usd) - $creditQuote['usd'], 2) }}</span>
+                    <div class="ns-note" style="justify-content:space-between;align-items:center">
+                        <span>{{ __('checkout.charged_after_credits') }}</span>
+                        <b style="color:rgb(var(--nx-text));font-variant-numeric:tabular-nums">${{ number_format($__due - $creditQuote['usd'], 2) }}</b>
                     </div>
                 @endif
             @endif
         @endunless
 
         @if ($error)
-            <div class="mt-4 flex items-start gap-2 rounded-lg bg-red-50 p-3 text-sm text-red-700 dark:bg-red-950/40 dark:text-red-300">
-                <x-icon name="x" class="mt-0.5 h-4 w-4 shrink-0" /> <span>{{ $error }}</span>
-            </div>
+            <x-nx.note icon="info" variant="warn" role="alert">
+                {{ $error }}
+                @if ($needsTopUp)<a href="{{ route('wallet') }}" wire:navigate class="ns-btn ns-btn--solid" style="margin-top:10px;display:inline-flex">{{ __('checkout.top_up_wallet') }}</a>@endif
+            </x-nx.note>
         @endif
 
         @if ($done)
-            <div class="mt-4 flex items-start gap-2 rounded-lg bg-green-50 p-3 text-sm text-green-700 dark:bg-green-950/40 dark:text-green-300">
-                <x-icon name="badge-check" class="mt-0.5 h-4 w-4 shrink-0" /> <span>{{ $message }}</span>
-            </div>
-            <a href="{{ route('dashboard') }}" wire:navigate
-               class="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-br from-primary via-primary-dark to-navy px-4 py-3.5 font-bold text-white shadow-lg shadow-primary/25 transition hover:-translate-y-0.5 hover:shadow-xl">
-                {{ __('checkout.go_to_connectivity') }} <x-icon name="chevron-right" class="h-4 w-4" />
-            </a>
+            <x-nx.note icon="check">{{ $message }}</x-nx.note>
+            <a href="{{ route('dashboard') }}" wire:navigate class="ns-cta" style="margin-top:16px">{{ __('checkout.go_to_connectivity') }} <x-nx.icon name="chevron-right" /></a>
         @else
-            {{-- Device-compatibility check — runs BEFORE purchase (Section 32) --}}
-            <div class="mt-6 rounded-xl border border-slate-200 p-4 dark:border-[var(--brand-card-border-dark)]">
-                <h2 class="flex items-center gap-2 text-sm font-semibold text-slate-800 dark:text-slate-100">
-                    <x-icon name="phone" class="h-4 w-4 text-primary" /> {{ __('checkout.compat_heading') }}
-                </h2>
-                <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">{{ __('checkout.compat_subheading') }}</p>
-
-                <div class="mt-3 flex gap-2">
-                    <input wire:model="device" type="text" placeholder="{{ __('checkout.device_placeholder') }}"
-                           class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-[var(--brand-card-border-dark)] dark:bg-[#243352] dark:text-slate-100">
-                    <button type="button" wire:click="checkDevice" wire:loading.attr="disabled" wire:target="checkDevice"
-                            class="shrink-0 rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-[var(--brand-card-border-dark)] dark:text-slate-200 dark:hover:bg-[#243352]">{{ __('checkout.check') }}</button>
-                </div>
-
-                @if ($deviceResult === true)
-                    <p class="mt-2 flex items-center gap-1 text-xs font-medium text-green-600 dark:text-green-400"><x-icon name="badge-check" class="h-4 w-4" /> {{ __('checkout.compat_yes') }}</p>
-                @elseif ($deviceResult === false)
-                    {{-- Warning, not a hard block (Prompt 10 §3): some buyers are purchasing
-                         for a second device or gifting the eSIM, so we surface the risk and
-                         require an explicit acknowledgment click rather than preventing checkout. --}}
-                    <p class="mt-2 flex items-center gap-1 text-xs font-medium text-amber-600 dark:text-amber-400"><x-icon name="alert-triangle" class="h-4 w-4" /> {{ __('checkout.compat_no') }}</p>
-                @elseif ($deviceResult === null && $device !== '')
-                    <p class="mt-2 text-xs text-amber-600 dark:text-amber-400">{{ __('checkout.compat_unsure', ['howToCheck' => \App\Support\Niche\DeviceCompat::howToCheck()]) }}</p>
-                @endif
-
-                <label class="mt-3 flex items-start gap-2 text-xs text-slate-600 dark:text-slate-300">
-                    <input type="checkbox" wire:model.live="deviceConfirmed" class="mt-0.5 rounded text-primary">
-                    @if ($deviceResult === false)
-                        <span>{{ __('checkout.confirm_incompatible') }}</span>
-                    @else
-                        <span>{{ __('checkout.confirm_compatible') }}</span>
-                    @endif
+            {{-- Device-compatibility check: runs BEFORE purchase (Section 32). --}}
+            <x-nx.step icon="phone" :title="__('checkout.compat_heading')" :hint="__('checkout.compat_subheading')" />
+            <div style="display:flex;gap:8px;align-items:center">
+                <label class="ns-search" style="flex:1;min-width:0;margin-top:0">
+                    <x-nx.icon name="search" />
+                    <input wire:model="device" type="text" placeholder="{{ __('checkout.device_placeholder') }}" aria-label="{{ __('checkout.compat_heading') }}">
                 </label>
+                <button type="button" class="ns-btn" style="height:54px" wire:click="checkDevice" wire:loading.attr="disabled" wire:target="checkDevice">{{ __('checkout.check') }}</button>
             </div>
 
-            {{-- Shared plan (Prompt 11 §3): only shown when the buyer has at
-                 least one ACCEPTED shared-plan membership. Defaults to their
-                 own wallet — this never changes existing checkout behaviour
-                 for anyone without a shared plan. --}}
-            @if ($sharedPlans->isNotEmpty())
-                <div class="mt-4">
-                    <label class="mb-1.5 block text-xs font-medium text-slate-500 dark:text-slate-400">{{ __('checkout.pay_from_heading') }}</label>
-                    <select wire:model.live="payFromGroupMemberId"
-                            class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-900 focus:border-primary focus:ring-2 focus:ring-primary/40 dark:border-[var(--brand-card-border-dark)] dark:bg-[#243352] dark:text-slate-100">
-                        <option value="">{{ __('checkout.pay_from_own_wallet') }}</option>
-                        @foreach ($sharedPlans as $plan_member)
-                            <option value="{{ $plan_member->id }}">
-                                {{ __('checkout.pay_from_shared_plan', ['name' => $plan_member->walletGroup->owner->name ?? 'A NaaraSim user']) }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
+            @if ($deviceResult === true)
+                <x-nx.note icon="check">{{ __('checkout.compat_yes') }}</x-nx.note>
+            @elseif ($deviceResult === false)
+                {{-- Warning, not a hard block (Prompt 10 §3): some buyers purchase for a second device or gift the eSIM, so the risk is
+                     surfaced and an explicit acknowledgment is required rather than preventing checkout. --}}
+                <x-nx.note icon="info" variant="warn">{{ __('checkout.compat_no') }}</x-nx.note>
+            @elseif ($deviceResult === null && $device !== '')
+                <x-nx.note icon="info" variant="warn">{{ __('checkout.compat_unsure', ['howToCheck' => \App\Support\Niche\DeviceCompat::howToCheck()]) }}</x-nx.note>
             @endif
 
-            <button type="button" wire:click="purchase" wire:loading.attr="disabled" wire:target="purchase"
-                    @disabled(! $deviceConfirmed)
-                    class="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-br from-primary via-primary-dark to-navy px-4 py-3.5 font-bold text-white shadow-lg shadow-primary/25 transition hover:-translate-y-0.5 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-primary/50 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0">
-                <span wire:loading.remove wire:target="purchase" class="inline-flex items-center gap-2">
-                    <x-icon name="shield-check" class="h-5 w-5" /> {{ __('checkout.pay_with_wallet') }}
-                </span>
-                <span wire:loading wire:target="purchase" class="inline-flex items-center gap-2">
-                    <x-ui.spinner class="h-5 w-5" /> {{ __('checkout.processing') }}
-                </span>
-            </button>
-            <p class="mt-3 text-center text-xs text-slate-400 dark:text-slate-500">{!! __('checkout.wallet_disclaimer', ['refundPolicy' => '<a href="'.route('refund-policy').'" class="text-primary hover:underline">'.__('checkout.refund_policy').'</a>']) !!}</p>
+            <label class="ns-chk" style="cursor:pointer">
+                <input type="checkbox" wire:model.live="deviceConfirmed" class="ns-check-input">
+                <div><small style="font-size:14px;color:rgb(var(--nx-text-2))">{{ $deviceResult === false ? __('checkout.confirm_incompatible') : __('checkout.confirm_compatible') }}</small></div>
+            </label>
+
+            {{-- Shared plan (Prompt 11 §3): only shown with at least one ACCEPTED shared-plan membership; defaults to the member's own wallet. --}}
+            @if ($sharedPlans->isNotEmpty())
+                <div class="ns-lbl" style="margin-top:20px">{{ __('checkout.pay_from_heading') }}</div>
+                <select wire:model.live="payFromGroupMemberId" class="ns-select" aria-label="{{ __('checkout.pay_from_heading') }}">
+                    <option value="">{{ __('checkout.pay_from_own_wallet') }}</option>
+                    @foreach ($sharedPlans as $plan_member)
+                        <option value="{{ $plan_member->id }}">{{ __('checkout.pay_from_shared_plan', ['name' => $plan_member->walletGroup->owner->name ?? 'A NaaraSim user']) }}</option>
+                    @endforeach
+                </select>
+            @endif
+
+            {{-- Taxes & fees (Prompt 10): no separate tax or fee is charged on top of the retail price shown, so the customer is never
+                 left wondering whether something will be added before Pay. Gold CTA: it commits wallet funds. --}}
+            <x-nx.price-bar :fees-label="__('checkout.taxes_and_fees')" fees="$0.00" :pay-label="__('checkout.you_pay')" :total="$__total" :local="$__local" style="margin:20px -16px -28px">
+                @if ($couponPrice !== null)<x-nx.note icon="check">{{ __('checkout.you_save', ['amount' => '$'.number_format($couponSaved, 2)]) }}</x-nx.note>@endif
+                <x-nx.cta variant="gold" wire:click="purchase" loading="purchase" :disabled="! $deviceConfirmed">
+                    <span wire:loading.remove wire:target="purchase" class="ns-cta__label"><x-nx.icon name="shield" /> {{ __('checkout.pay_with_wallet') }}</span>
+                    <span wire:loading wire:target="purchase" class="ns-cta__label"><x-ui.spinner class="h-5 w-5" /> {{ __('checkout.processing') }}</span>
+                </x-nx.cta>
+                <x-nx.note icon="info">{!! __('checkout.wallet_disclaimer', ['refundPolicy' => '<a href="'.route('refund-policy').'" style="text-decoration:underline">'.__('checkout.refund_policy').'</a>']) !!}</x-nx.note>
+            </x-nx.price-bar>
         @endif
     </div>
+</x-nx.page>
 </div>

@@ -31,9 +31,9 @@ class NumbersBentoTest extends TestCase
         // Row 1: Verify (4) + Rent (2). Naara Line is full-width (span 6), so
         // is Contact Management; Internet Calls + Call Forwarding are halves (3).
         $bySpan = collect($cards)->keyBy('key');
-        $this->assertSame(4, $bySpan['verify']['span']);
+        $this->assertSame(3, $bySpan['verify']['span']);
         $this->assertTrue($bySpan['verify']['tall']);
-        $this->assertSame(2, $bySpan['rent']['span']);
+        $this->assertSame(3, $bySpan['rent']['span']);
         $this->assertSame(6, $bySpan['line']['span']);
         $this->assertSame(6, $bySpan['contact_management']['span']);
         $this->assertSame(3, $bySpan['internet_calls']['span']);
@@ -173,20 +173,19 @@ class NumbersBentoTest extends TestCase
     }
 
     /**
-     * Frontend-UX-fix blueprint Phase E — the title span now truncates to one
-     * line (`truncate`) instead of growing the card unboundedly, and its `h3`
-     * carries `flex-1` so it actually claims the row's remaining width rather
-     * than collapsing to its own near-zero max-content size next to the fixed
-     * icon — both load-bearing for the fix (reproduced live: without
-     * `flex-1`, even the plain default "Verify" title vanished entirely on
-     * the narrow mobile card, not just an overly long custom one).
+     * Phase E regression, restated for the skin components: a long admin-set title must never grow a card without bound or push its
+     * neighbours around. The card is a flex column with `min-width:0` (it can shrink inside the 2-col grid) and the title is a plain
+     * <h3> inside it; nothing positions a badge over the text any more (the badge sits in the card's top row).
      */
-    public function test_the_bento_title_truncates_instead_of_growing_the_card_unboundedly(): void
+    public function test_the_bento_title_cannot_grow_the_card_unboundedly(): void
     {
-        $html = file_get_contents(resource_path('views/partials/numbers-bento.blade.php'));
+        $card = file_get_contents(resource_path('views/components/nx/bento-card.blade.php'));
+        $css = file_get_contents(resource_path('css/nx-components.css'));
 
-        $this->assertStringContainsString('flex-1 font-display', $html);
-        $this->assertMatchesRegularExpression('/class="truncate w-full font-bold text-primary/', $html);
+        $this->assertStringContainsString('<h3>{{ $card[\'title\'] }}</h3>', $card);
+        $this->assertStringNotContainsString('absolute right-2.5 top-2.5', $card, 'the badge must not overlay the title');
+        $this->assertMatchesRegularExpression('/\.ns-card\{[^}]*flex-direction:column[^}]*min-width:0/', $css);
+        $this->assertMatchesRegularExpression('/\.ns-grid\{[^}]*minmax\(0,1fr\)/', $css);
     }
 
 }

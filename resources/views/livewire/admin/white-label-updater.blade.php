@@ -114,6 +114,19 @@
                 </div>
                 <p class="mt-3 text-xs text-slate-500 dark:text-slate-400">To unlock more, contact the original platform operator — once your account is upgraded, use “Refresh now”.</p>
             @endif
+
+            {{-- Skin allowance (Prompt 22): the number comes from the original platform; this only shows it and links to the picker. --}}
+            <div class="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-slate-200 pt-3 dark:border-[#2D4060]">
+                <p class="text-sm text-slate-700 dark:text-slate-200">
+                    <x-icon name="sparkles" class="mr-1 inline h-4 w-4 text-teal-600 dark:text-teal-300" />
+                    @if (\App\Support\Appearance\LicensedSkins::activated())
+                        Your licence unlocks <strong>{{ \App\Support\Appearance\LicensedSkins::allowance() }}</strong> {{ \Illuminate\Support\Str::plural('skin', \App\Support\Appearance\LicensedSkins::allowance()) }}.
+                    @else
+                        Skin allowance not received yet — one skin is offered until this instance checks in.
+                    @endif
+                </p>
+                <a href="{{ route('admin.skins') }}" wire:navigate class="text-sm font-semibold text-teal-700 hover:underline dark:text-teal-300">Choose your skins</a>
+            </div>
         </div>
 
         {{-- Fallback: manual upload (unchanged from Batch 2) --}}

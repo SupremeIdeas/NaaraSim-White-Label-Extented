@@ -1,0 +1,82 @@
+<?php
+
+return [
+    'menu' => 'Mwonekano',
+    'back' => 'Rudi',
+    'title' => 'Mwonekano',
+    'subtitle' => 'Chagua jinsi Naara inavyoonekana kwako. Akaunti yako tu ndiyo inabadilika.',
+    'only_you' => 'Imehifadhiwa kwenye akaunti yako pekee. Hakuna mtu mwingine anayeathirika.',
+    'locked' => 'Mwonekano unasimamiwa na mwendeshaji wako.',
+    'saved' => 'Imehifadhiwa kwenye akaunti yako',
+    'default' => 'Chaguomsingi',
+    'mode_label' => 'Hali',
+    'mode' => [
+        'light' => 'Mwanga',
+        'dark' => 'Giza',
+        'system' => 'Mfumo',
+    ],
+    'skin_label' => 'Mandhari (:count zinapatikana)',
+    'accent_label' => 'Rangi ya msisitizo',
+    'custom' => 'Maalum',
+    'pick_colour' => 'Chagua rangi',
+    'hex_label' => 'Rangi ya hex',
+    'reset_accent' => 'Rudisha chaguomsingi',
+    'custom_ok' => 'Inasomeka kwenye vitufe na maandishi.',
+    'custom_adjusted' => 'Imerekebishwa kidogo ili vitufe na maandishi visomeke.',
+    'custom_hint' => 'Chagua rangi yoyote. Tunaiweka isomeke kiotomatiki. Kurudisha kunarejesha :default.',
+    'accent_note' => 'Msisitizo hubadilisha rangi ya vitufe, chaguzi na vivutio. Dhahabu (pesa), rangi za hali na bendera havibadiliki kamwe.',
+    'personalise' => 'Binafsisha',
+    'reset_all' => 'Rudisha ubinafsishaji wote',
+    'preview' => [
+        'verify' => 'Thibitisha',
+        'verify_text' => 'Pokea misimbo ya OTP.',
+        'rent' => 'Kodi',
+        'rent_text' => 'Namba za muda.',
+        'cta' => 'Pata msimbo wangu',
+    ],
+    'dial' => [
+        'round' => 'Mviringo wa pembe',
+        'dens' => 'Msongamano',
+        'ts' => 'Ukubwa wa maandishi',
+        'depth' => 'Kina cha kadi',
+        'font' => 'Aina ya herufi',
+        'motion' => 'Mwendo',
+    ],
+    'dial_option' => [
+        'round' => [
+            'def' => 'Chaguomsingi',
+            'sharp' => 'Pembe kali',
+            'round' => 'Mviringo',
+        ],
+        'dens' => [
+            'comf' => 'Starehe',
+            'compact' => 'Finyu',
+        ],
+        'ts' => [
+            'def' => 'Chaguomsingi',
+            's' => 'Ndogo',
+            'l' => 'Kubwa',
+        ],
+        'depth' => [
+            'soft' => 'Laini',
+            'flat' => 'Bapa',
+            'deep' => 'Kina',
+        ],
+        'font' => [
+            'naara' => 'Naara',
+            'system' => 'Mfumo',
+            'serif' => 'Vichwa vya serif',
+            'mono' => 'Namba za mono',
+        ],
+        'motion' => [
+            'full' => 'Kamili',
+            'reduced' => 'Pungufu',
+        ],
+    ],
+    'err' => [
+        'locked' => 'Mwonekano unasimamiwa na mwendeshaji wako.',
+        'slow_down' => 'Mabadiliko mengi mno. Subiri kidogo.',
+        'invalid' => 'Chaguo hilo halipatikani.',
+        'hex' => 'Tumia rangi ya hex kama #8b5cf6.',
+    ],
+];
