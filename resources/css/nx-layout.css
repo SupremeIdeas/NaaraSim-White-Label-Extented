@@ -1066,3 +1066,14 @@ html[data-nx-skin] .nx-lang-chip:focus-visible, html[data-nx-skin] .nx-lang__opt
 .ns-plan .ns-row__price { flex: none; white-space: nowrap; }
 .ns-plan .ns-chevron { flex: none; }
 .ns-plan .ns-row__label { flex: 1 1 0; min-width: 0; }
+
+/* ===== Standard phone gutters =====
+   The app shell's <main> already supplies the 16px page gutter, and `.ns-app__body` added another 16px inside it: 32px each side, which left only
+   286 of 350px for content on a phone (owner: spacing too big on the Naara Surface skin). Inside the shell the body now adds no horizontal
+   padding, so there is ONE gutter (16px), and the vertical rhythm tightens to match. Desktop is unchanged. */
+@media (max-width: 640px) {
+  [data-nx-page] .ns-app__body { padding: 8px 0 20px; }
+  [data-nx-page] .ns-app--flush > .ns-app__body { padding-bottom: 24px; }
+  [data-nx-page] .ns-showcase-grid, [data-nx-page] .ns-cards-grid { margin-top: 14px; }
+  [data-nx-page] .ns-pg__card { padding: 16px; }
+}
