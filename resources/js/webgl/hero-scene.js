@@ -9,6 +9,7 @@
 // guards prefers-reduced-motion; the CSS fallback stays put if WebGL is absent.
 
 import * as THREE from 'three';
+import { fatLattice, fatArc, recolour, arcPulse, syncResolution, isDarkPage, watchTheme } from './lines.js';
 
 const TEAL = 0x0a6e6e;
 const TEAL_LIGHT = 0x2dd4bf;
@@ -109,11 +110,9 @@ function mountPlanet(canvas) {
     );
     world.add(planet);
 
+    let dark = isDarkPage();
     const latticeGeo = new THREE.EdgesGeometry(new THREE.IcosahedronGeometry(2.14, 3));
-    const lattice = new THREE.LineSegments(
-        latticeGeo,
-        new THREE.LineBasicMaterial({ color: GOLD, transparent: true, opacity: 0.3 }),
-    );
+    const lattice = fatLattice(latticeGeo, { dark, width: 1.6 });
     world.add(lattice);
 
     // Orbiting connectivity nodes.
@@ -147,10 +146,9 @@ function mountPlanet(canvas) {
         const b = surfacePoint();
         const mid = a.clone().add(b).multiplyScalar(0.5).setLength(2.9);
         const curve = new THREE.QuadraticBezierCurve3(a, mid, b);
-        const geo = new THREE.BufferGeometry().setFromPoints(curve.getPoints(40));
-        const mat = new THREE.LineBasicMaterial({ color: GOLD, transparent: true, opacity: 0.5 });
-        arcMats.push({ mat, phase: Math.random() * Math.PI * 2 });
-        arcs.add(new THREE.Line(geo, mat));
+        const line = fatArc(curve.getPoints(40), { dark, width: 2.8 });
+        arcMats.push({ mat: line.material, phase: Math.random() * Math.PI * 2 });
+        arcs.add(line);
     }
 
     // Faint starfield for depth.
@@ -178,12 +176,16 @@ function mountPlanet(canvas) {
     scene.add(rim);
 
     const { target, dispose: disposePointer } = pointerParallax(0.5);
+    // The lines follow the page theme: deep teal/amber on a light page, the light mint scent colour on a dark one.
+    const disposeTheme = watchTheme((d) => { dark = d; recolour(lattice, d); arcs.children.forEach((l) => recolour(l, d)); });
+    const fat = [lattice, ...arcs.children];
 
     stage.setUpdate((t) => {
+        syncResolution(stage.renderer, fat);
         world.rotation.y = t * 0.1;
         world.rotation.x = Math.sin(t * 0.18) * 0.1;
         nodes.rotation.y = -t * 0.05;
-        arcMats.forEach(({ mat, phase }) => { mat.opacity = 0.25 + 0.35 * (0.5 + 0.5 * Math.sin(t * 1.6 + phase)); });
+        arcMats.forEach(({ mat, phase }) => { mat.opacity = arcPulse(dark, t, phase); });
         camera.position.x += (target.x * 1.3 - camera.position.x) * 0.04;
         camera.position.y += (-target.y * 1.3 - camera.position.y) * 0.04;
         camera.lookAt(0, -0.85, 0);
@@ -191,6 +193,7 @@ function mountPlanet(canvas) {
 
     return () => stage.teardown(() => {
         disposePointer();
+        disposeTheme();
         planetGeo.dispose();
         planet.material.dispose();
         latticeGeo.dispose();

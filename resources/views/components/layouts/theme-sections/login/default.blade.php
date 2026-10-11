@@ -42,8 +42,8 @@
                 <x-flag-orbit tone="dark" />
             @endif
 
-            <div class="relative flex h-full flex-col justify-between p-8 pb-[calc(2rem+30px)] lg:p-12">
-                <a href="{{ route('home') }}" class="inline-flex">
+            <div class="relative flex h-full min-h-[8.5rem] flex-col justify-between p-8 pb-[calc(2rem+30px)] lg:min-h-0 lg:p-12">
+                <a href="{{ route('home') }}" class="hidden lg:inline-flex">
                     <x-brand-logo variant="family" theme="dark" size="lg" fallback-icon="signal" />
                 </a>
                 <div class="hidden lg:block">

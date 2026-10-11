@@ -27,8 +27,8 @@
             @endif
             <div class="pointer-events-none absolute inset-0 bg-gradient-to-br from-navy/50 via-transparent to-navy/60"></div>
 
-            <div class="relative flex h-full flex-col justify-between p-8 lg:p-12">
-                <a href="{{ route('home') }}" class="inline-flex">
+            <div class="relative flex h-full min-h-[8rem] flex-col justify-between p-8 lg:min-h-0 lg:p-12">
+                <a href="{{ route('home') }}" class="hidden lg:inline-flex">
                     <x-brand-logo variant="family" theme="dark" size="lg" fallback-icon="signal" />
                 </a>
                 <div class="hidden lg:block">

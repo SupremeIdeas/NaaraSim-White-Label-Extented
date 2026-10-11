@@ -28,8 +28,8 @@
             @endif
             <div class="pointer-events-none absolute inset-0 bg-gradient-to-b from-navy/40 via-navy/60 to-navy"></div>
 
-            <div class="relative flex items-center justify-between">
-                <a href="{{ route('home') }}" class="inline-flex">
+            <div class="relative flex min-h-[7rem] items-center justify-between lg:min-h-0">
+                <a href="{{ route('home') }}" class="hidden lg:inline-flex">
                     <x-brand-logo variant="family" theme="dark" size="lg" fallback-icon="signal" />
                 </a>
                 <span class="hidden items-center gap-1.5 border border-accent/60 bg-accent/15 px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-[0.15em] text-accent [clip-path:polygon(10%_0,100%_0,90%_100%,0_100%)] lg:inline-flex">

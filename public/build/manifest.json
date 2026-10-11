@@ -3,6 +3,10 @@
     "file": "assets/_commonjsHelpers-CqkleIqs.js",
     "name": "_commonjsHelpers"
   },
+  "_lines-N_6Cqf0Q.js": {
+    "file": "assets/lines-N_6Cqf0Q.js",
+    "name": "lines"
+  },
   "_lottie-DG5NakNH.js": {
     "file": "assets/lottie-DG5NakNH.js",
     "name": "lottie",
@@ -10,10 +14,6 @@
     "imports": [
       "__commonjsHelpers-CqkleIqs.js"
     ]
-  },
-  "_three.module-DAbQJLGd.js": {
-    "file": "assets/three.module-DAbQJLGd.js",
-    "name": "three.module"
   },
   "node_modules/@twilio/voice-sdk/esm/twilio.js": {
     "file": "assets/twilio-C5IOeHeB.js",
@@ -2199,7 +2199,7 @@
     "src": "node_modules/flag-icons/flags/4x3/zw.svg"
   },
   "resources/css/app.css": {
-    "file": "assets/app-Ckt94L9M.css",
+    "file": "assets/app-FeNl0YFK.css",
     "src": "resources/css/app.css",
     "isEntry": true
   },
@@ -2246,7 +2246,7 @@
     "isDynamicEntry": true
   },
   "resources/js/app.js": {
-    "file": "assets/app-CZep9Cuv.js",
+    "file": "assets/app-BNkaRVl_.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
@@ -2268,7 +2268,7 @@
     ]
   },
   "resources/js/composer/composer.js": {
-    "file": "assets/composer-CA3sBmNc.js",
+    "file": "assets/composer-X04UnGHO.js",
     "name": "composer",
     "src": "resources/js/composer/composer.js",
     "isDynamicEntry": true,
@@ -2286,7 +2286,7 @@
     "isDynamicEntry": true
   },
   "resources/js/dialer.js": {
-    "file": "assets/dialer-CJYM4WQJ.js",
+    "file": "assets/dialer-DUcqHr9I.js",
     "name": "dialer",
     "src": "resources/js/dialer.js",
     "isDynamicEntry": true,
@@ -2298,21 +2298,21 @@
     ]
   },
   "resources/js/webgl/hero-scene.js": {
-    "file": "assets/hero-scene-DpH_wwuW.js",
+    "file": "assets/hero-scene-Bw3Pc6IK.js",
     "name": "hero-scene",
     "src": "resources/js/webgl/hero-scene.js",
     "isDynamicEntry": true,
     "imports": [
-      "_three.module-DAbQJLGd.js"
+      "_lines-N_6Cqf0Q.js"
     ]
   },
   "resources/js/webgl/login-scene.js": {
-    "file": "assets/login-scene-Cn9XdpYY.js",
+    "file": "assets/login-scene-3Rq0bOAn.js",
     "name": "login-scene",
     "src": "resources/js/webgl/login-scene.js",
     "isDynamicEntry": true,
     "imports": [
-      "_three.module-DAbQJLGd.js"
+      "_lines-N_6Cqf0Q.js"
     ]
   }
 }

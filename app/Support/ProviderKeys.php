@@ -317,12 +317,29 @@ class ProviderKeys
             return null;
         }
 
+        // A saved SECRET never shows a single character of itself (not its tail, not its length): a fixed mask only. Plain settings
+        // (account ids, URLs, modes) keep a short tail so the admin can tell which one is saved.
+        if (self::isSecretField($field)) {
+            return str_repeat('•', 8);
+        }
+
         $len = strlen($value);
         if ($len <= 4) {
             return str_repeat('•', $len);
         }
 
         return str_repeat('•', min($len - 4, 12)).substr($value, -4);
+    }
+
+    public static function isSecretField(string $field): bool
+    {
+        foreach (self::schema() as $group) {
+            if (isset($group['fields'][$field])) {
+                return (bool) ($group['fields'][$field]['secret'] ?? false);
+            }
+        }
+
+        return false;
     }
 
     public static function flush(): void

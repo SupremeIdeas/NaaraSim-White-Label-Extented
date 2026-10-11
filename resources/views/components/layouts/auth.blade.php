@@ -14,5 +14,8 @@
          this at any built style family via ThemePreset::sectionStyle('login')
          — 'default' (below) is the original, unmodified markup, so every
          existing theme keeps rendering today's exact login screen. --}}
-    @include('components.layouts.theme-sections.login.'.\App\Support\ThemePreset::sectionStyle('login'))
+    {{-- data-glow-fields: the fields in every sign-in form glow while typed in (resources/css/field-glow.css). `contents` keeps the layout untouched. --}}
+    <div data-glow-fields class="contents">
+        @include('components.layouts.theme-sections.login.'.\App\Support\ThemePreset::sectionStyle('login'))
+    </div>
 </x-layouts.app>

@@ -9,6 +9,7 @@
 // teardown so nothing leaks when the SPA navigates away.
 
 import * as THREE from 'three';
+import { fatLattice, syncResolution } from './lines.js';
 
 const TEAL = 0x0a6e6e;
 const TEAL_LIGHT = 0x2dd4bf;
@@ -39,10 +40,8 @@ export function mountLoginScene(canvas) {
     world.add(planet);
 
     // 2) The gold connectivity lattice over the planet.
-    const lattice = new THREE.LineSegments(
-        new THREE.EdgesGeometry(new THREE.IcosahedronGeometry(1.74, 2)),
-        new THREE.LineBasicMaterial({ color: GOLD, transparent: true, opacity: 0.35 }),
-    );
+    // The login panel is dark navy in BOTH page themes, so its lattice always uses the light mint scent colour, thick enough to read across the flags.
+    const lattice = fatLattice(new THREE.EdgesGeometry(new THREE.IcosahedronGeometry(1.74, 2)), { dark: true, width: 2.2 });
     world.add(lattice);
 
     // 3) Orbiting connectivity nodes (glowing points on an inclined ring).
@@ -102,6 +101,7 @@ export function mountLoginScene(canvas) {
     function frame() {
         if (!running) return;
         const t = clock.getElapsedTime();
+        syncResolution(renderer, [lattice]);
         world.rotation.y = t * 0.12;
         world.rotation.x = Math.sin(t * 0.2) * 0.12;
         nodes.rotation.y = -t * 0.06;
