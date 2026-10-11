@@ -9,6 +9,12 @@
 
 ## DONE
 
+### Engineering v3 Phases 2-3 (generic parts, ported from master) (2026-10-11)
+- Wallet tabs / quick amounts "hang until refresh": root-caused to `<x-nx.page>` being the first element of a Livewire view (Livewire put `wire:id` on the inner div, so outer Alpine state was wiped by the first update). 13 views here now start with a plain `<div>` root; `LivewireRootsTest` guards it (it also caught `admin/skin-selection`).
+- Payout gateway status: `GatewayStatusResolver` reports why a rail is not usable (no key / key for the other environment / not installed / switched off / breaker tripped); `AutomationStatus` reads the registry; `RailAdvisor` says "not open yet" vs "temporarily unavailable" (breaker only). Adding the same bank account twice gets a friendly message.
+- Reward check-in is race-safe and writes a bell notification. Wallet tab buttons meet the 44px touch minimum.
+- Master-only and NOT ported: the probe layer and Payout Health panel (Bootstrap tooling), `naara:verify` checks, Grey/NOWPayments hooks.
+
 ### Engineering v3 Phase 1: shared UI primitives (2026-10-11)
 - **Liquid-fill upload progress** (`resources/js/nx-upload.js` + `nx-upload.css`): one card for every upload surface. Livewire uploads are picked up automatically from the `livewire-upload-*` events (about 50 `WithFileUploads` components covered with no per-component change); XHR/chunked uploaders call `window.nxUpload.track()`. States preparing, uploading, processing, done, failed, cancelled; Cancel and Retry; `role=progressbar`, 25/50/75/100 announcements, plain bar under reduced motion. The master chunked video uploader is wired to it.
 - **Layer manager** (`nx-layers.js`/`nx-layers.css`): `--nx-dock-h` and `--nx-header-h` measured live; the app shell reserves the real dock height instead of a fixed `pb-28`; floating buttons hide while a text field has the keyboard; one documented z-index scale (modal 80, toast 100, call 120; modals no longer sit above toasts); `window.nxLayers.audit()` lists text covered by a fixed layer.

@@ -40,6 +40,7 @@ return [
     'reason_no_fast_rail_in_country' => 'Aucun moyen plus rapide ne couvre votre pays.',
     'reason_global_payout_available' => 'Le paiement mondial est ouvert pour votre pays.',
     'reason_temporarily_unavailable' => 'Momentanément indisponible.',
+    'reason_not_open_yet' => 'Pas encore ouvert.',
     'reason_coming_soon' => 'Le prestataire couvre votre pays ; nous ne l\'avons pas encore activé.',
     'reason_not_supported' => 'Non couvert dans votre pays.',
     'reason_blocked' => 'Non disponible.',

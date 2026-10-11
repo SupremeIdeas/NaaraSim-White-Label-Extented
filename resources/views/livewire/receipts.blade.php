@@ -1,4 +1,5 @@
 {{-- Receipts on the skin system (S3 Batch 3): every purchase as a list row, same "Email me" resend and pagination. --}}
+<div>
 <x-nx.page class="ns-narrow">
     <h1 class="ns-h1" style="margin-top:6px">Receipts</h1>
     <p class="ns-sub">Every purchase, for your records. Save, re-view, or resend any receipt to your email.</p>
@@ -25,3 +26,4 @@
 
     <div style="margin-top:18px">{{ $receipts->links() }}</div>
 </x-nx.page>
+</div>

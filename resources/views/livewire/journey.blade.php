@@ -1,5 +1,6 @@
 {{-- My Journey on the skin system (S3 Batch 3): milestones as a timeline of nodes + cards, goals with progress bars, travel stamps. Same data,
      tabs and rules as before. --}}
+<div>
 <x-nx.page class="ns-narrow">
     <h1 class="ns-h1" style="margin-top:6px">My Journey</h1>
     <p class="ns-sub">Your rewards path and your connectivity history — built from your own activity.</p>
@@ -106,3 +107,4 @@
         @endif
     @endif
 </x-nx.page>
+</div>

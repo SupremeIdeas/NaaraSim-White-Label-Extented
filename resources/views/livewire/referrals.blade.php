@@ -1,5 +1,6 @@
 {{-- Referrals on the skin system (S3 Batch 3): the link lives on a primary card with a gold Copy action (as the wireframe), the refer-and-earn
      animation and every payout/earnings component stay. --}}
+<div>
 <x-nx.page class="ns-narrow" x-data="{ copied: false }">
     {{-- Hero: refer-and-earn illustration beside the copy (self-hosted Lottie, reduced-motion aware). Text flexes; the animation keeps a fixed size. --}}
     <div style="display:flex;align-items:center;gap:14px">
@@ -37,3 +38,4 @@
     <div class="ns-lbl" style="margin-top:30px;color:rgb(var(--nx-text));font-weight:600">Your cash earnings</div>
     <livewire:payout-dashboard earner-type="referral" />
 </x-nx.page>
+</div>

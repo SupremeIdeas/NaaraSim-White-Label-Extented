@@ -1,5 +1,6 @@
 {{-- Withdraw on the skin system (S3 Batch 2). Renders as a page at /rewards/withdraw and embedded in the Wallet's Payout tab (`bare`
      = no second canvas inside the Wallet's). Livewire bindings and server rules are unchanged. --}}
+<div>
 <x-nx.page :bare="$embedded">
     @if ($embedded)
         <h2 class="ns-h1" style="font-size:22px;margin:18px 0 0">Withdraw earnings</h2>
@@ -174,3 +175,4 @@
         <span wire:loading wire:target="withdraw" class="ns-cta__label"><x-ui.spinner class="h-4 w-4" /> Withdrawing…</span>
     </x-nx.cta>
 </x-nx.page>
+</div>

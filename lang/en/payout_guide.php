@@ -40,6 +40,7 @@ return [
     'reason_no_fast_rail_in_country' => 'No faster rail covers your country.',
     'reason_global_payout_available' => 'Global Payout is open for your country.',
     'reason_temporarily_unavailable' => 'Temporarily unavailable.',
+    'reason_not_open_yet' => 'Not open yet.',
     'reason_coming_soon' => 'The provider covers your country; we have not switched it on yet.',
     'reason_not_supported' => 'Not covered in your country.',
     'reason_blocked' => 'Not available.',

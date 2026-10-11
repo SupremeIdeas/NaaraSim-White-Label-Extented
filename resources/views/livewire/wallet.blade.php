@@ -1,5 +1,6 @@
 {{-- Wallet on the skin system (Prompt 20 §23, S3 Batch 2). Every Livewire binding, Alpine tab and server rule is unchanged; only the
      markup moved onto the x-nx components so the signed-in member's skin reaches it. --}}
+<div>
 <x-nx.page class="ns-narrow" x-data="{ tab: 'topup' }">
     <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
         <h1 class="ns-h1" style="margin:6px 0 0">Wallet</h1>
@@ -316,3 +317,4 @@
         @endif
     </div>
 </x-nx.page>
+</div>

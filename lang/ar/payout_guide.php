@@ -40,6 +40,7 @@ return [
     'reason_no_fast_rail_in_country' => 'لا يغطي أي مسار أسرع دولتك.',
     'reason_global_payout_available' => 'الدفع العالمي متاح لدولتك.',
     'reason_temporarily_unavailable' => 'غير متاح مؤقتًا.',
+    'reason_not_open_yet' => 'غير متاح بعد.',
     'reason_coming_soon' => 'المزوّد يغطي دولتك؛ لكننا لم نفعّله بعد.',
     'reason_not_supported' => 'غير مغطى في دولتك.',
     'reason_blocked' => 'غير متاح.',
