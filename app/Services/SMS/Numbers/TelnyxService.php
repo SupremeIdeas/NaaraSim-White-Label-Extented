@@ -5,6 +5,7 @@ namespace App\Services\SMS\Numbers;
 use App\Exceptions\OutOfStockException;
 use App\Models\Setting;
 use App\Services\SMS\NumberProviderInterface;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 
 /**
@@ -123,6 +124,30 @@ class TelnyxService implements NumberProviderInterface
         return $res->successful();
     }
 
+    /**
+     * Ed25519 over "{telnyx-timestamp}|{raw body}" with the portal public key. Rejects a missing key, a malformed signature, a stale timestamp (5 minute replay window) and
+     * anything that fails the check. Never throws: false means "do not trust this request".
+     */
+    public function verifyWebhook(Request $request, string $url): bool
+    {
+        $signature = $request->header('telnyx-signature-ed25519');
+        $timestamp = $request->header('telnyx-timestamp');
+        $publicKey = (string) config('services.telnyx.public_key');
+        if (! is_string($signature) || ! is_string($timestamp) || $publicKey === '' || ! ctype_digit($timestamp) || abs(time() - (int) $timestamp) > 300) {
+            return false;
+        }
+        $sig = base64_decode($signature, true);
+        $key = base64_decode($publicKey, true);
+        if ($sig === false || $key === false || strlen($sig) !== SODIUM_CRYPTO_SIGN_BYTES || strlen($key) !== SODIUM_CRYPTO_SIGN_PUBLICKEYBYTES) {
+            return false;
+        }
+        try {
+            return sodium_crypto_sign_verify_detached($sig, $timestamp.'|'.$request->getContent(), $key);
+        } catch (\Throwable) {
+            return false;
+        }
+    }
+
     public function sendSms(string $from, string $to, string $body, ?string $mediaUrl = null): array
     {
         if (! $this->configured()) {
@@ -132,6 +157,8 @@ class TelnyxService implements NumberProviderInterface
         $payload = array_filter([
             'from' => $from, 'to' => $to, 'text' => $body,
             'media_urls' => $mediaUrl !== null && $mediaUrl !== '' ? [$mediaUrl] : null,
+            // Per-message delivery webhook (takes priority over the profile's): the signed message.finalized report settles or refunds the charge.
+            'webhook_url' => route('webhooks.sms-delivery', ['provider' => 'telnyx']),
         ], fn ($v) => $v !== null && $v !== '');
         $res = $this->client()->post('/messages', $payload);
         if ($res->failed()) {

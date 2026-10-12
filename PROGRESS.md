@@ -4534,6 +4534,9 @@ Rate limits (Section 19.2): `api` limiter 300/min auth · 60/min public (on `rou
 
 ---
 
+### DONE 2026-10-12 — SMS delivery reports and queued send (ported from master, generic reliability)
+Same change as the Basic fork: signature-verified Twilio (X-Twilio-Signature) and Telnyx (Ed25519 message.finalized) delivery reports settle the charge, a final failure refunds once (idempotent, a delivered message never flips to failed; switch `sms.refund_on_failed_delivery`, default on), sends request the provider callback, Telnyx inbound texts are read, and the provider call runs in `SendOutboundSmsJob` after the request has charged and queued the message (a failure refunds in full). New `TelnyxService::verifyWebhook`, `TELNYX_PUBLIC_KEY`. Tests: `SmsProviderWebhookTest`, `MessageSenderTest`.
+
 ## NEXT  (build strictly top to bottom)
 
 ### ▶ TOP OF NEXT — Numbers/Verify/Rent catalogue sync: queued job + observability
