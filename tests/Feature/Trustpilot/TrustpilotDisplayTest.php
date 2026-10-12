@@ -14,7 +14,7 @@ class TrustpilotDisplayTest extends TestCase
     private function turnOn(array $extra = []): void
     {
         TP::put('enabled', true);
-        TP::put('business_unit_id', 'abc123');
+        TP::put('business_unit_id', '4f3e2d1c0b9a8f7e6d5c4b3a');
         TP::put('profile_url', 'https://www.trustpilot.com/review/example.com');
         foreach ($extra as $k => $v) {
             TP::put($k, $v);
@@ -41,7 +41,7 @@ class TrustpilotDisplayTest extends TestCase
     public function test_template_id_renders_official_trustbox_with_business_unit(): void
     {
         $this->turnOn(['placements' => ['auth.badge' => true], 'templates' => ['micro_combo' => '5419b6a8b0d04a076446a9ad']]);
-        $this->get('/login')->assertSee('data-template-id="5419b6a8b0d04a076446a9ad"', false)->assertSee('data-businessunit-id="abc123"', false);
+        $this->get('/login')->assertSee('data-template-id="5419b6a8b0d04a076446a9ad"', false)->assertSee('data-businessunit-id="4f3e2d1c0b9a8f7e6d5c4b3a"', false);
     }
 
     public function test_reviews_page_needs_the_page_switch(): void
@@ -75,5 +75,39 @@ class TrustpilotDisplayTest extends TestCase
         }
         TP::put('click_to_load', true);
         $this->get('/login')->assertDontSee('invitejs.trustpilot.com', false);
+    }
+
+    private function adminPanel()
+    {
+        $this->seed(\Database\Seeders\RoleSeeder::class);
+        $admin = \App\Models\User::factory()->create();
+        $admin->assignRole('admin');
+
+        return \Livewire\Livewire::actingAs($admin)->test(\App\Livewire\Admin\TrustpilotPanel::class);
+    }
+
+    public function test_an_admin_pastes_their_own_integration_key_and_it_is_the_one_served(): void
+    {
+        $this->turnOn();
+        $this->adminPanel()->assertSet('integrationKey', '')->set('integrationKey', 'NewKey12345678')->call('save')->assertHasNoErrors();
+        auth()->logout();
+        $this->get('/login')->assertSee("tp('register', \"NewKey12345678\")", false);
+    }
+
+    public function test_a_bad_key_is_rejected_by_the_panel_and_never_saved(): void
+    {
+        $this->adminPanel()->set('integrationKey', "x'); alert(1);//")->call('save')->assertHasErrors(['integrationKey']);
+        $this->assertSame('', TP::integrationKey());
+    }
+
+    public function test_the_script_is_in_the_head_once_and_no_key_ships_with_the_code(): void
+    {
+        $this->turnOn();
+        $this->get('/')->assertDontSee('invitejs.trustpilot.com', false);
+        TP::put('integration_key', 'ZZZZ1111yyyy2222');
+        $html = $this->get('/')->assertOk()->getContent();
+        $this->assertLessThan(strpos($html, '</head>'), strpos($html, 'invitejs.trustpilot.com'));
+        $this->assertSame(1, substr_count($html, "tp('register'"));
+        $this->assertFalse(class_exists(\App\Support\MasterMarketing\NaaraTrustpilotProfile::class), 'no master preset class exists here');
     }
 }
