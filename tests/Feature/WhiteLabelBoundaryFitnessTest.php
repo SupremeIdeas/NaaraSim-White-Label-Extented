@@ -111,6 +111,10 @@ class WhiteLabelBoundaryFitnessTest extends TestCase
                 if (preg_match('#merchant[_-]?widget#i', $rel) === 1) {
                     $found[] = $rel;
                 }
+                // The White Label purchase funnel (documents, balance payment, manual-payment accounts, hub, connect popup) sells the licence: master-only.
+                if (preg_match('#wl[_-]?funnel|wl[_-]?invoice|wl[_-]?balance|wl[_-]?hub|wl[_-]?secrets|whitelabel/funnel/|whitelabel/payments/|manual[_-]?payment|connect[_-]?prompt#i', $rel) === 1) {
+                    $found[] = $rel;
+                }
             }
         }
         $this->assertSame([], $found, 'N2N is permanently master-only and must not exist on a white-label build: '.implode(', ', array_slice($found, 0, 8)));

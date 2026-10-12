@@ -123,4 +123,14 @@ class ServiceIconsTest extends TestCase
             ->assertSee('Naara Gift')                    // a product line advertised on the front end
             ->assertSee('data-countup="190"', false);
     }
+
+    public function test_the_google_mark_is_pinned_and_every_google_service_name_resolves_to_it(): void
+    {
+        foreach (['google', 'Gmail', 'go', 'google voice', 'Google_Play', 'googlevoice'] as $name) {
+            $this->assertSame(['type' => 'sprite', 'id' => 'svc-google'], ServiceIcons::resolve($name, 'https://supplier.example/funny-google.png'), $name);
+        }
+        $this->assertSame('img', ServiceIcons::resolve('unknownservice', 'https://supplier.example/x.png')['type']);
+        $this->assertStringContainsString('#4285F4', file_get_contents(public_path('images/brand/google/google-g.svg')));
+        $this->assertStringContainsString('images/brand/google/google-g.svg', file_get_contents(resource_path('views/components/auth/google-button.blade.php')));
+    }
 }
