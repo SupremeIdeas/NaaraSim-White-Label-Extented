@@ -9,6 +9,9 @@
 
 ## DONE
 
+### Trustpilot invitation script (2026-10)
+- **Built:** JavaScript-integration script while Trustpilot is on, key pasted by the admin (none is shipped), CSP origin added, never loads behind click-to-load.
+
 ### Trustpilot reviews: display layer (2026-10, OFF by default)
 - **Built:** official TrustBox widgets or a profile link, Admin > More > Trustpilot reviews, CSP origins only while live, placements (home, rewards, auth, blog end), `/reviews` page (404 until on). See `docs/TRUSTPILOT-REVIEWS.md`.
 - **NOT built, on purpose:** invitations, review sync, review rewards.

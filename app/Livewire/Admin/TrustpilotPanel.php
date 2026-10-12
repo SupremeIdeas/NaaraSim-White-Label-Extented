@@ -18,6 +18,8 @@ class TrustpilotPanel extends Component
 
     public string $profileUrl = '';
 
+    public string $integrationKey = '';
+
     public string $locale = 'en-US';
 
     /** @var array<string, string> */
@@ -45,6 +47,7 @@ class TrustpilotPanel extends Component
         $this->enabled = TP::enabled();
         $this->businessUnitId = TP::businessUnitId();
         $this->profileUrl = TP::profileUrl();
+        $this->integrationKey = TP::integrationKey();
         $this->locale = TP::locale();
         foreach (array_keys(TP::WIDGET_TYPES) as $t) {
             $this->templates[$t] = TP::templateId($t);
@@ -68,6 +71,7 @@ class TrustpilotPanel extends Component
         $this->validate([
             'businessUnitId' => ['nullable', 'regex:/^[0-9a-f]{20,40}$/i'],
             'profileUrl' => ['nullable', 'url', 'max:200', 'regex:#^https://([a-z0-9-]+\.)?trustpilot\.com/#i'],
+            'integrationKey' => ['nullable', 'regex:/^[A-Za-z0-9]{8,40}$/'],
             'locale' => ['required', 'regex:/^[a-z]{2}-[A-Z]{2}$/'],
             'templates.*' => ['nullable', 'regex:/^[0-9a-f]{20,40}$/i'],
             'pageTitle' => ['nullable', 'max:80'],
@@ -77,6 +81,7 @@ class TrustpilotPanel extends Component
         TP::put('enabled', $this->enabled);
         TP::put('business_unit_id', trim($this->businessUnitId));
         TP::put('profile_url', trim($this->profileUrl));
+        TP::put('integration_key', trim($this->integrationKey));
         TP::put('locale', $this->locale);
         TP::put('templates', array_map('trim', $this->templates));
         TP::put('placements', array_map('boolval', $this->placements));

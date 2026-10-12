@@ -64,6 +64,9 @@ final class TrustpilotSettings
     public static function profileUrl(): string
     {
         $u = trim((string) self::get('profile_url', ''));
+        if ($u === '' && class_exists(\App\Support\MasterMarketing\NaaraTrustpilotProfile::class)) {
+            $u = \App\Support\MasterMarketing\NaaraTrustpilotProfile::URL;   // master only: a white label has no such class and starts empty
+        }
 
         return preg_match('#^https://([a-z0-9-]+\.)?trustpilot\.com/[\w./%-]+$#i', $u) === 1 ? $u : '';
     }
@@ -124,7 +127,33 @@ final class TrustpilotSettings
             $out[$dir] = array_values(array_filter(array_map('trim', $list), fn ($o) => preg_match('#^https://(\*\.)?[a-z0-9.-]+$#i', $o) === 1));
         }
 
+        if (self::inviteActive() && ! in_array('https://invitejs.trustpilot.com', $out['script-src'], true)) {
+            $out['script-src'][] = 'https://invitejs.trustpilot.com';
+        }
+
         return $out;
+    }
+
+    /** Trustpilot's review-invitation script key (public in page source, like any client-side id). Admin-saved wins; master falls back to its own preset, a white label starts empty. */
+    public static function integrationKey(): string
+    {
+        $k = trim((string) self::get('integration_key', ''));
+        if ($k === '' && class_exists(\App\Support\MasterMarketing\NaaraTrustpilotProfile::class)) {
+            $k = \App\Support\MasterMarketing\NaaraTrustpilotProfile::INTEGRATION_KEY;
+        }
+
+        return preg_match('/^[A-Za-z0-9]{8,40}$/', $k) === 1 ? $k : '';
+    }
+
+    /** The invitation script loads on every page only while the layer is on, a key exists, and visitors are not asked first (it would otherwise load before consent). */
+    public static function inviteActive(): bool
+    {
+        return self::enabled() && self::integrationKey() !== '' && ! self::clickToLoad();
+    }
+
+    public static function inviteScriptSrc(): string
+    {
+        return 'https://invitejs.trustpilot.com/tp.min.js';
     }
 
     /** Is the layer actually producing anything that needs the script? */
@@ -135,7 +164,7 @@ final class TrustpilotSettings
 
     public static function cspActive(): bool
     {
-        return self::active();
+        return self::active() || self::inviteActive();
     }
 
     public static function scriptSrc(): string

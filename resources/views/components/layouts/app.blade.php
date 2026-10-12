@@ -162,6 +162,7 @@
     @endif
     @if ($nx && ($nxCss = \App\Support\Appearance\AppearanceResolver::customAccentCss($nx)))<style id="nx-accent-vars">{!! $nxCss !!}</style>@endif
     @stack('head')
+    <x-trust.invite-script />
     @include('partials.tracking')
 </head>
 {{--

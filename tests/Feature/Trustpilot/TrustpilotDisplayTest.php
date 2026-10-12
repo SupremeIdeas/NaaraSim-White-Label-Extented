@@ -62,4 +62,18 @@ class TrustpilotDisplayTest extends TestCase
         $this->assertTrue(TP::enabled());
         $this->assertSame('4f3e2d1c0b9a8f7e6d5c4b3a', TP::businessUnitId());
     }
+
+    public function test_invite_script_needs_an_admin_key_and_never_loads_behind_click_to_load(): void
+    {
+        $this->turnOn();
+        $this->get('/login')->assertDontSee('invitejs.trustpilot.com', false);   // no key on a white label until the admin pastes one
+        TP::put('integration_key', 'ZZZZ1111yyyy2222');
+        $res = $this->get('/login')->assertSee('https://invitejs.trustpilot.com/tp.min.js', false)->assertSee('ZZZZ1111yyyy2222', false);
+        $csp = (string) $res->headers->get('Content-Security-Policy');
+        if ($csp !== '') {
+            $this->assertStringContainsString('https://invitejs.trustpilot.com', $csp);
+        }
+        TP::put('click_to_load', true);
+        $this->get('/login')->assertDontSee('invitejs.trustpilot.com', false);
+    }
 }
