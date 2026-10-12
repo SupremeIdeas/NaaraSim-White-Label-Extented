@@ -139,4 +139,10 @@ class BlogReaderTest extends TestCase
         $this->mk('Newest');
         $this->assertStringContainsString('Newest', $render() . view('components.blog.menu-preview')->render()) ;
     }
+
+    public function test_blog_preview_lives_in_the_global_menu_with_legal_not_in_the_more_sheet(): void
+    {
+        $this->assertStringContainsString('x-blog.menu-preview', file_get_contents(resource_path('views/components/global-sidebar.blade.php')));
+        $this->assertStringNotContainsString('menu-preview', file_get_contents(resource_path('views/components/more-sheet.blade.php')));
+    }
 }
