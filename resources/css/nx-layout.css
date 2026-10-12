@@ -667,8 +667,11 @@ select.ns-input { appearance: none; padding-inline-end: 34px; background-image: 
 .ns-dl__optcode { flex: none; font-size: 13px; font-weight: 600; color: rgb(var(--nx-text-2)); }
 .ns-dl__wallet { display: none; align-items: center; gap: 6px; height: 36px; padding: 0 14px; border-radius: 99px; font-size: 14px; font-weight: 700; color: rgb(var(--nx-teal-ink)); background: rgb(var(--nx-teal) / .14); }
 @media (min-width: 1024px) { .ns-dl__wallet { display: inline-flex; } }
-.ns-dl__display { position: relative; display: flex; align-items: center; justify-content: center; min-height: 52px; padding: 0 40px; }
-.ns-dl__num { width: 100%; text-align: center; font-size: 28px; font-weight: 600; letter-spacing: .02em; color: rgb(var(--nx-text)); background: transparent; border: 0; outline: 0; padding: 0; font-variant-numeric: tabular-nums; }
+.ns-dl__display { position: relative; display: flex; align-items: center; justify-content: center; min-height: 52px; min-width: 0; padding: 0 40px; direction: ltr; }
+.ns-dl__num { width: 100%; min-width: 0; direction: ltr; text-overflow: clip; text-align: center; font-size: clamp(22px, 7.4vw, 28px); font-weight: 600; letter-spacing: .02em; color: rgb(var(--nx-text)); background: transparent; border: 0; outline: 0; padding: 0; font-variant-numeric: tabular-nums; }
+.ns-dl__num.is-long { font-size: clamp(16px, 5.4vw, 21px); letter-spacing: 0; }   /* a long number shrinks instead of overflowing or moving anything else */
+.ns-dl__grid > div { min-width: 0; }
+.ns-dl__card { min-width: 0; overflow: clip; }
 .ns-dl__num::placeholder { color: rgb(var(--nx-text-3)); opacity: 1; }
 .ns-dl__bs { position: absolute; right: 0; width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; font-size: 22px; color: rgb(var(--nx-text-2)); }
 .ns-dl__bs:hover { background: rgb(var(--nx-surface-3)); }
@@ -678,8 +681,8 @@ select.ns-input { appearance: none; padding-inline-end: 34px; background-image: 
 .ns-dl__rate { font-size: 13.5px; font-weight: 600; color: rgb(var(--nx-teal-ink)); }
 .ns-dl__rate:disabled { opacity: .55; }
 .ns-dl__rate:not(:disabled):hover { text-decoration: underline; }
-.ns-dl__pad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px 24px; max-width: 19rem; margin: 18px auto 0; }
-.ns-dl__key { width: 66px; height: 66px; margin-inline: auto; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1; color: rgb(var(--nx-text)); background: rgb(var(--nx-surface-3)); box-shadow: inset 0 0 0 1px rgb(var(--nx-line)); transition: transform .1s, background .1s; user-select: none; touch-action: manipulation; }
+.ns-dl__pad { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(8px, 2.6vw, 14px) clamp(12px, 6vw, 26px); width: 100%; max-width: 19rem; margin: 18px auto 0; }   /* fixed 3x4 grid: nothing about the number can change it */
+.ns-dl__key { width: 100%; max-width: 72px; height: auto; aspect-ratio: 1; min-width: 0; margin-inline: auto; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1; color: rgb(var(--nx-text)); background: rgb(var(--nx-surface-3)); box-shadow: inset 0 0 0 1px rgb(var(--nx-line)); transition: transform .1s, background .1s; user-select: none; touch-action: manipulation; }
 .ns-dl__key b { font-size: 26px; font-weight: 600; }
 .ns-dl__key small { margin-top: 3px; font-size: 9.5px; font-weight: 700; letter-spacing: .18em; color: rgb(var(--nx-text-2)); }
 .ns-dl__key:active { transform: scale(.92); background: rgb(var(--nx-surface-2)); }
