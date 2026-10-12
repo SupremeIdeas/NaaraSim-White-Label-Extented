@@ -22,6 +22,16 @@ class VerifyEmailNotification extends VerifyEmail implements ShouldQueue
 {
     use Queueable;
 
+    /** The public confirmation route, so the link also works from another device or browser (see EmailConfirmationController). */
+    protected function verificationUrl($notifiable)
+    {
+        return \Illuminate\Support\Facades\URL::temporarySignedRoute(
+            'email.confirm',
+            now()->addMinutes((int) config('auth.verification.expire', 60)),
+            ['id' => $notifiable->getKey(), 'hash' => sha1($notifiable->getEmailForVerification())]
+        );
+    }
+
     public function toMail($notifiable): MailMessage
     {
         $url = $this->verificationUrl($notifiable);

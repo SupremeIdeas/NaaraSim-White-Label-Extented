@@ -39,7 +39,7 @@ class ReferralRewardService
             return null;
         }
 
-        return DB::transaction(function () use ($buyer, $referrer, $sourceType, $orderProfit) {
+        $earning = DB::transaction(function () use ($buyer, $referrer, $sourceType, $orderProfit) {
             // Lock the referral row so a concurrent order can't reward twice.
             $referral = Referral::where('referrer_id', $referrer->id)
                 ->where('referred_id', $buyer->id)
@@ -78,5 +78,12 @@ class ReferralRewardService
 
             return $earning;
         });
+
+        // After the commit, never inside it: a notification problem must not touch the money, and a queued job must not run before the row exists.
+        if ($earning) {
+            \App\Support\Notifications\Notify::event($referrer, 'reward.referral_credited', ['amount' => '$'.number_format((float) $earning->amount, 2)], dedupe: 'earning-'.$earning->id);
+        }
+
+        return $earning;
     }
 }

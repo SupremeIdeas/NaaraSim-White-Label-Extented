@@ -343,6 +343,23 @@ class AppServiceProvider extends ServiceProvider
 
         // Requested → the payee is told, with a "This wasn't me" link (Addendum D-3.5).
         Event::listen(\App\Events\PayoutRequested::class, \App\Listeners\NotifyPayoutRequested::class);
+        // Email confirmed: leave a persisted in-app record (Verified fires once; a re-click never reaches it).
+        Event::listen(\Illuminate\Auth\Events\Verified::class, function ($e) {
+            try {
+                $e->user->notify(new \App\Notifications\EmailVerifiedNotification);
+            } catch (\Throwable $ex) {
+                report($ex);   // a notification problem must never undo the confirmation
+            }
+        });
+        // Confirmed on another device? Show the toast at their next sign-in, once.
+        Event::listen(\Illuminate\Auth\Events\Login::class, function ($e) {
+            try {
+                if (\Illuminate\Support\Facades\Cache::pull(\App\Http\Controllers\EmailConfirmationController::PENDING_PREFIX.$e->user->getAuthIdentifier())) {
+                    session()->flash('flash_toast', \App\Http\Controllers\EmailConfirmationController::successToast());
+                }
+            } catch (\Throwable) {
+            }
+        });
 
         // Delivered / returned → the payee is told, in their language (PayoutStatusText).
         Event::listen(\App\Events\PayoutSettled::class, \App\Listeners\NotifyPayoutStatus::class);

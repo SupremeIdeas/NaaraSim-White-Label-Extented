@@ -45,6 +45,8 @@ class PayoutFreeze
             context: ['user_id' => $user->id, 'reason' => $reason],
         );
 
+        \App\Support\Notifications\Notify::event($user, 'payout.frozen', [], dedupe: 'freeze-'.$user->id.'-'.now()->format('YmdH'));
+
         return $cancelled;
     }
 

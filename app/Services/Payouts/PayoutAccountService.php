@@ -183,6 +183,7 @@ class PayoutAccountService
             throw new PayoutException('This account has a withdrawal in progress. You can remove it once that finishes.');
         }
 
+        $label = trim(($account->bank_name ?: ucfirst((string) $account->type)).' '.($account->account_name ? '('.$account->account_name.')' : ''));
         DB::transaction(function () use ($user, $account) {
             $wasDefault = $account->is_default;
             $accountId = $account->id;
@@ -195,6 +196,8 @@ class PayoutAccountService
 
             Auditor::log('payout.account_removed', 'PayoutAccount', $accountId, ['user_id' => $user->id]);
         });
+
+        \App\Support\Notifications\Notify::event($user, 'payout.bank_account_removed', ['account' => $label], dedupe: 'acct-removed-'.$account->id);
     }
 
     /**

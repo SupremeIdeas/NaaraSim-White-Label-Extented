@@ -64,6 +64,7 @@
             this.dismissHero();
         },
      }"
+     @if (session('flash_toast')) x-init="$nextTick(() => push(@js((array) session('flash_toast'))))" @endif
      x-on:nx-toast.window="push($event.detail)"
      x-on:keydown.escape.window="dismissHero()">
 
