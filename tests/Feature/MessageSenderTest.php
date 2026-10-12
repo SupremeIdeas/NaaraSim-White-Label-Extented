@@ -126,16 +126,31 @@ class MessageSenderTest extends TestCase
         $user = $this->fundedUser(usd: 5.0, smsCost: 0.10, throwOnSend: true);
         $line = $this->line($user);
 
-        try {
-            app(MessageSenderService::class)->send($user, $line, '+2348012345678', 'Hello');
-            $this->fail('Expected an SmsException.');
-        } catch (SmsException $e) {
-            // expected
-        }
+        // The provider call runs in a queued job now, so the person is not made to wait: the row ends failed and the wallet is whole again.
+        $msg = app(MessageSenderService::class)->send($user, $line, '+2348012345678', 'Hello');
 
-        // Never charged without delivering — balance restored, row marked failed.
+        $this->assertSame('failed', $msg->status);
         $this->assertSame('5.0000', (string) $user->wallet->fresh()->usd_balance);
         $this->assertSame('failed', OutboundMessage::first()->status);
+    }
+
+    public function test_the_provider_call_is_a_queued_job_that_runs_once_and_never_double_refunds(): void
+    {
+        \Illuminate\Support\Facades\Queue::fake();
+        $user = $this->fundedUser(usd: 5.0, smsCost: 0.10);
+        $line = $this->line($user);
+
+        $msg = app(MessageSenderService::class)->send($user, $line, '+2348012345678', 'Hello');
+
+        \Illuminate\Support\Facades\Queue::assertPushed(\App\Jobs\SendOutboundSmsJob::class, fn ($j) => $j->messageId === $msg->id);
+        $this->assertSame('queued', $msg->fresh()->status, 'charged and queued, nothing has left yet');
+        $this->assertSame([], app('number.twilio')->sent, 'no provider call inside the request');
+
+        $sender = app(MessageSenderService::class);
+        $sender->deliver($msg->id);
+        $sender->deliver($msg->id);   // a duplicate job does nothing
+        $this->assertSame('sent', $msg->fresh()->status);
+        $this->assertCount(1, app('number.twilio')->sent);
     }
 
     public function test_an_attachment_sends_as_mms_and_is_stored(): void

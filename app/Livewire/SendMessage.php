@@ -167,7 +167,7 @@ class SendMessage extends Component
 
         $this->reset('body', 'error', 'attachment', 'voiceNote');
         $this->open = false;
-        $this->dispatch('nx-toast', type: 'success', message: 'Message sent.');
+        $this->dispatch('nx-toast', type: 'success', message: 'Message on its way.');
     }
 
     public function render()

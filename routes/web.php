@@ -565,6 +565,10 @@ Route::middleware(['admin', 'throttle:admin'])
 Route::post('/webhooks/sms-inbound/{provider}', SmsInboundWebhookController::class)
     ->name('webhooks.sms-inbound');
 
+// Delivery reports: Twilio (X-Twilio-Signature) and Telnyx (Ed25519) are signature-verified before they are trusted.
+Route::post('/webhooks/sms-delivery/{provider}', \App\Http\Controllers\Webhooks\SmsDeliveryWebhookController::class)
+    ->name('webhooks.sms-delivery');
+
 Route::post('/webhooks/getatext', GetatextWebhookController::class)
     ->name('webhooks.getatext');
 

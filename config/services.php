@@ -172,6 +172,7 @@ return [
         // inbound replies reach /webhooks/sms-inbound/telnyx?token=<webhook_token>.
         'messaging_profile_id' => env('TELNYX_MESSAGING_PROFILE_ID'),
         'webhook_token' => env('TELNYX_WEBHOOK_TOKEN'),
+        'public_key' => env('TELNYX_PUBLIC_KEY'),   // portal public key that verifies SMS delivery and inbound webhooks (Ed25519)
     ],
 
     // WhatsApp Cloud API (Meta) — WhatsApp Autopilot (BUILD-4 §7). Automated,

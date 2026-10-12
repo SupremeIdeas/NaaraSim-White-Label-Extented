@@ -32,11 +32,27 @@ class SmsInboundWebhookController extends Controller
             return response()->json(['ok' => false], 404);
         }
 
-        // Verify BEFORE trusting the payload (money/PII-safety rule 9).
-        $secret = (string) config("services.$provider.webhook_token", config("services.$provider.inbound_token", ''));
-        $provided = (string) ($request->header('X-Webhook-Token') ?? $request->query('token', ''));
-        if ($secret === '' || ! hash_equals($secret, $provided)) {
-            return response()->json(['ok' => false], 401);
+        // Verify BEFORE trusting the payload (money/PII-safety rule 9). Twilio and Telnyx sign every webhook, so a valid signature is accepted on its own;
+        // everything else (and a signing provider without its key set) uses the shared secret token.
+        $signed = in_array($provider, ['twilio', 'telnyx'], true) && $request->hasHeader($provider === 'telnyx' ? 'telnyx-signature-ed25519' : 'X-Twilio-Signature')
+            && app('number.'.$provider)->verifyWebhook($request, $request->url());
+        if (! $signed) {
+            $secret = (string) config("services.$provider.webhook_token", config("services.$provider.inbound_token", ''));
+            $provided = (string) ($request->header('X-Webhook-Token') ?? $request->query('token', ''));
+            if ($secret === '' || ! hash_equals($secret, $provided)) {
+                return response()->json(['ok' => false], 401);
+            }
+        }
+
+        // Telnyx nests the message: {data:{event_type, payload:{id, from:{phone_number}, to:[{phone_number}], text, media:[{url}]}}}. Only message.received is an inbound text.
+        if ($provider === 'telnyx' && $request->has('data.event_type')) {
+            if ((string) $request->input('data.event_type') !== 'message.received') {
+                return response()->json(['ok' => true, 'matched' => false]);
+            }
+            $request->merge([
+                'from' => data_get($request->all(), 'data.payload.from.phone_number'), 'to' => data_get($request->all(), 'data.payload.to.0.phone_number'),
+                'text' => data_get($request->all(), 'data.payload.text'), 'media' => data_get($request->all(), 'data.payload.media.0.url'), 'message_id' => data_get($request->all(), 'data.payload.id'),
+            ]);
         }
 
         $to = $this->firstOf($request, ['to', 'To', 'to_number', 'destination']);

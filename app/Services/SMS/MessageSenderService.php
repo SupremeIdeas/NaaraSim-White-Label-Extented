@@ -127,7 +127,7 @@ class MessageSenderService
         }
 
         $provider = $line->provider;
-        $svc = app("number.{$provider}");
+        app("number.{$provider}");   // fails fast, before any charge, when the provider is not wired
 
         $cost = $this->costFor($provider, $to, $hasMedia);
         $minProfit = (float) Setting::getValue('pricing.sms_min_profit', 0.01);
@@ -169,31 +169,50 @@ class MessageSenderService
             throw new SmsException('Something went wrong — your wallet was not charged.');
         }
 
-        // 3) Hand it to the provider. On failure: refund + mark failed (rule 6).
-        try {
-            $result = $svc->sendSms($line->phone_number, $to, $body, $mediaUrl);
-        } catch (Throwable $e) {
-            $this->wallet->refund($user, $charge, 'USD', ['reference' => "refund:{$ref}", 'description' => 'Message delivery failed']);
-            $message->update(['status' => 'failed']);
-            Log::warning("MessageSenderService: {$provider} send failed: ".$e->getMessage());
-            throw new SmsException('That message couldn’t be sent — your wallet was refunded.');
-        }
-
-        // 4) Delivered. Persist the provider ref. If THIS update somehow fails the
-        //    message is already out (delivered), so we keep the charge and alert.
-        try {
-            $message->update([
-                'status' => 'sent',
-                'provider_ref' => (string) ($result['provider_ref'] ?? ''),
-            ]);
-        } catch (Throwable $e) {
-            AlertAdminJob::dispatch(
-                code: 'sms_send_bookkeeping',
-                message: "Sent SMS {$ref} for user {$user->id} but failed to record the provider ref.",
-                context: ['user_id' => $user->id, 'reference' => $ref],
-            );
-        }
+        // 3) Hand it to the provider in a queued job (rule 8). The job completes or refunds this one row; with the sync driver (tests, small installs) it runs here.
+        \App\Jobs\SendOutboundSmsJob::dispatch($message->id)->afterCommit();
 
         return $message->refresh();
+    }
+
+    /**
+     * The provider hand-off for a row send() already charged and queued. Idempotent (only a queued row is acted on, under a per-message lock), never retried, and a
+     * failure refunds the full charge under the same reference the delivery reconciler uses, so no path can pay out twice.
+     */
+    public function deliver(int $messageId): ?OutboundMessage
+    {
+        return \Illuminate\Support\Facades\Cache::lock('sms-deliver:'.$messageId, 60)->block(5, function () use ($messageId) {
+            $message = OutboundMessage::query()->find($messageId);
+            if (! $message || $message->status !== 'queued') {
+                return $message;
+            }
+            $user = $message->user;
+            $line = VirtualNumber::query()->find($message->virtual_number_id);
+            $charge = (float) $message->amount_charged;
+            $ref = (string) $message->reference;
+
+            try {
+                if (! $line) {
+                    throw new SmsException('The sending number is gone.');
+                }
+                $result = app("number.{$message->provider}")->sendSms($line->phone_number, $message->to_number, (string) $message->body, $message->attachment_url);
+            } catch (Throwable $e) {
+                $this->wallet->refund($user, $charge, 'USD', ['reference' => "refund:{$ref}", 'description' => 'Message delivery failed']);
+                $message->update(['status' => 'failed']);
+                Log::warning("MessageSenderService: {$message->provider} send failed: ".$e->getMessage());
+                \App\Support\Notifications\Notify::event($user, 'message.delivery_failed', ['to' => $message->to_number, 'reason' => 'It could not be sent, and your wallet was refunded.'], dedupe: 'msg-'.$message->id);
+
+                return $message->refresh();
+            }
+
+            // The message is out. If recording the provider ref fails we keep the charge and alert (it was delivered).
+            try {
+                $message->update(['status' => 'sent', 'provider_ref' => (string) ($result['provider_ref'] ?? '')]);
+            } catch (Throwable $e) {
+                AlertAdminJob::dispatch(code: 'sms_send_bookkeeping', message: "Sent SMS {$ref} for user {$user->id} but failed to record the provider ref.", context: ['user_id' => $user->id, 'reference' => $ref]);
+            }
+
+            return $message->refresh();
+        });
     }
 }

@@ -280,6 +280,8 @@ class TwilioService implements NumberProviderInterface, VoiceProviderInterface
         $payload = array_filter([
             'From' => $from, 'To' => $to, 'Body' => $body,
             'MediaUrl' => $mediaUrl,
+            // Final delivery report (delivered / undelivered / failed) comes back signed; it settles the charge or refunds it.
+            'StatusCallback' => route('webhooks.sms-delivery', ['provider' => 'twilio']),
         ], fn ($v) => $v !== null && $v !== '');
         $res = $this->client()->asForm()->post('/Messages.json', $payload);
         if ($res->failed()) {
