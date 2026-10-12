@@ -225,6 +225,8 @@ Route::get('/preloader-asset/{id}.json', \App\Http\Controllers\PreloaderAssetCon
 // SAME hero/carousel/infinite-feed serves marketing + the in-app floating nav.
 Route::get('/blog', Blog::class)->name('blog');
 Route::get('/blog/{post:slug}', [BlogController::class, 'show'])->name('blog.show');
+// Email confirmation link (public: works from another device; the signature is the proof). See EmailConfirmationController.
+Route::get('/email/confirm/{id}/{hash}', \App\Http\Controllers\EmailConfirmationController::class)->whereNumber('id')->middleware('throttle:20,1')->name('email.confirm');
 Route::post('/blog-reader-event', [\App\Http\Controllers\BlogReaderEventController::class, 'store'])->middleware('throttle:60,1')->name('blog.reader-event');
 
 // Public pricing page (Module 29) — real plans when live, estimate tiers before.
@@ -361,6 +363,7 @@ Route::middleware(['auth', 'active'])->group(function () {
     Route::get('/account/verify', IdentityVerification::class)->name('account.verify');
     // In-app notification centre (owner request) — the bell's "see all" page.
     Route::get('/notifications', Notifications::class)->name('notifications');
+    Route::get('/notifications/settings', \App\Livewire\NotificationPreferences::class)->name('notifications.settings');
     // Self-hosted web-push subscribe/unsubscribe (owner request).
     Route::post('/push/subscribe', [PushSubscriptionController::class, 'store'])->name('push.subscribe');
     Route::post('/push/unsubscribe', [PushSubscriptionController::class, 'destroy'])->name('push.unsubscribe');

@@ -107,6 +107,25 @@ class NotificationCenter extends Component
         );
     }
 
+    /**
+     * Event notifications that asked for a live toast (config/notification_events.php, channel `toast`) are shown once, while the person is in the app.
+     * Anything older than ten minutes is left to the bell: a toast about something that happened an hour ago is noise.
+     */
+    public function checkForEventToasts(): void
+    {
+        $user = Auth::user();
+        if (! $user) {
+            return;
+        }
+        $note = $user->unreadNotifications()->where('created_at', '>=', now()->subMinutes(10))->latest()->get()
+            ->first(fn ($n) => ! empty($n->data['toast']) && empty($n->data['toasted']));
+        if (! $note) {
+            return;
+        }
+        $note->forceFill(['data' => array_merge($note->data, ['toasted' => true])])->save();
+        $this->dispatch('nx-toast', type: 'info', message: trim(($note->data['title'] ?? '').'. '.($note->data['body'] ?? '')));
+    }
+
     /** The Accept/Decline buttons inside the toast call back into this via `Livewire.dispatch()`. */
     #[On('wallet-invite-respond')]
     public function respondToWalletInvite(int $memberId, bool $accept, WalletGroupService $groups): void

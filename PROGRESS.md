@@ -9,6 +9,10 @@
 
 ## DONE
 
+### Email confirmation + event notifications (ported from master, generic only)
+- Public signed confirmation link (works from another device), toast on same-browser / at next sign-in, friendly already-confirmed and expired states, persisted EmailVerifiedNotification.
+- Event matrix + `Notify` dispatcher with per-category preferences, quiet hours (push only), idempotent delivery, and a new Notification settings page. Triggers wired: referral reward credited, payout frozen, payout account removed. `message.delivery_failed` is defined but not triggered here (no SMS delivery webhook in this install). This fork has no Bootstrap tooling, so `config/notification_catalog.php` carries only the category defaults, and event emails use the standard mail layout (no Email Studio notice template yet).
+
 ### Blog reader (ported from master, generic only)
 - Centred Share modal (server-built links + UTM, canonical/OG/Twitter tags), Keep reading carousel (inline + once-per-article pop-up), "From the blog" preview in the More menu (grid/list/carousel), Admin > Blog reader settings with privacy-safe daily counters. Master-only pieces (built-in Business/Brain/Chat More apps, marketing video slots) were NOT ported. Share endpoints not yet re-verified against live platform docs.
 

@@ -4,7 +4,7 @@
     <div class="ns-nt__top">
         <div>
             <h1 class="ns-h1" style="margin-top:6px">Notifications</h1>
-            <p class="ns-sub">Everything that concerns your account, in one place.</p>
+            <p class="ns-sub">Everything that concerns your account, in one place. <a href="{{ route('notifications.settings') }}" wire:navigate class="underline">Settings</a></p>
         </div>
         @if ($unread > 0)
             <button type="button" wire:click="markAllRead" wire:loading.attr="disabled" wire:target="markAllRead" class="ns-cta ns-cta--pill ns-cta--ghost ns-cta--sm">Mark all read</button>
