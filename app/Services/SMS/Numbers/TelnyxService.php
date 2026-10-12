@@ -86,12 +86,41 @@ class TelnyxService implements NumberProviderInterface
         // The order id is the provider ref; the actual phone_number id is under data.phone_numbers.
         $ref = (string) (data_get($res->json(), 'data.phone_numbers.0.id') ?: data_get($res->json(), 'data.id'));
 
+        // Telnyx will not send or receive SMS on a number until it is assigned to a Messaging Profile. Done as a queued job with backoff, because a fresh
+        // order can still be pending for a moment and the assignment needs the finished phone-number record.
+        $bought = (string) (data_get($res->json(), 'data.phone_numbers.0.phone_number') ?: $number);
+        if (! empty(config('services.telnyx.messaging_profile_id'))) {
+            \App\Jobs\AssignTelnyxMessagingProfileJob::dispatch($bought);
+        }
+
         return [
             'provider_ref' => $ref,
-            'number' => (string) (data_get($res->json(), 'data.phone_numbers.0.phone_number') ?: $number),
+            'number' => $bought,
             'monthly_cost' => $this->monthlyCost($country),
             'capabilities' => ['sms' => true, 'voice' => true],
         ];
+    }
+
+    /**
+     * Assign a purchased number to the configured Messaging Profile (idempotent: assigning the same profile again changes nothing).
+     * Endpoint per Telnyx v2 docs (PATCH /phone_numbers/{id}/messaging); verify in the Telnyx sandbox at go-live (rule 1.1).
+     *
+     * @return bool true when the number is now on the profile
+     */
+    public function assignMessagingProfile(string $e164): bool
+    {
+        $profile = (string) config('services.telnyx.messaging_profile_id');
+        if (! $this->configured() || $profile === '') {
+            return false;
+        }
+        $found = $this->client()->get('/phone_numbers', ['filter[phone_number]' => $e164]);
+        $id = $found->successful() ? (string) data_get($found->json(), 'data.0.id', '') : '';
+        if ($id === '') {
+            return false;   // not visible yet (the order is still pending): the job retries
+        }
+        $res = $this->client()->patch("/phone_numbers/{$id}/messaging", ['messaging_profile_id' => $profile]);
+
+        return $res->successful();
     }
 
     public function sendSms(string $from, string $to, string $body, ?string $mediaUrl = null): array
