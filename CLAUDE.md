@@ -294,3 +294,12 @@ platform.
   before relying on it for architectural decisions.
 - If `graphify-out/wiki/index.md` exists, use it for broad navigation instead
   of raw source browsing (falls back to `GRAPH_REPORT.md`).
+
+---
+
+## CONVENTIONS LEARNED (Engineering Blueprint v3, 2026-10)
+
+- **Notifications go through `App\Support\Notifications\Notify`** with a row in `config/notification_events.php` (preferences, quiet hours, once-only delivery, never throws into a money path). Event keys contain dots: read them with `config('x.events')[$event]`, never `config("x.events.$event")`.
+- **Guided tours are data.** Every step needs a real `data-tour` anchor on a live element; `TourIntegrity` (Admin > Guided tours > Check all tours, and the test suite) fails when one disappears. A new screen worth touring gets anchors and a step in `config/tours.php` in the same change.
+- **Blade traps:** a directive glued to a word (`word@if`) is not a directive; inline `@php(...)` with nested parentheses breaks; use `@php ... @endphp`. Livewire views need one plain root element.
+- **Tests that run the app as an admin** need `ADMIN_PATH=adminmaster` if the local `.env` sets a custom admin path.
