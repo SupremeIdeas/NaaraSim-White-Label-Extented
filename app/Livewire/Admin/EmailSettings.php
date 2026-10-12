@@ -41,6 +41,9 @@ class EmailSettings extends Component
 
     public ?string $testError = null;
 
+    /** @var array<string, mixed>|null */
+    public ?array $dns = null;
+
     /** Email-verification enforcement (NAARA-BUILD-20 §2): off | soft | hard. */
     public string $verificationMode = 'soft';
 
@@ -115,13 +118,30 @@ class EmailSettings extends Component
                 .($this->mailer === 'log' ? ' (mailer is "log" — check storage/logs, nothing was actually emailed).' : '. Check your inbox.');
             Auditor::log('mail.test_sent');
         } catch (\Throwable $e) {
-            $this->testError = 'Could not send: '.$e->getMessage();
+            $this->testError = 'Could not send: '.\App\Support\Mail\SmtpAdvisor::explain($e, $this->smtp_username, (string) \App\Support\MailSettings::get('smtp_password', ''));
         }
+    }
+
+    /** Apply the encryption that matches the port (the inline hint's one-click fix). */
+    public function fixEncryption(): void
+    {
+        $adv = \App\Support\Mail\SmtpAdvisor::pairing($this->smtp_port, $this->smtp_scheme);
+        if (! $adv['ok'] && $adv['fix_scheme'] !== null) {
+            $this->smtp_scheme = $adv['fix_scheme'];
+        }
+    }
+
+    /** Look up SPF / DMARC / DKIM for the From domain (read-only DNS). */
+    public function checkDns(): void
+    {
+        abort_unless(Auth::user()->hasRole('super_admin'), 403);
+        $this->dns = \App\Support\Mail\SmtpAdvisor::dns($this->from_address);
     }
 
     public function render()
     {
         return view('livewire.admin.email-settings', [
+            'pairing' => $this->mailer === 'smtp' ? \App\Support\Mail\SmtpAdvisor::pairing($this->smtp_port, $this->smtp_scheme) : ['ok' => true, 'message' => null, 'fix_scheme' => null],
             'passwordPreview' => MailSettings::passwordPreview(),
         ]);
     }

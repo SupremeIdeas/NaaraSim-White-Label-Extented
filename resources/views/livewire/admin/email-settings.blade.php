@@ -83,6 +83,9 @@
                                 <option value="">STARTTLS (port 587)</option>
                                 <option value="smtps">SSL/TLS (port 465)</option>
                             </select>
+                            @if (! $pairing['ok'])
+                                <p class="mt-1 text-xs text-amber-600 dark:text-amber-400" role="alert">{{ $pairing['message'] }} <button type="button" wire:click="fixEncryption" class="underline">Fix it</button></p>
+                            @endif
                         </div>
                     </div>
                 @endif
@@ -124,6 +127,20 @@
                 @endforeach
             </div>
             @error('verificationMode') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+        </div>
+
+        <div class="rounded-2xl border border-slate-200 bg-white p-6 dark:border-slate-700 dark:bg-slate-900">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+                <div><h2 class="text-sm font-semibold text-slate-800 dark:text-slate-100">Deliverability check</h2><p class="text-xs text-slate-500 dark:text-slate-400">Looks up SPF, DKIM and DMARC for the From address's domain, so mail lands in the inbox instead of spam.</p></div>
+                <button type="button" wire:click="checkDns" wire:loading.attr="disabled" wire:target="checkDns" class="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-medium dark:border-slate-600">Check DNS</button>
+            </div>
+            @if ($dns)
+                <ul class="mt-3 space-y-1 text-sm text-slate-700 dark:text-slate-200">
+                    @foreach (['spf' => 'SPF', 'dkim' => 'DKIM', 'dmarc' => 'DMARC'] as $k => $lbl)
+                        <li class="flex gap-2"><b class="{{ $dns[$k]['ok'] ? 'text-emerald-600' : 'text-amber-600' }}">{{ $lbl }} {{ $dns[$k]['ok'] ? 'OK' : 'missing' }}</b><span class="text-slate-500 dark:text-slate-400">{{ $dns[$k]['note'] }}</span></li>
+                    @endforeach
+                </ul>
+            @endif
         </div>
 
         <div class="flex flex-wrap items-center justify-between gap-3">
