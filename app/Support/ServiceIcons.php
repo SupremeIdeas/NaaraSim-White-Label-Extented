@@ -26,7 +26,7 @@ class ServiceIcons
 
     /** Slugs that have a bundled sprite symbol (svc-{slug}) — real brand logos. */
     public const BUNDLED = [
-        'whatsapp', 'telegram', 'facebook', 'google', 'instagram', 'tiktok', 'x', 'snapchat',
+        'whatsapp', 'telegram', 'linkedin', 'facebook', 'google', 'instagram', 'tiktok', 'x', 'snapchat',
         'discord', 'tinder', 'okcupid', 'uber', 'apple', 'netflix', 'paypal', 'viber',
         'signal', 'wechat', 'binance', 'coinbase', 'revolut', 'cashapp', 'venmo', 'twitch',
         'spotify', 'airbnb', 'aliexpress', 'ebay', 'steam', 'epicgames', 'protonmail', 'line',

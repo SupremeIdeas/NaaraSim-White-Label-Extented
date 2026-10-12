@@ -79,6 +79,13 @@ class Post extends Model
         return ['published_at' => 'datetime'];
     }
 
+    protected static function booted(): void
+    {
+        $flush = fn () => \App\Support\Blog\RelatedPosts::flush();   // related/keep-reading lists + header preview follow every publish, edit and delete
+        static::saved($flush);
+        static::deleted($flush);
+    }
+
     public function author(): BelongsTo
     {
         return $this->belongsTo(User::class, 'author_id');
