@@ -181,6 +181,7 @@
     <x-brand-preloader :page-type="$pageType" />
     <x-splash />
     <x-ui.toast-stack />
+    @unless (request()->is(config('admin.path'), config('admin.path').'/*') || request()->is('install', 'install/*'))<x-cookie-banner />@endunless
     {{ $slot ?? '' }}
     @yield('content')
     @livewireScripts

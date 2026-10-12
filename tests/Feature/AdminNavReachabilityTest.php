@@ -14,6 +14,7 @@ class AdminNavReachabilityTest extends TestCase
 {
     /** Pages that are intentionally not top-level navigation entries. */
     private const NOT_NAV = [
+        'admin.cookies.export' => 'CSV download button on the Cookies page',
         'admin.login' => 'auth flow',
         'admin.recover' => 'auth flow',
         'admin.nci.provider' => 'detail page opened from the Provider Registry list',
