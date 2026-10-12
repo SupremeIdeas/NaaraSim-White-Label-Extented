@@ -36,7 +36,7 @@
     {{-- Balance widget: ONE parent card (owner request) housing the balance, the live NGN equivalent and the quick actions, so every
          skin gives the whole widget a premium treatment. The settlement (USD) balance leads; NGN is a secondary row — no invented
          "total" across two real currencies. Quick actions switch the tabs below (no fake buttons). --}}
-    <x-nx.balance-hero class="ns-wallet-hero" style="margin-top:14px" label="USD balance" icon="credit-card" :amount="'$'.number_format((float) $wallet->usd_balance, 2)"
+    <x-nx.balance-hero class="ns-wallet-hero" data-tour="wallet.balance" style="margin-top:14px" label="USD balance" icon="credit-card" :amount="'$'.number_format((float) $wallet->usd_balance, 2)"
                        :sub="$usdLocal ? '≈ '.$usdLocal.' · live rate' : null">
         <x-slot:footer>
             {{-- Unified USD Wallet (Part B): usd_balance is the ONE spendable balance. The NGN figure is the LIVE-rate equivalent for
@@ -47,17 +47,17 @@
                 <div class="ns-balance__sub ns-balance__sub--quiet"><span>Legacy NGN balance (historical, from before top-ups settled in USD)</span><b>NGN {{ number_format((float) $wallet->ngn_balance, 2) }}</b></div>
             @endif
             <div class="ns-balance__actions">
-                <button type="button" @click="tab = 'topup'"><x-nx.icon name="zap" /> Top up</button>
-                <button type="button" @click="tab = 'payout'"><x-nx.icon name="credit-card" /> Withdraw</button>
+                <button type="button" data-tour="wallet.topup" @click="tab = 'topup'"><x-nx.icon name="zap" /> Top up</button>
+                <button type="button" data-tour="wallet.payout" @click="tab = 'payout'"><x-nx.icon name="credit-card" /> Withdraw</button>
                 <button type="button" @click="tab = 'spending'"><x-nx.icon name="signal" /> Spending</button>
             </div>
         </x-slot:footer>
     </x-nx.balance-hero>
 
     {{-- Tabbed navigation (owner request): Top Up / Payout / Spending / Shared each get their own tab instead of one long scroll. --}}
-    <div class="ns-seg" style="margin-top:22px" role="tablist">
+    <div class="ns-seg" data-tour="wallet.tabs" style="margin-top:22px" role="tablist">
         @foreach (['topup' => 'Top Up', 'payout' => 'Payout', 'spending' => 'Spending', 'shared' => 'Shared'] as $key => $text)
-            <button type="button" role="tab" @click="tab = '{{ $key }}'" :class="tab === '{{ $key }}' ? 'is-on' : ''" :aria-selected="tab === '{{ $key }}'">{{ $text }}</button>
+            <button type="button" role="tab" data-tour="wallet.tab-{{ $key }}" @click="tab = '{{ $key }}'" :class="tab === '{{ $key }}' ? 'is-on' : ''" :aria-selected="tab === '{{ $key }}'">{{ $text }}</button>
         @endforeach
     </div>
 
@@ -191,7 +191,7 @@
             @endif
         </div>
 
-        <div class="ns-lbl" style="margin-top:22px">Recent transactions</div>
+        <div class="ns-lbl" data-tour="wallet.history" style="margin-top:22px">Recent transactions</div>
         @forelse ($transactions as $txn)
             @php($out = in_array($txn->type, ['debit', 'withdrawal']))
             <div wire:key="txn-{{ $txn->id }}" class="ns-row" style="height:auto;min-height:60px;padding:10px 14px">

@@ -19,7 +19,7 @@
     @endphp
 
     {{-- Bell --}}
-    <button type="button" @click="$dispatch('open-modal', { name: '{{ $modalName }}' })" aria-label="Notifications"
+    <button type="button" data-tour="header.bell" @click="$dispatch('open-modal', { name: '{{ $modalName }}' })" aria-label="Notifications"
             class="relative flex h-10 w-10 items-center justify-center rounded-full text-[rgb(var(--nx-text-2))] hover:bg-[rgb(var(--nx-surface-3))]">
         <x-icon name="bell" class="h-5 w-5" />
         @if ($unread > 0)

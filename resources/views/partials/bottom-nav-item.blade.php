@@ -1,6 +1,6 @@
 {{-- One slot in the mobile bottom bar. $item may be null (padding slot). --}}
 @if ($item)
-    <a href="{{ route($item['route']) }}" wire:navigate
+    <a href="{{ route($item['route']) }}" wire:navigate data-tour="nav.{{ $item['route'] }}"
        @class([
            'flex flex-col items-center gap-0.5 py-2 text-[11px] font-medium transition',
            'text-primary dark:text-primary' => $isActive($item['route']),

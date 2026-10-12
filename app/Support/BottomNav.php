@@ -115,6 +115,12 @@ class BottomNav
             $more = array_values(array_filter($more, fn ($item) => ($item['route'] ?? null) !== 'brand.get-listed'));
         }
 
+        // Guided tours: the replay hub, while the new-user window is open (or always, if the owner chose "keep").
+        if ($u && \Illuminate\Support\Facades\Route::has('account.tours') && \App\Support\Tours\TourWindow::hubVisible($u)) {
+            $at = array_search('account', array_column($more, 'route'), true);
+            array_splice($more, $at === false ? count($more) : $at + 1, 0, [['route' => 'account.tours', 'label' => 'Guided tours', 'icon' => 'compass']]);
+        }
+
         if (ProviderStatus::isActive('twilio')) {
             array_splice($more, 1, 0, [['route' => 'numbers.dialer', 'label' => 'Internet calls', 'icon' => 'phone']]);
         }

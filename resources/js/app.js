@@ -1,5 +1,6 @@
 import './bootstrap';
 import './field-glow';
+import './tours/engine';
 import { registerNxUpload } from './nx-upload';
 import { registerNxLayers } from './nx-layers';
 import './lottie';

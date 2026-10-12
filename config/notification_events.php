@@ -20,6 +20,9 @@ return [
         'reward.referral_credited' => ['category' => 'lifecycle', 'channels' => ['in_app', 'toast', 'push'], 'dedupe' => true, 'icon' => 'gift', 'route' => 'rewards', 'title' => 'Referral reward credited', 'body' => '{amount} was added because someone you invited joined.'],
         'reward.claim_rejected' => ['pending' => true] + ['category' => 'lifecycle', 'channels' => ['in_app', 'email'], 'dedupe' => true, 'icon' => 'alert-triangle', 'route' => 'rewards', 'title' => 'Reward claim not approved', 'body' => '{reason}'],
 
+        // Guided tours
+        'tour.completed' => ['category' => 'lifecycle', 'channels' => ['in_app'], 'dedupe' => true, 'icon' => 'check', 'route' => 'account.tours', 'title' => 'Tour finished', 'body' => 'You finished the {tour} tour. Replay it any time from Guided tours.'],
+
         // Wallet and payouts (processing / paid / failed are PayoutStatusNotification; funds added is TopUpReceiptNotification)
         'payout.bank_account_removed' => ['category' => 'security', 'channels' => ['in_app', 'email'], 'dedupe' => true, 'icon' => 'shield-check', 'route' => 'withdraw', 'title' => 'A withdrawal account was removed', 'body' => '{account} was removed from your payout accounts. If this was not you, secure your account now.'],
         'payout.frozen' => ['category' => 'security', 'channels' => ['in_app', 'email'], 'dedupe' => true, 'icon' => 'shield-check', 'route' => 'withdraw', 'title' => 'Payouts paused for your protection', 'body' => 'We paused payouts on your account. Pending withdrawals were cancelled and the money stays in your wallet. Reset your password and contact support to resume.'],

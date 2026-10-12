@@ -363,6 +363,14 @@ Route::middleware(['auth', 'active'])->group(function () {
     Route::get('/account/verify', IdentityVerification::class)->name('account.verify');
     // In-app notification centre (owner request) — the bell's "see all" page.
     Route::get('/notifications', Notifications::class)->name('notifications');
+
+    // Guided tours: JSON for the browser engine + the replay hub (Account > Guided tours).
+    Route::prefix('tours')->middleware('throttle:120,1')->group(function () {
+        Route::get('auto', [\App\Http\Controllers\TourController::class, 'auto'])->name('tours.auto');
+        Route::get('{key}', [\App\Http\Controllers\TourController::class, 'show'])->where('key', '[a-z0-9._-]+')->name('tours.show');
+        Route::post('{key}/progress', [\App\Http\Controllers\TourController::class, 'progress'])->where('key', '[a-z0-9._-]+')->name('tours.progress');
+    });
+    Route::get('/account/tours', \App\Livewire\GuidedTours::class)->name('account.tours');
     Route::get('/notifications/settings', \App\Livewire\NotificationPreferences::class)->name('notifications.settings');
     // Self-hosted web-push subscribe/unsubscribe (owner request).
     Route::post('/push/subscribe', [PushSubscriptionController::class, 'store'])->name('push.subscribe');
@@ -446,6 +454,7 @@ Route::middleware(['admin', 'throttle:admin'])
             Route::get('/legal', LegalEditor::class)->name('legal');
             Route::get('/blog', Posts::class)->name('blog');
             Route::get('/blog-reader', \App\Livewire\Admin\BlogReader::class)->name('blog-reader');
+            Route::get('/tours', \App\Livewire\Admin\TourStudio::class)->name('tours');
             Route::get('/pages', CustomPages::class)->name('pages');
             Route::get('/builder', PageBuilder::class)->name('builder');
             Route::get('/app-builder', AppBuilder::class)->name('app-builder');

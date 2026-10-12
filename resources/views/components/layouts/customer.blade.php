@@ -13,6 +13,10 @@
     ['primary' => $primary, 'more' => $more] = \App\Support\BottomNav::resolveMain($u);
 @endphp
 
+@push('head')
+    <meta name="nx-route" content="{{ request()->route()?->getName() }}">
+@endpush
+
 <x-layouts.app :title="$title ?? config('app.name')" :page-type="$preloaderType" :body-class="\App\Support\PlatformTheme::bodyClass()">
     <x-app-shell :primary="$primary" :more="$more" :promo="true" brand-label="NaaraSim" brand-icon="signal" :brand-route="route('dashboard')">
         {{-- In-app notification bell (owner request). Two keyed instances so the
