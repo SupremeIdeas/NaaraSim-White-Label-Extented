@@ -9,6 +9,9 @@
 
 ## DONE
 
+### Dialer keypad hardening (ported from master)
+- Keypad is a fixed 3x4 grid whatever the number length (minmax columns, square keys, long numbers shrink, single-line LTR display); `scripts/responsive/dialer-grid.mjs` is the regression. The reported scatter was not reproduced headlessly.
+
 ### Guided tours (ported from master, generic only)
 - Custom tour engine, data-driven tours (Dashboard, Wallet), Account > Guided tours replay hub with quick replay and the new-user window switch, Admin > Guided tours (Tour Studio), and the Tour Integrity check (Check all tours button). The Naara Chat and Business Suite tours are master only and not here. No `naara:verify` framework in this install, so the check runs from Tour Studio and the test suite only.
 

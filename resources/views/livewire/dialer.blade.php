@@ -89,7 +89,7 @@
 
         {{-- Number display: big, centred, editable (paste-friendly). --}}
         <div class="ns-dl__display">
-            <input type="tel" wire:model.live="destination" inputmode="tel" placeholder="Enter a number" aria-label="Number to call" class="ns-dl__num">
+            <input type="tel" wire:model.live="destination" inputmode="tel" placeholder="Enter a number" aria-label="Number to call" class="ns-dl__num" x-bind:class="(($wire.destination || '').length > 13) ? 'is-long' : ''">
             <button type="button" x-show="($wire.destination || '').length" x-on:click="back()" x-on:contextmenu.prevent="clearAll()" aria-label="Delete last digit" class="ns-dl__bs"><x-nx.icon name="delete" /></button>
         </div>
 
