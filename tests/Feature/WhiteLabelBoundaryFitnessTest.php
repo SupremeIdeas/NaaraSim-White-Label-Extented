@@ -152,7 +152,7 @@ class WhiteLabelBoundaryFitnessTest extends TestCase
     public function test_no_business_suite_or_brain_files_exist_on_this_fork(): void
     {
         $roots = ['app', 'routes', 'database', 'resources', 'lang', 'config', 'public/js', 'public/images'];
-        $patterns = '#(business-suite|business_suite|businesssuite|app/support/business/|app/services/business/|controllers/business/|controllers/api/v1/business|app/livewire/business|app/livewire/admin/business|views/business/|layouts/business|views/livewire/business|views/livewire/admin/business|marketing/business|ensurebusiness|commands/business|add_business_|create_business_|call-flow-builder|callflowbuilder|images/business/|gifs/business|naarabrain|app/support/brain/|app/livewire/brain|config/brain\.php|views/brain/|brain_)#i';
+        $patterns = '#(business-suite|business_suite|businesssuite|app/support/business/|app/services/business/|controllers/business/|controllers/api/v1/business|app/livewire/business|app/livewire/admin/business|views/business/|layouts/business|views/livewire/business|views/livewire/admin/business|marketing/business|ensurebusiness|commands/business|add_business_|create_business_|call-flow-builder|callflowbuilder|images/business/|gifs/business|jobs/business|businessbrain|business_brain|naarabrain|app/support/brain/|app/livewire/brain|config/brain\.php|views/brain/|brain_)#i';
         $found = [];
         foreach ($roots as $root) {
             $dir = base_path($root);
