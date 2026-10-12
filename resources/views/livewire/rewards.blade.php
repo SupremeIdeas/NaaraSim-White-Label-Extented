@@ -125,5 +125,6 @@
             </div>
         </div>
     @endunless
+    <x-trust.reviews placement="rewards.card" class="mt-6" />
 </x-nx.page>
 </div>

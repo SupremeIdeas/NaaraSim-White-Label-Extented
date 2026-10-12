@@ -40,5 +40,6 @@
         </div>
 
         <x-blog.keep-reading :post="$post" />
+        <x-trust.reviews placement="blog.end" class="mt-8" />
     </article>
 </x-layouts.marketing>

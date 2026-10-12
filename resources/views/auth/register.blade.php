@@ -57,4 +57,5 @@
             Already have an account? <a href="/login" class="font-semibold text-primary hover:underline">Sign in</a>
         </p>
     </form>
+    <x-trust.reviews placement="auth.badge" class="mt-4 text-center" />
 </x-layouts.auth>

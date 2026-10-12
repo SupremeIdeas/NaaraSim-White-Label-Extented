@@ -9,6 +9,10 @@
 
 ## DONE
 
+### Trustpilot reviews: display layer (2026-10, OFF by default)
+- **Built:** official TrustBox widgets or a profile link, Admin > More > Trustpilot reviews, CSP origins only while live, placements (home, rewards, auth, blog end), `/reviews` page (404 until on). See `docs/TRUSTPILOT-REVIEWS.md`.
+- **NOT built, on purpose:** invitations, review sync, review rewards.
+
 ### Provider blueprint 3.1/3.2: Telnyx messaging profile and webhook token (2026-10)
 - **Built:** a Telnyx number we buy is now assigned to the configured Messaging Profile by a queued, backed-off job (`AssignTelnyxMessagingProfileJob`; a still-pending order retries), because without it the number cannot send or receive SMS. `config/services.php` telnyx gained `messaging_profile_id` and `webhook_token` (env `TELNYX_MESSAGING_PROFILE_ID`, `TELNYX_WEBHOOK_TOKEN`), and both are editable in Admin > Provider keys. Endpoint per Telnyx v2 docs, to be confirmed in the Telnyx sandbox at go-live. `TelnyxMessagingProfileTest` (5).
 - **Owner still to do:** create the Messaging Profile in the Telnyx portal, paste its ID and a random webhook token into Provider keys, and set the profile's webhook URL to `/webhooks/sms-inbound/telnyx?token=...`.
