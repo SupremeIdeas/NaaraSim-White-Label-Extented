@@ -50,8 +50,6 @@
 
             {{-- Grid (4-col tiles) or list (stacked rows), per the §6.7 toggle. The active row is a surface step plus a left edge
                  (is-on), never a colour flood; hierarchy comes from the tokens, so every skin restyles it. --}}
-            <x-blog.menu-preview />
-
             <div class="ns-list" :class="moreLayout === 'grid' ? 'ns-list--grid' : ''">
                 @foreach ($more as $item)
                     @continue(! empty($item['heading'])) {{-- headings are desktop-sidebar only --}}

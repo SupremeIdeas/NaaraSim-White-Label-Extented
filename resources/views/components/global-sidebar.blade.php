@@ -9,7 +9,6 @@
     $reviews = \App\Support\SidebarMenu::reviewsUrl();
     $mode = \App\Support\SidebarMenu::displayMode();
     $social = \App\Support\SocialLinks::all();
-    $posts = \App\Support\SidebarMenu::blogPosts();
     $linkGridClass = $mode === 'grid' ? 'grid grid-cols-2 gap-2' : 'flex flex-col gap-1.5';
     // Wear the same contextual brand mark as the top-bar/side-rail header (chrome
     // wears the product's mark on its own surface, the umbrella mark elsewhere —
@@ -92,20 +91,8 @@
                 </a>
             @endif
 
-            {{-- Blog widget (admin-toggled) — live from the Blog model. --}}
-            @if ($posts->isNotEmpty())
-                <section>
-                    <h3 class="mb-2 px-1 text-[11px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">From the blog</h3>
-                    <div class="overflow-hidden rounded-2xl border border-slate-200 dark:border-white/10">
-                        @foreach ($posts as $post)
-                            <a href="{{ route('blog.show', $post->slug) }}" wire:navigate @click="open = false"
-                               class="block border-b border-slate-100 bg-white px-3.5 py-3 text-sm text-slate-700 transition last:border-0 hover:bg-slate-50 dark:border-white/5 dark:bg-transparent dark:text-slate-200 dark:hover:bg-white/5">
-                                <span class="line-clamp-2 font-medium">{{ $post->title }}</span>
-                            </a>
-                        @endforeach
-                    </div>
-                </section>
-            @endif
+            {{-- From the blog: the real articles (cover, read time), layout and count set in Admin > Blog reader. --}}
+            <x-blog.menu-preview close="open = false" />
 
             {{-- Social handles. --}}
             @if (! empty($social))
