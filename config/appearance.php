@@ -109,7 +109,7 @@ return [
             ],
             3 => [
                 'label' => 'Call abroad, Contacts, Messages, Rewards, My Journey, Data estimator, Naara Gift, Notifications',
-                'views' => ['livewire/dialer', 'livewire/contacts', 'livewire/messages', 'livewire/rewards', 'livewire/journey', 'livewire/data-estimator', 'livewire/gift-cards', 'livewire/notifications', 'livewire/notification-preferences', 'livewire/receipts', 'livewire/referrals', 'livewire/payout-dashboard'],
+                'views' => ['livewire/dialer', 'livewire/contacts', 'livewire/messages', 'livewire/rewards', 'livewire/journey', 'livewire/data-estimator', 'livewire/gift-cards', 'livewire/notifications', 'livewire/notification-preferences', 'livewire/guided-tours', 'livewire/admin/tour-studio', 'livewire/receipts', 'livewire/referrals', 'livewire/payout-dashboard'],
             ],
             4 => [
                 'label' => 'Clients, Invoices, Developer API',

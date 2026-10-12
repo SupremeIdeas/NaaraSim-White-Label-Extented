@@ -23,7 +23,7 @@
 
         {{-- Centre "More" button --}}
         <div class="flex justify-center">
-            <button type="button" @click="moreOpen = true" aria-label="More"
+            <button type="button" data-tour="nav.more" @click="moreOpen = true" aria-label="More"
                     class="nx-bn-more ns-cta -mt-6 flex h-14 w-14 items-center justify-center rounded-full text-white ring-4 ring-[#F8F9FA] transition active:scale-95 dark:ring-navy">
                 <x-icon name="grid" class="h-6 w-6" />
             </button>

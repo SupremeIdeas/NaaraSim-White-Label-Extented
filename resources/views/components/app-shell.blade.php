@@ -86,7 +86,7 @@
                         <p x-show="!navCollapsed" class="px-3 pb-1 pt-4 text-[11px] font-semibold uppercase tracking-wider text-slate-400">{{ $item['heading'] }}</p>
                         <div x-show="navCollapsed" x-cloak class="mx-auto my-2 h-px w-6 bg-slate-200 dark:bg-white/10"></div>
                     @else
-                        <a href="{{ route($item['route']) }}" wire:navigate
+                        <a href="{{ route($item['route']) }}" wire:navigate data-tour="nav.{{ $item['route'] }}"
                            :class="navCollapsed && 'justify-center'"
                            :title="navCollapsed ? @js($item['label']) : null"
                            @class([

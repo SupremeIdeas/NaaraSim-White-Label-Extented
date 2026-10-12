@@ -9,6 +9,9 @@
 
 ## DONE
 
+### Guided tours (ported from master, generic only)
+- Custom tour engine, data-driven tours (Dashboard, Wallet), Account > Guided tours replay hub with quick replay and the new-user window switch, Admin > Guided tours (Tour Studio), and the Tour Integrity check (Check all tours button). The Naara Chat and Business Suite tours are master only and not here. No `naara:verify` framework in this install, so the check runs from Tour Studio and the test suite only.
+
 ### Email confirmation + event notifications (ported from master, generic only)
 - Public signed confirmation link (works from another device), toast on same-browser / at next sign-in, friendly already-confirmed and expired states, persisted EmailVerifiedNotification.
 - Event matrix + `Notify` dispatcher with per-category preferences, quiet hours (push only), idempotent delivery, and a new Notification settings page. Triggers wired: referral reward credited, payout frozen, payout account removed. `message.delivery_failed` is defined but not triggered here (no SMS delivery webhook in this install). This fork has no Bootstrap tooling, so `config/notification_catalog.php` carries only the category defaults, and event emails use the standard mail layout (no Email Studio notice template yet).
