@@ -196,6 +196,12 @@ Route::get('/legal/{slug}', function (string $slug) {
     return view('legal.show', ['doc' => LegalContent::doc($slug)]);
 })->name('legal.show');
 Route::get('/refund-policy', fn () => view('legal.show', ['doc' => LegalContent::doc('refund')]))->name('refund-policy');
+// Reviews page (Trustpilot display layer). A plain 404 until an admin turns the page on.
+Route::get('/reviews', function () {
+    abort_unless(\App\Support\Trustpilot\TrustpilotSettings::dedicatedPageOn(), 404);
+
+    return view('marketing.reviews');
+})->name('reviews');
 // FAQ — wired the same way as About/How It Works/Contact: a SiteContent-driven
 // page (admin-editable hero incl. background image via Admin → Pages → FAQ)
 // whose Q&A content is pulled live from the homepage's own 'faq' section, so
@@ -455,6 +461,7 @@ Route::middleware(['admin', 'throttle:admin'])
             Route::get('/blog', Posts::class)->name('blog');
             Route::get('/blog-reader', \App\Livewire\Admin\BlogReader::class)->name('blog-reader');
             Route::get('/tours', \App\Livewire\Admin\TourStudio::class)->name('tours');
+            Route::get('/trustpilot', \App\Livewire\Admin\TrustpilotPanel::class)->name('trustpilot');
             Route::get('/pages', CustomPages::class)->name('pages');
             Route::get('/builder', PageBuilder::class)->name('builder');
             Route::get('/app-builder', AppBuilder::class)->name('app-builder');

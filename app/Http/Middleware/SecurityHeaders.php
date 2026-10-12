@@ -42,6 +42,7 @@ class SecurityHeaders
             $policy = $this->policyWithTurnstile((string) config('security.csp.policy'));
             $policy = $this->policyWithConvai($policy);
             $policy = $this->policyWithGoogleFonts($policy);
+            $policy = $this->policyWithTrustpilot($policy);
             $headers['Content-Security-Policy'] = $policy;
         }
 
@@ -140,6 +141,36 @@ class SecurityHeaders
      * BrandSettings::usesGoogleFont(), so the strict default policy is
      * untouched on an unconfigured install.
      */
+    /** Trustpilot widget origins (admin-editable list), added only while the reviews layer is live. */
+    private function policyWithTrustpilot(string $policy): string
+    {
+        if (! \App\Support\Trustpilot\TrustpilotSettings::cspActive()) {
+            return $policy;
+        }
+        $add = \App\Support\Trustpilot\TrustpilotSettings::cspHosts();
+        $directives = array_map('trim', explode(';', $policy));
+        $present = [];
+        foreach ($directives as $i => $directive) {
+            foreach ($add as $name => $origins) {
+                if (str_starts_with($directive, $name.' ')) {
+                    $present[$name] = true;
+                    foreach ($origins as $origin) {
+                        if (! str_contains($directive, $origin)) {
+                            $directives[$i] .= ' '.$origin;
+                        }
+                    }
+                }
+            }
+        }
+        foreach ($add as $name => $origins) {
+            if (empty($present[$name]) && $origins !== []) {
+                $directives[] = $name." 'self' ".implode(' ', $origins);
+            }
+        }
+
+        return implode('; ', array_filter($directives));
+    }
+
     private function policyWithGoogleFonts(string $policy): string
     {
         if (! BrandSettings::usesGoogleFont()) {

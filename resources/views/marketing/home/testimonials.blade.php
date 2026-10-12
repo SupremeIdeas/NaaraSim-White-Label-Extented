@@ -1,5 +1,6 @@
 {{-- Testimonials (CMS: home.testimonials) — the TEAL scene + star ratings
      reusing the Module 20 star-rating component. --}}
+@if (\App\Support\Trustpilot\TrustpilotSettings::defaultTestimonialsOn() || ! \App\Support\Trustpilot\TrustpilotSettings::placementOn('home.carousel'))
 <section class="bg-[#07403f] px-4 py-24 text-teal-50" data-bg="teal">
     <div class="mx-auto max-w-6xl">
         <div class="text-center">
@@ -21,3 +22,7 @@
         </div>
     </div>
 </section>
+@endif
+@if (\App\Support\Trustpilot\TrustpilotSettings::placementOn('home.carousel'))
+    <section class="bg-white py-10 dark:bg-slate-900"><div class="mx-auto max-w-6xl px-4"><x-trust.reviews placement="home.carousel" /></div></section>
+@endif

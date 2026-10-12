@@ -32,4 +32,5 @@
             New here? <a href="/register" class="font-semibold text-primary hover:underline">Create an account</a>
         </p>
     </form>
+    <x-trust.reviews placement="auth.badge" class="mt-4 text-center" />
 </x-layouts.auth>

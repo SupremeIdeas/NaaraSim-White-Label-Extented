@@ -84,6 +84,7 @@
         $more[] = ['route' => 'admin.home-media', 'label' => 'Homepage media', 'icon' => 'play'];
         $more[] = ['route' => 'admin.sidebar-menu', 'label' => 'Sidebar menu', 'icon' => 'menu'];
         $more[] = ['route' => 'admin.pages', 'label' => 'Custom pages', 'icon' => 'file-text'];
+        $more[] = ['route' => 'admin.trustpilot', 'label' => 'Trustpilot reviews', 'icon' => 'star'];
         $more[] = ['route' => 'admin.blog', 'label' => 'Blog', 'icon' => 'file-text'];
         $more[] = ['route' => 'admin.blog-reader', 'label' => 'Blog reader', 'icon' => 'share'];
         $more[] = ['route' => 'admin.tours', 'label' => 'Guided tours', 'icon' => 'compass'];
