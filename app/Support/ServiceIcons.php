@@ -26,7 +26,7 @@ class ServiceIcons
 
     /** Slugs that have a bundled sprite symbol (svc-{slug}) — real brand logos. */
     public const BUNDLED = [
-        'whatsapp', 'telegram', 'linkedin', 'facebook', 'google', 'instagram', 'tiktok', 'x', 'snapchat',
+        'whatsapp', 'telegram', 'linkedin', 'facebook', 'google', 'youtube', 'instagram', 'tiktok', 'x', 'snapchat',
         'discord', 'tinder', 'okcupid', 'uber', 'apple', 'netflix', 'paypal', 'viber',
         'signal', 'wechat', 'binance', 'coinbase', 'revolut', 'cashapp', 'venmo', 'twitch',
         'spotify', 'airbnb', 'aliexpress', 'ebay', 'steam', 'epicgames', 'protonmail', 'line',
@@ -34,10 +34,13 @@ class ServiceIcons
         'shopee', 'tumblr', 'vk', 'naver', 'kakaotalk', 'badoo', 'microsoft',
     ];
 
+    /** Slugs whose bundled mark is always used (a provider's own image for them is ignored). */
+    public const PINNED = ['google'];
+
     /** Common provider aliases → our slugs (5sim/SMS-Activate naming). */
     private const ALIASES = [
         'twitter' => 'x', 'fb' => 'facebook', 'wa' => 'whatsapp',
-        'gmail' => 'google', 'youtube' => 'google', 'plentyoffish' => 'pof',
+        'gmail' => 'google', 'go' => 'google', 'googlevoice' => 'google', 'google voice' => 'google', 'google_voice' => 'google', 'google-voice' => 'google', 'googleplay' => 'google', 'google play' => 'google', 'google_play' => 'google', 'plentyoffish' => 'pof',
     ];
 
     /**
@@ -53,7 +56,8 @@ class ServiceIcons
             return ['type' => 'img', 'url' => $url];
         }
 
-        if ($apiUrl) {
+        // The owner's own brand marks beat a provider-supplied picture: a stray supplier logo for these never appears.
+        if ($apiUrl && ! in_array($slug, self::PINNED, true)) {
             return ['type' => 'img', 'url' => $apiUrl];
         }
 
