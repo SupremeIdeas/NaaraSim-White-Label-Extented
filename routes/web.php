@@ -225,6 +225,7 @@ Route::get('/preloader-asset/{id}.json', \App\Http\Controllers\PreloaderAssetCon
 // SAME hero/carousel/infinite-feed serves marketing + the in-app floating nav.
 Route::get('/blog', Blog::class)->name('blog');
 Route::get('/blog/{post:slug}', [BlogController::class, 'show'])->name('blog.show');
+Route::post('/blog-reader-event', [\App\Http\Controllers\BlogReaderEventController::class, 'store'])->middleware('throttle:60,1')->name('blog.reader-event');
 
 // Public pricing page (Module 29) — real plans when live, estimate tiers before.
 Route::get('/pricing', PricingPage::class)->name('pricing');
@@ -441,6 +442,7 @@ Route::middleware(['admin', 'throttle:admin'])
             Route::get('/chrome', SiteChromePage::class)->name('chrome');
             Route::get('/legal', LegalEditor::class)->name('legal');
             Route::get('/blog', Posts::class)->name('blog');
+            Route::get('/blog-reader', \App\Livewire\Admin\BlogReader::class)->name('blog-reader');
             Route::get('/pages', CustomPages::class)->name('pages');
             Route::get('/builder', PageBuilder::class)->name('builder');
             Route::get('/app-builder', AppBuilder::class)->name('app-builder');

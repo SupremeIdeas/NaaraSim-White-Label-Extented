@@ -9,6 +9,9 @@
 
 ## DONE
 
+### Blog reader (ported from master, generic only)
+- Centred Share modal (server-built links + UTM, canonical/OG/Twitter tags), Keep reading carousel (inline + once-per-article pop-up), "From the blog" preview in the More menu (grid/list/carousel), Admin > Blog reader settings with privacy-safe daily counters. Master-only pieces (built-in Business/Brain/Chat More apps, marketing video slots) were NOT ported. Share endpoints not yet re-verified against live platform docs.
+
 ### Engineering v3 Phases 2-3 (generic parts, ported from master) (2026-10-11)
 - Wallet tabs / quick amounts "hang until refresh": root-caused to `<x-nx.page>` being the first element of a Livewire view (Livewire put `wire:id` on the inner div, so outer Alpine state was wiped by the first update). 13 views here now start with a plain `<div>` root; `LivewireRootsTest` guards it (it also caught `admin/skin-selection`).
 - Payout gateway status: `GatewayStatusResolver` reports why a rail is not usable (no key / key for the other environment / not installed / switched off / breaker tripped); `AutomationStatus` reads the registry; `RailAdvisor` says "not open yet" vs "temporarily unavailable" (breaker only). Adding the same bank account twice gets a friendly message.

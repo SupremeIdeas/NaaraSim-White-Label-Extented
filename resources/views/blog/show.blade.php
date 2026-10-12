@@ -1,5 +1,14 @@
 <x-layouts.marketing :title="$post->metaTitle().' — '.\App\Support\BrandSettings::name()"
                      :description="$post->metaDescription()" :og-image="$post->cover_image_url">
+    @push('head')
+        <link rel="canonical" href="{{ route('blog.show', $post) }}">
+        <meta property="og:type" content="article">
+        <meta property="og:url" content="{{ route('blog.show', $post) }}">
+        <meta name="twitter:card" content="summary_large_image">
+        <meta name="twitter:title" content="{{ $post->metaTitle() }}">
+        <meta name="twitter:description" content="{{ $post->metaDescription() }}">
+        @if ($post->cover_image_url)<meta name="twitter:image" content="{{ $post->cover_image_url }}">@endif
+    @endpush
     {{-- Accent wash tied to this post's colour (Blog overhaul §5). --}}
     <div class="pointer-events-none fixed inset-x-0 top-0 -z-10 h-96" aria-hidden="true"
          style="background: radial-gradient(90% 60% at 50% 0%, {{ $post->accentColor() }}22 0%, transparent 60%);"></div>
@@ -27,7 +36,9 @@
         {{-- Reader actions: reactions + share (component-library batch 2 §4/§5). --}}
         <div class="mt-10 flex flex-wrap items-center justify-between gap-4 border-t border-slate-200 pt-6 dark:border-[var(--brand-card-border-dark)]">
             <livewire:post-reactions :post="$post" :key="'react-'.$post->id" />
-            <x-share-button :url="route('blog.show', $post)" :title="$post->title" />
+            <x-blog.share-modal :post="$post" />
         </div>
+
+        <x-blog.keep-reading :post="$post" />
     </article>
 </x-layouts.marketing>

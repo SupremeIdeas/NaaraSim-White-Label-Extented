@@ -85,6 +85,7 @@
         $more[] = ['route' => 'admin.sidebar-menu', 'label' => 'Sidebar menu', 'icon' => 'menu'];
         $more[] = ['route' => 'admin.pages', 'label' => 'Custom pages', 'icon' => 'file-text'];
         $more[] = ['route' => 'admin.blog', 'label' => 'Blog', 'icon' => 'file-text'];
+        $more[] = ['route' => 'admin.blog-reader', 'label' => 'Blog reader', 'icon' => 'share'];
         $more[] = ['route' => 'admin.legal', 'label' => 'Legal', 'icon' => 'shield'];
         $more[] = ['route' => 'admin.incidents', 'label' => 'Status incidents', 'icon' => 'bell'];
         $more[] = ['route' => 'admin.branding', 'label' => 'Branding', 'icon' => 'image'];
