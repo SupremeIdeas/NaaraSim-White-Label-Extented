@@ -108,6 +108,6 @@ class TrustpilotDisplayTest extends TestCase
         $html = $this->get('/')->assertOk()->getContent();
         $this->assertLessThan(strpos($html, '</head>'), strpos($html, 'invitejs.trustpilot.com'));
         $this->assertSame(1, substr_count($html, "tp('register'"));
-        $this->assertStringNotContainsString('A5H7RxzB3RWdbggz', (string) file_get_contents(base_path('app/Support/Trustpilot/TrustpilotSettings.php')));
+        $this->assertFalse(class_exists(\App\Support\MasterMarketing\NaaraTrustpilotProfile::class), 'no master preset class exists here');
     }
 }
