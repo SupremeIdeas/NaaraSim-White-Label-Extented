@@ -9,6 +9,11 @@
 
 ## DONE
 
+### Provider blueprint 3.1/3.2: Telnyx messaging profile and webhook token (2026-10)
+- **Built:** a Telnyx number we buy is now assigned to the configured Messaging Profile by a queued, backed-off job (`AssignTelnyxMessagingProfileJob`; a still-pending order retries), because without it the number cannot send or receive SMS. `config/services.php` telnyx gained `messaging_profile_id` and `webhook_token` (env `TELNYX_MESSAGING_PROFILE_ID`, `TELNYX_WEBHOOK_TOKEN`), and both are editable in Admin > Provider keys. Endpoint per Telnyx v2 docs, to be confirmed in the Telnyx sandbox at go-live. `TelnyxMessagingProfileTest` (5).
+- **Owner still to do:** create the Messaging Profile in the Telnyx portal, paste its ID and a random webhook token into Provider keys, and set the profile's webhook URL to `/webhooks/sms-inbound/telnyx?token=...`.
+
+
 ### Dialer keypad hardening (ported from master)
 - Keypad is a fixed 3x4 grid whatever the number length (minmax columns, square keys, long numbers shrink, single-line LTR display); `scripts/responsive/dialer-grid.mjs` is the regression. The reported scatter was not reproduced headlessly.
 

@@ -168,6 +168,10 @@ return [
     'telnyx' => [
         'api_key' => env('TELNYX_API_KEY'),
         'base_url' => env('TELNYX_BASE_URL', 'https://api.telnyx.com/v2'),
+        // SMS: every purchased number must be assigned to a Messaging Profile or it cannot send or receive text (created once in the Telnyx portal);
+        // inbound replies reach /webhooks/sms-inbound/telnyx?token=<webhook_token>.
+        'messaging_profile_id' => env('TELNYX_MESSAGING_PROFILE_ID'),
+        'webhook_token' => env('TELNYX_WEBHOOK_TOKEN'),
     ],
 
     // WhatsApp Cloud API (Meta) — WhatsApp Autopilot (BUILD-4 §7). Automated,
