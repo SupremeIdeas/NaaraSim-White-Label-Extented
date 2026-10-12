@@ -4537,6 +4537,9 @@ Rate limits (Section 19.2): `api` limiter 300/min auth · 60/min public (on `rou
 ### DONE 2026-10-12 — SMS delivery reports and queued send (ported from master, generic reliability)
 Same change as the Basic fork: signature-verified Twilio (X-Twilio-Signature) and Telnyx (Ed25519 message.finalized) delivery reports settle the charge, a final failure refunds once (idempotent, a delivered message never flips to failed; switch `sms.refund_on_failed_delivery`, default on), sends request the provider callback, Telnyx inbound texts are read, and the provider call runs in `SendOutboundSmsJob` after the request has charged and queued the message (a failure refunds in full). New `TelnyxService::verifyWebhook`, `TELNYX_PUBLIC_KEY`. Tests: `SmsProviderWebhookTest`, `MessageSenderTest`.
 
+### DONE 2026-10-12 — Cookie consent system (ported from master, generic platform feature)
+Opt-in cookie banner on every public and signed-in page (Accept all, Reject all of equal weight, Choose; Necessary / Functional / Analytics / Marketing, each shown only if a live service uses it), GA4 and Meta Pixel inert until consent (Consent Mode v2 default denied then updated; withdrawing clears their cookies; Global Privacy Control counts as reject), `/cookie-preferences` consent page, "Cookie settings" re-open button and footer link, policy-version re-ask, renewal period, proof-of-consent log (hashed address) with daily prune and CSV export, and Admin > Cookies (wording, layout, colours with live preview, behaviour, stats, log). Default cookie policy text updated. Tests: `CookieConsentTest` (16). See master PROGRESS for the research notes; a lawyer should confirm the final wording.
+
 ## NEXT  (build strictly top to bottom)
 
 ### ▶ TOP OF NEXT — Numbers/Verify/Rent catalogue sync: queued job + observability

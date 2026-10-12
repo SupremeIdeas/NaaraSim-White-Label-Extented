@@ -168,16 +168,25 @@ TXT,
             'cookies' => [
                 'title' => 'Cookie Policy',
                 'body' => <<<'TXT'
-{brand} uses a small number of cookies to make the service work.
+{brand} uses cookies to make the service work and, only if you agree, to understand how it is used and to measure our adverts. Nothing optional runs until you say yes.
 
-## Essential cookies
-We use cookies that are strictly necessary: to keep you signed in (session), to protect forms against cross-site request forgery, and to remember your light/dark theme preference. The service cannot function without these.
+## Strictly necessary cookies
+These keep you signed in (session), protect forms against cross-site request forgery, remember your cookie choice, and remember your language and light/dark theme. The service cannot function without them, so they do not need your consent.
 
-## What we do not do
-We do not use advertising cookies and we do not sell cookie data to third parties.
+## Optional cookies (off until you agree)
+- **Functional:** optional extras from other providers, such as the customer reviews widget and embedded videos.
+- **Analytics:** help us see which pages are used, in aggregate, so we can improve the product.
+- **Marketing:** let advertising partners measure whether our adverts work.
+The exact services, the cookies each one sets and how long they last are listed on the cookie preferences page, which always shows what is currently in use.
 
-## Managing cookies
-You can clear or block cookies in your browser settings, but essential cookies are required to sign in and buy. Disabling them will break parts of the service.
+## Your choices
+When you first visit you can accept all, reject all, or choose by category. Rejecting is as easy as accepting and never stops you using the site. You can change or withdraw your choice at any time from the "Cookie settings" button or the cookie preferences page. We keep your choice for about six months and then ask again, and we ask again sooner if we add a new service. If your browser sends the Global Privacy Control signal we treat it as a rejection of all optional cookies.
+
+## Records of your choice
+To show your choice was respected we keep a record of it: a random reference, the time, what you chose, the policy version, and a scrambled form of your connection address (never the address itself). These records are deleted after the retention period.
+
+## Managing cookies in your browser
+You can also clear or block cookies in your browser settings, but blocking the strictly necessary ones will stop you signing in and buying.
 TXT,
             ],
             'data-deletion' => [

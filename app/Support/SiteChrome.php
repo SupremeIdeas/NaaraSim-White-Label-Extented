@@ -206,6 +206,7 @@ class SiteChrome
         return [
             ['label' => 'Terms', 'url' => '/legal/terms'],
             ['label' => 'Privacy', 'url' => '/legal/privacy'],
+            ['label' => 'Cookie settings', 'url' => '/cookie-preferences'],
             ['label' => 'Refunds', 'url' => '/legal/refund'],
             ['label' => 'Status', 'url' => '/status'],
         ];

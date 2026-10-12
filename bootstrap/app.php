@@ -38,6 +38,7 @@ return Application::configure(basePath: dirname(__DIR__))
         // (HMAC/shared-secret) inside each handler.
         $middleware->validateCsrfTokens(except: [
             'webhooks/*',
+            'cookie-consent',
         ]);
 
         $middleware->alias([

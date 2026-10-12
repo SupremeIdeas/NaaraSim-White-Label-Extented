@@ -4,6 +4,7 @@ import './tours/engine';
 import { registerNxUpload } from './nx-upload';
 import { registerNxLayers } from './nx-layers';
 import './lottie';
+import './cookie-consent';
 registerNxUpload();
 registerNxLayers();
 import { initImageCompression } from './image-compress';

@@ -195,6 +195,9 @@ Route::get('/legal/{slug}', function (string $slug) {
 
     return view('legal.show', ['doc' => LegalContent::doc($slug)]);
 })->name('legal.show');
+// Cookie consent: the full preferences page and the proof-of-consent log endpoint (public, throttled, CSRF-exempt because it only records evidence).
+Route::get('/cookie-preferences', [\App\Http\Controllers\CookieConsentController::class, 'preferences'])->name('cookie-preferences');
+Route::post('/cookie-consent', [\App\Http\Controllers\CookieConsentController::class, 'store'])->middleware('throttle:30,1')->name('cookie-consent.store');
 Route::get('/refund-policy', fn () => view('legal.show', ['doc' => LegalContent::doc('refund')]))->name('refund-policy');
 // Reviews page (Trustpilot display layer). A plain 404 until an admin turns the page on.
 Route::get('/reviews', function () {
@@ -458,6 +461,8 @@ Route::middleware(['admin', 'throttle:admin'])
             Route::get('/sidebar-menu', SidebarMenu::class)->name('sidebar-menu');
             Route::get('/chrome', SiteChromePage::class)->name('chrome');
             Route::get('/legal', LegalEditor::class)->name('legal');
+            Route::get('/cookies', \App\Livewire\Admin\CookieSettings::class)->name('cookies');
+            Route::get('/cookies/export', [\App\Http\Controllers\Admin\CookieConsentExportController::class, 'export'])->name('cookies.export');
             Route::get('/blog', Posts::class)->name('blog');
             Route::get('/blog-reader', \App\Livewire\Admin\BlogReader::class)->name('blog-reader');
             Route::get('/tours', \App\Livewire\Admin\TourStudio::class)->name('tours');
