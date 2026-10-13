@@ -74,6 +74,7 @@ class WhiteLabelUpdateClientTest extends TestCase
     public function test_check_for_updates_fails_cleanly_with_no_current_version_recorded(): void
     {
         Setting::setValue(UpdateApplier::VERSION_SETTING, null);
+        config(['updater.shipped_version' => '']);   // a build that does not know its own version, and has applied no update: nothing to compare packages with
         Http::fake(); // no request should even be made
 
         $result = $this->client()->checkForUpdates('code');
