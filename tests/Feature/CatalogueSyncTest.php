@@ -134,6 +134,19 @@ class CatalogueSyncTest extends TestCase
         $this->assertSame(2.60, (float) $plan->fresh()->final_retail_usd);
     }
 
+    public function test_an_esimgo_unlimited_bundle_is_stored_as_null_data_not_minus_one(): void
+    {
+        $this->bindProvider('esimgo', ['bundles' => [
+            ['name' => 'unl_ng_1d', 'description' => 'Unlimited, 1 Day, Nigeria', 'dataAmount' => -1, 'unlimited' => true, 'duration' => 1, 'price' => 5.45, 'countries' => [['iso' => 'NG']]],
+            ['name' => 'cap_ng_7d', 'description' => '1GB, 7 Days, Nigeria', 'dataAmount' => 1000, 'unlimited' => false, 'duration' => 7, 'price' => 3.1, 'countries' => [['iso' => 'NG']]],
+        ]]);
+
+        app(CatalogueSyncService::class)->sync('esimgo');
+
+        $this->assertNull(EsimPlan::where('provider_plan_id', 'unl_ng_1d')->firstOrFail()->data_mb, 'unlimited is null across the platform (fair-usage note, failover matching)');
+        $this->assertSame(1000, (int) EsimPlan::where('provider_plan_id', 'cap_ng_7d')->firstOrFail()->data_mb);
+    }
+
     public function test_synced_plan_never_leaks_cost_in_serialized_output(): void
     {
         $this->bindProvider('quibity', [

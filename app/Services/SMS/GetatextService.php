@@ -53,7 +53,10 @@ class GetatextService implements SmsProviderInterface
     {
         $this->guardConfigured();
 
-        $items = $this->client()->get('/prices-info')->throw()->json() ?? [];
+        // The live API answers {"status": "...", "errors": null, "prices": [...]}; iterating the top level matched nothing, so EVERY service read as "not offered" and
+        // the US lane owner never served a number (found 2026-10-13 against the live account). A bare list is still read, for older answers and fakes.
+        $json = $this->client()->get('/prices-info')->throw()->json() ?? [];
+        $items = is_array($json['prices'] ?? null) ? $json['prices'] : (array_is_list($json) ? $json : []);
 
         foreach ($items as $item) {
             if (($item['api_name'] ?? null) === $service || ($item['service_name'] ?? null) === $service) {
