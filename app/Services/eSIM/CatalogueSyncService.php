@@ -146,7 +146,9 @@ class CatalogueSyncService
                 'provider_plan_id' => $b['name'] ?? $b['bundle_name'] ?? null,
                 'name' => $b['description'] ?? $b['name'] ?? 'eSIM bundle',
                 'type' => $b['type'] ?? null,
-                'data_mb' => $this->intOrNull($b['dataAmount'] ?? $b['data'] ?? null),
+                // eSIM Go reports an unlimited bundle as dataAmount -1 with `unlimited: true`; across the platform unlimited is data_mb = null (the fair-usage
+                // disclosure, failover matching and display all key on it), so -1 must never be stored.
+                'data_mb' => ! empty($b['unlimited']) || (is_numeric($b['dataAmount'] ?? null) && (int) $b['dataAmount'] < 0) ? null : $this->intOrNull($b['dataAmount'] ?? $b['data'] ?? null),
                 'validity_days' => $this->intOrNull($b['duration'] ?? null),
                 'countries' => $countries,
                 'cost_price_usd' => (float) ($b['price'] ?? 0),

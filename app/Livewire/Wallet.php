@@ -311,6 +311,7 @@ class Wallet extends Component
         try {
             $result = app("pay.{$this->gateway}")->initialize($user, $amount, $currency);
         } catch (\Throwable $e) {
+            report($e);   // the person sees a calm message; the log keeps the provider's real answer (a bad email, a bad key, a down API)
             $this->error = 'We could not start the payment. Please try again.';
             $this->dispatch('nx-toast', variant: 'hero', type: 'error',
                 title: 'Top-up could not start',
