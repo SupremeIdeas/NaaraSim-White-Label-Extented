@@ -63,8 +63,9 @@ class SupportVoiceMimeTest extends TestCase
 
     public function test_transcoder_falls_back_gracefully_when_ffmpeg_is_unavailable(): void
     {
-        // This dev/CI sandbox has no ffmpeg binary — confirms the fallback
-        // path (never a hard failure) rather than assuming ffmpeg exists.
+        // Pretend there is no ffmpeg (whatever this machine has), so the fallback
+        // path (never a hard failure) is what is exercised.
+        \Illuminate\Support\Facades\Process::fake(['*' => \Illuminate\Support\Facades\Process::result('', 'ffmpeg: not found', 127)]);
         $transcoder = app(AudioTranscoder::class);
         $this->assertFalse($transcoder->available());
 
