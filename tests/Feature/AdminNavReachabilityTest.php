@@ -14,6 +14,7 @@ class AdminNavReachabilityTest extends TestCase
 {
     /** Pages that are intentionally not top-level navigation entries. */
     private const NOT_NAV = [
+        'admin.review-moments' => 'Review moments button on the Trustpilot page',
         'admin.cookies.export' => 'CSV download button on the Cookies page',
         'admin.login' => 'auth flow',
         'admin.recover' => 'auth flow',

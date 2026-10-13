@@ -275,6 +275,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Review moments: record when a purchase or use really worked, so the app can ask how it went at a calm moment (off until an admin switches it on).
+        \App\Support\Reviews\ReviewMomentHooks::register();
+
         // White-label brand token (@brand). Echoes text with the shipped 'Naara'
         // token swapped for the admin-set brand word — used for the handful of
         // brand names generated/shown centrally. A no-op on a default install.

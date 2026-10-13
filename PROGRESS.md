@@ -9,6 +9,8 @@
 
 ## DONE
 
+- **Review Moments (ported from master, 2026-10-13).** Trustpilot review ask after real success: first eSIM delivery, SMS verification completed, virtual number active, gift card delivered. Fires when the person is idle 15 min or returns to the app; one per product (first only), 14-day cool-down, no gating (everyone invited equally, support link only added for 1-3 stars), nothing offered in return. Admin > Trustpilot > Review moments panel for switches and timings. Master-only triggers (Brain, Business Suite, N2N calls) are NOT present here. Tests: `ReviewMomentsTest`; full suite green except two pre-existing env failures (`EnvExampleSyncTest` TELNYX_PUBLIC_KEY, `SupportVoiceMimeTest` ffmpeg).
+
 ### Trustpilot invitation script (2026-10)
 - **Built:** JavaScript-integration script while Trustpilot is on, key pasted by the admin (none is shipped), CSP origin added, never loads behind click-to-load.
 

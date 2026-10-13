@@ -5,6 +5,7 @@ import { registerNxUpload } from './nx-upload';
 import { registerNxLayers } from './nx-layers';
 import './lottie';
 import './cookie-consent';
+import './review-moments';
 registerNxUpload();
 registerNxLayers();
 import { initImageCompression } from './image-compress';

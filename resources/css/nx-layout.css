@@ -1126,3 +1126,29 @@ html.ck-open { overflow: hidden; }
 .ck-reopen[hidden] { display: none; }
 .ck-reopen svg { width: 20px; height: 20px; }
 @media (max-width: 640px) { .ck-reopen { inset-block-end: 84px; } .ck--card .ck__box { max-width: none; } }
+
+/* ---- Review-moment sheet ("how did it go?") ---- */
+.ncr { position: fixed; inset: 0; z-index: 96; display: grid; align-items: end; }
+.ncr[hidden] { display: none; }
+.ncr__scrim { position: absolute; inset: 0; background: rgb(0 0 0 / .55); }
+.ncr__sheet { position: relative; width: min(100%, 560px); margin: 0 auto; padding: 20px 22px calc(22px + env(safe-area-inset-bottom)); border-radius: 28px 28px 0 0; background: rgb(var(--nx-surface)); color: rgb(var(--nx-text)); box-shadow: 0 -14px 44px rgb(0 0 0 / .4), inset 0 0 0 1px rgb(var(--nx-line)); animation: ncr-up .25s ease; }
+@keyframes ncr-up { from { transform: translateY(24px); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .ncr__sheet { animation: none; } }
+.ncr__head { display: flex; align-items: center; gap: 14px; }
+.ncr__head h2 { margin: 0; font-size: 20px; font-weight: 700; }
+.ncr__x { width: 44px; height: 44px; border: 0; border-radius: 50%; background: transparent; color: rgb(var(--nx-text)); display: grid; place-items: center; cursor: pointer; font-size: 22px; }
+.ncr__sub { margin: 18px 6px 0; text-align: center; color: rgb(var(--nx-text-2)); font-size: 16px; line-height: 1.45; }
+.ncr__stars { display: flex; justify-content: center; gap: 10px; margin: 24px 0 8px; }
+.ncr__star { border: 0; background: none; padding: 4px; cursor: pointer; color: rgb(var(--nx-text-2)); font-size: 44px; line-height: 0; transition: transform .12s, color .12s; }
+.ncr__star:hover { transform: scale(1.08); }
+.ncr__star .ns-i { fill: none; }
+.ncr__star.is-on { color: rgb(var(--nx-gold)); } .ncr__star.is-on .ns-i { fill: currentColor; }
+.ncr__row { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 26px; }
+.ncr__quiet { border: 0; background: none; color: rgb(var(--nx-teal-ink, var(--nx-teal))); font: inherit; font-weight: 600; font-size: 17px; padding: 14px 18px; cursor: pointer; border-radius: 99px; }
+.ncr__go { border: 0; min-width: 44%; padding: 14px 22px; border-radius: 99px; font: inherit; font-weight: 700; font-size: 17px; cursor: pointer; color: #fff; background: rgb(var(--nx-teal)); transition: opacity .15s; }
+.ncr__go:disabled { cursor: default; color: rgb(var(--nx-text-2)); background: rgb(var(--nx-surface-2, var(--nx-line)) / .8); opacity: .8; }
+.ncr__tp { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 22px; padding: 16px 20px; border-radius: 99px; background: #00b67a; color: #fff; font-weight: 700; font-size: 17px; text-decoration: none; }
+.ncr__tp .ns-i { font-size: 22px; fill: currentColor; }
+.ncr__help { display: block; margin: 16px auto 0; text-align: center; color: rgb(var(--nx-text-2)); text-decoration: underline; font-size: 15px; }
+.ncr__help[hidden] { display: none; }
+body:has(.ncr:not([hidden])) .ck-reopen { display: none; }   /* the cookie shield must not sit on top of the rating sheet */
