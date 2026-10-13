@@ -71,6 +71,18 @@ final class TrustpilotSettings
         return preg_match('#^https://([a-z0-9-]+\.)?trustpilot\.com/[\w./%-]+$#i', $u) === 1 ? $u : '';
     }
 
+    /** Trustpilot's own "write a review" form for the saved profile (the profile's /review/ path becomes /evaluate/). Null when no Trustpilot profile address is set. */
+    public static function reviewFormUrl(): ?string
+    {
+        $u = self::profileUrl();
+        if ($u === '') {
+            return null;
+        }
+        $e = preg_replace('#/review/#', '/evaluate/', $u, 1);
+
+        return is_string($e) && $e !== '' ? $e : $u;
+    }
+
     public static function locale(): string
     {
         $l = (string) self::get('locale', 'en-US');

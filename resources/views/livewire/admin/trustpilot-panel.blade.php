@@ -11,6 +11,8 @@
         <p class="mt-1 text-sm text-[rgb(var(--nx-text-2))]">Show your real Trustpilot reviews with Trustpilot's own widgets. Everything is off until you switch it on, and switching it off removes every script and page. This panel only <b>displays</b> reviews. Review invitations and thank-you rewards are not built: Trustpilot's rules on incentives are not settled, so nothing here asks for, steers or pays for reviews.</p>
     </div>
 
+    @if (Route::has('admin.review-moments'))<a href="{{ route('admin.review-moments') }}" class="{{ $card }} flex items-center justify-between text-sm font-semibold text-[rgb(var(--nx-text))]" data-review-moments-link>Review moments: ask for reviews after an eSIM, number or gift card really worked <span aria-hidden="true">&rarr;</span></a>@endif
+
     <details class="{{ $card }}">
         <summary class="cursor-pointer text-base font-semibold text-[rgb(var(--nx-text))]">Quick setup guide</summary>
         <ol class="mt-3 list-decimal space-y-2 pl-5 text-sm text-[rgb(var(--nx-text))]">

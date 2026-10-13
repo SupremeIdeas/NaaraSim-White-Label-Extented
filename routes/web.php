@@ -197,6 +197,14 @@ Route::get('/legal/{slug}', function (string $slug) {
 })->name('legal.show');
 // Cookie consent: the full preferences page and the proof-of-consent log endpoint (public, throttled, CSRF-exempt because it only records evidence).
 Route::get('/cookie-preferences', [\App\Http\Controllers\CookieConsentController::class, 'preferences'])->name('cookie-preferences');
+// Review moments: the "how did it go?" sheet after something really worked (off until an admin switches it on).
+Route::middleware(['auth', 'active', 'throttle:30,1'])->prefix('reviews')->name('reviews.')->group(function () {
+    Route::get('/next', [\App\Http\Controllers\ReviewMomentController::class, 'next'])->name('next');
+    Route::post('/{id}/rate', [\App\Http\Controllers\ReviewMomentController::class, 'rate'])->whereNumber('id')->name('rate');
+    Route::post('/{id}/dismiss', [\App\Http\Controllers\ReviewMomentController::class, 'dismiss'])->whereNumber('id')->name('dismiss');
+    Route::post('/{id}/opened', [\App\Http\Controllers\ReviewMomentController::class, 'opened'])->whereNumber('id')->name('opened');
+});
+
 Route::post('/cookie-consent', [\App\Http\Controllers\CookieConsentController::class, 'store'])->middleware('throttle:30,1')->name('cookie-consent.store');
 Route::get('/refund-policy', fn () => view('legal.show', ['doc' => LegalContent::doc('refund')]))->name('refund-policy');
 // Reviews page (Trustpilot display layer). A plain 404 until an admin turns the page on.
@@ -467,6 +475,7 @@ Route::middleware(['admin', 'throttle:admin'])
             Route::get('/blog-reader', \App\Livewire\Admin\BlogReader::class)->name('blog-reader');
             Route::get('/tours', \App\Livewire\Admin\TourStudio::class)->name('tours');
             Route::get('/trustpilot', \App\Livewire\Admin\TrustpilotPanel::class)->name('trustpilot');
+            Route::get('/review-moments', \App\Livewire\Admin\ReviewMomentsPanel::class)->name('review-moments');
             Route::get('/pages', CustomPages::class)->name('pages');
             Route::get('/builder', PageBuilder::class)->name('builder');
             Route::get('/app-builder', AppBuilder::class)->name('app-builder');

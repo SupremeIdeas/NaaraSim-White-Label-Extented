@@ -182,6 +182,12 @@
     <x-splash />
     <x-ui.toast-stack />
     @unless (request()->is(config('admin.path'), config('admin.path').'/*') || request()->is('install', 'install/*'))<x-cookie-banner />@endunless
+    {{-- Review moments: the "how did it go?" sheet, only for a signed-in person while an admin has it on and a Trustpilot profile is set. --}}
+    @if (auth()->check() && \App\Support\Reviews\ReviewMoments::enabled())
+        @persist('review-moment')
+            <x-review-moment />
+        @endpersist
+    @endif
     {{ $slot ?? '' }}
     @yield('content')
     @livewireScripts
