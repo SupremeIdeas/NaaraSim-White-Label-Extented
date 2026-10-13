@@ -62,10 +62,25 @@ class AiraloService implements EsimProviderInterface
             ->acceptJson();
     }
 
-    /** Raw /packages data (country → operators → packages). Mapped on sync. */
+    /**
+     * Raw /packages data (country → operators → packages). Mapped on sync.
+     * Airalo paginates (`page`, `meta.last_page`); a single big `limit` can be
+     * silently capped, so walk every page (bounded) and concatenate.
+     */
     public function getCatalogue(): array
     {
-        return $this->client()->get('/packages', ['limit' => 500])->throw(fn ($r, $e) => throw new EsimProviderException($e->getMessage(), previous: $e))->json('data') ?? [];
+        $all = [];
+        $page = 1;
+        $last = 1;
+        do {
+            $res = $this->client()->get('/packages', ['limit' => 100, 'page' => $page])
+                ->throw(fn ($r, $e) => throw new EsimProviderException($e->getMessage(), previous: $e));
+            $all = array_merge($all, $res->json('data') ?? []);
+            $last = (int) ($res->json('meta.last_page') ?? 1);
+            $page++;
+        } while ($page <= $last && $page <= 200);
+
+        return $all;
     }
 
     /** Exchange rates (used for NGN display in CurrencyService). */
