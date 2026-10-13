@@ -99,6 +99,12 @@
                 </div>
             @endif
 
+            @if (blank(config('updater.api_token')))
+                <div class="mb-3 rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm text-amber-800 dark:border-amber-900/50 dark:bg-amber-950/30 dark:text-amber-200" data-license-not-activated>
+                    <b>Not activated yet.</b> This instance has not connected to the original platform, so nothing below has been confirmed by your licence. Activate it with the licence key you were given:
+                    send it once to <code>/api/v1/white-label/activate</code> on the original platform, then put the platform's address in <code>NAARA_ORIGINAL_PLATFORM_URL</code> and the token it returns in <code>NAARA_UPDATE_API_TOKEN</code> in your <code>.env</code>.
+                </div>
+            @endif
             @if (empty($this->activeLocks))
                 <p class="flex items-center gap-2 text-sm text-teal-700 dark:text-teal-300">
                     <x-icon name="check" class="h-4 w-4" /> All features unlocked on this instance.

@@ -72,4 +72,10 @@ return [
 
     'api_token' => env('NAARA_UPDATE_API_TOKEN'),
 
+    /*
+    | The platform version this build shipped as (YYYY.MM.DD-N, the same format as a package's version). A copy that has never applied an update
+    | uses it as its starting point, so update checks work right after activation. Bumped by the release process with every new build.
+    */
+    'shipped_version' => env('NAARA_SHIPPED_VERSION', '2026.10.13-1'),
+
 ];

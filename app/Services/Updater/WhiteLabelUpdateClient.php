@@ -217,11 +217,25 @@ class WhiteLabelUpdateClient
         }
     }
 
+    /**
+     * The version this copy is running. An update records it as it applies; a copy that has never applied one reports the version it was built from
+     * (config updater.shipped_version) and remembers it, so a freshly activated instance can check for updates straight away instead of being told to apply
+     * one by hand first (found by walking a fresh install through activation, 2026-10-13).
+     */
     private function currentVersion(): ?string
     {
         $version = Setting::getValue(UpdateApplier::VERSION_SETTING);
+        if (is_string($version) && $version !== '') {
+            return $version;
+        }
+        $shipped = (string) config('updater.shipped_version');
+        if (preg_match('/^\d{4}\.\d{2}\.\d{2}-\d+$/', $shipped) === 1) {
+            Setting::setValue(UpdateApplier::VERSION_SETTING, $shipped);
 
-        return is_string($version) && $version !== '' ? $version : null;
+            return $shipped;
+        }
+
+        return null;
     }
 
     /** Null when this instance isn't configured to reach the original platform yet. */

@@ -203,22 +203,23 @@ class CatalogueSyncService
     /** @return array<int, array<string, mixed>> */
     private function mapQuibity(array $raw): array
     {
-        $plans = $raw['data'] ?? $raw['plans'] ?? $raw;
+        $plans = $raw['plans'] ?? $raw['data'] ?? $raw;
 
-        return collect($plans)->map(function ($p) {
+        return collect($plans)->reject(fn ($p) => ! empty($p['hasPhoneNumber']) || (isset($p['isActive']) && ! $p['isActive']))->map(function ($p) {
             $countries = $this->isoList($p['countries'] ?? []);
+            $unlimited = ! empty($p['isUnlimited']);
 
-            // Quibity's marketing confirms a real regional-vs-country choice (§1);
-            // read a `region` field when the authenticated response supplies one,
-            // otherwise coverage falls back to the country count.
+            // Fields per the partner API (docs.esim.sm): `mb`, `days`, `price` (list) and `salePrice` (the discounted price). The platform's MarginGuard must never sell
+            // below what a plan really costs and the order answer is the only place the true charge shows, so the HIGHER of the two is the working cost until it is confirmed.
+            // Plans that bundle a phone number are a different product (Naara Connect lane) and are not ingested as data plans.
             return array_merge([
                 'provider_plan_id' => isset($p['id']) ? (string) $p['id'] : null,
                 'name' => $p['name'] ?? 'eSIM plan',
                 'type' => $p['type'] ?? null,
-                'data_mb' => $this->intOrNull($p['data_mb'] ?? null),
-                'validity_days' => $this->intOrNull($p['validity_days'] ?? null),
+                'data_mb' => $unlimited ? null : $this->intOrNull($p['mb'] ?? $p['data_mb'] ?? null),
+                'validity_days' => $this->intOrNull($p['days'] ?? $p['validity_days'] ?? null),
                 'countries' => $countries,
-                'cost_price_usd' => (float) ($p['price'] ?? 0),
+                'cost_price_usd' => (float) max((float) ($p['price'] ?? 0), (float) ($p['salePrice'] ?? 0)),
             ], $this->deriveCoverage($countries, $p['region'] ?? null));
         })->filter(fn ($r) => $r['provider_plan_id'] !== null)->values()->all();
     }
