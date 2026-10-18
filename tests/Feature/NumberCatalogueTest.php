@@ -23,6 +23,7 @@ class NumberCatalogueTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        config(['services.fivesim.api_key' => 'test-key']);   // a global number provider is keyed: the whole catalogue is offerable
         NumberCatalogue::flush();
     }
 
@@ -146,5 +147,19 @@ class NumberCatalogueTest extends TestCase
             ->call('openModal', 'numbers')
             ->assertSee('WhatsApp')
             ->assertSee('Binance');
+    }
+
+    public function test_only_countries_a_keyed_provider_really_covers_are_offerable(): void
+    {
+        foreach (['fivesim', 'herosms', 'virtsms', 'smspool', 'onlinesim', 'getatext'] as $p) {
+            config(["services.{$p}.api_key" => null]);
+        }
+        $this->assertSame([], \App\Support\NumberCatalogue::offerableCountries(), 'nothing keyed: the screens show their unavailable state');
+
+        config(['services.getatext.api_key' => 'test-key']);
+        $this->assertSame(['usa'], array_keys(\App\Support\NumberCatalogue::offerableCountries()), 'Getatext alone covers the USA only');
+
+        config(['services.fivesim.api_key' => 'test-key']);
+        $this->assertGreaterThan(100, count(\App\Support\NumberCatalogue::offerableCountries()), 'a global provider opens the whole catalogue');
     }
 }

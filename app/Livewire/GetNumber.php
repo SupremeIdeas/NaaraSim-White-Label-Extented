@@ -572,7 +572,7 @@ class GetNumber extends Component
             'order' => $order,
             // Active permanent line for the landing strip (owner-scoped; hidden when the member has none, never a placeholder).
             'activeLine' => \App\Models\VirtualNumber::where('user_id', auth()->id())->where('status', 'active')->latest('id')->first(['id', 'phone_number']),
-            'countries' => NumberCatalogue::countries(),
+            'countries' => NumberCatalogue::offerableCountries(),
             'services' => NumberCatalogue::services(),
             // "Any service" (full rent) is only offered when a full-rent-capable
             // provider is configured, so there's never a dead option.

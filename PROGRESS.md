@@ -9,6 +9,8 @@
 
 ## DONE
 
+- **Verify/Rent country list follows real coverage (2026-10-18; master + both forks).** `NumberCatalogue::offerableCountries()`: a global number provider keyed (5sim, HeroSMS, VirtSMS, SMSPool, OnlineSIM) opens the whole catalogue, Getatext alone offers the USA only, nothing keyed offers nothing (the picker's unavailable text). Used by the Get Number page, the Wizard, the country picker (cache keyed by coverage) and, on master, the Naara Widgets number catalogue. Test: `NumberCatalogueTest::test_only_countries_a_keyed_provider_really_covers_are_offerable`; the existing number tests now key a provider explicitly.
+
 - **eSIM images by country name + more country photos (2026-10-18).** Admin > eSIM > Images shows and picks countries by name; 195 shipped country photos with credits. Existing installs: `php artisan db:seed --class=EsimImageSeeder`.
 
 - **Gift card pricing screen (2026-10-18).** Admin > Pricing > Global now has Gift cards markup % and minimum profit (USD), used by `PricingEngine::giftCardRetail`.

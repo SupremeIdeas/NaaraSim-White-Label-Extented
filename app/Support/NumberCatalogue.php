@@ -66,6 +66,30 @@ class NumberCatalogue
     }
 
     /**
+     * The countries a person can actually BUY a number in right now: only what a provider that has its keys saved really covers. The static
+     * catalogue lists every country for labels and search; offering all of them with one provider keyed (or none) leads to dead ends at checkout.
+     *   - a global provider (5sim, HeroSMS, VirtSMS, SMSPool, OnlineSIM) keyed -> the whole catalogue;
+     *   - only Getatext keyed -> the USA alone;
+     *   - nothing keyed -> empty (the screens show their "unavailable" state).
+     *
+     * @return array<string, string> slug => label
+     */
+    public static function offerableCountries(): array
+    {
+        $all = self::countries();
+        foreach (['fivesim', 'herosms', 'virtsms', 'smspool', 'onlinesim'] as $global) {
+            if (\App\Support\ProviderModels::providerConfigured($global)) {
+                return $all;
+            }
+        }
+        if (\App\Support\ProviderModels::providerConfigured('getatext')) {
+            return array_intersect_key($all, ['usa' => true, 'us' => true]);
+        }
+
+        return [];
+    }
+
+    /**
      * Every service, slug => label. Merges base + synced, sorted by label.
      *
      * @return array<string, string>

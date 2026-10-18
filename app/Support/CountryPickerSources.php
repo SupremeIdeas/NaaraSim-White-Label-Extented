@@ -48,12 +48,14 @@ class CountryPickerSources
      */
     private static function numbers(): array
     {
-        return Cache::remember('country_picker:numbers', now()->addMinutes(15), function () {
+        $coverage = md5(implode(',', array_keys(\App\Support\NumberCatalogue::offerableCountries())));
+
+        return Cache::remember('country_picker:numbers:'.$coverage, now()->addMinutes(15), function () {
             $router = app(SmsNumberRouter::class);
             $scorer = app(NciScorer::class);
 
             $rows = [];
-            foreach (\App\Support\NumberCatalogue::countries() as $slug => $label) {
+            foreach (\App\Support\NumberCatalogue::offerableCountries() as $slug => $label) {
                 $lane = $router->laneFor($slug, NumberRequest::TYPE_OTP);
                 $rows[] = [
                     'code' => $slug,
