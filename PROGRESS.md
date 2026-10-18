@@ -9,6 +9,8 @@
 
 ## DONE
 
+- **eSIM images by country name + more country photos (2026-10-18).** Admin > eSIM > Images shows and picks countries by name; 195 shipped country photos with credits. Existing installs: `php artisan db:seed --class=EsimImageSeeder`.
+
 - **Gift card pricing screen (2026-10-18).** Admin > Pricing > Global now has Gift cards markup % and minimum profit (USD), used by `PricingEngine::giftCardRetail`.
 
 - **Popular-first gift cards + hero sizing (2026-10-18).** Gift store leads with the most-bought brands (`GiftPopularity`, `is_lead` migration, one lead card per brand); eSIM and Numbers desktop hero carousels capped at 64rem x 17.5rem (phones unchanged).

@@ -377,6 +377,27 @@ class EsimControlCenter extends Component
         $this->flash = "Saved image for {$label}.";
     }
 
+    /**
+     * Every ISO-3166 country as code => name, A-Z by name, for the upload picker (admins pick "Nigeria", never type "NG").
+     *
+     * @return array<string, string>
+     */
+    public function countryOptions(): array
+    {
+        $out = [];
+        foreach (range('A', 'Z') as $a) {
+            foreach (range('A', 'Z') as $b) {
+                $name = CountryNames::name($a.$b);
+                if (\App\Support\CountryFlags::iso($a.$b) !== null && $name !== '' && strtolower($name) !== strtolower($a.$b) && ! str_starts_with($name, 'Unknown')) {
+                    $out[$a.$b] = $name;
+                }
+            }
+        }
+        asort($out);
+
+        return $out;
+    }
+
     public function deleteCountryImage(int $id): void
     {
         EsimCountryImage::where('id', $id)->delete();
@@ -444,7 +465,9 @@ class EsimControlCenter extends Component
             ];
         } else { // images
             $data += [
-                'countryImages' => EsimCountryImage::orderBy('country_code')->get(),
+                // Sorted by the country's NAME (not its ISO code) so the grid reads like a country list.
+                'countryImages' => EsimCountryImage::all()->sortBy(fn ($i) => CountryNames::name($i->country_code))->values(),
+                'countryOptions' => $this->countryOptions(),
                 'regionImages' => EsimRegionImage::orderBy('region_slug')->get(),
                 'regionOptions' => array_merge(EsimRegions::labels(), [EsimCatalogue::REGION_OTHER => 'Other regions']),
             ];
