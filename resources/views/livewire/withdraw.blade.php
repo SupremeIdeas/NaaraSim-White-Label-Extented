@@ -66,7 +66,7 @@
             </span>
         </div>
     @empty
-        <x-nx.empty text="No payout accounts yet — add one below." />
+        <x-nx.empty art="es-bank" text="No payout accounts yet — add one below." />
     @endforelse
 
     {{-- Add account --}}

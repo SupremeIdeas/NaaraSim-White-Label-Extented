@@ -93,7 +93,7 @@
                 </div>
             @endif
         @empty
-            <x-nx.empty title="Nothing here yet." text="New activity on your account shows up here." />
+            <x-nx.empty art="es-bell" title="Nothing here yet." text="New activity on your account shows up here." />
         @endforelse
     </div>
 
