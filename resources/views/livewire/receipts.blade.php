@@ -21,7 +21,7 @@
             </span>
         </div>
     @empty
-        <x-nx.empty text="No purchases yet — your receipts will appear here." style="margin-top:16px" />
+        <x-nx.empty art="es-receipts" text="No purchases yet — your receipts will appear here." style="margin-top:16px" />
     @endforelse
 
     <div style="margin-top:18px">{{ $receipts->links() }}</div>

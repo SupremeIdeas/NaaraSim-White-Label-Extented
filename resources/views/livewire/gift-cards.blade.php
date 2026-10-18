@@ -49,7 +49,7 @@
 
     {{-- Brand catalogue --}}
     @if ($products->isEmpty())
-        <x-nx.empty text="No gift cards available yet." style="margin-top:16px" />
+        <x-nx.empty art="giftcard" text="No gift cards available yet." style="margin-top:16px" />
     @else
         <div class="ns-gf__brands" :class="view === 'grid' ? 'is-grid' : 'is-list'">
             @foreach ($products as $product)

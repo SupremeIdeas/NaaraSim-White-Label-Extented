@@ -31,7 +31,7 @@
             <x-nx.pill :variant="$referral->rewarded ? 'rec' : null"><x-nx.icon :name="$referral->rewarded ? 'check' : 'clock'" /> {{ $referral->rewarded ? 'Rewarded' : 'Pending' }}</x-nx.pill>
         </div>
     @empty
-        <x-nx.empty text="No referrals yet. Share your link to start earning." />
+        <x-nx.empty art="es-referral" text="No referrals yet. Share your link to start earning." />
     @endforelse
 
     {{-- Real, withdrawable referral earnings + payout status (BUILD-22 §1/§4). --}}

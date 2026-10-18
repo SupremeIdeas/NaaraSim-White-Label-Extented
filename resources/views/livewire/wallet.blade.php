@@ -203,7 +203,7 @@
                 <b style="flex:none;font-size:15px;font-variant-numeric:tabular-nums;color:rgb(var(--nx-{{ $out ? 'bad' : 'ok' }}))">{{ $out ? '−' : '+' }}{{ $txn->currency }} {{ number_format((float) $txn->amount, 2) }}</b>
             </div>
         @empty
-            <x-nx.empty text="No transactions yet." />
+            <x-nx.empty art="es-wallet" text="No transactions yet." />
         @endforelse
     </div>
 
