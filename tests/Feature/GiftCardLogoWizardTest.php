@@ -168,4 +168,21 @@ class GiftCardLogoWizardTest extends TestCase
         app(ZenditVoucherService::class)->order('ACME_US_25', 25.0, 'USD', [], 'tx-1');
         Http::assertSent(fn ($r) => $r['offerId'] === 'ACME_US_25' && ! isset($r['value']));
     }
+
+    public function test_the_shipped_logo_pack_seeds_every_brand_without_network_and_survives_a_sync(): void
+    {
+        Http::fake();
+        $manifest = json_decode((string) file_get_contents(database_path('seeders/giftcard-logos.json')), true);
+        $this->assertGreaterThan(7000, count($manifest));
+        foreach (array_slice($manifest, 0, 25) as $e) {
+            $this->assertFileExists(public_path(GiftCardLogoWizard::PACK_DIR.$e['file']));
+        }
+        $first = $manifest[0];
+        $this->product($first['brand_key'], $first['brand_name'], 'https://hotlink.example/x.png');
+        $this->assertGreaterThan(7000, app(GiftCardLogoWizard::class)->seedFromPack());
+        app(GiftCardLogoWizard::class)->applyToProducts();
+        $url = (string) GiftCardProduct::where('brand_key', $first['brand_key'])->value('logo_url');
+        $this->assertStringContainsString('images/giftcards/logos/', $url);
+        Http::assertNothingSent();
+    }
 }

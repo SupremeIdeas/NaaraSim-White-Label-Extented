@@ -25,6 +25,39 @@ class GiftCardLogoWizard
 
     private const DIR = 'giftcards/logos';
 
+    /** Logos shipped with the app (one normalised file per brand + a manifest) so a fresh install already has them. */
+    public const PACK_DIR = 'images/giftcards/logos/';
+
+    /**
+     * Load the shipped logo pack (database/seeders/giftcard-logos.json) for every brand that has no row yet. No network, idempotent, and
+     * never touches a brand the wizard or an admin already handled.
+     */
+    public function seedFromPack(): int
+    {
+        $file = database_path('seeders/giftcard-logos.json');
+        if (! is_file($file)) {
+            return 0;
+        }
+        $pack = json_decode((string) file_get_contents($file), true);
+        if (! is_array($pack)) {
+            return 0;
+        }
+        $have = GiftCardBrandLogo::query()->pluck('brand_key')->flip();
+        $now = now();
+        $rows = [];
+        foreach ($pack as $e) {
+            if (isset($have[$e['brand_key']]) || ! is_file(public_path(self::PACK_DIR.$e['file']))) {
+                continue;
+            }
+            $rows[] = ['brand_key' => $e['brand_key'], 'brand_name' => $e['brand_name'], 'path' => self::PACK_DIR.$e['file'], 'source' => $e['source'], 'source_url' => $e['source_url'] ?? null,
+                'status' => $e['status'], 'fetched_at' => $now, 'created_at' => $now, 'updated_at' => $now];
+        }
+        foreach (array_chunk($rows, 500) as $chunk) {
+            GiftCardBrandLogo::query()->insert($chunk);
+        }
+        return count($rows);
+    }
+
     /** @return array{brands:int, approved:int, review:int, fallback:int, skipped:int} */
     public function run(?int $limit = null, bool $refresh = false, ?callable $progress = null): array
     {
@@ -161,6 +194,11 @@ class GiftCardLogoWizard
 
     public function url(GiftCardBrandLogo $l): string
     {
+        // A logo from the shipped pack is a committed file under public/, not on the media disk.
+        if (str_starts_with((string) $l->path, self::PACK_DIR)) {
+            return asset($l->path);
+        }
+
         return Storage::disk(MediaStorage::disk())->url($l->path);
     }
 
@@ -346,7 +384,7 @@ class GiftCardLogoWizard
         $path = self::DIR.'/'.$row->brand_key.'-'.substr($hash, 0, 8).'.'.$ext;
         $disk = Storage::disk(MediaStorage::disk());
         $disk->put($path, $bytes, 'public');
-        if ($row->path && $row->path !== $path) {
+        if ($row->path && $row->path !== $path && ! str_starts_with($row->path, self::PACK_DIR)) {
             $disk->delete($row->path);   // replaced: no orphan files
         }
         $row->fill(['path' => $path, 'source' => $source, 'source_url' => $sourceUrl, 'sha256' => $hash, 'status' => $status, 'fetched_at' => now()])->save();

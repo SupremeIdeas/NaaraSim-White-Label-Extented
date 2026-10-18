@@ -4,7 +4,7 @@
 @php($icon = \App\Support\ServiceIcons::resolve($slug, $apiUrl))
 @if ($icon['type'] === 'img')
     <img src="{{ $icon['url'] }}" alt="{{ ucfirst($slug) }}" loading="lazy"
-         {{ $attributes->merge(['class' => $class.' rounded-md object-contain']) }}>
+         {{ $attributes->merge(['class' => $class.' rounded-md object-contain'.(str_contains($icon['url'], '/images/service-icons/') ? ' bg-white p-0.5' : '')]) }}>
 @elseif ($icon['type'] === 'sprite')
     <svg {{ $attributes->merge(['class' => $class]) }} aria-label="{{ ucfirst($slug) }}" role="img">
         <use href="#{{ $icon['id'] }}"></use>

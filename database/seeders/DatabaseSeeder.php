@@ -28,6 +28,7 @@ class DatabaseSeeder extends Seeder
             ProviderExpansionSeeder::class, // new adapters, enabled=false (BUILD-18)
             AppearancePresetSeeder::class,  // per-user skins/accents (admin-governed presets)
             ThemePresetSeeder::class,       // switchable visual skins — built-in naara-official (Theme Batch 1)
+            GiftCardLogoSeeder::class,  // shipped gift-card brand logos (a fresh install already has them)
         ]);
     }
 }
