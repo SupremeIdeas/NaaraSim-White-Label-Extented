@@ -121,6 +121,7 @@ class FeatureGateTest extends TestCase
 
     public function test_the_voice_line_stays_unlocked_on_extended_even_when_a_lock_is_stored(): void
     {
+        config(['services.gigs.api_key' => 'k', 'services.gigs.project' => 'p']);   // Naara Connect needs a Full-eSIM supplier to be live
         $this->fork([FeatureLocks::F_ESIM_VOICE]);
 
         Livewire::actingAs($this->user())
@@ -133,6 +134,7 @@ class FeatureGateTest extends TestCase
     public function test_the_voice_line_works_normally_on_the_master(): void
     {
         config()->set('updater.product_identifier', 'naarasim-core');
+        config(['services.gigs.api_key' => 'k', 'services.gigs.project' => 'p']);
         FeatureEntitlements::bust();
 
         Livewire::actingAs($this->user())

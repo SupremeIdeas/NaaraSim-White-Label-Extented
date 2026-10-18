@@ -65,6 +65,15 @@ class FeatureFlags
             'guide' => 'elevenlabs',
             'default' => true,
         ],
+        'naara_connect' => [
+            'name' => 'Naara Connect (Data + Calls eSIM)',
+            'group' => 'Products',
+            'icon' => 'signal',
+            'description' => 'The Data + Calls tab in the eSIM store. Off until a Full-eSIM provider (1GLOBAL, Gigs or Monty Mobile) has its keys saved or a synced plan includes calls: it then switches itself on. Switch it off to hide the tab, or on to force it as soon as the line can deliver.',
+            'requires' => [],
+            'guide' => null,
+            'default' => 'auto',   // not stored yet: follows availability; once an admin flips the switch their choice wins
+        ],
         'naara_gift' => [
             'name' => 'Naara Gift (gift cards)',
             'group' => 'Products',
@@ -85,20 +94,28 @@ class FeatureFlags
             return false;
         }
 
-        return Cache::rememberForever(self::CACHE_PREFIX.$key, function () use ($key) {
+        $cached = Cache::rememberForever(self::CACHE_PREFIX.$key, function () use ($key) {
             try {
                 $stored = Setting::getValue("features.$key.enabled");
             } catch (\Throwable) {
                 $stored = null;
             }
 
+            if ($stored === null && self::FEATURES[$key]['default'] === 'auto') {
+                return null;   // decided live below (availability changes when keys are saved)
+            }
+
             return $stored === null ? (bool) self::FEATURES[$key]['default'] : (bool) $stored;
         });
+        return $cached ?? self::configured($key);
     }
 
     /** Whether the feature's required API keys are all present. */
     public static function configured(string $key): bool
     {
+        if ($key === 'naara_connect') {
+            return NaaraConnect::available();
+        }
         if (! empty(self::FEATURES[$key]['requires_any'])) {
             foreach (self::FEATURES[$key]['requires_any'] as $group) {
                 if (array_filter($group, fn ($c) => empty(config($c))) === []) {
@@ -144,7 +161,7 @@ class FeatureFlags
             'admin_enabled' => self::adminEnabled($key),
             'configured' => self::configured($key),
             'enabled' => self::enabled($key),
-            'needs_keys' => ! empty($meta['requires']),
+            'needs_keys' => ! empty($meta['requires']) || $key === 'naara_connect',
         ])->values()->all();
     }
 

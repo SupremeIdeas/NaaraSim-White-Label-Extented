@@ -32,11 +32,12 @@ class OneGlobalService implements EsimProviderInterface
         return rtrim(config('services.oneglobal.base_url'), '/');
     }
 
+    /** Keycloak client-credentials token (valid ~5 min; cached 4). Documented at docs.connect.1global.com/docs/platform/authentication. */
     private function accessToken(): string
     {
-        return Cache::remember(self::TOKEN_CACHE_KEY, now()->addMinutes(50), function () {
+        return Cache::remember(self::TOKEN_CACHE_KEY, now()->addMinutes(4), function () {
             $response = Http::timeout(8)->connectTimeout(3)->asForm()->acceptJson()
-                ->post($this->baseUrl().'/oauth2/token', [
+                ->post((string) config('services.oneglobal.token_url'), [
                     'grant_type' => 'client_credentials',
                     'client_id' => config('services.oneglobal.client_id'),
                     'client_secret' => config('services.oneglobal.client_secret'),
@@ -61,41 +62,54 @@ class OneGlobalService implements EsimProviderInterface
             ->acceptJson();
     }
 
+    /** GET /v1/products -> [{id, name, description, period, period_unit, data:{value,units}, footprint[], activeCountries[], pricing, region}]. */
     public function getCatalogue(): array
     {
-        return $this->client()->get('/plans', ['limit' => 500])->throw(fn ($r, $e) => throw new EsimProviderException($e->getMessage(), previous: $e))->json() ?? [];
+        $res = $this->client()->timeout(30)->get('/v1/products')->throw(fn ($r, $e) => throw new EsimProviderException($e->getMessage(), previous: $e))->json() ?? [];
+
+        return array_is_list($res) ? ['list' => $res] : $res;
     }
 
+    /**
+     * POST /v1/orders {input:{operationType:NEW_ESIM|TOPUP, customer, esim:{iccid}, subscriptions:[{product_id}]}} -> {id, status, matching_id, iccid,
+     * lpa_url, qrcode_url, subscription_id}. A top-up passes the existing ICCID. The customer is a synthetic per-order record.
+     */
     public function orderBundle(string $planId, int $qty = 1, ?string $iccid = null): array
     {
-        // Purchase call — longer 15s ceiling for a real order confirmation.
-        return $this->client()->timeout(15)->post('/esims', array_filter([
-            'planId' => $planId,
-            'quantity' => $qty,
-            'iccid' => $iccid,
-            'reference' => 'naara-'.Str::uuid()->toString(),
-        ]))->throw(fn ($r, $e) => throw new EsimProviderException($e->getMessage(), previous: $e))->json() ?? [];
+        $ref = 'naara-'.Str::uuid()->toString();
+        $domain = (string) config('services.oneglobal.customer_email_domain', 'users.invalid');
+        $res = $this->client()->timeout(15)->post('/v1/orders', ['input' => array_filter([
+            'operationType' => $iccid ? 'TOPUP' : 'NEW_ESIM',
+            'customer' => ['email' => "{$ref}@{$domain}", 'firstName' => 'Naara', 'lastName' => 'eSIM'],
+            'esim' => $iccid ? ['iccid' => $iccid] : null,
+            'subscriptions' => [['product_id' => $planId]],
+        ])])->throw(fn ($r, $e) => throw new EsimProviderException($e->getMessage(), previous: $e))->json() ?? [];
+
+        return $res + ['orderReference' => (string) ($res['id'] ?? $ref), 'activationCode' => $res['lpa_url'] ?? null, 'qrCodeUrl' => $res['qrcode_url'] ?? null,
+            'pending' => empty($res['lpa_url']) && empty($res['iccid'])];
     }
 
+    /** GET /v1/sim/{iccid}. */
     public function getEsim(string $iccid): array
     {
-        return $this->client()->get("/esims/{$iccid}")->throw(fn ($r, $e) => throw new EsimProviderException($e->getMessage(), previous: $e))->json() ?? [];
+        return $this->client()->get('/v1/sim/'.rawurlencode($iccid))->throw(fn ($r, $e) => throw new EsimProviderException($e->getMessage(), previous: $e))->json() ?? [];
     }
 
+    /** GET /v1/sim/{iccid}/subscriptions -> each {id, status, initialBalance, spentBalance, ...} in bytes. */
     public function getUsage(string $iccid, string $bundleName): array
     {
-        return $this->client()->get("/esims/{$iccid}/usage")->throw(fn ($r, $e) => throw new EsimProviderException($e->getMessage(), previous: $e))->json() ?? [];
+        return $this->client()->get('/v1/sim/'.rawurlencode($iccid).'/subscriptions')->throw(fn ($r, $e) => throw new EsimProviderException($e->getMessage(), previous: $e))->json() ?? [];
     }
 
+    /** DELETE /v1/sim/{iccid}. */
     public function revoke(string $iccid, string $bundleName): array
     {
-        return $this->client()->delete("/esims/{$iccid}")->throw(fn ($r, $e) => throw new EsimProviderException($e->getMessage(), previous: $e))->json() ?? [];
+        return $this->client()->delete('/v1/sim/'.rawurlencode($iccid))->throw(fn ($r, $e) => throw new EsimProviderException($e->getMessage(), previous: $e))->json() ?? [];
     }
 
     public function getBalance(): float
     {
-        $b = $this->client()->get('/account/balance')->throw(fn ($r, $e) => throw new EsimProviderException($e->getMessage(), previous: $e))->json() ?? [];
-
-        return (float) ($b['balance'] ?? $b['available'] ?? 0);
+        // The Connect API documents no wallet-balance endpoint (billing is invoiced).
+        return 0.0;
     }
 }

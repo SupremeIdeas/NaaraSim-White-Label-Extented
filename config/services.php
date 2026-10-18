@@ -82,14 +82,17 @@ return [
         'client_id' => env('ONEGLOBAL_CLIENT_ID'),
         'client_secret' => env('ONEGLOBAL_CLIENT_SECRET'),
         'sandbox' => env('ONEGLOBAL_SANDBOX', false),
-        'base_url' => env('ONEGLOBAL_BASE_URL', 'https://api.connect.1global.com/v1'),
+        'base_url' => env('ONEGLOBAL_BASE_URL', 'https://services.truphone.com/connect-api'),
+        'token_url' => env('ONEGLOBAL_TOKEN_URL', 'https://services.truphone.com/auth/realms/tru-staff/protocol/openid-connect/token'),
+        'customer_email_domain' => env('ONEGLOBAL_CUSTOMER_EMAIL_DOMAIN', 'users.invalid'),
     ],
 
     // Monty Mobile (RSP API) — Bearer API key. Sales-led onboarding.
     'montymobile' => [
         'api_key' => env('MONTYMOBILE_API_KEY'),
         'sandbox' => env('MONTYMOBILE_SANDBOX', false),
-        'base_url' => env('MONTYMOBILE_BASE_URL', 'https://rsp.montymobile.com'),
+        // Partner-gated eSIM (RSP) API, no public host: set MONTYMOBILE_BASE_URL from Monty's onboarding pack (the eSIM line stays off without it).
+        'base_url' => env('MONTYMOBILE_BASE_URL'),
     ],
 
     // Gigs (Connectivity API) — Bearer API key, project-scoped. Full MVNO stack.
@@ -97,7 +100,8 @@ return [
         'api_key' => env('GIGS_API_KEY'),
         'project' => env('GIGS_PROJECT'),
         'sandbox' => env('GIGS_SANDBOX', false),
-        'base_url' => env('GIGS_BASE_URL', 'https://api.gigs.com/v1'),
+        'base_url' => env('GIGS_BASE_URL', 'https://api.gigs.com'),   // no /v1: paths are /projects/{project}/...
+        'user_email_domain' => env('GIGS_USER_EMAIL_DOMAIN', 'users.invalid'),   // synthetic per-order Gigs users
     ],
 
     // -- Number / SMS providers (blueprint Sections 8-11) -----------------

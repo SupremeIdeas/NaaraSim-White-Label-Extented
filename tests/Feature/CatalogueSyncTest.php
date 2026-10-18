@@ -242,15 +242,15 @@ class CatalogueSyncTest extends TestCase
         // 1GLOBAL / Monty / Gigs are voice+data MVNO providers — every plan is a
         // Full eSIM (has_voice = true). The defensive mapper reads common field
         // names; the wholesale cost stays private.
-        $this->bindProvider('oneglobal', ['data' => [
+        $this->bindProvider('montymobile', ['data' => [
             ['id' => 'og-eu-10gb', 'name' => 'Europe 10GB + calls', 'dataGB' => 10,
                 'durationDays' => 30, 'countries' => ['FR', 'DE'], 'wholesale' => 6.0],
         ]]);
 
-        $count = app(CatalogueSyncService::class)->sync('oneglobal');
+        $count = app(CatalogueSyncService::class)->sync('montymobile');
         $this->assertSame(1, $count);
 
-        $plan = EsimPlan::where('provider', 'oneglobal')->firstOrFail();
+        $plan = EsimPlan::where('provider', 'montymobile')->firstOrFail();
         $this->assertTrue($plan->has_voice);
         $this->assertSame('Voice + Data', $plan->type);
         $this->assertSame(10240, $plan->data_mb);

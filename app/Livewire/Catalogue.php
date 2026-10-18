@@ -67,7 +67,8 @@ class Catalogue extends Component
      */
     public function getVoiceLockedProperty(): bool
     {
-        return \App\Support\FeatureEntitlements::locked(\App\Support\FeatureLocks::F_ESIM_VOICE);
+        // Hidden when a white-label licence locks it, or while Naara Connect is switched off / has nothing to deliver it.
+        return \App\Support\FeatureEntitlements::locked(\App\Support\FeatureLocks::F_ESIM_VOICE) || ! \App\Support\NaaraConnect::live();
     }
 
     public function setTab(string $tab): void

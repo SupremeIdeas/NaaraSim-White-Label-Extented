@@ -74,20 +74,43 @@ class ZenditService implements EsimProviderInterface
             'iccid' => $iccid,
         ]))->throw(fn ($r, $e) => throw new EsimProviderException($e->getMessage(), previous: $e));
 
-        // Read the purchase back for the activation confirmation. Flatten the
-        // nested `confirmation` block to the top level so LpaActivation and the
-        // checkout's data_get() lookups (iccid / activationCode / smdpAddress /
-        // qrCodeUrl) find it regardless of nesting.
-        $purchase = $this->client()->get("/esim/purchases/{$transactionId}")
-            ->throw(fn ($r, $e) => throw new EsimProviderException($e->getMessage(), previous: $e))->json() ?? [];
+        // Zendit fulfils asynchronously (status ACCEPTED / PENDING / IN_PROGRESS -> DONE | FAILED; the `confirmation` block with iccid,
+        // activationCode and smdpAddress exists only once DONE). Read it back a few times with a short, bounded wait. FAILED throws so the
+        // router fails over / the money layer refunds; a purchase still in flight after the window is returned as such (never failed over,
+        // which could deliver twice) and its transactionId lets the order be reconciled later.
+        $purchase = [];
+        $tries = (int) config('services.zendit.poll_tries', 6);
+        for ($i = 0; $i < max(1, $tries); $i++) {
+            $purchase = $this->client()->get("/esim/purchases/{$transactionId}")
+                ->throw(fn ($r, $e) => throw new EsimProviderException($e->getMessage(), previous: $e))->json() ?? [];
+            $status = strtoupper((string) ($purchase['status'] ?? ''));
+            if ($status === 'FAILED') {
+                throw new EsimProviderException('Zendit could not fulfil this eSIM: '.((string) data_get($purchase, 'error.message', 'purchase failed')));
+            }
+            if ($status === 'DONE' || ! empty(data_get($purchase, 'confirmation.iccid'))) {
+                break;
+            }
+            if ($i < $tries - 1) {
+                usleep((int) config('services.zendit.poll_wait_ms', 2000) * 1000);
+            }
+        }
 
-        $confirmation = $purchase['confirmation'] ?? [];
+        // Flatten the nested `confirmation` block to the top level so LpaActivation and the checkout's data_get() lookups
+        // (iccid / activationCode / smdpAddress) find it regardless of nesting.
+        $confirmation = (array) ($purchase['confirmation'] ?? []);
 
         return array_merge($purchase, $confirmation, [
             'transactionId' => $transactionId,
             'id' => $transactionId,
             'orderReference' => $transactionId,
+            'pending' => strtoupper((string) ($purchase['status'] ?? '')) !== 'DONE',
         ]);
+    }
+
+    /** The activation QR as base64 (GET /esim/purchases/{transactionId}/qrcode -> imageBase64). */
+    public function qrCode(string $transactionId): ?string
+    {
+        return $this->client()->get("/esim/purchases/{$transactionId}/qrcode")->json('imageBase64');
     }
 
     public function getEsim(string $iccid): array

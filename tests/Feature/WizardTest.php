@@ -50,8 +50,8 @@ class WizardTest extends TestCase
 
     private function configureConnectLane(): void
     {
-        // Zendit is the primary Naara Connect (voice+data eSIM) provider.
-        config(['services.zendit.api_key' => 'test-key']);
+        // A Full-eSIM provider (Gigs here) is what switches Naara Connect on; a Zendit gift/data key alone does not.
+        config(['services.zendit.api_key' => 'test-key', 'services.gigs.api_key' => 'k', 'services.gigs.project' => 'p']);
         \App\Support\ProviderKeys::flush();
     }
 
