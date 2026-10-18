@@ -13,6 +13,7 @@ class GiftCardsLogosCommand extends Command
 
     public function handle(GiftCardLogoWizard $wizard): int
     {
+        $this->line('Shipped logo pack: '.$wizard->seedFromPack().' brands seeded.');
         $stats = $wizard->run($this->option('limit') !== null ? (int) $this->option('limit') : null, (bool) $this->option('refresh'), function ($row) {
             $this->line(sprintf('%-9s %-11s %s', $row->status, $row->source, $row->brand_name));
         });

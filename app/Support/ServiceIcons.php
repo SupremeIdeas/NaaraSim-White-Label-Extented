@@ -65,6 +65,11 @@ class ServiceIcons
             return ['type' => 'sprite', 'id' => 'svc-'.$slug];
         }
 
+        // A brand mark shipped as a file (Simple Icons, exact slug match): public/images/service-icons/{slug}.svg.
+        if (preg_match('/^[a-z0-9]+$/', $slug) && is_file(public_path('images/service-icons/'.$slug.'.svg'))) {
+            return ['type' => 'img', 'url' => asset('images/service-icons/'.$slug.'.svg')];
+        }
+
         return ['type' => 'letter', 'letter' => mb_strtoupper(mb_substr($slug, 0, 1) ?: '?')];
     }
 

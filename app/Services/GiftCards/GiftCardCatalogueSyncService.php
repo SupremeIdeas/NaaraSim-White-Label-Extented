@@ -62,7 +62,8 @@ class GiftCardCatalogueSyncService
 
         try {
             $count = 0;
-            // A logo the Logo Wizard already stored locally wins over the provider's hot-link on every re-sync.
+            // A logo the Logo Wizard already stored locally (or the shipped pack) wins over the provider's hot-link on every re-sync.
+            app(GiftCardLogoWizard::class)->seedFromPack();
             $local = \App\Models\GiftCardBrandLogo::query()->whereNotNull('path')->get()->keyBy('brand_key');
             $wizard = app(GiftCardLogoWizard::class);
             foreach ($svc->getCatalogue() as $p) {
