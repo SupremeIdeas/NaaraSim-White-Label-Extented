@@ -88,6 +88,24 @@
                         @error('minimum_profit_usd') <span class="text-xs text-red-600 dark:text-red-400">{{ $message }}</span> @enderror
                     </div>
 
+                    {{-- Naara Gift: gift-card retail = provider cost + markup, never below cost + the minimum profit. --}}
+                    <div class="rounded-lg border border-slate-200 bg-slate-50 p-3 dark:border-slate-700 dark:bg-slate-800/60 sm:col-span-2">
+                        <p class="mb-2 text-xs font-semibold text-slate-700 dark:text-slate-200">Gift cards</p>
+                        <p class="mb-3 text-[11px] text-slate-600 dark:text-slate-300">Applied to every gift card at checkout. Gift cards carry thin margins, so the default is lower than eSIMs.</p>
+                        <div class="grid gap-3 sm:grid-cols-2">
+                            <div>
+                                <label class="mb-1 block text-[11px] font-medium text-slate-600 dark:text-slate-300">Gift card markup %</label>
+                                <input type="number" step="0.1" min="0" max="100" wire:model="giftcard_markup_pct" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100">
+                                @error('giftcard_markup_pct') <span class="text-xs text-red-600 dark:text-red-400">{{ $message }}</span> @enderror
+                            </div>
+                            <div>
+                                <label class="mb-1 block text-[11px] font-medium text-slate-600 dark:text-slate-300">Gift card minimum profit (USD)</label>
+                                <input type="number" step="0.01" min="0" max="50" wire:model="giftcard_min_profit" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100">
+                                @error('giftcard_min_profit') <span class="text-xs text-red-600 dark:text-red-400">{{ $message }}</span> @enderror
+                            </div>
+                        </div>
+                    </div>
+
                     {{-- Margin-safe discount floor (discount-floor blueprint §2). --}}
                     <div class="rounded-lg border border-slate-200 bg-slate-50/60 p-3 dark:border-[#2D4060] dark:bg-[#1a2840]/40 sm:col-span-2">
                         <p class="mb-2 text-xs font-semibold text-slate-700 dark:text-slate-200">Discount margin caps</p>
