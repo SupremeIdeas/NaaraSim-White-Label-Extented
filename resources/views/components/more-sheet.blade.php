@@ -62,6 +62,8 @@
                 @endforeach
             </div>
 
+                        @if (\Illuminate\Support\Facades\Route::has('cookie-preferences'))<a href="{{ route('cookie-preferences') }}" wire:navigate @click="moreOpen = false" data-more-cookie style="display:block;margin:12px auto 0;width:max-content;font-size:12.5px;font-weight:600;text-decoration:underline;text-underline-offset:3px;color:rgb(var(--nx-text-2))">Cookie settings</a>@endif
+
             <form method="POST" action="{{ route('logout') }}" class="ns-more__logout">
                 @csrf
                 <button type="submit" class="ns-btn" style="width:100%;justify-content:center;height:46px"><x-nx.icon name="log-out" /> Sign out</button>

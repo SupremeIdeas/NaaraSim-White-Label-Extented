@@ -181,7 +181,7 @@
     <x-brand-preloader :page-type="$pageType" />
     <x-splash />
     <x-ui.toast-stack />
-    @unless (request()->is(config('admin.path'), config('admin.path').'/*') || request()->is('install', 'install/*'))<x-cookie-banner />@endunless
+    @unless (request()->is(config('admin.path'), config('admin.path').'/*') || request()->is('install', 'install/*') || isset($bodyClass))<x-cookie-banner />@endunless
     {{-- Review moments: the "how did it go?" sheet, only for a signed-in person while an admin has it on and a Trustpilot profile is set. --}}
     @if (auth()->check() && \App\Support\Reviews\ReviewMoments::enabled())
         @persist('review-moment')

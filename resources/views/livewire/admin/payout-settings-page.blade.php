@@ -1,7 +1,7 @@
 @php
     $inp = 'w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100';
 @endphp
-<div class="mx-auto max-w-4xl pb-24">
+<div class="mx-auto max-w-4xl pb-48 lg:pb-24">
     <div class="flex flex-wrap items-start justify-between gap-3">
         <div>
             <h1 class="text-2xl font-bold text-slate-900 dark:text-slate-100">Payout settings</h1>
@@ -72,7 +72,7 @@
     @endforelse
 
     {{-- Sticky save bar --}}
-    <div class="fixed inset-x-0 bottom-0 z-30 border-t border-slate-200 bg-white/95 p-3 backdrop-blur dark:border-[#2D4060] dark:bg-[#1A2840]/95 lg:left-64">
+    <div class="fixed inset-x-0 bottom-[calc(6rem+env(safe-area-inset-bottom))] z-30 border-t border-slate-200 bg-white/95 p-3 backdrop-blur dark:border-[#2D4060] dark:bg-[#1A2840]/95 lg:bottom-0 lg:left-64">
         <div class="mx-auto flex max-w-4xl flex-wrap items-center justify-between gap-3">
             <div class="text-sm text-slate-600 dark:text-slate-300">
                 @if (count($dirtyKeys))
