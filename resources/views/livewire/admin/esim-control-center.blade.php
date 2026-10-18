@@ -216,10 +216,12 @@
 
         <form wire:submit="saveImage" class="mb-6 grid grid-cols-1 gap-4 rounded-xl border border-slate-200 bg-white p-5 sm:grid-cols-3 dark:border-[#2D4060] dark:bg-[#1B2A44]">
             <div>
-                <label class="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-300">{{ $imageKind === 'country' ? 'Country (ISO2)' : 'Region' }}</label>
+                <label class="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-300">{{ $imageKind === 'country' ? 'Country' : 'Region' }}</label>
                 @if ($imageKind === 'country')
-                    <input type="text" wire:model="imgCountry" maxlength="2" placeholder="NG"
-                           class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm uppercase dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                    <select wire:model="imgCountry" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100">
+                        <option value="">Choose a country…</option>
+                        @foreach ($countryOptions as $code => $label)<option value="{{ $code }}">{{ $label }}</option>@endforeach
+                    </select>
                     @error('imgCountry') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
                 @else
                     <select wire:model="imgRegion" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
@@ -256,7 +258,7 @@
                             @if ($img->icon_path)<img src="{{ $img->icon_path }}" class="h-full w-full object-cover">@else<x-country-flag :country="$img->country_code" class="h-10 w-14 rounded" />@endif
                         </div>
                         <div class="flex items-center justify-between p-2 text-xs">
-                            <span class="font-semibold text-slate-700 dark:text-slate-200">{{ $img->country_code }}</span>
+                            <span class="min-w-0 truncate font-semibold text-slate-700 dark:text-slate-200" title="{{ $img->country_code }}">{{ \App\Support\CountryNames::name($img->country_code) }}</span>
                             <button wire:click="deleteCountryImage({{ $img->id }})" wire:confirm="Remove this image?" class="text-red-500 hover:underline">Remove</button>
                         </div>
                     </div>
