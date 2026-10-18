@@ -68,9 +68,10 @@
 document.addEventListener('alpine:init', () => {
     Alpine.data('blogShare', (cfg) => ({
         open: false, copied: false, canNative: false,
-        init() { this.canNative = !!(cfg.native && navigator.share); window.addEventListener('popstate', () => { if (this.open) this.open = false; }); },
-        openIt() { this.open = true; history.pushState({ blogShare: 1 }, ''); this.track('share_open'); },
-        close() { if (!this.open) return; this.open = false; if (history.state && history.state.blogShare) history.back(); this.$nextTick(() => this.$refs.trigger && this.$refs.trigger.focus()); },
+        init() { this.canNative = !!(cfg.native && navigator.share); this._nav = () => { this.open = false; }; document.addEventListener('livewire:navigate', this._nav); },
+        destroy() { document.removeEventListener('livewire:navigate', this._nav); },
+        openIt() { this.open = true; this.track('share_open'); },
+        close() { if (!this.open) return; this.open = false; this.$nextTick(() => this.$refs.trigger && this.$refs.trigger.focus()); },
         track(event, channel) { try { const b = JSON.stringify({ event, channel: channel || '', post: cfg.post }); const u = @js(route('blog.reader-event')); const t = document.querySelector('meta[name=csrf-token]'); navigator.sendBeacon ? fetch(u, { method: 'POST', keepalive: true, headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': t ? t.content : '', Accept: 'application/json' }, body: b }) : null; } catch (e) {} },
         go(ev, key) { this.track('share_click', key); const w = window.open(ev.currentTarget.href, 'share', 'noopener,noreferrer,width=600,height=640'); if (!w) location.href = ev.currentTarget.href; },
         async copy() { try { await navigator.clipboard.writeText(cfg.url); this.copied = true; this.track('share_copy', 'copy'); window.dispatchEvent(new CustomEvent('nx-toast', { detail: { type: 'success', message: 'Link copied' } })); setTimeout(() => this.copied = false, 1800); } catch (e) { window.dispatchEvent(new CustomEvent('nx-toast', { detail: { type: 'error', message: 'Could not copy the link.' } })); } },

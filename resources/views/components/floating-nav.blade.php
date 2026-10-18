@@ -22,7 +22,9 @@
 @endphp
 
 @if ($center || ! empty($bar['left']) || ! empty($bar['right']))
-    <div class="nx-floatnav fixed inset-x-0 bottom-4 z-40 flex justify-center px-3 print:hidden">
+    {{-- Slides away while the page footer is on screen (IntersectionObserver), so it never covers the footer links; restored the moment the footer leaves. --}}
+    <div class="nx-floatnav fixed inset-x-0 bottom-4 z-40 flex justify-center px-3 transition duration-200 motion-reduce:transition-none print:hidden" :class="atFooter && 'pointer-events-none translate-y-6 opacity-0'" :inert="atFooter"
+         x-data="{ atFooter: false, io: null }" x-init="const f = document.querySelector('footer'); if (f && 'IntersectionObserver' in window) { io = new IntersectionObserver(([e]) => atFooter = e.isIntersecting, { threshold: 0.05 }); io.observe(f); }" x-on:livewire:navigating.window="io && io.disconnect()">
         <nav class="pointer-events-auto flex items-center gap-0.5 rounded-full border border-slate-200/70 bg-white px-1.5 py-1.5 shadow-[0_12px_40px_rgba(13,27,42,0.18)] dark:border-white/10 dark:bg-[#0D1B2A] sm:gap-1"
              aria-label="Primary">
             @foreach ($bar['left'] as $slot)
