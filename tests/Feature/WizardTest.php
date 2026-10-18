@@ -32,6 +32,7 @@ class WizardTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        config(['services.fivesim.api_key' => 'test-key']);   // a global number provider is keyed: the whole catalogue is offerable
         $this->seed(PricingSettingsSeeder::class);
         Queue::fake(); // PollSmsOtpJob is dispatched, not run
     }

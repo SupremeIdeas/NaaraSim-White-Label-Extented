@@ -123,7 +123,7 @@ class Wizard extends Component
      */
     private function catalogueCountries(): array
     {
-        return \App\Support\NumberCatalogue::countries();
+        return \App\Support\NumberCatalogue::offerableCountries();
     }
 
     /** @return list<string> service slugs */

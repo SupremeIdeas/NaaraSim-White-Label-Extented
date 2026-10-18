@@ -25,6 +25,7 @@ class ServiceIconsTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        config(['services.fivesim.api_key' => 'test-key']);   // a global number provider is keyed: the whole catalogue is offerable
         $this->seed(RoleSeeder::class);
         ServiceIcons::flush();
     }

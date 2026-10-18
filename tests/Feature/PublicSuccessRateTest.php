@@ -20,7 +20,14 @@ class PublicSuccessRateTest extends TestCase
 {
     use RefreshDatabase;
 
-    private function outcomes(string $key, int $success, int $failure): void
+    
+    protected function setUp(): void
+    {
+        parent::setUp();
+        config(['services.fivesim.api_key' => 'test-key']);   // a global number provider is keyed: the whole catalogue is offerable
+    }
+
+private function outcomes(string $key, int $success, int $failure): void
     {
         foreach (range(1, $success) as $i) {
             ProviderOutcome::create(['provider_key' => $key, 'stack' => 'sms', 'outcome' => 'success', 'occurred_at' => now()]);

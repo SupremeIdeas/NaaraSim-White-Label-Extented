@@ -18,7 +18,14 @@ class ServicePickerTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_services_with_icons_sort_before_icon_less_ones(): void
+    
+    protected function setUp(): void
+    {
+        parent::setUp();
+        config(['services.fivesim.api_key' => 'test-key']);   // a global number provider is keyed: the whole catalogue is offerable
+    }
+
+public function test_services_with_icons_sort_before_icon_less_ones(): void
     {
         $options = ServicePickerSources::options();
 
