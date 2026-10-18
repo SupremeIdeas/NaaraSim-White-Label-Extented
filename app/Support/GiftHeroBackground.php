@@ -37,9 +37,9 @@ class GiftHeroBackground
 
     public const TITLE_SIZE_KEY = 'giftcard.hero.title_size';
 
-    public const DEFAULT_DESCRIPTION = 'Gift cards for the brands you love — delivered instantly.';
+    public const DEFAULT_DESCRIPTION = 'Netflix, Steam, Uber, Spotify and thousands more. Pay from your wallet and get the code in seconds.';
 
-    public const DEFAULT_TITLE = 'Naara Gift';
+    public const DEFAULT_TITLE = 'Buy gift cards in seconds';
 
     public const DEFAULT_TITLE_SIZE = 'md';
 

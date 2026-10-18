@@ -86,6 +86,7 @@ class GiftCardCatalogueSyncService
             }
 
             $this->recomputePrimary();
+            \App\Support\GiftPopularity::markLeads();   // one lead card per brand for the popular-first store
             SyncStatus::record('giftcards:'.$provider, true, $count);
 
             return $count;

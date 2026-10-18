@@ -113,7 +113,7 @@ class GiftCards extends Component
         $products = GiftCardProduct::storefrontCards()
             ->when($this->search !== '', fn ($q) => $q->where('brand_name', 'like', '%'.$this->search.'%'))
             ->when($this->country, fn ($q) => $q->where('country', $this->country))
-            ->orderByDesc('featured')->orderBy('brand_name')
+            ->tap(fn ($q) => \App\Support\GiftPopularity::order($q))   // featured, then what people buy most, then A-Z
             ->paginate(18);
 
         $selected = $this->selectedId ? GiftCardProduct::storefront()->find($this->selectedId) : null;

@@ -50,16 +50,16 @@ class GiftHeroBackgroundTest extends TestCase
     public function test_unconfigured_install_shows_the_default_title_and_description(): void
     {
         $this->assertSame(GiftHeroBackground::DEFAULT_TITLE, GiftHeroBackground::title());
-        $this->assertSame('Naara', GiftHeroBackground::titleFirstWord());
-        $this->assertSame('Gift', GiftHeroBackground::titleRestWords());
+        $this->assertSame('Buy', GiftHeroBackground::titleFirstWord());
+        $this->assertSame('gift cards in seconds', GiftHeroBackground::titleRestWords());
         $this->assertSame(GiftHeroBackground::DEFAULT_DESCRIPTION, GiftHeroBackground::description());
         $this->assertFalse(GiftHeroBackground::isSet());
         $this->assertFalse(GiftHeroBackground::showsImage());
 
         $this->enableGiftFeature();
         Livewire::actingAs(User::factory()->create())->test(GiftCards::class)
-            ->assertSee('Naara')
-            ->assertSee('Gift')
+            ->assertSee('Buy')
+            ->assertSee('gift cards in seconds')
             ->assertSee(GiftHeroBackground::DEFAULT_DESCRIPTION);
     }
 
