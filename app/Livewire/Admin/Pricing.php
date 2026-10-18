@@ -30,6 +30,11 @@ class Pricing extends Component
 
     public $minimum_profit_usd;
 
+    // Naara Gift: markup on the provider cost + a floor in USD (PricingEngine::giftCardRetail).
+    public $giftcard_markup_pct;
+
+    public $giftcard_min_profit;
+
     // Margin-safe discount floor (discount-floor blueprint §2) — the max % of
     // MARGIN (not price) a single order's combined coupon+credit discount may eat.
     public $discount_margin_cap_pct;
@@ -85,6 +90,8 @@ class Pricing extends Component
     {
         $this->default_markup_pct = Setting::getValue('pricing.default_markup_pct', 30);
         $this->minimum_profit_usd = Setting::getValue('pricing.minimum_profit_usd', 0.50);
+        $this->giftcard_markup_pct = Setting::getValue('pricing.giftcard_markup_pct', 8);
+        $this->giftcard_min_profit = Setting::getValue('pricing.giftcard_min_profit', 0.25);
         $this->discount_margin_cap_pct = Setting::getValue('pricing.discount_margin_cap_pct', 30);
         $this->merchant_discount_admin_pct = Setting::getValue('pricing.merchant_discount_admin_pct', 20);
         $this->merchant_discount_merchant_pct = Setting::getValue('pricing.merchant_discount_merchant_pct', 10);
@@ -131,6 +138,8 @@ class Pricing extends Component
         $this->validate([
             'default_markup_pct' => 'required|numeric|min:0|max:1000',
             'minimum_profit_usd' => 'required|numeric|min:0',
+            'giftcard_markup_pct' => 'required|numeric|min:0|max:100',
+            'giftcard_min_profit' => 'required|numeric|min:0|max:50',
             'discount_margin_cap_pct' => 'required|numeric|min:0|max:100',
             'merchant_discount_admin_pct' => 'required|numeric|min:0|max:100',
             'merchant_discount_merchant_pct' => 'required|numeric|min:0|max:100',
@@ -142,6 +151,8 @@ class Pricing extends Component
 
         Setting::setValue('pricing.default_markup_pct', (float) $this->default_markup_pct, 'pricing');
         Setting::setValue('pricing.minimum_profit_usd', (float) $this->minimum_profit_usd, 'pricing');
+        Setting::setValue('pricing.giftcard_markup_pct', (float) $this->giftcard_markup_pct, 'pricing');
+        Setting::setValue('pricing.giftcard_min_profit', round((float) $this->giftcard_min_profit, 2), 'pricing');
         Setting::setValue('pricing.discount_margin_cap_pct', (float) $this->discount_margin_cap_pct, 'pricing');
         Setting::setValue('pricing.merchant_discount_admin_pct', (float) $this->merchant_discount_admin_pct, 'pricing');
         Setting::setValue('pricing.merchant_discount_merchant_pct', (float) $this->merchant_discount_merchant_pct, 'pricing');
