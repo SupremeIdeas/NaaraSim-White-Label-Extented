@@ -31,13 +31,13 @@ class BitrefillService implements GiftCardProviderInterface, GiftCardStatusCheck
 
     public function available(): bool
     {
-        return filled(config('services.bitrefill.api_id')) && filled(config('services.bitrefill.api_secret'));
+        return filled(config('services.bitrefill.api_key'));
     }
 
     private function client(): PendingRequest
     {
         return Http::baseUrl(rtrim((string) config('services.bitrefill.base_url'), '/'))
-            ->withBasicAuth((string) config('services.bitrefill.api_id'), (string) config('services.bitrefill.api_secret'))
+            ->withToken((string) config('services.bitrefill.api_key'))
             ->acceptJson()->timeout(30);
     }
 

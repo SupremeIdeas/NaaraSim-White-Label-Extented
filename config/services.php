@@ -454,8 +454,7 @@ return [
         'webhook_token' => env('SINCH_WEBHOOK_TOKEN'), // shared secret for /webhooks/sms-inbound/sinch
     ],
     'bitrefill' => [
-        'api_id' => env('BITREFILL_API_ID'),
-        'api_secret' => env('BITREFILL_API_SECRET'),
+        'api_key' => env('BITREFILL_API_KEY'),   // personal access token, sent as a Bearer token (the v2 API rejects Basic auth)
         'base_url' => env('BITREFILL_BASE_URL', 'https://api.bitrefill.com/v2'),
         'webhook_secret' => env('BITREFILL_WEBHOOK_SECRET'),
     ],
