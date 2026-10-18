@@ -34,7 +34,7 @@ class ProviderStatus
         'sonetel' => ['services.sonetel.username', 'services.sonetel.password', 'services.sonetel.account_id'],
         'vonage' => ['services.vonage.api_key', 'services.vonage.api_secret'],
         'sinch' => ['services.sinch.client_id', 'services.sinch.client_secret', 'services.sinch.project_id'],
-        'bitrefill' => ['services.bitrefill.api_id', 'services.bitrefill.api_secret'],
+        'bitrefill' => ['services.bitrefill.api_key'],
         'tillo' => ['services.tillo.api_key', 'services.tillo.secret'],
         'whatsapp' => ['services.whatsapp.phone_number_id', 'services.whatsapp.access_token'],
         'paystack' => ['services.paystack.secret_key'],
