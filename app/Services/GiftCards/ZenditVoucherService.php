@@ -63,32 +63,40 @@ class ZenditVoucherService implements GiftCardProviderInterface
      */
     private function backfillLogos(array &$rows): void
     {
-        $cache = [];
-        $lookups = 0;
-        $cap = 500;
-
-        foreach ($rows as &$row) {
-            $brandId = $row['_brand_lookup_key'] ?? null;
-            unset($row['_brand_lookup_key']);
-            if ($brandId === null || $brandId === '') {
-                continue;
+        // Distinct brand ids first, then look them up in small concurrent batches (one request per brand, never per offer).
+        $ids = [];
+        foreach ($rows as $row) {
+            $id = $row['_brand_lookup_key'] ?? null;
+            if ($id !== null && $id !== '') {
+                $ids[$id] = true;
             }
-
-            if (! array_key_exists($brandId, $cache)) {
-                if ($lookups >= $cap) {
+        }
+        $found = [];
+        foreach (array_chunk(array_slice(array_keys($ids), 0, 2500), 20) as $batch) {
+            try {
+                $responses = Http::pool(fn ($pool) => array_map(
+                    fn ($id) => $pool->as($id)->withToken((string) config('services.zendit.api_key'))->baseUrl((string) config('services.zendit.base_url'))->timeout(30)->acceptJson()->get('/brands/'.rawurlencode($id)),
+                    $batch,
+                ));
+            } catch (\Throwable) {
+                continue; // a lost batch never fails the sync; those brands are picked up by the logo wizard
+            }
+            foreach ($responses as $id => $res) {
+                if (! $res instanceof \Illuminate\Http\Client\Response || ! $res->successful()) {
                     continue;
                 }
-                $lookups++;
-                try {
-                    $b = (array) $this->client()->get('/brands/'.rawurlencode($brandId))->throw()->json();
-                    $cache[$brandId] = data_get($b, 'logoUrl') ?: data_get($b, 'logo') ?: data_get($b, 'imageUrl');
-                } catch (\Throwable) {
-                    $cache[$brandId] = null; // tolerate — never blocks the sync
-                }
+                $b = (array) $res->json();
+                // Live shape (2026-10-18): brandLogo / brandBigImage / brandGiftImage / brandColor (not logoUrl).
+                $logo = data_get($b, 'brandLogo') ?: data_get($b, 'logoUrl') ?: data_get($b, 'logo') ?: data_get($b, 'imageUrl') ?: data_get($b, 'brandGiftImage');
+                $found[$id] = ['logo' => $logo ?: null, 'color' => data_get($b, 'brandColor') ?: null];
             }
-
-            if ($cache[$brandId]) {
-                $row['logo_url'] = $cache[$brandId];
+        }
+        foreach ($rows as &$row) {
+            $id = $row['_brand_lookup_key'] ?? null;
+            unset($row['_brand_lookup_key']);
+            if ($id !== null && isset($found[$id])) {
+                $row['logo_url'] = $found[$id]['logo'];
+                $row['brand_color'] = $found[$id]['color'];
             }
         }
     }
@@ -118,7 +126,7 @@ class ZenditVoucherService implements GiftCardProviderInterface
             // account if brand identifiers turn out to be shaped differently).
             '_brand_lookup_key' => (string) ($o['brand'] ?? $o['brandId'] ?? '') ?: null,
             'brand_color' => null,
-            'category' => (string) ($o['subType'] ?? $o['productType'] ?? '') ?: null,
+            'category' => (string) (data_get($o, 'subTypes.0') ?? $o['subType'] ?? $o['productType'] ?? '') ?: null,
             'required_fields' => $this->fields((array) ($o['requiredFields'] ?? [])),
             'redeem_instruction' => (string) ($o['notes'] ?? $o['shortNotes'] ?? '') ?: null,
             'cost_meta' => ['cost' => $o['cost'] ?? null, 'priceCurrency' => $ccy ?: null],
@@ -178,8 +186,11 @@ class ZenditVoucherService implements GiftCardProviderInterface
                 'transactionId' => $reference,
                 'fields' => collect($fields)->map(fn ($v, $k) => ['key' => $k, 'value' => $v])->values()->all(),
             ];
-            // RANGE offers require the value; FIXED omit it.
-            $body['value'] = ['type' => 'SEND', 'value' => (int) round($amount * 100)];
+            // RANGE offers require the value; FIXED offers must omit it (the offer already fixes the face value).
+            $type = \App\Models\GiftCardProduct::query()->where('provider', 'zendit')->where('provider_product_id', $providerProductId)->value('denomination_type');
+            if (strtoupper((string) $type) === 'RANGE') {
+                $body['value'] = ['type' => 'SEND', 'value' => (int) round($amount * 100)];
+            }
 
             $res = $this->client()->post('/vouchers/purchases', $body)->throw();
             $status = strtoupper((string) ($res->json('status') ?? 'PENDING'));
