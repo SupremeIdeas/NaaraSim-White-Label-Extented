@@ -74,7 +74,7 @@ class NaaraGiftStorefrontTest extends TestCase
     public function test_storefront_shows_coming_soon_without_keys_then_flips_live(): void
     {
         // Hermetic: ensure no provider keys leak in from the environment.
-        config(['services.reloadly.client_id' => null, 'services.reloadly.client_secret' => null]);
+        config(['services.reloadly.client_id' => null, 'services.reloadly.client_secret' => null, 'services.zendit.api_key' => null, 'services.bitrefill.api_key' => null]);
         $this->product();
         $user = User::factory()->create(['is_active' => true]);
         Cache::forget('features.enabled.naara_gift');

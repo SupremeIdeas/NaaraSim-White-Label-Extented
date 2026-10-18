@@ -46,7 +46,7 @@
             </div>
 
             {{-- ▸ Tablet + desktop (md+): the 3-up peek carousel. --}}
-            <div class="nx-imghero nx-imghero--peek relative mb-8 hidden h-80 w-full md:block lg:h-[22rem]">
+            <div class="nx-imghero nx-imghero--peek relative mx-auto mb-8 hidden h-64 w-full max-w-[64rem] md:block lg:h-[17.5rem]">
                 <div class="nx-imghero__track" :style="`transform: translateX(${8 - active * 84}%)`">
                     @foreach ($images as $i => $src)
                         <div class="nx-imghero__slide" :class="active === {{ $i }} && 'is-active'"
