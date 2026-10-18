@@ -36,10 +36,12 @@ class GiftCardPricing
             ];
         }
 
-        $options = collect((array) $product->fixed_denominations)
-            ->filter(fn ($f) => is_numeric($f) && (float) $f > 0)
-            ->map(fn ($f) => ['face' => (float) $f, 'retail' => $this->retail($product, (float) $f)])
-            ->values()->all();
+        // A provider that lists one offer per denomination: merge the siblings' faces into one list.
+        $rows = $product->exists ? $product->siblings()->get() : collect([$product]);
+        $rows = $rows->isEmpty() ? collect([$product]) : $rows;
+        $options = $rows->flatMap(fn ($row) => collect((array) $row->fixed_denominations)->filter(fn ($f) => is_numeric($f) && (float) $f > 0)
+            ->map(fn ($f) => ['face' => (float) $f, 'retail' => $this->retail($row, (float) $f)]))
+            ->unique('face')->sortBy('face')->values()->all();
 
         return ['type' => 'FIXED', 'options' => $options];
     }

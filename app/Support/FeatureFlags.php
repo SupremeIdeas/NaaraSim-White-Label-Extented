@@ -71,6 +71,8 @@ class FeatureFlags
             'icon' => 'gift',
             'description' => 'The gift-card storefront powered by Reloadly (primary) + Zendit (failover). On by default; still stays "Coming Soon" until the Reloadly keys are added and the catalogue is synced.',
             'requires' => ['services.reloadly.client_id', 'services.reloadly.client_secret'],
+            // Any ONE registered gift provider is enough to open the store (Zendit or Bitrefill alone must not leave it \"Coming Soon\").
+            'requires_any' => [['services.reloadly.client_id', 'services.reloadly.client_secret'], ['services.zendit.api_key'], ['services.bitrefill.api_key']],
             'guide' => null,
             'default' => true,
         ],
@@ -97,6 +99,15 @@ class FeatureFlags
     /** Whether the feature's required API keys are all present. */
     public static function configured(string $key): bool
     {
+        if (! empty(self::FEATURES[$key]['requires_any'])) {
+            foreach (self::FEATURES[$key]['requires_any'] as $group) {
+                if (array_filter($group, fn ($c) => empty(config($c))) === []) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
         foreach (self::FEATURES[$key]['requires'] ?? [] as $configKey) {
             if (empty(config($configKey))) {
                 return false;

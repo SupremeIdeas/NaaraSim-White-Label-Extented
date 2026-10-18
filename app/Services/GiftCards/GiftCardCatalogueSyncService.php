@@ -62,7 +62,13 @@ class GiftCardCatalogueSyncService
 
         try {
             $count = 0;
+            // A logo the Logo Wizard already stored locally wins over the provider's hot-link on every re-sync.
+            $local = \App\Models\GiftCardBrandLogo::query()->whereNotNull('path')->get()->keyBy('brand_key');
+            $wizard = app(GiftCardLogoWizard::class);
             foreach ($svc->getCatalogue() as $p) {
+                if (isset($local[$p['brand_key'] ?? ''])) {
+                    $p['logo_url'] = $wizard->url($local[$p['brand_key']]);
+                }
                 if (($p['provider_product_id'] ?? '') === '') {
                     continue;
                 }

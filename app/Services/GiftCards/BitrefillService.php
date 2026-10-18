@@ -44,20 +44,33 @@ class BitrefillService implements GiftCardProviderInterface, GiftCardStatusCheck
     public function getCatalogue(): array
     {
         $out = [];
-        $offset = 0;
-        $limit = 100;
+        $start = 0;
+        $total = null;
+        // Live v2 shape (2026-10-18): pages of 50 selected with `start` (a `limit` above 50 is capped), {meta:{total}, data:[...]}.
         do {
-            $res = $this->client()->get('/products', ['limit' => $limit, 'offset' => $offset])->throw();
-            $products = (array) (data_get($res->json(), 'data', $res->json()) ?? []);
+            $res = $this->client()->get('/products', ['limit' => 50, 'start' => $start])->throw();
+            $products = (array) ($res->json('data') ?? []);
+            $total ??= (int) $res->json('meta.total');
             foreach ($products as $p) {
                 if (is_array($p)) {
                     $out[] = $this->map($p);
                 }
             }
-            $offset += $limit;
-        } while (count($products) === $limit && $offset <= 5000);
+            $start += count($products);
+        } while ($products !== [] && $start < max($total, 1) && $start <= 20000);
 
         return $out;
+    }
+
+    /** Bitrefill's `image` is a slug; the public asset is /content/cn/{slug}.png. (The wizard then stores its own normalised copy.) */
+    private function imageUrl(mixed $image): ?string
+    {
+        $image = (string) $image;
+        if ($image === '') {
+            return null;
+        }
+
+        return str_starts_with($image, 'http') ? $image : 'https://www.bitrefill.com/content/cn/'.rawurlencode($image).'.png';
     }
 
     private function map(array $p): array
@@ -73,7 +86,7 @@ class BitrefillService implements GiftCardProviderInterface, GiftCardStatusCheck
             'provider_product_id' => (string) data_get($p, 'id'),
             'brand_key' => Str::slug($brandName),
             'brand_name' => $brandName,
-            'country' => strtoupper((string) data_get($p, 'countryCode', '')) ?: null,
+            'country' => strtoupper((string) (data_get($p, 'country_code') ?? data_get($p, 'countryCode', ''))) ?: null,
             'currency' => $ccy ?: null,
             'denomination_type' => $isRange ? 'RANGE' : 'FIXED',
             'fixed_denominations' => $isRange ? [] : collect($packages)
@@ -82,9 +95,9 @@ class BitrefillService implements GiftCardProviderInterface, GiftCardStatusCheck
                 ->values()->all(),
             'min_amount' => $isRange ? (float) data_get($range, 'min', 0) : null,
             'max_amount' => $isRange ? (float) data_get($range, 'max', 0) : null,
-            'logo_url' => data_get($p, 'image') ?: data_get($p, 'logoImage.url'),
-            'brand_color' => null,
-            'category' => (string) data_get($p, 'category', '') ?: null,
+            'logo_url' => $this->imageUrl(data_get($p, 'image')) ?: data_get($p, 'logoImage.url'),
+            'brand_color' => preg_match('/^#[0-9a-f]{6}$/i', (string) data_get($p, 'logo_background')) ? data_get($p, 'logo_background') : null,
+            'category' => (string) (data_get($p, 'categories.0') ?? data_get($p, 'category', '')) ?: null,
             // Bitrefill's create-invoice payload (product_id, package_id/value,
             // quantity, payment_method, external_id) doesn't confirm a required
             // recipient field the way Reloadly's recipientEmail does — left
@@ -92,11 +105,11 @@ class BitrefillService implements GiftCardProviderInterface, GiftCardStatusCheck
             // (code/pin/link come back in the response), not emailed to a
             // third party.
             'required_fields' => [],
-            'redeem_instruction' => (string) data_get($p, 'instructions', '') ?: null,
+            'redeem_instruction' => (string) (data_get($p, 'instructions') ?: data_get($p, 'termsAndConditions', '')) ?: null,
             'cost_meta' => array_filter([
                 'range_step' => $isRange ? data_get($range, 'step') : null,
             ], fn ($v) => $v !== null),
-            'provider_enabled' => (bool) data_get($p, 'enabled', true),
+            'provider_enabled' => (bool) data_get($p, 'in_stock', data_get($p, 'enabled', true)),
             // Same currency-safety gate as Zendit: only sell where the charged
             // currency is USD (or unspecified), so an FX gap can never
             // undercharge (money-safety rule 1.4).
@@ -107,7 +120,7 @@ class BitrefillService implements GiftCardProviderInterface, GiftCardStatusCheck
     public function getBalance(): float
     {
         try {
-            return (float) $this->client()->get('/accounts/balance')->json('balance', 0);
+            return (float) ($this->client()->get('/accounts/balance')->json('data.balance') ?? $this->client()->get('/accounts/balance')->json('balance', 0));
         } catch (\Throwable) {
             return 0.0;
         }
@@ -117,12 +130,12 @@ class BitrefillService implements GiftCardProviderInterface, GiftCardStatusCheck
     {
         $blank = ['ok' => false, 'balance' => null, 'currency' => null, 'products' => null, 'error' => null];
         if (! $this->available()) {
-            return ['error' => 'Add your Bitrefill API ID + secret on Admin → API keys first.'] + $blank;
+            return ['error' => 'Add your Bitrefill API key on Admin → API keys first.'] + $blank;
         }
 
         try {
-            $bal = (array) $this->client()->get('/accounts/balance')->throw()->json();
-            $probe = $this->client()->get('/products', ['limit' => 1, 'offset' => 0])->throw();
+            $bal = (array) ($this->client()->get('/accounts/balance')->throw()->json('data') ?? []);
+            $probe = $this->client()->get('/products', ['limit' => 1, 'start' => 0])->throw();
             $count = data_get($probe->json(), 'total') ?? data_get($probe->json(), 'meta.total');
 
             return [
@@ -134,7 +147,7 @@ class BitrefillService implements GiftCardProviderInterface, GiftCardStatusCheck
             ];
         } catch (\Throwable $e) {
             $msg = str_contains($e->getMessage(), '401') || str_contains($e->getMessage(), 'Unauthorized')
-                ? 'Authentication failed — check the API ID and secret.'
+                ? 'Authentication failed — check the API key.'
                 : $e->getMessage();
 
             return ['error' => mb_substr($msg, 0, 200)] + $blank;

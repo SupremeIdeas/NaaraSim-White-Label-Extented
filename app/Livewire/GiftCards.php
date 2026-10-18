@@ -86,6 +86,10 @@ class GiftCards extends Component
     {
         abort_unless($this->live, 404); // no purchases in Coming-Soon mode
         $product = GiftCardProduct::storefront()->findOrFail($this->selectedId);
+        // The card stands for several per-denomination offers: buy through the offer that carries the chosen face value.
+        if (! $product->isRange()) {
+            $product = $product->siblings()->get()->first(fn ($p) => collect((array) $p->fixed_denominations)->contains(fn ($v) => abs((float) $v - (float) $this->amount) < 0.0001)) ?? $product;
+        }
         try {
             $order = $orders->purchase(Auth::user(), $product, (float) $this->amount, array_map('strval', $this->fields));
         } catch (GiftCardException $e) {
@@ -106,7 +110,7 @@ class GiftCards extends Component
             ]);
         }
 
-        $products = GiftCardProduct::storefront()
+        $products = GiftCardProduct::storefrontCards()
             ->when($this->search !== '', fn ($q) => $q->where('brand_name', 'like', '%'.$this->search.'%'))
             ->when($this->country, fn ($q) => $q->where('country', $this->country))
             ->orderByDesc('featured')->orderBy('brand_name')
