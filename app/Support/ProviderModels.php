@@ -199,6 +199,10 @@ class ProviderModels
             return 'coming_soon';
         }
 
+        if ($key === 'naara_connect') {
+            return NaaraConnect::live() ? 'live' : 'needs_key';   // the switch + a real voice supplier, not just a Zendit gift key
+        }
+
         return self::laneConfigured($model['lane']) ? 'live' : 'needs_key';
     }
 

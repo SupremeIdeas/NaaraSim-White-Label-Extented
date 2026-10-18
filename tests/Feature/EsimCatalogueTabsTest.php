@@ -52,6 +52,7 @@ class EsimCatalogueTabsTest extends TestCase
 
     public function test_the_full_tab_shows_coming_soon_when_empty(): void
     {
+        config(['services.gigs.api_key' => 'k', 'services.gigs.project' => 'p']);   // a Full-eSIM provider is keyed, nothing synced yet
         $this->plan('USA Data 3GB', voice: false); // only data plans
 
         Livewire::actingAs(User::factory()->create())->test(Catalogue::class)

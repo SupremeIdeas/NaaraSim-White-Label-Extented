@@ -161,6 +161,7 @@ class EsimPopularDestinationsTest extends TestCase
 
     public function test_the_full_line_and_data_line_are_scoped_independently(): void
     {
+        config(['services.gigs.api_key' => 'k', 'services.gigs.project' => 'p']);
         $this->plan(['has_voice' => false]); // FR on the data-only line
 
         Livewire::actingAs(User::factory()->create())->test(Catalogue::class)

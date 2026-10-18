@@ -59,6 +59,7 @@ class CatalogueSyncService
         try {
             $count = $this->doSync($provider);
             SyncStatus::record($provider, ok: true, count: $count);
+            \App\Support\NaaraConnect::flush();   // a synced voice plan can switch the Data + Calls line on
 
             return $count;
         } catch (\Throwable $e) {
@@ -75,7 +76,9 @@ class CatalogueSyncService
             'airalo' => $this->mapAiralo(app('esim.airalo')->getCatalogue()),
             'quibity' => $this->mapQuibity(app('esim.quibity')->getCatalogue()),
             'zendit' => $this->mapZendit(app('esim.zendit')->getCatalogue()),
-            'oneglobal', 'montymobile', 'gigs' => $this->mapFullEsim($provider, app("esim.{$provider}")->getCatalogue()),
+            'gigs' => $this->mapGigs(app('esim.gigs')->getCatalogue()),
+            'oneglobal' => $this->mapOneGlobal(app('esim.oneglobal')->getCatalogue()),
+            'montymobile' => $this->mapFullEsim($provider, app("esim.{$provider}")->getCatalogue()),
             default => throw new \InvalidArgumentException("Unknown eSIM provider [$provider]."),
         };
 
@@ -336,6 +339,88 @@ class CatalogueSyncService
             ->filter(fn ($r) => $r !== null && $r['provider_plan_id'] !== '')
             ->values()
             ->all();
+    }
+
+    /**
+     * Gigs plans (GET /projects/{project}/plans?simType=eSIM): `allowances` {dataBytes, voiceSeconds, smsMessages} (null or -1 = unlimited,
+     * 0 = none), `price` {amount in minor units, currency}, `coverage` {countries[]}. Only USD plans that need no address/device from the
+     * buyer are sold (an auto-ordered eSIM cannot collect them), and only plans that really include voice go to Naara Connect; a data-only
+     * Gigs plan is stored as a data plan, never mislabelled as calls + data.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    private function mapGigs(array $raw): array
+    {
+        return collect($raw['items'] ?? [])
+            ->filter(fn ($p) => is_array($p) && ($p['status'] ?? 'available') === 'available' && in_array('eSIM', (array) ($p['simTypes'] ?? ['eSIM']), true))
+            ->filter(fn ($p) => strtoupper((string) data_get($p, 'price.currency', 'USD')) === 'USD')
+            ->filter(fn ($p) => in_array(data_get($p, 'requirements.address', 'none'), ['none', null], true) && ! array_filter((array) data_get($p, 'requirements', []), fn ($v, $k) => $k !== 'address' && ! in_array($v, ['none', null, false], true), ARRAY_FILTER_USE_BOTH))
+            ->map(function ($p) {
+                $a = (array) ($p['allowances'] ?? []);
+                $bytes = array_key_exists('dataBytes', $a) ? $a['dataBytes'] : ($p['data'] ?? 0);
+                $voice = array_key_exists('voiceSeconds', $a) ? $a['voiceSeconds'] : ($p['voice'] ?? 0);
+                $unlimited = static fn ($v) => $v === null || (is_numeric($v) && (int) $v === -1);
+                $countries = $this->isoList((array) data_get($p, 'coverage.countries', []));
+
+                return array_merge([
+                    'provider_plan_id' => (string) ($p['id'] ?? ''),
+                    'name' => $p['name'] ?? 'eSIM',
+                    'type' => ($unlimited($voice) || (int) $voice > 0) ? 'Voice + Data' : 'Data',
+                    'has_voice' => $unlimited($voice) || (int) $voice > 0,
+                    'data_mb' => $unlimited($bytes) ? null : ((int) $bytes > 0 ? (int) round(((int) $bytes) / 1048576) : null),
+                    'validity_days' => $this->gigsDays($p['validity'] ?? null),
+                    'countries' => $countries,
+                    'cost_price_usd' => (float) data_get($p, 'price.amount', 0) / 100,
+                ], $this->deriveCoverage($countries, null));
+            })
+            ->filter(fn ($r) => $r['provider_plan_id'] !== '' && $r['cost_price_usd'] > 0)
+            ->values()
+            ->all();
+    }
+
+    /**
+     * 1GLOBAL Connect products: {id, name, period + period_unit, data:{value, units}, footprint[]/activeCountries[], pricing, region}. The documented
+     * product carries no voice field, so these are stored as DATA plans (never silently passed off as calls + data); a product that does declare
+     * voice (a `voice` key with minutes) is treated as Naara Connect.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    private function mapOneGlobal(array $raw): array
+    {
+        return collect($raw['list'] ?? $raw['items'] ?? $raw['data'] ?? [])->filter(fn ($p) => is_array($p) && ! empty($p['id']))->map(function ($p) {
+            $units = strtoupper((string) data_get($p, 'data.units', 'GB'));
+            $val = data_get($p, 'data.value');
+            $mb = is_numeric($val) && (float) $val > 0 ? (int) round((float) $val * match ($units) { 'TB' => 1048576, 'GB' => 1024, 'KB' => 1 / 1024, default => 1 }) : null;
+            $days = is_numeric($p['period'] ?? null) ? (int) $p['period'] * match (strtoupper((string) ($p['period_unit'] ?? 'DAYS'))) { 'WEEKS' => 7, 'MONTHS' => 30, 'YEARS' => 365, default => 1 } : null;
+            $countries = $this->isoList((array) ($p['activeCountries'] ?? $p['footprint'] ?? []));
+            $price = data_get($p, 'pricing.price') ?? data_get($p, 'pricing.amount') ?? data_get($p, 'pricing.wholesale') ?? 0;
+            $voice = (int) data_get($p, 'voice.value', data_get($p, 'voice', 0));
+
+            return array_merge([
+                'provider_plan_id' => (string) $p['id'], 'name' => $p['name'] ?? '1GLOBAL eSIM', 'type' => $voice > 0 ? 'Voice + Data' : 'Data', 'has_voice' => $voice > 0,
+                'data_mb' => $mb, 'validity_days' => $days, 'countries' => $countries, 'cost_price_usd' => (float) (is_array($price) ? ($price['amount'] ?? 0) : $price),
+            ], $this->deriveCoverage($countries, is_string($p['region'] ?? null) ? $p['region'] : null));
+        })->filter(fn ($r) => $r['cost_price_usd'] > 0)->values()->all();
+    }
+
+    /** Gigs `validity` describes the subscription period; read a day count defensively (shape to confirm in the sandbox). */
+    private function gigsDays(mixed $v): ?int
+    {
+        if (! is_array($v)) {
+            return null;
+        }
+        foreach (['days', 'periodDays', 'lengthDays'] as $k) {
+            if (isset($v[$k]) && is_numeric($v[$k])) {
+                return (int) $v[$k];
+            }
+        }
+        $len = $v['periodLength'] ?? $v['length'] ?? null;
+        $unit = strtolower((string) ($v['periodUnit'] ?? $v['unit'] ?? 'day'));
+        if (is_numeric($len)) {
+            return (int) $len * match (true) { str_starts_with($unit, 'week') => 7, str_starts_with($unit, 'month') => 30, str_starts_with($unit, 'year') => 365, default => 1 };
+        }
+
+        return null;
     }
 
     /** A human name for a Zendit offer: "<brand> — <data> + <voice>". */

@@ -18,7 +18,7 @@ class ProviderStatus
         'zendit' => ['services.zendit.api_key'],
         'reloadly' => ['services.reloadly.client_id', 'services.reloadly.client_secret'],
         'oneglobal' => ['services.oneglobal.client_id', 'services.oneglobal.client_secret'],
-        'montymobile' => ['services.montymobile.api_key'],
+        'montymobile' => ['services.montymobile.api_key', 'services.montymobile.base_url'],
         'gigs' => ['services.gigs.api_key', 'services.gigs.project'],
         'esimaccess' => ['services.esimaccess.api_key'],
         'ubigi' => ['services.ubigi.api_key'],
