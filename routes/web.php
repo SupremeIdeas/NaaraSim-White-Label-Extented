@@ -96,6 +96,7 @@ use App\Livewire\Admin\Reconciliation;
 use App\Livewire\Admin\RecoverPassword;
 use App\Livewire\Admin\Refunds;
 use App\Livewire\Admin\Security;
+use App\Livewire\Admin\IconPacksPage;
 use App\Livewire\Admin\ServiceIconsPage;
 use App\Livewire\Admin\SidebarMenu;
 use App\Livewire\Admin\SiteChromePage;
@@ -161,6 +162,8 @@ use Illuminate\Support\Facades\Route;
 // from Admin → Pages with no redeploy.
 Route::get('/', fn () => view('marketing.home', ['sections' => SiteContent::page('home')]))->name('home');
 Route::get('/about', fn () => view('marketing.about', ['sections' => SiteContent::page('about')]))->name('about');
+// Icon packs: one canonical SVG set recoloured per pack (see App\Support\IconPacks\IconPacks).
+Route::get('/icon-pack/{pack}/{group}/{file}.svg', \App\Http\Controllers\IconPackController::class)->where(['pack' => '[a-z0-9-]+', 'group' => '[a-z]+', 'file' => '[a-z0-9-]+'])->name('icon-pack.svg');
 Route::get('/how-it-works', fn () => view('marketing.how-it-works', ['sections' => SiteContent::page('how-it-works')]))->name('how-it-works');
 Route::get('/contact', fn () => view('marketing.contact', ['sections' => SiteContent::page('contact')]))->name('contact');
 
@@ -486,6 +489,7 @@ Route::middleware(['admin', 'throttle:admin'])
             Route::get('/bottom-nav', NavSettings::class)->name('bottom-nav');
             Route::get('/guides', Guides::class)->name('guides');
             Route::get('/service-icons', ServiceIconsPage::class)->name('service-icons');
+            Route::get('/icon-packs', IconPacksPage::class)->name('icon-packs');
             Route::get('/banners', Banners::class)->name('banners');
             // Frontend-UX-fix blueprint Phase G — "More from Naara" banner placement system.
             Route::get('/banner-placements', BannerPlacements::class)->name('banner-placements');

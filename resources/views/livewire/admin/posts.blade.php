@@ -118,7 +118,7 @@
                 <label class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">Accent colour <span class="font-normal text-slate-400">(scroll-tint; blank = auto from category)</span></label>
                 <div class="flex items-center gap-2">
                     <input type="color" wire:model="accent_color" class="h-9 w-14 rounded-lg border border-slate-300 dark:border-[#2D4060]">
-                    <input type="text" wire:model="accent_color" placeholder="#0A6E6E" class="w-32 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                    <input type="text" wire:model="accent_color" placeholder="#A21CAF" class="w-32 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
                     @if ($accent_color)<button type="button" wire:click="$set('accent_color', '')" class="text-xs text-slate-400 hover:text-slate-600">Clear</button>@endif
                 </div>
                 @error('accent_color') <span class="mt-1 block text-xs text-red-600">{{ $message }}</span> @enderror

@@ -96,8 +96,8 @@ class NiaGlowTest extends TestCase
     {
         // The three colours pulled from the Naara brand gradient (§5).
         $css = file_get_contents(resource_path('css/nia-glow.css'));
-        $this->assertStringContainsString('--nia-glow-1: #0A6E6E', $css); // Deep Teal
-        $this->assertStringContainsString('--nia-glow-2: #D4A017', $css); // Warm Gold
+        $this->assertStringContainsString('--nia-glow-1: #A21CAF', $css); // Orchid
+        $this->assertStringContainsString('--nia-glow-2: #84CC16', $css); // Lime
         $this->assertStringContainsString('--nia-glow-3: #2dd4bf', $css); // Bright Teal
     }
 }

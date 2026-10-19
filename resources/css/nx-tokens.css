@@ -9,7 +9,7 @@
     --nx-surface: 255 255 255; --nx-surface-2: 244 248 249; --nx-surface-3: 230 239 242;
     --nx-line: 213 227 231; --nx-line-strong: 160 195 203; --nx-hi: 255 255 255;
     --nx-text: 10 36 49; --nx-text-2: 70 96 109; --nx-text-3: 87 113 126;
-    --nx-teal: 10 155 148; --nx-cta-a: 12 158 150; --nx-cta-b: 5 118 114; --nx-teal-ink: 0 123 117;
+    --nx-teal: 192 38 211; --nx-cta-a: 162 28 175; --nx-cta-b: 134 25 143; --nx-teal-ink: 134 25 143;
     --nx-gold: 242 185 59; --nx-gold-2: 226 152 8; --nx-gold-ink: 115 79 0; --nx-on-gold: 38 28 0;
     --nx-ok: 4 120 87; --nx-warn: 133 92 0; --nx-bad: 185 28 28;
     --nx-acc-a: 15 169 164; --nx-acc-b: 6 118 128; --nx-acc-c: 4 84 99;
@@ -27,7 +27,7 @@
     --nx-surface: 8 32 47; --nx-surface-2: 11 41 58; --nx-surface-3: 16 54 72;
     --nx-line: 23 68 82; --nx-line-strong: 36 110 122;
     --nx-text: 234 244 248; --nx-text-2: 158 184 199; --nx-text-3: 118 147 165;
-    --nx-teal: 16 181 174; --nx-cta-a: 15 165 157; --nx-cta-b: 6 128 124; --nx-teal-ink: 61 219 208;
+    --nx-teal: 232 121 249; --nx-cta-a: 162 28 175; --nx-cta-b: 134 25 143; --nx-teal-ink: 240 171 252;
     --nx-gold-ink: 242 185 59;
     --nx-ok: 52 211 153; --nx-warn: 242 185 59; --nx-bad: 248 113 113;
     --nx-e1: 0 14px 30px -20px rgb(0 0 0 / .75); --nx-e2: 0 -24px 60px -24px rgb(0 0 0 / .7);

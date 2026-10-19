@@ -21,12 +21,12 @@
                     <svg viewBox="0 0 200 48" class="h-12 w-full" role="img" aria-label="Daily data usage, last 7 days" preserveAspectRatio="none">
                         <defs>
                             <linearGradient id="nx-home-usage-fill" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="0%" stop-color="#0A6E6E" stop-opacity="0.45" />
-                                <stop offset="100%" stop-color="#0A6E6E" stop-opacity="0" />
+                                <stop offset="0%" stop-color="#A21CAF" stop-opacity="0.45" />
+                                <stop offset="100%" stop-color="#A21CAF" stop-opacity="0" />
                             </linearGradient>
                         </defs>
                         <polygon points="0,44 {{ $usageSparkline }} 200,44" fill="url(#nx-home-usage-fill)" />
-                        <polyline points="{{ $usageSparkline }}" fill="none" stroke="#0A6E6E" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="dark:stroke-teal-300" />
+                        <polyline points="{{ $usageSparkline }}" fill="none" stroke="#A21CAF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="dark:stroke-teal-300" />
                     </svg>
                 @else
                     <div class="flex h-12 items-center text-xs text-slate-400 dark:text-slate-500">No usage yet this week.</div>
@@ -44,14 +44,14 @@
                 </span>
             </div>
             <div class="mt-2 flex items-center gap-3 text-[11px] font-medium">
-                <span class="inline-flex items-center gap-1 text-slate-500 dark:text-slate-400"><span class="h-2 w-2 rounded-full bg-[#D4A017]"></span> Deposits</span>
-                <span class="inline-flex items-center gap-1 text-slate-500 dark:text-slate-400"><span class="h-2 w-2 rounded-full bg-[#0A6E6E]"></span> Spend</span>
+                <span class="inline-flex items-center gap-1 text-slate-500 dark:text-slate-400"><span class="h-2 w-2 rounded-full bg-[#84CC16]"></span> Deposits</span>
+                <span class="inline-flex items-center gap-1 text-slate-500 dark:text-slate-400"><span class="h-2 w-2 rounded-full bg-[#A21CAF]"></span> Spend</span>
             </div>
             <div class="mt-2">
                 @if ($hasFlowData)
                     <svg viewBox="0 0 200 48" class="h-12 w-full" role="img" aria-label="Deposits versus spend, last 30 days" preserveAspectRatio="none">
-                        <polyline points="{{ $depositsSparkline }}" fill="none" stroke="#D4A017" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
-                        <polyline points="{{ $spendSparkline }}" fill="none" stroke="#0A6E6E" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="dark:stroke-teal-300" />
+                        <polyline points="{{ $depositsSparkline }}" fill="none" stroke="#84CC16" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+                        <polyline points="{{ $spendSparkline }}" fill="none" stroke="#A21CAF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="dark:stroke-teal-300" />
                     </svg>
                 @else
                     <div class="flex h-12 items-center text-xs text-slate-400 dark:text-slate-500">No wallet activity yet this month.</div>

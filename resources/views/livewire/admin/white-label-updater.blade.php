@@ -11,11 +11,11 @@
     {{-- Tabs --}}
     <div class="mb-6 flex gap-1 border-b border-slate-200 dark:border-[#2D4060]">
         <button type="button" wire:click="$set('tab', 'code')"
-            class="border-b-2 px-4 py-2 text-sm font-medium {{ $tab === 'code' ? 'border-[#0A6E6E] text-[#0A6E6E] dark:text-teal-300' : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200' }}">
+            class="border-b-2 px-4 py-2 text-sm font-medium {{ $tab === 'code' ? 'border-[#A21CAF] text-[#A21CAF] dark:text-teal-300' : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200' }}">
             Code updates
         </button>
         <button type="button" wire:click="$set('tab', 'themes')"
-            class="border-b-2 px-4 py-2 text-sm font-medium {{ $tab === 'themes' ? 'border-[#0A6E6E] text-[#0A6E6E] dark:text-teal-300' : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200' }}">
+            class="border-b-2 px-4 py-2 text-sm font-medium {{ $tab === 'themes' ? 'border-[#A21CAF] text-[#A21CAF] dark:text-teal-300' : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200' }}">
             Themes
         </button>
     </div>
@@ -41,7 +41,7 @@
                 </div>
                 <button type="button" wire:click="checkForCodeUpdates"
                     wire:loading.attr="disabled" wire:target="checkForCodeUpdates"
-                    class="inline-flex items-center justify-center rounded-lg bg-[#0A6E6E] px-4 py-2 text-sm font-medium text-white hover:bg-[#0A5E5E] disabled:opacity-50">
+                    class="inline-flex items-center justify-center rounded-lg bg-[#A21CAF] px-4 py-2 text-sm font-medium text-white hover:bg-[#0A5E5E] disabled:opacity-50">
                     <span wire:loading.remove wire:target="checkForCodeUpdates">Check for updates</span>
                     <span wire:loading wire:target="checkForCodeUpdates">Checking…</span>
                 </button>
@@ -65,7 +65,7 @@
                                 <button type="button" wire:click="pullAndApply('{{ $pkg['package_id'] }}')"
                                     wire:confirm="Download and apply {{ $pkg['version'] }}? The platform enters maintenance mode, takes a full backup, and rolls back automatically if the health check fails."
                                     wire:loading.attr="disabled" wire:target="pullAndApply('{{ $pkg['package_id'] }}')"
-                                    class="shrink-0 rounded-lg bg-slate-800 px-3 py-1.5 text-xs font-semibold text-white hover:bg-slate-900 disabled:opacity-50 dark:bg-[#0A6E6E] dark:hover:bg-[#0A5E5E]">
+                                    class="shrink-0 rounded-lg bg-slate-800 px-3 py-1.5 text-xs font-semibold text-white hover:bg-slate-900 disabled:opacity-50 dark:bg-[#A21CAF] dark:hover:bg-[#0A5E5E]">
                                     Download &amp; apply
                                 </button>
                             </div>
@@ -148,7 +148,7 @@
                 </div>
                 <button type="button" wire:click="verifyPackage"
                     wire:loading.attr="disabled" wire:target="verifyPackage,package"
-                    class="inline-flex items-center justify-center rounded-lg bg-slate-800 px-4 py-2 text-sm font-medium text-white hover:bg-slate-900 disabled:opacity-50 dark:bg-[#0A6E6E] dark:hover:bg-[#0A5E5E]">
+                    class="inline-flex items-center justify-center rounded-lg bg-slate-800 px-4 py-2 text-sm font-medium text-white hover:bg-slate-900 disabled:opacity-50 dark:bg-[#A21CAF] dark:hover:bg-[#0A5E5E]">
                     <span wire:loading.remove wire:target="verifyPackage,package">Verify</span>
                     <span wire:loading wire:target="verifyPackage,package">Verifying…</span>
                 </button>
@@ -186,7 +186,7 @@
                 <button type="button" wire:click="applyPackage"
                     wire:confirm="Apply {{ $verified['version'] }}? The platform enters maintenance mode, takes a full backup, applies files and migrations, and rolls back automatically if the health check fails."
                     wire:loading.attr="disabled" wire:target="applyPackage"
-                    class="mt-4 inline-flex items-center justify-center rounded-lg bg-[#0A6E6E] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#0A5E5E] disabled:opacity-50">
+                    class="mt-4 inline-flex items-center justify-center rounded-lg bg-[#A21CAF] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#0A5E5E] disabled:opacity-50">
                     <span wire:loading.remove wire:target="applyPackage">Apply this update</span>
                     <span wire:loading wire:target="applyPackage">Queueing…</span>
                 </button>
@@ -258,7 +258,7 @@
                 </div>
                 <button type="button" wire:click="checkForThemeUpdates"
                     wire:loading.attr="disabled" wire:target="checkForThemeUpdates"
-                    class="inline-flex items-center justify-center rounded-lg bg-[#0A6E6E] px-4 py-2 text-sm font-medium text-white hover:bg-[#0A5E5E] disabled:opacity-50">
+                    class="inline-flex items-center justify-center rounded-lg bg-[#A21CAF] px-4 py-2 text-sm font-medium text-white hover:bg-[#0A5E5E] disabled:opacity-50">
                     <span wire:loading.remove wire:target="checkForThemeUpdates">Check for themes</span>
                     <span wire:loading wire:target="checkForThemeUpdates">Checking…</span>
                 </button>
@@ -281,7 +281,7 @@
                                 </div>
                                 <button type="button" wire:click="pullAndInstallTheme('{{ $pkg['package_id'] }}')"
                                     wire:loading.attr="disabled" wire:target="pullAndInstallTheme('{{ $pkg['package_id'] }}')"
-                                    class="shrink-0 rounded-lg bg-slate-800 px-3 py-1.5 text-xs font-semibold text-white hover:bg-slate-900 disabled:opacity-50 dark:bg-[#0A6E6E] dark:hover:bg-[#0A5E5E]">
+                                    class="shrink-0 rounded-lg bg-slate-800 px-3 py-1.5 text-xs font-semibold text-white hover:bg-slate-900 disabled:opacity-50 dark:bg-[#A21CAF] dark:hover:bg-[#0A5E5E]">
                                     Download &amp; install
                                 </button>
                             </div>
@@ -304,7 +304,7 @@
                 </div>
                 <button type="button" wire:click="verifyTheme"
                     wire:loading.attr="disabled" wire:target="verifyTheme,themePackage"
-                    class="inline-flex items-center justify-center rounded-lg bg-slate-800 px-4 py-2 text-sm font-medium text-white hover:bg-slate-900 disabled:opacity-50 dark:bg-[#0A6E6E] dark:hover:bg-[#0A5E5E]">
+                    class="inline-flex items-center justify-center rounded-lg bg-slate-800 px-4 py-2 text-sm font-medium text-white hover:bg-slate-900 disabled:opacity-50 dark:bg-[#A21CAF] dark:hover:bg-[#0A5E5E]">
                     <span wire:loading.remove wire:target="verifyTheme,themePackage">Verify</span>
                     <span wire:loading wire:target="verifyTheme,themePackage">Verifying…</span>
                 </button>
@@ -359,7 +359,7 @@
 
                 <button type="button" wire:click="installTheme"
                     wire:loading.attr="disabled" wire:target="installTheme"
-                    class="mt-4 inline-flex items-center justify-center rounded-lg bg-[#0A6E6E] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#0A5E5E] disabled:opacity-50">
+                    class="mt-4 inline-flex items-center justify-center rounded-lg bg-[#A21CAF] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#0A5E5E] disabled:opacity-50">
                     <span wire:loading.remove wire:target="installTheme">Install this theme</span>
                     <span wire:loading wire:target="installTheme">Installing…</span>
                 </button>

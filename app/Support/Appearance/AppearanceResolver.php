@@ -218,7 +218,7 @@ class AppearanceResolver
      */
     public static function customAccentCss(array $r): string
     {
-        // L0 -> L2 bridge (Prompt 20 §13): on a non-default platform theme, the default accent ("Naara Teal") means "inherit the
+        // L0 -> L2 bridge (Prompt 20 §13): on a non-default platform theme, the default accent ("Orchid") means "inherit the
         // theme's brand colour", so the dashboard follows the operator's theme until the member picks an accent of their own.
         if ($r['accent'] === 'teal' && ($bridge = self::themeBridgeHex()) !== null) {
             $tone = fn (string $mode) => self::accentBlock(AccentDeriver::derive($bridge, $mode), false);

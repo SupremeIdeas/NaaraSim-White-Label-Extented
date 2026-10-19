@@ -50,7 +50,7 @@ class ThemePresetAccentDarkMigrationTest extends TestCase
 
         $row = DB::table('theme_presets')->where('slug', 'naara-official')->first();
         $tokens = json_decode($row->tokens, true);
-        $this->assertSame('148 112 16', $tokens['colors']['accent_dark']);
+        $this->assertSame('77 124 15', $tokens['colors']['accent_dark']);
         // Untouched fields survive the merge.
         $this->assertSame('212 160 23', $tokens['colors']['accent']);
     }

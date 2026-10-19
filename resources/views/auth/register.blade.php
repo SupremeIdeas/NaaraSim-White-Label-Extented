@@ -4,7 +4,7 @@
          alongside it with "Powered by NaaraSim". --}}
     @isset($inviteMerchant)
         @if ($inviteMerchant)
-            @php($accent = $inviteMerchant->brand_color ?: '#0A6E6E')
+            @php($accent = $inviteMerchant->brand_color ?: '#A21CAF')
             <div class="mb-4 flex items-center gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-[#2D4060] dark:bg-[#1A2840]">
                 @if ($inviteMerchant->logo_url)
                     <img src="{{ $inviteMerchant->logo_url }}" alt="{{ $inviteMerchant->business_name }}" class="h-11 w-11 rounded-xl object-contain ring-1 ring-black/5 dark:ring-white/10">

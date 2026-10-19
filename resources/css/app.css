@@ -59,9 +59,9 @@
    whole platform at runtime — no rebuild. --brand-radius scales button/input
    roundness. */
 :root {
-    --brand-primary: 10 110 110;      /* Deep Teal   #0A6E6E */
-    --brand-primary-dark: 8 85 85;    /* Teal Dark   #085555 */
-    --brand-accent: 212 160 23;       /* Warm Gold   #D4A017 */
+    --brand-primary: 162 28 175;      /* Deep Teal   #A21CAF */
+    --brand-primary-dark: 134 25 143;    /* Teal Dark   #86198F */
+    --brand-accent: 132 204 22;       /* Warm Gold   #84CC16 */
     /* Text/icon-safe darkened accent (color-system skill, §05 "Badges, tags
        and status pills"): the raw accent value is tuned to look good as a
        FILL (buttons, gradient orbs, hero glows), not as small text or an
@@ -73,7 +73,7 @@
        plain or lightly-tinted light surface should use `-dark` instead,
        reserving the bare accent for use on dark/saturated backgrounds
        (navy cards, primary gradients) where it already contrasts well. */
-    --brand-accent-dark: 148 112 16;
+    --brand-accent-dark: 77 124 15;
     --brand-navy: 13 27 42;           /* Midnight Navy #0D1B2A */
     --brand-action: 232 65 42;        /* Coral Red   #E8412A */
     --brand-radius: 0.5rem;           /* default control roundness */
@@ -164,7 +164,7 @@
     background-clip: content-box;
 }
 *::-webkit-scrollbar-thumb:hover {
-    background-color: rgb(10 110 110 / 0.65);            /* brand teal on hover */
+    background-color: rgb(162 28 175 / 0.65);            /* brand teal on hover */
     background-clip: content-box;
 }
 *::-webkit-scrollbar-corner {

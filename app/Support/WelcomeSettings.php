@@ -29,8 +29,8 @@ class WelcomeSettings
             'welcome_text' => 'Welcome to',
             'tagline_text' => "Let's get you started",
             'aurora_speed' => 8,               // seconds (blob loop)
-            'brand_color_1' => '#0A6E6E',      // Deep Teal
-            'brand_color_2' => '#D4A017',      // Warm Gold
+            'brand_color_1' => '#A21CAF',      // Orchid
+            'brand_color_2' => '#84CC16',      // Lime
         ];
     }
 

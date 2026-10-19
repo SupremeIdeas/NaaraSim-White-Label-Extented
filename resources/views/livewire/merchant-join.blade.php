@@ -1,5 +1,5 @@
 <div class="mx-auto max-w-2xl px-4 py-16">
-    @php($accent = $merchant->brand_color ?: '#0A6E6E')
+    @php($accent = $merchant->brand_color ?: '#A21CAF')
     <div class="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-xl dark:border-[var(--brand-card-border-dark)] dark:bg-[var(--brand-card-dark)]">
         {{-- Merchant hero (co-brand accent) --}}
         <div class="relative px-8 py-12 text-center"

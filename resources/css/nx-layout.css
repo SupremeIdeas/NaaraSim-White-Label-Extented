@@ -858,7 +858,7 @@ select.ns-input.ns-input--list { background-image: none; padding-inline-end: 6px
 .ns-pg__cols3 { display: grid; gap: 14px; }
 @media (min-width: 640px) { .ns-pg__cols3 { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 /* Marketing-style hero for business pages: a deliberate dark brand panel in every skin and mode. */
-.ns-pg__hero { padding: 48px 20px 64px; text-align: center; color: rgb(238 246 250); background: linear-gradient(135deg, rgb(13 27 42), rgb(13 27 42) 45%, rgb(10 110 110)); }
+.ns-pg__hero { padding: 48px 20px 64px; text-align: center; color: rgb(238 246 250); background: linear-gradient(135deg, rgb(13 27 42), rgb(13 27 42) 45%, rgb(162 28 175)); }
 .ns-pg__hero h1 { margin: 12px auto 0; max-width: 46rem; font-size: clamp(28px, 6vw, 46px); line-height: 1.12; font-weight: 800; color: #fff; }
 .ns-pg__hero p { margin: 18px auto 0; max-width: 40rem; font-size: 16px; line-height: 1.6; color: rgb(214 228 236); }
 .ns-pg__hero .ns-pg__kicker { color: rgb(242 185 59); }
@@ -966,7 +966,7 @@ select.ns-input.ns-input--list { background-image: none; padding-inline-end: 6px
 html[data-nx-skin] .nx-lang-chip { height: 36px; color: rgb(var(--nx-text-2)); border-color: rgb(var(--nx-line)); background: rgb(var(--nx-surface) / .72); }
 html[data-nx-skin] .nx-lang-chip:hover { color: rgb(var(--nx-text)); border-color: rgb(var(--nx-teal) / .6); }
 html[data-nx-skin] .nx-lang-chip:focus-visible, html[data-nx-skin] .nx-lang__opt:focus-visible { outline: 2px solid rgb(var(--nx-teal-ink)); outline-offset: 2px; }
-.nx-lang__opt:focus-visible { outline: 2px solid rgb(var(--color-primary, 10 110 110)); outline-offset: 2px; }
+.nx-lang__opt:focus-visible { outline: 2px solid rgb(var(--color-primary, 162 28 175)); outline-offset: 2px; }
 
 /* ------------------------------------------------------------------ Admin overview (S3 Batch 5) */
 .ns-adm { padding-bottom: 24px; }
@@ -1161,3 +1161,12 @@ html.ck-open { overflow: hidden; }
 .ncr__help { display: block; margin: 16px auto 0; text-align: center; color: rgb(var(--nx-text-2)); text-decoration: underline; font-size: 15px; }
 .ncr__help[hidden] { display: none; }
 body:has(.ncr:not([hidden])) .ck-reopen { display: none; }   /* the cookie shield must not sit on top of the rating sheet */
+
+/* Icon pack menu icons: one <img> per colour mode, swapped by the app's own dark class. Sized by the parent (--mi-size). */
+.mi { display: inline-grid; place-items: center; width: var(--mi-size, 1.35em); height: var(--mi-size, 1.35em); flex: none; line-height: 0; }
+.mi > img { grid-area: 1 / 1; width: 100%; height: 100%; object-fit: contain; pointer-events: none; user-select: none; }
+.mi__d { display: none; }
+html.dark .mi--duo .mi__d { display: block; }
+html.dark .mi--duo .mi__l { display: none; }
+.ns-tile .mi { --mi-size: 1.7em; }
+.ns-more .ns-list--grid .ns-tile .mi { --mi-size: 36px; }

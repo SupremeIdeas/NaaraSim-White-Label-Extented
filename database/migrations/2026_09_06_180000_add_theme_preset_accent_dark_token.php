@@ -73,7 +73,7 @@ return new class extends Migration
     private function accentDark(): array
     {
         return [
-            'naara-official' => '148 112 16',
+            'naara-official' => '77 124 15',
             'verdant-pulse' => '90 127 29',
             'cobalt-frost' => '36 123 161',
             'mango-burst' => '124 58 140',

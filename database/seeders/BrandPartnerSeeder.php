@@ -53,7 +53,7 @@ class BrandPartnerSeeder extends Seeder
                 'category' => 'Travel & Transport',
                 'listing_status' => BrandPartner::STATUS_ACTIVE,
                 'is_featured' => true,
-                'background_color' => '#0A6E6E',
+                'background_color' => '#A21CAF',
                 'hero_image_path' => '/images/brand-partners/sahara-airways/hero.webp',
                 'is_active' => true,
                 'handles' => [
@@ -80,7 +80,7 @@ class BrandPartnerSeeder extends Seeder
                 'category' => 'Food & Drink',
                 'listing_status' => BrandPartner::STATUS_ACTIVE,
                 'is_featured' => false,
-                'background_color' => '#D4A017',
+                'background_color' => '#84CC16',
                 'hero_image_path' => '/images/brand-partners/lagos-eats/hero.webp',
                 'is_active' => true,
                 'handles' => [

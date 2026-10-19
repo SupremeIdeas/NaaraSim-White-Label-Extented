@@ -67,7 +67,7 @@ class MerchantDashboard extends Component
 
         $this->merchant = $merchant;
         $this->businessName = $merchant->business_name;
-        $this->brandColor = $merchant->brand_color ?: '#0A6E6E';
+        $this->brandColor = $merchant->brand_color ?: '#A21CAF';
         $this->accountId = PayoutAccount::where('user_id', Auth::id())->where('is_verified', true)
             ->where('is_default', true)->value('id');
     }
@@ -78,7 +78,7 @@ class MerchantDashboard extends Component
             'businessName' => ['required', 'string', 'max:120'],
             'brandColor' => ['required', 'regex:/^#[0-9A-Fa-f]{6}$/'],
             'logo' => ['nullable', 'image', 'max:1024'],
-        ], ['brandColor.regex' => 'Use a hex colour like #0A6E6E.']);
+        ], ['brandColor.regex' => 'Use a hex colour like #A21CAF.']);
 
         $data = ['business_name' => $this->businessName, 'brand_color' => $this->brandColor];
         if ($this->logo) {

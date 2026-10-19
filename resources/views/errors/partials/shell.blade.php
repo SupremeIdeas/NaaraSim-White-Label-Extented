@@ -20,15 +20,15 @@
             padding: 2.5rem 2rem; box-shadow: 0 10px 40px -12px rgba(10,110,110,.25); }
         @media (prefers-color-scheme: dark) { .card { background: #101d33; box-shadow: none; border: 1px solid #22314e; } }
         .badge { display: inline-flex; align-items: center; gap: .4rem; font-size: .75rem; font-weight: 700;
-            color: #0A6E6E; background: rgba(10,110,110,.1); padding: .3rem .7rem; border-radius: 999px; }
+            color: #A21CAF; background: rgba(10,110,110,.1); padding: .3rem .7rem; border-radius: 999px; }
         @media (prefers-color-scheme: dark) { .badge { color: #2dd4bf; } }
         h1 { font-size: 1.35rem; margin: 1rem 0 .5rem; }
         p { color: #64748b; line-height: 1.6; margin: 0 0 1.5rem; font-size: .95rem; }
         @media (prefers-color-scheme: dark) { p { color: #94a3b8; } }
         .btns { display: flex; gap: .6rem; justify-content: center; flex-wrap: wrap; }
         a.btn { text-decoration: none; font-weight: 600; font-size: .9rem; padding: .7rem 1.3rem; border-radius: .6rem; }
-        .primary { background: #0A6E6E; color: #fff; }
-        .ghost { color: #0A6E6E; box-shadow: inset 0 0 0 1.5px rgba(10,110,110,.5); }
+        .primary { background: #A21CAF; color: #fff; }
+        .ghost { color: #A21CAF; box-shadow: inset 0 0 0 1.5px rgba(10,110,110,.5); }
         @media (prefers-color-scheme: dark) { .ghost { color: #2dd4bf; box-shadow: inset 0 0 0 1.5px rgba(94,234,212,.5); } }
     </style>
 </head>

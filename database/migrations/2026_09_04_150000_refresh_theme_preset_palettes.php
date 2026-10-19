@@ -180,7 +180,7 @@ return new class extends Migration
             ],
             'aries-contrast' => [
                 'old_primary' => '17 24 39',
-                'old_colors' => ['primary' => '17 24 39', 'primary_dark' => '0 0 0', 'accent' => '212 160 23', 'navy' => '10 10 12', 'action' => '200 50 40'],
+                'old_colors' => ['primary' => '17 24 39', 'primary_dark' => '0 0 0', 'accent' => '132 204 22', 'navy' => '10 10 12', 'action' => '200 50 40'],
                 'old_name' => 'Aries', 'old_persona' => 'High-contrast black/white/gold, sharp corners, luxury-travel feel.',
                 'name' => 'Aries', 'persona' => 'High-contrast black, white and gold, sharp corners — live-odds, luxury-travel energy.',
                 'colors' => ['primary' => '10 10 10', 'primary_dark' => '0 0 0', 'accent' => '245 197 24', 'navy' => '8 8 10', 'action' => '200 50 40'],

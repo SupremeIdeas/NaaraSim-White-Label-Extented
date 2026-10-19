@@ -138,7 +138,7 @@ class CookieConsentTest extends TestCase
         $d = CookieConsent::design();
         $this->assertSame('bar', $d['layout']);
         $this->assertSame('Hello there', $d['title'], 'markup is stripped');
-        $this->assertSame('--ck-bg:#112233;--ck-text:#F1F5F9;--ck-btn:#D4A017;--ck-btn-text:#0D1B2A;', CookieConsent::cssVars($d));
+        $this->assertSame('--ck-bg:#112233;--ck-text:#F1F5F9;--ck-btn:#84CC16;--ck-btn-text:#0D1B2A;', CookieConsent::cssVars($d));
         $this->assertSame(200, $d['renew_days']);
     }
 

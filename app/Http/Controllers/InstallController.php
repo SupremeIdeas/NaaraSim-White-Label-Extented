@@ -7,6 +7,7 @@ use Database\Seeders\DefaultAdminSeeder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 /**
  * Web installer wizard (blueprint Section 22.1), styled after the CodeCanyon
@@ -47,6 +48,7 @@ class InstallController extends Controller
             'db_database' => 'required|string',
             'db_username' => 'required_if:db_connection,mysql|nullable|string',
             'db_password' => 'nullable|string',
+            'admin_email' => 'required|email:rfc|max:120',
         ], [
             'app_url.regex' => 'Please do not enter “/” at the end of the URL. Example: https://naarasim.com',
         ]);
@@ -95,8 +97,13 @@ class InstallController extends Controller
             DB::purge('mysql');
         }
 
+        // The first super admin: the operator's own email and a password generated here, shown once on the Done screen. No default credentials ship.
+        $adminPassword = Str::password(16, symbols: false).'#'.random_int(10, 99);
+        DefaultAdminSeeder::use($data['admin_email'], $adminPassword);
+
         Artisan::call('migrate', ['--force' => true]);
-        Artisan::call('db:seed', ['--force' => true]); // roles, pricing, default admin
+        Artisan::call('db:seed', ['--force' => true]); // roles, pricing, the first admin
+        DefaultAdminSeeder::forget();
 
         // 3) Link the public storage disk (for logo/media uploads without Wasabi)
         //    and warm the caches — production only.
@@ -113,8 +120,8 @@ class InstallController extends Controller
         }
 
         return view('install.done', [
-            'email' => DefaultAdminSeeder::EMAIL,
-            'password' => DefaultAdminSeeder::PASSWORD,
+            'email' => $data['admin_email'],
+            'password' => $adminPassword,
             'adminPath' => config('admin.path'),
             'adminLoginUrl' => route('admin.login'),
             'hosting' => $data['hosting_type'] === 'vps' ? 'vps' : 'shared',

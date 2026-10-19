@@ -8,8 +8,8 @@
          via <x-icon gradient /> or the .nx-grad-icon class; active items stay solid. --}}
     <defs>
         <linearGradient id="nx-icon-gradient" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stop-color="rgb(var(--brand-primary, 10 110 110))"/>
-            <stop offset="100%" stop-color="rgb(var(--brand-accent, 212 160 23))"/>
+            <stop offset="0%" stop-color="rgb(var(--brand-primary, 162 28 175))"/>
+            <stop offset="100%" stop-color="rgb(var(--brand-accent, 132 204 22))"/>
         </linearGradient>
     </defs>
     <symbol id="i-compass" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">

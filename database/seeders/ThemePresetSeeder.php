@@ -104,10 +104,10 @@ class ThemePresetSeeder extends Seeder
         ThemePreset::updateOrCreate(
             ['slug' => 'naara-official'],
             [
-                'name' => 'Naara Official',
-                'persona' => 'Current shipped look — deep teal, warm gold, midnight navy, 3D icons. Permanent default.',
+                'name' => 'Orchid Lime',
+                'persona' => 'The shipped default of this platform — orchid magenta, fresh lime, midnight navy, 3D icons. Permanent default.',
                 'tokens' => [
-                    'colors' => ['primary' => '10 110 110', 'primary_dark' => '8 85 85', 'accent' => '212 160 23', 'accent_dark' => '148 112 16', 'navy' => '13 27 42', 'action' => '232 65 42'],
+                    'colors' => ['primary' => '162 28 175', 'primary_dark' => '134 25 143', 'accent' => '132 204 22', 'accent_dark' => '77 124 15', 'navy' => '13 27 42', 'action' => '232 65 42'],
                     'radius' => ['control' => '0.5rem', 'card' => '1.5rem', 'pill' => '9999px'],
                     'typography' => ['display' => 'Supreme Display', 'sans' => 'Didact Gothic'],
                     'surface' => ['card_shadow' => 'sm', 'card_border_opacity' => '0.6'],

@@ -98,9 +98,9 @@ class CookieConsent
     public static function cssVars(array $design): string
     {
         $c = match ($design['theme']) {
-            'navy' => ['bg' => '#0D1B2A', 'text' => '#F1F5F9', 'button' => '#D4A017', 'button_text' => '#0D1B2A'],
-            'teal' => ['bg' => '#0A6E6E', 'text' => '#FFFFFF', 'button' => '#FFFFFF', 'button_text' => '#0A6E6E'],
-            'light' => ['bg' => '#FFFFFF', 'text' => '#0F172A', 'button' => '#0A6E6E', 'button_text' => '#FFFFFF'],
+            'navy' => ['bg' => '#0D1B2A', 'text' => '#F1F5F9', 'button' => '#84CC16', 'button_text' => '#0D1B2A'],
+            'teal' => ['bg' => '#A21CAF', 'text' => '#FFFFFF', 'button' => '#FFFFFF', 'button_text' => '#A21CAF'],
+            'light' => ['bg' => '#FFFFFF', 'text' => '#0F172A', 'button' => '#A21CAF', 'button_text' => '#FFFFFF'],
             'custom' => $design['custom'],
             default => null,
         };

@@ -61,7 +61,7 @@
                         {{-- Self-hosted: native controls tinted to the brand (progress
                              bar), inside a clean brand frame — no page chrome. --}}
                         <video :src="src" class="h-full w-full bg-black" controls autoplay playsinline
-                               style="accent-color: var(--nia-glow-1, #0A6E6E)"></video>
+                               style="accent-color: var(--nia-glow-1, #A21CAF)"></video>
                     </template>
                 </div>
             </div>

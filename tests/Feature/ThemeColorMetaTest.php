@@ -25,7 +25,7 @@ class ThemeColorMetaTest extends TestCase
 
     public function test_default_theme_uses_the_app_export_colour(): void
     {
-        $this->get('/')->assertSee('name="theme-color" content="#0A6E6E"', false);
+        $this->get('/')->assertSee('name="theme-color" content="#A21CAF"', false);
     }
 
     public function test_a_non_default_theme_repaints_the_browser_chrome(): void

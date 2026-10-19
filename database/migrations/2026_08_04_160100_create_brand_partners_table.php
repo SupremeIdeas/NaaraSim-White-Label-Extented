@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('brand_name');
             $table->string('short_description', 500)->nullable();
             $table->string('fallback_image', 512)->nullable();
-            $table->string('background_color', 9)->default('#0A6E6E'); // hex, drives the scroll bg
+            $table->string('background_color', 9)->default('#A21CAF'); // hex, drives the scroll bg
             $table->unsignedInteger('sort_order')->default(0);
             $table->boolean('is_active')->default(true);
             $table->timestamps();

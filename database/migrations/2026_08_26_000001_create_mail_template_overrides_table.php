@@ -20,7 +20,7 @@ return new class extends Migration
             $table->string('heading')->nullable();
             $table->text('intro')->nullable();          // lead paragraph override (plain text)
             $table->string('button_text')->nullable();
-            $table->string('accent_color', 9)->nullable(); // hex, e.g. #0A6E6E
+            $table->string('accent_color', 9)->nullable(); // hex, e.g. #A21CAF
             $table->timestamps();
         });
     }

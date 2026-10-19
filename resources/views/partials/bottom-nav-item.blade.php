@@ -8,7 +8,7 @@
        ])>
         {{-- Active item: solid brand colour. Inactive: two-tone brand gradient. --}}
         <span class="relative">
-            <x-icon :name="$item['icon']" class="h-5 w-5" :gradient="! $isActive($item['route'])" />
+            <x-icon-pack.slot :route="$item['route']" surface="app" :fallback="$item['icon']" :size="24" />
             @if ($item['badge'] ?? null)
                 <span class="absolute -right-3 -top-1.5 rounded-full bg-accent px-1 py-px text-[8px] font-bold uppercase leading-tight text-navy">{{ $item['badge'] }}</span>
             @endif

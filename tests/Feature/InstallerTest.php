@@ -87,19 +87,22 @@ class InstallerTest extends TestCase
             'hosting_type' => 'shared',
             'db_connection' => 'sqlite',
             'db_database' => 'naarasim',
+            'admin_email' => 'owner@install.test',
         ]);
 
         $response->assertOk()
             ->assertSee('Installation Completed')
-            ->assertSee(DefaultAdminSeeder::EMAIL, false)
-            ->assertSee(DefaultAdminSeeder::PASSWORD, false)
+            ->assertSee('owner@install.test', false)
+            ->assertDontSee(DefaultAdminSeeder::PASSWORD, false)
             ->assertSee('/'.config('admin.path'), false);
 
         // The "Go to admin login" button must point at the REAL admin login,
         // never the customer-facing /login.
         $response->assertSee(route('admin.login'), false);
 
-        $admin = User::where('email', DefaultAdminSeeder::EMAIL)->firstOrFail();
+        $admin = User::where('email', 'owner@install.test')->firstOrFail();
+        $this->assertNull(User::where('email', DefaultAdminSeeder::EMAIL)->first(), 'no default admin account is created');
+        $this->assertFalse(\Illuminate\Support\Facades\Hash::check(DefaultAdminSeeder::PASSWORD, $admin->password));
         $this->assertTrue($admin->hasRole('super_admin'));
         $this->assertTrue(Installer::isInstalled());
 
@@ -116,6 +119,7 @@ class InstallerTest extends TestCase
             'hosting_type' => 'shared',
             'db_connection' => 'sqlite',
             'db_database' => 'naarasim',
+            'admin_email' => 'owner@install.test',
         ])->assertOk();
 
         $env = file_get_contents(Installer::$envPath);
@@ -132,6 +136,7 @@ class InstallerTest extends TestCase
             'hosting_type' => 'vps',
             'db_connection' => 'sqlite',
             'db_database' => 'naarasim',
+            'admin_email' => 'owner@install.test',
         ])->assertOk();
 
         $env = file_get_contents(Installer::$envPath);
@@ -147,6 +152,7 @@ class InstallerTest extends TestCase
             'app_url' => 'https://naarasim.test',
             'db_connection' => 'sqlite',
             'db_database' => 'naarasim',
+            'admin_email' => 'owner@install.test',
         ])->assertSessionHasErrors('hosting_type');
 
         $this->assertFalse(Installer::isInstalled());
@@ -159,6 +165,7 @@ class InstallerTest extends TestCase
             'app_url' => 'https://naarasim.test/', // trailing slash
             'db_connection' => 'sqlite',
             'db_database' => 'naarasim',
+            'admin_email' => 'owner@install.test',
         ])->assertSessionHasErrors('app_url');
 
         $this->assertFalse(Installer::isInstalled());

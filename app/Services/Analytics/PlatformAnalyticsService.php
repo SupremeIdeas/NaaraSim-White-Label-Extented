@@ -53,8 +53,8 @@ class PlatformAnalyticsService
             $giftRevenue = $this->giftRevenueSince($since);
 
             $segments = [
-                ['label' => 'eSIM data', 'value' => round($esimRevenue, 2), 'color' => '#0A6E6E'],
-                ['label' => 'Virtual numbers', 'value' => round($numberRevenue, 2), 'color' => '#D4A017'],
+                ['label' => 'eSIM data', 'value' => round($esimRevenue, 2), 'color' => '#A21CAF'],
+                ['label' => 'Virtual numbers', 'value' => round($numberRevenue, 2), 'color' => '#84CC16'],
                 ['label' => 'Verification', 'value' => round($smsRevenue - $numberRevenue, 2), 'color' => '#4C9F9F'],
                 ['label' => 'Naara Gift', 'value' => round($giftRevenue, 2), 'color' => '#0D1B2A'],
             ];

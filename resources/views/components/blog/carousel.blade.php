@@ -14,7 +14,7 @@
                         @if ($it['cover'])
                             <img src="{{ $it['cover'] }}" alt="" loading="lazy" decoding="async" width="640" height="360" class="h-full w-full object-cover transition duration-300 group-hover:scale-[1.03]">
                         @else
-                            <div class="flex h-full w-full items-center justify-center bg-gradient-to-br from-[#0D1B2A] to-[#0A6E6E] text-3xl font-bold text-white/80" aria-hidden="true">{{ mb_strtoupper(mb_substr($it['category'] ?: $it['title'], 0, 1)) }}</div>
+                            <div class="flex h-full w-full items-center justify-center bg-gradient-to-br from-[#0D1B2A] to-[#A21CAF] text-3xl font-bold text-white/80" aria-hidden="true">{{ mb_strtoupper(mb_substr($it['category'] ?: $it['title'], 0, 1)) }}</div>
                         @endif
                     </div>
                     <div class="p-3.5">

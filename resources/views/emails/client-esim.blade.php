@@ -19,7 +19,7 @@
     @if ($universalLink)
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 18px;">
             <tr><td align="center">
-                <a href="{{ $universalLink }}" style="display:inline-block;background:#0A6E6E;color:#fff;text-decoration:none;font-weight:700;padding:12px 22px;border-radius:10px;">Tap to install on iPhone</a>
+                <a href="{{ $universalLink }}" style="display:inline-block;background:#A21CAF;color:#fff;text-decoration:none;font-weight:700;padding:12px 22px;border-radius:10px;">Tap to install on iPhone</a>
                 <p style="margin:8px 0 0;color:#94a3b8;font-size:12px;">iPhone (iOS 17.4+). On Android, use the manual code below.</p>
             </td></tr>
         </table>

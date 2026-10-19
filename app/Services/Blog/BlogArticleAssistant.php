@@ -104,7 +104,7 @@ class BlogArticleAssistant
     /** A cover-image generation prompt tailored to the article (admin copies it). */
     public function imagePrompt(string $title, string $body): string
     {
-        $system = 'You write vivid, specific prompts for a text-to-image model to create a premium blog COVER image. No text/words in the image. Brand palette: deep teal #0A6E6E, warm gold #D4A017, midnight navy #0D1B2A. 16:9. Return ONLY the prompt text, no preamble.';
+        $system = 'You write vivid, specific prompts for a text-to-image model to create a premium blog COVER image. No text/words in the image. Brand palette: deep teal #A21CAF, warm gold #84CC16, midnight navy #0D1B2A. 16:9. Return ONLY the prompt text, no preamble.';
 
         return trim($this->ai->complete($system, [[
             'role' => 'user',

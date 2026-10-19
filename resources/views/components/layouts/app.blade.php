@@ -43,7 +43,7 @@
          edge), else (2) the active Theme Preset's primary colour so the
          chrome repaints with whichever theme is active, else (3) the
          admin-configured App Export PWA colour on the default theme. --}}
-    <meta name="theme-color" content="{{ \App\Support\ThemePreset::headerColorHex() ?? \App\Support\ThemePreset::browserThemeColor() ?? \App\Support\AppExport::get('theme_color', '#0A6E6E') }}">
+    <meta name="theme-color" content="{{ \App\Support\ThemePreset::headerColorHex() ?? \App\Support\ThemePreset::browserThemeColor() ?? \App\Support\AppExport::get('theme_color', '#A21CAF') }}">
 
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">

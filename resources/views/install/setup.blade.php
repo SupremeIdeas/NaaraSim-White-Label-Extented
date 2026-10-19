@@ -97,6 +97,11 @@
                     <label class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">Database Password</label>
                     <input type="password" name="db_password" placeholder="Database Password" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
                 </div>
+                <div>
+                    <label class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">Admin email (you sign in with this)</label>
+                    <input type="email" name="admin_email" required value="{{ old('admin_email') }}" placeholder="you@yourdomain.com" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                    <p class="mt-1 text-[11px] text-slate-400">A strong password is generated for you and shown once when the install finishes.</p>
+                </div>
                 <button type="submit"
                         class="flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-3 font-semibold text-white hover:bg-primary-dark">
                     Install <x-icon name="chevron-right" class="h-4 w-4" />
