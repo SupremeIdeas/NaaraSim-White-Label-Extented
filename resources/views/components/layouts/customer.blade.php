@@ -90,7 +90,7 @@
             @if ($coBrand->logo_url)
                 <img src="{{ $coBrand->logo_url }}" alt="{{ $coBrand->business_name }}" class="h-5 w-5 rounded object-contain">
             @else
-                <span class="flex h-5 w-5 items-center justify-center rounded text-[9px] font-bold uppercase text-white" style="background-color: {{ $coBrand->brand_color ?: '#0A6E6E' }};">{{ \Illuminate\Support\Str::of($coBrand->business_name)->trim()->substr(0, 1) }}</span>
+                <span class="flex h-5 w-5 items-center justify-center rounded text-[9px] font-bold uppercase text-white" style="background-color: {{ $coBrand->brand_color ?: '#A21CAF' }};">{{ \Illuminate\Support\Str::of($coBrand->business_name)->trim()->substr(0, 1) }}</span>
             @endif
             <span class="font-medium text-slate-600 dark:text-slate-300">{{ $coBrand->business_name }}</span>
             <span class="text-slate-300 dark:text-slate-600">·</span>

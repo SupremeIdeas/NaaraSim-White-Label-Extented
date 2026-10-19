@@ -33,7 +33,7 @@ class CookieSettings extends Component
     public string $theme = 'skin';
 
     /** @var array{bg:string,text:string,button:string,button_text:string} */
-    public array $custom = ['bg' => '#0D1B2A', 'text' => '#F1F5F9', 'button' => '#D4A017', 'button_text' => '#0D1B2A'];
+    public array $custom = ['bg' => '#0D1B2A', 'text' => '#F1F5F9', 'button' => '#84CC16', 'button_text' => '#0D1B2A'];
 
     public string $renewDays = '180';
 

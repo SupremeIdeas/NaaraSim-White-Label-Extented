@@ -15,7 +15,7 @@
     ];
     // Faint network between node indices.
     $links = [[0,2],[2,7],[7,4],[1,3],[3,8],[8,6],[6,1],[0,7],[3,6],[4,8]];
-    $lineColor = $tone === 'dark' ? '#D4A017' : '#0A6E6E';
+    $lineColor = $tone === 'dark' ? '#84CC16' : '#A21CAF';
     $chip = $tone === 'dark'
         ? 'border-white/15 bg-white/10 text-white'
         : 'border-slate-200/70 bg-white/80 text-slate-700 dark:border-white/10 dark:bg-white/10 dark:text-slate-200';

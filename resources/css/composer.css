@@ -3,7 +3,7 @@
 naara-composer { display: block; min-width: 0; }
 
 .cc {
-    --cc-accent: rgb(var(--brand-primary, 10 110 110));
+    --cc-accent: rgb(var(--brand-primary, 162 28 175));
     --cc-accent-ink: #fff;
     --cc-bg: #fff; --cc-panel: #fff; --cc-border: #e2e8f0; --cc-text: #0f172a; --cc-muted: #64748b; --cc-hover: #f1f5f9; --cc-danger: #dc2626;
     position: relative; color: var(--cc-text); font-size: 15px; line-height: 1.5; text-align: start;

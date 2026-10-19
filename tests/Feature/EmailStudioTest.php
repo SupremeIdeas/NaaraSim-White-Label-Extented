@@ -44,7 +44,7 @@ class EmailStudioTest extends TestCase
         // Nothing saved -> the Blade default subject is used.
         $this->assertSame('Confirm your email', MailTemplates::subject('verify', 'Confirm your email'));
         $this->assertNull(MailTemplates::intro('verify'));
-        $this->assertSame('#0A6E6E', MailTemplates::accent('verify'));
+        $this->assertSame('#A21CAF', MailTemplates::accent('verify'));
 
         MailTemplates::save('verify', ['subject' => 'Verify now', 'intro' => 'Hi there', 'accent_color' => '#123456']);
         $this->assertSame('Verify now', MailTemplates::subject('verify', 'Confirm your email'));

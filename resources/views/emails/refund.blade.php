@@ -13,7 +13,7 @@
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:20px 0;border:1px solid #e2e8f0;border-radius:12px;">
         <tr>
             <td style="padding:14px 16px;color:#64748b;font-size:13px;">Amount refunded</td>
-            <td align="right" style="padding:14px 16px;font-weight:700;color:#0A6E6E;">{{ $amountStr }}</td>
+            <td align="right" style="padding:14px 16px;font-weight:700;color:#A21CAF;">{{ $amountStr }}</td>
         </tr>
     </table>
 

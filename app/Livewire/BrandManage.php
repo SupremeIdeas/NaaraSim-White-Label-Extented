@@ -30,7 +30,7 @@ class BrandManage extends Component
 {
     use WithFileUploads;
 
-    public array $profile = ['brand_name' => '', 'category' => '', 'short_description' => '', 'background_color' => '#0A6E6E'];
+    public array $profile = ['brand_name' => '', 'category' => '', 'short_description' => '', 'background_color' => '#A21CAF'];
 
     public $heroImage = null;
 
@@ -61,7 +61,7 @@ class BrandManage extends Component
             'brand_name' => $brand->brand_name,
             'category' => $brand->category ?: '',
             'short_description' => $brand->short_description ?: '',
-            'background_color' => $brand->background_color ?: '#0A6E6E',
+            'background_color' => $brand->background_color ?: '#A21CAF',
         ];
     }
 

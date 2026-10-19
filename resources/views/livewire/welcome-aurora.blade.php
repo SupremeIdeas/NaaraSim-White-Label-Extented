@@ -4,8 +4,8 @@
     $logoSpeed = max(150, (int) ($s['logo_reveal_speed'] ?? 600));
     $taglineDelay = max(0, (int) ($s['tagline_reveal_delay'] ?? 800));
     $aurora = max(3, (int) ($s['aurora_speed'] ?? 8));
-    $c1 = $s['brand_color_1'] ?? '#0A6E6E';
-    $c2 = $s['brand_color_2'] ?? '#D4A017';
+    $c1 = $s['brand_color_1'] ?? '#A21CAF';
+    $c2 = $s['brand_color_2'] ?? '#84CC16';
     // Which entrance style: 'aurora' (drifting blobs) or 'spotlight' (radial beam).
     $style = in_array(($s['style'] ?? 'aurora'), ['aurora', 'spotlight'], true) ? $s['style'] : 'aurora';
     // Start the blur-out a beat before we redirect (spec: ~200ms before the end).

@@ -190,7 +190,7 @@ return [
         'waba_id' => env('WHATSAPP_WABA_ID'),
         'app_secret' => env('WHATSAPP_APP_SECRET'),
         'verify_token' => env('WHATSAPP_VERIFY_TOKEN'),
-        'graph_version' => env('WHATSAPP_GRAPH_VERSION', 'v21.0'),
+        'graph_version' => env('WHATSAPP_GRAPH_VERSION', 'v25.0'),
         'default_lang' => env('WHATSAPP_DEFAULT_LANG', 'en'),
     ],
 

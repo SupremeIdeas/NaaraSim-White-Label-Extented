@@ -20,7 +20,7 @@
         </tr>
         <tr>
             <td style="padding:14px 16px;color:#64748b;font-size:13px;">Amount paid</td>
-            <td align="right" style="padding:14px 16px;font-weight:700;color:#0A6E6E;">{{ $amountStr }}</td>
+            <td align="right" style="padding:14px 16px;font-weight:700;color:#A21CAF;">{{ $amountStr }}</td>
         </tr>
     </table>
 

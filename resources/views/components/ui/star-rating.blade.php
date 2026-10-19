@@ -16,7 +16,7 @@
         @for ($i = 1; $i <= $max; $i++)
             <x-icon name="star" @class([
                 $size,
-                'fill-[#D4A017] text-[#D4A017]' => $i <= $rounded,
+                'fill-[#84CC16] text-[#84CC16]' => $i <= $rounded,
                 'fill-transparent text-slate-300 dark:text-slate-600' => $i > $rounded,
             ]) />
         @endfor
@@ -42,7 +42,7 @@
                     @keydown.arrow-right.prevent="set(Math.min({{ $max }}, current + 1)); $el.nextElementSibling?.focus()"
                     @keydown.arrow-left.prevent="set(Math.max(1, current - 1)); $el.previousElementSibling?.focus()"
                     class="rounded p-0.5 outline-none focus-visible:ring-2 focus-visible:ring-primary">
-                <x-icon name="star" ::class="'{{ $size }} ' + (({{ $i }} <= (hover || current)) ? 'fill-[#D4A017] text-[#D4A017]' : 'fill-transparent text-slate-300 dark:text-slate-600')" />
+                <x-icon name="star" ::class="'{{ $size }} ' + (({{ $i }} <= (hover || current)) ? 'fill-[#84CC16] text-[#84CC16]' : 'fill-transparent text-slate-300 dark:text-slate-600')" />
             </button>
         @endfor
     </div>

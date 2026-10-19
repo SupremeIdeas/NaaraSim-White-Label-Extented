@@ -372,7 +372,7 @@ class GiftCardLogoWizard
     private function monogram(string $name, ?string $color): string
     {
         $initials = Str::upper(Str::substr(preg_replace('/[^A-Za-z0-9 ]/', '', Str::ascii($name)) ?: 'G', 0, 1).(preg_match('/\s(\w)/', preg_replace('/[^A-Za-z0-9 ]/', '', Str::ascii($name)), $m) ? $m[1] : ''));
-        $palette = ['#0A6E6E', '#1F6FEB', '#7A3FD1', '#C2410C', '#B4235A', '#0F766E', '#3F6212', '#92400E'];
+        $palette = ['#A21CAF', '#1F6FEB', '#7A3FD1', '#C2410C', '#B4235A', '#0F766E', '#3F6212', '#92400E'];
         $bg = $color && preg_match('/^#[0-9a-f]{6}$/i', $color) ? $color : $palette[abs(crc32($name)) % count($palette)];
 
         return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256"><rect width="256" height="256" rx="48" fill="'.$bg.'"/><text x="128" y="128" text-anchor="middle" dominant-baseline="central" font-family="Arial,Helvetica,sans-serif" font-size="104" font-weight="700" fill="#fff">'.e($initials).'</text></svg>';

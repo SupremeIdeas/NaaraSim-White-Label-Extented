@@ -164,8 +164,8 @@ class Branding extends Component
             'preloader_style' => 'required|in:'.implode(',', BrandSettings::PRELOADER_STYLES),
         ], [
             'brand_word.regex' => 'Use a plain brand word (letters, numbers, spaces).',
-            'color_primary.regex' => 'Use a 6-digit hex colour like #0A6E6E.',
-            'color_accent.regex' => 'Use a 6-digit hex colour like #D4A017.',
+            'color_primary.regex' => 'Use a 6-digit hex colour like #A21CAF.',
+            'color_accent.regex' => 'Use a 6-digit hex colour like #84CC16.',
             'color_navy.regex' => 'Use a 6-digit hex colour like #0D1B2A.',
             'color_action.regex' => 'Use a 6-digit hex colour like #E8412A.',
         ]);

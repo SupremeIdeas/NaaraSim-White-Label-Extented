@@ -267,7 +267,7 @@
 
         <div class="space-y-5">
             <div class="flex items-center gap-3">
-                <input type="color" wire:model="headerBg" value="{{ $headerBg ?: '#0a6e6e' }}"
+                <input type="color" wire:model="headerBg" value="{{ $headerBg ?: '#A21CAF' }}"
                        class="h-10 w-10 shrink-0 cursor-pointer rounded-lg border border-slate-300 bg-white p-0.5 dark:border-[#2D4060] dark:bg-[#243352]">
                 <div class="min-w-0 flex-1">
                     <label class="mb-1 block text-xs font-semibold text-slate-600 dark:text-slate-300">Header colour</label>

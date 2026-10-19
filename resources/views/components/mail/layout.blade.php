@@ -1,7 +1,7 @@
 {{-- Branded transactional-email shell (Module 22). Inline styles only — email
      clients strip <style>/external CSS and don't support dark: variants, so we
      use a light, high-contrast brand palette that renders everywhere. Brand:
-     Deep Teal #0A6E6E, Warm Gold #D4A017, Midnight Navy #0D1B2A. --}}
+     Orchid #A21CAF, Lime #84CC16, Midnight Navy #0D1B2A. --}}
 @props(['heading' => null, 'accent' => null, 'templateKey' => 'global'])
 @php($appName = config('app.name', 'NaaraSim'))
 @php($accentColor = $accent ?: \App\Support\MailTemplates::accent($templateKey))

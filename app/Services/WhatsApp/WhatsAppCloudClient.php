@@ -44,7 +44,7 @@ class WhatsAppCloudClient
             return null;
         }
 
-        $version = (string) config('services.whatsapp.graph_version', 'v21.0');
+        $version = (string) config('services.whatsapp.graph_version', 'v25.0');
         $phoneId = (string) config('services.whatsapp.phone_number_id');
         $token = (string) config('services.whatsapp.access_token');
         $lang ??= (string) config('services.whatsapp.default_lang', 'en');

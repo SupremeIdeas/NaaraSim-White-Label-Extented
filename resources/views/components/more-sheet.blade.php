@@ -55,7 +55,7 @@
                     @continue(! empty($item['heading'])) {{-- headings are desktop-sidebar only --}}
                     <a href="{{ route($item['route']) }}" wire:navigate @click="moreOpen = false"
                        @class(['ns-list__row', 'is-on' => $isActive($item['route'])]) @if ($isActive($item['route'])) aria-current="page" @endif>
-                        <span class="ns-tile"><x-nx.icon :name="$item['icon']" /></span>
+                        <span class="ns-tile"><x-icon-pack.slot :route="$item['route']" surface="app" :fallback="$item['icon']" nx /></span>
                         <span>{{ $item['label'] }}</span>
                         <x-nx.icon name="chevron-right" class="ns-chevron" />
                     </a>

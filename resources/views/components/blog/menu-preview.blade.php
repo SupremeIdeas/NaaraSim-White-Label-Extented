@@ -22,7 +22,7 @@
                     <a href="{{ $it['url'] }}" wire:navigate @click="{{ $close }}" @class(['group flex overflow-hidden rounded-2xl border border-[rgb(var(--nx-line))] bg-[rgb(var(--nx-surface))]', 'flex-col h-full' => $layout === 'grid', 'items-center gap-3 p-2' => $layout === 'list'])>
                         <span @class(['block shrink-0 overflow-hidden bg-[rgb(var(--nx-surface-3))]', 'aspect-[16/9] w-full' => $layout === 'grid', 'h-16 w-20 rounded-xl' => $layout === 'list'])>
                             @if ($it['cover'])<img src="{{ $it['cover'] }}" alt="" loading="lazy" decoding="async" class="h-full w-full object-cover">
-                            @else<span class="flex h-full w-full items-center justify-center bg-gradient-to-br from-[#0D1B2A] to-[#0A6E6E] text-xl font-bold text-white/80" aria-hidden="true">{{ mb_strtoupper(mb_substr($it['category'] ?: $it['title'], 0, 1)) }}</span>@endif
+                            @else<span class="flex h-full w-full items-center justify-center bg-gradient-to-br from-[#0D1B2A] to-[#A21CAF] text-xl font-bold text-white/80" aria-hidden="true">{{ mb_strtoupper(mb_substr($it['category'] ?: $it['title'], 0, 1)) }}</span>@endif
                         </span>
                         <span @class(['block min-w-0', 'p-2.5' => $layout === 'grid'])><span class="line-clamp-2 text-[13px] font-semibold leading-snug text-[rgb(var(--nx-text))]">{{ $it['title'] }}</span><span class="mt-0.5 block text-[11px] text-[rgb(var(--nx-text-2))]">{{ $it['minutes'] }} min read</span></span>
                     </a>

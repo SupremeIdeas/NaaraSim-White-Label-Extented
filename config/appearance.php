@@ -61,8 +61,8 @@ return [
 
     // Accent presets (Prompt 20 §16). Dark values; `light` overrides only what differs in light mode.
     'accents' => [
-        'teal' => ['label' => 'Naara Teal', 'dark' => ['teal' => '16 181 174', 'cta_a' => '15 165 157', 'cta_b' => '6 128 124', 'teal_ink' => '61 219 208', 'acc_a' => '15 169 164', 'acc_b' => '6 118 128', 'acc_c' => '4 84 99'],
-            'light' => ['teal' => '10 155 148', 'cta_a' => '12 158 150', 'cta_b' => '5 118 114', 'teal_ink' => '0 123 117'], 'access' => 'free'],
+        'teal' => ['label' => 'Orchid', 'dark' => ['teal' => '232 121 249', 'cta_a' => '162 28 175', 'cta_b' => '134 25 143', 'teal_ink' => '240 171 252', 'acc_a' => '217 70 239', 'acc_b' => '162 28 175', 'acc_c' => '112 26 117'],
+            'light' => ['teal' => '192 38 211', 'cta_a' => '162 28 175', 'cta_b' => '134 25 143', 'teal_ink' => '134 25 143'], 'access' => 'free'],
         'ocean' => ['label' => 'Ocean', 'dark' => ['teal' => '40 150 235', 'cta_a' => '36 132 220', 'cta_b' => '22 96 184', 'teal_ink' => '125 194 255', 'acc_a' => '38 140 226', 'acc_b' => '22 96 176', 'acc_c' => '14 64 128'],
             'light' => ['teal_ink' => '16 96 176', 'cta_a' => '30 120 208', 'cta_b' => '18 88 170'], 'access' => 'pro'],
         'violet' => ['label' => 'Violet', 'dark' => ['teal' => '140 110 240', 'cta_a' => '134 104 232', 'cta_b' => '98 68 200', 'teal_ink' => '190 170 255', 'acc_a' => '128 98 232', 'acc_b' => '92 64 190', 'acc_c' => '58 40 130'],

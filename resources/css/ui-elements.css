@@ -60,21 +60,21 @@
 .nx-btn--primary {
     background: var(--ui-primary);
     color: #fff;
-    box-shadow: 0 4px 14px rgb(10 110 110 / 0.35);
+    box-shadow: 0 4px 14px rgb(162 28 175 / 0.35);
 }
 .nx-btn--primary:hover:not(:disabled) {
     background: var(--ui-primary-dark);
     transform: translateY(-1px);
-    box-shadow: 0 6px 20px rgb(10 110 110 / 0.45);
+    box-shadow: 0 6px 20px rgb(162 28 175 / 0.45);
 }
 .nx-btn--primary:active:not(:disabled) { transform: translateY(0); }
 
 .nx-btn--gold {
     background: linear-gradient(135deg, var(--ui-accent), #b8860b);
     color: var(--ui-navy);
-    box-shadow: 0 4px 14px rgb(212 160 23 / 0.4);
+    box-shadow: 0 4px 14px rgb(132 204 22 / 0.4);
 }
-.nx-btn--gold:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 6px 20px rgb(212 160 23 / 0.5); }
+.nx-btn--gold:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 6px 20px rgb(132 204 22 / 0.5); }
 
 .nx-btn--ghost {
     background: transparent;
@@ -82,7 +82,7 @@
     box-shadow: inset 0 0 0 1.5px var(--ui-primary);
 }
 .dark .nx-btn--ghost { color: #5eead4; box-shadow: inset 0 0 0 1.5px rgb(94 234 212 / 0.6); }
-.nx-btn--ghost:hover:not(:disabled) { background: rgb(10 110 110 / 0.08); }
+.nx-btn--ghost:hover:not(:disabled) { background: rgb(162 28 175 / 0.08); }
 .dark .nx-btn--ghost:hover:not(:disabled) { background: rgb(94 234 212 / 0.08); }
 
 .nx-btn--danger {
@@ -102,7 +102,7 @@
 .nx-btn--glow {
     background: var(--ui-primary);
     color: #fff;
-    box-shadow: 0 4px 14px rgb(10 110 110 / 0.35);
+    box-shadow: 0 4px 14px rgb(162 28 175 / 0.35);
     z-index: 0;
 }
 .nx-btn--glow::before {
@@ -158,11 +158,11 @@
     color: var(--ui-navy);
     background: linear-gradient(110deg, var(--ui-accent), var(--ui-primary), var(--ui-accent), #f0c96b, var(--ui-accent));
     background-size: 300% 100%;
-    box-shadow: 0 4px 16px rgb(212 160 23 / 0.4);
+    box-shadow: 0 4px 16px rgb(132 204 22 / 0.4);
     animation: nx-premium-pan 6s linear infinite;
 }
 .dark .nx-btn--premium { color: #06201f; }
-.nx-btn--premium:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 6px 22px rgb(212 160 23 / 0.5); }
+.nx-btn--premium:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 6px 22px rgb(132 204 22 / 0.5); }
 @keyframes nx-premium-pan { to { background-position: 300% 0; } }
 @media (prefers-reduced-motion: reduce) { .nx-btn--premium { animation: none; } }
 
@@ -266,7 +266,7 @@
 }
 .nx-switch input:checked + .nx-switch__track { background: var(--ui-primary); }
 .nx-switch input:checked + .nx-switch__track::before { transform: translateX(1.3rem); }
-.nx-switch input:focus-visible + .nx-switch__track { box-shadow: 0 0 0 3px rgb(212 160 23 / 0.55); }
+.nx-switch input:focus-visible + .nx-switch__track { box-shadow: 0 0 0 3px rgb(132 204 22 / 0.55); }
 .nx-switch input:disabled + .nx-switch__track { opacity: 0.5; }
 
 /* --------------------------------------------------------------- checkbox --
@@ -315,7 +315,7 @@
     border-color: var(--ui-primary);
 }
 .nx-check input:checked + .nx-check__box::after { transform: rotate(45deg) scale(1); }
-.nx-check input:focus-visible + .nx-check__box { box-shadow: 0 0 0 3px rgb(212 160 23 / 0.55); }
+.nx-check input:focus-visible + .nx-check__box { box-shadow: 0 0 0 3px rgb(132 204 22 / 0.55); }
 
 /* ------------------------------------------------------------------ toast --
    Slide-in notification toasts (success/error/info). Adapted from the toast
@@ -350,9 +350,9 @@
     display: flex; flex-shrink: 0; align-items: center; justify-content: center;
     width: 1.5rem; height: 1.5rem; border-radius: 9999px; color: #fff;
 }
-.nx-toast__glyph--success { background-image: linear-gradient(135deg, #14b8a6, #0A6E6E); }
+.nx-toast__glyph--success { background-image: linear-gradient(135deg, #14b8a6, #A21CAF); }
 .nx-toast__glyph--error { background-image: linear-gradient(135deg, #fb7185, #E8412A); }
-.nx-toast__glyph--info { background-image: linear-gradient(135deg, #38bdf8, #0A6E6E); }
+.nx-toast__glyph--info { background-image: linear-gradient(135deg, #38bdf8, #A21CAF); }
 
 /* --------------------------------------------------------------- hero toast --
    A big, CENTRED success/status moment (fintech-style) for money/activity
@@ -391,10 +391,10 @@
     border: 2px solid currentColor; opacity: 0.18;
 }
 @keyframes nx-hero-pop { from { transform: scale(0); } to { transform: scale(1); } }
-.nx-hero__glyph--success { background-image: linear-gradient(135deg, #14b8a6, #0A6E6E); }
+.nx-hero__glyph--success { background-image: linear-gradient(135deg, #14b8a6, #A21CAF); }
 .nx-hero__glyph--error { background-image: linear-gradient(135deg, #fb7185, #E8412A); }
 .nx-hero__glyph--pending { background-image: linear-gradient(135deg, #94a3b8, #64748b); }
-.nx-hero__glyph--info { background-image: linear-gradient(135deg, #38bdf8, #0A6E6E); }
+.nx-hero__glyph--info { background-image: linear-gradient(135deg, #38bdf8, #A21CAF); }
 .nx-hero__draw { width: 3rem; height: 3rem; }
 .nx-hero__tick { stroke: #fff; stroke-dasharray: 60; stroke-dashoffset: 60; animation: nx-hero-draw 0.45s 0.2s ease forwards; }
 .nx-hero__spin { width: 2.4rem; height: 2.4rem; animation: nx-spin 0.9s linear infinite; }
@@ -407,8 +407,8 @@
 .nx-hero__cta {
     display: block; width: 100%; margin-top: 1rem; padding: 0.7rem 1rem;
     border-radius: 0.9rem; font-size: 0.9rem; font-weight: 600; text-align: center;
-    text-decoration: none; color: #fff; background-image: linear-gradient(135deg, #0A6E6E, #085555);
-    box-shadow: 0 8px 20px rgb(10 110 110 / 0.30); transition: filter 0.15s;
+    text-decoration: none; color: #fff; background-image: linear-gradient(135deg, #A21CAF, #86198F);
+    box-shadow: 0 8px 20px rgb(162 28 175 / 0.30); transition: filter 0.15s;
 }
 .nx-hero__cta:hover { filter: brightness(1.06); }
 .nx-hero--error .nx-hero__cta { background-image: linear-gradient(135deg, #E8412A, #b91c1c); box-shadow: 0 8px 20px rgb(232 65 42 / 0.30); }
@@ -690,10 +690,10 @@
 }
 .nx-alert--info { background: #f0fdfa; border-color: #99f6e4; color: #134e4a; }
 .nx-alert--info::before { background: var(--ui-primary); }
-.dark .nx-alert--info { background: rgb(10 110 110 / 0.12); border-color: rgb(15 118 110 / 0.5); color: #99f6e4; }
+.dark .nx-alert--info { background: rgb(162 28 175 / 0.12); border-color: rgb(15 118 110 / 0.5); color: #99f6e4; }
 .nx-alert--warning { background: #fffbeb; border-color: #fcd34d; color: #78350f; }
 .nx-alert--warning::before { background: var(--ui-accent); }
-.dark .nx-alert--warning { background: rgb(212 160 23 / 0.1); border-color: rgb(212 160 23 / 0.4); color: #fde68a; }
+.dark .nx-alert--warning { background: rgb(132 204 22 / 0.1); border-color: rgb(132 204 22 / 0.4); color: #fde68a; }
 .nx-alert--danger { background: #fef2f2; border-color: #fca5a5; color: #7f1d1d; }
 .nx-alert--danger::before { background: var(--ui-danger); }
 .dark .nx-alert--danger { background: rgb(220 38 38 / 0.12); border-color: rgb(153 27 27 / 0.6); color: #fecaca; }
@@ -718,7 +718,7 @@
 .dark .nx-tag--soon { background: rgb(148 163 184 / 0.12); color: #94a3b8; }
 .nx-tag--soon .nx-tag__dot { background: #94a3b8; }
 .nx-tag--gold { background: #fffbeb; color: #92400e; }
-.dark .nx-tag--gold { background: rgb(212 160 23 / 0.14); color: #fcd34d; }
+.dark .nx-tag--gold { background: rgb(132 204 22 / 0.14); color: #fcd34d; }
 .nx-tag--gold .nx-tag__dot { background: var(--ui-accent); }
 @keyframes nx-pulse {
     0%, 100% { box-shadow: 0 0 0 0 rgb(22 163 74 / 0.45); }
@@ -743,8 +743,8 @@
     transition: border-color 0.25s, background 0.25s, transform 0.25s;
 }
 .dark .nx-upload { border-color: #2d4060; background: rgb(36 51 82 / 0.4); }
-.nx-upload:hover { border-color: var(--ui-primary); background: rgb(10 110 110 / 0.04); }
-.dark .nx-upload:hover { background: rgb(10 110 110 / 0.12); }
+.nx-upload:hover { border-color: var(--ui-primary); background: rgb(162 28 175 / 0.04); }
+.dark .nx-upload:hover { background: rgb(162 28 175 / 0.12); }
 .nx-upload input[type="file"] {
     position: absolute;
     inset: 0;
@@ -824,7 +824,7 @@
     inset: -1px;
     border-radius: inherit;
     padding: 1px;
-    background: linear-gradient(135deg, rgb(10 110 110 / 0), rgb(10 110 110 / 0.65), rgb(212 160 23 / 0.55));
+    background: linear-gradient(135deg, rgb(162 28 175 / 0), rgb(162 28 175 / 0.65), rgb(132 204 22 / 0.55));
     -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
     -webkit-mask-composite: xor;
     mask-composite: exclude;
@@ -913,8 +913,8 @@
     border-radius: 1.5rem;
     padding: 1.75rem;
     color: #fff;
-    background: linear-gradient(135deg, #0a6e6e 0%, #085555 45%, #0d1b2a 100%);
-    box-shadow: 0 18px 40px rgb(10 110 110 / 0.25);
+    background: linear-gradient(135deg, #A21CAF 0%, #86198F 45%, #0d1b2a 100%);
+    box-shadow: 0 18px 40px rgb(162 28 175 / 0.25);
 }
 .nx-aurora__glow {
     position: absolute;
@@ -925,7 +925,7 @@
 }
 .nx-aurora__glow--1 {
     width: 16rem; height: 16rem; top: -6rem; right: -4rem;
-    background: rgb(212 160 23 / 0.35);
+    background: rgb(132 204 22 / 0.35);
 }
 .nx-aurora__glow--2 {
     width: 14rem; height: 14rem; bottom: -7rem; left: -3rem;
@@ -945,7 +945,7 @@
     position: relative;
     border-radius: 1.5rem;
     padding: 2px; /* the moving border lives in this gap */
-    background: linear-gradient(115deg, #0a6e6e, #d4a017, #4c9f9f, #0a6e6e);
+    background: linear-gradient(115deg, #A21CAF, #84CC16, #4c9f9f, #A21CAF);
     background-size: 300% 300%;
     animation: nx-border-flow 8s linear infinite;
 }
@@ -963,8 +963,8 @@
 .nx-anim-card__bar {
     height: var(--bar-h, 8%);
     border-radius: 0.375rem 0.375rem 0.2rem 0.2rem;
-    background: linear-gradient(180deg, #d4a017, rgb(212 160 23 / 0.45));
-    box-shadow: 0 0 12px rgb(212 160 23 / 0.25);
+    background: linear-gradient(180deg, #84CC16, rgb(132 204 22 / 0.45));
+    box-shadow: 0 0 12px rgb(132 204 22 / 0.25);
     transform-origin: bottom;
     animation: nx-bar-grow 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
     animation-delay: var(--bar-delay, 0ms);
@@ -1192,7 +1192,7 @@
 }
 .nx-card3d:hover .nx-card3d__body {
     transform: rotateX(7deg) rotateY(-7deg) translateY(-6px);
-    box-shadow: 0 26px 48px rgb(10 110 110 / 0.22);
+    box-shadow: 0 26px 48px rgb(162 28 175 / 0.22);
 }
 .nx-card3d__glass {
     position: absolute;
@@ -1216,8 +1216,8 @@
     justify-content: center;
     border-radius: 1rem;
     color: #fff;
-    background: linear-gradient(140deg, #0a6e6e, #085555);
-    box-shadow: 0 8px 18px rgb(10 110 110 / 0.35);
+    background: linear-gradient(140deg, #A21CAF, #86198F);
+    box-shadow: 0 8px 18px rgb(162 28 175 / 0.35);
     transform: translateZ(40px);
     transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
 }
@@ -1263,7 +1263,7 @@
     width: 10rem;
     height: 10rem;
     border-radius: 9999px;
-    background: radial-gradient(circle, rgb(212 160 23 / 0.5), transparent 65%);
+    background: radial-gradient(circle, rgb(132 204 22 / 0.5), transparent 65%);
     animation: nx-float-drift 6s ease-in-out infinite alternate;
     pointer-events: none;
 }
@@ -1274,7 +1274,7 @@
     width: 9rem;
     height: 9rem;
     border-radius: 9999px;
-    border: 1.5px solid rgb(10 110 110 / 0.5);
+    border: 1.5px solid rgb(162 28 175 / 0.5);
     animation: nx-float-drift 7s ease-in-out infinite alternate-reverse;
     pointer-events: none;
 }
@@ -1308,8 +1308,8 @@
     width: 2.6rem;
     height: 2.6rem;
     border-radius: 9999px;
-    background: radial-gradient(circle at 35% 35%, #f4c430, #d4a017);
-    box-shadow: 0 0 24px rgb(212 160 23 / 0.55);
+    background: radial-gradient(circle at 35% 35%, #f4c430, #84CC16);
+    box-shadow: 0 0 24px rgb(132 204 22 / 0.55);
     transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1), background 0.7s, box-shadow 0.7s;
 }
 .is-night .nx-theme-scene__orb {
@@ -1654,7 +1654,7 @@
   mask-image: linear-gradient(to left, #000 80%, transparent 100%);
   animation: nx-gift-float 5s ease-in-out infinite;
 }
-.dark .nx-gift-stage__box { filter: drop-shadow(0 0 26px rgb(212 160 23 / .28)) drop-shadow(0 14px 22px rgb(0 0 0 / .5)); }
+.dark .nx-gift-stage__box { filter: drop-shadow(0 0 26px rgb(132 204 22 / .28)) drop-shadow(0 14px 22px rgb(0 0 0 / .5)); }
 /* a bright band that only paints where the box is (the box image is its own mask) */
 .nx-gift-stage__shine {
   position: absolute;
@@ -1679,7 +1679,7 @@
   width: 78%;
   aspect-ratio: 1;
   border-radius: 9999px;
-  background: radial-gradient(closest-side, rgb(212 160 23 / .45), rgb(212 160 23 / .12) 55%, transparent 72%);
+  background: radial-gradient(closest-side, rgb(132 204 22 / .45), rgb(132 204 22 / .12) 55%, transparent 72%);
   opacity: 0;
   animation: nx-gift-halo var(--gift-t) ease-in-out infinite;
 }

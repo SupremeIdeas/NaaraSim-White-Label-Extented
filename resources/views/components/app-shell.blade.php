@@ -94,7 +94,7 @@
                                'is-active' => $isActive($item['route']),
                                'text-slate-600 hover:bg-slate-100/80 dark:text-slate-300 dark:hover:bg-white/5' => ! $isActive($item['route']),
                            ])>
-                            <x-icon :name="$item['icon']" class="h-5 w-5 shrink-0" />
+                            <x-icon-pack.slot :route="$item['route']" :fallback="$item['icon']" :size="24" class="shrink-0" />
                             <span class="truncate" x-show="!navCollapsed">{{ $item['label'] }}</span>
                             @if ($item['badge'] ?? null)
                                 <span x-show="!navCollapsed" class="ml-auto rounded-full bg-accent/15 px-1.5 py-0.5 text-[10px] font-bold uppercase text-accent-dark dark:text-accent">{{ $item['badge'] }}</span>

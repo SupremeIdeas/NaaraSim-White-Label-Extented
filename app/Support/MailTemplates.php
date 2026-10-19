@@ -19,7 +19,7 @@ class MailTemplates
 
     private const CACHE_KEY = 'mail.template.overrides';
 
-    private const BRAND_ACCENT = '#0A6E6E';
+    private const BRAND_ACCENT = '#A21CAF';
 
     /** In-memory preview override (Email Studio live preview of unsaved edits). */
     private static ?array $preview = null;

@@ -66,8 +66,8 @@ class BrandSettings
 
     /** Brand default hex palette (mirrors app.css :root — CLAUDE.md Section 2). */
     public const COLOR_DEFAULTS = [
-        'primary' => '#0A6E6E',
-        'accent' => '#D4A017',
+        'primary' => '#A21CAF',
+        'accent' => '#84CC16',
         'navy' => '#0D1B2A',
         'action' => '#E8412A',
     ];
@@ -208,7 +208,7 @@ class BrandSettings
      * @var array<string, array{primary:string, accent:string, navy:string, action:string}>
      */
     public const PALETTES = [
-        'Naara Teal' => ['primary' => '#0A6E6E', 'accent' => '#D4A017', 'navy' => '#0D1B2A', 'action' => '#E8412A'],
+        'Orchid Lime' => ['primary' => '#A21CAF', 'accent' => '#84CC16', 'navy' => '#0D1B2A', 'action' => '#E8412A'],
         'Midnight Indigo' => ['primary' => '#4F46E5', 'accent' => '#F59E0B', 'navy' => '#111827', 'action' => '#EF4444'],
         'Royal Violet' => ['primary' => '#7C3AED', 'accent' => '#F5B301', 'navy' => '#1E1B2E', 'action' => '#EC4899'],
         'Emerald Forest' => ['primary' => '#047857', 'accent' => '#F59E0B', 'navy' => '#0B1F17', 'action' => '#DC2626'],
@@ -226,7 +226,7 @@ class BrandSettings
         'Sky Fresh' => ['primary' => '#0284C7', 'accent' => '#FACC15', 'navy' => '#0B1725', 'action' => '#F97316'],
         'Plum Wine' => ['primary' => '#86198F', 'accent' => '#FBBF24', 'navy' => '#170A18', 'action' => '#E11D48'],
         'Olive Earth' => ['primary' => '#4D7C0F', 'accent' => '#EAB308', 'navy' => '#12160A', 'action' => '#EA580C'],
-        'Graphite Gold' => ['primary' => '#1F2937', 'accent' => '#D4A017', 'navy' => '#0B0F17', 'action' => '#EF4444'],
+        'Graphite Gold' => ['primary' => '#1F2937', 'accent' => '#84CC16', 'navy' => '#0B0F17', 'action' => '#EF4444'],
         'Turquoise Pop' => ['primary' => '#0891B2', 'accent' => '#F59E0B', 'navy' => '#0A1A1E', 'action' => '#F43F5E'],
         'Berry Bold' => ['primary' => '#9D174D', 'accent' => '#FBBF24', 'navy' => '#180912', 'action' => '#FB923C'],
         'Pine Green' => ['primary' => '#065F46', 'accent' => '#FCD34D', 'navy' => '#08160F', 'action' => '#F87171'],
@@ -315,7 +315,7 @@ class BrandSettings
         return $lines === [] ? '' : ':root{'.implode('', $lines).'}';
     }
 
-    /** "#0A6E6E" => "10 110 110" (channel triple), or null if malformed. */
+    /** "#A21CAF" => "162 28 175" (channel triple), or null if malformed. */
     public static function hexToChannels(string $hex): ?string
     {
         $hex = ltrim(trim($hex), '#');
@@ -334,7 +334,7 @@ class BrandSettings
     {
         $rgb = self::hexToChannels($hex);
         if ($rgb === null) {
-            return '8 85 85';
+            return '134 25 143';
         }
 
         return implode(' ', array_map(fn ($c) => (int) round((int) $c * 0.78), explode(' ', $rgb)));

@@ -28,7 +28,7 @@
                 </div>
             </div>
             <button type="button" wire:click="lookup" wire:loading.attr="disabled" wire:target="lookup"
-                    class="mt-4 inline-flex items-center gap-2 rounded-lg bg-[#0A6E6E] px-4 py-2 text-sm font-medium text-white hover:bg-[#085757] disabled:opacity-60">
+                    class="mt-4 inline-flex items-center gap-2 rounded-lg bg-[#A21CAF] px-4 py-2 text-sm font-medium text-white hover:bg-[#085757] disabled:opacity-60">
                 <x-icon name="search" class="h-4 w-4" /> Look up retained records
             </button>
         </div>

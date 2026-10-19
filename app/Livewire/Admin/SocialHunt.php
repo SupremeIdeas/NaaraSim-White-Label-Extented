@@ -27,7 +27,7 @@ class SocialHunt extends Component
     public array $handle = ['platform' => 'instagram', 'handle_label' => '', 'handle_url' => '', 'credit_reward' => 5, 'verification' => 'self'];
 
     /** New brand form. */
-    public array $brand = ['brand_name' => '', 'short_description' => '', 'background_color' => '#0A6E6E'];
+    public array $brand = ['brand_name' => '', 'short_description' => '', 'background_color' => '#A21CAF'];
 
     public $brandImage = null;
 
@@ -92,7 +92,7 @@ class SocialHunt extends Component
             'sort_order' => (int) BrandPartner::max('sort_order') + 1,
         ]);
         $this->reset('brand', 'brandImage');
-        $this->brand = ['brand_name' => '', 'short_description' => '', 'background_color' => '#0A6E6E'];
+        $this->brand = ['brand_name' => '', 'short_description' => '', 'background_color' => '#A21CAF'];
         Auditor::log('hunt.brand_added');
         $this->saved = 'Brand added.';
     }

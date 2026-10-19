@@ -55,7 +55,7 @@ class BlogOverhaulTest extends TestCase
         $this->assertMatchesRegularExpression('/^#[0-9a-f]{6}$/', $a->accentColor());
         $this->assertSame($a->accentColor(), $b->accentColor()); // deterministic per category
 
-        $this->assertSame('#0A6E6E', (new Post(['category' => '']))->accentColor()); // base fallback
+        $this->assertSame('#A21CAF', (new Post(['category' => '']))->accentColor()); // base fallback
     }
 
     public function test_public_blog_renders_and_lists_published_posts(): void

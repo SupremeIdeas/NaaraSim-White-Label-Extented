@@ -103,6 +103,7 @@
         $more[] = ['route' => 'admin.user-appearance', 'label' => 'User appearance', 'icon' => 'sparkles'];
         $more[] = ['route' => 'admin.skins', 'label' => 'Your skins', 'icon' => 'sparkles'];
         $more[] = ['route' => 'admin.service-icons', 'label' => 'Service icons', 'icon' => 'grid'];
+        $more[] = ['route' => 'admin.icon-packs', 'label' => 'Icon packs', 'icon' => 'sparkles'];
         $more[] = ['route' => 'admin.integrations', 'label' => 'Integrations', 'icon' => 'link'];
         $more[] = ['route' => 'admin.features', 'label' => 'Features', 'icon' => 'zap'];
     }
