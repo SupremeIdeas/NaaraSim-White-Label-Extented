@@ -1177,3 +1177,6 @@ html .ns-tile:has(> .mi), html .ns-list__row .ns-tile:has(> .mi), html .ns-more 
 /* More menu columns: 3 per row by default, 4 when the member picks it (Appearance > Menu columns). */
 .ns-more .ns-list.ns-list--grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 html[data-nx-menucols=c4] .ns-more .ns-list.ns-list--grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+
+/* The framed panel around a page (Appearance, admin screens) is only a faint hint now: no tinted fill, no strong ring, so cards inside sit directly on the page canvas. */
+html[data-nx-skin] .ns-app:where(:not(.ns-app--flush):not([data-nx-preview] *)) { background: none !important; border-color: rgb(var(--nx-line) / .22) !important; box-shadow: none !important; }
