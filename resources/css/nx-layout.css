@@ -1173,3 +1173,7 @@ html.dark .mi--duo .mi__l { display: none; }
 
 /* Drawn menu icons sit on the page, not on a tinted glass tile: a tile that holds a pack icon loses its fill, ring, shadow and blur so the pack colours read as designed in light and dark. */
 html .ns-tile:has(> .mi), html .ns-list__row .ns-tile:has(> .mi), html .ns-more .ns-tile { background: none !important; box-shadow: none !important; border: 0 !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
+
+/* More menu columns: 3 per row by default, 4 when the member picks it (Appearance > Menu columns). */
+.ns-more .ns-list.ns-list--grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+html[data-nx-menucols=c4] .ns-more .ns-list.ns-list--grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }

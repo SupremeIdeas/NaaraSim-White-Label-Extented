@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\RateLimiter;
  */
 class UpdateUserAppearance
 {
-    private const FIELDS = ['skin', 'accent', 'accent_hex', 'mode', 'round', 'dens', 'ts', 'depth', 'font', 'motion'];
+    private const FIELDS = ['skin', 'accent', 'accent_hex', 'mode', 'round', 'dens', 'ts', 'depth', 'font', 'motion', 'menucols'];
 
     /**
      * @param  array<string, mixed>  $input  any of: skin, accent, accent_hex, mode, round, dens, ts, depth, font, motion

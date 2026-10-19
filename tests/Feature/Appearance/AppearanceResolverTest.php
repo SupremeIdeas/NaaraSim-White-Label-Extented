@@ -17,7 +17,7 @@ class AppearanceResolverTest extends AppearanceTestCase
         $this->assertSame('surface', $r['skin']);
         $this->assertSame('teal', $r['accent']);
         $this->assertNull($r['mode']);
-        $this->assertSame(['round' => 'def', 'dens' => 'comf', 'ts' => 'def', 'depth' => 'soft', 'font' => 'naara', 'motion' => 'full'], $r['dials']);
+        $this->assertSame(['round' => 'def', 'dens' => 'comf', 'ts' => 'def', 'depth' => 'soft', 'font' => 'naara', 'motion' => 'full', 'menucols' => 'c3'], $r['dials']);
     }
 
     public function test_guests_always_get_the_platform_defaults(): void

@@ -41,8 +41,13 @@ return [
         'depth' => 'Card depth',
         'font' => 'Typeface',
         'motion' => 'Motion',
+        'menucols' => 'Menu columns',
     ],
     'dial_option' => [
+        'menucols' => [
+            'c3' => '3 per row',
+            'c4' => '4 per row',
+        ],
         'round' => [
             'def' => 'Default',
             'sharp' => 'Sharp',
