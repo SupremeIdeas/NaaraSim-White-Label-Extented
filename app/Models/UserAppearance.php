@@ -8,11 +8,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 /** One member's own skin / accent / mode / dials. Null column = follow the platform default. */
 class UserAppearance extends Model
 {
-    public const DIALS = ['round', 'dens', 'ts', 'depth', 'font', 'motion'];
+    public const DIALS = ['round', 'dens', 'ts', 'depth', 'font', 'motion', 'menucols'];
 
     protected $table = 'user_appearance';
 
-    protected $fillable = ['user_id', 'skin_key', 'accent_key', 'accent_hex', 'mode', 'round', 'dens', 'ts', 'depth', 'font', 'motion', 'last_free_skin_key', 'last_pro_skin_key', 'last_pro_accent_key'];
+    protected $fillable = ['user_id', 'skin_key', 'accent_key', 'accent_hex', 'mode', 'round', 'dens', 'ts', 'depth', 'font', 'motion', 'menucols', 'last_free_skin_key', 'last_pro_skin_key', 'last_pro_accent_key'];
 
     public function user(): BelongsTo
     {

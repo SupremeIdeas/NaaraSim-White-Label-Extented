@@ -83,6 +83,7 @@ return [
         'depth' => ['label' => 'Card depth', 'options' => ['soft' => 'Soft', 'flat' => 'Flat', 'deep' => 'Deep']],
         'font' => ['label' => 'Typeface', 'options' => ['naara' => 'Naara', 'system' => 'System', 'serif' => 'Serif headings', 'mono' => 'Mono numbers']],
         'motion' => ['label' => 'Motion', 'options' => ['full' => 'Full', 'reduced' => 'Reduced']],
+        'menucols' => ['label' => 'Menu columns', 'options' => ['c3' => '3 per row', 'c4' => '4 per row']],
     ],
 
     'modes' => ['light', 'dark', 'system'],

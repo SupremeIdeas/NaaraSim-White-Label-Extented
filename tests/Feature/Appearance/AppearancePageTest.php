@@ -80,4 +80,13 @@ class AppearancePageTest extends AppearanceTestCase
         $labels = collect(\App\Support\BottomNav::eligibleMainItems($u)['more'])->pluck('label');
         $this->assertTrue($labels->contains('Appearance'));
     }
+
+    public function test_menu_columns_default_to_three_and_a_member_can_choose_four(): void
+    {
+        $u = \App\Models\User::factory()->create(['is_active' => true, 'email_verified_at' => now()]);
+        $this->assertSame('c3', \App\Support\Appearance\AppearanceResolver::for($u)['dials']['menucols']);
+        \Livewire\Livewire::actingAs($u)->test(\App\Livewire\Account\Appearance::class)->call('setDial', 'menucols', 'c4');
+        $this->assertSame('c4', \App\Support\Appearance\AppearanceResolver::for($u->fresh())['dials']['menucols']);
+        $this->assertStringContainsString('data-nx-menucols="c4"', \App\Support\Appearance\AppearanceResolver::htmlAttributes(\App\Support\Appearance\AppearanceResolver::for($u->fresh())));
+    }
 }
