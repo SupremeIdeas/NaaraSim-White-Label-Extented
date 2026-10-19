@@ -1170,3 +1170,6 @@ html.dark .mi--duo .mi__d { display: block; }
 html.dark .mi--duo .mi__l { display: none; }
 .ns-tile .mi { --mi-size: 1.7em; }
 .ns-more .ns-list--grid .ns-tile .mi { --mi-size: 36px; }
+
+/* Drawn menu icons sit on the page, not on a tinted glass tile: a tile that holds a pack icon loses its fill, ring, shadow and blur so the pack colours read as designed in light and dark. */
+html .ns-tile:has(> .mi), html .ns-list__row .ns-tile:has(> .mi), html .ns-more .ns-tile { background: none !important; box-shadow: none !important; border: 0 !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
