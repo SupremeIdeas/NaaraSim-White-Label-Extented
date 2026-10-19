@@ -192,8 +192,10 @@ class NciScorer
      */
     public function publicSuccessRate(string $providerKey): ?float
     {
-        return Cache::remember(
-            "nci:public_success_rate:{$providerKey}",
+        // The answer is wrapped so a "not enough data" null is cached too: Cache::remember treats a stored null as a miss, which made every
+        // country row of the Numbers picker re-run these two COUNT queries (about a thousand queries to open the list when a provider had few outcomes).
+        $hit = Cache::remember(
+            "nci:public_success_rate:v2:{$providerKey}",
             now()->addMinutes(self::PUBLIC_RATE_TTL_MINUTES),
             function () use ($providerKey) {
                 $since = now()->subDays(self::WINDOW_DAYS);
@@ -201,14 +203,16 @@ class NciScorer
 
                 $total = (clone $base)->count();
                 if ($total < self::PUBLIC_MIN_SAMPLE) {
-                    return null;
+                    return ['rate' => null];
                 }
 
                 $success = (clone $base)->where('outcome', ProviderOutcome::SUCCESS)->count();
 
-                return round($success / $total, 4);
+                return ['rate' => round($success / $total, 4)];
             }
         );
+
+        return $hit['rate'] ?? null;
     }
 
     /** Best (highest) public success rate among a lane of candidate providers, or null if none qualify. */
@@ -222,7 +226,7 @@ class NciScorer
     /** Drop a provider's cached public success rate (tests / an admin manual recompute). */
     public static function flushPublicSuccessRate(string $providerKey): void
     {
-        Cache::forget("nci:public_success_rate:{$providerKey}");
+        Cache::forget("nci:public_success_rate:v2:{$providerKey}");
     }
 
     /**
