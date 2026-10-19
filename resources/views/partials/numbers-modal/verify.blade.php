@@ -32,11 +32,11 @@
     @endif
 
     <div class="ns-stack">
-        <x-nx.field wire:click="pickService" :label="__('numbers.service_label')" :value="$serviceName">
+        <x-nx.field x-on:click="$dispatch('open-service-picker', { for: 'numbers', title: 'Choose a service' })" :label="__('numbers.service_label')" :value="$serviceName">
             <x-slot:leading><x-service-icon :slug="$service" class="h-9 w-9 shrink-0" /></x-slot:leading>
         </x-nx.field>
         @if ($buyMode === 'manual')
-            <x-nx.field wire:click="pickCountry" :label="__('numbers.country_label')" :value="$countryName">
+            <x-nx.field x-on:click="$dispatch('open-country-picker', { source: 'numbers', args: [], for: 'numbers', title: 'Choose a country' })" :label="__('numbers.country_label')" :value="$countryName">
                 <x-slot:leading><x-country-flag :country="$country" class="h-6 w-8 shrink-0" /></x-slot:leading>
             </x-nx.field>
         @endif

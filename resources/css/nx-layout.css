@@ -409,6 +409,15 @@ html[data-nx-skin] .nx-bottomnav .nx-grad-icon { stroke: currentColor; }
    shrunk to tab size. The centre button is the same recipe, so the whole bar always matches the page's buttons. */
 html[data-nx-skin] .nx-bottomnav a.nx-tab.is-on { width: auto; height: auto; flex-direction: column; justify-content: center; gap: 2px; padding: 8px 0; margin: 2px 3px; font-size: 11px; font-weight: 800; }
 html[data-nx-skin] .nx-bottomnav a.nx-tab.is-on svg { transform: translateY(-1px) scale(1.08); }
+/* Contrast discipline: the active tab is a DEEPER brand teal than the page's primary buttons, and its icon and label are always pure white, so the icon
+   never sinks into the bubble (a teal custom icon on a teal bubble was the problem). Drawn menu icons (.mi) are flattened to white on the active tab. */
+html[data-nx-skin] .nx-bottomnav a.nx-tab.is-on {
+    background-image: linear-gradient(rgb(var(--nx-cta-b)), color-mix(in srgb, rgb(var(--nx-cta-b)) 62%, #00100f)); color: #fff;
+    box-shadow: inset 0 0 0 1px rgb(255 255 255 / .14), 0 2px 8px rgb(0 0 0 / .28);
+}
+html[data-nx-skin] .nx-bottomnav a.nx-tab.is-on svg { stroke: #fff; color: #fff; }
+html[data-nx-skin] .nx-bottomnav a.nx-tab.is-on .mi img { filter: brightness(0) invert(1); opacity: 1; }
+
 html[data-nx-skin] .nx-bottomnav a.nx-tab svg { transition: transform .18s ease; }
 html[data-nx-skin] .nx-bottomnav .nx-bn-more { width: 56px; height: 56px; padding: 0; flex: none; }
 @media (prefers-reduced-motion: reduce) { html[data-nx-skin] .nx-bottomnav a svg { transition: none; } }

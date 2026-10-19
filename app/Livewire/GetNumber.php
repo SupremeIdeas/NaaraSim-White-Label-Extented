@@ -135,13 +135,15 @@ class GetNumber extends Component
         $this->modal = '';
     }
 
-    /** Open the shared service picker for the number flow. */
+    /** Open the shared service picker for the number flow. The buttons dispatch the browser event directly (no round trip); this stays as a render-free fallback. */
+    #[\Livewire\Attributes\Renderless]
     public function pickService(): void
     {
         $this->dispatch('open-service-picker', for: 'numbers', title: 'Choose a service');
     }
 
-    /** Open the shared country picker (numbers source → dial codes). */
+    /** Open the shared country picker (numbers source → dial codes). Same: instant from the button, render-free fallback here. */
+    #[\Livewire\Attributes\Renderless]
     public function pickCountry(): void
     {
         $this->dispatch('open-country-picker', source: 'numbers', args: [], for: 'numbers', title: 'Choose a country');
@@ -547,8 +549,12 @@ class GetNumber extends Component
         if (in_array($this->modal, ['verify', 'rent'], true) && $order === null) {
             $router = app(SmsNumberRouter::class);
             try {
-                $q = $router->quote(
-                    new NumberRequest($this->country, $this->type, $this->service, auth()->user(), operator: $this->operator ?: null, rentalTime: $this->activeRentalTime(), autoRenew: $this->autoRenew)
+                // The live provider quote is the slow part of every re-render, so a quote is reused for 45 s per person and selection (the real
+                // price is always re-fetched at reservation).
+                $q = \Illuminate\Support\Facades\Cache::remember(
+                    'numq:'.md5(implode('|', [auth()->id(), $this->country, $this->type, $this->service, $this->operator, $this->activeRentalTime(), (int) $this->autoRenew])),
+                    now()->addSeconds(45),
+                    fn () => $router->quote(new NumberRequest($this->country, $this->type, $this->service, auth()->user(), operator: $this->operator ?: null, rentalTime: $this->activeRentalTime(), autoRenew: $this->autoRenew))
                 );
                 $modalPrice = (float) $q['retail'];
                 if (CreditSettings::enabled() && $creditBalance > 0) {
@@ -561,7 +567,11 @@ class GetNumber extends Component
             // Step-3 operator comparison for Verify (manual mode) — retail only.
             if ($this->modal === 'verify' && $this->buyMode === 'manual') {
                 try {
-                    $operators = $router->compareOperators($this->country, $this->service, $this->type);
+                    $operators = \Illuminate\Support\Facades\Cache::remember(
+                        'numops:'.md5(implode('|', [auth()->id(), $this->country, $this->service, $this->type])),
+                        now()->addSeconds(45),
+                        fn () => $router->compareOperators($this->country, $this->service, $this->type)
+                    );
                 } catch (\Throwable) {
                     $operators = [];
                 }

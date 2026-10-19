@@ -22,13 +22,13 @@
     </div>
 
     <x-nx.step icon="pin" :title="__('numbers.rent.step_country')" :hint="__('numbers.rent.step_country_hint')" />
-    <x-nx.field wire:click="pickCountry" :value="$countryName" value-first>
+    <x-nx.field x-on:click="$dispatch('open-country-picker', { source: 'numbers', args: [], for: 'numbers', title: 'Choose a country' })" :value="$countryName" value-first>
         <x-slot:leading><x-country-flag :country="$country" class="h-6 w-8 shrink-0" /></x-slot:leading>
     </x-nx.field>
 
     <x-nx.step icon="chat" :title="__('numbers.rent.step_service')" :hint="__('numbers.rent.step_service_hint')" />
     @unless ($isAny)
-        <x-nx.field wire:click="pickService" :value="$serviceName" value-first>
+        <x-nx.field x-on:click="$dispatch('open-service-picker', { for: 'numbers', title: 'Choose a service' })" :value="$serviceName" value-first>
             <x-slot:leading><x-service-icon :slug="$service" class="h-9 w-9 shrink-0" /></x-slot:leading>
         </x-nx.field>
     @else

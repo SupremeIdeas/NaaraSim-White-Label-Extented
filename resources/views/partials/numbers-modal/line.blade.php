@@ -14,7 +14,7 @@
     @else
         <p class="ns-sub" style="font-size:17px;margin:16px 0;color:rgb(var(--nx-text))">{!! __('numbers.line.intro', ['bold' => '<b>'.e(__('numbers.line.intro_bold')).'</b>']) !!}</p>
 
-        <x-nx.field wire:click="pickCountry" :label="__('numbers.country_label')" :value="$countryName">
+        <x-nx.field x-on:click="$dispatch('open-country-picker', { source: 'numbers', args: [], for: 'numbers', title: 'Choose a country' })" :label="__('numbers.country_label')" :value="$countryName">
             <x-slot:leading><x-country-flag :country="$country" class="h-6 w-8 shrink-0" /></x-slot:leading>
         </x-nx.field>
 
