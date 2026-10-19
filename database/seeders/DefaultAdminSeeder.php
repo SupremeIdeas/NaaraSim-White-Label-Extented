@@ -12,8 +12,8 @@ use Illuminate\Support\Str;
  * installer finishes (the pattern CodeCanyon products ship with). Idempotent —
  * only created if it doesn't already exist.
  *
- * SECURITY: the installer never uses the constants below on a real install; it calls use() with the operator's own email and a freshly generated
- * password (shown once on the Done screen). The constants only serve `db:seed` in local development and the test suite.
+ * SECURITY: change this password immediately after first login. The Done screen
+ * and DEPLOYMENT.md both say so.
  */
 class DefaultAdminSeeder extends Seeder
 {
@@ -21,34 +21,16 @@ class DefaultAdminSeeder extends Seeder
 
     public const PASSWORD = '123456789@AdminMaster';
 
-    private static ?string $email = null;
-
-    private static ?string $password = null;
-
-    /** The installer hands over the credentials chosen for this install before it seeds. */
-    public static function use(string $email, string $password): void
-    {
-        self::$email = $email;
-        self::$password = $password;
-    }
-
-    public static function forget(): void
-    {
-        self::$email = self::$password = null;
-    }
-
     public function run(): void
     {
-        $email = self::$email ?? self::EMAIL;
-        $password = self::$password ?? self::PASSWORD;
-        if (User::query()->where('email', $email)->exists()) {
+        if (User::query()->where('email', self::EMAIL)->exists()) {
             return;
         }
 
         $admin = User::create([
             'name' => 'Supreme Admin',
-            'email' => $email,
-            'password' => Hash::make($password),
+            'email' => self::EMAIL,
+            'password' => Hash::make(self::PASSWORD),
             'is_active' => true,
             'email_verified_at' => now(),
             'referral_code' => Str::upper(Str::random(8)),
