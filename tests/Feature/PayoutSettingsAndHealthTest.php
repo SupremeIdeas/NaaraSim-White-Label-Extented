@@ -112,8 +112,8 @@ class PayoutSettingsAndHealthTest extends TestCase
         ];
 
         foreach (PayoutSettingsSchema::flat() as $key => $field) {
-            if (in_array($key, [PayoutSettings::DENIED_COUNTRIES, 'payouts.currency_decimals', PayoutSettings::DISABLED_EXTENSIONS], true)) {
-                continue; // free-text fields: default ''/'{}' by construction
+            if (in_array($key, [PayoutSettings::DENIED_COUNTRIES, 'payouts.currency_decimals', PayoutSettings::DISABLED_EXTENSIONS, PayoutSettings::ENV_MODE], true)) {
+                continue; // free-text fields: default ''/'{}' by construction; ENV_MODE is a text select whose unsaved value is 'auto' (see PayoutEnvironmentNeverLocksTest)
             }
             $this->assertArrayHasKey($key, $accessors, "{$key} has a schema entry but no accessor comparison");
             $this->assertEqualsWithDelta((float) $accessors[$key](), (float) $field['default'], 0.0001, "{$key}: the schema default must equal the code default");

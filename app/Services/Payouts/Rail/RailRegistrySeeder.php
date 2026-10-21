@@ -24,6 +24,18 @@ class RailRegistrySeeder
 
     public const FLUTTERWAVE = ['NG', 'GH', 'KE', 'UG', 'TZ', 'ZA', 'RW', 'ZM', 'CI', 'SN', 'CM', 'EG'];
 
+    /**
+     * Stripe Connect cross-border payouts: a platform in the US, UK, EEA, Canada or Switzerland can pay connected accounts in any of those regions
+     * (docs.stripe.com/connect/cross-border-payouts, read 2026-10-21). The Stripe API (`country_specs`) replaces this the moment a key is saved.
+     */
+    public const STRIPE_CONNECT_DOCS = ['US', 'GB', 'CA', 'CH', 'AT', 'BE', 'BG', 'HR', 'CY', 'CZ', 'DK', 'EE', 'FI', 'FR', 'DE', 'GR', 'HU', 'IE', 'IT', 'LV', 'LT', 'LU', 'MT', 'NL', 'PL', 'PT', 'RO', 'SK', 'SI', 'ES', 'SE', 'IS', 'LI', 'NO'];
+
+    /**
+     * Stripe Global Payouts recipient countries for a US or UK sender (docs.stripe.com/global-payouts/recipient-requirements, read 2026-10-21):
+     * pay a third party's bank account in their own currency. This is how Africa outside Nigeria/Ghana is reached on Stripe.
+     */
+    public const STRIPE_GLOBAL_DOCS = ['AL', 'DZ', 'AG', 'AM', 'AU', 'AT', 'BS', 'BH', 'BE', 'BJ', 'BT', 'BA', 'BW', 'BN', 'BG', 'CA', 'CN', 'CR', 'CI', 'HR', 'CY', 'CZ', 'DK', 'DO', 'EC', 'EG', 'SV', 'EE', 'ET', 'FI', 'FR', 'GM', 'DE', 'GR', 'GT', 'GY', 'HK', 'HU', 'IS', 'IN', 'ID', 'IE', 'IL', 'IT', 'JM', 'JP', 'JO', 'KE', 'KW', 'LV', 'LI', 'LT', 'LU', 'MG', 'MY', 'MT', 'MU', 'MX', 'MD', 'MC', 'MN', 'MA', 'MZ', 'PE', 'NA', 'NL', 'NZ', 'MK', 'NO', 'OM', 'PK', 'PA', 'PH', 'PL', 'PT', 'QA', 'RO', 'RW', 'LC', 'SM', 'SN', 'RS', 'SG', 'SK', 'SI', 'LK', 'ZA', 'ES', 'SE', 'CH', 'TW', 'TZ', 'TH', 'TT', 'TN', 'TR', 'AE', 'GB', 'US', 'UZ', 'VN'];
+
     public function __construct(private PayoutRailRegistry $registry) {}
 
     /** @return array{seeded: int, drift: list<string>, skipped: list<string>} */
@@ -40,14 +52,37 @@ class RailRegistrySeeder
         // Verify against each provider's API where we hold credentials; report any disagreement.
         $paystack = $this->paystackCountries();
         if ($paystack === null) {
-            $out['skipped'][] = 'paystack (no key / API unreachable)';
+            $out['skipped'][] = 'paystack (no key / API unreachable): built-in list used';
         } else {
             $this->markVerified('paystack', self::PAYSTACK, $paystack, $out);
+            // Whatever the API lists is covered, even where the built-in list never heard of it.
+            foreach (array_diff($paystack, self::PAYSTACK) as $c) {
+                $out['seeded'] += $this->upsert($c, 'paystack', true, 'api', ['bank'], 'https://paystack.com/docs/api/miscellaneous/#country', verified: true);
+            }
+        }
+
+        $flutterwave = $this->flutterwaveCountries();
+        if ($flutterwave === null) {
+            $out['skipped'][] = 'flutterwave (no key / API unreachable): built-in list used';
+        } else {
+            $this->markVerified('flutterwave', self::FLUTTERWAVE, $flutterwave, $out);
+            foreach (array_diff($flutterwave, self::FLUTTERWAVE) as $c) {
+                $out['seeded'] += $this->upsert($c, 'flutterwave', true, 'api', ['bank'], 'https://developer.flutterwave.com/reference/get-all-banks', verified: true);
+            }
+        }
+
+        // Documented coverage, always seeded (never overwrites an admin override or a row the API has verified): without it the guide would call every
+        // Stripe country "not supported" simply because no Stripe key has been saved yet. It is labelled as documentation, not as verified.
+        foreach (self::STRIPE_CONNECT_DOCS as $c) {
+            $out['seeded'] += $this->upsertDocs($c, 'stripe_connect', 'https://docs.stripe.com/connect/cross-border-payouts', ['bank']);
+        }
+        foreach (self::STRIPE_GLOBAL_DOCS as $c) {
+            $out['seeded'] += $this->upsertDocs($c, 'global', 'https://docs.stripe.com/global-payouts/recipient-requirements', ['bank', 'wire']);
         }
 
         $stripe = $this->stripeCountries();
         if ($stripe === null) {
-            $out['skipped'][] = 'stripe_connect (no key / API unreachable)';
+            $out['skipped'][] = 'stripe_connect (no key / API unreachable): documented list used';
         } else {
             foreach ($stripe as $c) {
                 $out['seeded'] += $this->upsert($c, 'stripe_connect', true, 'api', ['bank'], 'https://docs.stripe.com/api/country_specs', verified: true);
@@ -72,6 +107,9 @@ class RailRegistrySeeder
         if (($p = $this->paystackCountries()) !== null) {
             $this->markVerified('paystack', self::PAYSTACK, $p, $out);
         }
+        if (($fw = $this->flutterwaveCountries()) !== null) {
+            $this->markVerified('flutterwave', self::FLUTTERWAVE, $fw, $out);
+        }
         if (($s = $this->stripeCountries()) !== null) {
             $known = PayoutCountryRail::where('rail', 'stripe_connect')->where('provider_supports', true)->pluck('country')->all();
             foreach (array_diff($s, $known) as $c) {
@@ -90,6 +128,19 @@ class RailRegistrySeeder
         $this->registry->flush();
 
         return ['drift' => $out['drift'], 'stale' => $stale];
+    }
+
+    /** A row from a provider's published documentation: created when missing, never touches an override, and never downgrades a row the API verified. */
+    private function upsertDocs(string $country, string $rail, string $source, array $methods): int
+    {
+        $row = PayoutCountryRail::firstOrNew(['country' => strtoupper($country), 'rail' => $rail]);
+        if ($row->exists) {
+            return 0;
+        }
+        $row->fill(['provider_supports' => true, 'methods' => $methods, 'source_url' => $source, 'verified_at' => now(), 'verified_by' => 'docs']);
+        $row->save();
+
+        return 1;
     }
 
     /** @param array<string, mixed>|null $methods */
@@ -122,6 +173,47 @@ class RailRegistrySeeder
             return $codes === [] ? null : $codes;
         } catch (Throwable $e) {
             Log::warning('payout rail audit: paystack /country failed: '.$e->getMessage());
+
+            return null;
+        }
+    }
+
+    /** Every African country (ISO 3166-1 alpha-2): the candidates Flutterwave is asked about. A continent's membership is a fact, not a gateway claim. */
+    public const AFRICA = ['DZ', 'AO', 'BJ', 'BW', 'BF', 'BI', 'CM', 'CV', 'CF', 'TD', 'KM', 'CG', 'CD', 'CI', 'DJ', 'EG', 'GQ', 'ER', 'SZ', 'ET', 'GA', 'GM', 'GH', 'GN', 'GW', 'KE', 'LS', 'LR', 'LY', 'MG', 'MW', 'ML', 'MR', 'MU', 'MA', 'MZ', 'NA', 'NE', 'NG', 'RW', 'ST', 'SN', 'SC', 'SL', 'SO', 'ZA', 'SS', 'SD', 'TZ', 'TG', 'TN', 'UG', 'ZM', 'ZW'];
+
+    /**
+     * Countries Flutterwave can pay into, found by asking its bank-list endpoint about each African country (a country it does not serve answers with an error or an
+     * empty list). One country failing to answer is skipped; the whole result is null when nothing could be asked at all.
+     *
+     * @return list<string>|null
+     */
+    private function flutterwaveCountries(): ?array
+    {
+        $key = (string) config('services.flutterwave.secret_key');
+        if ($key === '') {
+            return null;
+        }
+        try {
+            $base = rtrim((string) config('services.flutterwave.base_url'), '/');
+            $responses = Http::pool(fn ($pool) => array_map(
+                fn ($cc) => $pool->as($cc)->withToken($key)->acceptJson()->timeout(12)->connectTimeout(4)->get($base.'/banks/'.$cc),
+                self::AFRICA
+            ));
+            $asked = 0;
+            $found = [];
+            foreach ($responses as $cc => $res) {
+                if (! $res instanceof \Illuminate\Http\Client\Response) {
+                    continue;   // a timeout or connection error for this one country
+                }
+                $asked++;
+                if ($res->successful() && data_get($res->json(), 'status') === 'success' && ! empty(data_get($res->json(), 'data'))) {
+                    $found[] = (string) $cc;
+                }
+            }
+
+            return $asked === 0 || ($found === [] && $asked > 0) ? null : $found;   // every answer empty usually means a bad key, not "serves nowhere"
+        } catch (Throwable $e) {
+            Log::warning('payout rail audit: flutterwave banks probe failed: '.$e->getMessage());
 
             return null;
         }

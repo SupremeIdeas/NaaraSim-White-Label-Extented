@@ -56,6 +56,57 @@
         </div>
     </section>
 
+    {{-- Portable configuration backup --}}
+    <section class="mb-8 rounded-2xl border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-900/60 p-6" data-config-backup>
+        <h2 class="mb-1 flex items-center gap-2 text-sm font-semibold text-slate-900 dark:text-slate-100">
+            <x-icon name="shield" class="h-4 w-4 text-primary" /> Configuration backup (works on a fresh install)
+        </h2>
+        <p class="mb-4 text-xs text-slate-500 dark:text-slate-400">
+            One encrypted file with everything you configured: all settings, pages, posts, menus, themes, plans and more ({{ count($cfgTables) }} content tables).
+            Restore it on a new install and the site comes back as you left it. It does <span class="font-semibold">not</span> include the Admin &gt; API Keys secrets, users, wallets or orders; add those keys again on the new install.
+            Keep the passphrase safe: without it the file cannot be opened.
+        </p>
+
+        <div class="mb-5 flex flex-wrap items-end gap-3">
+            <div>
+                <label class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">Passphrase (8+ characters)</label>
+                <input type="password" wire:model="cfgPassphrase" autocomplete="new-password" class="w-64 rounded-lg border border-slate-300 bg-white dark:border-white/20 dark:bg-slate-900 px-3 py-1.5 text-sm text-slate-900 dark:text-slate-100">
+            </div>
+            <button type="button" wire:click="exportConfig" wire:loading.attr="disabled" wire:target="exportConfig" @disabled(strlen($cfgPassphrase) < 8)
+                    class="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary-dark disabled:opacity-50">
+                <span wire:loading.remove wire:target="exportConfig" class="inline-flex items-center gap-2"><x-icon name="download" class="h-4 w-4" /> Download configuration backup</span>
+                <span wire:loading wire:target="exportConfig" class="inline-flex items-center gap-2"><x-ui.spinner class="h-4 w-4" /> Preparing...</span>
+            </button>
+        </div>
+
+        <div class="border-t border-slate-200 dark:border-white/10 pt-4">
+            <label class="mb-2 block text-xs font-medium text-slate-500 dark:text-slate-400">Restore from a configuration backup (.naaracfg)</label>
+            <div class="flex flex-wrap items-center gap-3">
+                <input type="file" wire:model="cfgFile" class="text-sm text-slate-500 dark:text-slate-400">
+                <input type="password" wire:model="cfgRestorePassphrase" placeholder="Passphrase" autocomplete="off" class="w-56 rounded-lg border border-slate-300 bg-white dark:border-white/20 dark:bg-slate-900 px-3 py-1.5 text-sm text-slate-900 dark:text-slate-100">
+                <button type="button" wire:click="previewConfig" wire:loading.attr="disabled" wire:target="previewConfig,cfgFile" @disabled(! $cfgFile)
+                        class="inline-flex items-center gap-2 rounded-lg border border-slate-300 dark:border-white/20 px-3 py-1.5 text-sm font-medium text-slate-900 dark:text-slate-100 hover:bg-slate-50 dark:hover:bg-white/5 disabled:opacity-50">Check the file</button>
+            </div>
+
+            @if ($cfgPreview !== null)
+                <div class="mt-4 rounded-xl border border-slate-200 bg-slate-50 dark:border-white/10 dark:bg-white/5 p-4" data-config-preview>
+                    <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Made {{ $cfgPreview['exported_at'] }} on {{ $cfgPreview['source'] ?? 'unknown' }}. Nothing written yet.</p>
+                    <ul class="space-y-1 text-sm text-slate-900 dark:text-slate-100">
+                        <li><span class="font-medium">Settings</span>: {{ $cfgPreview['settings']['new'] }} new, {{ $cfgPreview['settings']['changed'] }} will change, {{ $cfgPreview['settings']['same'] }} identical</li>
+                        @foreach ($cfgPreview['tables'] as $t => $c)
+                            <li><span class="font-medium">{{ $t }}</span>: {{ $c['current'] }} now, replaced by {{ $c['incoming'] }}</li>
+                        @endforeach
+                    </ul>
+                    <button type="button" wire:click="restoreConfig" wire:loading.attr="disabled" wire:target="restoreConfig" wire:confirm="Restore this configuration? Settings in the file overwrite the ones here and the listed content tables are replaced."
+                            class="mt-3 inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary-dark disabled:opacity-60">
+                        <span wire:loading.remove wire:target="restoreConfig" class="inline-flex items-center gap-2"><x-icon name="check" class="h-4 w-4" /> Restore this configuration</span>
+                        <span wire:loading wire:target="restoreConfig" class="inline-flex items-center gap-2"><x-ui.spinner class="h-4 w-4" /> Restoring...</span>
+                    </button>
+                </div>
+            @endif
+        </div>
+    </section>
+
     {{-- Dataset export / import --}}
     <section class="rounded-2xl border border-slate-200 bg-white p-6 dark:border-[#2D4060] dark:bg-[#1A2840]">
         <h2 class="mb-1 flex items-center gap-2 text-sm font-semibold text-slate-800 dark:text-slate-100">

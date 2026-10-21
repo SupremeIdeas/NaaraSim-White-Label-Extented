@@ -4,6 +4,7 @@ namespace App\Livewire\Admin;
 
 use App\Jobs\RunBackupJob;
 use App\Services\Backup\BackupManager;
+use App\Services\Backup\ConfigBackup;
 use App\Services\Backup\DatasetService;
 use App\Services\Backup\RestoreService;
 use App\Support\Auditor;
@@ -34,6 +35,17 @@ class Backups extends Component
     public ?array $dryRun = null;
 
     public string $pendingImportJson = '';
+
+    /** Portable configuration backup. */
+    public string $cfgPassphrase = '';
+
+    public string $cfgRestorePassphrase = '';
+
+    public $cfgFile;
+
+    public ?array $cfgPreview = null;
+
+    public string $cfgPendingFile = '';
 
     public function mount(): void
     {
@@ -110,6 +122,53 @@ class Backups extends Component
         $this->status = "Dataset imported — {$inserted} new row(s) added.";
     }
 
+    public function exportConfig(ConfigBackup $config)
+    {
+        $this->error = null;
+        try {
+            $file = $config->export($this->cfgPassphrase);
+        } catch (\Throwable $e) {
+            $this->error = $e->getMessage();
+
+            return null;
+        }
+        Auditor::log('backup.config_exported');
+        $this->cfgPassphrase = '';
+
+        return response()->streamDownload(fn () => print ($file), 'naara-config-'.now()->format('Ymd-His').'.naaracfg', ['Content-Type' => 'application/json']);
+    }
+
+    public function previewConfig(ConfigBackup $config): void
+    {
+        $this->error = null;
+        $this->cfgPreview = null;
+        $this->validate(['cfgFile' => 'required|file|max:51200']);
+        try {
+            $file = $this->cfgFile->get();
+            $this->cfgPreview = $config->preview($file, $this->cfgRestorePassphrase);
+            $this->cfgPendingFile = $file;
+        } catch (\Throwable $e) {
+            $this->error = $e->getMessage();
+        }
+    }
+
+    public function restoreConfig(ConfigBackup $config): void
+    {
+        $this->error = null;
+        if ($this->cfgPendingFile === '') {
+            return;
+        }
+        try {
+            $r = $config->restore($this->cfgPendingFile, $this->cfgRestorePassphrase);
+        } catch (\Throwable $e) {
+            $this->error = 'Nothing was changed. '.$e->getMessage();
+
+            return;
+        }
+        $this->reset('cfgFile', 'cfgPreview', 'cfgPendingFile', 'cfgRestorePassphrase');
+        $this->status = 'Configuration restored: '.$r['settings'].' settings and '.array_sum($r['tables']).' content rows.';
+    }
+
     private function assertOwnedBackup(string $path, BackupManager $backups): void
     {
         abort_unless(str_starts_with($path, $backups->directory().'/'), 403);
@@ -122,6 +181,7 @@ class Backups extends Component
             'disk' => app(BackupManager::class)->disk(),
             'engine' => app(RestoreService::class)->dumpEngine(),
             'exportable' => DatasetService::exportableTables(),
+            'cfgTables' => ConfigBackup::tables(),
         ]);
     }
 }

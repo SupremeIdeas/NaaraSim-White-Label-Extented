@@ -323,7 +323,7 @@ export class Composer {
     /* ---------------------------------------------------------- text input */
     onKey(e) {
         const t = this.refs.text;
-        if (e.key === 'Enter' && !e.shiftKey && !e.isComposing && !this.field && this.o.sendOnEnter) { e.preventDefault(); this.handleSend(); return; }
+        if (e.key === 'Enter' && !e.shiftKey && !e.isComposing && !this.field && this.o.sendOnEnter) { e.preventDefault(); if (this.pending) this.sendNow(); else this.handleSend(); return; }
         if (this.has('snippets') && (e.key === ' ' || e.key === 'Tab')) {
             const v = t.value; const p = t.selectionStart; const m = /(^|\s)\/(\w+)$/.exec(v.slice(0, p));
             const key = m && m[2].toLowerCase();
@@ -925,6 +925,15 @@ export class Composer {
         this.ring(true);
         this.pending = { snap, t: setTimeout(() => { this.ring(false); this.pending = null; this.updateSend(); this.enqueue(snap); }, this.o.undoMs) };
         this.updateSend();
+        // The short undo window is for people who want a second look; for everyone else, "Send now" skips the wait.
+        this.say(this.L.sendingSoon, this.L.sendNow, () => this.sendNow(), this.o.undoMs);
+    }
+
+    /** Skip the rest of the undo window and send straight away. */
+    sendNow() {
+        if (!this.pending) return;
+        clearTimeout(this.pending.t); const snap = this.pending.snap; this.pending = null; this.ring(false); this.updateSend();
+        this.refs.status.hidden = true; this.enqueue(snap);
     }
 
     ring(on) {

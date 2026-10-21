@@ -70,7 +70,7 @@ class GatewayStatusResolver
             if ($why === GatewayStatus::R_ENV_MISMATCH) {
                 $mode = PayoutEnvGuard::mode();
 
-                return $this->make($provider, $label, GatewayStatus::S_BLOCKED, GatewayStatus::R_ENV_MISMATCH, "{$label} has its keys, but they belong to the other environment (payouts are in ".strtoupper($mode).' mode).', $mode === 'live' ? 'Use the live keys and the live URL, or switch Payout mode back to sandbox.' : 'Use the sandbox keys and URL, or switch Payout mode to live (only on the production server).', true, $core);
+                return $this->make($provider, $label, GatewayStatus::S_BLOCKED, GatewayStatus::R_ENV_MISMATCH, "{$label} has its keys, but they belong to the other environment (payouts are in ".strtoupper($mode).' mode).', $mode === 'live' ? 'Use the live keys and the live URL, or switch Payout mode back to sandbox.' : 'Use the sandbox keys and URL, or open Admin > Payout settings > Payout environment and choose Auto or Live.', true, $core);
             }
 
             return $this->make($provider, $label, GatewayStatus::S_NOT_CONFIGURED, GatewayStatus::R_NO_KEY, "{$label} has no credentials saved.", 'Add its keys in Admin, Provider Keys.', true, $core);
@@ -79,7 +79,7 @@ class GatewayStatusResolver
         if (! PayoutEnvGuard::allows($provider)) {
             $mode = PayoutEnvGuard::mode();
 
-            return $this->make($provider, $label, GatewayStatus::S_BLOCKED, GatewayStatus::R_ENV_MISMATCH, $mode === 'live' ? "{$label} has a TEST key, but payouts are in LIVE mode." : "{$label} has a LIVE key, but payouts are in SANDBOX mode.", $mode === 'live' ? 'Replace it with the live key, or switch Payout mode to sandbox.' : 'Use the test key here, or switch Payout mode to live on the production server.', true, $core);
+            return $this->make($provider, $label, GatewayStatus::S_BLOCKED, GatewayStatus::R_ENV_MISMATCH, $mode === 'live' ? "{$label} has a TEST key, but payouts are in LIVE mode." : "{$label} has a LIVE key, but payouts are in SANDBOX mode.", $mode === 'live' ? 'Replace it with the live key, or switch Payout mode to sandbox.' : 'Open Admin > Payout settings > Payout environment and choose Auto or Live (on a real website), or use the test key here.', true, $core);
         }
         if (RadarAlerts::isUnhealthy($provider)) {
             return $this->make($provider, $label, GatewayStatus::S_FAILING, GatewayStatus::R_BREAKER, "{$label} is paused: its recent payout failure rate tripped the safety breaker.", 'Open Payouts, Health to see the failures. It re-opens by itself once it recovers.', true, $core);

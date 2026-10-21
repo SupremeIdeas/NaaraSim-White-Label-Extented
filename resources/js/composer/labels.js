@@ -1,7 +1,7 @@
 // Default (English) labels. Hosts pass a translated `labels` object (lang/*/composer.php) that is merged over these.
 export const LABELS = {
     placeholder: 'Message',
-    send: 'Send', undo: 'Undo send', attach: 'Attach', emoji: 'Emoji', gif: 'GIF', schedule: 'Schedule send', record: 'Record a voice note',
+    send: 'Send', undo: 'Undo send', sendNow: 'Send now', sendingSoon: 'Sending in a moment…', attach: 'Attach', emoji: 'Emoji', gif: 'GIF', schedule: 'Schedule send', record: 'Record a voice note',
     searchEmoji: 'Search emojis…', recent: 'Recent', noEmoji: 'No emoji found',
     gallery: 'Gallery', camera: 'Camera', video: 'Video', document: 'Document', audio: 'Audio', location: 'Location', contact: 'Contact', poll: 'Poll',
     recentPhotos: 'Recent photos', browse: 'Browse', clearRecents: 'Clear', recentEmpty: 'Photos you attach will show up here.',

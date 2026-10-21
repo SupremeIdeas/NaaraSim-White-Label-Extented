@@ -175,7 +175,7 @@ class PayoutRailGuideTest extends TestCase
         $this->assertNotEmpty($out['drift']);
         $this->assertTrue(PayoutCountryRail::where('country', 'GH')->where('rail', 'paystack')->value('provider_supports'), 'drift is reported, never silently applied');
         $this->assertSame('force_off', PayoutCountryRail::where('country', 'KE')->where('rail', 'paystack')->value('admin_override'));
-        $this->assertContains('stripe_connect (no key / API unreachable)', $out['skipped']);
+        $this->assertContains('stripe_connect (no key / API unreachable): documented list used', $out['skipped']);
     }
 
     public function test_audit_alerts_on_drift_and_counts_rows_needing_reverification(): void

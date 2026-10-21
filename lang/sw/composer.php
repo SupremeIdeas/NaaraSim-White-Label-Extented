@@ -5,6 +5,8 @@ return [
     'placeholder' => 'Ujumbe',
     'send' => 'Tuma',
     'undo' => 'Tengua kutuma',
+    'sendNow' => 'Tuma sasa',
+    'sendingSoon' => 'Inatumwa baada ya muda mfupi…',
     'attach' => 'Ambatisha',
     'emoji' => 'Emoji',
     'record' => 'Rekodi ujumbe wa sauti',

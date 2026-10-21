@@ -14,6 +14,9 @@ class PayoutSettings
 {
     public const FLAG = 'payouts.enabled';
 
+    /** auto (follow where the app runs: a real HTTPS domain is live) | live | sandbox. Chosen in Admin > Payout settings; beats the env file. */
+    public const ENV_MODE = 'payouts.env_mode';
+
     public const MODE = 'payouts.mode';               // manual | autopilot
 
     public const MIN = 'payouts.min_withdrawal_usd';

@@ -46,7 +46,11 @@ class GatewayCurrencyMatrix
     /** @return list<string> currency codes this gateway accepts, or [] if unknown. */
     public static function currenciesFor(string $gateway): array
     {
-        return self::MATRIX[$gateway]['currencies'] ?? [];
+        // What the gateway's own API says this ACCOUNT can take wins over the documented list (see GatewayCapabilities); the table below is the fallback
+        // for gateways with no capability endpoint and for an account that has not been checked yet.
+        $live = GatewayCapabilities::detected($gateway);
+
+        return $live ?? (self::MATRIX[$gateway]['currencies'] ?? []);
     }
 
     /** @return list<string> gateway names that accept this currency. */
@@ -56,7 +60,7 @@ class GatewayCurrencyMatrix
 
         return array_values(array_filter(
             array_keys(self::MATRIX),
-            fn (string $gateway) => in_array($currency, self::MATRIX[$gateway]['currencies'], true),
+            fn (string $gateway) => in_array($currency, self::currenciesFor($gateway), true),
         ));
     }
 
@@ -86,10 +90,16 @@ class GatewayCurrencyMatrix
         return null;
     }
 
-    /** Every currency any known gateway accepts, restricted to CurrencyService::SUPPORTED. */
-    public static function allCurrencies(): array
+    /**
+     * Every currency the given gateways accept (default: every known gateway), restricted to CurrencyService::SUPPORTED. The wallet passes the gateways that
+     * are switched on, so the picker lists only what a customer can actually pay in, from what each account's own API reported.
+     *
+     * @param  list<string>|null  $gateways
+     */
+    public static function allCurrencies(?array $gateways = null): array
     {
-        $codes = array_unique(array_merge(...array_values(array_map(fn ($m) => $m['currencies'], self::MATRIX))));
+        $gateways = $gateways === null || $gateways === [] ? array_keys(self::MATRIX) : $gateways;
+        $codes = array_unique(array_merge([], ...array_map(fn ($g) => self::currenciesFor($g), $gateways)));
 
         return array_values(array_filter($codes, fn ($c) => isset(CurrencyService::SUPPORTED[$c])));
     }

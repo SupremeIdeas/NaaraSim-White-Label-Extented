@@ -5,6 +5,8 @@ return [
     'placeholder' => 'Message',
     'send' => 'Send',
     'undo' => 'Undo send',
+    'sendNow' => 'Send now',
+    'sendingSoon' => 'Sending in a moment…',
     'attach' => 'Attach',
     'emoji' => 'Emoji',
     'record' => 'Record a voice note',
