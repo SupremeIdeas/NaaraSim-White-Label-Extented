@@ -47,6 +47,7 @@ class Gateways extends Component
 
         GatewayCredentials::updateFrom($this->creds);
         $this->creds = [];
+        dispatch(fn () => \App\Support\GatewayCapabilities::refreshAll())->afterResponse();   // new keys: ask each gateway what the account can take
         Auditor::log('payments.credentials_saved');
         $this->dispatch('nx-toast', type: 'success', message: 'Gateway keys saved. The active set follows each gateway’s Sandbox/Live toggle.');
     }
@@ -69,6 +70,9 @@ class Gateways extends Component
 
         $result = PaymentGatewayConfig::testConnection($gateway);
         $this->probe[$gateway] = $result;
+        if (in_array($gateway, \App\Support\GatewayCapabilities::DETECTABLE, true) && ProviderStatus::isActive($gateway)) {
+            \App\Support\GatewayCapabilities::refresh($gateway);   // the same click also asks the gateway which currencies this account can take
+        }
         $this->dispatch('nx-toast', type: $result['ok'] ? 'success' : 'error', message: $result['message']);
     }
 
@@ -85,6 +89,9 @@ class Gateways extends Component
             'webhook_url' => PaymentGatewayConfig::webhookUrl($gw),
             'callback_url' => PaymentGatewayConfig::callbackUrl(),
             'probe' => $this->probe[$gw] ?? null,
+            'caps' => \App\Support\GatewayCapabilities::snapshot($gw),
+            'caps_detectable' => in_array($gw, \App\Support\GatewayCapabilities::DETECTABLE, true),
+            'caps_effective' => \App\Support\GatewayCurrencyMatrix::currenciesFor($gw),
         ])->values()->all();
 
         // Dual-key card gateways (HOTFIX §4) with masked previews per mode/type.

@@ -5,6 +5,8 @@ return [
     'placeholder' => 'Message',
     'send' => 'Envoyer',
     'undo' => 'Annuler l’envoi',
+    'sendNow' => 'Envoyer maintenant',
+    'sendingSoon' => 'Envoi dans un instant…',
     'attach' => 'Joindre',
     'emoji' => 'Emoji',
     'record' => 'Enregistrer un message vocal',

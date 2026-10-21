@@ -24,6 +24,18 @@ class RailRegistrySeeder
 
     public const FLUTTERWAVE = ['NG', 'GH', 'KE', 'UG', 'TZ', 'ZA', 'RW', 'ZM', 'CI', 'SN', 'CM', 'EG'];
 
+    /**
+     * Stripe Connect cross-border payouts: a platform in the US, UK, EEA, Canada or Switzerland can pay connected accounts in any of those regions
+     * (docs.stripe.com/connect/cross-border-payouts, read 2026-10-21). The Stripe API (`country_specs`) replaces this the moment a key is saved.
+     */
+    public const STRIPE_CONNECT_DOCS = ['US', 'GB', 'CA', 'CH', 'AT', 'BE', 'BG', 'HR', 'CY', 'CZ', 'DK', 'EE', 'FI', 'FR', 'DE', 'GR', 'HU', 'IE', 'IT', 'LV', 'LT', 'LU', 'MT', 'NL', 'PL', 'PT', 'RO', 'SK', 'SI', 'ES', 'SE', 'IS', 'LI', 'NO'];
+
+    /**
+     * Stripe Global Payouts recipient countries for a US or UK sender (docs.stripe.com/global-payouts/recipient-requirements, read 2026-10-21):
+     * pay a third party's bank account in their own currency. This is how Africa outside Nigeria/Ghana is reached on Stripe.
+     */
+    public const STRIPE_GLOBAL_DOCS = ['AL', 'DZ', 'AG', 'AM', 'AU', 'AT', 'BS', 'BH', 'BE', 'BJ', 'BT', 'BA', 'BW', 'BN', 'BG', 'CA', 'CN', 'CR', 'CI', 'HR', 'CY', 'CZ', 'DK', 'DO', 'EC', 'EG', 'SV', 'EE', 'ET', 'FI', 'FR', 'GM', 'DE', 'GR', 'GT', 'GY', 'HK', 'HU', 'IS', 'IN', 'ID', 'IE', 'IL', 'IT', 'JM', 'JP', 'JO', 'KE', 'KW', 'LV', 'LI', 'LT', 'LU', 'MG', 'MY', 'MT', 'MU', 'MX', 'MD', 'MC', 'MN', 'MA', 'MZ', 'PE', 'NA', 'NL', 'NZ', 'MK', 'NO', 'OM', 'PK', 'PA', 'PH', 'PL', 'PT', 'QA', 'RO', 'RW', 'LC', 'SM', 'SN', 'RS', 'SG', 'SK', 'SI', 'LK', 'ZA', 'ES', 'SE', 'CH', 'TW', 'TZ', 'TH', 'TT', 'TN', 'TR', 'AE', 'GB', 'US', 'UZ', 'VN'];
+
     public function __construct(private PayoutRailRegistry $registry) {}
 
     /** @return array{seeded: int, drift: list<string>, skipped: list<string>} */
@@ -45,9 +57,18 @@ class RailRegistrySeeder
             $this->markVerified('paystack', self::PAYSTACK, $paystack, $out);
         }
 
+        // Documented coverage, always seeded (never overwrites an admin override or a row the API has verified): without it the guide would call every
+        // Stripe country "not supported" simply because no Stripe key has been saved yet. It is labelled as documentation, not as verified.
+        foreach (self::STRIPE_CONNECT_DOCS as $c) {
+            $out['seeded'] += $this->upsertDocs($c, 'stripe_connect', 'https://docs.stripe.com/connect/cross-border-payouts', ['bank']);
+        }
+        foreach (self::STRIPE_GLOBAL_DOCS as $c) {
+            $out['seeded'] += $this->upsertDocs($c, 'global', 'https://docs.stripe.com/global-payouts/recipient-requirements', ['bank', 'wire']);
+        }
+
         $stripe = $this->stripeCountries();
         if ($stripe === null) {
-            $out['skipped'][] = 'stripe_connect (no key / API unreachable)';
+            $out['skipped'][] = 'stripe_connect (no key / API unreachable): documented list used';
         } else {
             foreach ($stripe as $c) {
                 $out['seeded'] += $this->upsert($c, 'stripe_connect', true, 'api', ['bank'], 'https://docs.stripe.com/api/country_specs', verified: true);
@@ -90,6 +111,19 @@ class RailRegistrySeeder
         $this->registry->flush();
 
         return ['drift' => $out['drift'], 'stale' => $stale];
+    }
+
+    /** A row from a provider's published documentation: created when missing, never touches an override, and never downgrades a row the API verified. */
+    private function upsertDocs(string $country, string $rail, string $source, array $methods): int
+    {
+        $row = PayoutCountryRail::firstOrNew(['country' => strtoupper($country), 'rail' => $rail]);
+        if ($row->exists) {
+            return 0;
+        }
+        $row->fill(['provider_supports' => true, 'methods' => $methods, 'source_url' => $source, 'verified_at' => now(), 'verified_by' => 'docs']);
+        $row->save();
+
+        return 1;
     }
 
     /** @param array<string, mixed>|null $methods */

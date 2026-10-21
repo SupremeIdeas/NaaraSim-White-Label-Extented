@@ -42,6 +42,12 @@ class Tour {
     }
 
     async run() {
+        // Count only the steps this person can actually see. An optional step whose element is not on this screen (a module that is switched off, a
+        // feature their plan does not include) used to stay in the total, so the card read "Step 3 of 8" straight after "Step 1 of 8" with eight dots.
+        // A step that needs a click first (before_click) cannot be judged until that click, so it is kept.
+        const resume = this.opts.resume ? this.d.resume_at || 0 : 0;
+        this.d.steps = this.d.steps.map((s, k) => ({ ...s, _o: k })).filter((s) => this.keep(s));   // _o: the step's place in the full tour, which is what the server records
+        if (this.opts.resume) this.d.resume_at = Math.max(0, this.d.steps.findIndex((s) => s._o >= resume));
         this.mount();
         this.i = Math.min(this.opts.resume ? this.d.resume_at || 0 : 0, Math.max(0, this.d.steps.length - 1));
         // Nothing on this screen for this person (e.g. no workspace yet): say so and leave, rather than "finishing" an empty tour.
@@ -101,6 +107,12 @@ class Tour {
         else if (!this.card.contains(document.activeElement)) { e.preventDefault(); first.focus(); }
     }
 
+    keep(s) {
+        if ((s.viewport === 'mobile' && !isMobile()) || (s.viewport === 'desktop' && isMobile())) return false;
+        if (s.before_click || !s.optional) return true;
+        return !!find(s.anchor);
+    }
+
     // Find the next step (from index i, moving by dir) whose element can be shown on this screen; skip and report the rest.
     async resolve(i, dir) {
         const n = this.d.steps.length;
@@ -132,7 +144,7 @@ class Tour {
         this.keepInView();
         this.place();
         this.card.focus({ preventScroll: true });
-        post(this.d.key, { event: 'step', step: this.i, anchor: s.anchor });
+        post(this.d.key, { event: 'step', step: s._o ?? this.i, anchor: s.anchor });
     }
 
     // Bring the target into the part of the screen the card does not cover (phones: card is at the top or bottom, opposite the target).

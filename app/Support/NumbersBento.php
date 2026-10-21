@@ -160,9 +160,7 @@ class NumbersBento
     /**
      * True when this togglable key's admin-set display mode is 'page'. A
      * non-togglable key (already always a dedicated page) or an unset
-     * override both resolve to the card's own hardcoded default — 'modal'
-     * for every currently togglable key, so an untouched install never
-     * changes behaviour.
+     * override resolves to 'page' (a dedicated page), the platform default.
      */
     public static function isPageMode(string $key): bool
     {
@@ -170,7 +168,8 @@ class NumbersBento
             return false;
         }
 
-        return self::rows()->get($key)?->display_mode === 'page';
+        // A dedicated page is the default (owner, 2026-10-21): the pop-up modal made the pickers misbehave. A card an admin explicitly set to 'modal' stays a modal.
+        return (self::rows()->get($key)?->display_mode ?? 'page') === 'page';
     }
 
     /** @return \Illuminate\Support\Collection<string, NumbersBentoCard> */

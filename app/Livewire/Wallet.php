@@ -14,6 +14,7 @@ use App\Services\Payouts\WithdrawalService;
 use App\Services\Pricing\CurrencyService;
 use App\Services\Wallet\WalletGroupService;
 use App\Support\AppPlatform;
+use App\Support\GatewayCapabilities;
 use App\Support\GatewayCurrencyMatrix;
 use App\Support\LocaleCurrency;
 use App\Support\MobileMoneyRails;
@@ -312,6 +313,19 @@ class Wallet extends Component
             $result = app("pay.{$this->gateway}")->initialize($user, $amount, $currency);
         } catch (\Throwable $e) {
             report($e);   // the person sees a calm message; the log keeps the provider's real answer (a bad email, a bad key, a down API)
+            $said = $e instanceof \Illuminate\Http\Client\RequestException
+                ? (string) (data_get($e->response?->json(), 'message') ?: data_get($e->response?->json(), 'error.message'))
+                : '';
+            if (GatewayCapabilities::isCurrencyRefusal($said)) {
+                // The provider answered, and its answer is "this account cannot take that currency": learn it so nobody else is offered it, and say what to do instead.
+                GatewayCapabilities::learnUnsupported($this->gateway, $currency);
+                $next = GatewayCurrencyMatrix::allCurrencies(array_keys($this->availableGateways()))[0] ?? 'USD';
+                $this->error = ucfirst($this->gateway)." can't take {$currency} on this account yet, so nothing was charged. Please pay in ".(CurrencyService::SUPPORTED[$next][1] ?? $next).' instead.';
+                $this->currency = $next;
+                $this->updatedCurrency();
+
+                return null;
+            }
             $this->error = 'We could not start the payment. Please try again.';
             $this->dispatch('nx-toast', variant: 'hero', type: 'error',
                 title: 'Top-up could not start',
@@ -510,7 +524,7 @@ class Wallet extends Component
             // The full top-up currency picker (owner request: a real dropdown,
             // not a hardcoded NGN/USD pair) — every currency any configured
             // gateway accepts, restricted to what CurrencyService models.
-            'payCurrencyOptions' => collect(GatewayCurrencyMatrix::allCurrencies())
+            'payCurrencyOptions' => collect(GatewayCurrencyMatrix::allCurrencies(array_keys($this->availableGateways())))
                 ->mapWithKeys(fn ($code) => [$code => CurrencyService::SUPPORTED[$code][1]])
                 ->all(),
             // Localized display (owner request): the USD balance shown in the

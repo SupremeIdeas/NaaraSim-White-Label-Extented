@@ -79,6 +79,19 @@
                         <span class="text-[11px] text-slate-400">Auto-test not available — verify with a small live payment.</span>
                     @endif
                 </div>
+                {{-- What this account can really take, from the gateway's own API (GatewayCapabilities) --}}
+                <p class="mt-2 text-xs text-slate-500 dark:text-slate-400" data-gateway-currencies="{{ $g['key'] }}">
+                    <span class="font-semibold text-slate-700 dark:text-slate-200">Customers can pay in:</span>
+                    {{ $g['caps_effective'] === [] ? 'not known yet' : implode(', ', $g['caps_effective']) }}
+                    @if ($g['caps_detectable'] && $g['caps'] && ($g['caps']['checked_at'] ?? null))
+                        <span>· read from {{ ucfirst($g['key']) }}'s API {{ \Illuminate\Support\Carbon::parse($g['caps']['checked_at'])->diffForHumans() }}</span>
+                    @elseif ($g['caps_detectable'])
+                        <span>· not read from the API yet: press Test connection</span>
+                    @else
+                        <span>· from the gateway's documentation (it has no endpoint that reports this)</span>
+                    @endif
+                    @if (! empty($g['caps']['error']))<span class="text-rose-600 dark:text-rose-400"> · last check failed: {{ $g['caps']['error'] }}</span>@endif
+                </p>
             </div>
         @endforeach
     </div>

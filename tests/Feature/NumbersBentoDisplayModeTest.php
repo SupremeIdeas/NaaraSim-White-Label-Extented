@@ -34,16 +34,24 @@ class NumbersBentoDisplayModeTest extends TestCase
         return $u;
     }
 
-    public function test_an_untouched_install_keeps_every_togglable_card_as_a_modal(): void
+    public function test_an_untouched_install_opens_every_togglable_card_as_a_dedicated_page(): void
     {
         foreach (NumbersBento::TOGGLABLE as $key) {
-            $this->assertFalse(NumbersBento::isPageMode($key));
+            $this->assertTrue(NumbersBento::isPageMode($key));
         }
 
         $cards = collect(NumbersBento::cards())->keyBy('key');
         foreach (NumbersBento::TOGGLABLE as $key) {
-            $this->assertArrayHasKey('modal', $cards[$key]['link']);
+            $this->assertArrayHasKey('route', $cards[$key]['link']);
         }
+    }
+
+    public function test_a_card_an_admin_explicitly_set_to_modal_stays_a_modal(): void
+    {
+        NumbersBentoCard::create(['key' => 'verify', 'title' => 'x', 'subtitle' => 'x', 'is_active' => true, 'display_mode' => 'modal']);
+
+        $this->assertFalse(NumbersBento::isPageMode('verify'));
+        $this->assertArrayHasKey('modal', collect(NumbersBento::cards())->keyBy('key')['verify']['link']);
     }
 
     public function test_a_non_togglable_key_is_never_page_mode_even_if_a_row_claims_it(): void

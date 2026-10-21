@@ -65,7 +65,7 @@
 @once
 @push('head')
 <script>
-document.addEventListener('alpine:init', () => {
+(function () { const reg = () => {
     Alpine.data('blogShare', (cfg) => ({
         open: false, copied: false, canNative: false,
         init() { this.canNative = !!(cfg.native && navigator.share); this._nav = () => { this.open = false; }; document.addEventListener('livewire:navigate', this._nav); },
@@ -77,7 +77,10 @@ document.addEventListener('alpine:init', () => {
         async copy() { try { await navigator.clipboard.writeText(cfg.url); this.copied = true; this.track('share_copy', 'copy'); window.dispatchEvent(new CustomEvent('nx-toast', { detail: { type: 'success', message: 'Link copied' } })); setTimeout(() => this.copied = false, 1800); } catch (e) { window.dispatchEvent(new CustomEvent('nx-toast', { detail: { type: 'error', message: 'Could not copy the link.' } })); } },
         async nativeShare() { try { await navigator.share({ title: cfg.title, text: cfg.text, url: cfg.url }); this.track('share_click', 'native'); this.close(); } catch (e) {} },
     }));
-});
+};
+// A visit that arrives by in-app navigation comes after alpine:init has already fired, so register at once when Alpine is already running
+if (window.Alpine) { reg(); } else { document.addEventListener('alpine:init', reg); }
+})();
 </script>
 @endpush
 @endonce

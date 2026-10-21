@@ -33,6 +33,8 @@ class SchedulerHealth
         'providers:health-check' => ['Provider health check', 900],
         'ops:worker-health' => ['Worker watchdog (Redis/Horizon)', 300],
         'payouts:reconcile-unknown' => ['Payout unknown-outcome reconciler', 120],
+        'payouts:enable-ready-corridors' => ['Payout corridors auto-enable', 3600 + 600],
+        'payments:detect-currencies' => ['Payment gateway currency check', 6 * 3600 + 600],
         'payouts:guard-sweep' => ['Payout Guardian sweeper', 60],
         'payouts:float-retry' => ['Payout float retry', 300],
         'payouts:float-sync' => ['Payout float sync', 1800],
