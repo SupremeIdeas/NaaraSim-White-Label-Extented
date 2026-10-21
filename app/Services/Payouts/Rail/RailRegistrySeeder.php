@@ -52,9 +52,23 @@ class RailRegistrySeeder
         // Verify against each provider's API where we hold credentials; report any disagreement.
         $paystack = $this->paystackCountries();
         if ($paystack === null) {
-            $out['skipped'][] = 'paystack (no key / API unreachable)';
+            $out['skipped'][] = 'paystack (no key / API unreachable): built-in list used';
         } else {
             $this->markVerified('paystack', self::PAYSTACK, $paystack, $out);
+            // Whatever the API lists is covered, even where the built-in list never heard of it.
+            foreach (array_diff($paystack, self::PAYSTACK) as $c) {
+                $out['seeded'] += $this->upsert($c, 'paystack', true, 'api', ['bank'], 'https://paystack.com/docs/api/miscellaneous/#country', verified: true);
+            }
+        }
+
+        $flutterwave = $this->flutterwaveCountries();
+        if ($flutterwave === null) {
+            $out['skipped'][] = 'flutterwave (no key / API unreachable): built-in list used';
+        } else {
+            $this->markVerified('flutterwave', self::FLUTTERWAVE, $flutterwave, $out);
+            foreach (array_diff($flutterwave, self::FLUTTERWAVE) as $c) {
+                $out['seeded'] += $this->upsert($c, 'flutterwave', true, 'api', ['bank'], 'https://developer.flutterwave.com/reference/get-all-banks', verified: true);
+            }
         }
 
         // Documented coverage, always seeded (never overwrites an admin override or a row the API has verified): without it the guide would call every
@@ -92,6 +106,9 @@ class RailRegistrySeeder
         $out = ['seeded' => 0, 'drift' => [], 'skipped' => []];
         if (($p = $this->paystackCountries()) !== null) {
             $this->markVerified('paystack', self::PAYSTACK, $p, $out);
+        }
+        if (($fw = $this->flutterwaveCountries()) !== null) {
+            $this->markVerified('flutterwave', self::FLUTTERWAVE, $fw, $out);
         }
         if (($s = $this->stripeCountries()) !== null) {
             $known = PayoutCountryRail::where('rail', 'stripe_connect')->where('provider_supports', true)->pluck('country')->all();
@@ -156,6 +173,47 @@ class RailRegistrySeeder
             return $codes === [] ? null : $codes;
         } catch (Throwable $e) {
             Log::warning('payout rail audit: paystack /country failed: '.$e->getMessage());
+
+            return null;
+        }
+    }
+
+    /** Every African country (ISO 3166-1 alpha-2): the candidates Flutterwave is asked about. A continent's membership is a fact, not a gateway claim. */
+    public const AFRICA = ['DZ', 'AO', 'BJ', 'BW', 'BF', 'BI', 'CM', 'CV', 'CF', 'TD', 'KM', 'CG', 'CD', 'CI', 'DJ', 'EG', 'GQ', 'ER', 'SZ', 'ET', 'GA', 'GM', 'GH', 'GN', 'GW', 'KE', 'LS', 'LR', 'LY', 'MG', 'MW', 'ML', 'MR', 'MU', 'MA', 'MZ', 'NA', 'NE', 'NG', 'RW', 'ST', 'SN', 'SC', 'SL', 'SO', 'ZA', 'SS', 'SD', 'TZ', 'TG', 'TN', 'UG', 'ZM', 'ZW'];
+
+    /**
+     * Countries Flutterwave can pay into, found by asking its bank-list endpoint about each African country (a country it does not serve answers with an error or an
+     * empty list). One country failing to answer is skipped; the whole result is null when nothing could be asked at all.
+     *
+     * @return list<string>|null
+     */
+    private function flutterwaveCountries(): ?array
+    {
+        $key = (string) config('services.flutterwave.secret_key');
+        if ($key === '') {
+            return null;
+        }
+        try {
+            $base = rtrim((string) config('services.flutterwave.base_url'), '/');
+            $responses = Http::pool(fn ($pool) => array_map(
+                fn ($cc) => $pool->as($cc)->withToken($key)->acceptJson()->timeout(12)->connectTimeout(4)->get($base.'/banks/'.$cc),
+                self::AFRICA
+            ));
+            $asked = 0;
+            $found = [];
+            foreach ($responses as $cc => $res) {
+                if (! $res instanceof \Illuminate\Http\Client\Response) {
+                    continue;   // a timeout or connection error for this one country
+                }
+                $asked++;
+                if ($res->successful() && data_get($res->json(), 'status') === 'success' && ! empty(data_get($res->json(), 'data'))) {
+                    $found[] = (string) $cc;
+                }
+            }
+
+            return $asked === 0 || ($found === [] && $asked > 0) ? null : $found;   // every answer empty usually means a bad key, not "serves nowhere"
+        } catch (Throwable $e) {
+            Log::warning('payout rail audit: flutterwave banks probe failed: '.$e->getMessage());
 
             return null;
         }

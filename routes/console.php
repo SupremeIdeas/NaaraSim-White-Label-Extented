@@ -47,6 +47,7 @@ Schedule::command('payouts:stats-hourly')->everyFiveMinutes()->withoutOverlappin
 Schedule::command('payouts:radar-alerts')->everyFiveMinutes()->withoutOverlapping();
 Schedule::command('payouts:guide-audit')->monthlyOn(1, '04:10')->withoutOverlapping();
 Schedule::command('payouts:enable-ready-corridors')->hourly()->withoutOverlapping();
+Schedule::command('payouts:enable-ready-corridors')->hourly()->withoutOverlapping();
 Schedule::command('payments:detect-currencies')->everySixHours()->withoutOverlapping();
 Schedule::command('payouts:radar-prune')->dailyAt('03:40')->withoutOverlapping();
 Schedule::command('payouts:peer-expire')->everyTenMinutes()->withoutOverlapping();

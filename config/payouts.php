@@ -43,8 +43,8 @@ return [
 
     // Sandbox/live separation (Addendum D-3.16). `sandbox` is the safe default everywhere. `live` is only honoured when
     // APP_ENV=production; a live provider key is refused outside live mode and a test key is refused inside it.
-    // A production install runs live by default (keys already decide what is real); everything else stays sandbox. PAYOUT_ENV still overrides either way.
-    'env' => env('PAYOUT_ENV', env('APP_ENV') === 'production' ? 'live' : 'sandbox'),
+    // Legacy value, used only when Admin > Payout settings > Payout environment has never been saved. 'auto' follows where the app runs.
+    'env' => env('PAYOUT_ENV', 'auto'),
 
     // Dedicated, rotatable key for the destination blind index (falls back to APP_KEY). Rotate with
     // `php artisan payouts:reindex-fingerprints`.
