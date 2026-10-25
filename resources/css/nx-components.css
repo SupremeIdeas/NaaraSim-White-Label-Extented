@@ -22,6 +22,11 @@
  background:linear-gradient(160deg,rgb(var(--nx-tone)/.2),rgb(var(--nx-surface)) 64%);color:rgb(var(--nx-text))}
 .ns-card .ns-card__top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
 .ns-card .ns-card__top>.ns-i{font-size:20px;color:rgb(var(--nx-text-3));margin-top:2px}
+.ns-card .ns-expand{position:absolute;right:10px;top:10px;z-index:2;width:32px;height:32px;display:grid;place-items:center;border-radius:10px;color:rgb(var(--nx-teal-ink));background:rgb(var(--nx-cta-b)/.12);transition:background .2s,color .2s,transform .2s;pointer-events:none}
+.ns-card--primary .ns-expand{color:#fff;background:rgb(255 255 255/.2)}
+.ns-card:hover .ns-expand,.ns-card:focus-visible .ns-expand{background:rgb(var(--nx-cta-b));color:#fff;transform:scale(1.06)}
+.ns-card:has(.ns-expand) .ns-card__top,.ns-card:has(.ns-expand) .ns-card__row{padding-right:40px}
+.ns-card:has(.ns-expand) .ns-card__top .ns-i,.ns-card:has(.ns-expand) .ns-chevron{opacity:0}
 .ns-card h3{font-size:clamp(18px,5.6cqw,21px);font-weight:600;margin-top:10px;letter-spacing:-.2px}
 .ns-card p{font-size:13px;line-height:1.35;color:rgb(var(--nx-text-2));display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .ns-chips{display:flex;flex-wrap:wrap;gap:6px 12px;margin-top:10px;padding-top:10px;border-top:1px solid rgb(var(--nx-line))}

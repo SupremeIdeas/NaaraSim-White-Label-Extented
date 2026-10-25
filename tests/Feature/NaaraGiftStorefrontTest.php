@@ -120,4 +120,18 @@ class NaaraGiftStorefrontTest extends TestCase
             ->assertSet('selectedId', $p->id)
             ->assertSet('fields', ['email' => '']);
     }
+
+    /** Regression: a range-priced card (type your own amount) never enabled Buy, because the amount only synced on a later action. */
+    public function test_range_priced_card_amount_is_live_so_buy_can_enable(): void
+    {
+        $this->enableFeature();
+        $p = $this->product(['denomination_type' => 'RANGE', 'fixed_denominations' => [], 'min_amount' => 5, 'max_amount' => 500]);
+        $user = User::factory()->create(['is_active' => true]);
+
+        $html = Livewire::actingAs($user)->test(GiftCards::class)->call('select', $p->id)->html();
+        $this->assertMatchesRegularExpression('/wire:model\.live[^=]*="amount"/', $html);
+
+        Livewire::actingAs($user)->test(GiftCards::class)->call('select', $p->id)->set('amount', 25)
+            ->assertDontSeeHtml('class="ns-cta" disabled');
+    }
 }

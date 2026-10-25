@@ -9,9 +9,29 @@ namespace App\Support;
  */
 class CountryNames
 {
-    /** Human country name for an ISO2 code or provider slug. */
+    /** Codes providers use that are not countries, and ICU names spelled out in full for display (no "&", no "Congo - Kinshasa"). */
+    private const SPECIAL = ['XI' => 'International'];
+
+    private const SPELLED = ['Congo - Kinshasa' => 'DR Congo', 'Congo - Brazzaville' => 'Republic of the Congo', 'St. ' => 'Saint '];
+
+    /** Human country name for an ISO2 code or provider slug, spelled out in full. */
     public static function name(?string $country): string
     {
+        $raw = self::resolve($country);
+        $raw = str_replace(' & ', ' and ', $raw);
+        foreach (self::SPELLED as $from => $to) {
+            $raw = str_starts_with($raw, $from) || $raw === $from ? $to.substr($raw, strlen($from)) : $raw;
+        }
+
+        return $raw;
+    }
+
+    private static function resolve(?string $country): string
+    {
+        if ($country !== null && isset(self::SPECIAL[strtoupper(trim($country))])) {
+            return self::SPECIAL[strtoupper(trim($country))];
+        }
+
         if ($country === null || trim($country) === '') {
             return '';
         }

@@ -106,12 +106,18 @@ class GiftCards extends Component
         // Coming-Soon mode (no keys yet): skip the catalogue queries entirely.
         if (! $this->live) {
             return view('livewire.gift-cards', [
-                'products' => null, 'countries' => collect(), 'selected' => null, 'denominations' => null,
+                'products' => null, 'countries' => [], 'selected' => null, 'denominations' => null,
             ]);
         }
 
         $products = GiftCardProduct::storefrontCards()
-            ->when($this->search !== '', fn ($q) => $q->where('brand_name', 'like', '%'.$this->search.'%'))
+            ->when($this->search !== '', function ($q) {
+                // The search box finds a brand by name OR a country by its full name ("united kingdom" shows that country's cards).
+                $needle = mb_strtolower(trim($this->search));
+                $codes = GiftCardProduct::storefront()->whereNotNull('country')->distinct()->pluck('country')
+                    ->filter(fn ($c) => str_contains(mb_strtolower(\App\Support\CountryNames::name($c)), $needle))->values()->all();
+                $q->where(fn ($w) => $w->where('brand_name', 'like', '%'.$this->search.'%')->orWhereIn('country', $codes));
+            })
             ->when($this->country, fn ($q) => $q->where('country', $this->country))
             ->tap(fn ($q) => \App\Support\GiftPopularity::order($q))   // featured, then what people buy most, then A-Z
             ->paginate(18);
@@ -121,7 +127,9 @@ class GiftCards extends Component
 
         return view('livewire.gift-cards', [
             'products' => $products,
-            'countries' => GiftCardProduct::storefront()->whereNotNull('country')->distinct()->orderBy('country')->pluck('country'),
+            // code => full country name, A to Z by name (never the bare code)
+            'countries' => GiftCardProduct::storefront()->whereNotNull('country')->distinct()->pluck('country')
+                ->mapWithKeys(fn ($c) => [$c => \App\Support\CountryNames::name($c)])->sort()->all(),
             'selected' => $selected,
             'denominations' => $denominations,
         ]);
