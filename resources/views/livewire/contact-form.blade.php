@@ -6,7 +6,7 @@
     @elseif (! $this->canDeliver)
         <x-ui.alert variant="warning" title="Email us directly" icon="mail">
             Our contact form is being set up. Reach us directly at
-            <a href="mailto:{{ config('naara.support.email') }}" class="font-semibold underline">{{ config('naara.support.email') }}</a>
+            <a href="mailto:{{ \App\Support\Niche\SupportLinks::email() }}" class="font-semibold underline">{{ \App\Support\Niche\SupportLinks::email() }}</a>
             @if (\App\Support\Niche\SupportLinks::hasWhatsapp())
                 or on <a href="{{ \App\Support\Niche\SupportLinks::whatsappUrl() }}" target="_blank" rel="noopener" class="font-semibold underline">WhatsApp</a>
             @endif

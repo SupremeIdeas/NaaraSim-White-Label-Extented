@@ -47,7 +47,7 @@
                     <x-icon name="mail" class="h-4 w-4 shrink-0 text-accent" />
                     <div>
                         <p class="text-sm font-bold text-slate-900 dark:text-white">Email</p>
-                        <a href="mailto:{{ config('naara.support.email') }}" class="text-xs font-semibold text-slate-500 hover:text-accent dark:text-slate-400">{{ config('naara.support.email') }}</a>
+                        <a href="mailto:{{ \App\Support\Niche\SupportLinks::email() }}" class="text-xs font-semibold text-slate-500 hover:text-accent dark:text-slate-400">{{ \App\Support\Niche\SupportLinks::email() }}</a>
                     </div>
                 </div>
                 @if (\App\Support\Niche\SupportLinks::hasWhatsapp())

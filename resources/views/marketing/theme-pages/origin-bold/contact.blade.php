@@ -46,7 +46,7 @@
                         <x-icon name="message-circle" class="h-7 w-7 text-white" />
                         <span class="text-xs font-black uppercase tracking-wide text-white">Live chat</span>
                     </a>
-                    <a href="mailto:{{ config('naara.support.email') }}"
+                    <a href="mailto:{{ \App\Support\Niche\SupportLinks::email() }}"
                        class="group flex flex-col items-center justify-center gap-2.5 border-4 border-white/20 bg-white/5 p-6 text-center transition hover:border-primary hover:bg-primary">
                         <x-icon name="mail" class="h-7 w-7 text-white" />
                         <span class="text-xs font-black uppercase tracking-wide text-white">Email</span>

@@ -29,7 +29,7 @@
     <p class="mx-auto mt-4 flex max-w-xl flex-wrap items-center justify-center gap-x-2.5 gap-y-1.5 text-sm text-slate-600 dark:text-slate-300">
         <a href="{{ auth()->check() ? route('support') : route('login') }}" class="border-b border-slate-400 pb-0.5 font-medium transition hover:border-slate-900 dark:border-slate-500 dark:hover:border-white">Live chat</a>
         <span aria-hidden="true" class="text-slate-300 dark:text-slate-600">&middot;</span>
-        <a href="mailto:{{ config('naara.support.email') }}" class="border-b border-slate-400 pb-0.5 font-medium transition hover:border-slate-900 dark:border-slate-500 dark:hover:border-white">{{ config('naara.support.email') }}</a>
+        <a href="mailto:{{ \App\Support\Niche\SupportLinks::email() }}" class="border-b border-slate-400 pb-0.5 font-medium transition hover:border-slate-900 dark:border-slate-500 dark:hover:border-white">{{ \App\Support\Niche\SupportLinks::email() }}</a>
         @if (\App\Support\Niche\SupportLinks::hasWhatsapp())
             <span aria-hidden="true" class="text-slate-300 dark:text-slate-600">&middot;</span>
             <a href="{{ \App\Support\Niche\SupportLinks::whatsappUrl() }}" target="_blank" rel="noopener" class="border-b border-slate-400 pb-0.5 font-medium transition hover:border-slate-900 dark:border-slate-500 dark:hover:border-white">WhatsApp</a>
