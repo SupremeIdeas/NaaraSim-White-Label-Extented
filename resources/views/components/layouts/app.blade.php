@@ -8,6 +8,8 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="scroll-smooth" @if ($nx) {!! \App\Support\Appearance\AppearanceResolver::htmlAttributes($nx) !!} @endif>
 <head>
+    {{-- The page draws its own light and dark themes. Declaring both stops Android Chrome and WebView "auto dark mode" from darkening half the page on its own (dark cards on a light canvas, unreadable titles). --}}
+    <meta name="color-scheme" content="light dark">
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">

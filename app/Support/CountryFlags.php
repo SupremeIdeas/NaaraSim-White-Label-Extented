@@ -52,7 +52,18 @@ class CountryFlags
             return $normalized;
         }
 
-        return self::NAMES[$normalized] ?? self::NAMES[str_replace([' ', '-', '_'], '', $normalized)] ?? null;
+        if (isset(self::NAMES[$normalized])) {
+            return self::NAMES[$normalized];
+        }
+        // Provider labels such as "Australia (Virtual)" or "Saint Lucia 2": drop the bracketed part, then compare letters and digits only.
+        $bare = preg_replace('/\s*\(.*?\)\s*/', '', $normalized);
+        $key = preg_replace('/[^a-z0-9]/', '', (string) $bare);
+        static $all = null;
+        $all ??= require __DIR__.'/CountryFlagNames.php';
+
+        $full = preg_replace('/[^a-z0-9]/', '', $normalized);
+
+        return self::NAMES[$full] ?? $all[$full] ?? self::NAMES[$key] ?? $all[$key] ?? null;
     }
 
     /** flag-icons CSS class, or null. */
