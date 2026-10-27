@@ -19,9 +19,13 @@
 @endphp
 <{{ $isRoute ? 'a' : 'button' }}
     @if ($isRoute) href="{{ route($card['link']['route'], $card['link']['query'] ?? []) }}" wire:navigate
-    @else type="button" wire:click="openModal('{{ $card['link']['modal'] }}')" wire:loading.attr="disabled" wire:target="openModal" @endif
+    @else type="button" aria-haspopup="dialog" wire:click="openModal('{{ $card['link']['modal'] }}')" wire:loading.attr="disabled" wire:target="openModal" @endif
     wire:key="bento-{{ $card['key'] }}" class="{{ $cls }}">
     <i class="ns-deco" aria-hidden="true"></i>
+    @unless ($isRoute)
+        {{-- A card that opens a pop-up says so: the same expand mark every bento in the app uses, so no tile looks like a dead end. --}}
+        <span class="ns-expand" aria-hidden="true"><x-icon name="maximize" class="h-4 w-4" /></span>
+    @endunless
     @if ($full)
         <span class="ns-card__row">
             <span class="ns-tile"><x-nx.icon :name="$card['icon']" /></span>

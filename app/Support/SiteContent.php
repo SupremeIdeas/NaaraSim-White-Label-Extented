@@ -310,6 +310,7 @@ class SiteContent
                     'chat_title' => 'Chat With Us',
                     'chat_text' => 'The fastest way to get help. Signed-in customers get our assistant plus a real human hand-off, right from the Help & Support menu.',
                     'email_title' => 'Email Support',
+                    'email_address' => '',
                     'email_text' => 'For detailed questions, installation screenshots, or billing issues. We respond within 2 hours during business hours.',
                     'partners' => 'Interested in integrating NaaraSim into your platform? Email partners via the address below — NaaraSim is a product of Supreme Ideas Agency.',
                 ],

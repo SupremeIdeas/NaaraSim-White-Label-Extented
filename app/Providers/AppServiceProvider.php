@@ -275,6 +275,22 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Gates that must hold on every Livewire action, not only on the page load: an action is a POST to /livewire/update, which re-runs only the route
+        // middleware named here. Without this a demoted admin, a paused account or a verification-gated page keeps working after access is lost.
+        // Each class is checked so this file is safe on any install.
+        \Livewire\Livewire::addPersistentMiddleware(array_values(array_filter(array_map(
+            fn (string $class) => class_exists($class) ? $class : null,
+            [
+                \App\Http\Middleware\EnsureAdmin::class,
+                \App\Http\Middleware\EnsureActive::class,
+                \App\Http\Middleware\EnsureKycLevel::class,
+                \App\Http\Middleware\EnsureVerifiedWhenMailConfigured::class,
+                \App\Http\Middleware\EnsureDeveloperApiEnabled::class,
+                \Spatie\Permission\Middleware\RoleMiddleware::class,
+                \Spatie\Permission\Middleware\PermissionMiddleware::class,
+            ],
+        ))));
+
         // Review moments: record when a purchase or use really worked, so the app can ask how it went at a calm moment (off until an admin switches it on).
         \App\Support\Reviews\ReviewMomentHooks::register();
 

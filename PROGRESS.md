@@ -1,3 +1,9 @@
+## 2026-10-27: Livewire gates now hold on every action (security port from master)
+- A Livewire action is a POST to `/livewire/update`, which re-ran only a short built-in middleware list, so the app's own gates (`admin`, `active`, `kyc`, `verified.mail`, `role`, `permission`, developer-API switch) were NOT re-checked on actions: a demoted admin or a paused account kept acting on a page that was already open. They are now registered with `Livewire::addPersistentMiddleware` in `AppServiceProvider::boot` (class-checked, so safe on any install).
+- `tests/Feature/LivewireGatesPersistTest.php` proves a demoted admin is refused on an open admin page and fails when any middleware on a Livewire page is neither persistent nor on the short "does not decide access" list. It fails without the fix (checked).
+- Fixed a missing `maximize` icon in the sprite (`icons:cache` test was red on both forks before this change).
+- Not ported (master only): App Shield, App Export hardening, attestation.
+
 # PROGRESS.md — NaaraSim Build Log (our save point)
 
 > Read this at the start of every session. It says exactly where we stopped.

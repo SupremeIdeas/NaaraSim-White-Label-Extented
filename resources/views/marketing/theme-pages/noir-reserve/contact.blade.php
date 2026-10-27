@@ -52,7 +52,7 @@
                         <div>
                             <p class="text-sm font-semibold text-[#241D1A] dark:text-white">Email</p>
                             <p class="mt-0.5 text-sm leading-relaxed text-stone-500 dark:text-slate-400">For anything that needs a paper trail.</p>
-                            <a href="mailto:{{ config('naara.support.email') }}" class="mt-1 inline-block text-sm font-semibold text-accent-dark hover:underline dark:text-accent">{{ config('naara.support.email') }}</a>
+                            <a href="mailto:{{ \App\Support\Niche\SupportLinks::email() }}" class="mt-1 inline-block text-sm font-semibold text-accent-dark hover:underline dark:text-accent">{{ \App\Support\Niche\SupportLinks::email() }}</a>
                         </div>
                     </li>
                     @if (\App\Support\Niche\SupportLinks::hasWhatsapp())

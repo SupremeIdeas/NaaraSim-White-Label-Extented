@@ -29,8 +29,15 @@ class SupportLinks
         return 'https://wa.me/'.self::whatsappNumber().'?text='.rawurlencode($text);
     }
 
+    /** The support email: what the admin typed on the Contact page (Site Editor), else the SUPPORT_EMAIL setting. Never hard-coded in a page. */
     public static function email(): string
     {
-        return (string) config('naara.support.email', 'support@naarasim.com');
+        try {
+            $typed = trim((string) (\App\Support\SiteContent::page('contact', false, false)['channels']['email_address'] ?? ''));
+        } catch (\Throwable) {
+            $typed = '';
+        }
+
+        return filter_var($typed, FILTER_VALIDATE_EMAIL) ? $typed : (string) config('naara.support.email', 'support@naarasim.com');
     }
 }

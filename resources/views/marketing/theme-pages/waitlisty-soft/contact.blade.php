@@ -46,7 +46,7 @@
         </div>
         <div class="flex items-center gap-2 rounded-full bg-white px-4 py-2.5 shadow-sm dark:bg-[#1c1329]">
             <span class="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary dark:bg-primary/20"><x-icon name="mail" class="h-4 w-4" /></span>
-            <a href="mailto:{{ config('naara.support.email') }}" class="text-xs font-semibold text-slate-800 hover:text-primary dark:text-white">Email</a>
+            <a href="mailto:{{ \App\Support\Niche\SupportLinks::email() }}" class="text-xs font-semibold text-slate-800 hover:text-primary dark:text-white">Email</a>
         </div>
         @if (\App\Support\Niche\SupportLinks::hasWhatsapp())
             <div class="flex items-center gap-2 rounded-full bg-white px-4 py-2.5 shadow-sm dark:bg-[#1c1329]">

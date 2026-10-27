@@ -87,7 +87,7 @@ class ContactForm extends Component
             ]);
             $conversation->messages()->create(['role' => 'user', 'body' => $this->message]);
         } else {
-            Notification::route('mail', config('naara.support.email'))
+            Notification::route('mail', \App\Support\Niche\SupportLinks::email())
                 ->notify(new ContactMessageNotification($this->name, $this->email, $this->subject, $this->message));
         }
 

@@ -66,7 +66,7 @@
                 </span>
                 <div class="min-w-0 flex-1">
                     <p class="text-sm font-semibold text-slate-900 dark:text-white">Email</p>
-                    <a href="mailto:{{ config('naara.support.email') }}" class="text-xs text-slate-500 hover:text-primary dark:text-slate-400">{{ config('naara.support.email') }}</a>
+                    <a href="mailto:{{ \App\Support\Niche\SupportLinks::email() }}" class="text-xs text-slate-500 hover:text-primary dark:text-slate-400">{{ \App\Support\Niche\SupportLinks::email() }}</a>
                 </div>
                 <span class="shrink-0 font-mono text-[10px] uppercase tracking-wider text-slate-300 dark:text-slate-600">CH-02</span>
             </div>

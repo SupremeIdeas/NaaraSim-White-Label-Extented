@@ -156,6 +156,10 @@ class GatewayCredentials
         if ($v === '') {
             return null;
         }
+        // A saved SECRET key shows no character of itself, not its head, tail or length. Publishable keys keep a short head/tail so the admin can tell which one is saved.
+        if ($type !== 'public_key') {
+            return str_repeat('•', 8);
+        }
         $len = strlen($v);
 
         return $len <= 8 ? str_repeat('•', $len) : substr($v, 0, 4).str_repeat('•', min($len - 8, 10)).substr($v, -4);

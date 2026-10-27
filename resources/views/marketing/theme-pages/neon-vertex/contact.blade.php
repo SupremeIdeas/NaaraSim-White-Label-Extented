@@ -70,7 +70,7 @@
             <span class="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-primary to-accent text-white"><x-icon name="mail" class="h-4 w-4" /></span>
             <h3 class="mt-3 font-bold text-slate-900 dark:text-white">Email</h3>
             <p class="mt-1.5 text-sm leading-relaxed text-slate-600 dark:text-slate-300">For anything that needs a paper trail.</p>
-            <a href="mailto:{{ config('naara.support.email') }}" class="mt-3 inline-block text-sm font-semibold text-primary hover:underline">{{ config('naara.support.email') }}</a>
+            <a href="mailto:{{ \App\Support\Niche\SupportLinks::email() }}" class="mt-3 inline-block text-sm font-semibold text-primary hover:underline">{{ \App\Support\Niche\SupportLinks::email() }}</a>
         </div>
 
         @if (\App\Support\Niche\SupportLinks::hasWhatsapp())

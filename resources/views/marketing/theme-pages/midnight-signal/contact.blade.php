@@ -52,7 +52,7 @@
         </div>
         <div class="flex flex-col items-center gap-2 text-center">
             <span class="flex h-12 w-12 items-center justify-center rounded-full border border-primary/30 bg-primary/10 text-primary"><x-icon name="mail" class="h-5 w-5" /></span>
-            <a href="mailto:{{ config('naara.support.email') }}" class="text-xs font-semibold text-white hover:underline">Email</a>
+            <a href="mailto:{{ \App\Support\Niche\SupportLinks::email() }}" class="text-xs font-semibold text-white hover:underline">Email</a>
         </div>
         @if (\App\Support\Niche\SupportLinks::hasWhatsapp())
             <div class="flex flex-col items-center gap-2 text-center">

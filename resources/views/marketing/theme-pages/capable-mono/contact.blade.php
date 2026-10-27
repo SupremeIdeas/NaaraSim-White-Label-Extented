@@ -46,10 +46,10 @@
             <x-icon name="terminal" class="h-4 w-4 shrink-0 text-slate-400 dark:text-white/30" />
             <span class="text-slate-400 dark:text-white/30">$</span> live-chat <span class="text-slate-400 dark:text-white/30">--open</span>
         </a>
-        <a href="mailto:{{ config('naara.support.email') }}"
+        <a href="mailto:{{ \App\Support\Niche\SupportLinks::email() }}"
            class="flex items-center gap-3 border-b border-slate-200 px-5 py-4 font-mono text-sm text-slate-700 transition hover:bg-slate-50 dark:border-white/10 dark:text-white/70 dark:hover:bg-white/[0.03] {{ \App\Support\Niche\SupportLinks::hasWhatsapp() ? '' : 'last:border-b-0' }}">
             <x-icon name="terminal" class="h-4 w-4 shrink-0 text-slate-400 dark:text-white/30" />
-            <span class="text-slate-400 dark:text-white/30">$</span> email <span class="text-slate-400 dark:text-white/30">{{ config('naara.support.email') }}</span>
+            <span class="text-slate-400 dark:text-white/30">$</span> email <span class="text-slate-400 dark:text-white/30">{{ \App\Support\Niche\SupportLinks::email() }}</span>
         </a>
         @if (\App\Support\Niche\SupportLinks::hasWhatsapp())
             <a href="{{ \App\Support\Niche\SupportLinks::whatsappUrl() }}" target="_blank" rel="noopener"

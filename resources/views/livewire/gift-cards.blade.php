@@ -35,10 +35,10 @@
             <x-nx.icon name="search" />
             <input type="text" wire:model.live.debounce.300ms="search" placeholder="Search brands…" aria-label="Search brands">
         </label>
-        @if ($countries->isNotEmpty())
+        @if (! empty($countries))
             <select wire:model.live="country" class="ns-input ns-gf__country" aria-label="Country">
                 <option value="">All countries</option>
-                @foreach ($countries as $c)<option value="{{ $c }}">{{ $c }}</option>@endforeach
+                @foreach ($countries as $code => $name)<option value="{{ $code }}">{{ $name }}</option>@endforeach
             </select>
         @endif
         <div class="ns-seg ns-small" role="group" aria-label="View">
@@ -63,7 +63,7 @@
                     </span>
                     <span class="ns-gf__brandtext">
                         <b>{{ $product->brand_name }}</b>
-                        <small>{{ $product->country }}@if ($product->category) · {{ $product->category }}@endif</small>
+                        <small>{{ \App\Support\CountryNames::name($product->country) ?: $product->country }}@if ($product->category) · {{ $product->category }}@endif</small>
                     </span>
                 </button>
             @endforeach
@@ -85,7 +85,7 @@
                             <b>{{ \Illuminate\Support\Str::substr($selected->brand_name, 0, 1) }}</b>
                         @endif
                     </span>
-                    <div class="ns-text"><b>{{ $selected->brand_name }}</b><small>{{ $selected->country }} · {{ $selected->currency }}</small></div>
+                    <div class="ns-text"><b>{{ $selected->brand_name }}</b><small>{{ \App\Support\CountryNames::name($selected->country) ?: $selected->country }} · {{ $selected->currency }}</small></div>
                     <button type="button" class="ns-sheet__close" wire:click="close" aria-label="Close"><x-nx.icon name="x" /></button>
                 </div>
                 <div class="ns-sheet__body">
@@ -93,7 +93,7 @@
 
                     <span class="ns-lbl" style="margin-top:18px">Choose an amount</span>
                     @if (($denominations['type'] ?? '') === 'RANGE')
-                        <input type="number" wire:model="amount" min="{{ $denominations['min'] }}" max="{{ $denominations['max'] }}"
+                        <input type="number" wire:model.live.debounce.350ms="amount" inputmode="decimal" step="0.01" min="{{ $denominations['min'] }}" max="{{ $denominations['max'] }}"
                                placeholder="{{ $denominations['min'] }} – {{ $denominations['max'] }} {{ $selected->currency }}" class="ns-input" aria-label="Amount">
                         <p class="ns-small" style="margin-top:6px">You pay retail; the exact charge is shown at checkout.</p>
                     @else

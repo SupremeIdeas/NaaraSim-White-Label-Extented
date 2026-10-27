@@ -67,7 +67,12 @@ class CountryPickerSources
 
             usort($rows, fn ($a, $b) => strcmp($a['name'], $b['name']));
 
-            return $rows;
+            // The same label from two providers (e.g. Bhutan twice) shows once; the first slug in catalogue order wins.
+            return array_values(array_reduce($rows, function (array $carry, array $r) {
+                $carry[mb_strtolower(trim($r['name']))] ??= $r;
+
+                return $carry;
+            }, []));
         });
     }
 

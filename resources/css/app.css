@@ -200,3 +200,7 @@
 html {
     scrollbar-gutter: stable;
 }
+
+/* Tell the browser which scheme the page is actually in, so it never re-darkens it. */
+html { color-scheme: light; }
+html.dark { color-scheme: dark; }
