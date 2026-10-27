@@ -58,10 +58,10 @@ class ProviderKeysTest extends TestCase
     {
         config(['services.telnyx.public_key' => null]);
 
-        ProviderKeys::save(['telnyx_public_key' => '6ioGNOh8Ep1GVisoDdtE3KujS3f+GIym0R9UOgrgvbo=']);
+        ProviderKeys::save(['telnyx_public_key' => 'test-public-key-base64==']);
         ProviderKeys::applyToConfig();
 
-        $this->assertSame('6ioGNOh8Ep1GVisoDdtE3KujS3f+GIym0R9UOgrgvbo=', config('services.telnyx.public_key'));   // the value TelnyxService verifies webhooks with
+        $this->assertSame('test-public-key-base64==', config('services.telnyx.public_key'));   // the value TelnyxService verifies webhooks with
     }
 
     public function test_a_blank_field_leaves_the_stored_key_untouched(): void
