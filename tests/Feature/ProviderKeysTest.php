@@ -54,6 +54,16 @@ class ProviderKeysTest extends TestCase
         $this->assertSame('Active', ProviderStatus::label('getatext'));
     }
 
+    public function test_the_telnyx_webhook_public_key_can_be_saved_in_the_admin_and_reaches_config(): void
+    {
+        config(['services.telnyx.public_key' => null]);
+
+        ProviderKeys::save(['telnyx_public_key' => '6ioGNOh8Ep1GVisoDdtE3KujS3f+GIym0R9UOgrgvbo=']);
+        ProviderKeys::applyToConfig();
+
+        $this->assertSame('6ioGNOh8Ep1GVisoDdtE3KujS3f+GIym0R9UOgrgvbo=', config('services.telnyx.public_key'));   // the value TelnyxService verifies webhooks with
+    }
+
     public function test_a_blank_field_leaves_the_stored_key_untouched(): void
     {
         ProviderKeys::save(['fivesim_api_key' => 'jwt-original']);
