@@ -16,6 +16,12 @@ return [
     'name' => env('APP_NAME', 'Laravel'),
 
     /*
+    | Random id of THIS install (written by the installer). Names the cache, session and queue keys and owns the database, so two installs on one server never collide.
+    */
+    'instance_id' => env('INSTANCE_ID'),
+    'edition' => env('APP_EDITION', 'whitelabel'),
+
+    /*
     |--------------------------------------------------------------------------
     | Application Environment
     |--------------------------------------------------------------------------
