@@ -1,14 +1,14 @@
 <div class="mx-auto max-w-2xl">
     <h1 class="mb-1 text-2xl font-bold text-slate-900 dark:text-slate-100">Security — two-factor authentication</h1>
     <p class="mb-6 text-sm text-slate-500 dark:text-slate-400">
-        The admin panel requires TOTP two-factor authentication. Scan the code with an authenticator app
-        (Google Authenticator, Authy, 1Password) and confirm to unlock the rest of the panel.
+        {{ \App\Support\SecuritySettings::admin2faRequired() ? 'The admin panel requires TOTP two-factor authentication.' : 'Two-factor authentication is strongly recommended for every admin account.' }} Scan the code with an authenticator app
+        (Google Authenticator, Authy, 1Password) and confirm to {{ \App\Support\SecuritySettings::admin2faRequired() ? 'unlock the rest of the panel' : 'turn it on' }}.
     </p>
 
     @if (! $confirmed)
         <div class="mb-6 flex items-start gap-2 rounded-lg bg-amber-50 p-3 text-sm text-amber-800 dark:bg-amber-950/40 dark:text-amber-300">
             <x-icon name="shield" class="mt-0.5 h-4 w-4 shrink-0" />
-            <span>Two-factor authentication is required before you can use the admin panel. Finish enrolment below.</span>
+            <span>{{ \App\Support\SecuritySettings::admin2faRequired() ? 'Two-factor authentication is required before you can use the admin panel. Finish enrolment below.' : 'Two-factor authentication is not on for your account yet. Turn it on below to protect the admin panel.' }}</span>
         </div>
     @endif
 

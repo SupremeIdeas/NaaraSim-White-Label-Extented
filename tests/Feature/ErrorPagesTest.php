@@ -21,7 +21,7 @@ class ErrorPagesTest extends TestCase
     private function assertPremiumAndSafe(string $html): void
     {
         $this->assertStringContainsString('name="viewport"', $html);
-        $this->assertStringContainsString('class="tile"', $html);
+        $this->assertStringContainsString('class="art"', $html);
         $this->assertStringContainsString('prefers-color-scheme: dark', $html);
         $this->assertStringContainsString('prefers-reduced-motion', $html);
         $this->assertDoesNotMatchRegularExpression('#(<script[^>]+src=|<link[^>]+href=|<img[^>]+src=|@import|url\(\s*[\'"]?https?:)#i', $html, 'the page must not load anything from outside');
