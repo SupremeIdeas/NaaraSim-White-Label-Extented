@@ -1,6 +1,7 @@
 @include('errors.partials.shell', [
-    'badge' => 'Back shortly',
+    'code' => '503', 'icon' => 'wrench', 'badge' => 'Back shortly',
     'title' => 'We’re doing a quick tune-up',
-    'message' => 'NaaraSim is briefly down for maintenance. Please check back in a few minutes — nothing is wrong with your account.',
+    'message' => config('app.name').' is briefly down for maintenance. This page refreshes by itself, and nothing is wrong with your account.',
     'back' => false,
+    'refresh' => 30,
 ])
