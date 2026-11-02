@@ -283,6 +283,7 @@ class AppServiceProvider extends ServiceProvider
             fn (string $class) => class_exists($class) ? $class : null,
             [
                 \App\Http\Middleware\EnsureAdminGateway::class,
+                \App\Http\Middleware\EnsureFeatureAllowed::class,
                 \App\Http\Middleware\EnsureAdmin::class,
                 \App\Http\Middleware\EnsureActive::class,
                 \App\Http\Middleware\EnsureKycLevel::class,

@@ -140,13 +140,18 @@ Schedule::command('staff:compensation-close')->monthlyOn(1, '03:15')->withoutOve
 Schedule::command('merchant:client-subscriptions')->dailyAt('05:35')->withoutOverlapping();
 
 // Naara Gift: sync the gift-card catalogue from every registered provider.
-Schedule::command('giftcards:sync')->dailyAt('03:15')->withoutOverlapping();
+// A feature the licence does not include is not scheduled at all (FeatureEntitlements::allowedAtBoot), not merely hidden.
+if (\App\Support\FeatureEntitlements::allowedAtBoot(\App\Support\FeatureLocks::F_GIFT_CARDS)) {
+    Schedule::command('giftcards:sync')->dailyAt('03:15')->withoutOverlapping();
+}
 
 // Naara Gift: recover an order stuck 'processing' because its provider's
 // async-delivery webhook never arrived — polls the real order-status
 // endpoint (Reloadly/Bitrefill/Tillo) rather than leaving the buyer's
 // receipt screen stuck forever on a dropped webhook.
-Schedule::command('giftcards:reconcile-processing')->everyFifteenMinutes()->withoutOverlapping();
+if (\App\Support\FeatureEntitlements::allowedAtBoot(\App\Support\FeatureLocks::F_GIFT_CARDS)) {
+    Schedule::command('giftcards:reconcile-processing')->everyFifteenMinutes()->withoutOverlapping();
+}
 
 // Brand Directory (BUILD-9 §5.2/§6): charge due brand-listing subscriptions,
 // pause short ones, and update follower-guarantee priority scores. runInBackground
@@ -155,7 +160,9 @@ Schedule::command('giftcards:reconcile-processing')->everyFifteenMinutes()->with
 // in chunks so its runtime stays flat. 05:45 sits just after the payout ranking
 // (05:30) and the merchant sweep (05:35), clear of every other slot in the
 // staggered window.
-Schedule::command('brand-subscriptions:bill')->dailyAt('05:45')->withoutOverlapping()->runInBackground();
+if (\App\Support\FeatureEntitlements::allowedAtBoot(\App\Support\FeatureLocks::F_BRAND_HUNT)) {
+    Schedule::command('brand-subscriptions:bill')->dailyAt('05:45')->withoutOverlapping()->runInBackground();
+}
 
 // Prompt 21-EXT2 §6: complete an in_progress white-label project intake once
 // its admin-set deploy timeline has elapsed, and email the merchant.

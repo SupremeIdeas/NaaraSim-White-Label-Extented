@@ -44,6 +44,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'admin' => \App\Http\Middleware\EnsureAdmin::class,
             'admin.gateway' => \App\Http\Middleware\EnsureAdminGateway::class,
+            'feature.allowed' => \App\Http\Middleware\EnsureFeatureAllowed::class,
             'active' => \App\Http\Middleware\EnsureActive::class,
             'verified.mail' => \App\Http\Middleware\EnsureVerifiedWhenMailConfigured::class,
             'installer' => \App\Http\Middleware\EnsureNotInstalled::class,

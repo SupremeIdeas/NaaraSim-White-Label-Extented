@@ -166,6 +166,14 @@
     if (\App\Support\AppExport::placementActive('admin_menu')) {
         $more[] = ['route' => 'download', 'label' => \App\Support\AppExport::placementLabel('admin_menu'), 'icon' => 'download'];
     }
+    // A feature this licence does not include has no menu entry either (its pages answer 404 as well).
+    $lockedAdminRoutes = [];
+    foreach (['gift_cards' => ['admin.gift-cards', 'admin.gift-hero'], 'brand_hunt' => ['admin.brand-directory', 'admin.social-hunt'], 'preloader_customization' => ['admin.preloader-studio']] as $lockKey => $routeNames) {
+        if (\App\Support\FeatureEntitlements::locked($lockKey)) {
+            $lockedAdminRoutes = array_merge($lockedAdminRoutes, $routeNames);
+        }
+    }
+    $more = array_values(array_filter($more, fn ($i) => ! in_array($i['route'] ?? '', $lockedAdminRoutes, true)));
 @endphp
 
 <x-layouts.app :title="($title ?? 'Admin').' — NaaraSim'" :page-type="$preloaderType" :body-class="\App\Support\PlatformTheme::bodyClass()">
