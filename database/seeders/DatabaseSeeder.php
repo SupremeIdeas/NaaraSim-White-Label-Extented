@@ -24,7 +24,6 @@ class DatabaseSeeder extends Seeder
             NumbersBentoSeeder::class,  // six Numbers landing bento cards
             BrandPlanSeeder::class,     // brand-directory subscription starter plans (BUILD-9)
             BlogPostSeeder::class,      // 5 evergreen starter guides + images (white-label starter blog)
-            BrandPartnerSeeder::class,  // Brand Hunt directory demo brands + handles/images (owner request, 2026-09-22)
             ProviderRegistrySeeder::class, // provider registry metadata + URLs (BUILD-14)
             ProviderExpansionSeeder::class, // new adapters, enabled=false (BUILD-18)
             AppearancePresetSeeder::class,  // per-user skins/accents (admin-governed presets)
