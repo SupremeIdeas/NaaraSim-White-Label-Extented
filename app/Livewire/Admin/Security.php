@@ -4,6 +4,10 @@ namespace App\Livewire\Admin;
 
 use App\Models\Setting;
 use App\Support\Auditor;
+use App\Models\User;
+use App\Notifications\AdminPathChangedNotification;
+use App\Support\AdminPath;
+use App\Support\Mailer;
 use App\Support\SecuritySettings;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
@@ -59,6 +63,15 @@ class Security extends Component
 
     public ?string $saved = null;
 
+    /** NAARA-PROMPT-22 §3 — the admin panel's URL path (super_admin only). */
+    public string $admin_path = '';
+
+    public string $admin_path_confirmation = '';
+
+    public string $admin_path_current_password = '';
+
+    public ?string $adminPathSaved = null;
+
     public function mount(): void
     {
         $s = SecuritySettings::current();
@@ -68,8 +81,56 @@ class Security extends Component
         $this->turnstile_enabled = $s['turnstile_enabled'] ?? false;
         $this->ip_allowlist_enabled = $s['admin_ip_allowlist_enabled'] ?? false;
         $this->ip_allowlist = implode("\n", $s['admin_ip_allowlist'] ?? []);
+        $this->admin_path = AdminPath::current();
         $this->country_allowlist_enabled = $s['admin_country_allowlist_enabled'] ?? false;
         $this->allowed_countries = implode(', ', $s['admin_allowed_countries'] ?? []);
+    }
+
+    /**
+     * NAARA-PROMPT-22 §3 — change the admin panel's URL path. Gated tighter
+     * than the rest of this screen (super_admin only, not admin): getting
+     * this wrong can lock every admin out of the panel. Requires the current
+     * password re-entered in the same request (a hijacked-but-unattended
+     * session shouldn't be able to take this action silently) and the new
+     * value typed twice (a typo here with no confirmation is a self-inflicted
+     * lockout). Every super_admin is emailed the new path immediately, and
+     * the acting admin's own session is untouched — Laravel's cookie-based
+     * auth isn't tied to the URL path, confirmed by test, not assumed.
+     */
+    public function saveAdminPath(): void
+    {
+        abort_unless(Auth::user()->hasRole('super_admin'), 403);
+
+        $this->validate([
+            'admin_path_current_password' => ['required', 'current_password:web'],
+            'admin_path' => ['required', 'string', 'regex:/^'.AdminPath::PATTERN.'$/', 'same:admin_path_confirmation'],
+        ], [
+            'admin_path_current_password.current_password' => 'That password is incorrect.',
+            'admin_path.regex' => 'Use 3-64 letters, numbers, hyphens or underscores only.',
+            'admin_path.same' => 'The two entries do not match — type the new path identically in both fields.',
+        ]);
+
+        if (AdminPath::collidesWithReserved($this->admin_path)) {
+            $this->addError('admin_path', 'That path is already used elsewhere in the app — choose another.');
+
+            return;
+        }
+
+        $old = AdminPath::current();
+        $new = $this->admin_path;
+
+        Setting::setValue(AdminPath::SETTING_KEY, $new, 'security');
+
+        $this->reset('admin_path_current_password', 'admin_path_confirmation');
+
+        Auditor::log('admin.path_changed', null, null, ['from' => $old, 'to' => $new]);
+
+        foreach (User::role('super_admin')->get() as $superAdmin) {
+            Mailer::notify($superAdmin, new AdminPathChangedNotification($new));
+        }
+
+        $this->adminPathSaved = "Admin path changed to /{$new} — every super_admin has been emailed the new path. Update your bookmarks now.";
+        $this->dispatch('nx-toast', type: 'success', message: 'Admin path updated.');
     }
 
     /**

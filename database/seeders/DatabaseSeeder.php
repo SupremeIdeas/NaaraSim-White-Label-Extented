@@ -16,6 +16,7 @@ class DatabaseSeeder extends Seeder
             RoleSeeder::class,          // must run before DefaultAdminSeeder
             PricingSettingsSeeder::class,
             DefaultAdminSeeder::class,  // seeds the default super_admin
+            AdminPathSeeder::class,     // seeds admin_path from config('admin.path') (editable in Admin > Security)
             DefaultBannerSeeder::class, // ships the five brand promo banners
             MarketingCouponsSeeder::class, // welcome + comeback marketing coupons
             EsimCompatibleDeviceSeeder::class, // eSIM device compatibility catalogue

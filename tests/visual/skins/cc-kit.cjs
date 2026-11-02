@@ -5,7 +5,7 @@ const CHROME=process.env.CHROME||'/opt/pw-browsers/chromium-1194/chrome-linux/ch
   const b=await chromium.launch({executablePath:CHROME}); const mode=process.env.MODE||'dark', w=+(process.env.W||1100);
   const ctx=await b.newContext({viewport:{width:w,height:1000},colorScheme:mode,permissions:['geolocation'],geolocation:{latitude:6.45,longitude:3.39}}); const p=await ctx.newPage();
   p.on('pageerror',e=>console.log('PAGEERROR',e.message)); p.on('console',m=>{if(m.type()==='error')console.log('CONSOLE',m.text())});
-  await p.goto(BASE+'/login',{waitUntil:'networkidle'});await p.fill('input[name="email"]','supremeideasz@gmail.com');await p.fill('input[name="password"]','password');
+  await p.goto(BASE+'/login',{waitUntil:'networkidle'});await p.fill('input[name="email"]','adminmaster1234@gmail.com');await p.fill('input[name="password"]','password');
   await Promise.all([p.waitForNavigation({waitUntil:'networkidle'}).catch(()=>{}),p.click('button[type="submit"]')]);
   await p.goto(BASE+'/adminmaster/ui-kit',{waitUntil:'networkidle'}); await p.waitForSelector('naara-composer .cc-box'); await p.locator('naara-composer').scrollIntoViewIfNeeded();
   const C=p.locator('naara-composer'); const shot=async n=>{await p.waitForTimeout(250);await C.locator('xpath=ancestor::section').screenshot({path:`out/ck-${n}-${mode}-${w}.png`})};
