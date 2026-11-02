@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Support\InstanceIdentity;
 use App\Support\Installer;
 use Database\Seeders\DefaultAdminSeeder;
 use Illuminate\Http\Request;
@@ -60,6 +61,30 @@ class InstallController extends Controller
             ? ['CACHE_STORE' => 'redis', 'SESSION_DRIVER' => 'redis', 'QUEUE_CONNECTION' => 'redis']
             : ['CACHE_STORE' => 'database', 'SESSION_DRIVER' => 'database', 'QUEUE_CONNECTION' => 'database'];
 
+        // Point the DB connection at the chosen database FIRST and check who owns it, before anything is written or migrated. An install must never run
+        // its migrations and seeders against a database that already holds another install's data (the master's, for example).
+        if (! app()->runningUnitTests() && $data['db_connection'] === 'mysql') {
+            config([
+                'database.default' => 'mysql',
+                'database.connections.mysql.host' => $data['db_host'],
+                'database.connections.mysql.port' => $data['db_port'],
+                'database.connections.mysql.database' => $data['db_database'],
+                'database.connections.mysql.username' => $data['db_username'],
+                'database.connections.mysql.password' => $data['db_password'] ?? '',
+            ]);
+            DB::purge('mysql');
+        }
+        $instanceId = InstanceIdentity::id() ?: InstanceIdentity::newId();
+        if (! app()->runningUnitTests() || config('installer.enforce_empty_db')) {
+            $state = InstanceIdentity::databaseState($instanceId);
+            if ($state === 'unreachable') {
+                return back()->withInput()->withErrors(['db_database' => 'We could not connect to that database. Check the host, name, user and password.']);
+            }
+            if ($state === 'foreign') {
+                return back()->withInput()->withErrors(['db_database' => 'That database already contains data from another install. Create a NEW, empty database (with its own user) for this site and use it here. Nothing was changed.']);
+            }
+        }
+
         // 1) Write .env.
         $env = array_filter([
             'APP_NAME' => $data['app_name'],
@@ -77,24 +102,16 @@ class InstallController extends Controller
             'QUEUE_CONNECTION' => $drivers['QUEUE_CONNECTION'],
         ], fn ($v) => $v !== null);
 
+        // A name for this install, and the cache / session / queue names derived from it, so nothing is shared with another install on the same server.
+        $env += InstanceIdentity::envFor($instanceId);
         if (! config('app.key')) {
             $env['APP_KEY'] = Installer::generateAppKey();
         }
         Installer::writeEnv($env);
 
-        // 2) Point the DB connection at the new database, then migrate + seed.
-        if (! app()->runningUnitTests() && $data['db_connection'] === 'mysql') {
-            config([
-                'database.default' => 'mysql',
-                'database.connections.mysql.host' => $data['db_host'],
-                'database.connections.mysql.port' => $data['db_port'],
-                'database.connections.mysql.database' => $data['db_database'],
-                'database.connections.mysql.username' => $data['db_username'],
-                'database.connections.mysql.password' => $data['db_password'] ?? '',
-            ]);
-            DB::purge('mysql');
-        }
-
+        // 2) Claim the database for this install, then migrate + seed.
+        Artisan::call('migrate', ['--force' => true, '--path' => InstanceIdentity::MIGRATION]);
+        InstanceIdentity::register($instanceId);
         Artisan::call('migrate', ['--force' => true]);
         Artisan::call('db:seed', ['--force' => true]); // roles, pricing, default admin
 
