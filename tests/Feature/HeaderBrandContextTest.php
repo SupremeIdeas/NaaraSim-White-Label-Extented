@@ -22,9 +22,11 @@ class HeaderBrandContextTest extends TestCase
     /** Resolve the header logo as if the given route were the current one. */
     private function logoOn(string $name): array
     {
-        Route::get('/__probe', fn () => BrandContext::headerLogo())->name($name)->middleware('web');
+        // Two segments, not one: a bare single segment would collide with the editable-admin-path wildcard {adminGateway}, which matches any unclaimed
+        // top-level segment (same adaptation as master's test).
+        Route::get('/__probe/route', fn () => BrandContext::headerLogo())->name($name)->middleware('web');
 
-        return $this->get('/__probe')->json();
+        return $this->get('/__probe/route')->json();
     }
 
     public function test_esim_and_number_surfaces_wear_the_naarasim_mark(): void

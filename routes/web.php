@@ -273,9 +273,9 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::get('/catalogue', Catalogue::class)->name('catalogue');
         // Naara Gift storefront (feature-gated: 404 until naara_gift is live).
         Route::get('/gift-cards', GiftCards::class)->name('gift-cards');
-        Route::get('/gift-cards/orders', [GiftCardOrderController::class, 'index'])->name('gift-cards.orders');
-        Route::get('/gift-cards/orders/{order}', [GiftCardOrderController::class, 'show'])->name('gift-cards.order');
-        Route::post('/gift-cards/orders/{order}/balance', [GiftCardOrderController::class, 'balance'])->name('gift-cards.order.balance');
+        Route::get('/gift-cards/orders', [GiftCardOrderController::class, 'index'])->middleware('feature.allowed:gift_cards')->name('gift-cards.orders');
+        Route::get('/gift-cards/orders/{order}', [GiftCardOrderController::class, 'show'])->middleware('feature.allowed:gift_cards')->name('gift-cards.order');
+        Route::post('/gift-cards/orders/{order}/balance', [GiftCardOrderController::class, 'balance'])->middleware('feature.allowed:gift_cards')->name('gift-cards.order.balance');
         Route::get('/checkout/{plan}', Checkout::class)->name('checkout');
         Route::get('/wallet', Wallet::class)->name('wallet');
         Route::get('/numbers', GetNumber::class)->name('numbers');
@@ -455,7 +455,7 @@ Route::middleware(['admin.gateway', 'admin', 'throttle:admin'])
             Route::get('/numbers-cards', NumbersBento::class)->name('numbers-cards');
             Route::get('/bento-icons', BentoIcons::class)->name('bento-icons');
             Route::get('/appearance', Splash::class)->name('appearance');
-            Route::get('/preloader-studio', PreloaderStudio::class)->name('preloader-studio');
+            Route::get('/preloader-studio', PreloaderStudio::class)->middleware('feature.allowed:preloader_customization')->name('preloader-studio');
             Route::get('/theme-toggle-studio', ThemeToggleStudio::class)->name('theme-toggle-studio');
             // Marketing Copy Studio — Claude-assisted copy population for CMS pages.
             Route::get('/copy-studio', MarketingCopyStudio::class)->name('copy-studio');
@@ -502,11 +502,11 @@ Route::middleware(['admin.gateway', 'admin', 'throttle:admin'])
             Route::get('/announcements', Announcements::class)->name('announcements');
             Route::get('/credits', Credits::class)->name('credits');
             Route::get('/journey-goals', JourneyGoals::class)->name('journey-goals');
-            Route::get('/social-hunt', SocialHunt::class)->name('social-hunt');
-            Route::get('/brand-directory', BrandDirectory::class)->name('brand-directory');
-            Route::get('/gift-cards', App\Livewire\Admin\GiftCards::class)->name('gift-cards');
+            Route::get('/social-hunt', SocialHunt::class)->middleware('feature.allowed:brand_hunt')->name('social-hunt');
+            Route::get('/brand-directory', BrandDirectory::class)->middleware('feature.allowed:brand_hunt')->name('brand-directory');
+            Route::get('/gift-cards', App\Livewire\Admin\GiftCards::class)->middleware('feature.allowed:gift_cards')->name('gift-cards');
             // Naara Gift storefront hero — same system as the dashboard home hero.
-            Route::get('/gift-hero', GiftHero::class)->name('gift-hero');
+            Route::get('/gift-hero', GiftHero::class)->middleware('feature.allowed:gift_cards')->name('gift-hero');
             Route::get('/developer-api', DeveloperApi::class)->name('developer-api');
             Route::get('/global-payout-rail', GlobalPayoutRail::class)->name('global-payout-rail');
             Route::get('/refunds', Refunds::class)->name('refunds');

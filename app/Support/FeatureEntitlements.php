@@ -67,6 +67,19 @@ class FeatureEntitlements
         return in_array($key, self::all(), true);
     }
 
+    /**
+     * For code that runs while the app boots (routes/console.php registers scheduled jobs on EVERY artisan command, including `migrate` on a brand-new
+     * database with no settings or cache table yet): never throws, and on any doubt says "allowed" so a half-installed site is not stripped of its jobs.
+     */
+    public static function allowedAtBoot(string $key): bool
+    {
+        try {
+            return self::allowed($key);
+        } catch (\Throwable) {
+            return true;
+        }
+    }
+
     /** Convenience inverse — reads better at a call site that unlocks. */
     public static function allowed(string $key): bool
     {

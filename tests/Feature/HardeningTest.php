@@ -74,9 +74,9 @@ class HardeningTest extends TestCase
 
     public function test_the_report_hook_writes_a_thrown_exception_to_the_error_log(): void
     {
-        Route::get('/_boom_test', fn () => throw new RuntimeException('boom via http'));
+        Route::get('/_boom/test', fn () => throw new RuntimeException('boom via http'));
 
-        $this->get('/_boom_test')->assertStatus(500);
+        $this->get('/_boom/test')->assertStatus(500);
 
         $this->assertDatabaseHas('error_logs', ['message' => 'boom via http']);
     }
