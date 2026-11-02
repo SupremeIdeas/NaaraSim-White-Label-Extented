@@ -4,7 +4,7 @@
 
     <div class="space-y-6">
         {{-- Star rating --}}
-        <section class="rounded-2xl border border-slate-200 bg-white p-6 dark:border-[#2D4060] dark:bg-[#1A2840]">
+        <section class="rounded-2xl border border-slate-200 bg-white p-6 dark:border-[#2A2E34] dark:bg-[#17191C]">
             <h2 class="mb-3 text-sm font-semibold text-slate-800 dark:text-slate-100">Star rating</h2>
             <div class="flex flex-wrap items-center gap-6">
                 <div>
@@ -20,7 +20,7 @@
         </section>
 
         {{-- Modal engine --}}
-        <section class="rounded-2xl border border-slate-200 bg-white p-6 dark:border-[#2D4060] dark:bg-[#1A2840]">
+        <section class="rounded-2xl border border-slate-200 bg-white p-6 dark:border-[#2A2E34] dark:bg-[#17191C]">
             <h2 class="mb-3 text-sm font-semibold text-slate-800 dark:text-slate-100">Modal engine (the only one)</h2>
             <button type="button" x-data
                     @click="$dispatch('open-modal', { name: 'demo' })"
@@ -32,14 +32,14 @@
             <x-ui.modal name="demo" title="Demo dialog" max-width="md">
                 <p class="text-sm text-slate-600 dark:text-slate-300">This dialog uses the shared engine. Tab cycles only these controls; ESC closes.</p>
                 <div class="mt-4 flex justify-end gap-2">
-                    <button type="button" x-data @click="$dispatch('close-modal')" class="rounded-lg border border-slate-300 px-3 py-1.5 text-sm dark:border-[#2D4060] dark:text-slate-200">Cancel</button>
+                    <button type="button" x-data @click="$dispatch('close-modal')" class="rounded-lg border border-slate-300 px-3 py-1.5 text-sm dark:border-[#2A2E34] dark:text-slate-200">Cancel</button>
                     <button type="button" x-data @click="$dispatch('close-modal')" class="rounded-lg bg-primary px-3 py-1.5 text-sm font-semibold text-white">Confirm</button>
                 </div>
             </x-ui.modal>
         </section>
 
         {{-- Countdown --}}
-        <section class="rounded-2xl border border-slate-200 bg-white p-6 dark:border-[#2D4060] dark:bg-[#1A2840]">
+        <section class="rounded-2xl border border-slate-200 bg-white p-6 dark:border-[#2A2E34] dark:bg-[#17191C]">
             <h2 class="mb-3 text-sm font-semibold text-slate-800 dark:text-slate-100">Server-anchored countdown</h2>
             <div class="text-2xl font-bold text-slate-900 dark:text-slate-100">
                 <x-ui.countdown :until="$countdownUntil" />
@@ -48,14 +48,14 @@
         </section>
 
         {{-- Search --}}
-        <section class="rounded-2xl border border-slate-200 bg-white p-6 dark:border-[#2D4060] dark:bg-[#1A2840]">
+        <section class="rounded-2xl border border-slate-200 bg-white p-6 dark:border-[#2A2E34] dark:bg-[#17191C]">
             <h2 class="mb-3 text-sm font-semibold text-slate-800 dark:text-slate-100">Search (debounced)</h2>
             <x-ui.search placeholder="Type to search…" class="max-w-sm" />
             <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">Debounced term: <span class="font-mono" x-text="term || '—'"></span></p>
         </section>
 
         {{-- Theme toggle --}}
-        <section class="rounded-2xl border border-slate-200 bg-white p-6 dark:border-[#2D4060] dark:bg-[#1A2840]">
+        <section class="rounded-2xl border border-slate-200 bg-white p-6 dark:border-[#2A2E34] dark:bg-[#17191C]">
             <h2 class="mb-3 text-sm font-semibold text-slate-800 dark:text-slate-100">Theme toggle</h2>
             <div class="flex items-center gap-3">
                 <x-theme-toggle />
@@ -64,7 +64,7 @@
         </section>
 
         {{-- Branded elements (Module 32 — adapted from the hand-picked Uiverse set) --}}
-        <section class="rounded-2xl border border-slate-200 bg-white p-6 dark:border-[#2D4060] dark:bg-[#1A2840] lg:col-span-2">
+        <section class="rounded-2xl border border-slate-200 bg-white p-6 dark:border-[#2A2E34] dark:bg-[#17191C] lg:col-span-2">
             <h2 class="mb-1 text-sm font-semibold text-slate-800 dark:text-slate-100">Branded elements</h2>
             <p class="mb-5 text-xs text-slate-400">Adapted from the hand-picked Uiverse library — re-coloured to the brand, dark-mode ready, no third-party runtime.</p>
 
@@ -135,7 +135,7 @@
 
         {{-- Chat Composer Pro — every feature switched on, events only (nothing is delivered). The real surfaces enable the subset their
              server accepts: see docs/chat-composer-plan.md. --}}
-        <section class="rounded-2xl border border-slate-200 bg-white p-6 dark:border-[#2D4060] dark:bg-[#1A2840] lg:col-span-2"
+        <section class="rounded-2xl border border-slate-200 bg-white p-6 dark:border-[#2A2E34] dark:bg-[#17191C] lg:col-span-2"
                  x-data="{ last: null, ev: [] }"
                  x-on:cc:transmit="$event.detail.wait(Promise.resolve($event.detail.payload).then(p => { last = { text: p.text, files: p.files.map(f => f.name), items: p.items.map(i => i.type), voice: p.voice ? Math.round(p.voice.duration) + 's' : null, scheduledAt: p.scheduledAt }; }))"
                  x-on:cc:typing="ev = ['typing', ...ev].slice(0, 4)" x-on:cc:queued="ev = ['queued', ...ev].slice(0, 4)" x-on:cc:sent="ev = ['sent', ...ev].slice(0, 4)">

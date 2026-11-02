@@ -34,7 +34,7 @@
             <div class="absolute inset-0 bg-gradient-to-t from-navy/80 via-navy/10 to-transparent"></div>
 
             <div class="absolute left-6 top-6 flex items-center gap-2 rounded-full bg-navy/90 px-4 py-2 shadow-lg backdrop-blur">
-                <x-icon name="star" class="h-3.5 w-3.5 text-primary" />
+                <x-glyph name="star" class="h-3.5 w-3.5 text-primary" />
                 <div>
                     <p class="text-[11px] font-semibold leading-none text-white">Usually replies within the hour</p>
                 </div>
@@ -47,21 +47,21 @@
 <section class="bg-navy px-4 py-16">
     <div class="mx-auto flex max-w-4xl flex-wrap justify-center gap-6 sm:gap-10">
         <div class="flex flex-col items-center gap-2 text-center">
-            <span class="flex h-12 w-12 items-center justify-center rounded-full border border-primary/30 bg-primary/10 text-primary"><x-icon name="message-circle" class="h-5 w-5" /></span>
+            <span class="flex h-12 w-12 items-center justify-center rounded-full border border-primary/30 bg-primary/10 text-primary"><x-glyph name="message-circle" class="h-5 w-5" /></span>
             <a href="{{ auth()->check() ? route('support') : route('login') }}" class="text-xs font-semibold text-white hover:underline">Live chat</a>
         </div>
         <div class="flex flex-col items-center gap-2 text-center">
-            <span class="flex h-12 w-12 items-center justify-center rounded-full border border-primary/30 bg-primary/10 text-primary"><x-icon name="mail" class="h-5 w-5" /></span>
+            <span class="flex h-12 w-12 items-center justify-center rounded-full border border-primary/30 bg-primary/10 text-primary"><x-glyph name="mail" class="h-5 w-5" /></span>
             <a href="mailto:{{ \App\Support\Niche\SupportLinks::email() }}" class="text-xs font-semibold text-white hover:underline">Email</a>
         </div>
         @if (\App\Support\Niche\SupportLinks::hasWhatsapp())
             <div class="flex flex-col items-center gap-2 text-center">
-                <span class="flex h-12 w-12 items-center justify-center rounded-full border border-primary/30 bg-primary/10 text-primary"><x-icon name="phone" class="h-5 w-5" /></span>
+                <span class="flex h-12 w-12 items-center justify-center rounded-full border border-primary/30 bg-primary/10 text-primary"><x-glyph name="phone" class="h-5 w-5" /></span>
                 <a href="{{ \App\Support\Niche\SupportLinks::whatsappUrl() }}" target="_blank" rel="noopener" class="text-xs font-semibold text-white hover:underline">WhatsApp</a>
             </div>
         @endif
         <div class="flex flex-col items-center gap-2 text-center">
-            <span class="flex h-12 w-12 items-center justify-center rounded-full border border-primary/30 bg-primary/10 text-primary"><x-icon name="help-circle" class="h-5 w-5" /></span>
+            <span class="flex h-12 w-12 items-center justify-center rounded-full border border-primary/30 bg-primary/10 text-primary"><x-glyph name="help-circle" class="h-5 w-5" /></span>
             <a href="{{ route('how-it-works') }}" wire:navigate class="text-xs font-semibold text-white hover:underline">Help centre</a>
         </div>
     </div>

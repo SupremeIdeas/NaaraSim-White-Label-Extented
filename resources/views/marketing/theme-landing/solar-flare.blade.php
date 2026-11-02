@@ -51,7 +51,7 @@
                     </a>
                     <a href="{{ route('how-it-works') }}" wire:navigate
                        class="inline-flex items-center justify-center gap-2 border border-white/20 px-7 py-3.5 text-sm font-bold text-white transition hover:bg-white/5 [clip-path:polygon(6%_0,100%_0,94%_100%,0_100%)]">
-                        <x-icon name="play" class="h-4 w-4" /> How it works
+                        <x-glyph name="play" class="h-4 w-4" /> How it works
                     </a>
                 </div>
             </div>
@@ -73,7 +73,7 @@
                             <p class="mt-1.5 text-[10px] font-semibold uppercase tracking-wider text-slate-400">{{ $content['stat_label'] }}</p>
                         </div>
                         <span class="ml-auto flex h-8 w-8 shrink-0 items-center justify-center bg-primary/15 text-primary [clip-path:polygon(15%_0,100%_0,85%_100%,0_100%)]">
-                            <x-icon name="signal" class="h-4 w-4" />
+                            <x-glyph name="signal" class="h-4 w-4" />
                         </span>
                     </div>
                 </div>
@@ -122,7 +122,7 @@
                 <div class="relative overflow-hidden border border-slate-200 bg-white p-6 pt-8 shadow-sm transition hover:-translate-y-1 hover:shadow-lg dark:border-white/10 dark:bg-[#12172a]">
                     <span class="absolute left-0 top-0 h-1.5 w-full bg-gradient-to-r from-primary to-accent" aria-hidden="true"></span>
                     <span class="flex h-10 w-10 items-center justify-center bg-gradient-to-br from-primary to-accent text-white [clip-path:polygon(15%_0,100%_0,85%_100%,0_100%)]">
-                        <x-icon :name="$card['icon']" class="h-5 w-5" />
+                        <x-glyph :name="$card['icon']" class="h-5 w-5" />
                     </span>
                     <h3 class="mt-4 font-display text-lg font-bold text-slate-900 dark:text-white">{{ $card['title'] }}</h3>
                     <p class="mt-1.5 text-sm leading-relaxed text-slate-500 dark:text-slate-400">{{ $card['body'] }}</p>

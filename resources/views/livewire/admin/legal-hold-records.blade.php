@@ -12,23 +12,23 @@
             <x-icon name="shield" class="h-4 w-4" /> Only a super admin may view retained records under legal hold.
         </div>
     @else
-        <div class="mb-6 rounded-2xl border border-slate-200 bg-white p-5 dark:border-[#2D4060] dark:bg-[#1A2840]">
+        <div class="mb-6 rounded-2xl border border-slate-200 bg-white p-5 dark:border-[#2A2E34] dark:bg-[#17191C]">
             <div class="grid gap-4 sm:grid-cols-3">
                 <div>
                     <label class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">Account id</label>
-                    <input type="text" wire:model="userId" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm dark:border-[#2D4060] dark:bg-[#111C31] dark:text-slate-100">
+                    <input type="text" wire:model="userId" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm dark:border-[#2A2E34] dark:bg-[#1f2023] dark:text-slate-100">
                 </div>
                 <div>
                     <label class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">Case reference</label>
-                    <input type="text" wire:model="caseReference" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm dark:border-[#2D4060] dark:bg-[#111C31] dark:text-slate-100">
+                    <input type="text" wire:model="caseReference" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm dark:border-[#2A2E34] dark:bg-[#1f2023] dark:text-slate-100">
                 </div>
                 <div>
                     <label class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">Reason</label>
-                    <input type="text" wire:model="reason" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm dark:border-[#2D4060] dark:bg-[#111C31] dark:text-slate-100">
+                    <input type="text" wire:model="reason" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm dark:border-[#2A2E34] dark:bg-[#1f2023] dark:text-slate-100">
                 </div>
             </div>
             <button type="button" wire:click="lookup" wire:loading.attr="disabled" wire:target="lookup"
-                    class="mt-4 inline-flex items-center gap-2 rounded-lg bg-[#A21CAF] px-4 py-2 text-sm font-medium text-white hover:bg-[#085757] disabled:opacity-60">
+                    class="mt-4 inline-flex items-center gap-2 rounded-lg bg-[#23272D] px-4 py-2 text-sm font-medium text-white hover:bg-[#323439] disabled:opacity-60">
                 <x-icon name="search" class="h-4 w-4" /> Look up retained records
             </button>
         </div>
@@ -41,7 +41,7 @@
 
         @if ($result)
             <div class="space-y-4">
-                <div class="rounded-2xl border border-slate-200 bg-white p-5 dark:border-[#2D4060] dark:bg-[#1A2840]">
+                <div class="rounded-2xl border border-slate-200 bg-white p-5 dark:border-[#2A2E34] dark:bg-[#17191C]">
                     <p class="text-sm text-slate-500 dark:text-slate-400">
                         User #{{ $result['user_id'] }} · anonymized {{ $result['anonymized_at'] }} ·
                         purge due {{ $result['retention_purge_due_at'] }}
@@ -49,12 +49,12 @@
                 </div>
 
                 @foreach (['wallet_transactions' => 'Wallet transactions', 'esim_orders' => 'eSIM orders', 'sms_orders' => 'SMS orders', 'virtual_numbers' => 'Virtual numbers'] as $key => $label)
-                    <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white dark:border-[#2D4060] dark:bg-[#1A2840]">
-                        <div class="border-b border-slate-100 px-5 py-3 text-sm font-semibold text-slate-700 dark:border-[#243352] dark:text-slate-200">
+                    <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white dark:border-[#2A2E34] dark:bg-[#17191C]">
+                        <div class="border-b border-slate-100 px-5 py-3 text-sm font-semibold text-slate-700 dark:border-[#373a3f] dark:text-slate-200">
                             {{ $label }} ({{ count($result[$key]) }})
                         </div>
                         @forelse ($result[$key] as $row)
-                            <div class="border-b border-slate-100 px-5 py-2 text-xs text-slate-500 last:border-0 dark:border-[#243352] dark:text-slate-400">
+                            <div class="border-b border-slate-100 px-5 py-2 text-xs text-slate-500 last:border-0 dark:border-[#373a3f] dark:text-slate-400">
                                 #{{ $row->id }} · {{ $row->created_at }}
                             </div>
                         @empty

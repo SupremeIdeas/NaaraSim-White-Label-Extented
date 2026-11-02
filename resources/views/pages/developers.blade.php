@@ -30,7 +30,7 @@
         <div class="lg:grid lg:grid-cols-[220px_1fr] lg:items-start lg:gap-8">
             <nav aria-label="Table of contents" class="sticky top-24 hidden lg:block">
                 <p class="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">On this page</p>
-                <ul class="space-y-1 border-l border-slate-200 text-sm dark:border-[#22314e]">
+                <ul class="space-y-1 border-l border-slate-200 text-sm dark:border-[#34373c]">
                     @foreach ($toc as $item)
                         <li>
                             <a href="#{{ $item['slug'] }}"
@@ -50,22 +50,22 @@
 
     @push('head')
         <style>
-            .api-docs { color: rgb(51 65 85); line-height: 1.7; font-size: .95rem; }
+            .api-docs { color: rgb(63 66 73); line-height: 1.7; font-size: .95rem; }
             :root[data-theme="dark"] .api-docs, .api-docs :where(*) { scroll-margin-top: 6rem; }
             @media (prefers-color-scheme: dark) { .api-docs { color: rgb(203 213 225); } }
             :root[data-theme="dark"] .api-docs { color: rgb(203 213 225); }
-            :root[data-theme="light"] .api-docs { color: rgb(51 65 85); }
+            :root[data-theme="light"] .api-docs { color: rgb(63 66 73); }
 
-            .api-docs h1 { font-size: 1.7rem; font-weight: 800; margin: 0 0 .5rem; color: rgb(15 23 42); }
-            .api-docs h2 { font-size: 1.3rem; font-weight: 700; margin: 2rem 0 .75rem; padding-top: 1.25rem; border-top: 1px solid rgb(226 232 240); color: rgb(15 23 42); }
-            .api-docs h3 { font-size: 1.05rem; font-weight: 700; margin: 1.5rem 0 .5rem; color: rgb(15 23 42); }
+            .api-docs h1 { font-size: 1.7rem; font-weight: 800; margin: 0 0 .5rem; color: rgb(27 28 30); }
+            .api-docs h2 { font-size: 1.3rem; font-weight: 700; margin: 2rem 0 .75rem; padding-top: 1.25rem; border-top: 1px solid rgb(226 232 240); color: rgb(27 28 30); }
+            .api-docs h3 { font-size: 1.05rem; font-weight: 700; margin: 1.5rem 0 .5rem; color: rgb(27 28 30); }
             @media (prefers-color-scheme: dark) {
                 .api-docs h1, .api-docs h2, .api-docs h3 { color: rgb(241 245 249); }
-                .api-docs h2 { border-color: rgb(34 49 78); }
+                .api-docs h2 { border-color: rgb(52 55 60); }
             }
             :root[data-theme="dark"] .api-docs :where(h1,h2,h3) { color: rgb(241 245 249); }
-            :root[data-theme="dark"] .api-docs h2 { border-color: rgb(34 49 78); }
-            :root[data-theme="light"] .api-docs :where(h1,h2,h3) { color: rgb(15 23 42); }
+            :root[data-theme="dark"] .api-docs h2 { border-color: rgb(52 55 60); }
+            :root[data-theme="light"] .api-docs :where(h1,h2,h3) { color: rgb(27 28 30); }
             :root[data-theme="light"] .api-docs h2 { border-color: rgb(226 232 240); }
 
             .api-docs p, .api-docs ul, .api-docs ol { margin: .75rem 0; }
@@ -83,27 +83,27 @@
 
             .api-docs code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .85em;
                 background: rgb(241 245 249); padding: .12em .4em; border-radius: .35rem; }
-            .api-docs pre { background: rgb(13 27 42); color: rgb(226 232 240); padding: 1rem 1.1rem;
+            .api-docs pre { background: rgb(11 11 12); color: rgb(226 232 240); padding: 1rem 1.1rem;
                 border-radius: .75rem; overflow-x: auto; margin: 1rem 0; font-size: .85rem; }
             .api-docs pre code { background: transparent; padding: 0; color: inherit; }
-            @media (prefers-color-scheme: dark) { .api-docs code { background: rgb(30 41 59); color: rgb(226 232 240); } }
-            :root[data-theme="dark"] .api-docs code { background: rgb(30 41 59); color: rgb(226 232 240); }
-            :root[data-theme="light"] .api-docs code { background: rgb(241 245 249); color: rgb(51 65 85); }
+            @media (prefers-color-scheme: dark) { .api-docs code { background: rgb(41 44 48); color: rgb(226 232 240); } }
+            :root[data-theme="dark"] .api-docs code { background: rgb(41 44 48); color: rgb(226 232 240); }
+            :root[data-theme="light"] .api-docs code { background: rgb(241 245 249); color: rgb(63 66 73); }
 
             .api-docs table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: .85rem; display: block; overflow-x: auto; }
             .api-docs th, .api-docs td { border: 1px solid rgb(226 232 240); padding: .5rem .7rem; text-align: left; vertical-align: top; }
             .api-docs th { background: rgb(248 250 252); font-weight: 700; }
             @media (prefers-color-scheme: dark) {
-                .api-docs th, .api-docs td { border-color: rgb(34 49 78); }
-                .api-docs th { background: rgb(24 39 66); }
+                .api-docs th, .api-docs td { border-color: rgb(52 55 60); }
+                .api-docs th { background: rgb(42 44 48); }
             }
-            :root[data-theme="dark"] .api-docs :where(th,td) { border-color: rgb(34 49 78); }
-            :root[data-theme="dark"] .api-docs th { background: rgb(24 39 66); }
+            :root[data-theme="dark"] .api-docs :where(th,td) { border-color: rgb(52 55 60); }
+            :root[data-theme="dark"] .api-docs th { background: rgb(42 44 48); }
 
             .api-docs blockquote { border-left: 3px solid rgb(var(--brand-accent)); background: rgb(var(--brand-accent) / .08);
                 padding: .6rem .9rem; margin: 1rem 0; border-radius: 0 .5rem .5rem 0; font-size: .9rem; }
             .api-docs hr { border: 0; border-top: 1px solid rgb(226 232 240); margin: 2rem 0; }
-            :root[data-theme="dark"] .api-docs hr { border-color: rgb(34 49 78); }
+            :root[data-theme="dark"] .api-docs hr { border-color: rgb(52 55 60); }
         </style>
     @endpush
 </x-layouts.marketing>

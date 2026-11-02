@@ -16,7 +16,7 @@
     $cDotOff = $onDark ? 'bg-white/25' : 'bg-slate-300 dark:bg-white/20';
     $cBtn = $onDark
         ? 'border-white/20 bg-white/10 text-white hover:bg-white/15'
-        : 'border-slate-200 bg-white text-primary hover:bg-slate-50 dark:border-white/10 dark:bg-[#16233d] dark:text-teal-300';
+        : 'border-slate-200 bg-white text-primary hover:bg-slate-50 dark:border-white/10 dark:bg-[#27292c] dark:text-teal-300';
 @endphp
 
 @php

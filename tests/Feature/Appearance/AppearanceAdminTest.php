@@ -62,7 +62,7 @@ class AppearanceAdminTest extends AppearanceTestCase
 
     public function test_disabling_an_accent_removes_it_from_what_members_can_choose(): void
     {
-        Livewire::actingAs($this->admin())->test(UserAppearance::class)->call('toggle', 'accent', 'graphite');
-        $this->assertNotContains('graphite', AppearanceResolver::platform()['accents']);
+        Livewire::actingAs($this->admin())->test(UserAppearance::class)->call('toggle', 'accent', 'steel');
+        $this->assertNotContains('steel', AppearanceResolver::platform()['accents']);
     }
 }

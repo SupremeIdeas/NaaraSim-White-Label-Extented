@@ -21,20 +21,20 @@
                 <div>
                     <label class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">Full Name</label>
                     <input type="text" wire:model="name" placeholder="What should we call you?"
-                           class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm dark:border-[var(--brand-card-border-dark)] dark:bg-[#243352] dark:text-slate-100">
+                           class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm dark:border-[var(--brand-card-border-dark)] dark:bg-[#373a3f] dark:text-slate-100">
                     @error('name') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
                 </div>
                 <div>
                     <label class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">Email Address</label>
                     <input type="email" wire:model="email" placeholder="Where should we reply?"
-                           class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm dark:border-[var(--brand-card-border-dark)] dark:bg-[#243352] dark:text-slate-100">
+                           class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm dark:border-[var(--brand-card-border-dark)] dark:bg-[#373a3f] dark:text-slate-100">
                     @error('email') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
                 </div>
             </div>
 
             <div>
                 <label class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">What's this about?</label>
-                <select wire:model="subject" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm dark:border-[var(--brand-card-border-dark)] dark:bg-[#243352] dark:text-slate-100">
+                <select wire:model="subject" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm dark:border-[var(--brand-card-border-dark)] dark:bg-[#373a3f] dark:text-slate-100">
                     @foreach ($subjects as $option)
                         <option value="{{ $option }}">{{ $option }}</option>
                     @endforeach
@@ -44,7 +44,7 @@
             <div>
                 <label class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">Your Message</label>
                 <textarea wire:model="message" rows="5" placeholder="Tell us what's going on. The more detail you give us, the faster we can help."
-                          class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm dark:border-[var(--brand-card-border-dark)] dark:bg-[#243352] dark:text-slate-100"></textarea>
+                          class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm dark:border-[var(--brand-card-border-dark)] dark:bg-[#373a3f] dark:text-slate-100"></textarea>
                 @error('message') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
             </div>
 

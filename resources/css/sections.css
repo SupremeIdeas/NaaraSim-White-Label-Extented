@@ -103,9 +103,9 @@
         radial-gradient(50% 50% at 85% 25%, rgb(var(--brand-accent) / 0.08), transparent 72%),
         radial-gradient(55% 55% at 50% 90%, rgb(var(--brand-primary) / 0.07), transparent 75%),
         #F6F8FA;
-    color: rgb(15 23 42);
+    color: rgb(27 28 30);
 }
-.nx-sechero.is-light .nx-sechero__cta.is-ghost { background: rgb(15 23 42 / 0.05); border-color: rgb(15 23 42 / 0.12); color: rgb(15 23 42); }
+.nx-sechero.is-light .nx-sechero__cta.is-ghost { background: rgb(27 28 30 / 0.05); border-color: rgb(27 28 30 / 0.12); color: rgb(27 28 30); }
 .nx-sechero.is-dark  { background: rgb(var(--brand-navy)); color: #fff; }
 .nx-sechero.is-dark .nx-sechero__eyebrow { background: rgb(255 255 255 / 0.14); color: #fff; }
 .nx-sechero.is-brand {
@@ -262,3 +262,192 @@
         radial-gradient(55% 55% at 50% 90%, rgb(var(--brand-primary) / 0.14), transparent 75%);
 }
 @media (prefers-reduced-motion: reduce) { .nx-ambient::before { animation: none; } }
+
+
+/* Homepage manifesto and Diagnosis/Architecture/Promise bento (ported from the flagship). */
+
+[data-bento-diagnosis] > .nx-bento-wrap:not(:first-child) { border-top-left-radius: 0; border-top-right-radius: 0; }
+.nx-bento-wrap {
+    --nx-bento-ink: #0b0b0c;
+    --nx-bento-muted: #5b6b7d;
+    --nx-bento-glass-bg: rgba(255, 255, 255, 0.55);
+    --nx-bento-glass-border: rgba(255, 255, 255, 0.7);
+    --nx-bento-glass-shadow: 0 20px 40px -12px rgba(26, 27, 29, 0.08), 0 0 20px rgba(255, 255, 255, 0.4);
+    position: relative;
+    /* These 3 sections sit inside a wrapper <div> (not a direct <main>
+       child), so the site-wide `main > section` 30px-curve rule doesn't
+       reach them automatically — set it explicitly here instead. */
+    border-top-left-radius: 30px;
+    border-top-right-radius: 30px;
+    background: #F4FAFA;
+    color: var(--nx-bento-ink);
+    padding: 5rem 1.5rem;
+}
+@media (min-width: 768px) { .nx-bento-wrap { padding: 7rem 1.5rem; } }
+.nx-bento-wrap::before {
+    content: ''; position: absolute; inset: 0; pointer-events: none;
+    background: radial-gradient(circle at 50% 0%, rgba(56, 59, 64, 0.05), transparent 70%),
+                radial-gradient(circle at 100% 50%, rgba(120, 126, 137, 0.04), transparent 50%);
+}
+.nx-bento-inner { max-width: 1280px; margin: 0 auto; position: relative; z-index: 1; }
+.nx-bento-eyebrow { font-size: 12px; font-weight: 700; letter-spacing: .15em; text-transform: uppercase; color: #947010; margin-bottom: 1.1rem; display: block; }
+.nx-bento-headline { font-family: var(--font-display, 'Supreme Display'), sans-serif; font-size: clamp(2rem, 4.5vw, 3.5rem); line-height: 1.08; letter-spacing: -.02em; color: var(--nx-bento-ink); margin-bottom: 1.75rem; }
+.nx-bento-headline .grad { background: linear-gradient(100deg, #383b40 0%, #b6bdc8 42%, #D4A017 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.nx-bento-intro { max-width: 42rem; font-size: 1.05rem; line-height: 1.8; color: #3f4249; }
+.js-enabled .nx-bento-intro { opacity: 0; transform: translateY(16px); transition: opacity .7s cubic-bezier(.16,1,.3,1), transform .7s cubic-bezier(.16,1,.3,1); }
+.js-enabled .nx-bento-intro.visible { opacity: 1; transform: translateY(0); }
+.nx-bento-intro p + p { margin-top: .9rem; }
+.nx-bento-grid { display: grid; gap: 1.1rem; margin-top: 3rem; }
+@media (min-width: 768px) { .nx-bento-grid { grid-template-columns: repeat(2, 1fr); gap: 1.4rem; } }
+@media (min-width: 1024px) { .nx-bento-grid { grid-template-columns: repeat(12, 1fr); gap: 1.75rem; } }
+
+.nx-bento-cell {
+    position: relative; border-radius: 26px; background: var(--nx-bento-glass-bg);
+    backdrop-filter: blur(32px) saturate(150%); -webkit-backdrop-filter: blur(32px) saturate(150%);
+    padding: 1.75rem; min-height: 320px; display: flex; flex-direction: column;
+    border: 1px solid var(--nx-bento-glass-border); box-shadow: var(--nx-bento-glass-shadow);
+    isolation: isolate; overflow: hidden;
+}
+.js-enabled .nx-bento-cell { opacity: 0; transform: translateY(32px); transition: opacity .7s cubic-bezier(.16,1,.3,1), transform .7s cubic-bezier(.16,1,.3,1); }
+@media (min-width: 768px) { .nx-bento-cell { padding: 2.4rem; border-radius: 28px; min-height: 380px; } }
+.js-enabled .nx-bento-cell.visible { opacity: 1; transform: translateY(0); }
+.nx-bento-cell::before {
+    content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; z-index: 1;
+    background: radial-gradient(500px circle at var(--mx, -999px) var(--my, -999px), rgba(255,255,255,.45), transparent 50%);
+    opacity: 0; transition: opacity .4s ease; mix-blend-mode: overlay;
+}
+@media (hover: hover) { .nx-bento-cell:hover::before { opacity: 1; } }
+.nx-bento-cell-content { position: relative; z-index: 2; }
+/* "More inside" mark: top-right of every card that opens a modal. It lifts and tints on hover or keyboard focus so the whole card reads as pressable. */
+.nx-bento-expand { position: absolute; top: 1.1rem; right: 1.1rem; z-index: 3; width: 2.5rem; height: 2.5rem; display: grid; place-items: center; border-radius: 12px;
+    color: #383b40; background: rgba(56, 59, 64, .08); transition: background .25s ease, color .25s ease, transform .25s ease; pointer-events: none; }
+@media (min-width: 768px) { .nx-bento-expand { top: 1.5rem; right: 1.5rem; } }
+.nx-bento-cell:hover .nx-bento-expand, .nx-bento-cell:focus-visible .nx-bento-expand { background: #383b40; color: #fff; transform: scale(1.06); }
+html.dark .nx-bento-expand { color: #d3d8df; background: rgba(158, 162, 170, .12); }
+html.dark .nx-bento-cell:hover .nx-bento-expand, html.dark .nx-bento-cell:focus-visible .nx-bento-expand { background: #b6bdc8; color: #0b0b0c; }
+.nx-bento-cell-content { padding-right: 2.9rem; }
+.nx-bento-eyebrow-sm { font-size: 12px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: #383b40; margin-bottom: .6rem; display: block; }
+.nx-bento-cell-title { font-family: var(--font-display, 'Supreme Display'), sans-serif; font-size: clamp(1.35rem, 2.2vw, 1.7rem); line-height: 1.15; margin-bottom: .7rem; color: var(--nx-bento-ink); }
+.nx-bento-cell-text { font-size: .95rem; line-height: 1.65; color: #3f4249; }
+.nx-bento-art { margin: auto -0.5rem 0; padding-top: 1.5rem; pointer-events: none; }
+.nx-bento-art svg { display: block; width: 100%; max-width: 320px; height: auto; margin: 0 auto; }
+@media (min-width: 1024px) {
+    .nx-bento-cell.is-span-4 { grid-column: span 4; }
+    .nx-bento-cell.is-span-5 { grid-column: span 5; }
+    .nx-bento-cell.is-span-6 { grid-column: span 6; }
+    .nx-bento-cell.is-span-7 { grid-column: span 7; }
+    .nx-bento-cell.is-span-8 { grid-column: span 8; }
+}
+
+/* Naara-mechanic SVG illustration tokens (light, fixed) */
+:is(.nx-bento-wrap, .nx-bento-modal) .ill text { font-family: var(--font-sans, 'Didact Gothic'), sans-serif; fill: #0b0b0c; font-size: 12.5px; }
+:is(.nx-bento-wrap, .nx-bento-modal) .ill .m { fill: #5b6b7d; font-size: 10.5px; }
+:is(.nx-bento-wrap, .nx-bento-modal) .ill .b { font-weight: 700; }
+:is(.nx-bento-wrap, .nx-bento-modal) .ill .w { fill: #ffffff; }
+:is(.nx-bento-wrap, .nx-bento-modal) .ill .tt { fill: #383b40; }
+:is(.nx-bento-wrap, .nx-bento-modal) .ill .ct { fill: #E8412A; }
+:is(.nx-bento-wrap, .nx-bento-modal) .ill .sf { fill: #ffffff; stroke: rgba(26,27,29,.16); stroke-width: 1.2; }
+:is(.nx-bento-wrap, .nx-bento-modal) .ill .sf2 { fill: #EEF6F5; stroke: rgba(26,27,29,.16); stroke-width: 1; }
+:is(.nx-bento-wrap, .nx-bento-modal) .ill .ln { fill: none; stroke: rgba(26,27,29,.16); stroke-width: 1.2; }
+:is(.nx-bento-wrap, .nx-bento-modal) .ill .dash { stroke-dasharray: 4 4; }
+:is(.nx-bento-wrap, .nx-bento-modal) .ill .fT { fill: #383b40; }
+:is(.nx-bento-wrap, .nx-bento-modal) .ill .fTs { fill: rgba(56,59,64,.10); }
+:is(.nx-bento-wrap, .nx-bento-modal) .ill .fG { fill: #D4A017; }
+:is(.nx-bento-wrap, .nx-bento-modal) .ill .fC { fill: #E8412A; }
+:is(.nx-bento-wrap, .nx-bento-modal) .ill .fCs { fill: rgba(232,65,42,.10); }
+:is(.nx-bento-wrap, .nx-bento-modal) .ill .fN { fill: #0b0b0c; opacity: .45; }
+:is(.nx-bento-wrap, .nx-bento-modal) .ill .sT { stroke: #383b40; }
+:is(.nx-bento-wrap, .nx-bento-modal) .ill .sC { stroke: #E8412A; }
+:is(.nx-bento-wrap, .nx-bento-modal) .ill .sW { stroke: #ffffff; }
+:is(.nx-bento-wrap, .nx-bento-modal) .ill .fS { fill: #ffffff; }
+:is(.nx-bento-wrap, .nx-bento-modal) .ill .fQ { fill: #0b0b0c; }
+:is(.nx-bento-wrap, .nx-bento-modal) .ill .h { font-family: var(--font-display, 'Supreme Display'), sans-serif; font-size: 14px; }
+:is(.nx-bento-wrap, .nx-bento-modal) .ill .ico { stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+.nx-bento-formula { display: flex; flex-direction: column; gap: .5rem; margin-bottom: 1.75rem; }
+.nx-bento-formula-line { font-family: var(--font-display, 'Supreme Display'), sans-serif; font-size: clamp(2rem, 5vw, 3.6rem); line-height: 1.08; letter-spacing: -.02em; color: var(--nx-bento-ink); }
+.js-enabled .nx-bento-formula-line { opacity: 0; transform: translateY(20px); transition: opacity .7s cubic-bezier(.16,1,.3,1), transform .7s cubic-bezier(.16,1,.3,1); }
+.js-enabled .nx-bento-formula-line.visible { opacity: 1; transform: translateY(0); }
+@media (prefers-reduced-motion: reduce) {
+    .js-enabled .nx-bento-intro, .js-enabled .nx-bento-cell, .js-enabled .nx-bento-formula-line { opacity: 1 !important; transform: none !important; transition: none !important; }
+}
+
+/* =============================================================================
+ * Homepage manifesto — scroll word-reveal (owner request, 2026-09-21,
+ * explicitly re-requested: "that reveal text on scroll... show case in hero
+ * after the flags carousel"). Fixed light surface regardless of site theme
+ * (the "premium feel" ask), same as the bento block above.
+ * ========================================================================== */
+.nx-manifesto { position: relative; overflow: hidden; background: #fff; padding: 4rem 1.5rem; }
+@media (min-width: 768px) { .nx-manifesto { padding: 6rem 1.5rem; } }
+.nx-manifesto::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, #383b40, #E8412A, #D4A017); }
+.nx-manifesto-inner { max-width: 1100px; margin: 0 auto; display: grid; gap: 2.5rem; }
+@media (min-width: 900px) { .nx-manifesto-inner { grid-template-columns: 280px 1fr; gap: 4rem; align-items: start; } }
+.nx-manifesto-side { position: sticky; top: 6rem; }
+@media (max-width: 899px) { .nx-manifesto-side { position: static; } }
+.nx-manifesto-tag { font-size: 10px; letter-spacing: .22em; text-transform: uppercase; color: #64748b; font-weight: 700; display: flex; align-items: center; gap: 10px; margin-bottom: 1.25rem; }
+.nx-manifesto-tag::before { content: ''; width: 20px; height: 1.5px; background: rgba(27,28,30,.25); }
+.nx-manifesto-title { font-family: var(--font-display, 'Supreme Display'), sans-serif; font-size: clamp(1.8rem, 3.2vw, 2.6rem); color: #1b1c1e; line-height: 1.1; letter-spacing: -.02em; margin-bottom: 1.1rem; }
+.nx-manifesto-title em { font-style: italic; background: linear-gradient(135deg, #b6bdc8 0%, #E8412A 50%, #D4A017 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.nx-manifesto-line { width: 48px; height: 3px; background: linear-gradient(to right, #383b40, #D4A017); }
+.nx-manifesto-text { font-family: var(--font-display, 'Supreme Display'), sans-serif; font-size: clamp(1.5rem, 2.8vw, 2.6rem); line-height: 1.4; letter-spacing: -.01em; color: #1b1c1e; }
+.nx-manifesto-word { display: inline; color: #1b1c1e; }
+.js-enabled .nx-manifesto-word { color: rgba(27, 28, 30, 0.12); transition: color 0.1s ease; }
+.js-enabled .nx-manifesto-word.is-lit { color: #1b1c1e; }
+@media (prefers-reduced-motion: reduce) { .js-enabled .nx-manifesto-word { color: #1b1c1e; } }
+
+
+/* ---- Bento detail modal ("The Diagnosis" / "The Naara Promise" cells) --------
+   Ported from the owner's naara_growth_overview reference: glass overlay + panel,
+   art beside the copy, light/dark switch (follows the site theme on open, with its
+   own toggle). Cells are the triggers; the art is cloned from the clicked cell. */
+.nx-bento-cell[data-cell] { cursor: pointer; }
+.nx-bento-cell[data-cell]:focus-visible { outline: 2px solid #383b40; outline-offset: 3px; }
+.nx-bento-modal { position: fixed; inset: 0; z-index: 80; display: flex; align-items: center; justify-content: center;
+    background: rgba(26,27,29,.6); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+    opacity: 0; pointer-events: none; transition: opacity .4s cubic-bezier(.16,1,.3,1); }
+.nx-bento-modal.is-open { opacity: 1; pointer-events: all; }
+.nx-bento-modal__panel { position: relative; display: flex; flex-direction: column; width: 92%; max-width: 640px; max-height: 90vh;
+    overflow: hidden; border-radius: 24px; background: rgba(255,255,255,.96); color: #0b0b0c;
+    border: 1px solid rgba(255,255,255,.6); box-shadow: 0 40px 80px rgba(0,0,0,.25);
+    transform: translateY(40px) scale(.98); opacity: 0; transition: transform .5s cubic-bezier(.16,1,.3,1), opacity .5s cubic-bezier(.16,1,.3,1), background-color .3s; }
+.nx-bento-modal.is-open .nx-bento-modal__panel { transform: none; opacity: 1; }
+.nx-bento-modal__actions { position: absolute; top: 14px; right: 14px; z-index: 5; display: flex; gap: 10px; }
+.nx-bento-modal__btn { display: inline-flex; height: 40px; width: 40px; align-items: center; justify-content: center; border-radius: 9999px;
+    border: 1px solid rgba(26,27,29,.14); background: rgba(255,255,255,.9); color: #0b0b0c; cursor: pointer; transition: background .2s; }
+.nx-bento-modal__btn:hover { background: #fff; }
+.nx-bento-modal__interior { display: flex; flex-direction: column; overflow-y: auto; }
+.nx-bento-modal__copy { padding: 3.25rem 1.5rem 1.75rem; }
+.nx-bento-modal__art { display: flex; align-items: center; justify-content: center; padding: 1.5rem; background: linear-gradient(135deg,#EEF6F5,#F8FBFB); }
+.nx-bento-modal__art svg { display: block; width: 100%; max-width: 480px; height: auto; }
+.nx-bento-modal__eyebrow { font-size: .72rem; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; color: #947010; }
+.nx-bento-modal__headline { margin: .6rem 0 1rem; font-family: var(--font-display, 'Supreme Display'), sans-serif; font-size: clamp(1.4rem, 3vw, 2rem); line-height: 1.15; }
+.nx-bento-modal__body p { margin: 0 0 .9rem; line-height: 1.7; color: #3f4249; }
+.nx-bento-modal__quote { margin: 1.1rem 0; padding-left: 1rem; border-left: 3px solid #D4A017; font-style: italic; font-weight: 600; }
+.nx-bento-modal__bullets { margin: 0; padding: 0; list-style: none; }
+.nx-bento-modal__bullets li { position: relative; margin-bottom: .8rem; padding-left: 1.6rem; line-height: 1.6; color: #3f4249; }
+.nx-bento-modal__bullets li::before { content: '\2192'; position: absolute; left: 0; color: #383b40; font-weight: 700; }
+@media (min-width: 1024px) {
+    .nx-bento-modal__panel { flex-direction: row; width: min(1120px, calc(100vw - 80px)); max-width: none; max-height: 88vh; border-radius: 30px; }
+    .nx-bento-modal__interior { flex-direction: row; overflow: hidden; width: 100%; }
+    .nx-bento-modal__copy { flex: 1 1 52%; overflow-y: auto; padding: 3.5rem 2.5rem 2.5rem 3rem; }
+    .nx-bento-modal__art { flex: 1 1 48%; padding: 2.5rem; }
+}
+.nx-bento-modal.is-dark .nx-bento-modal__panel { background: rgba(26,27,29,.97); color: #E6F2F0; border-color: rgba(255,255,255,.1); }
+.nx-bento-modal.is-dark .nx-bento-modal__btn { background: rgba(42,44,48,.9); border-color: rgba(255,255,255,.16); color: #E6F2F0; }
+.nx-bento-modal.is-dark .nx-bento-modal__btn:hover { background: #1D2024; }
+.nx-bento-modal.is-dark .nx-bento-modal__art { background: linear-gradient(135deg,#131416,#0b0b0c); }
+.nx-bento-modal.is-dark .nx-bento-modal__eyebrow { color: #D4A017; }
+.nx-bento-modal.is-dark .nx-bento-modal__body p, .nx-bento-modal.is-dark .nx-bento-modal__bullets li { color: #cbd5e1; }
+.nx-bento-modal.is-dark .nx-bento-modal__bullets li::before { color: #b6bdc8; }
+.nx-bento-modal.is-dark .ill text { fill: #E6F2F0; }
+.nx-bento-modal.is-dark .ill .m { fill: #9fb2c2; }
+.nx-bento-modal.is-dark .ill .w { fill: #fff; }
+.nx-bento-modal.is-dark .ill .sf { fill: #17191C; stroke: rgba(255,255,255,.18); }
+.nx-bento-modal.is-dark .ill .sf2 { fill: #131416; stroke: rgba(255,255,255,.18); }
+.nx-bento-modal.is-dark .ill .ln { stroke: rgba(255,255,255,.18); }
+.nx-bento-modal.is-dark .ill .fQ { fill: #E6F2F0; }
+.nx-bento-modal.is-dark .ill .fN { fill: #2A2E34; opacity: 1; }
+.nx-bento-modal.is-dark .ill .tt { fill: #b6bdc8; }
+.nx-bento-modal.is-dark .ill .sT { stroke: #b6bdc8; }
+@media (prefers-reduced-motion: reduce) { .nx-bento-modal, .nx-bento-modal__panel { transition: none; } }

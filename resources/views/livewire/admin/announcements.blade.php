@@ -11,18 +11,18 @@
     @endif
 
     {{-- Composer --}}
-    <form wire:submit="send" class="space-y-4 rounded-xl border border-slate-200 bg-white p-5 dark:border-[#2D4060] dark:bg-[#1B2A44]">
+    <form wire:submit="send" class="space-y-4 rounded-xl border border-slate-200 bg-white p-5 dark:border-[#2A2E34] dark:bg-[#1D2024]">
         <div>
             <label class="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-300">Title</label>
             <input type="text" wire:model="title" maxlength="120" placeholder="Weekend data sale — 20% off"
-                   class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                   class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
             @error('title') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
         </div>
 
         <div>
             <label class="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-300">Message</label>
             <textarea wire:model="body" rows="3" maxlength="500" placeholder="For this weekend only, get 20% off any eSIM plan. Tap to claim."
-                      class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100"></textarea>
+                      class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100"></textarea>
             @error('body') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
         </div>
 
@@ -31,7 +31,7 @@
             <div class="flex flex-wrap gap-2">
                 @foreach ($icons as $ic)
                     <button type="button" wire:click="$set('icon', '{{ $ic }}')"
-                            class="flex h-10 w-10 items-center justify-center rounded-lg border transition {{ $icon === $ic ? 'border-primary bg-primary/10 text-primary' : 'border-slate-300 text-slate-400 hover:bg-slate-50 dark:border-[#2D4060] dark:hover:bg-[#243352]' }}">
+                            class="flex h-10 w-10 items-center justify-center rounded-lg border transition {{ $icon === $ic ? 'border-primary bg-primary/10 text-primary' : 'border-slate-300 text-slate-400 hover:bg-slate-50 dark:border-[#2A2E34] dark:hover:bg-[#373a3f]' }}">
                         <x-icon :name="$ic" class="h-5 w-5" />
                     </button>
                 @endforeach
@@ -43,12 +43,12 @@
             <label class="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-300">Style</label>
             <div class="grid gap-2 sm:grid-cols-2">
                 <button type="button" wire:click="$set('style', 'banner_hero')"
-                        class="rounded-lg border p-3 text-left transition {{ $style === 'banner_hero' ? 'border-primary bg-primary/5' : 'border-slate-300 dark:border-[#2D4060]' }}">
+                        class="rounded-lg border p-3 text-left transition {{ $style === 'banner_hero' ? 'border-primary bg-primary/5' : 'border-slate-300 dark:border-[#2A2E34]' }}">
                     <p class="text-sm font-semibold text-slate-800 dark:text-slate-100">Banner hero</p>
                     <p class="mt-0.5 text-[11px] text-slate-500 dark:text-slate-400">Wide image up top, headline + one prominent button.</p>
                 </button>
                 <button type="button" wire:click="$set('style', 'dark_feature')"
-                        class="rounded-lg border p-3 text-left transition {{ $style === 'dark_feature' ? 'border-primary bg-primary/5' : 'border-slate-300 dark:border-[#2D4060]' }}">
+                        class="rounded-lg border p-3 text-left transition {{ $style === 'dark_feature' ? 'border-primary bg-primary/5' : 'border-slate-300 dark:border-[#2A2E34]' }}">
                     <p class="text-sm font-semibold text-slate-800 dark:text-slate-100">Dark feature card</p>
                     <p class="mt-0.5 text-[11px] text-slate-500 dark:text-slate-400">Premium "what's new" card, inset preview + bullet points.</p>
                 </button>
@@ -73,7 +73,7 @@
                 <div>
                     <label class="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-300">Feature bullets <span class="text-slate-400">(one per line, optional)</span></label>
                     <textarea wire:model="bulletsText" rows="3" maxlength="1000" placeholder="Faster eSIM activation&#10;New number ports&#10;Lower fees"
-                              class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100"></textarea>
+                              class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100"></textarea>
                     @error('bulletsText') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
                 </div>
             </div>
@@ -83,13 +83,13 @@
             <div>
                 <label class="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-300">Button label (optional)</label>
                 <input type="text" wire:model="cta_label" maxlength="40" placeholder="Claim offer"
-                       class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                       class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
                 @error('cta_label') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
             </div>
             <div>
                 <label class="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-300">Coupon code (optional)</label>
                 <input type="text" wire:model="coupon_code" maxlength="40" placeholder="WEEKEND20"
-                       class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm uppercase dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                       class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm uppercase dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
                 @error('coupon_code') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
             </div>
         </div>
@@ -100,14 +100,14 @@
             <label class="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-300">Link to (optional — ignored if a coupon is set)</label>
             <div class="flex flex-col gap-2 sm:flex-row">
                 <select @change="$wire.set('cta_url', $event.target.value)"
-                        class="rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100 sm:w-56">
+                        class="rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100 sm:w-56">
                     <option value="">— Pick an in-app page —</option>
                     @foreach ($deepLinks as $link)
                         <option value="{{ $link['url'] }}" @selected($cta_url === $link['url'])>{{ $link['label'] }}</option>
                     @endforeach
                 </select>
                 <input type="url" wire:model="cta_url" maxlength="300" placeholder="https://… (or pick a page above)"
-                       class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                       class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
             </div>
             <p class="mt-1 text-[11px] text-slate-400">With a coupon set, the button sends users to the catalogue with the code ready to claim.</p>
             @error('cta_url') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
@@ -118,16 +118,16 @@
                 <label class="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-300">Secondary link (optional — e.g. "View all changelogs")</label>
                 <div class="grid gap-2 sm:grid-cols-[1fr_auto_2fr]">
                     <input type="text" wire:model="secondary_label" maxlength="40" placeholder="View all changelogs"
-                           class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                           class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
                     <select @change="$wire.set('secondary_url', $event.target.value)"
-                            class="rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                            class="rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
                         <option value="">— Pick a page —</option>
                         @foreach ($deepLinks as $link)
                             <option value="{{ $link['url'] }}" @selected($secondary_url === $link['url'])>{{ $link['label'] }}</option>
                         @endforeach
                     </select>
                     <input type="url" wire:model="secondary_url" maxlength="300" placeholder="https://…"
-                           class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                           class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
                 </div>
                 @error('secondary_label') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
                 @error('secondary_url') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
@@ -148,7 +148,7 @@
     <h2 class="mb-3 mt-8 text-sm font-semibold text-slate-700 dark:text-slate-200">Sent announcements</h2>
     <div class="space-y-2">
         @forelse ($announcements as $a)
-            <div wire:key="a-{{ $a->id }}" class="flex items-start gap-3 rounded-xl border border-slate-200 bg-white p-4 dark:border-[#2D4060] dark:bg-[#1B2A44]">
+            <div wire:key="a-{{ $a->id }}" class="flex items-start gap-3 rounded-xl border border-slate-200 bg-white p-4 dark:border-[#2A2E34] dark:bg-[#1D2024]">
                 <span class="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary dark:bg-primary/20">
                     <x-icon :name="$a->icon ?: 'gift'" class="h-4 w-4" />
                 </span>
@@ -170,7 +170,7 @@
                 </div>
             </div>
         @empty
-            <p class="rounded-xl border border-dashed border-slate-200 py-10 text-center text-sm text-slate-400 dark:border-[#2D4060]">No announcements yet.</p>
+            <p class="rounded-xl border border-dashed border-slate-200 py-10 text-center text-sm text-slate-400 dark:border-[#2A2E34]">No announcements yet.</p>
         @endforelse
     </div>
 

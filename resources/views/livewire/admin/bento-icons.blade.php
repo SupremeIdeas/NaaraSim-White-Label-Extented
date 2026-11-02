@@ -21,10 +21,10 @@
                 @php($icon = \App\Support\BentoIcons::icon($key))
                 <div wire:key="bento-{{ $key }}"
                      x-data="{ op: @entangle('opacity.'.$key).live, sc: @entangle('scale.'.$key).live }"
-                     class="rounded-xl border border-slate-200 bg-white p-5 dark:border-[#2D4060] dark:bg-[#1B2A44]">
+                     class="rounded-xl border border-slate-200 bg-white p-5 dark:border-[#2A2E34] dark:bg-[#1D2024]">
                     <div class="flex flex-col gap-5 sm:flex-row sm:items-start">
                         {{-- Live preview on a card-like surface (reflects size + opacity). --}}
-                        <div class="flex h-28 w-28 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-slate-200 bg-gradient-to-br from-white to-[#f0f7f7] dark:border-white/10 dark:from-[#1a2840] dark:to-[#10243c]">
+                        <div class="flex h-28 w-28 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-slate-200 bg-gradient-to-br from-white to-[#f0f7f7] dark:border-white/10 dark:from-[#17191C] dark:to-[#232529]">
                             @if ($icon)
                                 <img src="{{ $icon }}" alt="{{ $def['label'] }}"
                                      class="h-14 w-14 object-contain transition-transform"
@@ -81,7 +81,7 @@
                                     <span wire:loading wire:target="save('{{ $key }}')">Saving…</span>
                                 </button>
                                 <button type="button" wire:click="revert('{{ $key }}')"
-                                        class="rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50 dark:border-[#2D4060] dark:text-slate-300 dark:hover:bg-white/5">
+                                        class="rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50 dark:border-[#2A2E34] dark:text-slate-300 dark:hover:bg-white/5">
                                     Reset
                                 </button>
                             </div>

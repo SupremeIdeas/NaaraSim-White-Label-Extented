@@ -138,7 +138,7 @@ class CookieConsentTest extends TestCase
         $d = CookieConsent::design();
         $this->assertSame('bar', $d['layout']);
         $this->assertSame('Hello there', $d['title'], 'markup is stripped');
-        $this->assertSame('--ck-bg:#112233;--ck-text:#F1F5F9;--ck-btn:#84CC16;--ck-btn-text:#0D1B2A;', CookieConsent::cssVars($d));
+        $this->assertSame('--ck-bg:#112233;--ck-text:#F1F5F9;--ck-btn:#94A0B0;--ck-btn-text:#0A0B0D;', CookieConsent::cssVars($d));
         $this->assertSame(200, $d['renew_days']);
     }
 
@@ -150,7 +150,7 @@ class CookieConsentTest extends TestCase
         $html = $this->get('/')->getContent();
 
         $this->assertStringNotContainsString('alert(1)', $html);
-        $this->assertStringContainsString('--ck-bg:#0D1B2A;', $html, 'falls back to the default colour');
+        $this->assertStringContainsString('--ck-bg:#0A0B0D;', $html, 'falls back to the default colour');
     }
 
     public function test_prune_removes_only_records_past_the_retention_period(): void

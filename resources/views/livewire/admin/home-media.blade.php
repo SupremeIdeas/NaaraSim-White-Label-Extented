@@ -11,20 +11,20 @@
     @endif
 
     {{-- ===================== Video section (§8) ===================== --}}
-    <div class="rounded-2xl border border-slate-200 bg-white p-6 dark:border-[#2D4060] dark:bg-[#1A2840]">
+    <div class="rounded-2xl border border-slate-200 bg-white p-6 dark:border-[#2A2E34] dark:bg-[#17191C]">
         <h2 class="mb-4 text-base font-semibold text-slate-900 dark:text-slate-100">Video section</h2>
 
         <form wire:submit="saveVideoHeading" class="mb-6 space-y-3">
             <div>
                 <label class="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-300">Section heading</label>
                 <input type="text" wire:model="vid_heading" placeholder="{{ \App\Support\HomeVideos::DEFAULT_HEADING }}"
-                       class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                       class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
                 @error('vid_heading') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
             </div>
             <div>
                 <label class="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-300">Sub-heading</label>
                 <input type="text" wire:model="vid_subheading" placeholder="{{ \App\Support\HomeVideos::DEFAULT_SUBHEADING }}"
-                       class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                       class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
             </div>
             <div class="flex justify-end">
                 <button type="submit" class="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary-dark">Save heading</button>
@@ -34,8 +34,8 @@
         {{-- Existing entries --}}
         <div class="mb-6 space-y-2">
             @forelse ($videos as $v)
-                <div wire:key="hv-{{ $v->id }}" class="flex items-center gap-3 rounded-xl border border-slate-100 p-2.5 dark:border-[#243352]">
-                    <div class="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-slate-100 dark:bg-[#243352]">
+                <div wire:key="hv-{{ $v->id }}" class="flex items-center gap-3 rounded-xl border border-slate-100 p-2.5 dark:border-[#373a3f]">
+                    <div class="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-slate-100 dark:bg-[#373a3f]">
                         @if ($v->posterOrFallback())
                             <img src="{{ $v->posterOrFallback() }}" alt="" class="h-full w-full object-cover">
                         @else
@@ -47,7 +47,7 @@
                         <p class="text-[11px] text-slate-400">{{ ucfirst($v->source_type) }} · {{ ucfirst($v->orientation) }}{{ $v->is_active ? '' : ' · hidden' }}</p>
                     </div>
                     <button type="button" wire:click="toggleVideo({{ $v->id }})"
-                            class="rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50 dark:border-[#2D4060] dark:text-slate-300 dark:hover:bg-[#243352]">
+                            class="rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50 dark:border-[#2A2E34] dark:text-slate-300 dark:hover:bg-[#373a3f]">
                         {{ $v->is_active ? 'Hide' : 'Show' }}
                     </button>
                     <button type="button" wire:click="deleteVideo({{ $v->id }})" wire:confirm="Remove this video?"
@@ -61,17 +61,17 @@
         </div>
 
         {{-- Add a video --}}
-        <form wire:submit="addVideo" class="space-y-3 rounded-xl bg-slate-50 p-4 dark:bg-[#182742]">
+        <form wire:submit="addVideo" class="space-y-3 rounded-xl bg-slate-50 p-4 dark:bg-[#2a2c30]">
             <p class="text-sm font-semibold text-slate-700 dark:text-slate-200">Add a video</p>
             <div class="grid gap-3 sm:grid-cols-2">
                 <div>
                     <label class="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-300">Title</label>
-                    <input type="text" wire:model="v_title" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                    <input type="text" wire:model="v_title" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
                     @error('v_title') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
                 </div>
                 <div>
                     <label class="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-300">Orientation</label>
-                    <select wire:model="v_orientation" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                    <select wire:model="v_orientation" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
                         <option value="portrait">Portrait (default on mobile)</option>
                         <option value="landscape">Landscape</option>
                     </select>
@@ -80,7 +80,7 @@
 
             <div>
                 <label class="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-300">Source</label>
-                <select wire:model.live="v_source" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                <select wire:model.live="v_source" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
                     <option value="youtube">YouTube link</option>
                     <option value="upload">Upload a clip (MP4/WebM)</option>
                 </select>
@@ -90,7 +90,7 @@
                 <div>
                     <label class="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-300">YouTube link or video id</label>
                     <input type="text" wire:model="v_youtube" placeholder="https://youtu.be/…"
-                           class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                           class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
                     @error('v_youtube') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
                 </div>
             @else
@@ -120,7 +120,7 @@
     </div>
 
     {{-- ===================== Story section (§9) ===================== --}}
-    <div class="rounded-2xl border border-slate-200 bg-white p-6 dark:border-[#2D4060] dark:bg-[#1A2840]">
+    <div class="rounded-2xl border border-slate-200 bg-white p-6 dark:border-[#2A2E34] dark:bg-[#17191C]">
         <form wire:submit="saveStory" class="space-y-4">
             <div class="flex items-center justify-between gap-4">
                 <h2 class="text-base font-semibold text-slate-900 dark:text-slate-100">Story section</h2>
@@ -134,24 +134,24 @@
                 <div>
                     <label class="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-300">Eyebrow</label>
                     <input type="text" wire:model="story_eyebrow" placeholder="{{ \App\Support\HomeStory::DEFAULTS['eyebrow'] }}"
-                           class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                           class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
                 </div>
                 <div>
                     <label class="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-300">Transition line (leads into the next section)</label>
                     <input type="text" wire:model="story_transition" placeholder="{{ \App\Support\HomeStory::DEFAULTS['transition'] }}"
-                           class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                           class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
                 </div>
             </div>
             <div>
                 <label class="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-300">Heading</label>
                 <input type="text" wire:model="story_heading" placeholder="{{ \App\Support\HomeStory::DEFAULTS['heading'] }}"
-                       class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                       class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
                 @error('story_heading') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
             </div>
             <div>
                 <label class="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-300">Body <span class="text-slate-400">(blank line between paragraphs)</span></label>
                 <textarea wire:model="story_body" rows="5" placeholder="Tell the Naara story…"
-                          class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100"></textarea>
+                          class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100"></textarea>
                 @error('story_body') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
             </div>
             <div class="flex justify-end">

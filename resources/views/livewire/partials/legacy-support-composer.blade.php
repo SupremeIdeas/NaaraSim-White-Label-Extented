@@ -18,7 +18,7 @@
                     <button type="button" @click="requestMic()"
                             class="rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-white hover:bg-primary-dark">Allow microphone</button>
                     <button type="button" @click="reset()"
-                            class="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-500 hover:bg-slate-50 dark:border-[var(--brand-card-border-dark)] dark:text-slate-300 dark:hover:bg-[#243352]">Not now</button>
+                            class="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-500 hover:bg-slate-50 dark:border-[var(--brand-card-border-dark)] dark:text-slate-300 dark:hover:bg-[#373a3f]">Not now</button>
                 </div>
             </div>
         </div>
@@ -35,7 +35,7 @@
 
         {{-- Unsupported / unexpected error. --}}
         <div x-show="state === 'unsupported' || state === 'error'" x-cloak x-transition
-             class="flex items-start gap-2 rounded-xl bg-slate-100 p-3 text-xs text-slate-600 dark:bg-[#243352] dark:text-slate-300">
+             class="flex items-start gap-2 rounded-xl bg-slate-100 p-3 text-xs text-slate-600 dark:bg-[#373a3f] dark:text-slate-300">
             <x-icon name="info" class="mt-0.5 h-4 w-4 shrink-0" />
             <div class="flex-1">
                 <span x-show="state === 'unsupported'">Recording isn’t supported in this browser — you can still type or attach an audio file.</span>
@@ -56,7 +56,7 @@
                  (same pattern already used in send-message.blade.php's char
                  counter) so the reveal is instant with zero extra network
                  round-trips. --}}
-            <div class="flex items-end gap-1 rounded-3xl bg-white px-2 py-1 shadow-sm dark:bg-[#243352]"
+            <div class="flex items-end gap-1 rounded-3xl bg-white px-2 py-1 shadow-sm dark:bg-[#373a3f]"
                  x-data="{
                     autoGrow(el) { el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight, 120) + 'px'; },
                     get hasContent() { return (($wire.draft || '').trim() !== '') || !!$wire.evidence; },
@@ -78,7 +78,7 @@
                           wire:loading.attr="disabled" wire:target="send,sendVoice"></textarea>
 
                 <label x-show="(state !== 'recording' && state !== 'uploading') && hasContent"
-                       class="flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-full text-slate-500 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-[#2D4060]" title="Attach evidence (image or PDF)">
+                       class="flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-full text-slate-500 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-[#2A2E34]" title="Attach evidence (image or PDF)">
                     <x-icon name="upload" class="h-5 w-5" />
                     <input type="file" accept="{{ \App\Support\SupportAttachment::acceptAttribute() }}" class="hidden" wire:model="evidence">
                 </label>
@@ -91,7 +91,7 @@
                      by the OS permission dialog). --}}
                 <button type="button" @click="promptMic()"
                         x-show="(state !== 'recording' && state !== 'uploading') && ! hasContent"
-                        class="flex h-9 w-9 shrink-0 animate-pulse items-center justify-center rounded-full text-slate-500 hover:bg-slate-100 hover:!animate-none dark:text-slate-300 dark:hover:bg-[#2D4060]" title="Record a voice note">
+                        class="flex h-9 w-9 shrink-0 animate-pulse items-center justify-center rounded-full text-slate-500 hover:bg-slate-100 hover:!animate-none dark:text-slate-300 dark:hover:bg-[#2A2E34]" title="Record a voice note">
                     <x-icon name="mic" class="h-5 w-5" />
                 </button>
 
@@ -104,7 +104,7 @@
                     <span class="font-mono text-sm tabular-nums text-slate-700 dark:text-slate-200" x-text="timeLabel">0:00</span>
                     <span class="flex-1 truncate text-xs text-slate-400" x-text="state === 'uploading' ? 'Sending…' : 'Recording your voice note…'"></span>
                     <button type="button" @click="cancel()" x-show="state === 'recording'"
-                            class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-slate-400 hover:bg-slate-100 hover:text-red-600 dark:hover:bg-[#2D4060]" title="Cancel">
+                            class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-slate-400 hover:bg-slate-100 hover:text-red-600 dark:hover:bg-[#2A2E34]" title="Cancel">
                         <x-icon name="x" class="h-4 w-4" />
                     </button>
                     <button type="button" @click="stop()" x-show="state === 'recording'"
@@ -127,7 +127,7 @@
         @if ($evidence)
             <div class="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-300">
                 <span wire:loading wire:target="evidence" class="text-slate-400">Attaching…</span>
-                <span wire:loading.remove wire:target="evidence" class="inline-flex items-center gap-1 rounded-full bg-slate-100 px-3 py-1 dark:bg-[#243352]">
+                <span wire:loading.remove wire:target="evidence" class="inline-flex items-center gap-1 rounded-full bg-slate-100 px-3 py-1 dark:bg-[#373a3f]">
                     <x-icon name="file-text" class="h-3.5 w-3.5" /> Evidence ready to send
                     <button type="button" wire:click="$set('evidence', null)" class="text-slate-400 hover:text-red-600"><x-icon name="x" class="h-3.5 w-3.5" /></button>
                 </span>

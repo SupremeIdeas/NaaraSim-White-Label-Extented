@@ -22,7 +22,7 @@
                     'text-slate-400 dark:text-slate-500' => $n !== $step,
                 ])>{{ $label }}</span>
                 @unless ($loop->last)
-                    <x-icon name="chevron-right" class="ml-1 hidden h-4 w-4 text-slate-300 dark:text-[#2D4060] sm:inline" />
+                    <x-icon name="chevron-right" class="ml-1 hidden h-4 w-4 text-slate-300 dark:text-[#2A2E34] sm:inline" />
                 @endunless
             </li>
         @endforeach

@@ -13,10 +13,10 @@
     @endif
 
     <form wire:submit="save" class="space-y-6">
-        <div class="rounded-2xl border border-slate-200 bg-white p-6 dark:border-[#2D4060] dark:bg-[#1A2840]">
+        <div class="rounded-2xl border border-slate-200 bg-white p-6 dark:border-[#2A2E34] dark:bg-[#17191C]">
             <label class="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-300">Brand name</label>
             <input type="text" wire:model="brand_name" placeholder="NaaraSim"
-                   class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                   class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
             @error('brand_name') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
         </div>
 
@@ -30,7 +30,7 @@
         @endphp
 
         @foreach ($groups as [$title, $slots, $hint])
-            <div class="rounded-2xl border border-slate-200 bg-white p-6 dark:border-[#2D4060] dark:bg-[#1A2840]">
+            <div class="rounded-2xl border border-slate-200 bg-white p-6 dark:border-[#2A2E34] dark:bg-[#17191C]">
                 <h2 class="mb-1 text-sm font-semibold text-slate-700 dark:text-slate-200">{{ $title }}</h2>
                 <p class="mb-4 text-xs text-slate-500 dark:text-slate-400">{{ $hint }} Use a transparent PNG/SVG; both variants render at the same height, so keep them the same proportions.</p>
                 <div class="grid gap-5 sm:grid-cols-2">
@@ -38,7 +38,7 @@
                         @php $current = $brand[$brandKey] ?? ''; @endphp
                         <div>
                             <label class="mb-2 block text-xs font-medium text-slate-600 dark:text-slate-300">{{ $label }}</label>
-                            <div class="mb-2 flex h-20 items-center justify-center overflow-hidden rounded-lg border border-slate-200 p-3 dark:border-[#2D4060] {{ $darkPreview ? 'bg-navy' : 'bg-slate-50' }}">
+                            <div class="mb-2 flex h-20 items-center justify-center overflow-hidden rounded-lg border border-slate-200 p-3 dark:border-[#2A2E34] {{ $darkPreview ? 'bg-navy' : 'bg-slate-50' }}">
                                 @if ($this->{$field})
                                     <img src="{{ $this->{$field}->temporaryUrl() }}" class="max-h-14 w-auto object-contain">
                                 @elseif ($current)
@@ -57,11 +57,11 @@
             </div>
         @endforeach
 
-        <div class="rounded-2xl border border-slate-200 bg-white p-6 dark:border-[#2D4060] dark:bg-[#1A2840]">
+        <div class="rounded-2xl border border-slate-200 bg-white p-6 dark:border-[#2A2E34] dark:bg-[#17191C]">
             <h2 class="mb-1 text-sm font-semibold text-slate-700 dark:text-slate-200">Favicon / app icon</h2>
             <p class="mb-3 text-xs text-slate-500 dark:text-slate-400">A square image (512×512 recommended) for the browser tab and installed app icon.</p>
             <div class="flex items-center gap-4">
-                <div class="flex h-16 w-16 items-center justify-center overflow-hidden rounded-xl border border-slate-200 bg-slate-50 dark:border-[#2D4060] dark:bg-navy">
+                <div class="flex h-16 w-16 items-center justify-center overflow-hidden rounded-xl border border-slate-200 bg-slate-50 dark:border-[#2A2E34] dark:bg-navy">
                     @if ($this->favicon)
                         <img src="{{ $this->favicon->temporaryUrl() }}" class="h-full w-full object-contain">
                     @elseif ($brand['favicon'] ?? '')
@@ -79,7 +79,7 @@
         {{-- Premium dashboard hero backgrounds (owner request). Optional light +
              dark art behind the dashboard greeting, under a gradient overlay.
              Leave blank to keep the default heading. --}}
-        <div class="rounded-xl border border-slate-200 p-4 dark:border-[#2D4060]">
+        <div class="rounded-xl border border-slate-200 p-4 dark:border-[#2A2E34]">
             <div class="mb-1 flex items-center justify-between gap-3">
                 <p class="text-sm font-semibold text-slate-800 dark:text-slate-100">Dashboard home hero <span class="font-normal text-slate-400">(optional)</span></p>
                 <div class="flex items-center gap-3">
@@ -104,14 +104,14 @@
                     <label class="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-300">Hero title</label>
                     <input type="text" wire:model="hero_title" maxlength="40"
                            placeholder="{{ \App\Support\HeroBackground::DEFAULT_TITLE }}"
-                           class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-primary focus:ring-primary dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                           class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-primary focus:ring-primary dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
                     <p class="mt-1 text-[11px] text-slate-400">The big headline above the description. Leave blank for the default. The first word renders plain; the rest renders in the accent gradient.</p>
                     @error('hero_title') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
                 </div>
                 <div>
                     <label class="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-300">Title size</label>
                     <select wire:model="hero_title_size"
-                            class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-primary focus:ring-primary dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                            class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-primary focus:ring-primary dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
                         @foreach (\App\Support\HeroBackground::TITLE_SIZES as $value => $label)
                             <option value="{{ $value }}">{{ $label }}</option>
                         @endforeach
@@ -127,7 +127,7 @@
                 <div>
                     <label class="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-300">Button size</label>
                     <select wire:model="hero_cta_size"
-                            class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-primary focus:ring-primary dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                            class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-primary focus:ring-primary dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
                         @foreach (\App\Support\HeroBackground::CTA_SIZES as $value => $label)
                             <option value="{{ $value }}">{{ $label }}</option>
                         @endforeach
@@ -141,7 +141,7 @@
                 <label class="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-300">Description line under the title</label>
                 <input type="text" wire:model="hero_description" maxlength="120"
                        placeholder="{{ \App\Support\HeroBackground::DEFAULT_DESCRIPTION }}"
-                       class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-primary focus:ring-primary dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                       class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-primary focus:ring-primary dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
                 <p class="mt-1 text-[11px] text-slate-400">One short sentence. Leave blank to use the default.</p>
                 @error('hero_description') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
             </div>
@@ -152,7 +152,7 @@
                         <label class="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-300">{{ $label }}</label>
                         {{-- Preview mirrors the dashboard's real-image treatment: a genuine
                              2:1 image block, not a faded background layer. --}}
-                        <div class="mb-2 flex aspect-[2/1] items-center justify-center overflow-hidden rounded-lg border border-slate-200 bg-slate-50 dark:border-[#2D4060] dark:bg-[#243352]">
+                        <div class="mb-2 flex aspect-[2/1] items-center justify-center overflow-hidden rounded-lg border border-slate-200 bg-slate-50 dark:border-[#2A2E34] dark:bg-[#373a3f]">
                             @if ($this->{$field} && $this->{$field}->isPreviewable())
                                 <img src="{{ $this->{$field}->temporaryUrl() }}" class="h-full w-full object-cover">
                             @elseif ($current)
@@ -172,7 +172,7 @@
         {{-- Logo sizing — scale each mark to taste (owner request). Live preview
              follows the slider; the chosen scale applies on Save, everywhere the
              mark shows. --}}
-        <div class="rounded-2xl border border-slate-200 bg-white p-5 dark:border-[#2D4060] dark:bg-[#1A2840]">
+        <div class="rounded-2xl border border-slate-200 bg-white p-5 dark:border-[#2A2E34] dark:bg-[#17191C]">
             <h2 class="text-sm font-semibold text-slate-900 dark:text-slate-100">Logo sizing</h2>
             <p class="mb-4 mt-0.5 text-xs text-slate-500 dark:text-slate-400">Scale each logo from 50% to 200%. The preview updates as you drag; the size applies across the platform when you save.</p>
             <div class="space-y-5">
@@ -192,7 +192,7 @@
                                    class="mt-1 w-full accent-primary">
                         </div>
                         {{-- Live preview box --}}
-                        <div class="flex h-16 flex-1 items-center overflow-hidden rounded-xl border border-slate-200 bg-slate-50 px-4 dark:border-[#2D4060] dark:bg-[#243352]">
+                        <div class="flex h-16 flex-1 items-center overflow-hidden rounded-xl border border-slate-200 bg-slate-50 px-4 dark:border-[#2A2E34] dark:bg-[#373a3f]">
                             <img src="{{ $previewSrc }}" alt="{{ $label }} preview"
                                  class="h-9 w-auto object-contain" :style="`transform: scale(${s}); transform-origin: left center`">
                         </div>
@@ -210,7 +210,7 @@
     </form>
 
     {{-- Brand theme (Module 26): colours, control roundness, preloader --}}
-    <form wire:submit="saveTheme" class="mt-8 space-y-6 border-t border-slate-200 pt-8 dark:border-[#2D4060]">
+    <form wire:submit="saveTheme" class="mt-8 space-y-6 border-t border-slate-200 pt-8 dark:border-[#2A2E34]">
         <div class="flex items-center justify-between">
             <div>
                 <h2 class="text-base font-semibold text-slate-900 dark:text-slate-100">Brand colours &amp; style</h2>
@@ -222,10 +222,10 @@
 
         {{-- White-label brand word — swaps "Naara" for a new business name in
              product/sub-brand names (e.g. "Naara Rent" → "{word} Rent"). --}}
-        <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4 dark:border-[#2D4060] dark:bg-[#243352]/40">
+        <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4 dark:border-[#2A2E34] dark:bg-[#373a3f]/40">
             <label class="mb-1 block text-xs font-semibold text-slate-600 dark:text-slate-300">Brand word (white-label)</label>
             <input type="text" wire:model.live="brand_word" maxlength="40" placeholder="Naara"
-                   class="w-full max-w-xs rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                   class="w-full max-w-xs rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
             @error('brand_word') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
             <p class="mt-1.5 text-xs text-slate-500 dark:text-slate-400">
                 Reselling the platform to a new business? Set their name here — every product name swaps automatically, e.g.
@@ -242,11 +242,11 @@
             <div class="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
                 @foreach (\App\Support\BrandSettings::PALETTES as $pName => $pColors)
                     <button type="button" wire:click="applyPalette(@js($pName))"
-                            class="group flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-2.5 py-2 text-left transition hover:border-primary/50 hover:shadow-sm dark:border-[#2D4060] dark:bg-[#1A2840]">
+                            class="group flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-2.5 py-2 text-left transition hover:border-primary/50 hover:shadow-sm dark:border-[#2A2E34] dark:bg-[#17191C]">
                         <span class="flex shrink-0 -space-x-1">
-                            <span class="h-5 w-5 rounded-full ring-2 ring-white dark:ring-[#1A2840]" style="background:{{ $pColors['primary'] }}"></span>
-                            <span class="h-5 w-5 rounded-full ring-2 ring-white dark:ring-[#1A2840]" style="background:{{ $pColors['accent'] }}"></span>
-                            <span class="h-5 w-5 rounded-full ring-2 ring-white dark:ring-[#1A2840]" style="background:{{ $pColors['action'] }}"></span>
+                            <span class="h-5 w-5 rounded-full ring-2 ring-white dark:ring-[#17191C]" style="background:{{ $pColors['primary'] }}"></span>
+                            <span class="h-5 w-5 rounded-full ring-2 ring-white dark:ring-[#17191C]" style="background:{{ $pColors['accent'] }}"></span>
+                            <span class="h-5 w-5 rounded-full ring-2 ring-white dark:ring-[#17191C]" style="background:{{ $pColors['action'] }}"></span>
                         </span>
                         <span class="min-w-0 truncate text-[11px] font-medium text-slate-600 group-hover:text-primary dark:text-slate-300">{{ $pName }}</span>
                     </button>
@@ -265,8 +265,8 @@
                 <div>
                     <label class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">{{ $label }}</label>
                     <div class="flex items-center gap-2">
-                        <input type="color" wire:model.live="{{ $field }}" class="h-9 w-11 shrink-0 cursor-pointer rounded-lg border border-slate-300 bg-white p-0.5 dark:border-[#2D4060] dark:bg-[#243352]">
-                        <input type="text" wire:model.live="{{ $field }}" class="w-full rounded-lg border border-slate-300 bg-white px-2 py-1.5 font-mono text-xs uppercase text-slate-900 dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                        <input type="color" wire:model.live="{{ $field }}" class="h-9 w-11 shrink-0 cursor-pointer rounded-lg border border-slate-300 bg-white p-0.5 dark:border-[#2A2E34] dark:bg-[#373a3f]">
+                        <input type="text" wire:model.live="{{ $field }}" class="w-full rounded-lg border border-slate-300 bg-white px-2 py-1.5 font-mono text-xs uppercase text-slate-900 dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
                     </div>
                     @error($field) <span class="mt-1 block text-xs text-red-600 dark:text-red-400">{{ $message }}</span> @enderror
                 </div>
@@ -276,7 +276,7 @@
         <div class="grid gap-4 sm:grid-cols-2">
             <div>
                 <label class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">Control roundness</label>
-                <select wire:model="radius" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                <select wire:model="radius" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
                     <option value="0rem">Square</option>
                     <option value="0.25rem">Subtle</option>
                     <option value="0.5rem">Default</option>
@@ -295,7 +295,7 @@
                 <label class="block text-sm font-medium text-slate-800 dark:text-slate-100">Loader style</label>
                 <p class="mt-0.5 mb-1 text-xs text-slate-500 dark:text-slate-400">The <span class="font-medium">pulsing logo</span> uses your uploaded favicon.</p>
                 <select wire:model="preloader_style"
-                        class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                        class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
                     <option value="pulse-logo">Pulsing logo (recommended)</option>
                     <option value="spinner">Spinner ring</option>
                     <option value="bars">Bars</option>
@@ -305,7 +305,7 @@
         </div>
 
         {{-- Live preview --}}
-        <div class="rounded-2xl border border-slate-200 p-5 dark:border-[#2D4060]">
+        <div class="rounded-2xl border border-slate-200 p-5 dark:border-[#2A2E34]">
             <p class="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-400">Live preview</p>
             <div class="flex flex-wrap items-center gap-3">
                 <button type="button" style="background:{{ $color_primary }};border-radius:calc({{ $radius }} + 0.25rem)" class="px-4 py-2 text-sm font-semibold text-white">Primary button</button>
@@ -329,7 +329,7 @@
          custom web font, per slot. Left blank, the shipped Naara default
          (Supreme Display for titles, Didact Gothic for body) stays untouched —
          this whole section is a purely additive override. --}}
-    <form wire:submit="saveFonts" class="mt-8 space-y-6 border-t border-slate-200 pt-8 dark:border-[#2D4060]">
+    <form wire:submit="saveFonts" class="mt-8 space-y-6 border-t border-slate-200 pt-8 dark:border-[#2A2E34]">
         <div class="flex items-center justify-between">
             <div>
                 <h2 class="text-base font-semibold text-slate-900 dark:text-slate-100">Fonts</h2>
@@ -348,18 +348,18 @@
             @php($googleField = "font_{$slot}_google")
             @php($customField = "font_{$slot}_custom")
             @php($currentCustomUrl = $brand["font_{$slot}_custom"] ?? '')
-            <div class="rounded-2xl border border-slate-200 bg-white p-5 dark:border-[#2D4060] dark:bg-[#1A2840]" x-data="{ source: @entangle($sourceField) }">
+            <div class="rounded-2xl border border-slate-200 bg-white p-5 dark:border-[#2A2E34] dark:bg-[#17191C]" x-data="{ source: @entangle($sourceField) }">
                 <h3 class="text-sm font-semibold text-slate-800 dark:text-slate-100">{{ $label }}</h3>
                 <p class="mb-3 mt-0.5 text-xs text-slate-500 dark:text-slate-400">{{ $hint }}</p>
 
                 <div class="mb-4 flex flex-wrap gap-2">
-                    <label class="flex cursor-pointer items-center gap-1.5 rounded-full border border-slate-200 px-3 py-1.5 text-xs font-medium dark:border-[#2D4060]" :class="source === '' ? 'border-primary bg-primary/10 text-primary' : 'text-slate-500 dark:text-slate-400'">
+                    <label class="flex cursor-pointer items-center gap-1.5 rounded-full border border-slate-200 px-3 py-1.5 text-xs font-medium dark:border-[#2A2E34]" :class="source === '' ? 'border-primary bg-primary/10 text-primary' : 'text-slate-500 dark:text-slate-400'">
                         <input type="radio" wire:model="{{ $sourceField }}" value="" class="hidden"> Naara default
                     </label>
-                    <label class="flex cursor-pointer items-center gap-1.5 rounded-full border border-slate-200 px-3 py-1.5 text-xs font-medium dark:border-[#2D4060]" :class="source === 'google' ? 'border-primary bg-primary/10 text-primary' : 'text-slate-500 dark:text-slate-400'">
+                    <label class="flex cursor-pointer items-center gap-1.5 rounded-full border border-slate-200 px-3 py-1.5 text-xs font-medium dark:border-[#2A2E34]" :class="source === 'google' ? 'border-primary bg-primary/10 text-primary' : 'text-slate-500 dark:text-slate-400'">
                         <input type="radio" wire:model="{{ $sourceField }}" value="google" class="hidden"> Google Font
                     </label>
-                    <label class="flex cursor-pointer items-center gap-1.5 rounded-full border border-slate-200 px-3 py-1.5 text-xs font-medium dark:border-[#2D4060]" :class="source === 'custom' ? 'border-primary bg-primary/10 text-primary' : 'text-slate-500 dark:text-slate-400'">
+                    <label class="flex cursor-pointer items-center gap-1.5 rounded-full border border-slate-200 px-3 py-1.5 text-xs font-medium dark:border-[#2A2E34]" :class="source === 'custom' ? 'border-primary bg-primary/10 text-primary' : 'text-slate-500 dark:text-slate-400'">
                         <input type="radio" wire:model="{{ $sourceField }}" value="custom" class="hidden"> Upload font
                     </label>
                 </div>
@@ -367,7 +367,7 @@
                 <div x-show="source === 'google'" x-cloak>
                     <label class="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-300">Google Font name</label>
                     <input type="text" wire:model="{{ $googleField }}" placeholder="e.g. Poppins" maxlength="60"
-                           class="w-full max-w-xs rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                           class="w-full max-w-xs rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
                     <p class="mt-1 text-[11px] text-slate-400">Exact name as it appears on <span class="font-medium">fonts.google.com</span> — letters, numbers and spaces only.</p>
                     @error($googleField) <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
                 </div>

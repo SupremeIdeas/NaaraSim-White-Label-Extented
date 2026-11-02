@@ -33,12 +33,12 @@
     </div>
 
     <form wire:submit="save" class="space-y-6">
-        <div class="rounded-2xl border border-slate-200 bg-white p-6 dark:border-[#2D4060] dark:bg-[#1A2840]">
+        <div class="rounded-2xl border border-slate-200 bg-white p-6 dark:border-[#2A2E34] dark:bg-[#17191C]">
             <div class="space-y-4">
                 <div>
                     <label class="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-300">Mailer</label>
                     <select wire:model.live="mailer"
-                            class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                            class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
                         <option value="log">Log (development — sends nothing)</option>
                         <option value="smtp">SMTP (recommended — works with any provider)</option>
                         <option value="sendmail">Sendmail (local mail server on a VPS)</option>
@@ -51,19 +51,19 @@
                         <div>
                             <label class="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-300">SMTP host</label>
                             <input type="text" wire:model="smtp_host" placeholder="mail.yourdomain.com" autocomplete="off"
-                                   class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                                   class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
                             @error('smtp_host') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
                         </div>
                         <div>
                             <label class="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-300">Port</label>
                             <input type="text" wire:model="smtp_port" placeholder="587" autocomplete="off"
-                                   class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                                   class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
                             @error('smtp_port') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
                         </div>
                         <div>
                             <label class="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-300">Username</label>
                             <input type="text" wire:model="smtp_username" placeholder="you@yourdomain.com" autocomplete="off"
-                                   class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                                   class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
                             @error('smtp_username') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
                         </div>
                         <div>
@@ -73,13 +73,13 @@
                             </label>
                             <input type="password" wire:model="smtp_password" autocomplete="off"
                                    placeholder="{{ $passwordPreview ? 'Leave blank to keep current' : 'SMTP password' }}"
-                                   class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                                   class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
                             @error('smtp_password') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
                         </div>
                         <div>
                             <label class="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-300">Encryption</label>
                             <select wire:model="smtp_scheme"
-                                    class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                                    class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
                                 <option value="">STARTTLS (port 587)</option>
                                 <option value="smtps">SSL/TLS (port 465)</option>
                             </select>
@@ -94,13 +94,13 @@
                     <div>
                         <label class="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-300">From address</label>
                         <input type="email" wire:model="from_address" placeholder="hello@yourdomain.com"
-                               class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                               class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
                         @error('from_address') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
                     </div>
                     <div>
                         <label class="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-300">From name</label>
                         <input type="text" wire:model="from_name" placeholder="{{ config('app.name') }}"
-                               class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                               class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
                         @error('from_name') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
                     </div>
                 </div>
@@ -108,7 +108,7 @@
         </div>
 
         {{-- Email verification enforcement (NAARA-BUILD-20 §2). --}}
-        <div class="rounded-2xl border border-slate-200 bg-white p-6 dark:border-[#2D4060] dark:bg-[#1A2840]">
+        <div class="rounded-2xl border border-slate-200 bg-white p-6 dark:border-[#2A2E34] dark:bg-[#17191C]">
             <h2 class="mb-1 text-sm font-semibold text-slate-700 dark:text-slate-200">Email verification</h2>
             <p class="mb-4 text-xs text-slate-500 dark:text-slate-400">How strongly to enforce confirming an email address. Only applies once a real mailer is configured above.</p>
             <div class="space-y-2">
@@ -117,7 +117,7 @@
                     'hard' => ['Hard', 'Unverified users are held at the verification screen until they confirm — nothing else opens.'],
                     'off' => ['Off', 'Verification is never required or nudged, even with mail configured.'],
                 ] as $val => [$label, $desc])
-                    <label class="flex cursor-pointer items-start gap-3 rounded-xl border p-3 {{ $verificationMode === $val ? 'border-primary bg-primary/5 dark:bg-primary/10' : 'border-slate-200 dark:border-[#2D4060]' }}">
+                    <label class="flex cursor-pointer items-start gap-3 rounded-xl border p-3 {{ $verificationMode === $val ? 'border-primary bg-primary/5 dark:bg-primary/10' : 'border-slate-200 dark:border-[#2A2E34]' }}">
                         <input type="radio" wire:model.live="verificationMode" value="{{ $val }}" class="mt-1 text-primary focus:ring-primary">
                         <span>
                             <span class="block text-sm font-semibold text-slate-800 dark:text-slate-100">{{ $label }}</span>
@@ -145,7 +145,7 @@
 
         <div class="flex flex-wrap items-center justify-between gap-3">
             <button type="button" wire:click="sendTest" wire:loading.attr="disabled" wire:target="sendTest"
-                    class="inline-flex items-center gap-2 rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-60 dark:border-[#2D4060] dark:text-slate-200 dark:hover:bg-[#243352]">
+                    class="inline-flex items-center gap-2 rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-60 dark:border-[#2A2E34] dark:text-slate-200 dark:hover:bg-[#373a3f]">
                 <x-icon name="send" class="h-4 w-4" />
                 <span wire:loading.remove wire:target="sendTest">Send test email</span>
                 <span wire:loading wire:target="sendTest">Sending…</span>

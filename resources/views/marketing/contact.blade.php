@@ -22,7 +22,7 @@
 
     <section class="mx-auto grid max-w-5xl gap-8 px-4 pb-24 lg:grid-cols-[1fr_320px]">
         @php($form = $sections['form'] ?? null)
-        <div data-reveal class="rounded-3xl border border-slate-200 bg-white p-6 sm:p-8 dark:border-[var(--brand-card-border-dark)] dark:bg-[#16233d]">
+        <div data-reveal class="rounded-3xl border border-slate-200 bg-white p-6 sm:p-8 dark:border-[var(--brand-card-border-dark)] dark:bg-[#27292c]">
             <h2 class="mb-5 text-xl font-bold text-slate-900 dark:text-white">{{ $form['headline'] ?? 'Send Us a Message' }}</h2>
             <livewire:contact-form />
         </div>
@@ -33,14 +33,14 @@
                 <h2 data-reveal class="text-sm font-semibold uppercase tracking-widest text-slate-400">{{ $channels['headline'] }}</h2>
 
                 <div data-reveal class="nx-card">
-                    <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10 text-primary dark:bg-primary/20"><x-icon name="message-circle" class="h-4 w-4" /></span>
+                    <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10 text-primary dark:bg-primary/20"><x-glyph name="message-circle" class="h-4 w-4" /></span>
                     <h3 class="mt-3 font-bold text-slate-900 dark:text-white">{{ $channels['chat_title'] }}</h3>
                     <p class="mt-1.5 text-sm leading-relaxed text-slate-600 dark:text-slate-300">{{ $channels['chat_text'] }}</p>
                     <a href="{{ auth()->check() ? route('support') : route('login') }}" class="mt-3 inline-block text-sm font-semibold text-primary hover:underline">Open the chat</a>
                 </div>
 
                 <div data-reveal class="nx-card">
-                    <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10 text-primary dark:bg-primary/20"><x-icon name="mail" class="h-4 w-4" /></span>
+                    <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10 text-primary dark:bg-primary/20"><x-glyph name="mail" class="h-4 w-4" /></span>
                     <h3 class="mt-3 font-bold text-slate-900 dark:text-white">{{ $channels['email_title'] }}</h3>
                     <p class="mt-1.5 text-sm leading-relaxed text-slate-600 dark:text-slate-300">{{ $channels['email_text'] }}</p>
                     <a href="mailto:{{ \App\Support\Niche\SupportLinks::email() }}" class="mt-3 inline-block text-sm font-semibold text-primary hover:underline">{{ \App\Support\Niche\SupportLinks::email() }}</a>
@@ -48,7 +48,7 @@
 
                 @if (\App\Support\Niche\SupportLinks::hasWhatsapp())
                     <div data-reveal class="nx-card">
-                        <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10 text-primary dark:bg-primary/20"><x-icon name="phone" class="h-4 w-4" /></span>
+                        <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10 text-primary dark:bg-primary/20"><x-glyph name="phone" class="h-4 w-4" /></span>
                         <h3 class="mt-3 font-bold text-slate-900 dark:text-white">WhatsApp</h3>
                         <p class="mt-1.5 text-sm text-slate-600 dark:text-slate-300">Message us directly for quick questions.</p>
                         <a href="{{ \App\Support\Niche\SupportLinks::whatsappUrl() }}" target="_blank" rel="noopener" class="mt-3 inline-block text-sm font-semibold text-primary hover:underline">Chat on WhatsApp</a>

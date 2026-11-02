@@ -72,7 +72,7 @@
         <div class="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             <div class="relative overflow-hidden border border-slate-200 bg-white p-6 pt-8 dark:border-white/10 dark:bg-[#12172a]">
                 <span class="absolute left-0 top-0 h-1.5 w-full bg-gradient-to-r from-primary to-accent" aria-hidden="true"></span>
-                <span class="flex h-10 w-10 items-center justify-center bg-gradient-to-br from-primary to-accent text-white [clip-path:polygon(15%_0,100%_0,85%_100%,0_100%)]"><x-icon name="message-circle" class="h-5 w-5" /></span>
+                <span class="flex h-10 w-10 items-center justify-center bg-gradient-to-br from-primary to-accent text-white [clip-path:polygon(15%_0,100%_0,85%_100%,0_100%)]"><x-glyph name="message-circle" class="h-5 w-5" /></span>
                 <h3 class="mt-4 font-bold text-slate-900 dark:text-white">Live chat</h3>
                 <p class="mt-1.5 text-sm leading-relaxed text-slate-600 dark:text-slate-300">Usually online — get a real answer in minutes.</p>
                 <a href="{{ auth()->check() ? route('support') : route('login') }}" class="mt-3 inline-block text-sm font-bold text-primary-dark hover:underline dark:text-primary">Open the chat</a>
@@ -80,7 +80,7 @@
 
             <div class="relative overflow-hidden border border-slate-200 bg-white p-6 pt-8 dark:border-white/10 dark:bg-[#12172a]">
                 <span class="absolute left-0 top-0 h-1.5 w-full bg-gradient-to-r from-primary to-accent" aria-hidden="true"></span>
-                <span class="flex h-10 w-10 items-center justify-center bg-gradient-to-br from-primary to-accent text-white [clip-path:polygon(15%_0,100%_0,85%_100%,0_100%)]"><x-icon name="mail" class="h-5 w-5" /></span>
+                <span class="flex h-10 w-10 items-center justify-center bg-gradient-to-br from-primary to-accent text-white [clip-path:polygon(15%_0,100%_0,85%_100%,0_100%)]"><x-glyph name="mail" class="h-5 w-5" /></span>
                 <h3 class="mt-4 font-bold text-slate-900 dark:text-white">Email</h3>
                 <p class="mt-1.5 text-sm leading-relaxed text-slate-600 dark:text-slate-300">For anything that needs a paper trail.</p>
                 <a href="mailto:{{ \App\Support\Niche\SupportLinks::email() }}" class="mt-3 inline-block text-sm font-bold text-primary-dark hover:underline dark:text-primary">{{ \App\Support\Niche\SupportLinks::email() }}</a>
@@ -89,7 +89,7 @@
             @if (\App\Support\Niche\SupportLinks::hasWhatsapp())
                 <div class="relative overflow-hidden border border-slate-200 bg-white p-6 pt-8 dark:border-white/10 dark:bg-[#12172a]">
                     <span class="absolute left-0 top-0 h-1.5 w-full bg-gradient-to-r from-primary to-accent" aria-hidden="true"></span>
-                    <span class="flex h-10 w-10 items-center justify-center bg-gradient-to-br from-primary to-accent text-white [clip-path:polygon(15%_0,100%_0,85%_100%,0_100%)]"><x-icon name="phone" class="h-5 w-5" /></span>
+                    <span class="flex h-10 w-10 items-center justify-center bg-gradient-to-br from-primary to-accent text-white [clip-path:polygon(15%_0,100%_0,85%_100%,0_100%)]"><x-glyph name="phone" class="h-5 w-5" /></span>
                     <h3 class="mt-4 font-bold text-slate-900 dark:text-white">WhatsApp</h3>
                     <p class="mt-1.5 text-sm leading-relaxed text-slate-600 dark:text-slate-300">Message us directly for quick questions.</p>
                     <a href="{{ \App\Support\Niche\SupportLinks::whatsappUrl() }}" target="_blank" rel="noopener" class="mt-3 inline-block text-sm font-bold text-primary-dark hover:underline dark:text-primary">Chat on WhatsApp</a>

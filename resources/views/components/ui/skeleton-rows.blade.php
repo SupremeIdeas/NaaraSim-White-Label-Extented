@@ -2,7 +2,7 @@
      Renders N shimmer rows; drop it inside a wire:loading block so a list shows
      a skeleton while the server round-trips (search, filter, navigate). --}}
 @props(['count' => 5, 'avatar' => true])
-<div {{ $attributes->merge(['class' => 'divide-y divide-slate-100 dark:divide-[#243352]']) }} aria-hidden="true">
+<div {{ $attributes->merge(['class' => 'divide-y divide-slate-100 dark:divide-[#373a3f]']) }} aria-hidden="true">
     @for ($i = 0; $i < (int) $count; $i++)
         <div class="flex items-center gap-3 px-4 py-3">
             @if ($avatar)

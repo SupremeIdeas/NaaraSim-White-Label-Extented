@@ -1,7 +1,7 @@
 <div class="mt-6 space-y-4">
     @php
-        $card = 'rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-[#2D4060] dark:bg-[#1A2840]';
-        $inp = 'rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100';
+        $card = 'rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-[#2A2E34] dark:bg-[#17191C]';
+        $inp = 'rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100';
     @endphp
 
     {{-- Matrix editor --}}
@@ -16,7 +16,7 @@
             <thead><tr class="text-left text-xs uppercase tracking-wide text-slate-400"><th class="py-2">Rail</th><th class="py-2">Shown as</th><th class="py-2">Override</th><th class="py-2">Verified</th></tr></thead>
             <tbody>
                 @foreach ($rows as $r)
-                    <tr class="border-t border-slate-50 dark:border-[#22314e]" wire:key="guide-{{ $country }}-{{ $r['rail'] }}">
+                    <tr class="border-t border-slate-50 dark:border-[#34373c]" wire:key="guide-{{ $country }}-{{ $r['rail'] }}">
                         <td class="py-2 font-medium capitalize text-slate-900 dark:text-slate-100">{{ str_replace('_', ' ', $r['rail']) }}</td>
                         <td class="py-2 text-slate-600 dark:text-slate-300">{{ str_replace('_', ' ', $r['state']) }}</td>
                         <td class="py-2">
@@ -34,7 +34,7 @@
             <div><label class="block text-xs text-slate-500">ETA min (hours)</label><input type="number" wire:model="etaMin" class="{{ $inp }} w-28"></div>
             <div><label class="block text-xs text-slate-500">ETA max (hours)</label><input type="number" wire:model="etaMax" class="{{ $inp }} w-28"></div>
             @foreach (['paystack', 'flutterwave', 'stripe_connect', 'global'] as $r)
-                <button type="button" wire:click="saveEta('{{ $r }}')" wire:loading.attr="disabled" class="rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-600 disabled:opacity-60 dark:border-[#2D4060] dark:text-slate-300">Set ETA: {{ str_replace('_', ' ', $r) }}</button>
+                <button type="button" wire:click="saveEta('{{ $r }}')" wire:loading.attr="disabled" class="rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-600 disabled:opacity-60 dark:border-[#2A2E34] dark:text-slate-300">Set ETA: {{ str_replace('_', ' ', $r) }}</button>
             @endforeach
         </div>
         @error('etaMin') <span class="text-xs text-red-600">{{ $message }}</span> @enderror @error('etaMax') <span class="text-xs text-red-600">{{ $message }}</span> @enderror
@@ -54,8 +54,8 @@
         @error('globalDays') <span class="text-xs text-red-600">{{ $message }}</span> @enderror
         <div class="mt-4 flex flex-wrap gap-2">
             <button type="button" wire:click="saveSettings" wire:loading.attr="disabled" wire:target="saveSettings" class="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary-dark disabled:opacity-60">Save settings</button>
-            <button type="button" wire:click="runAudit" wire:loading.attr="disabled" wire:target="runAudit" class="rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 disabled:opacity-60 dark:border-[#2D4060] dark:text-slate-300">Run audit now</button>
-            <button type="button" wire:click="reseed" wire:loading.attr="disabled" wire:target="reseed" wire:confirm="Re-seed from providers? Overrides are never overwritten." class="rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 disabled:opacity-60 dark:border-[#2D4060] dark:text-slate-300">Re-seed from providers</button>
+            <button type="button" wire:click="runAudit" wire:loading.attr="disabled" wire:target="runAudit" class="rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 disabled:opacity-60 dark:border-[#2A2E34] dark:text-slate-300">Run audit now</button>
+            <button type="button" wire:click="reseed" wire:loading.attr="disabled" wire:target="reseed" wire:confirm="Re-seed from providers? Overrides are never overwritten." class="rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 disabled:opacity-60 dark:border-[#2A2E34] dark:text-slate-300">Re-seed from providers</button>
         </div>
         @if ($auditResult) <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">{{ $auditResult }}</p> @endif
     </div>
@@ -67,7 +67,7 @@
         <div class="mt-3 flex flex-wrap gap-2">
             <select wire:model="previewCountry" class="{{ $inp }}" aria-label="Preview country">@foreach ($countries as $c) <option value="{{ $c }}">{{ $c }}</option> @endforeach</select>
             <select wire:model="previewHistoryRail" class="{{ $inp }}" aria-label="Simulated history"><option value="">No history</option>@foreach (['paystack', 'flutterwave', 'stripe_connect'] as $r) <option value="{{ $r }}">Paid via {{ $r }}</option> @endforeach</select>
-            <button type="button" wire:click="runPreview" class="rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 dark:border-[#2D4060] dark:text-slate-300">Preview</button>
+            <button type="button" wire:click="runPreview" class="rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 dark:border-[#2A2E34] dark:text-slate-300">Preview</button>
         </div>
         @if ($preview)
             <p class="mt-3 text-sm font-medium text-slate-900 dark:text-slate-100">Verdict: {{ str_replace('_', ' ', $preview['verdict']) }}</p>

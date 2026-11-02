@@ -1,0 +1,134 @@
+{
+ "s2-a": {
+  "eyebrow": "The Diagnosis, 01",
+  "headline": "You should know the total before the card comes out.",
+  "body": "<p>Roaming charges arrive after the trip. Airport SIM counters quote one price, then add a pack, then a top-up. The number you agreed to is not the number you pay.</p><p>Naara fixes the order of events. You pick a plan, you see its data, validity and coverage, and the final amount is on screen before checkout. An eSIM plan is a single purchase with no subscription attached.</p><p><strong>Every retail price comes from one pricing engine.</strong> No page, script or admin screen calculates its own. Coupons and NaaraCredits are re-quoted on the server at the moment you pay, so the amount you saw is the amount charged.</p>",
+  "quote": "The price on the screen is the price on the receipt.",
+  "bullets": [
+   "<strong>What breaks:</strong> Roaming bill shock, airport add-ons, a price that changes at the counter",
+   "<strong>What Naara does:</strong> One pricing engine for every plan and number, quoted before you pay",
+   "<strong>Where you see it:</strong> Plan tiles show a live \"from\" price, and checkout shows the final charge with any coupon or credit applied",
+   "<strong>Afterwards:</strong> Every purchase sends an itemised receipt"
+  ]
+ },
+ "s2-b": {
+  "eyebrow": "The Diagnosis, 02",
+  "headline": "Data gets you online. A number gets you verified.",
+  "body": "<p>Most eSIM apps sell data and stop there. Then you land, a bank or a messaging app sends a one-time code, and there is nowhere for it to go. You are online and still locked out.</p><p>Naara puts five products in one account. <strong>Naara Data</strong> for eSIM data. <strong>Naara Connect</strong> for a full eSIM with calls and data. <strong>Naara Verify</strong> and <strong>Naara Rent</strong> for one-time and short-term numbers. <strong>Naara Line</strong> for a permanent number with voice and SMS.</p><p>All five run on one wallet and one login. You never open a second app to fix a problem the first one left behind.</p>",
+  "quote": "A data plan and a phone number solve different problems. Naara sells both.",
+  "bullets": [
+   "<strong>Naara Data:</strong> Local, regional and global eSIM data plans",
+   "<strong>Naara Connect:</strong> A full eSIM with calls and data on one profile",
+   "<strong>Naara Verify and Rent:</strong> Disposable numbers for one-time codes, and short-term rentals",
+   "<strong>Naara Line:</strong> A permanent number with voice and SMS, billed monthly, with call forwarding and voicemail"
+  ]
+ },
+ "s2-c": {
+  "eyebrow": "The Diagnosis, 03",
+  "headline": "A charge without a delivery is the worst outcome. Naara treats it as a defect.",
+  "body": "<p>Every supplier fails sometimes. A plan goes out of stock, an API times out, a number pool runs dry. If a store depends on one supplier, that failure becomes yours, and you learn about it after the money has moved.</p><p>Naara routes each order through a lane of independent partners and moves to the next one when a partner can't deliver. If the whole lane fails, the wallet is refunded the exact amount charged and the operations team is alerted.</p><p><strong>Verification numbers carry the same promise.</strong> If the code doesn't arrive inside the window, the order is cancelled and refunded automatically. Nobody has to file a ticket to get their money back.</p>",
+  "quote": "Never charge without delivering.",
+  "bullets": [
+   "<strong>What breaks:</strong> Out-of-stock plans, provider timeouts, empty number pools",
+   "<strong>What Naara does:</strong> Fails over inside the lane, then refunds the exact amount charged",
+   "<strong>Codes that don't arrive:</strong> The order is cancelled and the wallet refunded on timeout",
+   "<strong>Visibility:</strong> Every total failure raises an admin alert with the order context"
+  ]
+ },
+ "s2-d": {
+  "eyebrow": "The Diagnosis, 04",
+  "headline": "One balance, and any way of paying into it.",
+  "body": "<p>People who cross borders carry a naira card, a dollar card, a mobile wallet and whatever the local shop accepts. Every app wants its own balance, and none of them talk to each other.</p><p>Naara keeps a single spendable balance in USD. You top up by card, bank or mobile payment, PayPal or crypto, depending on what is available in your country. Whatever you pay in is converted to USD, and the original payment stays on the ledger next to the credit.</p><p>The same balance pays for eSIMs, numbers and gift cards. If you run a shared plan, one wallet can fund family or team members, each with a spend cap you set.</p>",
+  "quote": "Top up once. Spend anywhere on Naara.",
+  "bullets": [
+   "<strong>Payment rails:</strong> Cards, bank and mobile payments, PayPal, and crypto, by country availability",
+   "<strong>Top-up currencies:</strong> USD, NGN, GHS, KES, ZAR, GBP, EUR, CAD, INR and USDT",
+   "<strong>Rate lock:</strong> When you pay in another local currency, the USD amount is fixed when you start the top-up",
+   "<strong>Shared plans:</strong> One wallet funds a group, with a spend cap per member"
+  ]
+ },
+ "s3-a": {
+  "eyebrow": "The Architecture, Stage 01",
+  "headline": "Every price has one author.",
+  "body": "<p>The pricing engine takes the partner's rate, applies Naara's margin and returns the retail price. Controllers, jobs, views and admin screens all call it. None of them calculate a price of their own. The partner rate never leaves the server.</p><p>A margin guard sits on the result. Any price that would land below its floor is corrected upward before it is quoted, and the guard cannot be switched off. Where a partner requires a minimum selling price, a second rule holds the plan at or above it.</p><p><strong>Number and SMS prices follow the same path, with one difference.</strong> The partner rate is fetched live before the quote, so a number is never sold from a stale price. Every calculation is written to a log.</p>",
+  "quote": "If two places can set a price, one of them is wrong.",
+  "bullets": [
+   "<strong>Function:</strong> Retail price is the partner rate plus margin, calculated in one service",
+   "<strong>Guards:</strong> A margin floor on every sale, plus a minimum-price rule where a partner requires one",
+   "<strong>Numbers:</strong> The partner rate is fetched live before every quote",
+   "<strong>Audit:</strong> Each calculation is logged with the markup, the final price and which guard acted"
+  ]
+ },
+ "s3-b": {
+  "eyebrow": "The Architecture, Stage 02",
+  "headline": "The router matches each order to the provider that can actually deliver it.",
+  "body": "<p>eSIMs are interchangeable across partners, so Naara keeps two failover lanes: one for data-only plans and one for full eSIMs that carry calls. A voice purchase can only fail over to another voice-capable partner. It is never quietly downgraded to a data plan.</p><p>Numbers are not interchangeable, so they are not treated as if they were. A request is routed by country and type to the partner that owns it, and falls back only inside that lane. The router never swaps in a different country or a different kind of number to make an order go through.</p><p><strong>Before each attempt, the router checks the partner's health.</strong> It skips any partner whose circuit is open or that an admin has paused, and orders the rest by live reliability. If every partner is down, it makes one last attempt with the least recently failed one and raises a critical alert, rather than turn the customer away outright.</p>",
+  "quote": "When a lane is exhausted, the honest answer is a refund, not a substitute.",
+  "bullets": [
+   "<strong>Two eSIM lanes:</strong> Naara Data for data-only, Naara Connect for calls plus data",
+   "<strong>Number lanes:</strong> Routed by country and type, with fallback inside the lane only",
+   "<strong>Circuit breaker:</strong> A failing partner is skipped, then probed once after a cooldown before it takes orders again",
+   "<strong>Admin pause:</strong> A paused partner stays out until an admin resumes it. It never resumes itself."
+  ]
+ },
+ "s3-c": {
+  "eyebrow": "The Architecture, Stage 03",
+  "headline": "Money moves once, and leaves a trail.",
+  "body": "<p>Every balance change goes through one wallet service. Each debit runs in a database transaction with the wallet row locked, and a second lock per wallet stops two requests from spending the same balance at the same moment. Each change writes a ledger row with the balance before and after.</p><p>Every charge carries a reference. If the same reference arrives twice, from a double tap or a retry, the wallet returns the first transaction instead of charging again. Checkout also refuses to place a second provider order against a charge that already exists.</p><p><strong>The last guard covers the ugly case.</strong> If a provider delivers but Naara fails to save the order, the wallet and any redeemed NaaraCredits are refunded and an alert goes out. Payment webhooks are signature-checked before any payload is trusted, and the top-up credit runs as a queued job that is idempotent on the payment reference.</p>",
+  "quote": "A balance is only real if every movement can be explained.",
+  "bullets": [
+   "<strong>Atomic:</strong> Database transaction, row lock and a per-wallet cache lock",
+   "<strong>Idempotent:</strong> The same reference returns the same transaction, never a second charge",
+   "<strong>Orphan-charge guard:</strong> Delivered but not saved triggers an automatic refund and an alert",
+   "<strong>Webhooks:</strong> Signature verified first, then credited by an idempotent queued job"
+  ]
+ },
+ "s3-d": {
+  "eyebrow": "The Architecture, The Result",
+  "headline": "The system gets more reliable the more it is used.",
+  "body": "<p>Every finished order records an outcome. A background scorer, Naara Core Intelligence, reads those outcomes and updates a reliability score, a confidence level and a risk rating for each partner. It runs as a queued listener and a scheduled recompute. It never runs inside a customer's purchase.</p><p>The score is built to resist both gaming and panic. One failed order moves a partner's score by five percent at most. A score built on five orders counts for far less than one built on hundreds. Expected gaps like out-of-stock are treated more gently than hard faults like timeouts and authentication errors.</p><p><strong>The router reads those scores to decide who to try first.</strong> The per-country success rates customers see come from the same outcome log, and they appear only once there are enough orders to make the number honest.</p>",
+  "quote": "A success rate built on five orders isn't a success rate, so Naara doesn't show one.",
+  "bullets": [
+   "<strong>Score:</strong> Nudged by each outcome and recomputed over a trailing 30-day window",
+   "<strong>Confidence:</strong> Grows with volume and reaches full weight at 200 outcomes",
+   "<strong>Risk:</strong> Failure rate plus error type, so timeouts weigh more than stock-outs",
+   "<strong>Kill switch:</strong> Admins can turn scoring off. Circuit breakers keep working either way."
+  ]
+ },
+ "s4-a": {
+  "eyebrow": "The Formula, Clarity",
+  "headline": "Clarity means no surprises after checkout.",
+  "body": "<p>The most common eSIM regret is buying a plan for a phone that can't install it. Naara runs a device check before purchase. Where the browser allows it, Naara detects your phone and pre-selects the model, then shows a clear supported, unsupported or unknown result. On iPhone, where Safari hides the model, you pick it from the list. If the result is unknown, Naara tells you how to check for yourself.</p><p>Plan pages show only facts Naara can stand behind: data, validity, voice and coverage. There is no invented feature list. A short plain-language tooltip explains each plan and is written without ever seeing price, cost or supplier. Browsing by local, regional or global reads from a cache, so nothing waits on a live supplier call.</p><p><strong>Not sure how much data you need?</strong> The data estimator sizes a plan from your usage profile and the number of days you're away.</p>",
+  "quote": "If Naara can't verify a feature, it doesn't appear on the plan page.",
+  "bullets": [
+   "<strong>Device check:</strong> Supported, unsupported or unknown, before you can buy",
+   "<strong>Plan facts:</strong> Data, validity, voice and coverage only",
+   "<strong>Data estimator:</strong> A plan size from your usage profile and trip length",
+   "<strong>Supplier names:</strong> Never shown. The public status page uses Naara's own service names."
+  ]
+ },
+ "s4-b": {
+  "eyebrow": "The Formula, Speed",
+  "headline": "Speed is everything between pay and connected.",
+  "body": "<p>After checkout the eSIM appears in My Lines with a QR code to scan and a manual activation code for phones that need it typed in. Each purchase sends an order confirmation and an itemised receipt, and an opt-in WhatsApp message if you've switched that on.</p><p>Verification numbers run against a clock. Naara polls the partner for the code on a queue and shows it in your account when it arrives. If the window closes with no code, the order cancels and refunds itself.</p><p><strong>If you're unsure where to start, the Wizard does the sorting.</strong> Type \"I need a number for WhatsApp in Ghana\" and it picks the product, country and service, then hands you the buy button. It only selects from a fixed list of options and never touches money.</p>",
+  "quote": "The best support ticket is the one you never had to open.",
+  "bullets": [
+   "<strong>eSIM delivery:</strong> QR code and manual activation code in My Lines",
+   "<strong>Codes:</strong> Queued polling, shown on arrival, cancelled and refunded on timeout",
+   "<strong>Messages:</strong> Order confirmation, itemised receipt and opt-in WhatsApp",
+   "<strong>The Wizard:</strong> Free text in, fixed options out, and you still tap to buy"
+  ]
+ },
+ "s4-c": {
+  "eyebrow": "The Formula, Reliability",
+  "headline": "People come back to the service that stayed honest when something went wrong.",
+  "body": "<p>Anything can fail once. What decides whether someone returns is what happens next. Naara refunds automatically, runs a public status page under its own service names, and lets you subscribe to status updates by email.</p><p>Support is handled by Nia, an AI agent that works from your own account. It can't see anyone else's data, and it can't see Naara's costs or profit. Its replies are screened so it can't claim a refund or an account change it never made. When it can't solve something, it hands the conversation to a human.</p><p><strong>NaaraCredits reward repeat use.</strong> Redeem them at checkout, and unlock goals in My Journey as you buy and travel. Credits are capped at checkout so a discount can never push a sale below its floor.</p>",
+  "quote": "Trust is built the one time something doesn't work.",
+  "bullets": [
+   "<strong>Refunds:</strong> Automatic on failed orders and timed-out codes",
+   "<strong>Status:</strong> A public page with Naara's own service names, plus email subscriptions",
+   "<strong>Support:</strong> Nia answers from your account data and escalates to a human",
+   "<strong>Loyalty:</strong> NaaraCredits and My Journey goals, redeemable at checkout"
+  ]
+ }
+}

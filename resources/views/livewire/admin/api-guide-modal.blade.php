@@ -6,7 +6,7 @@
             <dl class="space-y-4 text-sm">
                 <div>
                     <dt class="font-semibold text-slate-500 dark:text-slate-400">Config key</dt>
-                    <dd class="mt-1 rounded-lg bg-slate-100 px-3 py-2 font-mono text-slate-800 dark:bg-[#243352] dark:text-slate-200">{{ $content['config_key'] }}</dd>
+                    <dd class="mt-1 rounded-lg bg-slate-100 px-3 py-2 font-mono text-slate-800 dark:bg-[#373a3f] dark:text-slate-200">{{ $content['config_key'] }}</dd>
                 </div>
                 <div>
                     <dt class="font-semibold text-slate-500 dark:text-slate-400">Where to get it</dt>
@@ -23,7 +23,7 @@
                             <span @class([
                                 'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold',
                                 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300' => $content['required'],
-                                'bg-slate-100 text-slate-600 dark:bg-[#243352] dark:text-slate-400' => ! $content['required'],
+                                'bg-slate-100 text-slate-600 dark:bg-[#373a3f] dark:text-slate-400' => ! $content['required'],
                             ])>
                                 {{ $content['required'] ? 'Required' : 'Optional' }}
                             </span>

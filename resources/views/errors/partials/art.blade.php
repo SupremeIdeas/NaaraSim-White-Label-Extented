@@ -5,7 +5,7 @@
         <linearGradient id="g1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" style="stop-color:var(--c1)"/><stop offset="1" style="stop-color:var(--c2)"/></linearGradient>
         <linearGradient id="g2" x1="0" y1="1" x2="1" y2="0"><stop offset="0" style="stop-color:var(--c2)"/><stop offset="1" style="stop-color:var(--c1)"/></linearGradient>
         <radialGradient id="halo" cx=".5" cy=".5" r=".5"><stop offset="0" style="stop-color:var(--c1);stop-opacity:.28"/><stop offset="1" style="stop-color:var(--c1);stop-opacity:0"/></radialGradient>
-        <filter id="soft" x="-20%" y="-20%" width="140%" height="150%"><feDropShadow dx="0" dy="6" stdDeviation="6" flood-color="#0D1B2A" flood-opacity=".18"/></filter>
+        <filter id="soft" x="-20%" y="-20%" width="140%" height="150%"><feDropShadow dx="0" dy="6" stdDeviation="6" flood-color="#0b0b0c" flood-opacity=".18"/></filter>
     </defs>
     <circle cx="160" cy="96" r="92" fill="url(#halo)"/>
     <ellipse cx="160" cy="180" rx="92" ry="7" style="fill:var(--ink)" opacity=".09"/>

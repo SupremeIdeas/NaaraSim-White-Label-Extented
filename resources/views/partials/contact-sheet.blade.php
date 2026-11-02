@@ -6,7 +6,7 @@
 
     <div x-show="sheet" x-transition:enter="transition ease-out duration-300"
          x-transition:enter-start="translate-y-8 opacity-0 sm:scale-95" x-transition:enter-end="translate-y-0 opacity-100 sm:scale-100"
-         class="relative flex max-h-[92vh] w-full max-w-md flex-col overflow-hidden rounded-t-3xl bg-white shadow-2xl dark:bg-[#0D1B2A] sm:rounded-3xl">
+         class="relative flex max-h-[92vh] w-full max-w-md flex-col overflow-hidden rounded-t-3xl bg-white shadow-2xl dark:bg-[#0b0b0c] sm:rounded-3xl">
         <div class="mx-auto mt-3 h-1.5 w-10 shrink-0 rounded-full bg-slate-300 dark:bg-white/20 sm:hidden"></div>
 
         <div class="flex items-center justify-between px-5 py-4">
@@ -19,13 +19,13 @@
                 <div>
                     <label class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">Name</label>
                     <input type="text" wire:model="name" placeholder="Ada Obi"
-                           class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm dark:border-white/10 dark:bg-[#243352] dark:text-slate-100">
+                           class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm dark:border-white/10 dark:bg-[#373a3f] dark:text-slate-100">
                     @error('name') <span class="text-xs text-red-600">{{ $message }}</span> @enderror
                 </div>
                 <div>
                     <label class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">Number</label>
                     <input type="tel" wire:model="phone" placeholder="+2348012345678"
-                           class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm dark:border-white/10 dark:bg-[#243352] dark:text-slate-100">
+                           class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm dark:border-white/10 dark:bg-[#373a3f] dark:text-slate-100">
                     @error('phone') <span class="text-xs text-red-600">{{ $message }}</span> @enderror
                 </div>
             </div>

@@ -39,7 +39,6 @@
                  the marketing hero, tuned for the navy panel. Only over the
                  branded WebGL default (not an admin-uploaded image/video). --}}
             @if ($useWebgl)
-                <x-flag-orbit tone="dark" />
             @endif
 
             <div class="relative flex h-full min-h-[8.5rem] flex-col justify-between p-8 pb-[calc(2rem+30px)] lg:min-h-0 lg:p-12">

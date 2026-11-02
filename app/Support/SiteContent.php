@@ -19,6 +19,71 @@ class SiteContent
     public const PAGES = ['home', 'about', 'how-it-works', 'contact', 'faq'];
 
     /**
+     * Seeded defaults for the homepage Diagnosis/Architecture/Promise block:
+     * the card copy (resources/data/diagnosis-copy.json) plus every deep-dive
+     * modal's eyebrow/headline/body/quote/bullets (resources/data/
+     * bento-diagnosis-modals.json, flattened to `m_{cell}_{part}` fields, with
+     * the cell id's dash as an underscore — `s2-a` -> `m_s2_a_headline`). Kept
+     * in data files so ~100 fields don't bloat this class; edited from the
+     * Site Editor like any other section.
+     *
+     * @return array<string, string>
+     */
+    public static function diagnosisDefaults(): array
+    {
+        static $memo = null;
+        if ($memo !== null) {
+            return $memo;
+        }
+
+        $fields = [];
+        $copy = @file_get_contents(resource_path('data/diagnosis-copy.json'));
+        foreach ((array) json_decode((string) $copy, true) as $k => $v) {
+            $fields[(string) $k] = (string) $v;
+        }
+
+        $modals = @file_get_contents(resource_path('data/bento-diagnosis-modals.json'));
+        foreach ((array) json_decode((string) $modals, true) as $cell => $m) {
+            $id = 'm_'.str_replace('-', '_', (string) $cell);
+            foreach (['eyebrow', 'headline', 'body', 'quote'] as $part) {
+                $fields["{$id}_{$part}"] = (string) ($m[$part] ?? '');
+            }
+            $fields["{$id}_bullets"] = implode("\n", (array) ($m['bullets'] ?? []));
+        }
+
+        return $memo = $fields;
+    }
+
+    /**
+     * The modal payload the diagnosis partial hands to its JS: the shipped
+     * JSON overlaid with whatever the admin edited. Body HTML is reduced to a
+     * small allow-list so a pasted <script> or inline handler can never ship.
+     *
+     * @param  array<string, mixed>  $s  the diagnosis section's merged fields
+     * @return array<string, array<string, mixed>>
+     */
+    public static function diagnosisModals(array $s): array
+    {
+        $base = (array) json_decode((string) @file_get_contents(resource_path('data/bento-diagnosis-modals.json')), true);
+        $out = [];
+
+        foreach ($base as $cell => $m) {
+            $id = 'm_'.str_replace('-', '_', (string) $cell);
+            $bullets = array_values(array_filter(array_map('trim', preg_split('/\R/', (string) ($s["{$id}_bullets"] ?? '')) ?: [])));
+
+            $out[$cell] = array_merge($m, [
+                'eyebrow' => (string) ($s["{$id}_eyebrow"] ?? $m['eyebrow'] ?? ''),
+                'headline' => (string) ($s["{$id}_headline"] ?? $m['headline'] ?? ''),
+                'body' => strip_tags((string) ($s["{$id}_body"] ?? $m['body'] ?? ''), '<p><strong><em><br><ul><ol><li>'),
+                'quote' => (string) ($s["{$id}_quote"] ?? $m['quote'] ?? ''),
+                'bullets' => $bullets !== [] ? $bullets : (array) ($m['bullets'] ?? []),
+            ]);
+        }
+
+        return $out;
+    }
+
+    /**
      * PAGES minus any page that's master-only. Today that's just 'faq'
      * (owner decision, 2026-09-21 — the dedicated FAQ page's own route
      * 404s on a white-label fork, so its admin editor tab and page-select
@@ -89,6 +154,18 @@ class SiteContent
                     'showcase_image' => '',
                     'stat_1' => '190+ Countries', 'stat_2' => '3 Min Setup', 'stat_3' => '0 Physical SIM', 'stat_4' => '24/7 Support',
                 ],
+                'manifesto' => [
+                    'tag' => 'Our Manifesto',
+                    'title' => 'What we',
+                    'title_accent' => 'stand for.',
+                    'body' => 'Naara exists because staying connected should never depend on a border, a queue or a surprise bill. We built one wallet for data, numbers and gifts, priced honestly, delivered in minutes, and refunded automatically when we miss. No swapping SIMs. No hidden fees. No excuses. Just connection that works the way you always expected it to.',
+                ],
+                'diagnosis' => array_merge([
+                    'eyebrow' => 'The Diagnosis',
+                    'headline' => "The problem isn't signal.",
+                    'headline_accent' => "It's what sits behind it.",
+                    'promise_eyebrow' => 'The Naara Promise',
+                ], self::diagnosisDefaults()),
                 'how' => [
                     'eyebrow' => 'Simple by Design',
                     'headline' => 'Connected in Three Steps',
@@ -177,6 +254,12 @@ class SiteContent
                     't2_quote' => "I've used three different eSIM apps before NaaraSim. None of them felt like they were made for me. This one actually works in the countries I travel to, and the top-up process is so simple I did it in a taxi.",
                     't3_name' => 'Amara T.', 't3_route' => 'Nairobi → Toronto',
                     't3_quote' => 'The setup took literally two minutes. My previous experience with roaming was painful — surprise bills, dead zones, hours on the phone with customer service. NaaraSim solved all of that in one purchase.',
+                ],
+                'blogs' => [
+                    'eyebrow' => 'From the Blog',
+                    'headline' => 'Guides & news for border-crossers',
+                    'cta_label' => 'Read the blog',
+                    'card_cta' => 'Read more',
                 ],
                 'faq' => [
                     'headline' => 'Questions We Hear a Lot',

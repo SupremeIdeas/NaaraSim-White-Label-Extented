@@ -30,7 +30,7 @@
 
     <div class="relative mx-auto max-w-5xl px-4 text-center">
         <span class="inline-flex items-center gap-2 rounded-full border border-dashed border-accent/50 bg-accent/10 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.2em] text-accent">
-            <x-icon name="plane" class="h-3 w-3 -rotate-45" /> {{ $content['eyebrow'] }}
+            <x-glyph name="plane" class="h-3 w-3 -rotate-45" /> {{ $content['eyebrow'] }}
         </span>
 
         <div class="mx-auto mt-8 grid max-w-2xl grid-cols-3 gap-3 sm:gap-4">
@@ -82,7 +82,7 @@
                     @endif
                 </div>
                 <span class="absolute -bottom-4 left-6 inline-flex items-center gap-1.5 rounded-full bg-navy px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-white shadow-lg">
-                    <x-icon name="badge-check" class="h-3.5 w-3.5 text-accent" /> Boarding group A
+                    <x-glyph name="badge-check" class="h-3.5 w-3.5 text-accent" /> Boarding group A
                 </span>
             </div>
         </div>
@@ -97,7 +97,7 @@
                 <div class="relative rounded-2xl border-2 border-dashed border-primary/20 bg-white p-6 dark:border-white/10 dark:bg-white/5">
                     <span class="pointer-events-none absolute -left-2.5 top-6 h-5 w-5 rounded-full bg-[#FBF7F0] dark:bg-[#0F172A]" aria-hidden="true"></span>
                     <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-white">
-                        <x-icon :name="$card['icon']" class="h-5 w-5" />
+                        <x-glyph :name="$card['icon']" class="h-5 w-5" />
                     </span>
                     <h3 class="mt-4 font-display text-base font-bold text-[#1B2A47] dark:text-white">{{ $card['title'] }}</h3>
                     <p class="mt-1.5 text-sm leading-relaxed text-stone-500 dark:text-slate-400">{{ $card['body'] }}</p>

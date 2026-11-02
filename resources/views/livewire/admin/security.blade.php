@@ -18,7 +18,7 @@
         </div>
     @endif
 
-    <div class="rounded-2xl border border-slate-200 bg-white p-6 dark:border-[#2D4060] dark:bg-[#1A2840]">
+    <div class="rounded-2xl border border-slate-200 bg-white p-6 dark:border-[#2A2E34] dark:bg-[#17191C]">
         @if ($confirmed)
             <div class="flex items-center gap-2 text-sm font-semibold text-green-700 dark:text-green-400">
                 <x-icon name="badge-check" class="h-5 w-5" /> Two-factor authentication is active.
@@ -28,7 +28,7 @@
             </p>
 
             @if (! empty($recoveryCodes))
-                <div class="mt-4 grid grid-cols-2 gap-2 rounded-lg bg-slate-50 p-4 font-mono text-xs text-slate-700 dark:bg-[#243352] dark:text-slate-200">
+                <div class="mt-4 grid grid-cols-2 gap-2 rounded-lg bg-slate-50 p-4 font-mono text-xs text-slate-700 dark:bg-[#373a3f] dark:text-slate-200">
                     @foreach ($recoveryCodes as $rc)
                         <span>{{ $rc }}</span>
                     @endforeach
@@ -37,7 +37,7 @@
 
             <div class="mt-5 flex flex-wrap gap-2">
                 <button type="button" wire:click="regenerateRecoveryCodes" wire:loading.attr="disabled" wire:target="regenerateRecoveryCodes"
-                        class="inline-flex items-center gap-2 rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-60 dark:border-[#2D4060] dark:text-slate-200 dark:hover:bg-[#243352]">
+                        class="inline-flex items-center gap-2 rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-60 dark:border-[#2A2E34] dark:text-slate-200 dark:hover:bg-[#373a3f]">
                     <x-icon name="refresh" class="h-4 w-4" /> Regenerate recovery codes
                 </button>
                 @if ($canDisable)
@@ -56,11 +56,11 @@
                     <p class="text-sm text-slate-600 dark:text-slate-300">
                         Scan this QR code, or enter the setup key manually:
                     </p>
-                    <code class="mt-2 block break-all rounded-lg bg-slate-50 px-3 py-2 font-mono text-xs text-slate-700 dark:bg-[#243352] dark:text-slate-200">{{ $secret }}</code>
+                    <code class="mt-2 block break-all rounded-lg bg-slate-50 px-3 py-2 font-mono text-xs text-slate-700 dark:bg-[#373a3f] dark:text-slate-200">{{ $secret }}</code>
 
                     @if (! empty($recoveryCodes))
                         <p class="mt-4 text-xs font-medium text-slate-500 dark:text-slate-400">Recovery codes (save these now):</p>
-                        <div class="mt-1 grid grid-cols-2 gap-1 rounded-lg bg-slate-50 p-3 font-mono text-[11px] text-slate-700 dark:bg-[#243352] dark:text-slate-200">
+                        <div class="mt-1 grid grid-cols-2 gap-1 rounded-lg bg-slate-50 p-3 font-mono text-[11px] text-slate-700 dark:bg-[#373a3f] dark:text-slate-200">
                             @foreach ($recoveryCodes as $rc)
                                 <span>{{ $rc }}</span>
                             @endforeach
@@ -69,11 +69,11 @@
                 </div>
             </div>
 
-            <form wire:submit="confirm" class="mt-6 border-t border-slate-100 pt-5 dark:border-[#243352]">
+            <form wire:submit="confirm" class="mt-6 border-t border-slate-100 pt-5 dark:border-[#373a3f]">
                 <label class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">Enter the 6-digit code from your app</label>
                 <div class="flex items-start gap-2">
                     <input wire:model="code" inputmode="numeric" autocomplete="one-time-code" placeholder="123456"
-                           class="w-40 rounded-lg border border-slate-300 bg-white px-3 py-2 font-mono text-sm tracking-widest dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                           class="w-40 rounded-lg border border-slate-300 bg-white px-3 py-2 font-mono text-sm tracking-widest dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
                     <button type="submit" wire:loading.attr="disabled" wire:target="confirm"
                             class="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary-dark disabled:opacity-60">
                         <span wire:loading.remove wire:target="confirm">Confirm &amp; activate</span>
@@ -116,7 +116,7 @@
                 </div>
             @endif
 
-            <form wire:submit="saveSiteProtection" class="space-y-4 rounded-2xl border border-slate-200 bg-white p-6 dark:border-[#2D4060] dark:bg-[#1A2840]">
+            <form wire:submit="saveSiteProtection" class="space-y-4 rounded-2xl border border-slate-200 bg-white p-6 dark:border-[#2A2E34] dark:bg-[#17191C]">
                 <label class="flex items-start justify-between gap-4">
                     <span>
                         <span class="block text-sm font-medium text-slate-800 dark:text-slate-100">Content protection (CSP)</span>
@@ -125,7 +125,7 @@
                     <x-ui.switch wire:model="csp_enabled" label="Content protection (CSP)" class="mt-1" />
                 </label>
 
-                <label class="flex items-start justify-between gap-4 border-t border-slate-100 pt-4 dark:border-[#243352]">
+                <label class="flex items-start justify-between gap-4 border-t border-slate-100 pt-4 dark:border-[#373a3f]">
                     <span>
                         <span class="block text-sm font-medium text-slate-800 dark:text-slate-100">Force secure connection (HSTS)</span>
                         <span class="mt-0.5 block text-xs text-slate-500 dark:text-slate-400">Tells browsers to always use HTTPS. Turn off only if your server isn’t on HTTPS yet.</span>
@@ -133,7 +133,7 @@
                     <x-ui.switch wire:model="hsts_enabled" label="Force secure connection (HSTS)" class="mt-1" />
                 </label>
 
-                <label class="flex items-start justify-between gap-4 border-t border-slate-100 pt-4 dark:border-[#243352]">
+                <label class="flex items-start justify-between gap-4 border-t border-slate-100 pt-4 dark:border-[#373a3f]">
                     <span>
                         <span class="block text-sm font-medium text-slate-800 dark:text-slate-100">Require two-factor for admin login</span>
                         <span class="mt-0.5 block text-xs text-slate-500 dark:text-slate-400">Off by default — sign in with just email &amp; password. Turn on to require an authenticator code as an extra layer for everyone in the panel.</span>
@@ -141,7 +141,7 @@
                     <x-ui.switch wire:model="admin_2fa_required" label="Require two-factor for admin login" class="mt-1" />
                 </label>
 
-                <label class="flex items-start justify-between gap-4 border-t border-slate-100 pt-4 dark:border-[#243352]">
+                <label class="flex items-start justify-between gap-4 border-t border-slate-100 pt-4 dark:border-[#373a3f]">
                     <span>
                         <span class="block text-sm font-medium text-slate-800 dark:text-slate-100">Bot protection on sign-in (Cloudflare Turnstile)</span>
                         <span class="mt-0.5 block text-xs text-slate-500 dark:text-slate-400">
@@ -190,16 +190,16 @@
                 </div>
             @endif
 
-            <form wire:submit="saveAccessControl" class="space-y-5 rounded-2xl border border-slate-200 bg-white p-6 dark:border-[#2D4060] dark:bg-[#1A2840]">
+            <form wire:submit="saveAccessControl" class="space-y-5 rounded-2xl border border-slate-200 bg-white p-6 dark:border-[#2A2E34] dark:bg-[#17191C]">
                 {{-- Country --}}
                 <div>
                     <label class="flex items-center gap-3">
-                        <input type="checkbox" wire:model="country_allowlist_enabled" x-model="countryOn" class="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary dark:border-[#2D4060] dark:bg-[#243352]">
+                        <input type="checkbox" wire:model="country_allowlist_enabled" x-model="countryOn" class="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary dark:border-[#2A2E34] dark:bg-[#373a3f]">
                         <span class="text-sm font-medium text-slate-800 dark:text-slate-100">Restrict admin access by country</span>
                     </label>
                     <div class="mt-2 pl-7" x-show="countryOn" x-collapse>
                         <input type="text" wire:model="allowed_countries" x-ref="countries" placeholder="NG, GB, US"
-                               class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm uppercase dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                               class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm uppercase dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
                         <p class="mt-1 text-[11px] text-slate-400">Comma-separated ISO country codes. Requires Cloudflare (or a geo backend); if a country can’t be resolved, access is allowed (never a lockout).</p>
                         @error('allowed_countries') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
                     </div>
@@ -208,12 +208,12 @@
                 {{-- IP --}}
                 <div>
                     <label class="flex items-center gap-3">
-                        <input type="checkbox" wire:model="ip_allowlist_enabled" x-model="ipOn" class="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary dark:border-[#2D4060] dark:bg-[#243352]">
+                        <input type="checkbox" wire:model="ip_allowlist_enabled" x-model="ipOn" class="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary dark:border-[#2A2E34] dark:bg-[#373a3f]">
                         <span class="text-sm font-medium text-slate-800 dark:text-slate-100">Restrict admin access by IP address</span>
                     </label>
                     <div class="mt-2 pl-7" x-show="ipOn" x-collapse>
                         <textarea wire:model="ip_allowlist" x-ref="ips" rows="3" placeholder="One IP per line"
-                                  class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 font-mono text-xs dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100"></textarea>
+                                  class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 font-mono text-xs dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100"></textarea>
                         <p class="mt-1 text-[11px] text-slate-400">In addition to any ADMIN_IP_ALLOWLIST set in .env.</p>
                     </div>
                 </div>
@@ -247,7 +247,7 @@
                 </div>
             @endif
 
-            <form wire:submit="saveAdminPath" class="space-y-5 rounded-2xl border border-slate-200 bg-white p-6 dark:border-[#2D4060] dark:bg-[#1A2840]">
+            <form wire:submit="saveAdminPath" class="space-y-5 rounded-2xl border border-slate-200 bg-white p-6 dark:border-[#2A2E34] dark:bg-[#17191C]">
                 <div class="flex items-start gap-2 rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm text-amber-800 dark:border-amber-500/40 dark:bg-amber-500/10 dark:text-amber-200">
                     <x-icon name="alert-triangle" class="mt-0.5 h-4 w-4 shrink-0" />
                     <span>You will need this new path to reach the admin login going forward. Record it somewhere safe.</span>
@@ -258,7 +258,7 @@
                     <div class="flex items-center gap-1">
                         <span class="text-sm text-slate-500 dark:text-slate-400">/</span>
                         <input type="text" wire:model="admin_path" placeholder="adminmaster"
-                               class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 font-mono text-sm dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                               class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 font-mono text-sm dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
                     </div>
                     @error('admin_path') <p class="mt-1 text-xs text-red-600 dark:text-red-400">{{ $message }}</p> @enderror
                 </div>
@@ -266,13 +266,13 @@
                 <div>
                     <label class="mb-1 block text-sm font-medium text-slate-800 dark:text-slate-100">Confirm new path</label>
                     <input type="text" wire:model="admin_path_confirmation" placeholder="Type it again"
-                           class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 font-mono text-sm dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                           class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 font-mono text-sm dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
                 </div>
 
                 <div>
                     <label class="mb-1 block text-sm font-medium text-slate-800 dark:text-slate-100">Your current password</label>
                     <input type="password" wire:model="admin_path_current_password"
-                           class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                           class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
                     @error('admin_path_current_password') <p class="mt-1 text-xs text-red-600 dark:text-red-400">{{ $message }}</p> @enderror
                 </div>
 

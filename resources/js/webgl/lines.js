@@ -11,8 +11,8 @@ import { LineGeometry } from 'three/examples/jsm/lines/LineGeometry.js';
 import { LineMaterial } from 'three/examples/jsm/lines/LineMaterial.js';
 
 const PALETTE = {
-    light: { lattice: 0x0b5c5c, latticeOpacity: 0.78, arc: 0x9a6a00, arcMin: 0.65, arcMax: 1 },
-    dark: { lattice: 0x5eead4, latticeOpacity: 0.9, arc: 0xffd54f, arcMin: 0.55, arcMax: 1 },
+    light: { lattice: 0x3a404a, latticeOpacity: 0.78, arc: 0x5b6472, arcMin: 0.65, arcMax: 1 },
+    dark: { lattice: 0xc4cbd6, latticeOpacity: 0.9, arc: 0xe5e9ef, arcMin: 0.55, arcMax: 1 },
 };
 
 /** Is the page in dark mode right now? (`.dark` on <html>, which the theme toggle flips.) */

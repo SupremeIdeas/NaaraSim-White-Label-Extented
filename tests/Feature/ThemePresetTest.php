@@ -108,7 +108,8 @@ class ThemePresetTest extends TestCase
         // active. navy/action carry over unchanged (no separate dark variant).
         $this->assertStringContainsString(':root.dark body.theme-aurora-shift{', $css);
         $this->assertStringContainsString('--brand-primary:20 44 120', $css);
-        $this->assertStringContainsString('--brand-accent:36 123 161', $css);
+        // The theme's dark accent token is lifted just enough to read (4.5:1) on its own dark surface instead of used raw.
+        $this->assertStringContainsString('--brand-accent:'.\App\Support\ColorContrast::lightenToContrast('36 123 161', '10 20 35', 4.5), $css);
         $this->assertStringContainsString('--brand-navy:10 20 35', $css);
         $this->assertStringContainsString('--brand-action:230 60 45', $css);
     }
@@ -197,13 +198,13 @@ class ThemePresetTest extends TestCase
         $this->assertSame('default', ThemePreset::sectionStyle('header'));
     }
 
-    public function test_seeder_creates_all_forty_presets(): void
+    public function test_seeder_creates_all_forty_one_presets(): void
     {
         $this->seed(ThemePresetSeeder::class);
         ThemePreset::bust();
 
         $all = ThemePreset::all();
-        $this->assertCount(40, $all);
+        $this->assertCount(41, $all);
         // Exactly one built-in, and it is naara-official at sort_order 1.
         $builtIns = $all->where('is_built_in', true);
         $this->assertCount(1, $builtIns);
@@ -233,7 +234,7 @@ class ThemePresetTest extends TestCase
         $row = ThemePresetModel::where('slug', 'aurora-shift')->first();
         $this->assertSame('1 2 3', $row->tokens['colors']['primary']);
         // …but the built-in is always re-asserted authoritatively.
-        $this->assertSame(40, ThemePresetModel::count());
+        $this->assertSame(41, ThemePresetModel::count());
     }
 
     public function test_missing_active_row_falls_back_without_blanking(): void

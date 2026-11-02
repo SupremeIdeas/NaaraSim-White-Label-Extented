@@ -20,7 +20,7 @@
         </span>
     </div>
     <button type="button" wire:click="browseCountries" aria-label="Browse by country"
-            class="flex shrink-0 items-center justify-center rounded-2xl border border-slate-200 bg-white px-3.5 text-primary shadow-sm transition hover:bg-slate-50 dark:border-[var(--brand-card-border-dark)] dark:bg-[var(--brand-card-dark)] dark:text-teal-300 dark:hover:bg-[#243352]">
+            class="flex shrink-0 items-center justify-center rounded-2xl border border-slate-200 bg-white px-3.5 text-primary shadow-sm transition hover:bg-slate-50 dark:border-[var(--brand-card-border-dark)] dark:bg-[var(--brand-card-dark)] dark:text-teal-300 dark:hover:bg-[#373a3f]">
         <x-icon name="globe" class="h-5 w-5" />
         <span class="sr-only">Browse by country</span>
     </button>

@@ -24,7 +24,7 @@
         <div class="grid items-center gap-10 lg:grid-cols-2 lg:gap-14">
             <div>
                 <span class="inline-flex items-center gap-2 rounded-md border border-primary/20 bg-primary/5 px-3 py-1.5 font-mono text-[11px] font-semibold uppercase tracking-[0.15em] text-primary dark:border-white/10 dark:bg-white/5 dark:text-slate-300">
-                    <x-icon name="file-text" class="h-3.5 w-3.5" /> {{ $content['eyebrow'] }}
+                    <x-glyph name="file-text" class="h-3.5 w-3.5" /> {{ $content['eyebrow'] }}
                 </span>
                 <h1 class="mt-6 max-w-xl font-display text-4xl font-bold leading-[1.1] text-slate-900 sm:text-5xl dark:text-white">
                     {{ $content['headline'] }}
@@ -40,7 +40,7 @@
                     <div class="mt-3 flex items-center justify-between gap-3 border-t border-dashed border-slate-200 pt-3 dark:border-white/10">
                         <span class="font-mono text-xs uppercase tracking-wider text-slate-400 dark:text-slate-500">Ref. NS-AUDIT-01</span>
                         <span class="inline-flex items-center gap-1 rounded-md bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-primary dark:bg-white/5 dark:text-slate-200">
-                            <x-icon name="check" class="h-2.5 w-2.5" /> Verified
+                            <x-glyph name="check" class="h-2.5 w-2.5" /> Verified
                         </span>
                     </div>
                 </div>
@@ -56,10 +56,10 @@
         <div class="mt-10 overflow-hidden rounded-xl border border-slate-200 bg-white dark:border-white/10 dark:bg-navy">
             <div class="grid grid-cols-1 divide-y divide-slate-200 border-b border-slate-200 dark:divide-white/10 dark:border-white/10 sm:grid-cols-2 sm:divide-x sm:divide-y-0">
                 <p class="flex items-center justify-center gap-2 px-6 py-3 text-center text-xs font-bold uppercase tracking-[0.2em] text-primary">
-                    <x-icon name="target" class="h-3.5 w-3.5" /> Mission (Dr)
+                    <x-glyph name="target" class="h-3.5 w-3.5" /> Mission (Dr)
                 </p>
                 <p class="flex items-center justify-center gap-2 px-6 py-3 text-center text-xs font-bold uppercase tracking-[0.2em] text-accent-dark dark:text-accent">
-                    <x-icon name="eye" class="h-3.5 w-3.5" /> Vision (Cr)
+                    <x-glyph name="eye" class="h-3.5 w-3.5" /> Vision (Cr)
                 </p>
             </div>
             <div class="grid grid-cols-1 divide-y divide-slate-200 dark:divide-white/10 sm:grid-cols-2 sm:divide-x sm:divide-y-0">
@@ -83,7 +83,7 @@
             ] as $entry)
                 <div class="flex items-start gap-4 py-5">
                     <span class="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary dark:bg-white/5 dark:text-slate-200">
-                        <x-icon :name="$entry['icon']" class="h-4 w-4" />
+                        <x-glyph :name="$entry['icon']" class="h-4 w-4" />
                     </span>
                     <div class="min-w-0 flex-1">
                         <div class="flex items-center justify-between gap-3">
@@ -92,7 +92,7 @@
                         </div>
                         <p class="mt-1 text-sm leading-relaxed text-slate-500 dark:text-slate-400">{{ $entry['body'] }}</p>
                     </div>
-                    <x-icon name="check" class="mt-1 h-4 w-4 shrink-0 text-accent" />
+                    <x-glyph name="check" class="mt-1 h-4 w-4 shrink-0 text-accent" />
                 </div>
             @endforeach
         </div>

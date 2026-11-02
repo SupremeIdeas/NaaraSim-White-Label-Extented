@@ -3,8 +3,8 @@
     "file": "assets/_commonjsHelpers-CqkleIqs.js",
     "name": "_commonjsHelpers"
   },
-  "_lines-N_6Cqf0Q.js": {
-    "file": "assets/lines-N_6Cqf0Q.js",
+  "_lines-DzzUxfo_.js": {
+    "file": "assets/lines-DzzUxfo_.js",
     "name": "lines"
   },
   "_lottie-DG5NakNH.js": {
@@ -2199,7 +2199,7 @@
     "src": "node_modules/flag-icons/flags/4x3/zw.svg"
   },
   "resources/css/app.css": {
-    "file": "assets/app-DGvGybE3.css",
+    "file": "assets/app-DpYPwoBG.css",
     "src": "resources/css/app.css",
     "isEntry": true
   },
@@ -2246,7 +2246,7 @@
     "isDynamicEntry": true
   },
   "resources/js/app.js": {
-    "file": "assets/app-CfFFp7HE.js",
+    "file": "assets/app-CJ4cMqb5.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
@@ -2262,13 +2262,21 @@
       "resources/js/composer/composer.js",
       "node_modules/chart.js/dist/chart.js",
       "node_modules/chart.js/dist/chart.js",
-      "resources/js/webgl/login-scene.js",
+      "resources/js/webgl/globe-lite.js",
       "resources/js/webgl/hero-scene.js",
+      "resources/js/manifesto.js",
+      "resources/js/bento-diagnosis.js",
       "resources/js/dialer.js"
     ]
   },
+  "resources/js/bento-diagnosis.js": {
+    "file": "assets/bento-diagnosis-BkAsCISS.js",
+    "name": "bento-diagnosis",
+    "src": "resources/js/bento-diagnosis.js",
+    "isDynamicEntry": true
+  },
   "resources/js/composer/composer.js": {
-    "file": "assets/composer-Cq2BQbyJ.js",
+    "file": "assets/composer-CoZ1oHym.js",
     "name": "composer",
     "src": "resources/js/composer/composer.js",
     "isDynamicEntry": true,
@@ -2286,7 +2294,7 @@
     "isDynamicEntry": true
   },
   "resources/js/dialer.js": {
-    "file": "assets/dialer-BqIIpGeT.js",
+    "file": "assets/dialer-n_6WpuQS.js",
     "name": "dialer",
     "src": "resources/js/dialer.js",
     "isDynamicEntry": true,
@@ -2297,22 +2305,32 @@
       "node_modules/@twilio/voice-sdk/esm/twilio.js"
     ]
   },
+  "resources/js/manifesto.js": {
+    "file": "assets/manifesto-CLc5MvgH.js",
+    "name": "manifesto",
+    "src": "resources/js/manifesto.js",
+    "isDynamicEntry": true
+  },
+  "resources/js/webgl/globe-lite.js": {
+    "file": "assets/globe-lite-CV1dPLr7.js",
+    "name": "globe-lite",
+    "src": "resources/js/webgl/globe-lite.js",
+    "isDynamicEntry": true,
+    "imports": [
+      "_lines-DzzUxfo_.js"
+    ]
+  },
   "resources/js/webgl/hero-scene.js": {
-    "file": "assets/hero-scene-Bw3Pc6IK.js",
+    "file": "assets/hero-scene-tPC8PKRr.js",
     "name": "hero-scene",
     "src": "resources/js/webgl/hero-scene.js",
     "isDynamicEntry": true,
     "imports": [
-      "_lines-N_6Cqf0Q.js"
-    ]
-  },
-  "resources/js/webgl/login-scene.js": {
-    "file": "assets/login-scene-3Rq0bOAn.js",
-    "name": "login-scene",
-    "src": "resources/js/webgl/login-scene.js",
-    "isDynamicEntry": true,
-    "imports": [
-      "_lines-N_6Cqf0Q.js"
+      "resources/js/app.js",
+      "_lines-DzzUxfo_.js"
+    ],
+    "dynamicImports": [
+      "resources/js/webgl/globe-lite.js"
     ]
   }
 }

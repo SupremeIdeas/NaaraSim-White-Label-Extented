@@ -23,7 +23,7 @@
                     <span class="absolute right-1/4 top-1/3 h-40 w-40 rounded-full bg-accent/20 blur-3xl"></span>
                     <canvas data-webgl-hero="city"
                             class="absolute inset-0 h-full w-full opacity-0 transition-opacity duration-[1200ms] [&.is-live]:opacity-100"></canvas>
-                    <div class="absolute inset-0 bg-gradient-to-b from-[#F8F9FA] via-[#F8F9FA]/45 to-[#F8F9FA] dark:from-[#0D1B2A] dark:via-[#0D1B2A]/20 dark:to-[#0D1B2A]"></div>
+                    <div class="absolute inset-0 bg-gradient-to-b from-[#F8F9FA] via-[#F8F9FA]/45 to-[#F8F9FA] dark:from-[#0b0b0c] dark:via-[#0b0b0c]/20 dark:to-[#0b0b0c]"></div>
                 </div>
             @endif
             <div class="relative z-10 mx-auto max-w-4xl px-4 pb-16 pt-20 text-center sm:pt-24">
@@ -41,7 +41,7 @@
             {{-- Trendy timeline (Module 27.5): a muted rail with a teal progress
                  line GSAP draws downward as the visitor scrolls the steps. --}}
             <ol data-timeline class="relative mt-10 space-y-8 pl-8">
-                <span class="absolute bottom-1 left-[0.9rem] top-1 w-0.5 rounded-full bg-slate-200 dark:bg-[#2D4060]" aria-hidden="true"></span>
+                <span class="absolute bottom-1 left-[0.9rem] top-1 w-0.5 rounded-full bg-slate-200 dark:bg-[#2A2E34]" aria-hidden="true"></span>
                 <span data-timeline-rail class="absolute bottom-1 left-[0.9rem] top-1 w-0.5 origin-top rounded-full bg-primary" aria-hidden="true"></span>
                 @foreach (range(1, 7) as $n)
                     <li data-reveal style="--reveal-delay: {{ ($n - 1) * 0.05 }}s" class="relative">

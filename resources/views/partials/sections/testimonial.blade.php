@@ -17,7 +17,7 @@
                         @if ($rating > 0)
                             <div class="mb-3 flex gap-0.5 text-accent-dark dark:text-accent">
                                 @for ($i = 0; $i < 5; $i++)
-                                    <x-icon name="star" class="h-4 w-4 {{ $i < $rating ? 'text-accent-dark dark:text-accent' : 'text-slate-300 dark:text-white/15' }}" />
+                                    <x-glyph name="star" class="h-4 w-4 {{ $i < $rating ? 'text-accent-dark dark:text-accent' : 'text-slate-300 dark:text-white/15' }}" />
                                 @endfor
                             </div>
                         @endif

@@ -2,7 +2,7 @@
     <div class="mb-5 flex items-center justify-between">
         <div>
             <h1 class="text-2xl font-bold text-slate-900 dark:text-slate-100">Pages</h1>
-            <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Author custom-HTML pages served at <code class="rounded bg-slate-100 px-1 dark:bg-[#243352]">/p/&lt;slug&gt;</code>.</p>
+            <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Author custom-HTML pages served at <code class="rounded bg-slate-100 px-1 dark:bg-[#373a3f]">/p/&lt;slug&gt;</code>.</p>
         </div>
         <button type="button" wire:click="newPage"
                 class="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-sm font-semibold text-white hover:bg-primary-dark">
@@ -20,7 +20,7 @@
         {{-- List --}}
         <div class="space-y-2">
             @forelse ($pages as $page)
-                <div class="rounded-xl border border-slate-200 bg-white p-3 shadow-sm dark:border-[#2D4060] dark:bg-[#1A2840]" wire:key="pg-{{ $page->id }}">
+                <div class="rounded-xl border border-slate-200 bg-white p-3 shadow-sm dark:border-[#2A2E34] dark:bg-[#17191C]" wire:key="pg-{{ $page->id }}">
                     <div class="flex items-center justify-between gap-2">
                         <button type="button" wire:click="edit({{ $page->id }})" class="text-left">
                             <span class="block text-sm font-semibold text-slate-900 dark:text-slate-100">{{ $page->title }}</span>
@@ -43,34 +43,34 @@
                     </div>
                 </div>
             @empty
-                <div class="rounded-xl border border-dashed border-slate-300 p-6 text-center text-sm text-slate-400 dark:border-[#2D4060]">No pages yet.</div>
+                <div class="rounded-xl border border-dashed border-slate-300 p-6 text-center text-sm text-slate-400 dark:border-[#2A2E34]">No pages yet.</div>
             @endforelse
         </div>
 
         {{-- Editor --}}
-        <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-[#2D4060] dark:bg-[#1A2840]">
+        <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-[#2A2E34] dark:bg-[#17191C]">
             <h2 class="mb-3 text-sm font-semibold text-slate-900 dark:text-slate-100">{{ $editingId ? 'Edit page' : 'New page' }}</h2>
             <div class="space-y-3">
                 <div>
                     <label class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">Title</label>
-                    <input type="text" wire:model="title" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                    <input type="text" wire:model="title" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
                     @error('title') <span class="text-xs text-red-600">{{ $message }}</span> @enderror
                 </div>
                 <div>
                     <label class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">Slug <span class="text-slate-400">(URL: /p/…)</span></label>
-                    <input type="text" wire:model="slug" placeholder="auto from title" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                    <input type="text" wire:model="slug" placeholder="auto from title" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
                     @error('slug') <span class="text-xs text-red-600">{{ $message }}</span> @enderror
                 </div>
                 <div>
                     <label class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">Custom HTML</label>
                     <textarea wire:model="html" rows="12" spellcheck="false"
-                              class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 font-mono text-xs text-slate-900 dark:border-[#2D4060] dark:bg-[#0D1B2A] dark:text-slate-100"
+                              class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 font-mono text-xs text-slate-900 dark:border-[#2A2E34] dark:bg-[#0b0b0c] dark:text-slate-100"
                               placeholder="&lt;section class=&quot;text-center&quot;&gt;&#10;  &lt;h1&gt;Your page&lt;/h1&gt;&#10;&lt;/section&gt;"></textarea>
                     <p class="mt-1 text-[11px] text-slate-400">Tailwind classes work. Inline &lt;script&gt; is blocked by the site security policy (visitors are protected).</p>
                 </div>
                 <div>
                     <label class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">Meta description (SEO)</label>
-                    <input type="text" wire:model="meta" maxlength="200" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                    <input type="text" wire:model="meta" maxlength="200" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
                 </div>
                 <div class="flex flex-wrap gap-4 pt-1">
                     <label class="inline-flex items-center gap-2 text-sm text-slate-700 dark:text-slate-200"><input type="checkbox" wire:model="isPublished" class="rounded text-primary"> Published</label>

@@ -25,7 +25,7 @@
 
     <div class="relative mx-auto max-w-3xl px-4 pb-6 pt-16 text-center sm:pt-24">
         <span class="inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-1.5 text-xs font-semibold text-primary dark:bg-primary/20 dark:text-violet-200">
-            <x-icon name="sparkles" class="h-3.5 w-3.5" /> {{ $content['eyebrow'] }}
+            <x-glyph name="sparkles" class="h-3.5 w-3.5" /> {{ $content['eyebrow'] }}
         </span>
 
         <h1 class="mx-auto mt-5 max-w-xl font-display text-4xl font-bold leading-[1.15] text-slate-900 sm:text-5xl dark:text-white">
@@ -42,7 +42,7 @@
             </a>
             <a href="{{ route('how-it-works') }}" wire:navigate
                class="inline-flex items-center justify-center gap-2 rounded-full border border-primary/20 px-7 py-3.5 text-sm font-semibold text-slate-700 transition hover:bg-primary/5 dark:border-white/15 dark:text-slate-200 dark:hover:bg-white/5">
-                <x-icon name="play" class="h-4 w-4" /> See how it works
+                <x-glyph name="play" class="h-4 w-4" /> See how it works
             </a>
         </div>
     </div>
@@ -59,7 +59,7 @@
 
             <div class="absolute -left-6 top-6 flex items-center gap-2 rounded-full bg-white px-4 py-2.5 shadow-xl dark:bg-[#1c1329] sm:-left-10">
                 <span class="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary dark:bg-primary/20">
-                    <x-icon name="globe" class="h-4 w-4" />
+                    <x-glyph name="globe" class="h-4 w-4" />
                 </span>
                 <div>
                     <p class="font-display text-base font-bold leading-none text-slate-900 dark:text-white">{{ $content['stat_value'] }}</p>
@@ -67,7 +67,7 @@
                 </div>
             </div>
             <div class="absolute -right-4 bottom-4 flex h-14 w-14 items-center justify-center rounded-full bg-accent text-white shadow-xl sm:-right-8">
-                <x-icon name="heart" class="h-6 w-6" />
+                <x-glyph name="heart" class="h-6 w-6" />
             </div>
         </div>
     </div>
@@ -83,7 +83,7 @@
         ] as $card)
             <div class="{{ $card['shift'] }} rounded-[2rem] bg-white p-6 shadow-[0_18px_40px_-24px_rgba(109,63,160,0.4)] transition hover:-translate-y-1 dark:bg-[#1c1329]">
                 <span class="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-br from-primary to-accent text-white">
-                    <x-icon :name="$card['icon']" class="h-5 w-5" />
+                    <x-glyph :name="$card['icon']" class="h-5 w-5" />
                 </span>
                 <h3 class="mt-4 font-display text-lg font-bold text-slate-900 dark:text-white">{{ $card['title'] }}</h3>
                 <p class="mt-1.5 text-sm leading-relaxed text-slate-500 dark:text-slate-400">{{ $card['body'] }}</p>

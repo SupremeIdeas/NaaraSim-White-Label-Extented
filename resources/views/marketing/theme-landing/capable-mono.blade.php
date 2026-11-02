@@ -47,7 +47,7 @@
                     </a>
                     <a href="{{ route('how-it-works') }}" wire:navigate
                        class="inline-flex items-center gap-2 rounded-md border border-slate-300 px-6 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-900 hover:text-slate-900 dark:border-white/15 dark:text-white/70 dark:hover:border-white dark:hover:text-white">
-                        <x-icon name="play" class="h-4 w-4" /> How it works
+                        <x-glyph name="play" class="h-4 w-4" /> How it works
                     </a>
                 </div>
             </div>
@@ -91,7 +91,7 @@
                 ['cmd' => 'wallet --status', 'title' => 'One wallet, one price', 'body' => 'Top up once — data and numbers both draw from the same balance.'],
             ] as $row)
                 <div class="flex items-start gap-4 border-t border-white/10 px-5 py-5 first:border-t-0 sm:px-6">
-                    <x-icon name="terminal" class="mt-0.5 h-4 w-4 shrink-0 text-white/30" />
+                    <x-glyph name="terminal" class="mt-0.5 h-4 w-4 shrink-0 text-white/30" />
                     <div class="min-w-0">
                         <p class="font-mono text-xs text-white/35">$ {{ $row['cmd'] }}</p>
                         <p class="mt-1.5 font-display text-base font-semibold text-white">{{ $row['title'] }}</p>

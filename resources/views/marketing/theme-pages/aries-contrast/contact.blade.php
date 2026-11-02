@@ -37,14 +37,14 @@
             <p class="mb-1 mt-6 text-xs font-bold uppercase tracking-[0.2em] text-slate-900 dark:text-white">Other channels</p>
             <div class="divide-y divide-accent/40">
                 <div class="flex items-center gap-3 py-4">
-                    <x-icon name="message-circle" class="h-4 w-4 shrink-0 text-accent" />
+                    <x-glyph name="message-circle" class="h-4 w-4 shrink-0 text-accent" />
                     <div>
                         <p class="text-sm font-bold text-slate-900 dark:text-white">Live chat</p>
                         <a href="{{ auth()->check() ? route('support') : route('login') }}" class="text-xs font-semibold text-slate-500 hover:text-accent dark:text-slate-400">Usually online now</a>
                     </div>
                 </div>
                 <div class="flex items-center gap-3 py-4">
-                    <x-icon name="mail" class="h-4 w-4 shrink-0 text-accent" />
+                    <x-glyph name="mail" class="h-4 w-4 shrink-0 text-accent" />
                     <div>
                         <p class="text-sm font-bold text-slate-900 dark:text-white">Email</p>
                         <a href="mailto:{{ \App\Support\Niche\SupportLinks::email() }}" class="text-xs font-semibold text-slate-500 hover:text-accent dark:text-slate-400">{{ \App\Support\Niche\SupportLinks::email() }}</a>
@@ -52,7 +52,7 @@
                 </div>
                 @if (\App\Support\Niche\SupportLinks::hasWhatsapp())
                     <div class="flex items-center gap-3 py-4">
-                        <x-icon name="phone" class="h-4 w-4 shrink-0 text-accent" />
+                        <x-glyph name="phone" class="h-4 w-4 shrink-0 text-accent" />
                         <div>
                             <p class="text-sm font-bold text-slate-900 dark:text-white">WhatsApp</p>
                             <a href="{{ \App\Support\Niche\SupportLinks::whatsappUrl() }}" target="_blank" rel="noopener" class="text-xs font-semibold text-slate-500 hover:text-accent dark:text-slate-400">Chat directly</a>
@@ -60,7 +60,7 @@
                     </div>
                 @endif
                 <div class="flex items-center gap-3 py-4">
-                    <x-icon name="help-circle" class="h-4 w-4 shrink-0 text-accent" />
+                    <x-glyph name="help-circle" class="h-4 w-4 shrink-0 text-accent" />
                     <div>
                         <p class="text-sm font-bold text-slate-900 dark:text-white">Help centre</p>
                         <a href="{{ route('how-it-works') }}" wire:navigate class="text-xs font-semibold text-slate-500 hover:text-accent dark:text-slate-400">Read the process</a>

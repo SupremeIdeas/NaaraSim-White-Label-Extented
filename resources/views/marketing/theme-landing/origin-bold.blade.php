@@ -25,7 +25,7 @@
          translucent pill, matching the header's own colour-block bar. --}}
     <div class="border-b-4 border-navy bg-primary px-4 py-2.5 text-center dark:border-white/20">
         <span class="inline-flex items-center gap-2 text-xs font-black uppercase tracking-widest text-white">
-            <x-icon name="zap" class="h-3.5 w-3.5" /> {{ $content['eyebrow'] }}
+            <x-glyph name="zap" class="h-3.5 w-3.5" /> {{ $content['eyebrow'] }}
         </span>
     </div>
 
@@ -53,7 +53,7 @@
                     </a>
                     <a href="{{ route('how-it-works') }}" wire:navigate
                        class="inline-flex items-center gap-2 border-4 border-navy px-7 py-3.5 text-sm font-black uppercase tracking-wide text-navy transition hover:bg-navy hover:text-white dark:border-white/40 dark:text-white dark:hover:bg-white dark:hover:text-navy">
-                        <x-icon name="play" class="h-4 w-4" /> How it works
+                        <x-glyph name="play" class="h-4 w-4" /> How it works
                     </a>
                 </div>
             </div>
@@ -87,7 +87,7 @@
             ['icon' => 'wallet', 'title' => 'One wallet, one price', 'body' => 'Top up once — data and numbers both draw from it.', 'fill' => 'bg-primary text-white'],
         ] as $i => $card)
             <div class="{{ $card['fill'] }} {{ $i > 0 ? 'border-t-4 border-navy dark:border-white/20 sm:border-l-4 sm:border-t-0' : '' }} p-8">
-                <x-icon :name="$card['icon']" class="h-8 w-8" />
+                <x-glyph :name="$card['icon']" class="h-8 w-8" />
                 <h3 class="mt-4 font-display text-lg font-black uppercase">{{ $card['title'] }}</h3>
                 <p class="mt-2 text-sm leading-relaxed text-white/85">{{ $card['body'] }}</p>
             </div>

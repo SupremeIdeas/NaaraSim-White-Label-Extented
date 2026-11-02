@@ -8,7 +8,7 @@
  */
 export function registerLinesAnalyticsCharts() {
     const mounted = new WeakSet();
-    const palette = ['#A21CAF', '#84CC16', '#0D1B2A', '#2DD4BF', '#F59E0B', '#64748B', '#7C3AED', '#EC4899'];
+    const palette = ['#23272D', '#94A0B0', '#0b0b0c', '#b6bdc8', '#F59E0B', '#64748B', '#7C3AED', '#EC4899'];
 
     function config(type, labels, values) {
         if (type === 'donut') {
@@ -28,7 +28,7 @@ export function registerLinesAnalyticsCharts() {
 
         return {
             type: 'bar',
-            data: { labels, datasets: [{ data: values, backgroundColor: '#A21CAF', borderRadius: 4, maxBarThickness: 28 }] },
+            data: { labels, datasets: [{ data: values, backgroundColor: '#23272D', borderRadius: 4, maxBarThickness: 28 }] },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,

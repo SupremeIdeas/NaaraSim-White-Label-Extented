@@ -29,7 +29,7 @@
 
     @unless ($privileged)
         {{-- Staff view: scopes only, no business figures. --}}
-        <div class="rounded-2xl border border-slate-200 bg-white p-6 dark:border-[#2D4060] dark:bg-[#1A2840]">
+        <div class="rounded-2xl border border-slate-200 bg-white p-6 dark:border-[#2A2E34] dark:bg-[#17191C]">
             <h2 class="flex items-center gap-2 text-sm font-semibold text-slate-800 dark:text-slate-100">
                 <x-icon name="shield-check" class="h-4 w-4 text-primary" /> Your access
             </h2>
@@ -89,7 +89,7 @@
 
         {{-- Revenue split donut (Module 32 pick — code-town3 stat card, made
              functional): 30-day revenue share per product line. --}}
-        <div class="rounded-2xl border border-slate-200 bg-white p-5 dark:border-[#2D4060] dark:bg-[#1A2840]">
+        <div class="rounded-2xl border border-slate-200 bg-white p-5 dark:border-[#2A2E34] dark:bg-[#17191C]">
             <h2 class="flex items-center gap-2 text-sm font-semibold text-slate-800 dark:text-slate-100">
                 <x-icon name="signal" class="h-4 w-4 text-primary" /> Revenue split (30d)
             </h2>
@@ -131,7 +131,7 @@
             ];
         @endphp
         @foreach ($tiles as [$label, $value, $icon, $valueClass])
-            <div class="rounded-xl border border-slate-200 bg-white p-4 dark:border-[#2D4060] dark:bg-[#1A2840]">
+            <div class="rounded-xl border border-slate-200 bg-white p-4 dark:border-[#2A2E34] dark:bg-[#17191C]">
                 <div class="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
                     <x-icon :name="$icon" class="h-4 w-4" /> {{ $label }}
                 </div>
@@ -154,7 +154,7 @@
             ];
         @endphp
         @foreach ($oversight as [$label, $value, $sub, $icon, $valueClass])
-            <div class="rounded-xl border border-slate-200 bg-white p-4 dark:border-[#2D4060] dark:bg-[#1A2840]">
+            <div class="rounded-xl border border-slate-200 bg-white p-4 dark:border-[#2A2E34] dark:bg-[#17191C]">
                 <div class="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
                     <x-icon :name="$icon" class="h-4 w-4" /> {{ $label }}
                 </div>
@@ -166,7 +166,7 @@
 
     {{-- Most-bought by country + most-used models (owner request). --}}
     <div class="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <div class="rounded-2xl border border-slate-200 bg-white p-4 dark:border-[#2D4060] dark:bg-[#1A2840]">
+        <div class="rounded-2xl border border-slate-200 bg-white p-4 dark:border-[#2A2E34] dark:bg-[#17191C]">
             <h3 class="mb-2.5 flex items-center gap-2 text-sm font-semibold text-slate-700 dark:text-slate-200">
                 <x-icon name="globe" class="h-4 w-4" /> Most-bought numbers by country <span class="text-xs font-normal text-slate-400">· 30d</span>
             </h3>
@@ -176,7 +176,7 @@
                 @endphp
                 <div class="mb-2 flex items-center gap-3" wire:key="tc-{{ $row['country'] }}">
                     <span class="w-28 shrink-0 truncate text-sm capitalize text-slate-700 dark:text-slate-200">{{ str_replace('_', ' ', $row['country']) }}</span>
-                    <div class="h-2 flex-1 overflow-hidden rounded-full bg-slate-100 dark:bg-[#243352]">
+                    <div class="h-2 flex-1 overflow-hidden rounded-full bg-slate-100 dark:bg-[#373a3f]">
                         <div class="h-full rounded-full bg-primary" style="width: {{ round($row['count'] / $__max * 100) }}%"></div>
                     </div>
                     <span class="w-8 shrink-0 text-right text-xs font-semibold text-slate-500 dark:text-slate-400">{{ $row['count'] }}</span>
@@ -186,7 +186,7 @@
             @endforelse
         </div>
 
-        <div class="rounded-2xl border border-slate-200 bg-white p-4 dark:border-[#2D4060] dark:bg-[#1A2840]">
+        <div class="rounded-2xl border border-slate-200 bg-white p-4 dark:border-[#2A2E34] dark:bg-[#17191C]">
             <h3 class="mb-2.5 flex items-center gap-2 text-sm font-semibold text-slate-700 dark:text-slate-200">
                 <x-icon name="grid" class="h-4 w-4" /> Most-used NaaraSim models <span class="text-xs font-normal text-slate-400">· 30d</span>
             </h3>
@@ -196,7 +196,7 @@
                 @endphp
                 <div class="mb-2 flex items-center gap-3" wire:key="tm-{{ $row['label'] }}">
                     <span class="w-28 shrink-0 truncate text-sm text-slate-700 dark:text-slate-200">{{ $row['label'] }}</span>
-                    <div class="h-2 flex-1 overflow-hidden rounded-full bg-slate-100 dark:bg-[#243352]">
+                    <div class="h-2 flex-1 overflow-hidden rounded-full bg-slate-100 dark:bg-[#373a3f]">
                         <div class="h-full rounded-full bg-accent" style="width: {{ round($row['count'] / $__mmax * 100) }}%"></div>
                     </div>
                     <span class="w-8 shrink-0 text-right text-xs font-semibold text-slate-500 dark:text-slate-400">{{ $row['count'] }}</span>
@@ -216,11 +216,11 @@
             </h2>
             <div class="space-y-2">
                 @forelse ($health as $provider => $info)
-                    <div wire:key="health-{{ $provider }}" class="flex items-center justify-between rounded-xl border border-slate-200 bg-white px-4 py-3 dark:border-[#2D4060] dark:bg-[#1A2840]">
+                    <div wire:key="health-{{ $provider }}" class="flex items-center justify-between rounded-xl border border-slate-200 bg-white px-4 py-3 dark:border-[#2A2E34] dark:bg-[#17191C]">
                         <span class="flex items-center gap-2">
                             <span class="font-medium capitalize text-slate-900 dark:text-slate-100">{{ $provider }}</span>
                             @if (($info['stack'] ?? '') !== '')
-                                <span class="rounded-full bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-slate-500 dark:bg-[#243352] dark:text-slate-400">{{ $info['stack'] }}</span>
+                                <span class="rounded-full bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-slate-500 dark:bg-[#373a3f] dark:text-slate-400">{{ $info['stack'] }}</span>
                             @endif
                         </span>
                         <div class="flex items-center gap-3">
@@ -233,12 +233,12 @@
                                 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300' => ($info['status'] ?? '') === 'low',
                                 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300' => in_array($info['status'] ?? '', ['error', 'down'], true),
                                 'bg-sky-100 text-sky-700 dark:bg-sky-900/40 dark:text-sky-300' => ($info['status'] ?? '') === 'configured',
-                                'bg-slate-100 text-slate-600 dark:bg-[#243352] dark:text-slate-400' => ($info['status'] ?? '') === 'coming_soon',
+                                'bg-slate-100 text-slate-600 dark:bg-[#373a3f] dark:text-slate-400' => ($info['status'] ?? '') === 'coming_soon',
                             ])>{{ ucfirst(str_replace('_', ' ', $info['status'] ?? 'unknown')) }}</span>
                         </div>
                     </div>
                 @empty
-                    <div class="rounded-xl border border-dashed border-slate-300 p-6 text-center text-sm text-slate-400 dark:border-[#2D4060] dark:text-slate-500">
+                    <div class="rounded-xl border border-dashed border-slate-300 p-6 text-center text-sm text-slate-400 dark:border-[#2A2E34] dark:text-slate-500">
                         No health data yet. Run <code class="font-mono">providers:health-check</code>.
                     </div>
                 @endforelse
@@ -252,7 +252,7 @@
             </h2>
             <div class="grid grid-cols-2 gap-2">
                 @foreach ($statuses as $provider => $label)
-                    <div wire:key="status-{{ $provider }}" class="flex items-center justify-between rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-[#2D4060] dark:bg-[#1A2840]">
+                    <div wire:key="status-{{ $provider }}" class="flex items-center justify-between rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-[#2A2E34] dark:bg-[#17191C]">
                         <span class="capitalize text-slate-700 dark:text-slate-200">{{ $provider }}</span>
                         <x-ui.tag :variant="$label === 'Active' ? 'live' : 'soon'">{{ $label }}</x-ui.tag>
                     </div>
@@ -273,7 +273,7 @@
              fraud-signal service) — deferred rather than built on invented
              data; see PROGRESS.md for the explicit accounting. --}}
         <div class="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <div class="rounded-xl border border-slate-200 bg-white p-4 dark:border-[#2D4060] dark:bg-[#1A2840]">
+            <div class="rounded-xl border border-slate-200 bg-white p-4 dark:border-[#2A2E34] dark:bg-[#17191C]">
                 <p class="flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
                     <x-icon name="zap" class="h-3.5 w-3.5" /> Background jobs (1h)
                 </p>
@@ -288,7 +288,7 @@
                     @endif
                 </div>
             </div>
-            <div class="rounded-xl border border-slate-200 bg-white p-4 dark:border-[#2D4060] dark:bg-[#1A2840]">
+            <div class="rounded-xl border border-slate-200 bg-white p-4 dark:border-[#2A2E34] dark:bg-[#17191C]">
                 <p class="flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
                     <x-icon name="shield" class="h-3.5 w-3.5" /> KYC auto-resolved (30d)
                 </p>
@@ -308,7 +308,7 @@
              appears here at all. --}}
         <h2 class="mb-3 text-sm font-semibold text-slate-800 dark:text-slate-100">Provider network</h2>
         @if (empty($providerCards))
-            <p class="rounded-xl border border-dashed border-slate-200 p-6 text-center text-sm text-slate-400 dark:border-[#2D4060]">
+            <p class="rounded-xl border border-dashed border-slate-200 p-6 text-center text-sm text-slate-400 dark:border-[#2A2E34]">
                 No providers configured yet.
             </p>
         @else
@@ -330,7 +330,7 @@
                             return "{$x},{$y}";
                         })->implode(' ');
                     @endphp
-                    <div wire:key="provider-card-{{ $card['provider'] }}" class="rounded-xl border border-slate-200 bg-white p-4 dark:border-[#2D4060] dark:bg-[#1A2840]">
+                    <div wire:key="provider-card-{{ $card['provider'] }}" class="rounded-xl border border-slate-200 bg-white p-4 dark:border-[#2A2E34] dark:bg-[#17191C]">
                         <div class="flex items-center justify-between">
                             <div class="flex items-center gap-2">
                                 <span class="h-2 w-2 rounded-full {{ $dot }}"></span>
@@ -353,7 +353,7 @@
                                 <p class="mt-1 pt-6 text-base font-bold text-slate-900 dark:text-slate-100">{{ $card['order_volume'] }}</p>
                             </div>
                         </div>
-                        <div class="mt-3 flex items-center justify-between border-t border-slate-100 pt-2.5 text-[11px] text-slate-400 dark:border-[#2D4060]">
+                        <div class="mt-3 flex items-center justify-between border-t border-slate-100 pt-2.5 text-[11px] text-slate-400 dark:border-[#2A2E34]">
                             <span>Reachability: <span class="font-medium capitalize text-slate-600 dark:text-slate-300">{{ str_replace('_', ' ', $status ?? 'unknown') }}</span></span>
                         </div>
                     </div>

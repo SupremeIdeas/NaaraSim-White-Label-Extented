@@ -1,7 +1,7 @@
 {{-- Testimonials (CMS: home.testimonials) — the TEAL scene + star ratings
      reusing the Module 20 star-rating component. --}}
 @if (\App\Support\Trustpilot\TrustpilotSettings::defaultTestimonialsOn() || ! \App\Support\Trustpilot\TrustpilotSettings::placementOn('home.carousel'))
-<section class="bg-[#07403f] px-4 py-24 text-teal-50" data-bg="teal">
+<section class="bg-[#212225] px-4 py-24 text-teal-50" data-bg="teal">
     <div class="mx-auto max-w-6xl">
         <div class="text-center">
             <p data-reveal class="text-xs font-semibold uppercase tracking-[0.25em] text-accent">{{ $s['eyebrow'] }}</p>

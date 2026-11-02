@@ -26,7 +26,7 @@
         <div class="grid items-center gap-10 lg:grid-cols-2 lg:gap-16">
             <div class="{{ $imageOnLeft ? 'lg:order-2' : '' }} {{ $imageCentered ? 'text-center lg:col-span-2' : 'text-center lg:text-left' }}">
                 <span class="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-xs font-semibold text-primary dark:border-primary/30 dark:bg-primary/10 dark:text-teal-300">
-                    <x-icon name="zap" class="h-3.5 w-3.5" /> {{ $content['eyebrow'] }}
+                    <x-glyph name="zap" class="h-3.5 w-3.5" /> {{ $content['eyebrow'] }}
                 </span>
 
                 @php
@@ -48,7 +48,7 @@
                     </a>
                     <a href="{{ route('how-it-works') }}" wire:navigate
                        class="inline-flex items-center justify-center gap-2 rounded-full border border-slate-200 px-6 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 dark:border-white/15 dark:text-slate-200 dark:hover:bg-white/5">
-                        <x-icon name="play" class="h-4 w-4" /> How it works
+                        <x-glyph name="play" class="h-4 w-4" /> How it works
                     </a>
                 </div>
             </div>
@@ -64,7 +64,7 @@
                     {{-- Floating stat card, mirroring the reference's "Projects Launched" overlay. --}}
                     <div class="absolute -bottom-6 -left-4 flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-xl dark:border-white/10 dark:bg-[#12172a] sm:-left-8">
                         <span class="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-primary dark:bg-primary/20 dark:text-teal-300">
-                            <x-icon name="globe" class="h-4 w-4" />
+                            <x-glyph name="globe" class="h-4 w-4" />
                         </span>
                         <div>
                             <p class="font-display text-lg font-bold leading-none text-slate-900 dark:text-white">{{ $content['stat_value'] }}</p>
@@ -84,7 +84,7 @@
             ] as $card)
                 <div class="rounded-3xl border border-slate-200 bg-white p-6 transition hover:-translate-y-1 hover:shadow-lg dark:border-white/10 dark:bg-[#12172a]">
                     <span class="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-primary to-accent text-white">
-                        <x-icon :name="$card['icon']" class="h-5 w-5" />
+                        <x-glyph :name="$card['icon']" class="h-5 w-5" />
                     </span>
                     <h3 class="mt-4 font-display text-lg font-bold text-slate-900 dark:text-white">{{ $card['title'] }}</h3>
                     <p class="mt-1.5 text-sm leading-relaxed text-slate-500 dark:text-slate-400">{{ $card['body'] }}</p>

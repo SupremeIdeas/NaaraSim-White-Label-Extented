@@ -26,7 +26,7 @@
         @foreach (['default' => ['Default', 'The built-in premium treatment'], 'static_gradient' => ['Static gradient', 'Tune the brand blooms'], 'animated_gradient' => ['Animated', 'Blooms gently drift'], 'image' => ['Image', 'Upload a wallpaper']] as $key => $meta)
             <button type="button" @click="mode = '{{ $key }}'"
                     :class="mode === '{{ $key }}' ? 'border-primary ring-2 ring-primary/30' : 'border-slate-200 dark:border-white/10'"
-                    class="rounded-2xl border bg-white p-4 text-left transition dark:bg-[#1A2840]">
+                    class="rounded-2xl border bg-white p-4 text-left transition dark:bg-[#17191C]">
                 <p class="text-sm font-bold text-slate-900 dark:text-white">{{ $meta[0] }}</p>
                 <p class="mt-0.5 text-xs text-slate-500 dark:text-slate-400">{{ $meta[1] }}</p>
             </button>
@@ -56,7 +56,7 @@
     </div>
 
     {{-- ============ Image mode ============ --}}
-    <div x-show="mode === 'image'" x-cloak class="mb-6 rounded-2xl border border-slate-200 bg-white p-5 dark:border-white/10 dark:bg-[#1A2840]">
+    <div x-show="mode === 'image'" x-cloak class="mb-6 rounded-2xl border border-slate-200 bg-white p-5 dark:border-white/10 dark:bg-[#17191C]">
         <h2 class="mb-1 text-sm font-bold text-slate-900 dark:text-white">Wallpapers</h2>
         <p class="mb-4 text-xs text-slate-500 dark:text-slate-400">Upload a <strong>.webp</strong> for each theme (both required for image mode). Keep each under <strong>900 KB</strong> — it renders behind every page, so a light file keeps the app fast.</p>
         <div class="grid gap-4 sm:grid-cols-2">
@@ -77,7 +77,7 @@
 
     {{-- ============ Gradient tuning (static / animated) ============ --}}
     <div x-show="mode === 'static_gradient' || mode === 'animated_gradient'" x-cloak
-         class="rounded-2xl border border-slate-200 bg-white p-5 dark:border-white/10 dark:bg-[#1A2840]">
+         class="rounded-2xl border border-slate-200 bg-white p-5 dark:border-white/10 dark:bg-[#17191C]">
         {{-- Presets --}}
         <div class="mb-5">
             <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">Presets</p>
@@ -92,8 +92,8 @@
         {{-- Light / dark tabs + link toggle --}}
         <div class="mb-4 flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-3 dark:border-white/5">
             <div class="flex items-center gap-1 rounded-full border border-slate-200 bg-slate-100 p-1 dark:border-white/10 dark:bg-white/5">
-                <button type="button" @click="tab = 'light'" :class="tab === 'light' ? 'bg-white text-primary shadow-sm dark:bg-[#243352] dark:text-teal-300' : 'text-slate-400'" class="rounded-full px-4 py-1.5 text-sm font-semibold transition">Light</button>
-                <button type="button" @click="tab = 'dark'" :class="tab === 'dark' ? 'bg-white text-primary shadow-sm dark:bg-[#243352] dark:text-teal-300' : 'text-slate-400'" class="rounded-full px-4 py-1.5 text-sm font-semibold transition">Dark</button>
+                <button type="button" @click="tab = 'light'" :class="tab === 'light' ? 'bg-white text-primary shadow-sm dark:bg-[#373a3f] dark:text-teal-300' : 'text-slate-400'" class="rounded-full px-4 py-1.5 text-sm font-semibold transition">Light</button>
+                <button type="button" @click="tab = 'dark'" :class="tab === 'dark' ? 'bg-white text-primary shadow-sm dark:bg-[#373a3f] dark:text-teal-300' : 'text-slate-400'" class="rounded-full px-4 py-1.5 text-sm font-semibold transition">Dark</button>
             </div>
             <label class="flex items-center gap-2 text-xs font-medium text-slate-600 dark:text-slate-300">
                 <input type="checkbox" x-model="customize_dark" @change="if (!customize_dark) syncDark()" class="rounded border-slate-300 text-primary focus:ring-primary/40">
@@ -141,7 +141,7 @@
                     <div class="mt-4 grid gap-4 sm:grid-cols-2">
                         <label class="block">
                             <span class="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-300">Extra colour stop</span>
-                            <select x-model="t(theme).extra_color" @change="afterEdit(theme)" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm dark:border-white/10 dark:bg-[#243352] dark:text-slate-100">
+                            <select x-model="t(theme).extra_color" @change="afterEdit(theme)" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm dark:border-white/10 dark:bg-[#373a3f] dark:text-slate-100">
                                 @foreach ($extraPalette as $c)
                                     <option value="{{ $c }}">{{ ucfirst($c) }}</option>
                                 @endforeach
@@ -166,7 +166,7 @@
          section, or the NaaraSim support widget, none of which use this
          class. A plain server round-trip; two sliders don't need the
          Alpine live-preview machinery above. --}}
-    <div class="mt-8 rounded-2xl border border-slate-200 bg-white p-6 dark:border-[#2D4060] dark:bg-[#1A2840]">
+    <div class="mt-8 rounded-2xl border border-slate-200 bg-white p-6 dark:border-[#2A2E34] dark:bg-[#17191C]">
         <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
             <div>
                 <h2 class="text-base font-semibold text-slate-900 dark:text-white">Card glassmorphism</h2>
@@ -202,7 +202,7 @@
         </div>
         {{-- Live sample so the effect is judged against real page background,
              not an isolated swatch. --}}
-        <div class="relative mt-5 overflow-hidden rounded-2xl bg-gradient-to-br from-teal-100 via-slate-100 to-amber-100 p-8 dark:from-[#16233d] dark:via-[#141f36] dark:to-[#111a2e]">
+        <div class="relative mt-5 overflow-hidden rounded-2xl bg-gradient-to-br from-teal-100 via-slate-100 to-amber-100 p-8 dark:from-[#27292c] dark:via-[#222428] dark:to-[#1d1f22]">
             <div class="rounded-2xl border border-slate-200 nx-glass-tile p-4 dark:border-white/10"
                  :style="`--nx-glass-opacity-light:${$wire.glass_opacity / 100};--nx-glass-opacity-dark:${Math.max({{ \App\Support\GlassmorphismSettings::MIN_OPACITY }}, $wire.glass_opacity - 7) / 100};--nx-glass-blur:${$wire.glass_blur}px;`">
                 <p class="text-sm font-semibold text-slate-900 dark:text-white">Sample card</p>

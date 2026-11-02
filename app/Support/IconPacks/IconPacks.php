@@ -33,9 +33,9 @@ final class IconPacks
 
     public static function defaultSlug(): string
     {
-        $d = (string) config('icon_packs.default', 'orchid-lime');
+        $d = (string) config('icon_packs.default', 'graphite-mono');
 
-        return self::exists($d) ? $d : (array_key_first(self::all()) ?? 'orchid-lime');
+        return self::exists($d) ? $d : (array_key_first(self::all()) ?? 'graphite-mono');
     }
 
     /** The admin's stored choice: a pack slug or FOLLOW. */

@@ -100,7 +100,7 @@ class BrandThemeTest extends TestCase
 
         BrandSettings::flush();
         $this->assertFalse(BrandSettings::hasThemeOverride());
-        $this->assertSame('#A21CAF', BrandSettings::color('primary'));
+        $this->assertSame('#23272D', BrandSettings::color('primary'));
     }
 
     public function test_preloader_renders_only_when_enabled(): void

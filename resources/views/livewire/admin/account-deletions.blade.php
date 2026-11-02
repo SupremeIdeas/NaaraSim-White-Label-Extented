@@ -16,9 +16,9 @@
         </div>
     @endunless
 
-    <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white dark:border-[#2D4060] dark:bg-[#1A2840]">
+    <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white dark:border-[#2A2E34] dark:bg-[#17191C]">
         @forelse ($pending as $u)
-            <div class="flex items-center justify-between gap-4 border-b border-slate-100 px-5 py-4 last:border-0 dark:border-[#243352]">
+            <div class="flex items-center justify-between gap-4 border-b border-slate-100 px-5 py-4 last:border-0 dark:border-[#373a3f]">
                 <div class="min-w-0">
                     <p class="truncate text-sm font-medium text-slate-800 dark:text-slate-100">{{ $u->name }} <span class="text-slate-400">·</span> <span class="text-slate-500 dark:text-slate-400">{{ $u->email }}</span></p>
                     <p class="mt-0.5 text-xs text-slate-400 dark:text-slate-500">Requested {{ $u->deletion_requested_at?->diffForHumans() }} · user #{{ $u->id }}</p>

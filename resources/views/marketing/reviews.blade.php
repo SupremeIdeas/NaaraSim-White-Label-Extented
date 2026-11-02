@@ -11,7 +11,7 @@
                 <x-trust.reviews placement="page.list" />
             @elseif (TP::profileUrl() !== '')
                 <a href="{{ TP::profileUrl() }}" target="_blank" rel="noopener" class="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 font-semibold text-white hover:bg-primary-dark">
-                    <x-icon name="star" class="h-5 w-5" /> Read our reviews on Trustpilot
+                    <x-glyph name="star" class="h-5 w-5" /> Read our reviews on Trustpilot
                 </a>
             @endif
         </div>

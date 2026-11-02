@@ -22,7 +22,13 @@
     @foreach ($sections as $key => $s)
         {{-- Page-specific partial wins; a portable/reused section falls back to
              the shared `marketing.sections.*` partial so it renders anywhere. --}}
+        {{-- Each section is a rounded "sheet" pulled up over the one before it, so two different backgrounds meet on a curve, never a flat line.
+             overflow:clip (not hidden) keeps sticky stacks working. --}}
+        @php($radiusTop = max(0, min(80, (int) ($s['radius_top'] ?? 30))))
+        @php($auroraKeys = ['how', 'features', 'wizard', 'blogs', 'faq', 'cta', 'pricing'])
+        <div class="relative {{ in_array($key, $auroraKeys, true) ? 'nx-ambient nx-ambient--rich' : '' }}" style="border-top-left-radius:{{ $radiusTop }}px;border-top-right-radius:{{ $radiusTop }}px;overflow:clip;margin-top:-{{ $loop->first ? 0 : $radiusTop }}px">
         @includeFirst(['marketing.home.'.$key, 'marketing.sections.'.$key], ['s' => $s])
+        </div>
 
         {{-- Decorative, non-CMS sections injected at fixed anchors so the admin's
              section ordering stays intact. --}}

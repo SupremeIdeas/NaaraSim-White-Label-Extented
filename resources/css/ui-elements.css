@@ -60,30 +60,30 @@
 .nx-btn--primary {
     background: var(--ui-primary);
     color: #fff;
-    box-shadow: 0 4px 14px rgb(162 28 175 / 0.35);
+    box-shadow: 0 4px 14px rgb(37 39 43 / 0.35), 0 10px 28px -12px rgb(var(--brand-action) / 0.55);
 }
 .nx-btn--primary:hover:not(:disabled) {
     background: var(--ui-primary-dark);
     transform: translateY(-1px);
-    box-shadow: 0 6px 20px rgb(162 28 175 / 0.45);
+    box-shadow: 0 6px 20px rgb(37 39 43 / 0.45);
 }
 .nx-btn--primary:active:not(:disabled) { transform: translateY(0); }
 
 .nx-btn--gold {
-    background: linear-gradient(135deg, var(--ui-accent), #b8860b);
+    background: linear-gradient(135deg, var(--ui-accent), #5b6472);
     color: var(--ui-navy);
-    box-shadow: 0 4px 14px rgb(132 204 22 / 0.4);
+    box-shadow: 0 4px 14px rgb(148 160 176 / 0.4);
 }
-.nx-btn--gold:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 6px 20px rgb(132 204 22 / 0.5); }
+.nx-btn--gold:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 6px 20px rgb(148 160 176 / 0.5); }
 
 .nx-btn--ghost {
     background: transparent;
     color: var(--ui-primary);
     box-shadow: inset 0 0 0 1.5px var(--ui-primary);
 }
-.dark .nx-btn--ghost { color: #5eead4; box-shadow: inset 0 0 0 1.5px rgb(94 234 212 / 0.6); }
-.nx-btn--ghost:hover:not(:disabled) { background: rgb(162 28 175 / 0.08); }
-.dark .nx-btn--ghost:hover:not(:disabled) { background: rgb(94 234 212 / 0.08); }
+.dark .nx-btn--ghost { color: #d3d8df; box-shadow: inset 0 0 0 1.5px rgb(157 162 171 / 0.6); }
+.nx-btn--ghost:hover:not(:disabled) { background: rgb(37 39 43 / 0.08); }
+.dark .nx-btn--ghost:hover:not(:disabled) { background: rgb(157 162 171 / 0.08); }
 
 .nx-btn--danger {
     background: var(--ui-danger);
@@ -102,7 +102,7 @@
 .nx-btn--glow {
     background: var(--ui-primary);
     color: #fff;
-    box-shadow: 0 4px 14px rgb(162 28 175 / 0.35);
+    box-shadow: 0 4px 14px rgb(37 39 43 / 0.35);
     z-index: 0;
 }
 .nx-btn--glow::before {
@@ -156,13 +156,13 @@
    inside Teal/Gold/Navy while still reading as special. */
 .nx-btn--premium {
     color: var(--ui-navy);
-    background: linear-gradient(110deg, var(--ui-accent), var(--ui-primary), var(--ui-accent), #f0c96b, var(--ui-accent));
+    background: linear-gradient(110deg, var(--ui-accent), var(--ui-primary), var(--ui-accent), #e5e9ef, var(--ui-accent));
     background-size: 300% 100%;
-    box-shadow: 0 4px 16px rgb(132 204 22 / 0.4);
+    box-shadow: 0 4px 16px rgb(148 160 176 / 0.4);
     animation: nx-premium-pan 6s linear infinite;
 }
 .dark .nx-btn--premium { color: #06201f; }
-.nx-btn--premium:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 6px 22px rgb(132 204 22 / 0.5); }
+.nx-btn--premium:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 6px 22px rgb(148 160 176 / 0.5); }
 @keyframes nx-premium-pan { to { background-position: 300% 0; } }
 @media (prefers-reduced-motion: reduce) { .nx-btn--premium { animation: none; } }
 
@@ -201,7 +201,7 @@
     border-radius: 999px;
     background: var(--ui-navy);
     color: #fff;
-    box-shadow: 0 2px 10px rgb(13 27 42 / 0.25);
+    box-shadow: 0 2px 10px rgb(11 11 12 / 0.25);
     white-space: nowrap;
     transition: width 0.35s cubic-bezier(0.23, 1, 0.32, 1), background-color 0.3s, box-shadow 0.3s;
 }
@@ -251,7 +251,7 @@
     background: #cbd5e1;
     transition: background 0.3s cubic-bezier(0.23, 1, 0.32, 1), box-shadow 0.2s;
 }
-.dark .nx-switch__track { background: #334155; }
+.dark .nx-switch__track { background: #3f4249; }
 .nx-switch__track::before {
     content: "";
     position: absolute;
@@ -261,12 +261,12 @@
     height: 1.25rem;
     border-radius: 50%;
     background: #fff;
-    box-shadow: 0 2px 6px rgb(13 27 42 / 0.35);
+    box-shadow: 0 2px 6px rgb(11 11 12 / 0.35);
     transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 .nx-switch input:checked + .nx-switch__track { background: var(--ui-primary); }
 .nx-switch input:checked + .nx-switch__track::before { transform: translateX(1.3rem); }
-.nx-switch input:focus-visible + .nx-switch__track { box-shadow: 0 0 0 3px rgb(132 204 22 / 0.55); }
+.nx-switch input:focus-visible + .nx-switch__track { box-shadow: 0 0 0 3px rgb(148 160 176 / 0.55); }
 .nx-switch input:disabled + .nx-switch__track { opacity: 0.5; }
 
 /* --------------------------------------------------------------- checkbox --
@@ -296,7 +296,7 @@
     background: transparent;
     transition: background 0.25s, border-color 0.25s;
 }
-.dark .nx-check__box { border-color: #475569; }
+.dark .nx-check__box { border-color: #52565e; }
 .nx-check__box::after {
     content: "";
     position: absolute;
@@ -315,7 +315,7 @@
     border-color: var(--ui-primary);
 }
 .nx-check input:checked + .nx-check__box::after { transform: rotate(45deg) scale(1); }
-.nx-check input:focus-visible + .nx-check__box { box-shadow: 0 0 0 3px rgb(132 204 22 / 0.55); }
+.nx-check input:focus-visible + .nx-check__box { box-shadow: 0 0 0 3px rgb(148 160 176 / 0.55); }
 
 /* ------------------------------------------------------------------ toast --
    Slide-in notification toasts (success/error/info). Adapted from the toast
@@ -328,18 +328,18 @@
     max-width: calc(100vw - 2rem);
     padding: 0.7rem 0.85rem;
     border-radius: 0.9rem;
-    border: 1px solid rgb(13 27 42 / 0.06);
+    border: 1px solid rgb(11 11 12 / 0.06);
     /* Toasts pop up constantly — an opaque surface (no backdrop-filter) is the
        cheap, glitch-free choice. Blur here forced a full-page GPU repaint on
        every toast; a solid card reads just as clean and never stutters. */
     background: #ffffff;
-    box-shadow: 0 10px 30px rgb(13 27 42 / 0.16);
-    color: #0D1B2A;
+    box-shadow: 0 10px 30px rgb(11 11 12 / 0.16);
+    color: #0b0b0c;
     font-size: 0.85rem;
     line-height: 1.35;
     animation: nx-toast-in 0.4s cubic-bezier(0.21, 1.02, 0.73, 1);
 }
-.dark .nx-toast { background: #1a2840; border-color: rgb(255 255 255 / 0.08); color: #f1f5f9; box-shadow: 0 10px 30px rgb(0 0 0 / 0.4); }
+.dark .nx-toast { background: #17191C; border-color: rgb(255 255 255 / 0.08); color: #f1f5f9; box-shadow: 0 10px 30px rgb(0 0 0 / 0.4); }
 @keyframes nx-toast-in {
     from { transform: translateY(0.75rem) scale(0.97); opacity: 0; }
     to { transform: translateY(0) scale(1); opacity: 1; }
@@ -350,9 +350,9 @@
     display: flex; flex-shrink: 0; align-items: center; justify-content: center;
     width: 1.5rem; height: 1.5rem; border-radius: 9999px; color: #fff;
 }
-.nx-toast__glyph--success { background-image: linear-gradient(135deg, #14b8a6, #A21CAF); }
+.nx-toast__glyph--success { background-image: linear-gradient(135deg, #94a0b0, #23272D); }
 .nx-toast__glyph--error { background-image: linear-gradient(135deg, #fb7185, #E8412A); }
-.nx-toast__glyph--info { background-image: linear-gradient(135deg, #38bdf8, #A21CAF); }
+.nx-toast__glyph--info { background-image: linear-gradient(135deg, #38bdf8, #23272D); }
 
 /* --------------------------------------------------------------- hero toast --
    A big, CENTRED success/status moment (fintech-style) for money/activity
@@ -369,11 +369,11 @@
     max-width: calc(100vw - 2rem);
     padding: 2rem 1.5rem 1.6rem;
     border-radius: 1.5rem;
-    border: 1px solid rgb(13 27 42 / 0.06);
+    border: 1px solid rgb(11 11 12 / 0.06);
     background: #ffffff;
-    box-shadow: 0 30px 70px rgb(13 27 42 / 0.35);
+    box-shadow: 0 30px 70px rgb(11 11 12 / 0.35);
 }
-.dark .nx-hero { background: #16233d; border-color: rgb(255 255 255 / 0.08); box-shadow: 0 30px 70px rgb(0 0 0 / 0.6); }
+.dark .nx-hero { background: #27292c; border-color: rgb(255 255 255 / 0.08); box-shadow: 0 30px 70px rgb(0 0 0 / 0.6); }
 .nx-hero-enter { animation: nx-hero-in 0.45s cubic-bezier(0.34, 1.56, 0.64, 1); }
 @keyframes nx-hero-in {
     from { transform: translateY(0.5rem) scale(0.9); opacity: 0; }
@@ -391,15 +391,15 @@
     border: 2px solid currentColor; opacity: 0.18;
 }
 @keyframes nx-hero-pop { from { transform: scale(0); } to { transform: scale(1); } }
-.nx-hero__glyph--success { background-image: linear-gradient(135deg, #14b8a6, #A21CAF); }
+.nx-hero__glyph--success { background-image: linear-gradient(135deg, #94a0b0, #23272D); }
 .nx-hero__glyph--error { background-image: linear-gradient(135deg, #fb7185, #E8412A); }
 .nx-hero__glyph--pending { background-image: linear-gradient(135deg, #94a3b8, #64748b); }
-.nx-hero__glyph--info { background-image: linear-gradient(135deg, #38bdf8, #A21CAF); }
+.nx-hero__glyph--info { background-image: linear-gradient(135deg, #38bdf8, #23272D); }
 .nx-hero__draw { width: 3rem; height: 3rem; }
 .nx-hero__tick { stroke: #fff; stroke-dasharray: 60; stroke-dashoffset: 60; animation: nx-hero-draw 0.45s 0.2s ease forwards; }
 .nx-hero__spin { width: 2.4rem; height: 2.4rem; animation: nx-spin 0.9s linear infinite; }
 @keyframes nx-hero-draw { to { stroke-dashoffset: 0; } }
-.nx-hero__title { font-weight: 800; font-size: 1.15rem; line-height: 1.25; color: #0D1B2A; }
+.nx-hero__title { font-weight: 800; font-size: 1.15rem; line-height: 1.25; color: #0b0b0c; }
 .dark .nx-hero__title { color: #f1f5f9; }
 .nx-hero__msg { margin-top: 0.1rem; font-size: 0.9rem; line-height: 1.45; color: #64748b; }
 .dark .nx-hero__msg { color: #cbd5e1; }
@@ -407,8 +407,8 @@
 .nx-hero__cta {
     display: block; width: 100%; margin-top: 1rem; padding: 0.7rem 1rem;
     border-radius: 0.9rem; font-size: 0.9rem; font-weight: 600; text-align: center;
-    text-decoration: none; color: #fff; background-image: linear-gradient(135deg, #A21CAF, #86198F);
-    box-shadow: 0 8px 20px rgb(162 28 175 / 0.30); transition: filter 0.15s;
+    text-decoration: none; color: #fff; background-image: linear-gradient(135deg, #23272D, #111214);
+    box-shadow: 0 8px 20px rgb(37 39 43 / 0.30); transition: filter 0.15s;
 }
 .nx-hero__cta:hover { filter: brightness(1.06); }
 .nx-hero--error .nx-hero__cta { background-image: linear-gradient(135deg, #E8412A, #b91c1c); box-shadow: 0 8px 20px rgb(232 65 42 / 0.30); }
@@ -418,18 +418,18 @@
 .nx-hero__actions { display: flex; gap: 0.6rem; width: 100%; margin-top: 1rem; }
 .nx-hero__actions .nx-hero__cta { margin-top: 0; flex: 1; border: none; cursor: pointer; }
 .nx-hero__cta--muted {
-    color: #475569; background-image: none; background-color: rgb(13 27 42 / 0.06);
+    color: #52565e; background-image: none; background-color: rgb(11 11 12 / 0.06);
     box-shadow: none;
 }
 .dark .nx-hero__cta--muted { color: #cbd5e1; background-color: rgb(255 255 255 / 0.08); }
-.nx-hero__cta--muted:hover { filter: none; background-color: rgb(13 27 42 / 0.1); }
+.nx-hero__cta--muted:hover { filter: none; background-color: rgb(11 11 12 / 0.1); }
 .dark .nx-hero__cta--muted:hover { background-color: rgb(255 255 255 / 0.14); }
 .nx-hero__close {
     position: absolute; top: 0.75rem; right: 0.75rem; display: flex; align-items: center;
     justify-content: center; width: 1.75rem; height: 1.75rem; border-radius: 9999px;
     color: #94a3b8; opacity: 0.7; transition: opacity 0.15s, background-color 0.15s;
 }
-.nx-hero__close:hover { opacity: 1; background: rgb(13 27 42 / 0.06); }
+.nx-hero__close:hover { opacity: 1; background: rgb(11 11 12 / 0.06); }
 .dark .nx-hero__close:hover { background: rgb(255 255 255 / 0.08); }
 
 @media (prefers-reduced-motion: reduce) {
@@ -590,11 +590,11 @@
 .nx-navlink.is-active {
     background: #F8F9FA; /* == page background (light) */
     color: rgb(var(--brand-primary-dark));
-    box-shadow: 0 6px 18px -6px rgb(15 23 42 / 0.14);
+    box-shadow: 0 6px 18px -6px rgb(27 28 30 / 0.14);
 }
 .dark .nx-navlink.is-active {
     background: rgb(var(--brand-navy)); /* == page background (dark) */
-    color: rgb(94 234 212);
+    color: rgb(157 162 171);
     box-shadow: 0 6px 18px -6px rgb(0 0 0 / 0.55);
 }
 
@@ -648,7 +648,7 @@
     border-radius: 0.5rem;
     background: #e2e8f0;
 }
-.dark .nx-skeleton { background: #243352; }
+.dark .nx-skeleton { background: #373a3f; }
 .nx-skeleton::after {
     content: "";
     position: absolute;
@@ -658,7 +658,7 @@
     background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.55), transparent);
     animation: nx-shimmer 2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
 }
-.dark .nx-skeleton { background: #1f2e48; }
+.dark .nx-skeleton { background: #303237; }
 .dark .nx-skeleton::after {
     background: linear-gradient(90deg, transparent, rgb(148 163 184 / 0.14), transparent);
 }
@@ -688,12 +688,12 @@
     bottom: 0;
     width: 0.28rem;
 }
-.nx-alert--info { background: #f0fdfa; border-color: #99f6e4; color: #134e4a; }
+.nx-alert--info { background: #f0fdfa; border-color: #b6bdc8; color: #212225; }
 .nx-alert--info::before { background: var(--ui-primary); }
-.dark .nx-alert--info { background: rgb(162 28 175 / 0.12); border-color: rgb(15 118 110 / 0.5); color: #99f6e4; }
+.dark .nx-alert--info { background: rgb(37 39 43 / 0.12); border-color: rgb(61 65 72 / 0.5); color: #b6bdc8; }
 .nx-alert--warning { background: #fffbeb; border-color: #fcd34d; color: #78350f; }
 .nx-alert--warning::before { background: var(--ui-accent); }
-.dark .nx-alert--warning { background: rgb(132 204 22 / 0.1); border-color: rgb(132 204 22 / 0.4); color: #fde68a; }
+.dark .nx-alert--warning { background: rgb(148 160 176 / 0.1); border-color: rgb(148 160 176 / 0.4); color: #fde68a; }
 .nx-alert--danger { background: #fef2f2; border-color: #fca5a5; color: #7f1d1d; }
 .nx-alert--danger::before { background: var(--ui-danger); }
 .dark .nx-alert--danger { background: rgb(220 38 38 / 0.12); border-color: rgb(153 27 27 / 0.6); color: #fecaca; }
@@ -718,7 +718,7 @@
 .dark .nx-tag--soon { background: rgb(148 163 184 / 0.12); color: #94a3b8; }
 .nx-tag--soon .nx-tag__dot { background: #94a3b8; }
 .nx-tag--gold { background: #fffbeb; color: #92400e; }
-.dark .nx-tag--gold { background: rgb(132 204 22 / 0.14); color: #fcd34d; }
+.dark .nx-tag--gold { background: rgb(148 160 176 / 0.14); color: #fcd34d; }
 .nx-tag--gold .nx-tag__dot { background: var(--ui-accent); }
 @keyframes nx-pulse {
     0%, 100% { box-shadow: 0 0 0 0 rgb(22 163 74 / 0.45); }
@@ -742,9 +742,9 @@
     cursor: pointer;
     transition: border-color 0.25s, background 0.25s, transform 0.25s;
 }
-.dark .nx-upload { border-color: #2d4060; background: rgb(36 51 82 / 0.4); }
-.nx-upload:hover { border-color: var(--ui-primary); background: rgb(162 28 175 / 0.04); }
-.dark .nx-upload:hover { background: rgb(162 28 175 / 0.12); }
+.dark .nx-upload { border-color: #2A2E34; background: rgb(55 58 63 / 0.4); }
+.nx-upload:hover { border-color: var(--ui-primary); background: rgb(37 39 43 / 0.04); }
+.dark .nx-upload:hover { background: rgb(37 39 43 / 0.12); }
 .nx-upload input[type="file"] {
     position: absolute;
     inset: 0;
@@ -778,9 +778,9 @@
     transition: background-color 0.8s ease, color 0.8s ease;
     background-color: #F8F9FA;
 }
-.dark .mkt-bg { background-color: #0D1B2A; }
-.mkt-bg.bg-navy-scene { background-color: #0D1B2A; color: #e2e8f0; }
-.mkt-bg.bg-teal-scene { background-color: #07403f; color: #ccfbf1; }
+.dark .mkt-bg { background-color: #0b0b0c; }
+.mkt-bg.bg-navy-scene { background-color: #0b0b0c; color: #e2e8f0; }
+.mkt-bg.bg-teal-scene { background-color: #212225; color: #e9ecf0; }
 
 /* Stacking step cards: each card is sticky, so the next stacks over it. */
 .mkt-stack { display: grid; gap: 1.25rem; }
@@ -789,7 +789,7 @@
     top: 5.5rem;
     border-radius: 1.25rem;
     padding: 2rem;
-    box-shadow: 0 18px 40px rgb(13 27 42 / 0.16);
+    box-shadow: 0 18px 40px rgb(11 11 12 / 0.16);
 }
 
 /* Premium card (feature/testimonial): glassmorphism + lift + gradient edge glow
@@ -804,11 +804,11 @@
     -webkit-backdrop-filter: blur(14px) saturate(140%);
     backdrop-filter: blur(14px) saturate(140%);
     border: 1px solid rgb(255 255 255 / 0.6);
-    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.5), 0 6px 20px rgb(13 27 42 / 0.06);
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.5), 0 6px 20px rgb(11 11 12 / 0.06);
     transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.35s;
 }
 .dark .nx-card {
-    background: rgb(22 35 61 / 0.62);
+    background: rgb(39 41 44 / 0.62);
     border-color: rgb(255 255 255 / 0.08);
     box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.06), 0 6px 20px rgb(0 0 0 / 0.25);
 }
@@ -816,7 +816,7 @@
    never looks washed-out. */
 @supports not ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
     .nx-card { background: #ffffff; }
-    .dark .nx-card { background: #16233d; }
+    .dark .nx-card { background: #27292c; }
 }
 .nx-card::before {
     content: "";
@@ -824,7 +824,7 @@
     inset: -1px;
     border-radius: inherit;
     padding: 1px;
-    background: linear-gradient(135deg, rgb(162 28 175 / 0), rgb(162 28 175 / 0.65), rgb(132 204 22 / 0.55));
+    background: linear-gradient(135deg, rgb(37 39 43 / 0), rgb(37 39 43 / 0.65), rgb(148 160 176 / 0.55));
     -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
     -webkit-mask-composite: xor;
     mask-composite: exclude;
@@ -836,7 +836,7 @@
     transition: opacity 0.35s;
     pointer-events: none;
 }
-.nx-card:hover { transform: translateY(-4px); box-shadow: 0 16px 36px rgb(13 27 42 / 0.14); }
+.nx-card:hover { transform: translateY(-4px); box-shadow: 0 16px 36px rgb(11 11 12 / 0.14); }
 .nx-card:hover::before, .nx-card:focus-within::before { opacity: 1; }
 @media (prefers-reduced-motion: reduce) {
     .nx-card, .nx-card:hover { transform: none; }
@@ -851,22 +851,22 @@
     backdrop-filter: blur(16px) saturate(150%);
     border: 1px solid rgb(255 255 255 / 0.55);
     border-radius: 1.25rem;
-    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.5), 0 8px 24px rgb(13 27 42 / 0.07);
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.5), 0 8px 24px rgb(11 11 12 / 0.07);
 }
 .dark .nx-glass {
-    background: rgb(16 27 42 / 0.55);
+    background: rgb(27 28 31 / 0.55);
     border-color: rgb(255 255 255 / 0.08);
     box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.06), 0 8px 24px rgb(0 0 0 / 0.3);
 }
 @supports not ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
     .nx-glass { background: #ffffff; }
-    .dark .nx-glass { background: #16233d; }
+    .dark .nx-glass { background: #27292c; }
 }
 
 /* Lightweight glass for plain SOLID-surface cards so the dashboard background
    shows through (Platform Theme glass-audit rule). Unlike .nx-glass it only
    swaps the fill + adds blur — the card keeps its own radius / border / padding
-   / shadow — so it drops onto an existing `bg-white dark:bg-[#1A2840]` card by
+   / shadow — so it drops onto an existing `bg-white dark:bg-[#17191C]` card by
    replacing just those two colour classes. Readability-safe alpha; solid
    fallback where blur is unavailable.
 
@@ -913,8 +913,8 @@
     border-radius: 1.5rem;
     padding: 1.75rem;
     color: #fff;
-    background: linear-gradient(135deg, #A21CAF 0%, #86198F 45%, #0d1b2a 100%);
-    box-shadow: 0 18px 40px rgb(162 28 175 / 0.25);
+    background: linear-gradient(135deg, #23272D 0%, #111214 45%, #0b0b0c 100%);
+    box-shadow: 0 18px 40px rgb(37 39 43 / 0.25);
 }
 .nx-aurora__glow {
     position: absolute;
@@ -925,11 +925,11 @@
 }
 .nx-aurora__glow--1 {
     width: 16rem; height: 16rem; top: -6rem; right: -4rem;
-    background: rgb(132 204 22 / 0.35);
+    background: rgb(148 160 176 / 0.35);
 }
 .nx-aurora__glow--2 {
     width: 14rem; height: 14rem; bottom: -7rem; left: -3rem;
-    background: rgb(76 159 159 / 0.4);
+    background: rgb(108 114 127 / 0.4);
     animation-delay: -4.5s;
 }
 @keyframes nx-aurora-drift {
@@ -945,13 +945,13 @@
     position: relative;
     border-radius: 1.5rem;
     padding: 2px; /* the moving border lives in this gap */
-    background: linear-gradient(115deg, #A21CAF, #84CC16, #4c9f9f, #A21CAF);
+    background: linear-gradient(115deg, #23272D, #94A0B0, #707c8e, #23272D);
     background-size: 300% 300%;
     animation: nx-border-flow 8s linear infinite;
 }
 .nx-anim-card__inner {
     border-radius: calc(1.5rem - 2px);
-    background: linear-gradient(150deg, #10243c 0%, #0d1b2a 70%);
+    background: linear-gradient(150deg, #232529 0%, #0b0b0c 70%);
     padding: 1.5rem;
     height: 100%;
 }
@@ -963,8 +963,8 @@
 .nx-anim-card__bar {
     height: var(--bar-h, 8%);
     border-radius: 0.375rem 0.375rem 0.2rem 0.2rem;
-    background: linear-gradient(180deg, #84CC16, rgb(132 204 22 / 0.45));
-    box-shadow: 0 0 12px rgb(132 204 22 / 0.25);
+    background: linear-gradient(180deg, #94A0B0, rgb(148 160 176 / 0.45));
+    box-shadow: 0 0 12px rgb(148 160 176 / 0.25);
     transform-origin: bottom;
     animation: nx-bar-grow 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
     animation-delay: var(--bar-delay, 0ms);
@@ -1147,7 +1147,7 @@
     background:
         radial-gradient(95% 60% at 50% -12%, rgb(var(--brand-primary) / 0.55) 0%, rgb(var(--brand-primary) / 0.12) 34%, transparent 62%),
         radial-gradient(80% 45% at 50% 112%, rgb(var(--brand-accent) / 0.14) 0%, transparent 55%),
-        linear-gradient(162deg, #0d2b33 0%, rgb(var(--brand-navy)) 55%, #081019 100%);
+        linear-gradient(162deg, #161719 0%, rgb(var(--brand-navy)) 55%, #0f1012 100%);
 }
 
 /* --- Donut stat card (after code-town3) ------------------------------------ */
@@ -1159,7 +1159,7 @@
     display: grid;
     place-items: center;
 }
-.dark .nx-donut { background: var(--donut, conic-gradient(#2d4060 0% 100%)); }
+.dark .nx-donut { background: var(--donut, conic-gradient(#2A2E34 0% 100%)); }
 .nx-donut__hole {
     width: 4.5rem;
     height: 4.5rem;
@@ -1171,7 +1171,7 @@
     justify-content: center;
     line-height: 1.2;
 }
-.dark .nx-donut__hole { background: #1a2840; }
+.dark .nx-donut__hole { background: #17191C; }
 
 /* --- 3D glass product cards (after om_5409 / chase2k25) -------------------- */
 .nx-card3d { perspective: 900px; }
@@ -1184,15 +1184,15 @@
     padding: 1.5rem;
     transform-style: preserve-3d;
     transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.45s;
-    box-shadow: 0 10px 24px rgb(13 27 42 / 0.08);
+    box-shadow: 0 10px 24px rgb(11 11 12 / 0.08);
 }
 .dark .nx-card3d__body {
     border-color: rgb(255 255 255 / 0.1);
-    background: linear-gradient(150deg, #1a2840 0%, #10243c 100%);
+    background: linear-gradient(150deg, #17191C 0%, #232529 100%);
 }
 .nx-card3d:hover .nx-card3d__body {
     transform: rotateX(7deg) rotateY(-7deg) translateY(-6px);
-    box-shadow: 0 26px 48px rgb(162 28 175 / 0.22);
+    box-shadow: 0 26px 48px rgb(37 39 43 / 0.22);
 }
 .nx-card3d__glass {
     position: absolute;
@@ -1216,8 +1216,8 @@
     justify-content: center;
     border-radius: 1rem;
     color: #fff;
-    background: linear-gradient(140deg, #A21CAF, #86198F);
-    box-shadow: 0 8px 18px rgb(162 28 175 / 0.35);
+    background: linear-gradient(140deg, #23272D, #111214);
+    box-shadow: 0 8px 18px rgb(37 39 43 / 0.35);
     transform: translateZ(40px);
     transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
 }
@@ -1253,7 +1253,7 @@
     overflow: hidden;
     border-radius: 1.25rem;
     padding: 1.25rem;
-    background: linear-gradient(150deg, #10243c, #0d1b2a);
+    background: linear-gradient(150deg, #232529, #0b0b0c);
     border: 1px solid rgb(255 255 255 / 0.08);
 }
 .nx-float-card__light {
@@ -1263,7 +1263,7 @@
     width: 10rem;
     height: 10rem;
     border-radius: 9999px;
-    background: radial-gradient(circle, rgb(132 204 22 / 0.5), transparent 65%);
+    background: radial-gradient(circle, rgb(148 160 176 / 0.5), transparent 65%);
     animation: nx-float-drift 6s ease-in-out infinite alternate;
     pointer-events: none;
 }
@@ -1274,7 +1274,7 @@
     width: 9rem;
     height: 9rem;
     border-radius: 9999px;
-    border: 1.5px solid rgb(162 28 175 / 0.5);
+    border: 1.5px solid rgb(37 39 43 / 0.5);
     animation: nx-float-drift 7s ease-in-out infinite alternate-reverse;
     pointer-events: none;
 }
@@ -1294,11 +1294,11 @@
     padding: 1.5rem;
     border: 1px solid rgb(226 232 240 / 0.9);
     transition: background 0.6s ease, border-color 0.6s ease;
-    background: linear-gradient(160deg, #d9f0f0 0%, #f6fbfb 60%);
+    background: linear-gradient(160deg, #e9ecf0 0%, #f6fbfb 60%);
 }
 .nx-theme-scene.is-night {
-    border-color: rgb(45 64 96);
-    background: linear-gradient(160deg, #0d1b2a 0%, #10243c 70%);
+    border-color: rgb(66 69 75);
+    background: linear-gradient(160deg, #0b0b0c 0%, #232529 70%);
 }
 .nx-theme-scene__sky { position: absolute; inset: 0; pointer-events: none; }
 .nx-theme-scene__orb {
@@ -1308,8 +1308,8 @@
     width: 2.6rem;
     height: 2.6rem;
     border-radius: 9999px;
-    background: radial-gradient(circle at 35% 35%, #f4c430, #84CC16);
-    box-shadow: 0 0 24px rgb(132 204 22 / 0.55);
+    background: radial-gradient(circle at 35% 35%, #e5e9ef, #94A0B0);
+    box-shadow: 0 0 24px rgb(148 160 176 / 0.55);
     transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1), background 0.7s, box-shadow 0.7s;
 }
 .is-night .nx-theme-scene__orb {
@@ -1353,8 +1353,8 @@
     transition: background 0.5s, border-color 0.5s;
 }
 .is-night .nx-theme-scene__switch {
-    border-color: rgb(45 64 96);
-    background: rgb(13 27 42 / 0.85);
+    border-color: rgb(66 69 75);
+    background: rgb(11 11 12 / 0.85);
 }
 .nx-theme-scene__knob {
     display: flex;
@@ -1365,12 +1365,12 @@
     border-radius: 9999px;
     margin-left: 0.2rem;
     background: #fff;
-    box-shadow: 0 1px 4px rgb(13 27 42 / 0.25);
+    box-shadow: 0 1px 4px rgb(11 11 12 / 0.25);
     transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1), background 0.45s;
 }
 .is-night .nx-theme-scene__knob {
     transform: translateX(1.55rem);
-    background: #243352;
+    background: #373a3f;
 }
 @media (prefers-reduced-motion: reduce) {
     .nx-theme-scene, .nx-theme-scene__orb, .nx-theme-scene__knob { transition: none; }
@@ -1398,9 +1398,9 @@
    lines whose dash flows to feel alive. Static for reduced-motion. */
 .nx-orbit__line { stroke-dasharray: 12 9; stroke-linecap: round; stroke-width: 2.2px; opacity: .8; animation: nx-signal 2.6s linear infinite; }
 /* Visible connective lines: deep teal on a light page, the light mint scent colour (with a soft glow) on a dark one and on the always-dark login panel. */
-.nx-orbit__line--ink { stroke: #0b5c5c; }
-.dark .nx-orbit__line--ink { stroke: #5eead4; filter: drop-shadow(0 0 5px rgb(94 234 212 / .65)); }
-.nx-orbit__line--lite { stroke: #5eead4; filter: drop-shadow(0 0 5px rgb(94 234 212 / .65)); }
+.nx-orbit__line--ink { stroke: #3d4147; }
+.dark .nx-orbit__line--ink { stroke: #d3d8df; filter: drop-shadow(0 0 5px rgb(157 162 171 / .65)); }
+.nx-orbit__line--lite { stroke: #d3d8df; filter: drop-shadow(0 0 5px rgb(157 162 171 / .65)); }
 .nx-orbit__node { animation: nx-float-a 6s ease-in-out infinite; }
 .nx-orbit__node:nth-child(3n) { animation-name: nx-float-b; animation-duration: 7.5s; }
 .nx-orbit__node:nth-child(3n+1) { animation-name: nx-float-c; animation-duration: 8.5s; }
@@ -1419,8 +1419,8 @@
 .nx-gradient-text {
     background-image: linear-gradient(100deg,
         rgb(var(--brand-primary)) 0%,
-        #2dd4bf 42%,
-        rgb(var(--brand-accent)) 100%);
+        #b6bdc8 42%,
+        rgb(var(--brand-action)) 100%);
     background-size: 200% auto;
     -webkit-background-clip: text;
     background-clip: text;
@@ -1430,9 +1430,9 @@
 }
 .dark .nx-gradient-text {
     background-image: linear-gradient(100deg,
-        #5eead4 0%,
-        #2dd4bf 40%,
-        #f0c04a 100%);
+        #d3d8df 0%,
+        #b6bdc8 40%,
+        color-mix(in srgb, rgb(var(--brand-action)) 52%, white) 100%);
 }
 @keyframes nx-gradient-pan { 0%, 100% { background-position: 0% center; } 50% { background-position: 100% center; } }
 @media (prefers-reduced-motion: reduce) { .nx-gradient-text { animation: none; } }
@@ -1465,7 +1465,7 @@
 .nx-callctl-off { display: none; }
 .nx-callctl[aria-pressed="true"] .nx-callctl-on { display: none; }
 .nx-callctl[aria-pressed="true"] .nx-callctl-off { display: inline; }
-.nx-callctl[aria-pressed="true"] .nx-callctl-btn { background: #ffffff; color: #0D1B2A; }
+.nx-callctl[aria-pressed="true"] .nx-callctl-btn { background: #ffffff; color: #0b0b0c; }
 .nx-callctl[aria-pressed="true"] { color: #ffffff; }
 
 /* Theme toggle presets moved to their own file — see theme-toggle.css
@@ -1590,13 +1590,13 @@
 @supports not (color: color-mix(in srgb, red, blue)) {
   .dark .nx-icon-accent { color: #fff; }
 }
-.nx-header-fade > * { filter: drop-shadow(0 1px 2px rgb(15 23 42 / .12)); }
+.nx-header-fade > * { filter: drop-shadow(0 1px 2px rgb(27 28 30 / .12)); }
 .dark .nx-header-fade > * { filter: drop-shadow(0 1px 3px rgb(0 0 0 / .45)); }
 
 
 /* File inputs: the native "Choose file" button must stay legible in dark mode wherever a page styled it with a dark brand tint. */
-.dark input[type="file"]::file-selector-button { color: #CCFBF1; background-color: rgb(45 212 191 / .2); }
-.dark input[type="file"]::-webkit-file-upload-button { color: #CCFBF1; background-color: rgb(45 212 191 / .2); }
+.dark input[type="file"]::file-selector-button { color: #e9ecf0; background-color: rgb(182 189 200 / .2); }
+.dark input[type="file"]::-webkit-file-upload-button { color: #e9ecf0; background-color: rgb(182 189 200 / .2); }
 
 /* ============================================================================
  * Naara Gift hero: the looping "special" reveal (default art, until the admin uploads their own).
@@ -1654,7 +1654,7 @@
   mask-image: linear-gradient(to left, #000 80%, transparent 100%);
   animation: nx-gift-float 5s ease-in-out infinite;
 }
-.dark .nx-gift-stage__box { filter: drop-shadow(0 0 26px rgb(132 204 22 / .28)) drop-shadow(0 14px 22px rgb(0 0 0 / .5)); }
+.dark .nx-gift-stage__box { filter: drop-shadow(0 0 26px rgb(148 160 176 / .28)) drop-shadow(0 14px 22px rgb(0 0 0 / .5)); }
 /* a bright band that only paints where the box is (the box image is its own mask) */
 .nx-gift-stage__shine {
   position: absolute;
@@ -1679,7 +1679,7 @@
   width: 78%;
   aspect-ratio: 1;
   border-radius: 9999px;
-  background: radial-gradient(closest-side, rgb(132 204 22 / .45), rgb(132 204 22 / .12) 55%, transparent 72%);
+  background: radial-gradient(closest-side, rgb(148 160 176 / .45), rgb(148 160 176 / .12) 55%, transparent 72%);
   opacity: 0;
   animation: nx-gift-halo var(--gift-t) ease-in-out infinite;
 }

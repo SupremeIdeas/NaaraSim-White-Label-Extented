@@ -44,7 +44,7 @@
                  x-transition:leave-start="translate-y-0 sm:scale-100 sm:opacity-100"
                  x-transition:leave-end="translate-y-full sm:translate-y-0 sm:scale-95 sm:opacity-0"
                  @click.outside="open = false"
-                 class="relative flex max-h-[88dvh] w-full flex-col overflow-hidden rounded-t-3xl border border-slate-200 bg-white shadow-2xl sm:max-h-[85dvh] sm:max-w-md sm:rounded-3xl dark:border-white/10 dark:bg-[#0D1B2A]"
+                 class="relative flex max-h-[88dvh] w-full flex-col overflow-hidden rounded-t-3xl border border-slate-200 bg-white shadow-2xl sm:max-h-[85dvh] sm:max-w-md sm:rounded-3xl dark:border-white/10 dark:bg-[#0b0b0c]"
                  style="padding-bottom: env(safe-area-inset-bottom);">
 
         {{-- Grab handle (mobile bottom-sheet affordance). --}}

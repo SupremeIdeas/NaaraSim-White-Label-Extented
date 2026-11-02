@@ -47,7 +47,7 @@
              @keydown.escape.window="$wire.close()">
             <div class="absolute inset-0 bg-black/60" wire:click="close"></div>
 
-            <div class="relative flex max-h-[90vh] w-full max-w-lg flex-col overflow-hidden rounded-t-3xl bg-white shadow-2xl sm:rounded-3xl dark:bg-[#0D1B2A]">
+            <div class="relative flex max-h-[90vh] w-full max-w-lg flex-col overflow-hidden rounded-t-3xl bg-white shadow-2xl sm:rounded-3xl dark:bg-[#0b0b0c]">
                 {{-- Header --}}
                 <div class="flex items-center justify-between border-b border-slate-100 px-5 py-4 dark:border-white/10">
                     <h2 class="flex items-center gap-2 text-base font-bold text-slate-900 dark:text-white">
@@ -59,7 +59,7 @@
                 {{-- EID / *#06# banner --}}
                 <div class="mx-5 mt-4 rounded-xl border border-primary/25 bg-primary/5 p-3 dark:border-primary/30 dark:bg-primary/10">
                     <p class="text-sm font-semibold text-slate-800 dark:text-slate-100">The definitive check</p>
-                    <p class="mt-0.5 text-xs text-slate-600 dark:text-slate-300">Dial <span class="rounded bg-white px-1.5 py-0.5 font-mono font-bold text-primary dark:bg-[#1B2A44] dark:text-teal-300">*#06#</span> on your device — if an <strong>EID</strong> number appears, your device supports eSIM.</p>
+                    <p class="mt-0.5 text-xs text-slate-600 dark:text-slate-300">Dial <span class="rounded bg-white px-1.5 py-0.5 font-mono font-bold text-primary dark:bg-[#1D2024] dark:text-teal-300">*#06#</span> on your device — if an <strong>EID</strong> number appears, your device supports eSIM.</p>
                 </div>
 
                 {{-- Best-effort auto-detect result (BUILD-8 §6). Advisory only —
@@ -91,7 +91,7 @@
                     <div class="relative">
                         <x-icon name="search" class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                         <input type="text" wire:model.live.debounce.250ms="search" placeholder="Search your device…"
-                               class="w-full rounded-xl border border-slate-300 bg-white py-2.5 pl-9 pr-3 text-sm dark:border-[var(--brand-card-border-dark)] dark:bg-[#243352] dark:text-slate-100">
+                               class="w-full rounded-xl border border-slate-300 bg-white py-2.5 pl-9 pr-3 text-sm dark:border-[var(--brand-card-border-dark)] dark:bg-[#373a3f] dark:text-slate-100">
                     </div>
                 </div>
 
@@ -99,7 +99,7 @@
                 <div class="flex gap-2 px-5 pt-3">
                     @foreach (['apple' => 'Apple', 'android' => 'Android', 'others' => 'Others'] as $key => $label)
                         <button wire:click="setOs('{{ $key }}')"
-                                class="flex-1 rounded-full px-3 py-1.5 text-xs font-semibold transition {{ $os === $key ? 'bg-primary text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-[#243352] dark:text-slate-300 dark:hover:bg-[#2D4060]' }}">
+                                class="flex-1 rounded-full px-3 py-1.5 text-xs font-semibold transition {{ $os === $key ? 'bg-primary text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-[#373a3f] dark:text-slate-300 dark:hover:bg-[#2A2E34]' }}">
                             {{ $label }}
                         </button>
                     @endforeach

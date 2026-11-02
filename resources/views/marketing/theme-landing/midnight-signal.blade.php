@@ -20,7 +20,7 @@
 
     <div class="relative mx-auto max-w-5xl px-4 pb-14 pt-16 text-center sm:pb-20 sm:pt-24">
         <span class="inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-primary">
-            <x-icon name="signal" class="h-3.5 w-3.5" /> {{ $content['eyebrow'] }}
+            <x-glyph name="signal" class="h-3.5 w-3.5" /> {{ $content['eyebrow'] }}
         </span>
 
         <h1 class="mx-auto mt-5 max-w-2xl font-display text-4xl font-bold leading-tight text-white sm:text-5xl">
@@ -33,7 +33,7 @@
         <div class="mt-8 flex justify-center">
             <a href="{{ auth()->check() ? route('catalogue') : route('register') }}" wire:navigate
                class="inline-flex items-center gap-2 rounded-full bg-primary px-7 py-3 text-sm font-semibold text-white shadow-lg shadow-primary/40 transition hover:bg-primary-dark">
-                <x-icon name="search" class="h-4 w-4" /> {{ $content['cta_label'] }}
+                <x-glyph name="search" class="h-4 w-4" /> {{ $content['cta_label'] }}
             </a>
         </div>
 
@@ -81,7 +81,7 @@
             ] as $feature)
                 <div class="rounded-2xl border border-primary/10 bg-white p-5 dark:border-primary/15 dark:bg-navy/60">
                     <span class="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-primary dark:bg-primary/20">
-                        <x-icon :name="$feature['icon']" class="h-4 w-4" />
+                        <x-glyph :name="$feature['icon']" class="h-4 w-4" />
                     </span>
                     <h3 class="mt-3 text-sm font-bold text-slate-900 dark:text-white">{{ $feature['title'] }}</h3>
                     <p class="mt-1 text-xs leading-relaxed text-slate-500 dark:text-slate-400">{{ $feature['body'] }}</p>

@@ -11,7 +11,7 @@
                 and SMS verification in one app. Let’s get you started.
             </p>
             <a href="/install/requirements"
-               class="mt-8 flex w-full items-center justify-center gap-2 rounded-lg border border-slate-200 px-4 py-3 font-semibold text-slate-900 transition-colors hover:bg-slate-50 dark:border-[#2D4060] dark:text-slate-100 dark:hover:bg-[#243352]">
+               class="mt-8 flex w-full items-center justify-center gap-2 rounded-lg border border-slate-200 px-4 py-3 font-semibold text-slate-900 transition-colors hover:bg-slate-50 dark:border-[#2A2E34] dark:text-slate-100 dark:hover:bg-[#373a3f]">
                 Next <x-icon name="chevron-right" class="h-4 w-4" />
             </a>
         </div>

@@ -8,7 +8,7 @@
         </div>
     @endif
 
-    <form wire:submit="save" class="space-y-5 rounded-2xl border border-slate-200 bg-white p-6 dark:border-[#2D4060] dark:bg-[#1A2840]">
+    <form wire:submit="save" class="space-y-5 rounded-2xl border border-slate-200 bg-white p-6 dark:border-[#2A2E34] dark:bg-[#17191C]">
         <label class="flex items-center justify-between">
             <span class="text-sm font-medium text-slate-700 dark:text-slate-200">Show splash on app open</span>
             <input type="checkbox" wire:model="enabled" class="h-5 w-5 rounded text-primary">
@@ -17,16 +17,16 @@
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
                 <label class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">Product name</label>
-                <input wire:model="product_name" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                <input wire:model="product_name" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
                 @error('product_name') <span class="text-xs text-red-600 dark:text-red-400">{{ $message }}</span> @enderror
             </div>
             <div>
                 <label class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">“from …” tagline</label>
-                <input wire:model="brand_tagline" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                <input wire:model="brand_tagline" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
             </div>
             <div>
                 <label class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">Minimum display (ms, max 4000)</label>
-                <input type="number" wire:model="duration_ms" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                <input type="number" wire:model="duration_ms" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
                 @error('duration_ms') <span class="text-xs text-red-600 dark:text-red-400">{{ $message }}</span> @enderror
             </div>
             <label class="flex items-center gap-2 self-end pb-2 text-sm text-slate-600 dark:text-slate-300">
@@ -34,7 +34,7 @@
             </label>
         </div>
 
-        <div class="border-t border-slate-100 pt-4 dark:border-[#243352]">
+        <div class="border-t border-slate-100 pt-4 dark:border-[#373a3f]">
             <h2 class="mb-1 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Logos — light &amp; dark</h2>
             <p class="mb-3 text-xs text-slate-400 dark:text-slate-500">
                 Upload PNG, JPEG, WebP, GIF or SVG (up to 2 MB; SVGs are sanitized). Or paste a URL. Set BOTH light and
@@ -49,14 +49,14 @@
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 @foreach ([
                     'product_logo_light' => ['Product logo (light)', '#F8F9FA'],
-                    'product_logo_dark' => ['Product logo (dark)', '#0D1B2A'],
+                    'product_logo_dark' => ['Product logo (dark)', '#0b0b0c'],
                     'brand_logo_light' => ['Brand logo (light)', '#F8F9FA'],
-                    'brand_logo_dark' => ['Brand logo (dark)', '#0D1B2A'],
+                    'brand_logo_dark' => ['Brand logo (dark)', '#0b0b0c'],
                 ] as $field => [$label, $preview])
                     <div wire:key="logo-{{ $field }}">
                         <label class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">{{ $label }}</label>
                         <div class="flex items-center gap-2">
-                            <div class="flex h-11 w-16 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-slate-200 dark:border-[#2D4060]" style="background: {{ $preview }}">
+                            <div class="flex h-11 w-16 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-slate-200 dark:border-[#2A2E34]" style="background: {{ $preview }}">
                                 @if ($$field)
                                     <img src="{{ $$field }}" alt="{{ $label }}" class="max-h-9 max-w-[3.5rem] object-contain">
                                 @else
@@ -64,7 +64,7 @@
                                 @endif
                             </div>
                             <div class="min-w-0 flex-1">
-                                <input wire:model="{{ $field }}" placeholder="https://…  or upload →" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                                <input wire:model="{{ $field }}" placeholder="https://…  or upload →" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
                                 <label class="mt-1 flex cursor-pointer items-center gap-1 text-xs font-medium text-primary hover:underline">
                                     <x-icon name="inbox" class="h-3.5 w-3.5" />
                                     <span wire:loading.remove wire:target="{{ $field }}_file">Upload file</span>

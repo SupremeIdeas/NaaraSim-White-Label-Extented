@@ -2,7 +2,7 @@
     <div class="mx-auto max-w-3xl px-4 py-12 sm:px-6 sm:py-16">
         <div class="text-center">
             <span class="mb-4 inline-flex rounded-2xl bg-primary/10 p-4 text-primary dark:text-teal-300">
-                <x-icon name="download" class="h-8 w-8" />
+                <x-glyph name="download" class="h-8 w-8" />
             </span>
             <h1 class="text-3xl font-bold text-slate-900 dark:text-white sm:text-4xl">Get the {{ $appName }} app</h1>
             <p class="mt-3 text-slate-600 dark:text-slate-300">
@@ -15,13 +15,13 @@
             {{-- Android --}}
             <div class="rounded-3xl border border-slate-200/70 bg-white p-6 dark:border-white/10 dark:bg-slate-900/60">
                 <div class="mb-4 flex items-center gap-2 text-slate-800 dark:text-slate-100">
-                    <x-icon name="phone" class="h-5 w-5 text-primary dark:text-teal-300" />
+                    <x-glyph name="phone" class="h-5 w-5 text-primary dark:text-teal-300" />
                     <h2 class="text-lg font-semibold">Android</h2>
                 </div>
                 @if ($androidDownloadable)
                     <a href="{{ $apkUrl }}" rel="nofollow"
                         class="flex w-full items-center justify-center gap-2 rounded-full bg-primary px-5 py-3 text-sm font-semibold text-white transition hover:bg-primary-dark">
-                        <x-icon name="download" class="h-4 w-4" /> Download APK
+                        <x-glyph name="download" class="h-4 w-4" /> Download APK
                     </a>
                     <p class="mt-2 text-center text-xs text-slate-400">Direct install · signed build</p>
                 @endif
@@ -41,7 +41,7 @@
             {{-- iOS — App Store badge only, and only when the listing is live. --}}
             <div class="rounded-3xl border border-slate-200/70 bg-white p-6 dark:border-white/10 dark:bg-slate-900/60">
                 <div class="mb-4 flex items-center gap-2 text-slate-800 dark:text-slate-100">
-                    <x-icon name="phone" class="h-5 w-5 text-primary dark:text-teal-300" />
+                    <x-glyph name="phone" class="h-5 w-5 text-primary dark:text-teal-300" />
                     <h2 class="text-lg font-semibold">iPhone &amp; iPad</h2>
                 </div>
                 @if ($iosBadge)

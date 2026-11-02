@@ -6,7 +6,7 @@
 
     @foreach ($placements as $key => $label)
         @php($f = $form[$key])
-        <div wire:key="placement-{{ $key }}" class="mb-4 rounded-xl border border-slate-200 bg-white p-5 dark:border-[#2D4060] dark:bg-[#1B2A44]">
+        <div wire:key="placement-{{ $key }}" class="mb-4 rounded-xl border border-slate-200 bg-white p-5 dark:border-[#2A2E34] dark:bg-[#1D2024]">
             <div class="mb-4 flex items-center justify-between gap-3">
                 <div>
                     <p class="font-semibold text-slate-900 dark:text-white">{{ $label }}</p>
@@ -29,7 +29,7 @@
                 <div class="min-w-[220px] flex-1">
                     <label class="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-300">Display style</label>
                     <select wire:model="form.{{ $key }}.display_style"
-                            class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                            class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
                         @foreach ($displayStyles as $styleKey => $styleLabel)
                             <option value="{{ $styleKey }}">{{ $styleLabel }}</option>
                         @endforeach

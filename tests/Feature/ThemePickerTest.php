@@ -37,14 +37,14 @@ class ThemePickerTest extends TestCase
         Livewire::actingAs(User::factory()->create())->test(ThemePicker::class)->assertStatus(403);
     }
 
-    public function test_an_admin_sees_all_forty_presets(): void
+    public function test_an_admin_sees_all_forty_one_presets(): void
     {
         $admin = User::factory()->create();
         $admin->assignRole('admin');
 
         Livewire::actingAs($admin)->test(ThemePicker::class)
             ->assertStatus(200)
-            ->assertViewHas('presets', fn ($p) => $p->count() === 40)
+            ->assertViewHas('presets', fn ($p) => $p->count() === 41)
             ->assertSee('Naara Official')
             ->assertSee('Indigo Current');
     }

@@ -9,7 +9,7 @@
         @foreach (range(1, 6) as $n)
             <div data-reveal style="--reveal-delay: {{ ($n - 1) * 0.07 }}s" class="nx-card">
                 <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary dark:bg-primary/20">
-                    <x-icon :name="$icons[$n - 1]" class="h-5 w-5" />
+                    <x-glyph :name="$icons[$n - 1]" class="h-5 w-5" />
                 </span>
                 <h3 class="mt-4 font-bold text-slate-900 dark:text-white">{{ $s["f{$n}_title"] }}</h3>
                 <p class="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-300">{{ $s["f{$n}_text"] }}</p>

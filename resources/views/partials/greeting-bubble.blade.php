@@ -15,7 +15,7 @@
     <div class="relative min-w-0 flex-1">
         {{-- Speech-bubble tail toward the avatar. --}}
         <span class="absolute -left-1.5 top-3 h-3 w-3 rotate-45 rounded-[2px] bg-white/80 dark:bg-white/[0.07]" aria-hidden="true"></span>
-        <div class="relative rounded-2xl rounded-tl-md border border-slate-200/70 bg-white px-4 py-3 dark:border-white/10 dark:bg-[#101d33]">
+        <div class="relative rounded-2xl rounded-tl-md border border-slate-200/70 bg-white px-4 py-3 dark:border-white/10 dark:bg-[#1f2124]">
             @isset($onDismiss)
                 <button type="button" {!! $onDismiss !!} aria-label="Dismiss"
                         class="absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-full text-slate-400 transition hover:bg-slate-100 dark:hover:bg-white/10">

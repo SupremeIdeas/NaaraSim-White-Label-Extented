@@ -4,7 +4,7 @@
             <h1 class="text-2xl font-bold text-slate-900 dark:text-slate-100">System health</h1>
             <p class="text-sm text-slate-500 dark:text-slate-400">Is the live cron firing and the queue draining? If a task is overdue, fix the cPanel cron — not the code. This page refreshes itself every few seconds.</p>
         </div>
-        <button type="button" wire:click="refreshHealth" class="rounded-lg border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-50 dark:border-[#2D4060] dark:text-slate-300 dark:hover:bg-[#243352]">
+        <button type="button" wire:click="refreshHealth" class="rounded-lg border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-50 dark:border-[#2A2E34] dark:text-slate-300 dark:hover:bg-[#373a3f]">
             <x-icon name="refresh" class="mr-1 inline h-4 w-4" /> Refresh
         </button>
     </div>
@@ -33,7 +33,7 @@
 
     {{-- Queue --}}
     <div class="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-3">
-        <div class="rounded-2xl border border-slate-200 bg-white p-4 dark:border-[#2D4060] dark:bg-[#1A2840]">
+        <div class="rounded-2xl border border-slate-200 bg-white p-4 dark:border-[#2A2E34] dark:bg-[#17191C]">
             <p class="text-xs font-medium uppercase tracking-wide text-slate-400">Queue connection</p>
             <p @class([
                 'mt-1 text-lg font-bold',
@@ -44,12 +44,12 @@
                 <p class="mt-0.5 text-[11px] text-red-600 dark:text-red-400">Should be database or redis in production.</p>
             @endif
         </div>
-        <div class="rounded-2xl border border-slate-200 bg-white p-4 dark:border-[#2D4060] dark:bg-[#1A2840]">
+        <div class="rounded-2xl border border-slate-200 bg-white p-4 dark:border-[#2A2E34] dark:bg-[#17191C]">
             <p class="text-xs font-medium uppercase tracking-wide text-slate-400">Queue backlog</p>
             <p class="mt-1 text-lg font-bold text-slate-900 dark:text-slate-100">{{ is_null($queueBacklog) ? '—' : number_format($queueBacklog) }}</p>
             <p class="mt-0.5 text-[11px] text-slate-400">{{ is_null($queueBacklog) ? 'Not a database queue' : 'pending jobs' }}</p>
         </div>
-        <div class="rounded-2xl border border-slate-200 bg-white p-4 dark:border-[#2D4060] dark:bg-[#1A2840]">
+        <div class="rounded-2xl border border-slate-200 bg-white p-4 dark:border-[#2A2E34] dark:bg-[#17191C]">
             <p class="text-xs font-medium uppercase tracking-wide text-slate-400">Oldest job</p>
             <p class="mt-1 text-lg font-bold text-slate-900 dark:text-slate-100">{{ is_null($oldestJobAge) ? '—' : \Illuminate\Support\Carbon::now()->subSeconds($oldestJobAge)->diffForHumans(null, true) }}</p>
             <p class="mt-0.5 text-[11px] text-slate-400">{{ is_null($oldestJobAge) ? 'queue empty' : 'waiting to drain' }}</p>
@@ -78,11 +78,11 @@
     @endif
 
     <div class="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <div class="rounded-2xl border border-slate-200 bg-white p-4 dark:border-[#2D4060] dark:bg-[#1A2840]">
+        <div class="rounded-2xl border border-slate-200 bg-white p-4 dark:border-[#2A2E34] dark:bg-[#17191C]">
             <p class="text-xs font-medium uppercase tracking-wide text-slate-400">Worker driver</p>
             <p class="mt-1 text-lg font-bold text-slate-900 dark:text-slate-100">{{ $workerDriver }}</p>
         </div>
-        <div class="rounded-2xl border border-slate-200 bg-white p-4 dark:border-[#2D4060] dark:bg-[#1A2840]">
+        <div class="rounded-2xl border border-slate-200 bg-white p-4 dark:border-[#2A2E34] dark:bg-[#17191C]">
             <p class="text-xs font-medium uppercase tracking-wide text-slate-400">Horizon</p>
             @if (! $horizonInstalled)
                 <p class="mt-1 text-lg font-bold text-slate-400">Not installed</p>
@@ -98,12 +98,12 @@
                 <p class="mt-1 text-lg font-bold text-slate-400">—</p>
             @endif
         </div>
-        <div class="rounded-2xl border border-slate-200 bg-white p-4 dark:border-[#2D4060] dark:bg-[#1A2840]">
+        <div class="rounded-2xl border border-slate-200 bg-white p-4 dark:border-[#2A2E34] dark:bg-[#17191C]">
             <p class="text-xs font-medium uppercase tracking-wide text-slate-400">Pending jobs</p>
             <p class="mt-1 text-lg font-bold text-slate-900 dark:text-slate-100">{{ number_format(collect($pendingByQueue)->sum('length')) }}</p>
             <p class="mt-0.5 text-[11px] text-slate-400">across {{ count($pendingByQueue) ?: 0 }} queue{{ count($pendingByQueue) === 1 ? '' : 's' }}</p>
         </div>
-        <div class="rounded-2xl border border-slate-200 bg-white p-4 dark:border-[#2D4060] dark:bg-[#1A2840]">
+        <div class="rounded-2xl border border-slate-200 bg-white p-4 dark:border-[#2A2E34] dark:bg-[#17191C]">
             <p class="text-xs font-medium uppercase tracking-wide text-slate-400">Failed jobs</p>
             <p @class(['mt-1 text-lg font-bold', 'text-red-600 dark:text-red-400' => $failedCount > 0, 'text-slate-900 dark:text-slate-100' => $failedCount === 0])>{{ number_format($failedCount) }}</p>
             @if (! is_null($redisReachable))
@@ -114,11 +114,11 @@
 
     {{-- Per-queue breakdown (Horizon workload when available) --}}
     @if (count($pendingByQueue))
-        <div class="mb-4 overflow-hidden rounded-2xl border border-slate-200 bg-white dark:border-[#2D4060] dark:bg-[#1A2840]">
-            <div class="border-b border-slate-100 p-4 dark:border-[#243352]">
+        <div class="mb-4 overflow-hidden rounded-2xl border border-slate-200 bg-white dark:border-[#2A2E34] dark:bg-[#17191C]">
+            <div class="border-b border-slate-100 p-4 dark:border-[#373a3f]">
                 <h2 class="text-sm font-semibold text-slate-700 dark:text-slate-200">Queues</h2>
             </div>
-            <div class="divide-y divide-slate-100 dark:divide-[#243352]">
+            <div class="divide-y divide-slate-100 dark:divide-[#373a3f]">
                 @foreach ($pendingByQueue as $q)
                     <div class="flex items-center justify-between px-4 py-2.5 text-sm">
                         <span class="font-medium text-slate-700 dark:text-slate-200">{{ $q['queue'] }}</span>
@@ -135,11 +135,11 @@
 
     {{-- Recent failures --}}
     @if (count($recentFailed))
-        <div class="mb-4 overflow-hidden rounded-2xl border border-slate-200 bg-white dark:border-[#2D4060] dark:bg-[#1A2840]">
-            <div class="border-b border-slate-100 p-4 dark:border-[#243352]">
+        <div class="mb-4 overflow-hidden rounded-2xl border border-slate-200 bg-white dark:border-[#2A2E34] dark:bg-[#17191C]">
+            <div class="border-b border-slate-100 p-4 dark:border-[#373a3f]">
                 <h2 class="text-sm font-semibold text-slate-700 dark:text-slate-200">Recent failed jobs</h2>
             </div>
-            <div class="divide-y divide-slate-100 dark:divide-[#243352]">
+            <div class="divide-y divide-slate-100 dark:divide-[#373a3f]">
                 @foreach ($recentFailed as $f)
                     <div class="px-4 py-2.5">
                         <div class="flex items-center justify-between gap-2">
@@ -157,13 +157,13 @@
          NCI learns entirely from queued listeners and the nightly recompute. If
          the listeners are dying or the recompute has stalled, scores silently go
          stale with nothing else to show it — surface both here. --}}
-    <div class="mb-4 rounded-2xl border border-slate-200 bg-white p-4 dark:border-[#2D4060] dark:bg-[#1A2840]">
+    <div class="mb-4 rounded-2xl border border-slate-200 bg-white p-4 dark:border-[#2A2E34] dark:bg-[#17191C]">
         <div class="mb-3 flex items-center justify-between">
             <h2 class="text-sm font-semibold text-slate-700 dark:text-slate-200">NCI learning health</h2>
             <span class="text-[11px] uppercase tracking-wide text-slate-400">Layer 3</span>
         </div>
         <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <div class="rounded-xl border border-slate-100 p-3 dark:border-[#243352]">
+            <div class="rounded-xl border border-slate-100 p-3 dark:border-[#373a3f]">
                 <p class="text-xs font-medium uppercase tracking-wide text-slate-400">Failed NCI listeners</p>
                 <p @class(['mt-1 text-lg font-bold', 'text-red-600 dark:text-red-400' => $nci['failed'] > 0, 'text-slate-900 dark:text-slate-100' => $nci['failed'] === 0])>{{ number_format($nci['failed']) }}</p>
                 <p class="mt-0.5 text-[11px] text-slate-500 dark:text-slate-400">
@@ -174,7 +174,7 @@
                     @endif
                 </p>
             </div>
-            <div class="rounded-xl border border-slate-100 p-3 dark:border-[#243352]">
+            <div class="rounded-xl border border-slate-100 p-3 dark:border-[#373a3f]">
                 <p class="text-xs font-medium uppercase tracking-wide text-slate-400">Nightly recompute</p>
                 <p @class(['mt-1 text-lg font-bold', 'text-red-600 dark:text-red-400' => $nci['recompute_overdue'], 'text-slate-900 dark:text-slate-100' => ! $nci['recompute_overdue']])>
                     {{ $nci['recompute_ago'] ?? 'Never run' }}
@@ -191,7 +191,7 @@
     </div>
 
     {{-- ============ Maintenance: cache flusher ============ --}}
-    <div class="mb-6 rounded-2xl border border-slate-200 bg-white p-4 dark:border-[#2D4060] dark:bg-[#1A2840]">
+    <div class="mb-6 rounded-2xl border border-slate-200 bg-white p-4 dark:border-[#2A2E34] dark:bg-[#17191C]">
         <div class="flex flex-wrap items-center justify-between gap-3">
             <div>
                 <h2 class="text-sm font-semibold text-slate-700 dark:text-slate-200">Caches</h2>
@@ -206,7 +206,7 @@
                 </button>
                 <button type="button" wire:click="flushCache('all')" wire:loading.attr="disabled" wire:target="flushCache"
                         wire:confirm="Clear ALL caches (application, config, routes, views)? The next few requests will be a little slower while they rebuild."
-                        class="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 disabled:opacity-60 dark:border-[#2D4060] dark:text-slate-300 dark:hover:bg-[#243352]">
+                        class="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 disabled:opacity-60 dark:border-[#2A2E34] dark:text-slate-300 dark:hover:bg-[#373a3f]">
                     Clear all caches
                 </button>
             </div>
@@ -224,7 +224,7 @@
          but it still changes the live schema, so it's gated to super_admin
          only (one level above the cache flush above) and shown with an
          explicit list of what will run before the admin commits to it. --}}
-    <div class="mb-6 rounded-2xl border border-slate-200 bg-white p-4 dark:border-[#2D4060] dark:bg-[#1A2840]">
+    <div class="mb-6 rounded-2xl border border-slate-200 bg-white p-4 dark:border-[#2A2E34] dark:bg-[#17191C]">
         <div class="flex flex-wrap items-center justify-between gap-3">
             <div>
                 <h2 class="flex items-center gap-1.5 text-sm font-semibold text-slate-700 dark:text-slate-200">
@@ -274,9 +274,9 @@
          database queue drained by a one-minute cron). This shows the correct,
          ordered setup for the environment actually detected, with the real app
          path + PHP binary already filled into the cron line. --}}
-    <div class="mb-6 rounded-2xl border border-slate-200 bg-white dark:border-[#2D4060] dark:bg-[#1A2840]"
+    <div class="mb-6 rounded-2xl border border-slate-200 bg-white dark:border-[#2A2E34] dark:bg-[#17191C]"
          x-data="{ tab: @js($hostingMode) }">
-        <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 p-4 dark:border-[#243352]">
+        <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 p-4 dark:border-[#373a3f]">
             <div>
                 <h2 class="text-sm font-semibold text-slate-700 dark:text-slate-200">Hosting &amp; background setup</h2>
                 <p class="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
@@ -285,15 +285,15 @@
                 </p>
             </div>
             <div class="flex items-center gap-1 rounded-lg bg-slate-100 p-0.5 dark:bg-white/5">
-                <button type="button" @click="tab = 'shared'" :class="tab === 'shared' ? 'bg-white text-primary shadow-sm dark:bg-[#243352] dark:text-teal-300' : 'text-slate-400'" class="rounded-md px-3 py-1 text-xs font-semibold transition">Shared / cPanel</button>
-                <button type="button" @click="tab = 'vps'" :class="tab === 'vps' ? 'bg-white text-primary shadow-sm dark:bg-[#243352] dark:text-teal-300' : 'text-slate-400'" class="rounded-md px-3 py-1 text-xs font-semibold transition">VPS / Cloudways</button>
+                <button type="button" @click="tab = 'shared'" :class="tab === 'shared' ? 'bg-white text-primary shadow-sm dark:bg-[#373a3f] dark:text-teal-300' : 'text-slate-400'" class="rounded-md px-3 py-1 text-xs font-semibold transition">Shared / cPanel</button>
+                <button type="button" @click="tab = 'vps'" :class="tab === 'vps' ? 'bg-white text-primary shadow-sm dark:bg-[#373a3f] dark:text-teal-300' : 'text-slate-400'" class="rounded-md px-3 py-1 text-xs font-semibold transition">VPS / Cloudways</button>
             </div>
         </div>
 
         @foreach (['shared', 'vps'] as $mode)
             <div x-show="tab === '{{ $mode }}'" x-cloak class="space-y-3 p-4">
                 @foreach ($hostingSteps[$mode] as $step)
-                    <div class="rounded-xl border border-slate-100 p-3 dark:border-[#243352]">
+                    <div class="rounded-xl border border-slate-100 p-3 dark:border-[#373a3f]">
                         <p class="text-sm font-semibold text-slate-800 dark:text-slate-100">{{ $step[0] }}</p>
                         <p class="mt-0.5 text-xs text-slate-500 dark:text-slate-400">{{ $step[1] }}</p>
                         @if (! empty($step[2]))
@@ -301,7 +301,7 @@
                                 <div class="flex items-start gap-2">
                                     <pre class="min-w-0 flex-1 overflow-x-auto rounded-lg bg-slate-900 px-3 py-2 text-[11px] leading-relaxed text-slate-100 dark:bg-black/40"><code>{{ $step[2] }}</code></pre>
                                     <button type="button" @click="navigator.clipboard.writeText(@js($step[2])); copied = true; setTimeout(() => copied = false, 1500)"
-                                            class="shrink-0 rounded-lg border border-slate-200 p-1.5 text-slate-500 hover:bg-slate-50 dark:border-[#2D4060] dark:hover:bg-[#243352]" aria-label="Copy">
+                                            class="shrink-0 rounded-lg border border-slate-200 p-1.5 text-slate-500 hover:bg-slate-50 dark:border-[#2A2E34] dark:hover:bg-[#373a3f]" aria-label="Copy">
                                         <x-icon name="copy" class="h-4 w-4" x-show="! copied" />
                                         <x-icon name="check" class="h-4 w-4 text-green-500" x-show="copied" x-cloak />
                                     </button>
@@ -320,12 +320,12 @@
          never shown as an alarming red), or red (overdue or genuinely
          failing). Each card's detail line is the actual heartbeat's proof of
          the most recent real work, not just a light. --}}
-    <div class="rounded-2xl border border-slate-200 bg-white dark:border-[#2D4060] dark:bg-[#1A2840]">
-        <div class="border-b border-slate-100 p-4 dark:border-[#243352]">
+    <div class="rounded-2xl border border-slate-200 bg-white dark:border-[#2A2E34] dark:bg-[#17191C]">
+        <div class="border-b border-slate-100 p-4 dark:border-[#373a3f]">
             <h2 class="text-sm font-semibold text-slate-700 dark:text-slate-200">Scheduled tasks</h2>
             <p class="text-xs text-slate-400">Each task's last successful run + its most recent attempt's outcome. "Never" or "overdue" means the cron isn't firing.</p>
         </div>
-        <div class="divide-y divide-slate-100 dark:divide-[#243352]">
+        <div class="divide-y divide-slate-100 dark:divide-[#373a3f]">
             @foreach ($tasks as $task)
                 @php
                     $state = $task['outcome'] === 'skipped' ? 'skipped' : ($task['overdue'] || $task['outcome'] === 'failed' ? 'broken' : 'ok');
@@ -361,15 +361,15 @@
          executions across every scheduled job, newest first — genuine proof
          the platform is doing background work, not a static snapshot. This
          panel (and the whole page, via wire:poll above) refreshes on its own. --}}
-    <div class="mt-6 rounded-2xl border border-slate-200 bg-white dark:border-[#2D4060] dark:bg-[#1A2840]">
-        <div class="border-b border-slate-100 p-4 dark:border-[#243352]">
+    <div class="mt-6 rounded-2xl border border-slate-200 bg-white dark:border-[#2A2E34] dark:bg-[#17191C]">
+        <div class="border-b border-slate-100 p-4 dark:border-[#373a3f]">
             <h2 class="text-sm font-semibold text-slate-700 dark:text-slate-200">Recent activity</h2>
             <p class="text-xs text-slate-400">The last {{ $recentHeartbeats->count() }} scheduled-job runs, newest first — live proof-of-work, not a snapshot.</p>
         </div>
         @if ($recentHeartbeats->isEmpty())
             <p class="p-5 text-sm text-slate-500 dark:text-slate-400">No job has recorded a heartbeat yet — one will appear here the moment the cron next fires.</p>
         @else
-            <div class="divide-y divide-slate-100 dark:divide-[#243352]">
+            <div class="divide-y divide-slate-100 dark:divide-[#373a3f]">
                 @foreach ($recentHeartbeats as $h)
                     <div class="flex items-center justify-between gap-3 px-4 py-2.5" wire:key="heartbeat-{{ $h->id }}">
                         <div class="min-w-0">
@@ -401,9 +401,9 @@
     <div class="mt-8">
         <h2 class="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-400">Recent webhook deliveries</h2>
         @if ($webhookDeliveries->isEmpty())
-            <p class="rounded-2xl border border-dashed border-slate-300 p-5 text-sm text-slate-500 dark:border-[#2D4060] dark:text-slate-400">No webhook deliveries recorded yet. If a provider (e.g. Paystack) should be calling and nothing shows here, the webhook URL likely isn't registered on the provider's dashboard.</p>
+            <p class="rounded-2xl border border-dashed border-slate-300 p-5 text-sm text-slate-500 dark:border-[#2A2E34] dark:text-slate-400">No webhook deliveries recorded yet. If a provider (e.g. Paystack) should be calling and nothing shows here, the webhook URL likely isn't registered on the provider's dashboard.</p>
         @else
-            <div class="overflow-hidden rounded-2xl border border-slate-200 dark:border-[#2D4060]">
+            <div class="overflow-hidden rounded-2xl border border-slate-200 dark:border-[#2A2E34]">
                 <table class="w-full text-sm">
                     <thead class="bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-400 dark:bg-white/5">
                         <tr><th class="px-4 py-2">Provider</th><th class="px-4 py-2">Path</th><th class="px-4 py-2">Status</th><th class="px-4 py-2">When</th></tr>

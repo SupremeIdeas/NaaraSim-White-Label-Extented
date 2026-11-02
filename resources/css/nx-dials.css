@@ -7,7 +7,7 @@ html[data-nx-ts=s] { --nx-ts: .92; font-size: 92%; }
 html[data-nx-ts=l] { --nx-ts: 1.12; font-size: 112%; }
 html[data-nx-depth=flat] { --nx-e1: none; --nx-e2: none; }
 html[data-nx-depth=deep] { --nx-e1: 0 22px 44px -18px rgb(0 0 0 / .9); --nx-e2: 0 -30px 70px -20px rgb(0 0 0 / .85); }
-html:not(.dark)[data-nx-depth=deep] { --nx-e1: 0 22px 40px -18px rgb(10 36 49 / .45); --nx-e2: 0 -26px 60px -20px rgb(10 36 49 / .4); }
+html:not(.dark)[data-nx-depth=deep] { --nx-e1: 0 22px 40px -18px rgb(27 29 32 / .45); --nx-e2: 0 -26px 60px -20px rgb(27 29 32 / .4); }
 /* Typeface: system stacks only (no web fonts, no FOUT). `naara` keeps the bundled fonts. */
 html[data-nx-font=system] { --nx-font-display: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; --nx-font-num: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; }
 html[data-nx-font=serif] { --nx-font-display: Georgia, 'Times New Roman', serif; }

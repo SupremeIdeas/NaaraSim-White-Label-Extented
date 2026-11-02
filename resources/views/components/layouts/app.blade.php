@@ -45,7 +45,7 @@
          edge), else (2) the active Theme Preset's primary colour so the
          chrome repaints with whichever theme is active, else (3) the
          admin-configured App Export PWA colour on the default theme. --}}
-    <meta name="theme-color" content="{{ \App\Support\ThemePreset::headerColorHex() ?? \App\Support\ThemePreset::browserThemeColor() ?? \App\Support\AppExport::get('theme_color', '#A21CAF') }}">
+    <meta name="theme-color" content="{{ \App\Support\ThemePreset::headerColorHex() ?? \App\Support\ThemePreset::browserThemeColor() ?? \App\Support\AppExport::get('theme_color', '#23272D') }}">
 
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -176,7 +176,7 @@
     /adminmaster's own chrome (see the `body:not(.is-admin-surface)` scope
     in that method).
 --}}
-<body class="min-h-screen text-[#0F172A] antialiased dark:text-slate-100 {{ \App\Support\ThemePreset::bodyClass() }} {{ $bodyClass ?? 'bg-[#F8F9FA] dark:bg-navy' }} {{ request()->is(\App\Support\AdminPath::current(), \App\Support\AdminPath::current().'/*') ? 'is-admin-surface' : '' }}">
+<body class="min-h-screen text-[#1b1c1e] antialiased dark:text-slate-100 {{ \App\Support\ThemePreset::bodyClass() }} {{ $bodyClass ?? 'bg-[#F8F9FA] dark:bg-navy' }} {{ request()->is(\App\Support\AdminPath::current(), \App\Support\AdminPath::current().'/*') ? 'is-admin-surface' : '' }}">
     @include('partials.icon-sprite')
     @include('partials.service-icon-sprite')
     @include('partials.nx-icon-sprite')

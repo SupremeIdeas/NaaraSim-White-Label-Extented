@@ -24,7 +24,7 @@
     @if ($target) wire:target="{{ $target }}" @endif
     role="status" aria-live="polite"
     {{ $attributes->merge(['class' => $overlay
-        ? 'absolute inset-0 z-20 flex flex-col items-center justify-center gap-3 rounded-[inherit] bg-white/90 dark:bg-[#0D1B2A]/90'
+        ? 'absolute inset-0 z-20 flex flex-col items-center justify-center gap-3 rounded-[inherit] bg-white/90 dark:bg-[#0b0b0c]/90'
         : 'inline-flex items-center gap-2']) }}>
     @if ($fav)
         <span class="nx-pulse" style="width:{{ $size }}px;height:{{ $size }}px;">

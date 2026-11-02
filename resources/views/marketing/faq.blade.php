@@ -11,13 +11,13 @@
                     <span class="absolute right-1/4 top-1/3 h-40 w-40 rounded-full bg-accent/20 blur-3xl"></span>
                     <canvas data-webgl-hero="liquid"
                             class="absolute inset-0 h-full w-full opacity-0 transition-opacity duration-[1200ms] [&.is-live]:opacity-100"></canvas>
-                    <div class="absolute inset-0 bg-gradient-to-b from-[#F8F9FA] via-[#F8F9FA]/55 to-[#F8F9FA] dark:from-[#0D1B2A] dark:via-[#0D1B2A]/20 dark:to-[#0D1B2A]"></div>
+                    <div class="absolute inset-0 bg-gradient-to-b from-[#F8F9FA] via-[#F8F9FA]/55 to-[#F8F9FA] dark:from-[#0b0b0c] dark:via-[#0b0b0c]/20 dark:to-[#0b0b0c]"></div>
                 </div>
             @else
                 {{-- Admin-uploaded background (Admin → Pages → FAQ → hero image). --}}
                 <div class="absolute inset-0" aria-hidden="true">
                     <img src="{{ $hero['image'] }}" alt="" class="h-full w-full object-cover">
-                    <div class="absolute inset-0 bg-gradient-to-b from-white/75 via-white/55 to-[#F8F9FA] dark:from-[#0D1B2A]/85 dark:via-[#0D1B2A]/65 dark:to-[#0D1B2A]"></div>
+                    <div class="absolute inset-0 bg-gradient-to-b from-white/75 via-white/55 to-[#F8F9FA] dark:from-[#0b0b0c]/85 dark:via-[#0b0b0c]/65 dark:to-[#0b0b0c]"></div>
                 </div>
             @endif
             <div class="relative z-10 mx-auto max-w-3xl px-4 pb-14 pt-20 text-center sm:pt-24">

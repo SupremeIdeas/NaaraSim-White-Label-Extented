@@ -59,7 +59,7 @@
                     </a>
                     <a href="{{ route('how-it-works') }}" wire:navigate
                        class="inline-flex items-center justify-center gap-2 border-2 border-slate-900 px-6 py-3 text-sm font-bold uppercase tracking-wide text-slate-900 transition hover:border-accent hover:text-accent dark:border-white dark:text-white">
-                        <x-icon name="play" class="h-4 w-4" /> How it works
+                        <x-glyph name="play" class="h-4 w-4" /> How it works
                     </a>
                 </div>
             </div>
@@ -118,7 +118,7 @@
             ] as $card)
                 <div class="px-6 py-8 text-center sm:text-left">
                     <span class="mx-auto flex h-10 w-10 items-center justify-center border-2 border-slate-900 text-slate-900 sm:mx-0 dark:border-white dark:text-white">
-                        <x-icon :name="$card['icon']" class="h-5 w-5" />
+                        <x-glyph :name="$card['icon']" class="h-5 w-5" />
                     </span>
                     <h3 class="mt-4 font-display text-lg font-bold uppercase tracking-tight text-slate-900 dark:text-white">{{ $card['title'] }}</h3>
                     <p class="mt-1.5 text-sm leading-relaxed text-slate-500 dark:text-slate-400">{{ $card['body'] }}</p>

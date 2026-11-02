@@ -1,5 +1,5 @@
 <div class="mx-auto max-w-2xl px-4 py-16">
-    @php($accent = $merchant->brand_color ?: '#A21CAF')
+    @php($accent = $merchant->brand_color ?: '#23272D')
     <div class="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-xl dark:border-[var(--brand-card-border-dark)] dark:bg-[var(--brand-card-dark)]">
         {{-- Merchant hero (co-brand accent) --}}
         <div class="relative px-8 py-12 text-center"
@@ -20,7 +20,7 @@
         </div>
 
         {{-- Value + CTA --}}
-        <div class="border-t border-slate-100 px-8 py-8 dark:border-[#243352]">
+        <div class="border-t border-slate-100 px-8 py-8 dark:border-[#373a3f]">
             <ul class="mx-auto max-w-md space-y-3 text-sm text-slate-600 dark:text-slate-300">
                 <li class="flex items-start gap-2"><x-icon name="globe" class="mt-0.5 h-4 w-4 shrink-0 text-primary" /> Instant eSIM data plans for 190+ countries.</li>
                 <li class="flex items-start gap-2"><x-icon name="hash" class="mt-0.5 h-4 w-4 shrink-0 text-primary" /> Virtual & verification numbers in one app.</li>
@@ -38,7 +38,7 @@
         </div>
 
         {{-- Powered by NaaraSim — always present alongside the merchant brand. --}}
-        <div class="flex items-center justify-center gap-1.5 border-t border-slate-100 bg-slate-50 py-4 text-xs text-slate-400 dark:border-[#243352] dark:bg-[#141F33] dark:text-slate-500">
+        <div class="flex items-center justify-center gap-1.5 border-t border-slate-100 bg-slate-50 py-4 text-xs text-slate-400 dark:border-[#373a3f] dark:bg-[#212326] dark:text-slate-500">
             <x-icon name="signal" class="h-3.5 w-3.5" /> Powered by <span class="font-semibold text-slate-500 dark:text-slate-400">NaaraSim</span>
         </div>
     </div>

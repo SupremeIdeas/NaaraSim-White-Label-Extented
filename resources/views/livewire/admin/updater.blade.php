@@ -2,20 +2,20 @@
     <div class="mb-6">
         <h1 class="text-2xl font-bold text-slate-900 dark:text-slate-100">Platform updater</h1>
         <p class="text-sm text-slate-500 dark:text-slate-400">
-            Install signed <code class="rounded bg-slate-100 px-1 dark:bg-[#243352]">.naaraupdate</code> packages — code
+            Install signed <code class="rounded bg-slate-100 px-1 dark:bg-[#373a3f]">.naaraupdate</code> packages — code
             updates or themes. Current version:
             <span class="font-semibold text-slate-700 dark:text-slate-200">{{ $this->currentVersion ?? 'not yet recorded' }}</span>
         </p>
     </div>
 
     {{-- Tabs --}}
-    <div class="mb-6 flex gap-1 border-b border-slate-200 dark:border-[#2D4060]">
+    <div class="mb-6 flex gap-1 border-b border-slate-200 dark:border-[#2A2E34]">
         <button type="button" wire:click="$set('tab', 'code')"
-            class="border-b-2 px-4 py-2 text-sm font-medium {{ $tab === 'code' ? 'border-[#A21CAF] text-[#A21CAF] dark:text-teal-300' : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200' }}">
+            class="border-b-2 px-4 py-2 text-sm font-medium {{ $tab === 'code' ? 'border-[#23272D] text-[#23272D] dark:text-teal-300' : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200' }}">
             Code updates
         </button>
         <button type="button" wire:click="$set('tab', 'themes')"
-            class="border-b-2 px-4 py-2 text-sm font-medium {{ $tab === 'themes' ? 'border-[#A21CAF] text-[#A21CAF] dark:text-teal-300' : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200' }}">
+            class="border-b-2 px-4 py-2 text-sm font-medium {{ $tab === 'themes' ? 'border-[#23272D] text-[#23272D] dark:text-teal-300' : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200' }}">
             Themes
         </button>
     </div>
@@ -28,7 +28,7 @@
         @endif
 
         {{-- Upload + verify --}}
-        <div class="mb-6 rounded-2xl border border-slate-200 bg-white p-5 dark:border-[#2D4060] dark:bg-[#1B2A45]">
+        <div class="mb-6 rounded-2xl border border-slate-200 bg-white p-5 dark:border-[#2A2E34] dark:bg-[#2d2f33]">
             <h2 class="mb-3 text-lg font-semibold text-slate-900 dark:text-slate-100">Upload a package</h2>
             <p class="mb-3 text-xs text-slate-500 dark:text-slate-400">Every apply takes a full backup first and rolls itself back automatically if anything fails.</p>
 
@@ -36,11 +36,11 @@
                 <div class="flex-1">
                     <label class="mb-1 block text-sm font-medium text-slate-600 dark:text-slate-300">Package file (.naaraupdate)</label>
                     <input type="file" wire:model="package" accept=".naaraupdate"
-                        class="block w-full rounded-lg border border-slate-200 text-sm text-slate-600 file:mr-3 file:border-0 file:bg-slate-100 file:px-3 file:py-2 file:text-sm dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-300 dark:file:bg-[#2D4060]" />
+                        class="block w-full rounded-lg border border-slate-200 text-sm text-slate-600 file:mr-3 file:border-0 file:bg-slate-100 file:px-3 file:py-2 file:text-sm dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-300 dark:file:bg-[#2A2E34]" />
                 </div>
                 <button type="button" wire:click="verifyPackage"
                     wire:loading.attr="disabled" wire:target="verifyPackage,package"
-                    class="inline-flex items-center justify-center rounded-lg bg-slate-800 px-4 py-2 text-sm font-medium text-white hover:bg-slate-900 disabled:opacity-50 dark:bg-[#A21CAF] dark:hover:bg-[#0A5E5E]">
+                    class="inline-flex items-center justify-center rounded-lg bg-slate-800 px-4 py-2 text-sm font-medium text-white hover:bg-slate-900 disabled:opacity-50 dark:bg-[#23272D] dark:hover:bg-[#323439]">
                     <span wire:loading.remove wire:target="verifyPackage,package">Verify</span>
                     <span wire:loading wire:target="verifyPackage,package">Verifying…</span>
                 </button>
@@ -78,7 +78,7 @@
                 <button type="button" wire:click="applyPackage"
                     wire:confirm="Apply {{ $verified['version'] }}? The platform enters maintenance mode, takes a full backup, applies files and migrations, and rolls back automatically if the health check fails."
                     wire:loading.attr="disabled" wire:target="applyPackage"
-                    class="mt-4 inline-flex items-center justify-center rounded-lg bg-[#A21CAF] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#0A5E5E] disabled:opacity-50">
+                    class="mt-4 inline-flex items-center justify-center rounded-lg bg-[#23272D] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#323439] disabled:opacity-50">
                     <span wire:loading.remove wire:target="applyPackage">Apply this update</span>
                     <span wire:loading wire:target="applyPackage">Queueing…</span>
                 </button>
@@ -86,7 +86,7 @@
         @endif
 
         {{-- History --}}
-        <div class="rounded-2xl border border-slate-200 bg-white p-5 dark:border-[#2D4060] dark:bg-[#1B2A45]">
+        <div class="rounded-2xl border border-slate-200 bg-white p-5 dark:border-[#2A2E34] dark:bg-[#2d2f33]">
             <h2 class="mb-3 text-lg font-semibold text-slate-900 dark:text-slate-100">Apply history</h2>
 
             @if ($this->attempts->isEmpty())
@@ -104,7 +104,7 @@
                                 <th class="py-2 pr-4">Downtime</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-slate-100 dark:divide-[#2D4060]">
+                        <tbody class="divide-y divide-slate-100 dark:divide-[#2A2E34]">
                             @foreach ($this->attempts as $a)
                                 <tr class="text-slate-700 dark:text-slate-200">
                                     <td class="py-2 pr-4 text-slate-500 dark:text-slate-400">{{ $a->created_at->diffForHumans() }}</td>
@@ -115,7 +115,7 @@
                                                 'succeeded' => 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300',
                                                 'rolled_back' => 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300',
                                                 'failed_unrecoverable' => 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300',
-                                                default => 'bg-slate-100 text-slate-600 dark:bg-[#243352] dark:text-slate-300',
+                                                default => 'bg-slate-100 text-slate-600 dark:bg-[#373a3f] dark:text-slate-300',
                                             };
                                         @endphp
                                         <span class="rounded-full px-2 py-0.5 text-xs font-medium {{ $tone }}">{{ str_replace('_', ' ', $a->status) }}</span>
@@ -142,7 +142,7 @@
         @endif
 
         {{-- Upload + preview --}}
-        <div class="mb-6 rounded-2xl border border-slate-200 bg-white p-5 dark:border-[#2D4060] dark:bg-[#1B2A45]">
+        <div class="mb-6 rounded-2xl border border-slate-200 bg-white p-5 dark:border-[#2A2E34] dark:bg-[#2d2f33]">
             <h2 class="mb-3 text-lg font-semibold text-slate-900 dark:text-slate-100">Install a theme package</h2>
             <p class="mb-3 text-xs text-slate-500 dark:text-slate-400">A theme is paint, not plumbing — installing one writes a single row and copies a few images; no maintenance mode, no backup needed.</p>
 
@@ -150,11 +150,11 @@
                 <div class="flex-1">
                     <label class="mb-1 block text-sm font-medium text-slate-600 dark:text-slate-300">Theme package file (.naaraupdate)</label>
                     <input type="file" wire:model="themePackage" accept=".naaraupdate"
-                        class="block w-full rounded-lg border border-slate-200 text-sm text-slate-600 file:mr-3 file:border-0 file:bg-slate-100 file:px-3 file:py-2 file:text-sm dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-300 dark:file:bg-[#2D4060]" />
+                        class="block w-full rounded-lg border border-slate-200 text-sm text-slate-600 file:mr-3 file:border-0 file:bg-slate-100 file:px-3 file:py-2 file:text-sm dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-300 dark:file:bg-[#2A2E34]" />
                 </div>
                 <button type="button" wire:click="verifyTheme"
                     wire:loading.attr="disabled" wire:target="verifyTheme,themePackage"
-                    class="inline-flex items-center justify-center rounded-lg bg-slate-800 px-4 py-2 text-sm font-medium text-white hover:bg-slate-900 disabled:opacity-50 dark:bg-[#A21CAF] dark:hover:bg-[#0A5E5E]">
+                    class="inline-flex items-center justify-center rounded-lg bg-slate-800 px-4 py-2 text-sm font-medium text-white hover:bg-slate-900 disabled:opacity-50 dark:bg-[#23272D] dark:hover:bg-[#323439]">
                     <span wire:loading.remove wire:target="verifyTheme,themePackage">Verify</span>
                     <span wire:loading wire:target="verifyTheme,themePackage">Verifying…</span>
                 </button>
@@ -189,7 +189,7 @@
                 @if (! empty($themePreview['swatches']))
                     <div class="mt-3">
                         <p class="mb-1 text-xs font-medium uppercase text-slate-500 dark:text-slate-400">Palette preview</p>
-                        <div class="flex overflow-hidden rounded-lg border border-slate-200 dark:border-[#2D4060]" style="height:2.5rem">
+                        <div class="flex overflow-hidden rounded-lg border border-slate-200 dark:border-[#2A2E34]" style="height:2.5rem">
                             @foreach ($themePreview['swatches'] as $key => $rgb)
                                 <span class="flex-1" style="background: rgb({{ $rgb }})" title="{{ $key }}"></span>
                             @endforeach
@@ -209,7 +209,7 @@
 
                 <button type="button" wire:click="installTheme"
                     wire:loading.attr="disabled" wire:target="installTheme"
-                    class="mt-4 inline-flex items-center justify-center rounded-lg bg-[#A21CAF] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#0A5E5E] disabled:opacity-50">
+                    class="mt-4 inline-flex items-center justify-center rounded-lg bg-[#23272D] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#323439] disabled:opacity-50">
                     <span wire:loading.remove wire:target="installTheme">Install this theme</span>
                     <span wire:loading wire:target="installTheme">Installing…</span>
                 </button>
@@ -217,12 +217,12 @@
         @endif
 
         {{-- Installed themes --}}
-        <div class="rounded-2xl border border-slate-200 bg-white p-5 dark:border-[#2D4060] dark:bg-[#1B2A45]">
+        <div class="rounded-2xl border border-slate-200 bg-white p-5 dark:border-[#2A2E34] dark:bg-[#2d2f33]">
             <h2 class="mb-3 text-lg font-semibold text-slate-900 dark:text-slate-100">Installed themes</h2>
 
             <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 @foreach ($this->installedThemes as $t)
-                    <div class="rounded-xl border border-slate-200 p-3 dark:border-[#2D4060]">
+                    <div class="rounded-xl border border-slate-200 p-3 dark:border-[#2A2E34]">
                         <div class="flex items-center justify-between gap-2">
                             <div>
                                 <p class="font-medium text-slate-800 dark:text-slate-100">{{ $t['name'] }}</p>
@@ -235,7 +235,7 @@
                         <div class="mt-2 flex gap-2">
                             @if ($t['slug'] !== $this->activeThemeSlug)
                                 <button type="button" wire:click="activateTheme('{{ $t['slug'] }}')" wire:confirm="Activate {{ $t['name'] }} platform-wide?"
-                                    class="rounded-lg border border-slate-200 px-2.5 py-1 text-xs font-medium text-slate-600 hover:bg-slate-50 dark:border-[#2D4060] dark:text-slate-300 dark:hover:bg-[#243352]">
+                                    class="rounded-lg border border-slate-200 px-2.5 py-1 text-xs font-medium text-slate-600 hover:bg-slate-50 dark:border-[#2A2E34] dark:text-slate-300 dark:hover:bg-[#373a3f]">
                                     Activate
                                 </button>
                             @endif

@@ -41,21 +41,21 @@
 <section class="bg-[#FBF7FF] px-4 py-14 dark:bg-navy">
     <div class="mx-auto flex max-w-2xl flex-wrap justify-center gap-4">
         <div class="flex items-center gap-2 rounded-full bg-white px-4 py-2.5 shadow-sm dark:bg-[#1c1329]">
-            <span class="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary dark:bg-primary/20"><x-icon name="message-circle" class="h-4 w-4" /></span>
+            <span class="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary dark:bg-primary/20"><x-glyph name="message-circle" class="h-4 w-4" /></span>
             <a href="{{ auth()->check() ? route('support') : route('login') }}" class="text-xs font-semibold text-slate-800 hover:text-primary dark:text-white">Live chat</a>
         </div>
         <div class="flex items-center gap-2 rounded-full bg-white px-4 py-2.5 shadow-sm dark:bg-[#1c1329]">
-            <span class="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary dark:bg-primary/20"><x-icon name="mail" class="h-4 w-4" /></span>
+            <span class="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary dark:bg-primary/20"><x-glyph name="mail" class="h-4 w-4" /></span>
             <a href="mailto:{{ \App\Support\Niche\SupportLinks::email() }}" class="text-xs font-semibold text-slate-800 hover:text-primary dark:text-white">Email</a>
         </div>
         @if (\App\Support\Niche\SupportLinks::hasWhatsapp())
             <div class="flex items-center gap-2 rounded-full bg-white px-4 py-2.5 shadow-sm dark:bg-[#1c1329]">
-                <span class="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary dark:bg-primary/20"><x-icon name="phone" class="h-4 w-4" /></span>
+                <span class="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary dark:bg-primary/20"><x-glyph name="phone" class="h-4 w-4" /></span>
                 <a href="{{ \App\Support\Niche\SupportLinks::whatsappUrl() }}" target="_blank" rel="noopener" class="text-xs font-semibold text-slate-800 hover:text-primary dark:text-white">WhatsApp</a>
             </div>
         @endif
         <div class="flex items-center gap-2 rounded-full bg-white px-4 py-2.5 shadow-sm dark:bg-[#1c1329]">
-            <span class="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary dark:bg-primary/20"><x-icon name="help-circle" class="h-4 w-4" /></span>
+            <span class="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary dark:bg-primary/20"><x-glyph name="help-circle" class="h-4 w-4" /></span>
             <a href="{{ route('how-it-works') }}" wire:navigate class="text-xs font-semibold text-slate-800 hover:text-primary dark:text-white">Help centre</a>
         </div>
     </div>

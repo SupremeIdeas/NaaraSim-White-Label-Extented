@@ -5,12 +5,12 @@
             <p class="text-sm text-slate-500 dark:text-slate-400">Money in vs. wallet credits vs. paid out vs. provider costs — built on the wallet ledger, so an unaccounted-for gap surfaces early.</p>
         </div>
         {{-- Period toggle --}}
-        <div class="flex items-center gap-0.5 rounded-lg bg-slate-100 p-0.5 dark:bg-[#243352]">
+        <div class="flex items-center gap-0.5 rounded-lg bg-slate-100 p-0.5 dark:bg-[#373a3f]">
             @foreach ([7 => '7d', 30 => '30d', 90 => '90d'] as $d => $label)
                 <button type="button" wire:click="setDays({{ $d }})"
                         @class([
                             'rounded-md px-3 py-1.5 text-sm font-semibold transition',
-                            'bg-white text-primary shadow-sm dark:bg-[#1A2840] dark:text-teal-300' => $days === $d,
+                            'bg-white text-primary shadow-sm dark:bg-[#17191C] dark:text-teal-300' => $days === $d,
                             'text-slate-500 hover:text-slate-700 dark:text-slate-400' => $days !== $d,
                         ])>{{ $label }}</button>
             @endforeach
@@ -59,7 +59,7 @@
             ['Provider cost', $report['provider_cost'], 'Fulfilled orders'],
             ['Gross profit', $report['gross_profit'], 'Retail − cost'],
         ] as [$label, $value, $sub])
-            <div class="rounded-2xl border border-slate-200 bg-white p-4 dark:border-[#2D4060] dark:bg-[#1A2840]">
+            <div class="rounded-2xl border border-slate-200 bg-white p-4 dark:border-[#2A2E34] dark:bg-[#17191C]">
                 <p class="text-xs font-medium uppercase tracking-wide text-slate-400">{{ $label }}</p>
                 <p class="mt-1 text-xl font-bold text-slate-900 dark:text-slate-100">${{ number_format($value, 2) }}</p>
                 <p class="mt-0.5 text-[11px] text-slate-400">{{ $sub }}</p>
@@ -69,7 +69,7 @@
 
     <div class="grid gap-6 lg:grid-cols-2">
         {{-- Money in by gateway --}}
-        <div class="rounded-2xl border border-slate-200 bg-white p-5 dark:border-[#2D4060] dark:bg-[#1A2840]">
+        <div class="rounded-2xl border border-slate-200 bg-white p-5 dark:border-[#2A2E34] dark:bg-[#17191C]">
             <h2 class="mb-3 text-sm font-semibold text-slate-700 dark:text-slate-200">Money in by gateway</h2>
             @forelse ($report['in_by_gateway'] as $gateway => $amount)
                 <div class="flex items-center justify-between border-b border-slate-100 py-2 text-sm last:border-0 dark:border-white/5">
@@ -82,7 +82,7 @@
         </div>
 
         {{-- Wallet ledger by type --}}
-        <div class="rounded-2xl border border-slate-200 bg-white p-5 dark:border-[#2D4060] dark:bg-[#1A2840]">
+        <div class="rounded-2xl border border-slate-200 bg-white p-5 dark:border-[#2A2E34] dark:bg-[#17191C]">
             <h2 class="mb-3 text-sm font-semibold text-slate-700 dark:text-slate-200">Wallet ledger by type</h2>
             @forelse ($report['wallet_by_type'] as $type => $amount)
                 <div class="flex items-center justify-between border-b border-slate-100 py-2 text-sm last:border-0 dark:border-white/5">
@@ -96,7 +96,7 @@
     </div>
 
     {{-- Outstanding liabilities (point-in-time) --}}
-    <div class="mt-6 rounded-2xl border border-slate-200 bg-white p-5 dark:border-[#2D4060] dark:bg-[#1A2840]">
+    <div class="mt-6 rounded-2xl border border-slate-200 bg-white p-5 dark:border-[#2A2E34] dark:bg-[#17191C]">
         <h2 class="mb-1 text-sm font-semibold text-slate-700 dark:text-slate-200">Outstanding liabilities <span class="font-normal text-slate-400">(right now, not the period)</span></h2>
         <p class="mb-3 text-xs text-slate-400">What the platform still owes — user wallet balances + payouts not yet settled.</p>
         <div class="grid grid-cols-2 gap-3 sm:grid-cols-3">
@@ -116,7 +116,7 @@
     </div>
 
     {{-- Payout rails (money OUT, per provider + currency) --}}
-    <div class="mt-6 rounded-2xl border border-slate-200 bg-white p-5 dark:border-[#2D4060] dark:bg-[#1A2840]">
+    <div class="mt-6 rounded-2xl border border-slate-200 bg-white p-5 dark:border-[#2A2E34] dark:bg-[#17191C]">
         <h2 class="mb-1 text-sm font-semibold text-slate-700 dark:text-slate-200">Payout rails <span class="font-normal text-slate-400">(each in its own currency)</span></h2>
         <p class="mb-3 text-xs text-slate-400">Sent, confirmed, pending and failed per provider, with the float ledger check. A flagged rail needs a human look.</p>
         <div class="overflow-x-auto">

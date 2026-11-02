@@ -8,9 +8,9 @@
 
         @if ($categories->isNotEmpty())
             <div class="mt-8 flex flex-wrap gap-2">
-                <a href="{{ route('blog') }}" @class(['rounded-full px-3 py-1.5 text-sm font-medium transition', 'bg-primary text-white' => ! $activeCategory, 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-[#243352] dark:text-slate-300' => $activeCategory])>All</a>
+                <a href="{{ route('blog') }}" @class(['rounded-full px-3 py-1.5 text-sm font-medium transition', 'bg-primary text-white' => ! $activeCategory, 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-[#373a3f] dark:text-slate-300' => $activeCategory])>All</a>
                 @foreach ($categories as $cat)
-                    <a href="{{ route('blog', ['category' => $cat]) }}" @class(['rounded-full px-3 py-1.5 text-sm font-medium transition', 'bg-primary text-white' => $activeCategory === $cat, 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-[#243352] dark:text-slate-300' => $activeCategory !== $cat])>{{ $cat }}</a>
+                    <a href="{{ route('blog', ['category' => $cat]) }}" @class(['rounded-full px-3 py-1.5 text-sm font-medium transition', 'bg-primary text-white' => $activeCategory === $cat, 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-[#373a3f] dark:text-slate-300' => $activeCategory !== $cat])>{{ $cat }}</a>
                 @endforeach
             </div>
         @endif
@@ -23,7 +23,7 @@
             <div class="mt-10 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
                 @foreach ($posts as $post)
                     <a href="{{ route('blog.show', $post) }}" wire:key="post-{{ $post->id }}" class="group flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white transition hover:shadow-lg dark:border-[var(--brand-card-border-dark)] dark:bg-[var(--brand-card-dark)]">
-                        <div class="aspect-[1200/896] overflow-hidden bg-slate-100 dark:bg-[#243352]">
+                        <div class="aspect-[1200/896] overflow-hidden bg-slate-100 dark:bg-[#373a3f]">
                             @if ($post->cover_image_url)
                                 <img src="{{ $post->cover_image_url }}" alt="{{ $post->title }}" loading="lazy" class="h-full w-full object-cover transition group-hover:scale-105">
                             @else

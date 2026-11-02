@@ -17,7 +17,7 @@
     </div>
 
     {{-- Front row --}}
-    <div class="relative flex items-center gap-3 bg-white px-3 py-2.5 transition-transform duration-200 dark:bg-[#0f2030]"
+    <div class="relative flex items-center gap-3 bg-white px-3 py-2.5 transition-transform duration-200 dark:bg-[#1d1f22]"
          :style="{ transform: 'translateX(' + x + 'px)' }">
         <button type="button" wire:click="edit({{ $c->id }})" @click="$dispatch('contact-edit')"
                 class="flex min-w-0 flex-1 items-center gap-3 text-left">

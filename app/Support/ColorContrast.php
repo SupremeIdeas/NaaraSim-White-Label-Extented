@@ -63,4 +63,39 @@ class ColorContrast
 
         return ($lighter + 0.05) / ($darker + 0.05);
     }
+
+    /**
+     * Mix a colour toward black in 4% steps until it reaches `$min` contrast against `$against`; the colour itself if it already does.
+     * Used so a button colour an admin picks (a bright coral, a light cyan) can still carry white text. Returns an "R G B" triple.
+     */
+    public static function darkenToContrast(string $color, string $against = '#FFFFFF', float $min = 3.0): string
+    {
+        return self::shiftToContrast($color, $against, $min, 0);
+    }
+
+    /** Mix a colour toward white until it reaches `$min` contrast against `$against` (a dark surface). Returns an "R G B" triple. */
+    public static function lightenToContrast(string $color, string $against, float $min = 4.5): string
+    {
+        return self::shiftToContrast($color, $against, $min, 255);
+    }
+
+    private static function shiftToContrast(string $color, string $against, float $min, int $target): string
+    {
+        $rgb = self::toRgb($color);
+        for ($i = 0; $i <= 25; $i++) {
+            $k = $i * 0.04;
+            $try = array_map(fn ($c) => (int) round($c + ($target - $c) * $k), $rgb);
+            if (self::ratio(implode(' ', $try), $against) >= $min) {
+                return implode(' ', $try);
+            }
+        }
+
+        return implode(' ', array_fill(0, 3, $target));
+    }
+
+    /** "R G B" => "#RRGGBB". */
+    public static function toHex(string $triple): string
+    {
+        return sprintf('#%02X%02X%02X', ...self::toRgb($triple));
+    }
 }

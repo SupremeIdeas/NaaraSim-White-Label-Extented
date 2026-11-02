@@ -9,11 +9,11 @@
     @endif
 
     @php
-        $input = 'rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100';
+        $input = 'rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100';
     @endphp
 
     {{-- Platform handles --}}
-    <section class="mb-8 rounded-xl border border-slate-200 bg-white p-5 dark:border-[#2D4060] dark:bg-[#1B2A44]">
+    <section class="mb-8 rounded-xl border border-slate-200 bg-white p-5 dark:border-[#2A2E34] dark:bg-[#1D2024]">
         <h2 class="mb-3 text-sm font-bold text-slate-900 dark:text-white">NaaraSim handles</h2>
         <div class="space-y-2">
             @forelse ($handles as $h)
@@ -48,7 +48,7 @@
     </section>
 
     {{-- Brand partners --}}
-    <section class="rounded-xl border border-slate-200 bg-white p-5 dark:border-[#2D4060] dark:bg-[#1B2A44]">
+    <section class="rounded-xl border border-slate-200 bg-white p-5 dark:border-[#2A2E34] dark:bg-[#1D2024]">
         <h2 class="mb-3 text-sm font-bold text-slate-900 dark:text-white">Featured brand partners</h2>
         <div class="space-y-4">
             @forelse ($brands as $b)
@@ -78,7 +78,7 @@
                             <input wire:model="bh.{{ $b->id }}.handle_label" placeholder="Label" class="{{ $input }} sm:col-span-1">
                             <input wire:model="bh.{{ $b->id }}.handle_url" placeholder="https://…" class="{{ $input }} sm:col-span-2">
                             <input wire:model="bh.{{ $b->id }}.credit_reward" type="number" step="0.5" placeholder="Reward" class="{{ $input }} sm:col-span-1">
-                            <button wire:click="addBrandHandle({{ $b->id }})" class="rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 sm:col-span-1 dark:border-[#2D4060] dark:text-slate-200">Add</button>
+                            <button wire:click="addBrandHandle({{ $b->id }})" class="rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 sm:col-span-1 dark:border-[#2A2E34] dark:text-slate-200">Add</button>
                         </div>
                     </div>
                 </div>
@@ -90,7 +90,7 @@
         <div class="mt-4 grid gap-2 border-t border-slate-100 pt-4 sm:grid-cols-6 dark:border-white/5">
             <input wire:model="brand.brand_name" placeholder="Brand name" class="{{ $input }} sm:col-span-2">
             <input wire:model="brand.short_description" placeholder="Short description" class="{{ $input }} sm:col-span-2">
-            <input wire:model="brand.background_color" type="color" class="h-9 w-full rounded-lg border border-slate-300 sm:col-span-1 dark:border-[#2D4060]">
+            <input wire:model="brand.background_color" type="color" class="h-9 w-full rounded-lg border border-slate-300 sm:col-span-1 dark:border-[#2A2E34]">
             <input type="file" wire:model="brandImage" accept="image/*" class="text-xs sm:col-span-1">
             <button wire:click="addBrand" class="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary-dark sm:col-span-6">Add brand partner</button>
         </div>

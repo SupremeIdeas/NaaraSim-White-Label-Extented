@@ -66,10 +66,10 @@ class BrandSettings
 
     /** Brand default hex palette (mirrors app.css :root — CLAUDE.md Section 2). */
     public const COLOR_DEFAULTS = [
-        'primary' => '#A21CAF',
-        'accent' => '#84CC16',
-        'navy' => '#0D1B2A',
-        'action' => '#E8412A',
+        'primary' => '#23272D',
+        'accent' => '#94A0B0',
+        'navy' => '#0A0B0D',
+        'action' => '#3D5AFE',
     ];
 
     /**
@@ -208,29 +208,30 @@ class BrandSettings
      * @var array<string, array{primary:string, accent:string, navy:string, action:string}>
      */
     public const PALETTES = [
+        'Graphite' => ['primary' => '#23272D', 'accent' => '#94A0B0', 'navy' => '#0A0B0D', 'action' => '#3D5AFE'],
         'Orchid Lime' => ['primary' => '#A21CAF', 'accent' => '#84CC16', 'navy' => '#0D1B2A', 'action' => '#E8412A'],
         'Midnight Indigo' => ['primary' => '#4F46E5', 'accent' => '#F59E0B', 'navy' => '#111827', 'action' => '#EF4444'],
         'Royal Violet' => ['primary' => '#7C3AED', 'accent' => '#F5B301', 'navy' => '#1E1B2E', 'action' => '#EC4899'],
         'Emerald Forest' => ['primary' => '#047857', 'accent' => '#F59E0B', 'navy' => '#0B1F17', 'action' => '#DC2626'],
         'Ocean Blue' => ['primary' => '#0369A1', 'accent' => '#FBBF24', 'navy' => '#0C1A2B', 'action' => '#F43F5E'],
-        'Sunset Coral' => ['primary' => '#E11D48', 'accent' => '#F59E0B', 'navy' => '#1B1113', 'action' => '#FB7185'],
+        'Sunset Coral' => ['primary' => '#E11D48', 'accent' => '#F59E0B', 'navy' => '#1B1113', 'action' => '#E7687A'],
         'Amber Gold' => ['primary' => '#B45309', 'accent' => '#0EA5E9', 'navy' => '#1C1508', 'action' => '#EA580C'],
-        'Slate Pro' => ['primary' => '#334155', 'accent' => '#F59E0B', 'navy' => '#0F172A', 'action' => '#0EA5E9'],
-        'Crimson Noir' => ['primary' => '#B91C1C', 'accent' => '#FBBF24', 'navy' => '#180B0B', 'action' => '#F97316'],
-        'Cyber Lime' => ['primary' => '#3F6212', 'accent' => '#84CC16', 'navy' => '#0E1406', 'action' => '#22D3EE'],
-        'Deep Purple' => ['primary' => '#6D28D9', 'accent' => '#22D3EE', 'navy' => '#14101F', 'action' => '#F472B6'],
-        'Rose Quartz' => ['primary' => '#BE185D', 'accent' => '#FBBF24', 'navy' => '#1A0E15', 'action' => '#FB7185'],
-        'Steel Blue' => ['primary' => '#1D4ED8', 'accent' => '#F59E0B', 'navy' => '#0B1220', 'action' => '#06B6D4'],
+        'Slate Pro' => ['primary' => '#334155', 'accent' => '#F59E0B', 'navy' => '#0F172A', 'action' => '#0D9EE0'],
+        'Crimson Noir' => ['primary' => '#B91C1C', 'accent' => '#FBBF24', 'navy' => '#180B0B', 'action' => '#EF6E15'],
+        'Cyber Lime' => ['primary' => '#3F6212', 'accent' => '#84CC16', 'navy' => '#0E1406', 'action' => '#1AA0B5'],
+        'Deep Purple' => ['primary' => '#6D28D9', 'accent' => '#22D3EE', 'navy' => '#14101F', 'action' => '#E069A7'],
+        'Rose Quartz' => ['primary' => '#BE185D', 'accent' => '#FBBF24', 'navy' => '#1A0E15', 'action' => '#E7687A'],
+        'Steel Blue' => ['primary' => '#1D4ED8', 'accent' => '#F59E0B', 'navy' => '#0B1220', 'action' => '#05A0BB'],
         'Jade Mint' => ['primary' => '#0D9488', 'accent' => '#F59E0B', 'navy' => '#0A1A18', 'action' => '#F43F5E'],
         'Copper Rust' => ['primary' => '#9A3412', 'accent' => '#FACC15', 'navy' => '#1A0F08', 'action' => '#DC2626'],
-        'Sky Fresh' => ['primary' => '#0284C7', 'accent' => '#FACC15', 'navy' => '#0B1725', 'action' => '#F97316'],
+        'Sky Fresh' => ['primary' => '#0284C7', 'accent' => '#FACC15', 'navy' => '#0B1725', 'action' => '#EF6E15'],
         'Plum Wine' => ['primary' => '#86198F', 'accent' => '#FBBF24', 'navy' => '#170A18', 'action' => '#E11D48'],
         'Olive Earth' => ['primary' => '#4D7C0F', 'accent' => '#EAB308', 'navy' => '#12160A', 'action' => '#EA580C'],
         'Graphite Gold' => ['primary' => '#1F2937', 'accent' => '#84CC16', 'navy' => '#0B0F17', 'action' => '#EF4444'],
         'Turquoise Pop' => ['primary' => '#0891B2', 'accent' => '#F59E0B', 'navy' => '#0A1A1E', 'action' => '#F43F5E'],
-        'Berry Bold' => ['primary' => '#9D174D', 'accent' => '#FBBF24', 'navy' => '#180912', 'action' => '#FB923C'],
-        'Pine Green' => ['primary' => '#065F46', 'accent' => '#FCD34D', 'navy' => '#08160F', 'action' => '#F87171'],
-        'Cobalt Night' => ['primary' => '#1E40AF', 'accent' => '#FACC15', 'navy' => '#0A0F1F', 'action' => '#F97316'],
+        'Berry Bold' => ['primary' => '#9D174D', 'accent' => '#FBBF24', 'navy' => '#180912', 'action' => '#D37B32'],
+        'Pine Green' => ['primary' => '#065F46', 'accent' => '#FCD34D', 'navy' => '#08160F', 'action' => '#EE6C6C'],
+        'Cobalt Night' => ['primary' => '#1E40AF', 'accent' => '#FACC15', 'navy' => '#0A0F1F', 'action' => '#EF6E15'],
         'Terracotta' => ['primary' => '#C2410C', 'accent' => '#0D9488', 'navy' => '#1A0F0A', 'action' => '#DC2626'],
         'Monochrome Ink' => ['primary' => '#111827', 'accent' => '#6B7280', 'navy' => '#030712', 'action' => '#2563EB'],
     ];
@@ -302,6 +303,9 @@ class BrandSettings
         foreach ($map as $settingKey => $cssVar) {
             $hex = $c[$settingKey] ?? '';
             if ($hex !== '' && ($rgb = self::hexToChannels($hex)) !== null) {
+                if ($cssVar === 'brand-action') {
+                    $rgb = ColorContrast::darkenToContrast($rgb, '#FFFFFF', 3.0); // a CTA colour must carry white text
+                }
                 $lines[] = "--{$cssVar}: {$rgb};";
                 if ($cssVar === 'brand-primary') {
                     $lines[] = '--brand-primary-dark: '.self::darken($hex).';';
@@ -312,7 +316,18 @@ class BrandSettings
             $lines[] = '--brand-radius: '.self::sanitizeRadius($c['radius']).';';
         }
 
-        return $lines === [] ? '' : ':root{'.implode('', $lines).'}';
+        $css = $lines === [] ? '' : ':root{'.implode('', $lines).'}';
+
+        // The raw accent also paints text and icons on the dark surface in dark mode: lift a too-dark one so it stays readable there.
+        $accentRgb = self::hexToChannels((string) ($c['color_accent'] ?? ''));
+        if ($accentRgb !== null) {
+            $navy = self::hexToChannels((string) (($c['color_navy'] ?? '') !== '' ? $c['color_navy'] : self::COLOR_DEFAULTS['navy'])) ?? '10 11 13';
+            if (ColorContrast::ratio($accentRgb, $navy) < 4.5) {
+                $css .= '.dark{--brand-accent: '.ColorContrast::lightenToContrast($accentRgb, $navy, 4.5).';}';
+            }
+        }
+
+        return $css;
     }
 
     /** "#A21CAF" => "162 28 175" (channel triple), or null if malformed. */

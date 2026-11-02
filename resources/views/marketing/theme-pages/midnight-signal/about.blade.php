@@ -35,7 +35,7 @@
 
     <div class="relative mx-auto max-w-3xl px-4 pb-10 pt-16 text-center sm:pb-14 sm:pt-24">
         <span class="inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-primary">
-            <x-icon name="signal" class="h-3.5 w-3.5" /> {{ $content['eyebrow'] }}
+            <x-glyph name="signal" class="h-3.5 w-3.5" /> {{ $content['eyebrow'] }}
         </span>
         <h1 class="mx-auto mt-5 max-w-xl font-display text-4xl font-bold leading-tight text-white sm:text-5xl">
             {{ $content['headline'] }}
@@ -51,7 +51,7 @@
             @foreach ([['icon' => 'signal', 'label' => 'Live carrier scan'], ['icon' => 'shield-check', 'label' => 'Predictable pricing']] as $point)
                 <div class="flex items-center gap-3">
                     <p class="text-sm font-semibold text-white">{{ $point['label'] }}</p>
-                    <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-primary/30 bg-primary/10 text-primary"><x-icon :name="$point['icon']" class="h-4 w-4" /></span>
+                    <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-primary/30 bg-primary/10 text-primary"><x-glyph :name="$point['icon']" class="h-4 w-4" /></span>
                     <span class="h-px w-10 bg-gradient-to-r from-primary/50 to-transparent"></span>
                 </div>
             @endforeach
@@ -65,7 +65,7 @@
         <div class="flex w-60 flex-col gap-10">
             <div class="flex items-center gap-3">
                 <span class="h-px w-10 bg-gradient-to-l from-primary/50 to-transparent"></span>
-                <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-primary/30 bg-primary/10 text-primary"><x-icon name="clock" class="h-4 w-4" /></span>
+                <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-primary/30 bg-primary/10 text-primary"><x-glyph name="clock" class="h-4 w-4" /></span>
                 <p class="text-sm font-semibold text-white">24/7 monitoring</p>
             </div>
         </div>
@@ -78,7 +78,7 @@
             ['icon' => 'clock', 'label' => '24/7 monitoring'],
         ] as $point)
             <div class="mx-auto flex w-full max-w-xs items-center gap-3 rounded-2xl border border-primary/20 bg-navy/90 p-4 backdrop-blur">
-                <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-primary/30 bg-primary/10 text-primary"><x-icon :name="$point['icon']" class="h-4 w-4" /></span>
+                <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-primary/30 bg-primary/10 text-primary"><x-glyph :name="$point['icon']" class="h-4 w-4" /></span>
                 <p class="text-sm font-semibold text-white">{{ $point['label'] }}</p>
             </div>
         @endforeach
@@ -114,7 +114,7 @@
         ] as $feature)
             <div class="w-64 shrink-0 snap-start rounded-2xl border border-primary/10 bg-white p-5 dark:border-primary/15 dark:bg-navy/60">
                 <span class="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-primary dark:bg-primary/20">
-                    <x-icon :name="$feature['icon']" class="h-4 w-4" />
+                    <x-glyph :name="$feature['icon']" class="h-4 w-4" />
                 </span>
                 <h3 class="mt-3 text-sm font-bold text-slate-900 dark:text-white">{{ $feature['title'] }}</h3>
                 <p class="mt-1 text-xs leading-relaxed text-slate-500 dark:text-slate-400">{{ $feature['body'] }}</p>

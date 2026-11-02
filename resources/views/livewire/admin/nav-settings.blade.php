@@ -10,7 +10,7 @@
     </div>
 
     {{-- ============================ MAIN BOTTOM NAV ============================ --}}
-    <section class="rounded-2xl border border-slate-200 bg-white p-5 dark:border-white/10 dark:bg-[#0f2030]">
+    <section class="rounded-2xl border border-slate-200 bg-white p-5 dark:border-white/10 dark:bg-[#1d1f22]">
         <div class="mb-3 flex items-center justify-between">
             <h2 class="text-sm font-semibold text-slate-800 dark:text-slate-100">Main navigation</h2>
             <button type="button" wire:click="resetMain" wire:confirm="Reset the main bottom nav to platform defaults?"
@@ -53,7 +53,7 @@
                     <button type="button" wire:click="toggleMain('{{ $key }}')" role="switch"
                             aria-checked="{{ in_array($key, $mainHidden, true) ? 'false' : 'true' }}"
                             aria-label="Toggle {{ $mainCatalog[$key]['label'] ?? $key }}"
-                            class="relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition {{ in_array($key, $mainHidden, true) ? 'bg-slate-300 dark:bg-[#2D4060]' : 'bg-primary' }}">
+                            class="relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition {{ in_array($key, $mainHidden, true) ? 'bg-slate-300 dark:bg-[#2A2E34]' : 'bg-primary' }}">
                         <span class="inline-block h-4 w-4 transform rounded-full bg-white shadow transition {{ in_array($key, $mainHidden, true) ? 'translate-x-0.5' : 'translate-x-4' }}"></span>
                     </button>
                 </li>
@@ -62,7 +62,7 @@
     </section>
 
     {{-- ======================== NUMBERS SECTION BOTTOM NAV ======================== --}}
-    <section class="rounded-2xl border border-slate-200 bg-white p-5 dark:border-white/10 dark:bg-[#0f2030]">
+    <section class="rounded-2xl border border-slate-200 bg-white p-5 dark:border-white/10 dark:bg-[#1d1f22]">
         <div class="mb-1 flex items-center justify-between">
             <h2 class="text-sm font-semibold text-slate-800 dark:text-slate-100">Numbers section navigation</h2>
             <button type="button" wire:click="resetNumbers" wire:confirm="Reset the Numbers bottom nav to platform defaults?"
@@ -106,7 +106,7 @@
                     <button type="button" wire:click="toggleNumbers('{{ $key }}')" role="switch"
                             aria-checked="{{ in_array($key, $numbersHidden, true) ? 'false' : 'true' }}"
                             aria-label="Toggle {{ $numbersCatalog[$key]['label'] ?? $key }}"
-                            class="relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition {{ in_array($key, $numbersHidden, true) ? 'bg-slate-300 dark:bg-[#2D4060]' : 'bg-primary' }}">
+                            class="relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition {{ in_array($key, $numbersHidden, true) ? 'bg-slate-300 dark:bg-[#2A2E34]' : 'bg-primary' }}">
                         <span class="inline-block h-4 w-4 transform rounded-full bg-white shadow transition {{ in_array($key, $numbersHidden, true) ? 'translate-x-0.5' : 'translate-x-4' }}"></span>
                     </button>
                 </li>

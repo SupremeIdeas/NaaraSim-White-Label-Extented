@@ -1,6 +1,6 @@
 <x-layouts.auth title="Sign in — NaaraSim" heading="Welcome back" subheading="Sign in to manage your eSIMs, numbers and wallet.">
     <form method="POST" action="/login"
-          class="space-y-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-[#2D4060] dark:bg-[#1A2840]">
+          class="space-y-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-[#2A2E34] dark:bg-[#17191C]">
         @csrf
         @if ($errors->any())
             <div class="flex items-start gap-2 rounded-lg bg-red-50 p-3 text-sm text-red-700 dark:bg-red-950/40 dark:text-red-300">
@@ -11,12 +11,12 @@
         <div>
             <label class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">Email</label>
             <input type="email" name="email" value="{{ old('email') }}" required autofocus
-                   class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                   class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
         </div>
         <div>
             <label class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">Password</label>
             <x-ui.password name="password" required
-                   class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100" />
+                   class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100" />
         </div>
         <div class="flex items-center justify-between">
             <label class="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">

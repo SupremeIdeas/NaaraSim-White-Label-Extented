@@ -27,7 +27,7 @@ return [
         'layout' => 'card',            // card (corner) | bar (full width) | modal (centre, dims the page)
         'position' => 'right',         // left | right (card only)
         'theme' => 'skin',             // skin (follows the member's skin and dark mode) | navy | teal | light | custom
-        'custom' => ['bg' => '#0D1B2A', 'text' => '#F1F5F9', 'button' => '#84CC16', 'button_text' => '#0D1B2A'],
+        'custom' => ['bg' => '#0A0B0D', 'text' => '#F1F5F9', 'button' => '#94A0B0', 'button_text' => '#0A0B0D'],
         'renew_days' => 180,
         'retention_months' => 36,
         'respect_gpc' => true,

@@ -33,7 +33,7 @@ class BecomeMerchant extends Component
     // Application form.
     public string $businessName = '';
 
-    public string $brandColor = '#A21CAF';
+    public string $brandColor = '#23272D';
 
     public ?string $error = null;
 

@@ -55,7 +55,7 @@
             <div class="grid gap-3 p-6 sm:grid-cols-[80px_140px_1fr] sm:items-start sm:gap-4 sm:p-8">
                 <span class="font-display text-3xl font-black text-accent">01</span>
                 <div class="flex items-center gap-2">
-                    <x-icon name="target" class="h-4 w-4 text-slate-900 dark:text-white" />
+                    <x-glyph name="target" class="h-4 w-4 text-slate-900 dark:text-white" />
                     <p class="text-xs font-bold uppercase tracking-[0.2em] text-slate-900 dark:text-white">Mission</p>
                 </div>
                 <p class="text-sm leading-relaxed text-slate-600 dark:text-slate-400 sm:text-base">{{ $content['mission'] }}</p>
@@ -63,7 +63,7 @@
             <div class="grid gap-3 p-6 sm:grid-cols-[80px_140px_1fr] sm:items-start sm:gap-4 sm:p-8">
                 <span class="font-display text-3xl font-black text-accent">02</span>
                 <div class="flex items-center gap-2">
-                    <x-icon name="eye" class="h-4 w-4 text-slate-900 dark:text-white" />
+                    <x-glyph name="eye" class="h-4 w-4 text-slate-900 dark:text-white" />
                     <p class="text-xs font-bold uppercase tracking-[0.2em] text-slate-900 dark:text-white">Vision</p>
                 </div>
                 <p class="text-sm leading-relaxed text-slate-600 dark:text-slate-400 sm:text-base">{{ $content['vision'] }}</p>
@@ -86,7 +86,7 @@
             ] as $card)
                 <div class="px-6 py-8 text-center sm:text-left">
                     <span class="mx-auto flex h-10 w-10 items-center justify-center border-2 border-accent text-accent sm:mx-0">
-                        <x-icon :name="$card['icon']" class="h-5 w-5" />
+                        <x-glyph :name="$card['icon']" class="h-5 w-5" />
                     </span>
                     <h3 class="mt-4 font-display text-lg font-bold uppercase tracking-tight text-white dark:text-black">{{ $card['title'] }}</h3>
                     <p class="mt-1.5 text-sm leading-relaxed text-white/70 dark:text-black/60">{{ $card['body'] }}</p>

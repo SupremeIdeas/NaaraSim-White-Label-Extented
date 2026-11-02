@@ -12,9 +12,9 @@
             @php($t = $p['tokens']['colors'] ?? [])
             <div wire:key="theme-{{ $p['slug'] }}"
                  @class([
-                    'relative flex flex-col overflow-hidden rounded-2xl border bg-white p-4 transition dark:bg-[#1A2840]',
+                    'relative flex flex-col overflow-hidden rounded-2xl border bg-white p-4 transition dark:bg-[#17191C]',
                     'border-primary ring-2 ring-primary/40 dark:border-teal-400' => $p['slug'] === $active,
-                    'border-slate-200 dark:border-[#2D4060]' => $p['slug'] !== $active,
+                    'border-slate-200 dark:border-[#2A2E34]' => $p['slug'] !== $active,
                  ])>
                 {{-- Swatch strip — the preset's core palette. --}}
                 <div class="mb-3 flex h-14 overflow-hidden rounded-xl ring-1 ring-black/5 dark:ring-white/10">
@@ -51,22 +51,22 @@
                         </button>
                     @endif
                     <button type="button" wire:click="editHero('{{ $p['slug'] }}')"
-                            class="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-50 dark:border-[#2D4060] dark:text-slate-300 dark:hover:bg-[#243352]">
+                            class="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-50 dark:border-[#2A2E34] dark:text-slate-300 dark:hover:bg-[#373a3f]">
                         <x-icon name="image" class="h-4 w-4" /> Hero images
                     </button>
                     <button type="button" wire:click="editSections('{{ $p['slug'] }}')"
-                            class="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-50 dark:border-[#2D4060] dark:text-slate-300 dark:hover:bg-[#243352]">
+                            class="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-50 dark:border-[#2A2E34] dark:text-slate-300 dark:hover:bg-[#373a3f]">
                         <x-icon name="layers" class="h-4 w-4" /> Sections
                     </button>
                     <button type="button" wire:click="editColors('{{ $p['slug'] }}')"
-                            class="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-50 dark:border-[#2D4060] dark:text-slate-300 dark:hover:bg-[#243352]">
+                            class="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-50 dark:border-[#2A2E34] dark:text-slate-300 dark:hover:bg-[#373a3f]">
                         <x-icon name="settings" class="h-4 w-4" /> Colours
                         @if (! empty($p['color_overrides']))
                             <span class="ml-0.5 h-1.5 w-1.5 rounded-full bg-primary" title="Custom colours applied"></span>
                         @endif
                     </button>
                     <button type="button" wire:click="editHeader('{{ $p['slug'] }}')"
-                            class="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-50 dark:border-[#2D4060] dark:text-slate-300 dark:hover:bg-[#243352]">
+                            class="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-50 dark:border-[#2A2E34] dark:text-slate-300 dark:hover:bg-[#373a3f]">
                         <x-icon name="panel-top" class="h-4 w-4" /> Header
                         @if (! empty($p['header_settings']))
                             <span class="ml-0.5 h-1.5 w-1.5 rounded-full bg-primary" title="Custom header applied"></span>
@@ -74,7 +74,7 @@
                     </button>
                     @if (\App\Support\LandingHeroLibrary::has($p['section_styles']['landing_hero'] ?? 'default'))
                         <button type="button" wire:click="editLanding('{{ $p['slug'] }}')"
-                                class="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-50 dark:border-[#2D4060] dark:text-slate-300 dark:hover:bg-[#243352]">
+                                class="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-50 dark:border-[#2A2E34] dark:text-slate-300 dark:hover:bg-[#373a3f]">
                             <x-icon name="file-text" class="h-4 w-4" /> Landing page
                         </button>
                     @endif
@@ -85,7 +85,7 @@
                     ] as [$pageKey, $pageLabel])
                         @if (\App\Support\ThemePageLibrary::has($pageKey, $p['section_styles'][$pageKey] ?? 'default'))
                             <button type="button" wire:click="editPage('{{ $p['slug'] }}', '{{ $pageKey }}')"
-                                    class="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-50 dark:border-[#2D4060] dark:text-slate-300 dark:hover:bg-[#243352]">
+                                    class="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-50 dark:border-[#2A2E34] dark:text-slate-300 dark:hover:bg-[#373a3f]">
                                 <x-icon name="file-text" class="h-4 w-4" /> {{ $pageLabel }}
                             </button>
                         @endif
@@ -118,7 +118,7 @@
                 ['esim', 'eSIM', 'hero_esim'],
                 ['numbers', 'Numbers', 'hero_numbers'],
             ] as [$surface, $label, $field])
-                <div class="rounded-xl border border-slate-200 p-3 dark:border-[#2D4060]">
+                <div class="rounded-xl border border-slate-200 p-3 dark:border-[#2A2E34]">
                     <div class="mb-2 flex items-center justify-between">
                         <label class="text-xs font-semibold text-slate-600 dark:text-slate-300">{{ $label }}</label>
                         @if ($currentHero[$surface] ?? null)
@@ -127,7 +127,7 @@
                                     class="text-[11px] font-medium text-red-600 hover:underline">Remove</button>
                         @endif
                     </div>
-                    <div class="mb-2 flex aspect-[2/1] items-center justify-center overflow-hidden rounded-lg border border-slate-200 bg-slate-50 dark:border-[#2D4060] dark:bg-[#243352]">
+                    <div class="mb-2 flex aspect-[2/1] items-center justify-center overflow-hidden rounded-lg border border-slate-200 bg-slate-50 dark:border-[#2A2E34] dark:bg-[#373a3f]">
                         @if ($this->{$field} && $this->{$field}->isPreviewable())
                             <img src="{{ $this->{$field}->temporaryUrl() }}" class="h-full w-full object-cover">
                         @elseif ($currentHero[$surface] ?? null)
@@ -145,7 +145,7 @@
 
         <div class="mt-5 flex justify-end gap-2">
             <button type="button" @click="open = false"
-                    class="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 dark:border-[#2D4060] dark:text-slate-300 dark:hover:bg-[#243352]">
+                    class="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 dark:border-[#2A2E34] dark:text-slate-300 dark:hover:bg-[#373a3f]">
                 Cancel
             </button>
             <button type="button" wire:click="saveHero" wire:loading.attr="disabled" wire:target="saveHero"
@@ -179,7 +179,7 @@
                 <div>
                     <label class="mb-1 block text-xs font-semibold text-slate-600 dark:text-slate-300">{{ $label }}</label>
                     <select wire:model="sectionStyles.{{ $section }}"
-                            class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-primary focus:ring-2 focus:ring-primary/40 dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                            class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-primary focus:ring-2 focus:ring-primary/40 dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
                         @foreach ($this->sectionStyleOptions()[$section] as $key => $optionLabel)
                             <option value="{{ $key }}">{{ $optionLabel }}</option>
                         @endforeach
@@ -190,7 +190,7 @@
 
         <div class="mt-5 flex justify-end gap-2">
             <button type="button" @click="open = false"
-                    class="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 dark:border-[#2D4060] dark:text-slate-300 dark:hover:bg-[#243352]">
+                    class="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 dark:border-[#2A2E34] dark:text-slate-300 dark:hover:bg-[#373a3f]">
                 Cancel
             </button>
             <button type="button" wire:click="saveSections" wire:loading.attr="disabled" wire:target="saveSections"
@@ -219,11 +219,11 @@
             @foreach ($this->colorLabels() as $key => $label)
                 <div class="flex items-center gap-3">
                     <input type="color" wire:model="colorValues.{{ $key }}"
-                           class="h-10 w-10 shrink-0 cursor-pointer rounded-lg border border-slate-300 bg-white p-0.5 dark:border-[#2D4060] dark:bg-[#243352]">
+                           class="h-10 w-10 shrink-0 cursor-pointer rounded-lg border border-slate-300 bg-white p-0.5 dark:border-[#2A2E34] dark:bg-[#373a3f]">
                     <div class="min-w-0 flex-1">
                         <label class="mb-1 block text-xs font-semibold text-slate-600 dark:text-slate-300">{{ $label }}</label>
                         <input type="text" wire:model="colorValues.{{ $key }}" maxlength="7" placeholder="#000000"
-                               class="w-full rounded-lg border border-slate-300 bg-white px-3 py-1.5 font-mono text-sm text-slate-900 focus:border-primary focus:ring-2 focus:ring-primary/40 dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                               class="w-full rounded-lg border border-slate-300 bg-white px-3 py-1.5 font-mono text-sm text-slate-900 focus:border-primary focus:ring-2 focus:ring-primary/40 dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
                         @error('colorValues.'.$key) <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
                     </div>
                     <button type="button" wire:click="resetColor('{{ $key }}')"
@@ -241,7 +241,7 @@
             </button>
             <div class="flex gap-2">
                 <button type="button" @click="open = false"
-                        class="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 dark:border-[#2D4060] dark:text-slate-300 dark:hover:bg-[#243352]">
+                        class="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 dark:border-[#2A2E34] dark:text-slate-300 dark:hover:bg-[#373a3f]">
                     Cancel
                 </button>
                 <button type="button" wire:click="saveColors" wire:loading.attr="disabled" wire:target="saveColors"
@@ -267,12 +267,12 @@
 
         <div class="space-y-5">
             <div class="flex items-center gap-3">
-                <input type="color" wire:model="headerBg" value="{{ $headerBg ?: '#A21CAF' }}"
-                       class="h-10 w-10 shrink-0 cursor-pointer rounded-lg border border-slate-300 bg-white p-0.5 dark:border-[#2D4060] dark:bg-[#243352]">
+                <input type="color" wire:model="headerBg" value="{{ $headerBg ?: '#23272D' }}"
+                       class="h-10 w-10 shrink-0 cursor-pointer rounded-lg border border-slate-300 bg-white p-0.5 dark:border-[#2A2E34] dark:bg-[#373a3f]">
                 <div class="min-w-0 flex-1">
                     <label class="mb-1 block text-xs font-semibold text-slate-600 dark:text-slate-300">Header colour</label>
                     <input type="text" wire:model="headerBg" maxlength="7" placeholder="Theme default"
-                           class="w-full rounded-lg border border-slate-300 bg-white px-3 py-1.5 font-mono text-sm text-slate-900 focus:border-primary focus:ring-2 focus:ring-primary/40 dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                           class="w-full rounded-lg border border-slate-300 bg-white px-3 py-1.5 font-mono text-sm text-slate-900 focus:border-primary focus:ring-2 focus:ring-primary/40 dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
                     @error('headerBg') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
                 </div>
                 <button type="button" wire:click="resetHeaderField('bg')"
@@ -285,7 +285,7 @@
                 <div>
                     <label class="flex items-center gap-2 text-xs font-semibold text-slate-600 dark:text-slate-300">
                         <input type="checkbox" wire:model.live="headerRoundBottom"
-                               class="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary/40 dark:border-[#2D4060]">
+                               class="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary/40 dark:border-[#2A2E34]">
                         Round the bottom corners
                     </label>
 
@@ -337,7 +337,7 @@
             </button>
             <div class="flex gap-2">
                 <button type="button" @click="open = false"
-                        class="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 dark:border-[#2D4060] dark:text-slate-300 dark:hover:bg-[#243352]">
+                        class="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 dark:border-[#2A2E34] dark:text-slate-300 dark:hover:bg-[#373a3f]">
                     Cancel
                 </button>
                 <button type="button" wire:click="saveHeader" wire:loading.attr="disabled" wire:target="saveHeader"
@@ -366,16 +366,16 @@
 
                     @if ($field['type'] === 'textarea')
                         <textarea wire:model="landingValues.{{ $field['key'] }}" rows="3" maxlength="{{ $field['max'] }}"
-                                  class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-primary focus:ring-2 focus:ring-primary/40 dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100"></textarea>
+                                  class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-primary focus:ring-2 focus:ring-primary/40 dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100"></textarea>
                     @elseif ($field['type'] === 'select')
                         <select wire:model="landingValues.{{ $field['key'] }}"
-                                class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-primary focus:ring-2 focus:ring-primary/40 dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                                class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-primary focus:ring-2 focus:ring-primary/40 dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
                             @foreach ($field['options'] as $key => $optionLabel)
                                 <option value="{{ $key }}">{{ $optionLabel }}</option>
                             @endforeach
                         </select>
                     @elseif ($field['type'] === 'image')
-                        <div class="mb-2 flex aspect-[2/1] items-center justify-center overflow-hidden rounded-lg border border-slate-200 bg-slate-50 dark:border-[#2D4060] dark:bg-[#243352]">
+                        <div class="mb-2 flex aspect-[2/1] items-center justify-center overflow-hidden rounded-lg border border-slate-200 bg-slate-50 dark:border-[#2A2E34] dark:bg-[#373a3f]">
                             @if ($this->landing_image_upload && $this->landing_image_upload->isPreviewable())
                                 <img src="{{ $this->landing_image_upload->temporaryUrl() }}" class="h-full w-full object-cover">
                             @elseif ($landingValues[$field['key']] ?? null)
@@ -389,7 +389,7 @@
                         @error('landing_image_upload') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
                     @else
                         <input type="text" wire:model="landingValues.{{ $field['key'] }}" maxlength="{{ $field['max'] }}"
-                               class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-primary focus:ring-2 focus:ring-primary/40 dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                               class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-primary focus:ring-2 focus:ring-primary/40 dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
                     @endif
                     @error('landingValues.'.$field['key']) <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
                 </div>
@@ -398,7 +398,7 @@
 
         <div class="mt-5 flex justify-end gap-2">
             <button type="button" @click="open = false"
-                    class="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 dark:border-[#2D4060] dark:text-slate-300 dark:hover:bg-[#243352]">
+                    class="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 dark:border-[#2A2E34] dark:text-slate-300 dark:hover:bg-[#373a3f]">
                 Cancel
             </button>
             <button type="button" wire:click="saveLanding" wire:loading.attr="disabled" wire:target="saveLanding"
@@ -424,17 +424,17 @@
 
                     @if ($field['type'] === 'textarea')
                         <textarea wire:model="pageValues.{{ $field['key'] }}" rows="3" maxlength="{{ $field['max'] }}"
-                                  class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-primary focus:ring-2 focus:ring-primary/40 dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100"></textarea>
+                                  class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-primary focus:ring-2 focus:ring-primary/40 dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100"></textarea>
                     @elseif ($field['type'] === 'select')
                         <select wire:model="pageValues.{{ $field['key'] }}"
-                                class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-primary focus:ring-2 focus:ring-primary/40 dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                                class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-primary focus:ring-2 focus:ring-primary/40 dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
                             @foreach ($field['options'] as $key => $optionLabel)
                                 <option value="{{ $key }}">{{ $optionLabel }}</option>
                             @endforeach
                         </select>
                     @else
                         <input type="text" wire:model="pageValues.{{ $field['key'] }}" maxlength="{{ $field['max'] }}"
-                               class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-primary focus:ring-2 focus:ring-primary/40 dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                               class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-primary focus:ring-2 focus:ring-primary/40 dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
                     @endif
                     @error('pageValues.'.$field['key']) <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
                 </div>
@@ -443,7 +443,7 @@
 
         <div class="mt-5 flex justify-end gap-2">
             <button type="button" @click="open = false"
-                    class="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 dark:border-[#2D4060] dark:text-slate-300 dark:hover:bg-[#243352]">
+                    class="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 dark:border-[#2A2E34] dark:text-slate-300 dark:hover:bg-[#373a3f]">
                 Cancel
             </button>
             <button type="button" wire:click="savePage" wire:loading.attr="disabled" wire:target="savePage"

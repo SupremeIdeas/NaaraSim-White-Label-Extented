@@ -7,15 +7,16 @@
  * Source: the owner's Naara Icons bundles (39 packs), measured: every pack differs from the others by these two colours alone.
  */
 return [
-    'default' => 'orchid-lime',
+    'default' => 'graphite-mono',
     // Where the canonical (uncoloured-by-pack) SVG set lives, per group, relative to public/. A white-label install lists only the groups it ships.
     'dirs' => [
         'more' => 'images/icon-packs/more/svg',
         'admin' => 'images/icon-packs/admin/svg',
     ],
     'packs' => [
-        // The install's own default colourway (its brand), not a copy of the Naara one.
-        'orchid-lime' => ['label' => 'Orchid Lime (default)', 'ic' => '#A21CAF', 'ac' => '#84CC16'],
+        // The install's own default colourway (graphite and silver), not a copy of the Naara one. Orchid Lime is the saved previous default.
+        'graphite-mono' => ['label' => 'Graphite (default)', 'ic' => '#23272D', 'ac' => '#94A0B0'],
+        'orchid-lime' => ['label' => 'Orchid Lime', 'ic' => '#A21CAF', 'ac' => '#84CC16'],
         'afterdark-plum' => ['label' => 'Afterdark Plum', 'ic' => '#311D3F', 'ac' => '#CA3E47'],
         'arctic-teal' => ['label' => 'Arctic Teal', 'ic' => '#146E78', 'ac' => '#94A3B8'],
         'aries-contrast' => ['label' => 'Aries Contrast', 'ic' => '#0A0A0A', 'ac' => '#F5C518'],

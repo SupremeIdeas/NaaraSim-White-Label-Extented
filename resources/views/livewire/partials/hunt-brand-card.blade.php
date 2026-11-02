@@ -1,6 +1,6 @@
 {{-- Premium brand card — shared by the Featured band and the category
      sections below it, so both stay visually identical (BUILD-9 §8.1). --}}
-<div class="group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:shadow-md dark:border-white/10 dark:bg-[#16233d]"
+<div class="group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:shadow-md dark:border-white/10 dark:bg-[#27292c]"
      wire:key="brand-{{ $brand->id }}">
     @php($hero = $brand->hero_image_path ?: $brand->fallback_image)
     <a href="{{ route('rewards.hunt.profile', $brand) }}" wire:navigate class="relative block h-36 w-full overflow-hidden">

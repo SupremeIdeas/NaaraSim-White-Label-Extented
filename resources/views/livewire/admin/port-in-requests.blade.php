@@ -12,10 +12,10 @@
         <div class="mb-4 rounded-xl bg-emerald-50 px-4 py-2 text-sm text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300">{{ $flash }}</div>
     @endif
 
-    <div class="mb-4 inline-flex flex-wrap gap-1 rounded-full border border-slate-200 bg-slate-100 p-1 dark:border-[#2D4060] dark:bg-[#152238]">
-        <button wire:click="$set('filter', '')" class="rounded-full px-3 py-1.5 text-sm font-semibold transition {{ $filter === '' ? 'bg-white text-primary shadow-sm dark:bg-[#243352] dark:text-primary' : 'text-slate-500 dark:text-slate-400' }}">All</button>
+    <div class="mb-4 inline-flex flex-wrap gap-1 rounded-full border border-slate-200 bg-slate-100 p-1 dark:border-[#2A2E34] dark:bg-[#131416]">
+        <button wire:click="$set('filter', '')" class="rounded-full px-3 py-1.5 text-sm font-semibold transition {{ $filter === '' ? 'bg-white text-primary shadow-sm dark:bg-[#373a3f] dark:text-primary' : 'text-slate-500 dark:text-slate-400' }}">All</button>
         @foreach ($statuses as $status)
-            <button wire:click="$set('filter', '{{ $status }}')" class="rounded-full px-3 py-1.5 text-sm font-semibold transition {{ $filter === $status ? 'bg-white text-primary shadow-sm dark:bg-[#243352] dark:text-primary' : 'text-slate-500 dark:text-slate-400' }}">
+            <button wire:click="$set('filter', '{{ $status }}')" class="rounded-full px-3 py-1.5 text-sm font-semibold transition {{ $filter === $status ? 'bg-white text-primary shadow-sm dark:bg-[#373a3f] dark:text-primary' : 'text-slate-500 dark:text-slate-400' }}">
                 {{ \App\Models\PortInRequest::statusLabel($status) }}
             </button>
         @endforeach
@@ -23,7 +23,7 @@
 
     <div class="space-y-3">
         @forelse ($requests as $request)
-            <div class="rounded-2xl border border-slate-200 bg-white p-4 dark:border-[#2D4060] dark:bg-[#1B2A44]">
+            <div class="rounded-2xl border border-slate-200 bg-white p-4 dark:border-[#2A2E34] dark:bg-[#1D2024]">
                 <div class="flex flex-wrap items-start justify-between gap-3">
                     <div class="min-w-0">
                         <div class="flex items-center gap-2">
@@ -55,20 +55,20 @@
                 @if ($request->isOpen())
                     <div class="mt-3 flex flex-wrap items-center gap-2 border-t border-slate-100 pt-3 dark:border-white/10">
                         @if ($request->status !== \App\Models\PortInRequest::STATUS_IN_REVIEW)
-                            <button wire:click="setStatus({{ $request->id }}, 'in_review')" class="rounded-lg border border-slate-200 px-2.5 py-1 text-xs font-semibold text-slate-600 hover:border-primary/40 hover:text-primary dark:border-[#2D4060] dark:text-slate-300">Mark in review</button>
+                            <button wire:click="setStatus({{ $request->id }}, 'in_review')" class="rounded-lg border border-slate-200 px-2.5 py-1 text-xs font-semibold text-slate-600 hover:border-primary/40 hover:text-primary dark:border-[#2A2E34] dark:text-slate-300">Mark in review</button>
                         @endif
                         @if ($request->status !== \App\Models\PortInRequest::STATUS_SUBMITTED_TO_CARRIER)
-                            <button wire:click="setStatus({{ $request->id }}, 'submitted_to_carrier')" class="rounded-lg border border-slate-200 px-2.5 py-1 text-xs font-semibold text-slate-600 hover:border-primary/40 hover:text-primary dark:border-[#2D4060] dark:text-slate-300">Submitted to carrier</button>
+                            <button wire:click="setStatus({{ $request->id }}, 'submitted_to_carrier')" class="rounded-lg border border-slate-200 px-2.5 py-1 text-xs font-semibold text-slate-600 hover:border-primary/40 hover:text-primary dark:border-[#2A2E34] dark:text-slate-300">Submitted to carrier</button>
                         @endif
                         <button wire:click="setStatus({{ $request->id }}, 'completed')" wire:confirm="Mark this port-in complete? The account number and PIN will be cleared." class="rounded-lg bg-emerald-600 px-2.5 py-1 text-xs font-semibold text-white hover:bg-emerald-700">Mark completed</button>
-                        <button wire:click="editDetails({{ $request->id }})" class="rounded-lg border border-slate-200 px-2.5 py-1 text-xs font-semibold text-slate-600 hover:border-primary/40 hover:text-primary dark:border-[#2D4060] dark:text-slate-300">Notes / provider</button>
+                        <button wire:click="editDetails({{ $request->id }})" class="rounded-lg border border-slate-200 px-2.5 py-1 text-xs font-semibold text-slate-600 hover:border-primary/40 hover:text-primary dark:border-[#2A2E34] dark:text-slate-300">Notes / provider</button>
                         <button wire:click="startReject({{ $request->id }})" class="rounded-lg border border-red-200 px-2.5 py-1 text-xs font-semibold text-red-600 hover:bg-red-50 dark:border-red-500/30 dark:text-red-400">Reject</button>
                     </div>
 
                     @if ($rejectingId === $request->id)
-                        <div class="mt-2 rounded-xl bg-slate-50 p-3 dark:bg-[#152238]">
+                        <div class="mt-2 rounded-xl bg-slate-50 p-3 dark:bg-[#131416]">
                             <input type="text" wire:model="rejectReason" placeholder="Reason (shown to the customer)…"
-                                   class="w-full rounded-lg border border-slate-300 px-2 py-1 text-xs dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                                   class="w-full rounded-lg border border-slate-300 px-2 py-1 text-xs dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
                             @error('rejectReason') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
                             <div class="mt-2 flex gap-2">
                                 <button wire:click="reject({{ $request->id }})" class="rounded-lg bg-red-600 px-2.5 py-1 text-xs font-semibold text-white">Confirm reject</button>
@@ -78,11 +78,11 @@
                     @endif
 
                     @if ($editingId === $request->id)
-                        <div class="mt-2 space-y-2 rounded-xl bg-slate-50 p-3 dark:bg-[#152238]">
+                        <div class="mt-2 space-y-2 rounded-xl bg-slate-50 p-3 dark:bg-[#131416]">
                             <input type="text" wire:model="providerValue" placeholder="Target provider (internal, e.g. twilio)…"
-                                   class="w-full rounded-lg border border-slate-300 px-2 py-1 text-xs dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                                   class="w-full rounded-lg border border-slate-300 px-2 py-1 text-xs dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
                             <textarea wire:model="adminNotesValue" rows="2" placeholder="Ops notes…"
-                                      class="w-full rounded-lg border border-slate-300 px-2 py-1 text-xs dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100"></textarea>
+                                      class="w-full rounded-lg border border-slate-300 px-2 py-1 text-xs dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100"></textarea>
                             <div class="flex gap-2">
                                 <button wire:click="saveDetails({{ $request->id }})" class="rounded-lg bg-primary px-2.5 py-1 text-xs font-semibold text-white">Save</button>
                                 <button wire:click="cancelEdit" class="text-xs text-slate-400">Cancel</button>
@@ -92,7 +92,7 @@
                 @endif
             </div>
         @empty
-            <div class="rounded-2xl border border-dashed border-slate-300 p-10 text-center text-sm text-slate-400 dark:border-[#2D4060] dark:text-slate-500">
+            <div class="rounded-2xl border border-dashed border-slate-300 p-10 text-center text-sm text-slate-400 dark:border-[#2A2E34] dark:text-slate-500">
                 No port-in requests{{ $filter ? ' with this status' : '' }} yet.
             </div>
         @endforelse

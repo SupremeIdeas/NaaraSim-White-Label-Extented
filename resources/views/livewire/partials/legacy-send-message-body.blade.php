@@ -3,7 +3,7 @@
                     <div x-data="{ get len() { return ($wire.body || '').length; } }">
                         <label class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">Message</label>
                         <textarea wire:model.live.debounce.400ms="body" rows="4" maxlength="918" placeholder="Type your message…"
-                                  class="w-full resize-none rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm dark:border-white/10 dark:bg-[#243352] dark:text-slate-100"></textarea>
+                                  class="w-full resize-none rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm dark:border-white/10 dark:bg-[#373a3f] dark:text-slate-100"></textarea>
                         <div class="mt-1 flex items-center justify-between text-[11px] text-slate-400">
                             <span x-text="len + ' chars'"></span>
                             @if ($quote)

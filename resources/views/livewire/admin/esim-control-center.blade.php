@@ -14,7 +14,7 @@
     <div class="mb-6 flex flex-wrap gap-2">
         @foreach (['sync' => 'Sync status', 'plans' => 'Plans & margins', 'images' => 'Images'] as $key => $label)
             <button wire:click="setSection('{{ $key }}')"
-                    class="rounded-full border px-4 py-1.5 text-sm font-semibold transition {{ $section === $key ? 'border-primary bg-primary text-white' : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50 dark:border-[#2D4060] dark:bg-[#1B2A44] dark:text-slate-300' }}">
+                    class="rounded-full border px-4 py-1.5 text-sm font-semibold transition {{ $section === $key ? 'border-primary bg-primary text-white' : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50 dark:border-[#2A2E34] dark:bg-[#1D2024] dark:text-slate-300' }}">
                 {{ $label }}
             </button>
         @endforeach
@@ -31,7 +31,7 @@
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             @foreach ($providers as $key => $label)
                 @php($s = $status[$key] ?? null)
-                <div class="rounded-xl border border-slate-200 bg-white p-4 dark:border-[#2D4060] dark:bg-[#1B2A44]">
+                <div class="rounded-xl border border-slate-200 bg-white p-4 dark:border-[#2A2E34] dark:bg-[#1D2024]">
                     <div class="flex items-center justify-between">
                         <h3 class="font-semibold text-slate-900 dark:text-white">{{ $label }}</h3>
                         @if ($s === null)
@@ -50,7 +50,7 @@
                         <p class="mt-2 rounded bg-red-50 p-2 text-xs text-red-600 dark:bg-red-950/30 dark:text-red-300">{{ $s['error'] }}</p>
                     @endif
                     <button wire:click="syncProvider('{{ $key }}')" wire:loading.attr="disabled"
-                            class="mt-3 inline-flex w-full items-center justify-center gap-1.5 rounded-lg border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-60 dark:border-[#2D4060] dark:text-slate-200 dark:hover:bg-[#243352]">
+                            class="mt-3 inline-flex w-full items-center justify-center gap-1.5 rounded-lg border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-60 dark:border-[#2A2E34] dark:text-slate-200 dark:hover:bg-[#373a3f]">
                         <x-icon name="refresh" class="h-4 w-4" /> Sync now
                     </button>
                 </div>
@@ -62,37 +62,37 @@
         {{-- Filters --}}
         <div class="mb-4 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-5">
             <input type="text" wire:model.live.debounce.300ms="fSearch" placeholder="Search name…"
-                   class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
-            <select wire:model.live="fProvider" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                   class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
+            <select wire:model.live="fProvider" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
                 <option value="">All providers</option>
                 @foreach ($providers as $key => $label)<option value="{{ $key }}">{{ $label }}</option>@endforeach
             </select>
-            <select wire:model.live="fCoverage" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+            <select wire:model.live="fCoverage" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
                 <option value="">All coverage</option>
                 @foreach ($coverageTypes as $c)<option value="{{ $c }}">{{ ucfirst($c) }}</option>@endforeach
             </select>
-            <select wire:model.live="fRegion" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+            <select wire:model.live="fRegion" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
                 <option value="">All regions</option>
                 @foreach ($regions as $slug => $label)<option value="{{ $slug }}">{{ $label }}</option>@endforeach
             </select>
             <input type="text" wire:model.live.debounce.300ms="fCountry" placeholder="Country ISO (e.g. NG)" maxlength="2"
-                   class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm uppercase dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                   class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm uppercase dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
         </div>
 
         {{-- Bulk margin apply --}}
-        <div class="mb-4 flex flex-wrap items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm dark:border-[#2D4060] dark:bg-[#152238]">
+        <div class="mb-4 flex flex-wrap items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm dark:border-[#2A2E34] dark:bg-[#131416]">
             <span class="font-semibold text-slate-700 dark:text-slate-200">Bulk margin for the filtered set:</span>
             <input type="number" step="0.1" min="0" wire:model="bulkMargin" placeholder="e.g. 35"
-                   class="w-28 rounded-lg border border-slate-300 bg-white px-2 py-1.5 dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                   class="w-28 rounded-lg border border-slate-300 bg-white px-2 py-1.5 dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
             <span class="text-slate-500">%</span>
             <button wire:click="applyBulkMargin" wire:confirm="Apply this margin to every plan matching the current filter?"
                     class="rounded-lg bg-primary px-3 py-1.5 font-semibold text-white hover:bg-primary-dark">Apply</button>
             @error('bulkMargin') <span class="text-xs text-red-600">{{ $message }}</span> @enderror
         </div>
 
-        <div class="overflow-x-auto rounded-xl border border-slate-200 dark:border-[#2D4060]">
+        <div class="overflow-x-auto rounded-xl border border-slate-200 dark:border-[#2A2E34]">
             <table class="min-w-full divide-y divide-slate-100 text-sm dark:divide-white/10">
-                <thead class="bg-slate-50 text-left text-xs font-semibold uppercase text-slate-500 dark:bg-[#152238] dark:text-slate-400">
+                <thead class="bg-slate-50 text-left text-xs font-semibold uppercase text-slate-500 dark:bg-[#131416] dark:text-slate-400">
                     <tr>
                         <th class="px-3 py-2">Plan</th>
                         <th class="px-3 py-2">Coverage</th>
@@ -125,13 +125,13 @@
                                 @if ($editingMarginId === $plan->id)
                                     <div class="flex items-center gap-1">
                                         <input type="number" step="0.1" min="0" wire:model="marginValue" placeholder="global"
-                                               class="w-20 rounded border border-slate-300 px-2 py-1 text-xs dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                                               class="w-20 rounded border border-slate-300 px-2 py-1 text-xs dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
                                         <button wire:click="saveMargin({{ $plan->id }})" class="rounded bg-primary px-2 py-1 text-xs font-semibold text-white">Save</button>
                                         <button wire:click="cancelMargin" aria-label="Cancel" class="text-slate-400"><x-icon name="x" class="h-3.5 w-3.5" /></button>
                                     </div>
                                     @error('marginValue') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
                                 @else
-                                    <button wire:click="editMargin({{ $plan->id }})" class="inline-flex items-center gap-1 rounded border border-slate-200 px-2 py-1 text-xs hover:bg-slate-50 dark:border-[#2D4060] dark:hover:bg-[#243352]">
+                                    <button wire:click="editMargin({{ $plan->id }})" class="inline-flex items-center gap-1 rounded border border-slate-200 px-2 py-1 text-xs hover:bg-slate-50 dark:border-[#2A2E34] dark:hover:bg-[#373a3f]">
                                         {{ $plan->override_markup_pct !== null ? $plan->override_markup_pct.'%' : 'global' }} <x-icon name="settings" class="h-3 w-3" />
                                     </button>
                                 @endif
@@ -163,7 +163,7 @@
                             <td class="px-3 py-3 text-xs">
                                 @if ($editingTooltipId === $plan->id)
                                     <textarea wire:model="tooltipValue" rows="3" maxlength="400" placeholder="Manual override…"
-                                              class="w-56 rounded border border-slate-300 px-2 py-1 text-xs dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100"></textarea>
+                                              class="w-56 rounded border border-slate-300 px-2 py-1 text-xs dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100"></textarea>
                                     <div class="mt-1 flex gap-2">
                                         <button wire:click="saveTooltip({{ $plan->id }})" class="rounded bg-primary px-2 py-1 font-semibold text-white">Save</button>
                                         <button wire:click="cancelTooltip" class="text-slate-400">Cancel</button>
@@ -184,7 +184,7 @@
                                     <span class="text-slate-400">— data-limited, N/A —</span>
                                 @elseif ($editingFairUsageId === $plan->id)
                                     <textarea wire:model="fairUsageValue" rows="3" maxlength="300" placeholder="Real known threshold, e.g. 3GB/day @ 20Mbps, then 1Mbps…"
-                                              class="w-56 rounded border border-slate-300 px-2 py-1 text-xs dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100"></textarea>
+                                              class="w-56 rounded border border-slate-300 px-2 py-1 text-xs dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100"></textarea>
                                     <div class="mt-1 flex gap-2">
                                         <button wire:click="saveFairUsage({{ $plan->id }})" class="rounded bg-primary px-2 py-1 font-semibold text-white">Save</button>
                                         <button wire:click="cancelFairUsage" class="text-slate-400">Cancel</button>
@@ -208,13 +208,13 @@
 
     {{-- ============================== IMAGES ================================ --}}
     @else
-        <div class="mb-4 inline-flex rounded-full border border-slate-200 bg-slate-100 p-1 dark:border-[#2D4060] dark:bg-[#152238]">
+        <div class="mb-4 inline-flex rounded-full border border-slate-200 bg-slate-100 p-1 dark:border-[#2A2E34] dark:bg-[#131416]">
             @foreach (['country' => 'Countries', 'region' => 'Regions & Global'] as $key => $label)
-                <button wire:click="setImageKind('{{ $key }}')" class="rounded-full px-4 py-1.5 text-sm font-semibold transition {{ $imageKind === $key ? 'bg-white text-primary shadow-sm dark:bg-[#243352] dark:text-teal-300' : 'text-slate-500 dark:text-slate-400' }}">{{ $label }}</button>
+                <button wire:click="setImageKind('{{ $key }}')" class="rounded-full px-4 py-1.5 text-sm font-semibold transition {{ $imageKind === $key ? 'bg-white text-primary shadow-sm dark:bg-[#373a3f] dark:text-teal-300' : 'text-slate-500 dark:text-slate-400' }}">{{ $label }}</button>
             @endforeach
         </div>
 
-        <form wire:submit="saveImage" class="mb-6 grid grid-cols-1 gap-4 rounded-xl border border-slate-200 bg-white p-5 sm:grid-cols-3 dark:border-[#2D4060] dark:bg-[#1B2A44]">
+        <form wire:submit="saveImage" class="mb-6 grid grid-cols-1 gap-4 rounded-xl border border-slate-200 bg-white p-5 sm:grid-cols-3 dark:border-[#2A2E34] dark:bg-[#1D2024]">
             <div>
                 <label class="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-300">{{ $imageKind === 'country' ? 'Country' : 'Region' }}</label>
                 @if ($imageKind === 'country')
@@ -224,7 +224,7 @@
                     </select>
                     @error('imgCountry') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
                 @else
-                    <select wire:model="imgRegion" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                    <select wire:model="imgRegion" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
                         <option value="">Choose…</option>
                         @foreach ($regionOptions as $slug => $label)<option value="{{ $slug }}">{{ $label }}</option>@endforeach
                     </select>
@@ -253,8 +253,8 @@
         <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
             @if ($imageKind === 'country')
                 @forelse ($countryImages as $img)
-                    <div class="overflow-hidden rounded-xl border border-slate-200 dark:border-[#2D4060]">
-                        <div class="flex h-24 items-center justify-center bg-slate-100 dark:bg-[#152238]">
+                    <div class="overflow-hidden rounded-xl border border-slate-200 dark:border-[#2A2E34]">
+                        <div class="flex h-24 items-center justify-center bg-slate-100 dark:bg-[#131416]">
                             @if ($img->icon_path)<img src="{{ $img->icon_path }}" class="h-full w-full object-cover">@else<x-country-flag :country="$img->country_code" class="h-10 w-14 rounded" />@endif
                         </div>
                         <div class="flex items-center justify-between p-2 text-xs">
@@ -267,8 +267,8 @@
                 @endforelse
             @else
                 @forelse ($regionImages as $img)
-                    <div class="overflow-hidden rounded-xl border border-slate-200 dark:border-[#2D4060]">
-                        <div class="flex h-24 items-center justify-center bg-slate-100 dark:bg-[#152238]">
+                    <div class="overflow-hidden rounded-xl border border-slate-200 dark:border-[#2A2E34]">
+                        <div class="flex h-24 items-center justify-center bg-slate-100 dark:bg-[#131416]">
                             @if ($img->icon_path)<img src="{{ $img->icon_path }}" class="h-full w-full object-cover">@else<x-icon name="globe" class="h-8 w-8 text-primary/60" gradient />@endif
                         </div>
                         <div class="flex items-center justify-between p-2 text-xs">

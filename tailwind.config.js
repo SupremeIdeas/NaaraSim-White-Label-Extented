@@ -35,6 +35,9 @@ export default {
                 },
                 navy: 'rgb(var(--brand-navy) / <alpha-value>)',       // Midnight Navy
                 action: 'rgb(var(--brand-action) / <alpha-value>)',   // Coral Red
+                // The default Tailwind `teal` ramp is remapped to the graphite and silver family, so every teal utility in the views (about 250)
+                // follows the platform's black, white and grey identity without touching a single view.
+                teal: { 50: '#F5F6F8', 100: '#E9ECF0', 200: '#D3D8DF', 300: '#B6BDC8', 400: '#94A0B0', 500: '#707C8E', 600: '#565F6E', 700: '#424A56', 800: '#2E343D', 900: '#1E2228', 950: '#12151A' },
                 success: '#16A34A',
                 warning: '#D97706',
                 danger: '#DC2626',

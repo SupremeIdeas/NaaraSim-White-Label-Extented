@@ -21,12 +21,12 @@
         <p class="mt-0.5 text-xs text-slate-500 dark:text-slate-400">e.g. $10 ≈ ₦{{ number_format($resolvedRate * 10, 0) }} · $50 ≈ ₦{{ number_format($resolvedRate * 50, 0) }}</p>
     </div>
 
-    <div class="rounded-xl border border-slate-200 bg-white p-5 dark:border-[#2D4060] dark:bg-[#1B2A44]">
+    <div class="rounded-xl border border-slate-200 bg-white p-5 dark:border-[#2A2E34] dark:bg-[#1D2024]">
         {{-- Source --}}
         <label class="block text-sm font-semibold text-slate-900 dark:text-white">Rate source</label>
         <div class="mt-2 space-y-2">
             <label class="flex cursor-pointer items-start gap-3 rounded-xl border p-3 transition"
-                   :class="source === 'auto' ? 'border-primary bg-primary/5 dark:border-primary/50 dark:bg-primary/10' : 'border-slate-200 dark:border-[#2D4060]'">
+                   :class="source === 'auto' ? 'border-primary bg-primary/5 dark:border-primary/50 dark:bg-primary/10' : 'border-slate-200 dark:border-[#2A2E34]'">
                 <input type="radio" value="auto" x-model="source" class="mt-1 accent-primary">
                 <span>
                     <span class="block text-sm font-semibold text-slate-800 dark:text-slate-100">Automatic (official rate) + markup</span>
@@ -34,7 +34,7 @@
                 </span>
             </label>
             <label class="flex cursor-pointer items-start gap-3 rounded-xl border p-3 transition"
-                   :class="source === 'manual' ? 'border-primary bg-primary/5 dark:border-primary/50 dark:bg-primary/10' : 'border-slate-200 dark:border-[#2D4060]'">
+                   :class="source === 'manual' ? 'border-primary bg-primary/5 dark:border-primary/50 dark:bg-primary/10' : 'border-slate-200 dark:border-[#2A2E34]'">
                 <input type="radio" value="manual" x-model="source" class="mt-1 accent-primary">
                 <span>
                     <span class="block text-sm font-semibold text-slate-800 dark:text-slate-100">Manual (exact parallel rate)</span>
@@ -49,7 +49,7 @@
             <div class="mt-1 flex items-center gap-2">
                 <span class="text-slate-400">₦</span>
                 <input type="number" min="100" max="100000" step="1" x-model.number="manual"
-                       class="w-40 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                       class="w-40 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
             </div>
             @error('manual_ngn_rate') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
         </div>
@@ -60,7 +60,7 @@
             <div class="mt-1 flex items-center gap-2">
                 <span class="text-slate-400">₦</span>
                 <input type="number" min="100" max="100000" step="1" x-model.number="manual"
-                       class="w-40 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                       class="w-40 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
             </div>
         </div>
 

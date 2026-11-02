@@ -74,7 +74,7 @@ class ThemePresetSeeder extends Seeder
 
             ['slug' => 'mango-burst', 'name' => 'Mango Burst', 'sort_order' => 18,
                 'persona' => 'Tropical burnt-orange with a deep plum pop, playful travel energy.',
-                'colors' => ['primary' => '198 90 10', 'primary_dark' => '150 68 8', 'accent' => '124 58 140', 'accent_dark' => '124 58 140', 'navy' => '28 14 8', 'action' => '220 70 45'],
+                'colors' => ['primary' => '198 90 10', 'primary_dark' => '150 68 8', 'accent' => '140 82 154', 'accent_dark' => '124 58 140', 'navy' => '28 14 8', 'action' => '220 70 45'],
                 'radius' => ['control' => '0.75rem', 'card' => '1.75rem', 'pill' => '9999px'],
                 'typography' => ['display' => $display, 'sans' => 'Figtree'],
                 'surface' => ['card_shadow' => 'lg', 'card_border_opacity' => '0.5'],
@@ -104,10 +104,10 @@ class ThemePresetSeeder extends Seeder
         ThemePreset::updateOrCreate(
             ['slug' => 'naara-official'],
             [
-                'name' => 'Orchid Lime',
-                'persona' => 'The shipped default of this platform — orchid magenta, fresh lime, midnight navy, 3D icons. Permanent default.',
+                'name' => 'Graphite',
+                'persona' => 'The shipped default of this platform — core black and white with graphite and silver slate, 3D icons. Permanent default. The orchid and lime colourway is kept as the Orchid Lime preset.',
                 'tokens' => [
-                    'colors' => ['primary' => '162 28 175', 'primary_dark' => '134 25 143', 'accent' => '132 204 22', 'accent_dark' => '77 124 15', 'navy' => '13 27 42', 'action' => '232 65 42'],
+                    'colors' => ['primary' => '35 39 45', 'primary_dark' => '16 18 21', 'accent' => '148 160 176', 'accent_dark' => '71 80 94', 'navy' => '10 11 13', 'action' => '61 90 254'],
                     'radius' => ['control' => '0.5rem', 'card' => '1.5rem', 'pill' => '9999px'],
                     'typography' => ['display' => 'Supreme Display', 'sans' => 'Didact Gothic'],
                     'surface' => ['card_shadow' => 'sm', 'card_border_opacity' => '0.6'],
@@ -121,6 +121,23 @@ class ThemePresetSeeder extends Seeder
                 'sort_order' => 1,
             ],
         );
+
+        // The previous default colourway, kept as a normal selectable preset (orchid magenta + fresh lime on midnight navy).
+        ThemePreset::firstOrCreate(['slug' => 'orchid-lime'], [
+            'name' => 'Orchid Lime',
+            'persona' => 'The original colourway of this platform: orchid magenta, fresh lime, midnight navy. Saved so it is one click away.',
+            'tokens' => [
+                'colors' => ['primary' => '162 28 175', 'primary_dark' => '134 25 143', 'accent' => '132 204 22', 'accent_dark' => '77 124 15', 'navy' => '13 27 42', 'action' => '232 65 42'],
+                'radius' => ['control' => '0.5rem', 'card' => '1.5rem', 'pill' => '9999px'],
+                'typography' => ['display' => 'Supreme Display', 'sans' => 'Didact Gothic'],
+                'surface' => ['card_shadow' => 'sm', 'card_border_opacity' => '0.6'],
+            ],
+            'icon_family' => ['style' => '3d', 'set' => 'default'],
+            'hero_assets' => ['dashboard' => '/img/themes/balloons.webp'],
+            'layout_variants' => $this->baselineVariants(),
+            'is_built_in' => false,
+            'sort_order' => 1,
+        ]);
 
         // The data-forward personas lead with wallet + connectivity state on the
         // dashboard home (variant-b); everyone else keeps the baseline (variant-a).
@@ -381,7 +398,7 @@ class ThemePresetSeeder extends Seeder
 
             ['slug' => 'origin-bold', 'name' => 'Origin Bold', 'sort_order' => 7,
                 'persona' => 'Vivid construction-orange with graphite accents, oversized type, confident colour blocks.',
-                'colors' => ['primary' => '214 88 26', 'primary_dark' => '163 66 16', 'accent' => '23 23 23', 'accent_dark' => '23 23 23', 'navy' => '26 17 10', 'action' => '236 72 53'],
+                'colors' => ['primary' => '214 88 26', 'primary_dark' => '163 66 16', 'accent' => '107 107 107', 'accent_dark' => '23 23 23', 'navy' => '26 17 10', 'action' => '236 72 53'],
                 'radius' => ['control' => '0.75rem', 'card' => '1.75rem', 'pill' => '9999px'],
                 'typography' => ['display' => $display, 'sans' => 'Figtree'],
                 'surface' => ['card_shadow' => 'lg', 'card_border_opacity' => '0.5']],
@@ -605,7 +622,7 @@ class ThemePresetSeeder extends Seeder
 
             ['slug' => 'copper-line', 'name' => 'Copper Line', 'sort_order' => 38,
                 'persona' => 'Burnt copper with a steel-blue pop — industrial-craft, workshop-warm precision.',
-                'colors' => ['primary' => '181 101 29', 'primary_dark' => '130 73 21', 'accent' => '47 102 144', 'accent_dark' => '47 102 144', 'navy' => '30 20 15', 'action' => '200 75 50'],
+                'colors' => ['primary' => '181 101 29', 'primary_dark' => '130 73 21', 'accent' => '55 108 148', 'accent_dark' => '47 102 144', 'navy' => '30 20 15', 'action' => '200 75 50'],
                 'radius' => ['control' => '0.375rem', 'card' => '0.75rem', 'pill' => '0.5rem'],
                 'typography' => ['display' => $display, 'sans' => 'Figtree'],
                 'surface' => ['card_shadow' => 'sm', 'card_border_opacity' => '0.6'],

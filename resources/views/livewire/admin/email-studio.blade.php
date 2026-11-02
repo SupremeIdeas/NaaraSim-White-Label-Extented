@@ -26,24 +26,24 @@
 
         <div class="grid gap-6 md:grid-cols-2">
             {{-- Editor --}}
-            <div class="space-y-4 rounded-2xl border border-slate-200 bg-white p-5 dark:border-white/10 dark:bg-[#16233d]">
+            <div class="space-y-4 rounded-2xl border border-slate-200 bg-white p-5 dark:border-white/10 dark:bg-[#27292c]">
                 @if ($key === 'global')
                     <p class="text-sm text-slate-500 dark:text-slate-400">Accent colour applies to every email's header and buttons, unless a specific template sets its own.</p>
                 @else
                     <label class="block"><span class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-400">Subject line</span>
-                        <input type="text" wire:model.live.debounce.400ms="form.subject" placeholder="{{ $templates[$key]['subject'] ?? '' }}" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm dark:border-white/10 dark:bg-[#0D1B2A] dark:text-white">
+                        <input type="text" wire:model.live.debounce.400ms="form.subject" placeholder="{{ $templates[$key]['subject'] ?? '' }}" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm dark:border-white/10 dark:bg-[#0b0b0c] dark:text-white">
                         @error('form.subject') <span class="text-xs text-red-500">{{ $message }}</span> @enderror
                     </label>
                     <label class="block"><span class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-400">Heading (the email's page title, shown in some inboxes)</span>
-                        <input type="text" wire:model.live.debounce.400ms="form.heading" placeholder="{{ $templates[$key]['heading'] ?? '' }}" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm dark:border-white/10 dark:bg-[#0D1B2A] dark:text-white">
+                        <input type="text" wire:model.live.debounce.400ms="form.heading" placeholder="{{ $templates[$key]['heading'] ?? '' }}" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm dark:border-white/10 dark:bg-[#0b0b0c] dark:text-white">
                         @error('form.heading') <span class="text-xs text-red-500">{{ $message }}</span> @enderror
                     </label>
                     <label class="block"><span class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-400">Intro line (added above the body)</span>
-                        <textarea rows="3" wire:model.live.debounce.400ms="form.intro" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm dark:border-white/10 dark:bg-[#0D1B2A] dark:text-white"></textarea>
+                        <textarea rows="3" wire:model.live.debounce.400ms="form.intro" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm dark:border-white/10 dark:bg-[#0b0b0c] dark:text-white"></textarea>
                         @error('form.intro') <span class="text-xs text-red-500">{{ $message }}</span> @enderror
                     </label>
                     <label class="block"><span class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-400">Button text</span>
-                        <input type="text" wire:model.live.debounce.400ms="form.button_text" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm dark:border-white/10 dark:bg-[#0D1B2A] dark:text-white">
+                        <input type="text" wire:model.live.debounce.400ms="form.button_text" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm dark:border-white/10 dark:bg-[#0b0b0c] dark:text-white">
                     </label>
                 @endif
                 <label class="flex items-center gap-3 text-sm font-medium text-slate-700 dark:text-slate-200">

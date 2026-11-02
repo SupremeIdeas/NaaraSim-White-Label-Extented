@@ -78,7 +78,7 @@
             <span class="absolute left-0 top-0 h-1.5 w-full bg-gradient-to-r from-primary to-accent" aria-hidden="true"></span>
             <div>
                 <span class="flex h-10 w-10 items-center justify-center bg-gradient-to-br from-primary to-accent text-white [clip-path:polygon(15%_0,100%_0,85%_100%,0_100%)]">
-                    <x-icon name="target" class="h-5 w-5" />
+                    <x-glyph name="target" class="h-5 w-5" />
                 </span>
                 <p class="mt-4 text-xs font-extrabold uppercase tracking-[0.2em] text-primary-dark dark:text-primary">Mission</p>
                 <p class="mt-3 font-display text-2xl font-bold leading-snug text-slate-900 dark:text-white sm:text-3xl">{{ $content['mission'] }}</p>
@@ -100,7 +100,7 @@
         {{-- VISION --}}
         <div data-area="vision" class="relative overflow-hidden border border-slate-200 bg-gradient-to-br from-primary to-accent p-7 text-white shadow-sm">
             <span class="flex h-10 w-10 items-center justify-center bg-white/15 [clip-path:polygon(15%_0,100%_0,85%_100%,0_100%)]">
-                <x-icon name="eye" class="h-5 w-5" />
+                <x-glyph name="eye" class="h-5 w-5" />
             </span>
             <p class="mt-4 text-xs font-extrabold uppercase tracking-[0.2em] text-white/80">Vision</p>
             <p class="mt-3 font-display text-xl font-bold leading-snug sm:text-2xl">{{ $content['vision'] }}</p>

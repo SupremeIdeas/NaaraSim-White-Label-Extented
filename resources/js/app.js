@@ -194,9 +194,9 @@ function initLoginScene() {
     if (!canvas) return;
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
-    import('./webgl/login-scene.js')
-        .then(({ mountLoginScene }) => {
-            _loginSceneDestroy = mountLoginScene(canvas);
+    import('./webgl/globe-lite.js')
+        .then(({ mountGlobeLite }) => {
+            _loginSceneDestroy = mountGlobeLite(canvas, { mode: 'login' });
             canvas.classList.add('is-live'); // fades the canvas in over the fallback
         })
         .catch(() => { /* bundle/WebGL failure → CSS fallback stays */ });
@@ -231,6 +231,36 @@ function initHeroScenes() {
 
 document.addEventListener('DOMContentLoaded', initHeroScenes);
 document.addEventListener('livewire:navigated', initHeroScenes);
+
+// --- Homepage manifesto scroll-word-reveal (lazy) ---------------------------
+let _manifestoDestroy = null;
+function initManifesto() {
+    if (_manifestoDestroy) { _manifestoDestroy(); _manifestoDestroy = null; }
+    const root = document.querySelector('[data-manifesto]');
+    if (!root) return;
+
+    import('./manifesto.js')
+        .then(({ mountManifesto }) => { _manifestoDestroy = mountManifesto(root); })
+        .catch(() => { /* bundle failure → words render already-lit via the no-JS fallback */ });
+}
+
+document.addEventListener('DOMContentLoaded', initManifesto);
+document.addEventListener('livewire:navigated', initManifesto);
+
+// --- Homepage "Diagnosis / Architecture / Promise" bento block (lazy) ------
+let _bentoDestroy = null;
+function initBentoDiagnosis() {
+    if (_bentoDestroy) { _bentoDestroy(); _bentoDestroy = null; }
+    const root = document.querySelector('[data-bento-diagnosis]');
+    if (!root) return;
+
+    import('./bento-diagnosis.js')
+        .then(({ mountBentoDiagnosis }) => { _bentoDestroy = mountBentoDiagnosis(root); })
+        .catch(() => { /* bundle failure → cards render already-visible via the no-JS fallback */ });
+}
+
+document.addEventListener('DOMContentLoaded', initBentoDiagnosis);
+document.addEventListener('livewire:navigated', initBentoDiagnosis);
 
 // --- In-browser dialer (Live Voice — Part B, lazy) --------------------------
 // The Twilio Voice SDK is heavy + only needed on the dialer page, so the module

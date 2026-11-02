@@ -7,7 +7,7 @@
     ][$state];
 @endphp
 <x-layouts.auth :title="$copy[0].' | '.config('app.name')" :heading="$copy[0]" :subheading="$copy[1]">
-    <div class="space-y-4 rounded-2xl border border-slate-200 bg-white p-6 text-center shadow-sm dark:border-[#2D4060] dark:bg-[#1A2840]">
+    <div class="space-y-4 rounded-2xl border border-slate-200 bg-white p-6 text-center shadow-sm dark:border-[#2A2E34] dark:bg-[#17191C]">
         <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-full {{ $copy[2] === 'success' ? 'bg-green-100 text-green-700 dark:bg-green-950/50 dark:text-green-300' : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300' }}">
             <x-icon :name="$copy[2] === 'success' ? 'badge-check' : 'mail'" class="h-7 w-7" />
         </div>

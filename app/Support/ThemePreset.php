@@ -421,10 +421,16 @@ class ThemePreset
     {
         $colors = $tokens['colors'] ?? [];
 
+        $accent = $colors['accent_dark'] ?? null;
+        // In dark mode the accent sits on this theme's own dark surface as text and icons; lift it until it reads (4.5:1) instead of vanishing.
+        if (self::validChannelTriple($accent) && self::validChannelTriple($colors['navy'] ?? null)) {
+            $accent = ColorContrast::lightenToContrast($accent, $colors['navy'], 4.5);
+        }
+
         return [
             'colors' => [
                 'primary' => $colors['primary_dark'] ?? null,
-                'accent' => $colors['accent_dark'] ?? null,
+                'accent' => $accent,
                 'navy' => $colors['navy'] ?? null,
                 'action' => $colors['action'] ?? null,
             ],
@@ -653,6 +659,10 @@ class ThemePreset
         ];
         foreach ($colorMap as $key => $var) {
             $val = $tokens['colors'][$key] ?? null;
+            if ($key === 'action' && self::validChannelTriple($val)) {
+                // A button colour must carry white text: darken a too-light one just enough (WCAG 3:1, large/bold button labels).
+                $val = ColorContrast::darkenToContrast($val, '#FFFFFF', 3.0);
+            }
             if (self::validChannelTriple($val)) {
                 $out[] = "{$var}:{$val}";
             }

@@ -122,7 +122,7 @@
             ] as $card)
                 <div class="flex gap-4">
                     <span class="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-accent/25 text-accent-dark dark:text-accent">
-                        <x-icon :name="$card['icon']" class="h-4 w-4" />
+                        <x-glyph :name="$card['icon']" class="h-4 w-4" />
                     </span>
                     <div>
                         <h3 class="font-display text-base font-semibold text-[#241D1A] dark:text-white">{{ $card['title'] }}</h3>

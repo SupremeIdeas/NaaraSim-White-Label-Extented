@@ -76,9 +76,9 @@ class BrandWhiteLabelTest extends TestCase
         $this->assertSame(BrandSettings::PALETTES['Ocean Blue']['primary'], BrandSettings::color('primary'));
     }
 
-    public function test_there_are_25_curated_palettes(): void
+    public function test_there_are_26_curated_palettes(): void
     {
-        $this->assertCount(25, BrandSettings::PALETTES);
+        $this->assertCount(26, BrandSettings::PALETTES);
         foreach (BrandSettings::PALETTES as $name => $c) {
             foreach (['primary', 'accent', 'navy', 'action'] as $k) {
                 $this->assertMatchesRegularExpression('/^#[0-9A-Fa-f]{6}$/', $c[$k], "$name.$k");

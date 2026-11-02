@@ -9,21 +9,21 @@
     @endif
 
     {{-- Global settings --}}
-    <div class="mb-6 rounded-2xl border border-slate-200 bg-white p-5 dark:border-[#2D4060] dark:bg-[#1B2A44]">
+    <div class="mb-6 rounded-2xl border border-slate-200 bg-white p-5 dark:border-[#2A2E34] dark:bg-[#1D2024]">
         <h2 class="mb-3 text-sm font-bold text-slate-900 dark:text-white">Program settings</h2>
         <div class="flex flex-wrap items-end gap-4">
             <label class="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-200">
-                <input type="checkbox" wire:model="enabled" class="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary dark:border-[#2D4060] dark:bg-[#243352]"> Program enabled
+                <input type="checkbox" wire:model="enabled" class="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary dark:border-[#2A2E34] dark:bg-[#373a3f]"> Program enabled
             </label>
             <div>
                 <label class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">Default cadence</label>
-                <select wire:model="defaultCadence" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                <select wire:model="defaultCadence" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
                     <option value="monthly">Monthly</option><option value="weekly">Weekly</option>
                 </select>
             </div>
             <div>
                 <label class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">Default payout mode</label>
-                <select wire:model="defaultMode" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                <select wire:model="defaultMode" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
                     <option value="manual">Admin-approved</option><option value="auto">Automated</option>
                 </select>
             </div>
@@ -32,22 +32,22 @@
     </div>
 
     {{-- Add a partner --}}
-    <div class="mb-6 rounded-2xl border border-slate-200 bg-white p-5 dark:border-[#2D4060] dark:bg-[#1B2A44]">
+    <div class="mb-6 rounded-2xl border border-slate-200 bg-white p-5 dark:border-[#2A2E34] dark:bg-[#1D2024]">
         <h2 class="mb-1 text-sm font-bold text-slate-900 dark:text-white">Add a partner</h2>
         <p class="mb-3 text-xs text-slate-400">Existing user? Just enter their email. New person? Add a name too and we'll create the account with a one-time password — they land on /partner at first login.</p>
         <div class="flex flex-wrap items-end gap-3">
             <div class="min-w-[16rem] flex-1">
                 <label class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">Email</label>
-                <input type="email" wire:model="newEmail" placeholder="person@example.com" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                <input type="email" wire:model="newEmail" placeholder="person@example.com" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
                 @error('newEmail') <span class="text-xs text-red-600">{{ $message }}</span> @enderror
             </div>
             <div class="min-w-[10rem] flex-1">
                 <label class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">Name <span class="text-slate-400">(new account)</span></label>
-                <input type="text" wire:model="newName" placeholder="Optional" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                <input type="text" wire:model="newName" placeholder="Optional" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
             </div>
             <div class="w-28">
                 <label class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">Share %</label>
-                <input type="number" step="0.1" min="0" max="100" wire:model="newShare" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                <input type="number" step="0.1" min="0" max="100" wire:model="newShare" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
                 @error('newShare') <span class="text-xs text-red-600">{{ $message }}</span> @enderror
             </div>
             <button type="button" wire:click="addPartner" class="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary-dark">Add partner</button>
@@ -55,7 +55,7 @@
         @if ($newTempPassword)
             <div class="mt-3 flex flex-wrap items-center gap-2 rounded-lg border border-primary/30 bg-primary/5 p-3 text-sm dark:border-primary/40" x-data="{ copied: false }">
                 <span class="text-slate-600 dark:text-slate-300">New account created. Temporary password:</span>
-                <code class="rounded bg-white px-2 py-1 font-mono font-semibold text-primary dark:bg-[#243352] dark:text-teal-300">{{ $newTempPassword }}</code>
+                <code class="rounded bg-white px-2 py-1 font-mono font-semibold text-primary dark:bg-[#373a3f] dark:text-teal-300">{{ $newTempPassword }}</code>
                 <button type="button" @click="navigator.clipboard.writeText('{{ $newTempPassword }}'); copied = true; setTimeout(() => copied = false, 1500)"
                         class="inline-flex items-center gap-1 rounded-lg bg-primary px-2.5 py-1 text-xs font-semibold text-white"><x-icon name="copy" class="h-3.5 w-3.5" /> <span x-text="copied ? 'Copied' : 'Copy'"></span></button>
             </div>
@@ -63,7 +63,7 @@
     </div>
 
     {{-- Partner list --}}
-    <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white dark:border-[#2D4060] dark:bg-[#1B2A44]">
+    <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white dark:border-[#2A2E34] dark:bg-[#1D2024]">
         <table class="w-full text-sm">
             <thead class="bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-400 dark:bg-white/5">
                 <tr><th class="px-4 py-3">Partner</th><th class="px-4 py-3">Share</th><th class="px-4 py-3">Cadence</th><th class="px-4 py-3">Mode</th><th class="px-4 py-3">Balance</th><th class="px-4 py-3">Status</th><th class="px-4 py-3"></th></tr>
@@ -76,9 +76,9 @@
                             <p class="text-xs text-slate-400">{{ $p->owner?->email }}</p>
                         </td>
                         @if ($editingId === $p->id)
-                            <td class="px-4 py-3"><input type="number" step="0.1" min="0" max="100" wire:model="editShare" class="w-20 rounded border border-slate-300 bg-white px-2 py-1 text-sm dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100"></td>
-                            <td class="px-4 py-3"><select wire:model="editCadence" class="rounded border border-slate-300 bg-white px-2 py-1 text-sm dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100"><option value="monthly">Monthly</option><option value="weekly">Weekly</option></select></td>
-                            <td class="px-4 py-3"><select wire:model="editMode" class="rounded border border-slate-300 bg-white px-2 py-1 text-sm dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100"><option value="manual">Approve</option><option value="auto">Auto</option></select></td>
+                            <td class="px-4 py-3"><input type="number" step="0.1" min="0" max="100" wire:model="editShare" class="w-20 rounded border border-slate-300 bg-white px-2 py-1 text-sm dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100"></td>
+                            <td class="px-4 py-3"><select wire:model="editCadence" class="rounded border border-slate-300 bg-white px-2 py-1 text-sm dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100"><option value="monthly">Monthly</option><option value="weekly">Weekly</option></select></td>
+                            <td class="px-4 py-3"><select wire:model="editMode" class="rounded border border-slate-300 bg-white px-2 py-1 text-sm dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100"><option value="manual">Approve</option><option value="auto">Auto</option></select></td>
                             <td class="px-4 py-3 font-semibold text-slate-700 dark:text-slate-200">${{ number_format($p->admin_balance, 2) }}</td>
                             <td class="px-4 py-3" colspan="2">
                                 <button type="button" wire:click="saveTerms" class="rounded bg-primary px-3 py-1 text-xs font-semibold text-white">Save</button>

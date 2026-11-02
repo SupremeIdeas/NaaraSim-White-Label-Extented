@@ -11,7 +11,7 @@
     <div class="mkt-stack mt-12">
         @foreach ([1, 2, 3] as $n)
             @php($img = \App\Support\SiteContent::imageUrl($s["step_{$n}_image"] ?? ''))
-            <div class="mkt-stack__card overflow-hidden border border-slate-200 bg-white dark:border-[var(--brand-card-border-dark)] dark:bg-[#16233d]" style="top: calc(5.5rem + {{ ($n - 1) * 1.25 }}rem)">
+            <div class="mkt-stack__card overflow-hidden border border-slate-200 bg-white dark:border-[var(--brand-card-border-dark)] dark:bg-[#27292c]" style="top: calc(5.5rem + {{ ($n - 1) * 1.25 }}rem)">
                 <div class="grid items-center gap-6 sm:gap-10 {{ $img ? 'md:grid-cols-2' : '' }} {{ $n % 2 === 0 ? 'md:[&>figure]:order-first' : '' }}">
                     <div>
                         <div class="flex items-start gap-5">
