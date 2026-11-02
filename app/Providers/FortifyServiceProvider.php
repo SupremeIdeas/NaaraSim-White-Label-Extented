@@ -57,6 +57,8 @@ class FortifyServiceProvider extends ServiceProvider
         // or a recovery code). MUST be registered or a 2FA-enabled user (incl.
         // an admin) is stranded after entering their password. This is the extra
         // security layer that never blocks a legitimate login.
+        // Fortify sends people here before a sensitive action (turning on two-factor, passkeys). Without a view this page answered 500.
+        Fortify::confirmPasswordView(fn () => view('auth.confirm-password'));
         Fortify::twoFactorChallengeView(fn () => view('auth.two-factor-challenge'));
 
         // Password-reset + email-verification UX (Module 22). Without these the
