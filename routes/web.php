@@ -1,5 +1,6 @@
 <?php
 
+use App\Support\AdminPath;
 use App\Http\Controllers\AccountExportController;
 use App\Http\Controllers\Admin\LoginController;
 use App\Http\Controllers\Auth\SocialAuthController;
@@ -409,21 +410,24 @@ Route::middleware(['auth', 'active'])->group(function () {
 // {ADMIN_PATH}/login OUTSIDE the `admin` gate so guests can reach it; EnsureAdmin
 // redirects unauthenticated panel visitors here (a branded admin login) instead
 // of the customer login. Posts to Fortify /login. Throttled like the panel.
-Route::get(config('admin.path').'/login', LoginController::class)
-    ->middleware('throttle:admin')->name('admin.login');
+Route::get('{adminGateway}/login', LoginController::class)
+    ->where('adminGateway', AdminPath::PATTERN)
+    ->middleware(['admin.gateway', 'throttle:admin'])->name('admin.login');
 
 // Admin password recovery via security questions (guest, hard-throttled). A
 // self-service path when email reset isn't available on a self-hosted install.
-Route::get(config('admin.path').'/recover', RecoverPassword::class)
-    ->middleware('throttle:admin')->name('admin.recover');
+Route::get('{adminGateway}/recover', RecoverPassword::class)
+    ->where('adminGateway', AdminPath::PATTERN)
+    ->middleware(['admin.gateway', 'throttle:admin'])->name('admin.recover');
 
 // Admin panel (blueprint Sections 13, 15, 17, 25). Mounted on the env-driven
 // admin path; the `admin` middleware enforces the IP allow-list, a redirect to
 // the dedicated admin login for guests, a plain 404 for signed-in non-admins,
 // and TOTP 2FA enrolment. `auth` is intentionally omitted so EnsureAdmin owns
 // the guest handling. Throttled to blunt path probing.
-Route::middleware(['admin', 'throttle:admin'])
-    ->prefix(config('admin.path'))
+Route::middleware(['admin.gateway', 'admin', 'throttle:admin'])
+    ->prefix('{adminGateway}')
+    ->where(['adminGateway' => AdminPath::PATTERN])
     ->name('admin.')
     ->group(function () {
         // Panel entry + 2FA self-enrolment — any panel user (incl. staff).

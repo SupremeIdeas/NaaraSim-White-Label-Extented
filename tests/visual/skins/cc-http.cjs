@@ -4,7 +4,7 @@ const CHROME=process.env.CHROME||'/opt/pw-browsers/chromium-1194/chrome-linux/ch
 (async()=>{
   const b=await chromium.launch({executablePath:CHROME}); const ctx=await b.newContext({viewport:{width:900,height:1000}}); const p=await ctx.newPage();
   p.on('pageerror',e=>console.log('PAGEERROR',e.message));
-  await p.goto(BASE+'/login',{waitUntil:'networkidle'});await p.fill('input[name="email"]','supremeideasz@gmail.com');await p.fill('input[name="password"]','password');
+  await p.goto(BASE+'/login',{waitUntil:'networkidle'});await p.fill('input[name="email"]','adminmaster1234@gmail.com');await p.fill('input[name="password"]','password');
   await Promise.all([p.waitForNavigation({waitUntil:'networkidle'}).catch(()=>{}),p.click('button[type="submit"]')]);
   await p.goto(BASE+'/adminmaster/ui-kit',{waitUntil:'networkidle'}); await p.waitForSelector('naara-composer .cc-box');
   const calls=[]; let mode='ok';

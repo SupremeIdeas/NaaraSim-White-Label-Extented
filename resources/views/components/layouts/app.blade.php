@@ -176,14 +176,14 @@
     /adminmaster's own chrome (see the `body:not(.is-admin-surface)` scope
     in that method).
 --}}
-<body class="min-h-screen text-[#0F172A] antialiased dark:text-slate-100 {{ \App\Support\ThemePreset::bodyClass() }} {{ $bodyClass ?? 'bg-[#F8F9FA] dark:bg-navy' }} {{ request()->is(config('admin.path'), config('admin.path').'/*') ? 'is-admin-surface' : '' }}">
+<body class="min-h-screen text-[#0F172A] antialiased dark:text-slate-100 {{ \App\Support\ThemePreset::bodyClass() }} {{ $bodyClass ?? 'bg-[#F8F9FA] dark:bg-navy' }} {{ request()->is(\App\Support\AdminPath::current(), \App\Support\AdminPath::current().'/*') ? 'is-admin-surface' : '' }}">
     @include('partials.icon-sprite')
     @include('partials.service-icon-sprite')
     @include('partials.nx-icon-sprite')
     <x-brand-preloader :page-type="$pageType" />
     <x-splash />
     <x-ui.toast-stack />
-    @unless (request()->is(config('admin.path'), config('admin.path').'/*') || request()->is('install', 'install/*') || isset($bodyClass))<x-cookie-banner />@endunless
+    @unless (request()->is(\App\Support\AdminPath::current(), \App\Support\AdminPath::current().'/*') || request()->is('install', 'install/*') || isset($bodyClass))<x-cookie-banner />@endunless
     {{-- Review moments: the "how did it go?" sheet, only for a signed-in person while an admin has it on and a Trustpilot profile is set. --}}
     @if (auth()->check() && \App\Support\Reviews\ReviewMoments::enabled())
         @persist('review-moment')

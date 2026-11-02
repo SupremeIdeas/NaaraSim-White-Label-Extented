@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Support\AdminPath;
 use App\Events\CircuitClosed;
 use App\Events\CircuitOpened;
 use App\Events\HealthCheckCompleted;
@@ -281,6 +282,7 @@ class AppServiceProvider extends ServiceProvider
         \Livewire\Livewire::addPersistentMiddleware(array_values(array_filter(array_map(
             fn (string $class) => class_exists($class) ? $class : null,
             [
+                \App\Http\Middleware\EnsureAdminGateway::class,
                 \App\Http\Middleware\EnsureAdmin::class,
                 \App\Http\Middleware\EnsureActive::class,
                 \App\Http\Middleware\EnsureKycLevel::class,
@@ -578,5 +580,9 @@ class AppServiceProvider extends ServiceProvider
         // brute-force probing of the secret admin path.
         RateLimiter::for('admin', fn (Request $request) => Limit::perMinute(config('admin.throttle', 60))
             ->by('admin:'.(optional($request->user())->id ?: $request->ip())));
+
+        // The admin path is editable from Admin > Security and read request-time (AdminPath::current()), so every admin.* route() call
+        // needs {adminGateway} filled in: set it once here instead of at each of the call sites.
+        \Illuminate\Support\Facades\URL::defaults(['adminGateway' => AdminPath::current()]);
     }
 }

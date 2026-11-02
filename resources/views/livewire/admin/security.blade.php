@@ -236,5 +236,54 @@
                 </div>
             </form>
         </div>
+        {{-- Admin panel path: editable here (super_admin), never hard-coded. --}}
+        <div class="mt-8">
+            <h2 class="mb-1 text-lg font-bold text-slate-900 dark:text-slate-100">Admin panel path</h2>
+            <p class="mb-4 text-sm text-slate-500 dark:text-slate-400">The URL segment the admin panel lives under. Currently <span class="font-mono">/{{ $admin_path }}</span>.</p>
+
+            @if ($adminPathSaved)
+                <div class="mb-4 flex items-center gap-2 rounded-lg bg-emerald-50 px-4 py-3 text-sm text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300">
+                    <x-icon name="badge-check" class="h-4 w-4" /> {{ $adminPathSaved }}
+                </div>
+            @endif
+
+            <form wire:submit="saveAdminPath" class="space-y-5 rounded-2xl border border-slate-200 bg-white p-6 dark:border-[#2D4060] dark:bg-[#1A2840]">
+                <div class="flex items-start gap-2 rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm text-amber-800 dark:border-amber-500/40 dark:bg-amber-500/10 dark:text-amber-200">
+                    <x-icon name="alert-triangle" class="mt-0.5 h-4 w-4 shrink-0" />
+                    <span>You will need this new path to reach the admin login going forward. Record it somewhere safe.</span>
+                </div>
+
+                <div>
+                    <label class="mb-1 block text-sm font-medium text-slate-800 dark:text-slate-100">New path</label>
+                    <div class="flex items-center gap-1">
+                        <span class="text-sm text-slate-500 dark:text-slate-400">/</span>
+                        <input type="text" wire:model="admin_path" placeholder="adminmaster"
+                               class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 font-mono text-sm dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                    </div>
+                    @error('admin_path') <p class="mt-1 text-xs text-red-600 dark:text-red-400">{{ $message }}</p> @enderror
+                </div>
+
+                <div>
+                    <label class="mb-1 block text-sm font-medium text-slate-800 dark:text-slate-100">Confirm new path</label>
+                    <input type="text" wire:model="admin_path_confirmation" placeholder="Type it again"
+                           class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 font-mono text-sm dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                </div>
+
+                <div>
+                    <label class="mb-1 block text-sm font-medium text-slate-800 dark:text-slate-100">Your current password</label>
+                    <input type="password" wire:model="admin_path_current_password"
+                           class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                    @error('admin_path_current_password') <p class="mt-1 text-xs text-red-600 dark:text-red-400">{{ $message }}</p> @enderror
+                </div>
+
+                <div>
+                    <button type="submit" wire:loading.attr="disabled" wire:target="saveAdminPath"
+                            class="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white hover:bg-primary-dark disabled:opacity-60">
+                        <span wire:loading.remove wire:target="saveAdminPath">Change admin path</span>
+                        <span wire:loading wire:target="saveAdminPath" class="inline-flex items-center gap-2"><x-ui.spinner class="h-4 w-4" /> Saving…</span>
+                    </button>
+                </div>
+            </form>
+        </div>
     @endif
 </div>
