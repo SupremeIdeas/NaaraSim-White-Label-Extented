@@ -44,9 +44,9 @@
         main { position: relative; z-index: 1; width: min(100%, 31rem); text-align: center; background: var(--card); border: 1px solid var(--line); border-radius: 1.75rem;
             padding: clamp(1.75rem, 6vw, 2.75rem) clamp(1.25rem, 6vw, 2.5rem) clamp(1.5rem, 5vw, 2.25rem);
             -webkit-backdrop-filter: blur(18px) saturate(1.2); backdrop-filter: blur(18px) saturate(1.2); box-shadow: 0 30px 80px -30px rgba(13,27,42,.35), 0 2px 0 rgba(255,255,255,.5) inset; overflow: hidden; }
-        .code { position: absolute; left: 50%; top: -.12em; transform: translateX(-50%); font-weight: 900; letter-spacing: -.06em; line-height: 1; font-size: clamp(7rem, 30vw, 11.5rem);
-            background: linear-gradient(180deg, var(--c1), transparent 82%); -webkit-background-clip: text; background-clip: text; color: transparent; opacity: .16; user-select: none; pointer-events: none; white-space: nowrap; }
-        .tile { position: relative; width: 5.25rem; height: 5.25rem; margin: .5rem auto 1.35rem; display: grid; place-items: center; border-radius: 1.5rem; color: #fff;
+        .code { position: absolute; left: 50%; top: -.08em; transform: translateX(-50%); font-weight: 900; letter-spacing: -.06em; line-height: 1; font-size: clamp(4.6rem, 20vw, 7.4rem);
+            background: linear-gradient(180deg, var(--c1), transparent 82%); -webkit-background-clip: text; background-clip: text; color: transparent; opacity: .22; user-select: none; pointer-events: none; white-space: nowrap; }
+        .tile { position: relative; width: 5.25rem; height: 5.25rem; margin: clamp(3.4rem, 15vw, 4.8rem) auto 1.35rem; display: grid; place-items: center; border-radius: 1.5rem; color: #fff;
             background: linear-gradient(140deg, var(--c1), var(--c2)); box-shadow: 0 18px 40px -14px var(--c1), 0 0 0 6px color-mix(in srgb, var(--c1) 14%, transparent); animation: float 5s ease-in-out infinite; }
         .tile::after { content: ""; position: absolute; inset: -.6rem; border-radius: 1.9rem; border: 1.5px dashed color-mix(in srgb, var(--c1) 45%, transparent); animation: spin 26s linear infinite; }
         .tile svg { width: 2.5rem; height: 2.5rem; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
