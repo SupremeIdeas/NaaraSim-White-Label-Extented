@@ -5961,3 +5961,4 @@ Requested by the owner between M13 and M14. All shipped in one commit; suite 120
 
 - **Gift cards: real cost + categories (2026-11-03, ported from master, widget parts excluded):** Zendit priced from its real per-offer cost (above-face offers no longer sold at a loss), admin pricing mode face/cost-plus, shared category taxonomy + storefront chips. See docs/giftcards/PRICING-AND-CATEGORIES.md.
 - **Gift card pills + logos (2026-11-03, ported):** professional category pills with live counts; own logos always load from the current host.
+- **Gift card logos A-Z (2026-11-03, ported):** 31 brands that had no logo now ship one; every store card shows a real logo.
