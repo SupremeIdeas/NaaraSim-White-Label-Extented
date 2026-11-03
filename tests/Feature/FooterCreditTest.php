@@ -75,6 +75,9 @@ class FooterCreditTest extends TestCase
 
     public function test_admin_switches_to_made_with_love_and_it_renders_site_wide(): void
     {
+        // A licensee whose company differs from the brand (when they are the same the credit line is hidden on purpose).
+        \App\Models\Setting::setValue('brand.agency_name', 'Acme Holdings Ltd', 'brand');
+        \App\Support\BrandSettings::flush();
         Livewire::actingAs($this->admin())->test(SiteChromePage::class)
             ->set('credit_phrasing', SiteChrome::CREDIT_MADE_WITH_LOVE)
             ->call('save')

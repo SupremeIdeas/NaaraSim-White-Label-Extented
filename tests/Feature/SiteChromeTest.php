@@ -33,7 +33,7 @@ class SiteChromeTest extends TestCase
         foreach (['/login', '/register', '/forgot-password'] as $path) {
             $this->get($path)
                 ->assertOk()
-                ->assertSee('Stay Connected. No Borders. No Swaps.')
+                ->assertSee(\App\Support\BrandSettings::tagline())
                 ->assertSee(\App\Support\BrandSettings::company());
         }
     }
@@ -111,7 +111,7 @@ class SiteChromeTest extends TestCase
     {
         // Warm the cache with defaults, then a direct Setting write + flush hook
         // must surface the new value.
-        $this->assertSame('Stay Connected. No Borders. No Swaps.', SiteChrome::authPanel()['headline']);
+        $this->assertSame(\App\Support\BrandSettings::tagline(), SiteChrome::authPanel()['headline']);
         Setting::setValue('site.auth.headline', 'Changed', 'site');
         SiteChrome::flush();
         $this->assertSame('Changed', SiteChrome::authPanel()['headline']);

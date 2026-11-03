@@ -54,10 +54,10 @@ class PublicPricingTest extends TestCase
 
         $this->get('/pricing')
             ->assertOk()
-            ->assertSee('Plans That Make Sense')
+            ->assertSee('Plans that make sense')
             ->assertSee('Traveller')          // default estimate tier
             ->assertSee('from')
-            ->assertSee('Indicative');         // estimate banner
+            ->assertSee('prices for guidance');   // estimate banner
     }
 
     public function test_admin_can_force_live_mode_and_real_plans_render_without_cost(): void
