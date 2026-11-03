@@ -28,4 +28,15 @@ class SupplierScrubTest extends TestCase
         $this->assertSame('eSIM plan', SupplierScrub::name('Airalo'));
         $this->assertSame('eSIM plan', SupplierScrub::name('  zendit  '));
     }
+
+    public function test_names_with_an_em_dash_stay_valid_utf8(): void
+    {
+        // Zendit names look like "eSIM — Unlimited data". The tidy-up regexes once ran byte-wise and shredded the dash into invalid UTF-8.
+        $out = \App\Support\SupplierScrub::name('eSIM — Unlimited data + 100 mins');
+
+        $this->assertTrue(mb_check_encoding($out, 'UTF-8'));
+        $this->assertSame('eSIM — Unlimited data + 100 mins', $out);
+        $this->assertSame('Roam 5GB', \App\Support\SupplierScrub::name('esimgo — Roam 5GB'));   // a scrubbed brand leaves no dangling dash
+        $this->assertSame('Ünïcode — Plan', \App\Support\SupplierScrub::name('Ünïcode — Plan'));
+    }
 }
