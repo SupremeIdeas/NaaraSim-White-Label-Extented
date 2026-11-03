@@ -180,6 +180,7 @@
 
 <x-layouts.app :title="($title ?? 'Admin').' — NaaraSim'" :page-type="$preloaderType" :body-class="\App\Support\PlatformTheme::bodyClass()">
     <x-app-shell :primary="$primary" :more="$more" brand-label="NaaraSim Admin" brand-icon="settings" :brand-route="route('admin.dashboard')">
+        <x-admin.licence-banner />
         {{ $slot }}
     </x-app-shell>
 

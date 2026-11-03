@@ -17,7 +17,7 @@ class EnsureFeatureAllowed
     {
         foreach ($keys as $key) {
             if (FeatureEntitlements::locked($key)) {
-                abort(404);
+                \App\Support\LockedFeature::deny($key);
             }
         }
 

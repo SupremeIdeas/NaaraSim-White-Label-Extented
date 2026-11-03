@@ -29,6 +29,9 @@ Route::prefix('v1')
         Route::get('orders/{reference}', [OrderController::class, 'show'])->middleware('api.scope:status');
     });
 
+// The original platform nudges this install after a licence change (upgrade, suspend, restore, revoke). It only queues a normal signed check-in.
+Route::post('licence-signal', \App\Http\Controllers\Api\LicenceSignalController::class)->middleware('throttle:6,1')->name('licence-signal');
+
 /*
  | White-label license/distribution API is MASTER-ONLY and deliberately absent
  | here. A white-label build is a consumer + a leaf puller, never an issuer,
