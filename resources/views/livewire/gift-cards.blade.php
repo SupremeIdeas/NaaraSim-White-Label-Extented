@@ -47,6 +47,19 @@
         </div>
     </div>
 
+
+    {{-- Type chips: sort by what the card is (games, food, travel...), on top of the country and the search. --}}
+    @if (! empty($categories))
+        <div class="ns-gf__chips" role="group" aria-label="Gift card type">
+            <button type="button" wire:click="pickCategory(null)" class="ns-gf__chip {{ $category ? '' : 'is-on' }}" aria-pressed="{{ $category ? 'false' : 'true' }}">All</button>
+            @foreach ($categories as $c)
+                <button type="button" wire:click="pickCategory('{{ $c['key'] }}')" wire:key="gcat-{{ $c['key'] }}" class="ns-gf__chip {{ $category === $c['key'] ? 'is-on' : '' }}" aria-pressed="{{ $category === $c['key'] ? 'true' : 'false' }}">
+                    <x-nx.icon :name="$c['icon']" /> {{ $c['label'] }} <small>{{ $c['n'] }}</small>
+                </button>
+            @endforeach
+        </div>
+    @endif
+
     {{-- Brand catalogue --}}
     @if ($products->isEmpty())
         <x-nx.empty art="giftcard" text="No gift cards available yet." style="margin-top:16px" />
@@ -63,7 +76,7 @@
                     </span>
                     <span class="ns-gf__brandtext">
                         <b>{{ $product->brand_name }}</b>
-                        <small>{{ \App\Support\CountryNames::name($product->country) ?: $product->country }}@if ($product->category) · {{ $product->category }}@endif</small>
+                        <small>{{ \App\Support\CountryNames::name($product->country) ?: $product->country }}@if ($product->category_key) · {{ \App\Support\GiftCardCategories::label($product->category_key) }}@endif</small>
                     </span>
                 </button>
             @endforeach
@@ -89,7 +102,7 @@
                     <button type="button" class="ns-sheet__close" wire:click="close" aria-label="Close"><x-nx.icon name="x" /></button>
                 </div>
                 <div class="ns-sheet__body">
-                    <div style="margin-bottom:4px"><x-nx.pill variant="best"><x-nx.icon name="gift" /> {{ $selected->category ?: 'Gift Card' }}</x-nx.pill></div>
+                    <div style="margin-bottom:4px"><x-nx.pill variant="best"><x-nx.icon name="gift" /> {{ $selected->category_key ? \App\Support\GiftCardCategories::label($selected->category_key) : 'Gift Card' }}</x-nx.pill></div>
 
                     <span class="ns-lbl" style="margin-top:18px">Choose an amount</span>
                     @if (($denominations['type'] ?? '') === 'RANGE')

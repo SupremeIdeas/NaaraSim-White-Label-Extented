@@ -1,0 +1,13 @@
+diff a/app/Services/Pricing/PricingEngine.php b/app/Services/Pricing/PricingEngine.php	(rejected hunks)
+@@ -138,9 +147,9 @@ public function giftCardRetail(float $cost, string $provider = 'giftcard', bool
+      * merchantSmsPrice(): plain gift-card retail (cost + admin markup, MarginGuard-floored) with the reseller margin on top, then
+      * floored again at cost + the gift-card minimum profit so a margin of 0 can never sell at or below cost.
+      */
+-    public function giftCardMerchantPrice(float $cost, string $provider = 'giftcard', ?\App\Models\Merchant $merchant = null, bool $log = true): float
++    public function giftCardMerchantPrice(float $cost, string $provider = 'giftcard', ?\App\Models\Merchant $merchant = null, bool $log = true, ?float $face = null): float
+     {
+-        $retail = $this->giftCardRetail($cost, $provider, false);
++        $retail = $this->giftCardRetail($cost, $provider, false, $face);
+         $margin = $this->resellerMargin($merchant);
+         $computed = round($retail * (1 + $margin / 100), 2);
+ 

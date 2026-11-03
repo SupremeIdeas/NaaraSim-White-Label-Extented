@@ -133,7 +133,7 @@ class ZenditVoucherService implements GiftCardProviderInterface
             'provider_enabled' => (bool) ($o['enabled'] ?? true),
             // Failover pricing is only trustworthy without an FX gap. Non-USD
             // Zendit offers are withheld rather than mispriced against a USD wallet.
-            'priceable' => $ccy === '' || $ccy === 'USD',
+            'priceable' => ($ccy === '' || $ccy === 'USD') && (float) data_get($o, 'cost.discount', 0) >= -0.25,   // a cost >25% above face is a feed glitch: withheld, never sold
         ];
     }
 

@@ -8,6 +8,7 @@ use App\Services\GiftCards\GiftCardOrderService;
 use App\Support\AppExport;
 use App\Support\AppPlatform;
 use App\Support\FeatureFlags;
+use App\Support\GiftCardCategories;
 use App\Support\GiftCardPricing;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
@@ -32,6 +33,10 @@ class GiftCards extends Component
 
     #[Url]
     public ?string $country = null;
+
+    /** One of App\Support\GiftCardCategories::ALL (Games, Food & Beverage, Travel...). Combines with the country and the search. */
+    #[Url]
+    public ?string $category = null;
 
     public ?int $selectedId = null;
 
@@ -62,6 +67,18 @@ class GiftCards extends Component
 
     public function updatingSearch(): void
     {
+        $this->resetPage();
+    }
+
+    public function updatingCountry(): void
+    {
+        $this->resetPage();
+    }
+
+    /** Tap a category chip; tapping the active one clears it. */
+    public function pickCategory(?string $key): void
+    {
+        $this->category = ($key === null || $key === $this->category || ! isset(GiftCardCategories::ALL[$key])) ? null : $key;
         $this->resetPage();
     }
 
@@ -106,7 +123,7 @@ class GiftCards extends Component
         // Coming-Soon mode (no keys yet): skip the catalogue queries entirely.
         if (! $this->live) {
             return view('livewire.gift-cards', [
-                'products' => null, 'countries' => [], 'selected' => null, 'denominations' => null,
+                'products' => null, 'countries' => [], 'categories' => [], 'selected' => null, 'denominations' => null,
             ]);
         }
 
@@ -119,8 +136,16 @@ class GiftCards extends Component
                 $q->where(fn ($w) => $w->where('brand_name', 'like', '%'.$this->search.'%')->orWhereIn('country', $codes));
             })
             ->when($this->country, fn ($q) => $q->where('country', $this->country))
+            ->when($this->category && isset(GiftCardCategories::ALL[$this->category]), fn ($q) => $q->where('category_key', $this->category))
             ->tap(fn ($q) => \App\Support\GiftPopularity::order($q))   // featured, then what people buy most, then A-Z
             ->paginate(18);
+
+        // Chips: only categories that have cards (in the chosen country), with how many brands each holds.
+        $counts = GiftCardProduct::storefront()->whereNotNull('category_key')
+            ->when($this->country, fn ($q) => $q->where('country', $this->country))
+            ->selectRaw('category_key, count(distinct brand_key) as n')->groupBy('category_key')->pluck('n', 'category_key');
+        $chips = collect(GiftCardCategories::ALL)->filter(fn ($v, $k) => ($counts[$k] ?? 0) > 0)
+            ->map(fn ($v, $k) => ['key' => $k, 'label' => $v[0], 'icon' => $v[1], 'n' => (int) $counts[$k]])->values()->all();
 
         $selected = $this->selectedId ? GiftCardProduct::storefront()->find($this->selectedId) : null;
         $denominations = $selected ? app(GiftCardPricing::class)->denominations($selected) : null;
@@ -130,6 +155,7 @@ class GiftCards extends Component
             // code => full country name, A to Z by name (never the bare code)
             'countries' => GiftCardProduct::storefront()->whereNotNull('country')->distinct()->pluck('country')
                 ->mapWithKeys(fn ($c) => [$c => \App\Support\CountryNames::name($c)])->sort()->all(),
+            'categories' => $chips,
             'selected' => $selected,
             'denominations' => $denominations,
         ]);

@@ -18,7 +18,7 @@ class GiftCardPricing
     /** Retail (USD) the customer pays for a given face value. */
     public function retail(GiftCardProduct $product, float $face, bool $log = false): float
     {
-        return $this->pricing->giftCardRetail($this->cost($product, $face), $product->provider, $log);
+        return $this->pricing->giftCardRetail($this->cost($product, $face), $product->provider, $log, $this->usdFace($product, $face));
     }
 
     /**
@@ -59,20 +59,46 @@ class GiftCardPricing
 
         return match ($product->provider) {
             'reloadly' => $this->reloadlyCost($product, $meta, $face),
-            // Zendit, Bitrefill, Tillo: none of the three exposes a wholesale
-            // rate distinct from the offer/package/face value in what we sync
-            // from their catalogue (unlike Reloadly's explicit
-            // discountPercentage + sender-currency map). Face value is used as
-            // the cost basis — conservative (we may under-capture margin where
-            // a provider's real wholesale cost is lower) but never unsafe
-            // (retail is always cost+margin on top of a real, chargeable
-            // amount, never below it). Revisit per-provider if/when a rate
-            // field is confirmed against their live account terms.
-            'zendit', 'bitrefill', 'tillo' => round($face, 4),
+            // Zendit lists an exact wholesale cost for every offer (cost.discount vs the face price), so we use it: the customer-facing card can then be
+            // sold at face while the discount is our margin, and the offers whose real cost is ABOVE face are never sold below cost.
+            'zendit' => $this->zenditCost($meta, $face),
+            // Bitrefill quotes its cost in satoshis (no USD discount in the catalogue) and Tillo in its own terms: face value is the conservative basis
+            // (never unsafe, may under-capture margin) until a live USD rate is confirmed for the account.
+            'bitrefill', 'tillo' => round($face, 4),
             default => throw new \InvalidArgumentException(
                 "GiftCardPricing has no cost basis defined for provider [{$product->provider}] — add one before pricing it."
             ),
         };
+    }
+
+    /**
+     * The face value in USD, or null when the card is denominated in another currency (a 5,000 naira face is not $5,000): face-value pricing only
+     * applies to USD faces, and every other card is priced from its USD cost plus the markup.
+     */
+    private function usdFace(GiftCardProduct $product, float $face): ?float
+    {
+        $ccy = strtoupper((string) $product->currency);
+
+        return ($ccy === 'USD' || $ccy === '') ? $face : null;
+    }
+
+    /**
+     * Zendit wholesale cost in USD for a face (USD) value: face x (1 - discount), plus any flat fee and percentage fee, rounded UP to the cent.
+     * The discount is capped at 25% either way as a sanity bound: a feed error that claims 80% off must not make us under-price, and the offers that
+     * cost more than 25% above face (provider data glitches) are withheld at sync time (see ZenditVoucherService::map).
+     */
+    private function zenditCost(array $meta, float $face): float
+    {
+        $cost = (array) ($meta['cost'] ?? []);
+        if (! isset($cost['discount']) || ! is_numeric($cost['discount'])) {
+            return round($face, 4);   // an older synced row without the cost object: the conservative face basis
+        }
+        $discount = max(-0.25, min(0.25, (float) $cost['discount']));
+        $divisor = (int) ($cost['currencyDivisor'] ?? 100) ?: 100;
+        $fee = is_numeric($cost['fee'] ?? null) ? (float) $cost['fee'] / $divisor : 0.0;
+        $feePct = is_numeric($cost['feePct'] ?? null) ? (float) $cost['feePct'] : 0.0;
+
+        return ceil((($face * (1 - $discount)) + $fee + ($face * $feePct)) * 100 - 1e-9) / 100;
     }
 
     private function reloadlyCost(GiftCardProduct $product, array $meta, float $face): float
