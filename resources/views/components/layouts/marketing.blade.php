@@ -16,7 +16,7 @@
                 ['route' => 'pricing', 'label' => 'eSIM Data Plans', 'desc' => 'Local data, 190+ countries', 'icon' => 'globe'],
                 ['route' => 'how-it-works', 'label' => 'How It Works', 'desc' => 'From purchase to connected', 'icon' => 'signal'],
             ];
-            if (\App\Support\FeatureFlags::adminEnabled('naara_gift')) {
+            if (\App\Support\FeatureFlags::adminEnabled('naara_gift') && ! \App\Support\FeatureEntitlements::locked(\App\Support\FeatureLocks::F_GIFT_CARDS)) {
                 $navProducts[] = ['route' => 'gift-cards', 'label' => 'Naara Gift', 'desc' => 'Gift cards for 1,000+ brands', 'icon' => 'gift',
                     'badge' => \App\Support\FeatureFlags::configured('naara_gift') ? null : 'Soon', 'authOnly' => true];
             }

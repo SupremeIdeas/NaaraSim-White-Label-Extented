@@ -30,7 +30,7 @@ class SchedulerHealth
     public const TASKS = [
         'queue:work' => ['Queue drain (shared hosting)', 60],
         'cookies:prune' => ['Cookie consent log prune', 86400 + 3600],
-        'whitelabel:check-in' => ['Licence check-in with the original platform', 6 * 3600 + 3600],
+        'whitelabel:check-in' => ['Licence check-in with the original platform', 3600 + 1800],
         'providers:health-check' => ['Provider health check', 900],
         'ops:worker-health' => ['Worker watchdog (Redis/Horizon)', 300],
         'payouts:reconcile-unknown' => ['Payout unknown-outcome reconciler', 120],

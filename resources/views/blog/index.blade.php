@@ -2,8 +2,8 @@
     <div class="mx-auto max-w-5xl px-4 py-16">
         <div class="max-w-2xl">
             <p class="text-xs font-semibold uppercase tracking-[0.25em] text-accent-dark dark:text-accent">The {{ \App\Support\BrandSettings::name() }} Blog</p>
-            <h1 class="mt-3 font-display text-3xl font-bold text-slate-900 sm:text-4xl dark:text-white">Travel smarter, stay connected</h1>
-            <p class="mt-3 text-slate-600 dark:text-slate-300">Guides, tips and updates on eSIMs, numbers and travelling the world without roaming surprises.</p>
+            <h1 class="mt-3 font-display text-3xl font-bold text-slate-900 sm:text-4xl dark:text-white">{{ \App\Support\BlogSettings::get('title') }}</h1>
+            <p class="mt-3 text-slate-600 dark:text-slate-300">{{ \App\Support\BlogSettings::get('subtitle') }}</p>
         </div>
 
         @if ($categories->isNotEmpty())

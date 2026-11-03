@@ -65,4 +65,25 @@ class EnforcementStagesTest extends TestCase
         $this->actingAs($admin)->get($p)->assertOk()->assertSee('data-licence-banner="expired"', false)->assertSee('Activate now');
         $this->actingAs($admin)->get($p.'/license')->assertOk()->assertDontSee('data-licence-banner', false);
     }
+
+    public function test_an_untrusted_answer_is_firm_and_withholds_updates(): void
+    {
+        LicenseState::storeActivation('https://p.example', '1|abc', 'ABCD', ['domain' => 'x.test']);
+        LicenseState::put('status', 'unverified');
+        $this->assertSame('unverified', Enforcement::stage()['stage']);
+        $this->assertFalse(Enforcement::updatesAllowed());
+    }
+
+    public function test_a_month_without_a_signed_confirmation_is_a_lapse_and_a_week_is_a_warning(): void
+    {
+        $kp = sodium_crypto_sign_keypair();
+        config(['updater.licence_public_key' => base64_encode(sodium_crypto_sign_publickey($kp))]);
+        LicenseState::storeActivation('https://p.example', '1|abc', 'ABCD', ['domain' => 'x.test']);
+        LicenseState::put('verified_at', now()->subDays(9)->toIso8601String());
+        $this->assertSame('stale', Enforcement::stage()['stage']);
+        $this->assertTrue(Enforcement::updatesAllowed(), 'a warning does not withhold anything');
+        LicenseState::put('verified_at', now()->subDays(40)->toIso8601String());
+        $this->assertSame('lapsed', Enforcement::stage()['stage']);
+        $this->assertFalse(Enforcement::updatesAllowed());
+    }
 }

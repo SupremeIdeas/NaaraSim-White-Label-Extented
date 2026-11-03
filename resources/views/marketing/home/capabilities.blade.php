@@ -6,6 +6,11 @@
         if (trim((string) ($s["c{$n}_title"] ?? '')) === '') {
             continue;
         }
+        // A card that points at a feature this licence does not include is not advertised.
+        $u = strtolower((string) ($s["c{$n}_url"] ?? ''));
+        if ((str_contains($u, 'gift-cards') && \App\Support\FeatureEntitlements::locked(\App\Support\FeatureLocks::F_GIFT_CARDS)) || (str_contains($u, '/brand') && \App\Support\FeatureEntitlements::locked(\App\Support\FeatureLocks::F_BRAND_HUNT))) {
+            continue;
+        }
         $rows[] = [
             'icon' => $s["c{$n}_icon"] ?? 'sparkles', 'title' => $s["c{$n}_title"], 'text' => $s["c{$n}_text"] ?? '',
             'bullets' => array_values(array_filter(array_map('trim', preg_split('/\R/', (string) ($s["c{$n}_bullets"] ?? ''))))),

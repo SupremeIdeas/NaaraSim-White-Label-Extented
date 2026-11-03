@@ -14,6 +14,12 @@
     admin-configurable (App\Support\SiteChrome::footerCreditParts()).
 --}}
 @php($parts = \App\Support\SiteChrome::footerCreditParts())
+@php($sameName = mb_strtolower(trim(\App\Support\BrandSettings::company())) === mb_strtolower(trim(\App\Support\BrandSettings::name())))
+{{-- A licensee whose company IS the brand gets a plain copyright line: "Orbit. Made with love by Orbit." reads as a template, not a company. --}}
+@if ($sameName)
+<span>@if ($yearClass)<span class="{{ $yearClass }}">&copy; {{ date('Y') }}</span>@else&copy; {{ date('Y') }}@endif {{ \App\Support\BrandSettings::name() }}. All rights reserved.</span>
+@else
 <span>@if ($yearClass)<span class="{{ $yearClass }}">&copy; {{ date('Y') }}</span>@else&copy; {{ date('Y') }}@endif {{ \App\Support\BrandSettings::name() }}. {{ $parts['prefix'] }}<a
         href="{{ \App\Support\BrandSettings::companyUrl() }}" target="_blank" rel="noopener"
         class="{{ $linkClass }} hover:underline">{{ \App\Support\BrandSettings::company() }}</a>{{ $parts['suffix'] }} All rights reserved.</span>
+@endif

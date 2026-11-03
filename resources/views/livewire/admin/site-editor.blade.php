@@ -15,7 +15,7 @@
                 </button>
             @endforeach
         </div>
-        <a href="{{ $page === 'home' ? url('/') : url('/'.$page) }}" target="_blank" rel="noopener"
+        <a href="{{ $page === 'home' ? url('/') : ($page === 'sign-in' ? url('/login') : url('/'.$page)) }}" target="_blank" rel="noopener"
            class="text-sm font-medium text-primary hover:underline">View page</a>
     </div>
 

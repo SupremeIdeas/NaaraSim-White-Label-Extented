@@ -161,6 +161,27 @@ class WhiteLabelDoctorCommand extends Command
     {
         $has = \App\Support\Activation\LicenseState::isActivated();
         $this->line('       Licence: '.($has ? 'activation token present' : 'not activated yet (Admin > White Label Activation)').'; platform URL '.(\App\Support\Activation\LicenseState::platformUrl() !== '' ? 'set' : 'not set'));
+        $stage = \App\Support\Activation\Enforcement::stage();
+        $this->row(in_array($stage['stage'], ['ok', 'grace'], true), 'Licence standing: '.$stage['stage'].($stage['days_left'] !== null ? ' ('.$stage['days_left'].' day(s) left to activate)' : ''), $stage['message'], in_array($stage['stage'], ['stale', 'unreachable'], true));
+        if (! $has) {
+            return;
+        }
+        // Without the platform's public key this install cannot tell a real answer from a forged one.
+        $this->row(\App\Support\Activation\EntitlementVerifier::configured(), 'Platform public key present (NAARA_LICENCE_PUBLIC_KEY): answers are verified', 'Add the platform\'s public key to .env (the platform owner prints the line with: php artisan licence:public-key). Until then licence answers cannot be verified.');
+        try {
+            $beat = Schema::hasTable('job_heartbeats') ? JobHeartbeat::query()->where('job_name', 'whitelabel:check-in')->max('started_at') : null;
+        } catch (\Throwable) {
+            $beat = null;
+        }
+        $fresh = $beat !== null && now()->diffInHours($beat, true) <= 3;
+        $this->row($fresh, $beat ? 'Licence check-in last ran '.now()->diffInHours($beat, true).' hour(s) ago' : 'The licence check-in has never run from the scheduler', 'Make sure the one-minute schedule:run cron is in place. The check-in runs every hour.', true);
+        $last = \App\Support\Activation\LicenseState::get('last_checkin_at');
+        $this->line('       Last successful check-in: '.($last ? \Illuminate\Support\Carbon::parse($last)->diffForHumans() : 'never').'; status '.\App\Support\Activation\LicenseState::status());
+        if (config('queue.default') === 'database' && Schema::hasTable('jobs')) {
+            $old = \Illuminate\Support\Facades\DB::table('jobs')->min('created_at');
+            $stuck = $old !== null && (time() - (int) $old) > 600;
+            $this->row(! $stuck, $stuck ? 'Queued jobs are older than 10 minutes' : 'Queue is draining', 'The cron job (schedule:run every minute) also drains the queue on shared hosting. Check it.', true);
+        }
     }
 
     private function adopt(): int

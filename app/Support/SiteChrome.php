@@ -160,7 +160,16 @@ class SiteChrome
     /** @return list<array{heading: string, links: list<array{label: string, url: string}>}> */
     public static function footerColumns(): array
     {
-        return self::all()['footer_columns'];
+        // The dedicated /faq page does not exist on a white label (owner decision), so no footer link may point at it, whatever an older saved layout says.
+        $cols = [];
+        foreach (self::all()['footer_columns'] as $c) {
+            $c['links'] = array_values(array_filter($c['links'] ?? [], fn ($l) => rtrim((string) ($l['url'] ?? ''), '/') !== '/faq'));
+            if ($c['links'] !== []) {
+                $cols[] = $c;
+            }
+        }
+
+        return $cols;
     }
 
     /** @return list<array{label: string, url: string}> */
@@ -177,7 +186,7 @@ class SiteChrome
             'media_type' => 'image',
             'media_url' => '',
             'poster_url' => '',
-            'headline' => 'Stay Connected. No Borders. No Swaps.',
+            'headline' => BrandSettings::tagline(),
             'subtext' => 'eSIM data and phone numbers for 190+ countries — in one wallet. Installed before you fly, connected the moment you land.',
         ];
     }

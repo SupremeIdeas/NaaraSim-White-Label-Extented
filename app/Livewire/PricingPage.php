@@ -81,6 +81,7 @@ class PricingPage extends Component
             'mode' => $mode,
             'plans' => $mode === 'live' ? PricingDisplay::livePlans() : collect(),
             'tiers' => $mode === 'estimate' ? PricingDisplay::estimateTiers() : [],
+            'copy' => \App\Support\SiteContent::page('pricing'),   // every sentence on this page is editable in Admin > Marketing site > Pricing
         ]);
     }
 }

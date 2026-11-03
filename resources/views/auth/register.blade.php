@@ -1,4 +1,5 @@
-<x-layouts.auth title="Create account — NaaraSim" heading="Join NaaraSim" subheading="One account for eSIM data and phone numbers, worldwide.">
+@php($c = \App\Support\SiteContent::page('sign-in')['register'] ?? [])
+<x-layouts.auth title="Create account — NaaraSim" :heading="str_replace('{brand}', \App\Support\BrandSettings::name(), $c['heading'] ?? 'Join')" :subheading="$c['subheading'] ?? ''">
     {{-- Merchant co-branding (ROADMAP §Layer 3.3): shown when signing up via a
          reseller invite. NaaraSim branding is never removed — the merchant sits
          alongside it with "Powered by NaaraSim". --}}
@@ -51,10 +52,10 @@
         </div>
         <x-turnstile />
         <button type="submit" class="flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 font-semibold text-white hover:bg-primary-dark">
-            <x-icon name="badge-check" class="h-5 w-5" /> Create account
+            <x-icon name="badge-check" class="h-5 w-5" /> {{ $c['cta'] ?? 'Create account' }}
         </button>
         <p class="text-center text-sm text-slate-500 dark:text-slate-400">
-            Already have an account? <a href="/login" class="font-semibold text-primary hover:underline">Sign in</a>
+            {{ $c['switch_text'] ?? '' }} <a href="/login" class="font-semibold text-primary hover:underline">{{ $c['switch_link'] ?? '' }}</a>
         </p>
     </form>
     <x-trust.reviews placement="auth.badge" class="mt-4 text-center" />

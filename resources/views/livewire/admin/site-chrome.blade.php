@@ -1,6 +1,6 @@
 <div class="mx-auto max-w-3xl">
     <h1 class="mb-1 text-2xl font-bold text-slate-900 dark:text-slate-100">Auth &amp; Footer</h1>
-    <p class="mb-6 text-sm text-slate-500 dark:text-slate-400">The media panel shown beside the login/register form, and the footer links across the site. “Supreme Ideas Agency” attribution always shows and can’t be removed.</p>
+    <p class="mb-6 text-sm text-slate-500 dark:text-slate-400">The media panel shown beside the login/register form, and the footer links across the site. The company credit always shows (your company name, set in White Label Activation and Branding) and can’t be removed.</p>
 
     @if ($saved)
         <div class="mb-6 flex items-center gap-2 rounded-lg bg-primary/10 p-3 text-sm text-primary-dark dark:bg-primary/20 dark:text-primary">
@@ -148,23 +148,23 @@
         </section>
 
         {{-- Footer credit phrasing (theme-integrity blueprint §2). The
-             "Supreme Ideas Agency" name and its link to supremeideas.agency
+             company name and its link
              are never removable — only the surrounding phrasing is yours to
              pick. --}}
         <section class="rounded-2xl border border-slate-200 bg-white p-6 dark:border-[#2A2E34] dark:bg-[#17191C]">
             <h2 class="flex items-center gap-2 text-sm font-semibold text-slate-800 dark:text-slate-100">
                 <x-icon name="heart" class="h-4 w-4 text-primary" /> Footer credit line
             </h2>
-            <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">The "Supreme Ideas Agency" attribution always shows and always links to supremeideas.agency — pick how it's phrased.</p>
+            <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">The company credit always shows and always links to your company website. Pick how it is phrased.</p>
 
             <div class="mt-4 space-y-2">
                 <label class="flex cursor-pointer items-start gap-2 rounded-lg border border-slate-200 p-3 text-sm dark:border-[#2A2E34]">
                     <input type="radio" wire:model.live="credit_phrasing" value="product_of" class="mt-0.5 text-primary focus:ring-primary/40">
-                    <span>A product of <span class="font-semibold">Supreme Ideas Agency</span>.</span>
+                    <span>A product of <span class="font-semibold">{{ \App\Support\BrandSettings::company() }}</span>.</span>
                 </label>
                 <label class="flex cursor-pointer items-start gap-2 rounded-lg border border-slate-200 p-3 text-sm dark:border-[#2A2E34]">
                     <input type="radio" wire:model.live="credit_phrasing" value="made_with_love" class="mt-0.5 text-primary focus:ring-primary/40">
-                    <span>Made with love by <span class="font-semibold">Supreme Ideas Agency</span>.</span>
+                    <span>Made with love by <span class="font-semibold">{{ \App\Support\BrandSettings::company() }}</span>.</span>
                 </label>
                 <label class="flex cursor-pointer items-start gap-2 rounded-lg border border-slate-200 p-3 text-sm dark:border-[#2A2E34]">
                     <input type="radio" wire:model.live="credit_phrasing" value="custom" class="mt-0.5 text-primary focus:ring-primary/40">

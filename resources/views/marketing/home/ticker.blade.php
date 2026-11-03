@@ -1,5 +1,7 @@
 {{-- Statement band (CMS: home.ticker): a slow, oversized ticker of what the platform does, then four proof numbers. Editable: the phrases and the numbers. --}}
-@php($phrases = array_values(array_filter(array_map('trim', preg_split('/[·|\n]/u', (string) ($s['items'] ?? ''))))))
+@php
+    $phrases = array_values(array_filter(array_map('trim', preg_split('/[·|\n]/u', (string) ($s['items'] ?? ''))), fn ($t) => ! (stripos($t, 'gift') !== false && \App\Support\FeatureEntitlements::locked(\App\Support\FeatureLocks::F_GIFT_CARDS))));
+@endphp
 <section class="nx-ticker" data-bg="light" aria-label="{{ \App\Support\BrandSettings::name() }}">
     <div class="nx-ticker__rail" aria-hidden="true">
         <div class="nx-ticker__track">

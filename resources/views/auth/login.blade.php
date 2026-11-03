@@ -1,4 +1,5 @@
-<x-layouts.auth title="Sign in — NaaraSim" heading="Welcome back" subheading="Sign in to manage your eSIMs, numbers and wallet.">
+@php($c = \App\Support\SiteContent::page('sign-in')['login'] ?? [])
+<x-layouts.auth title="Sign in — NaaraSim" :heading="$c['heading'] ?? 'Welcome back'" :subheading="$c['subheading'] ?? ''">
     <form method="POST" action="/login"
           class="space-y-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-[#2A2E34] dark:bg-[#17191C]">
         @csrf
@@ -26,10 +27,10 @@
         </div>
         <x-turnstile />
         <button type="submit" class="flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 font-semibold text-white hover:bg-primary-dark">
-            <x-icon name="shield-check" class="h-5 w-5" /> Sign in
+            <x-icon name="shield-check" class="h-5 w-5" /> {{ $c['cta'] ?? 'Sign in' }}
         </button>
         <p class="text-center text-sm text-slate-500 dark:text-slate-400">
-            New here? <a href="/register" class="font-semibold text-primary hover:underline">Create an account</a>
+            {{ $c['switch_text'] ?? '' }} <a href="/register" class="font-semibold text-primary hover:underline">{{ $c['switch_link'] ?? '' }}</a>
         </p>
     </form>
     <x-trust.reviews placement="auth.badge" class="mt-4 text-center" />

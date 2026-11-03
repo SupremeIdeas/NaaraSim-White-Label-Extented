@@ -13,6 +13,7 @@ class ForkCopy
     {
         $b = BrandSettings::name();
         $co = BrandSettings::company();
+        $same = mb_strtolower(trim($co)) === mb_strtolower(trim($b));   // no company set: never print "X is operated by X"
 
         return [
             'home' => [
@@ -134,6 +135,24 @@ class ForkCopy
                 ],
                 'faq' => [
                     'headline' => 'Quick answers',
+                    'q1' => 'Does my phone support eSIM?',
+                    'a1' => "Most phones made from 2019 onward do, including iPhone XS and later, Samsung Galaxy S20 and later and Google Pixel 3 and later. It must not be carrier-locked. The compatibility checker tells you in seconds, before you buy.",
+                    'q2' => "Can I use {$b} and keep my regular number?",
+                    'a2' => "Yes. {$b} runs as a second line next to your physical SIM. Calls and texts keep landing on your usual number while {$b} handles your data abroad.",
+                    'q3' => 'When does my plan start?',
+                    'a3' => "When your phone first connects to a network at your destination, not when you pay. You will not burn data while you are still at home.",
+                    'q4' => 'What happens if I run out of data?',
+                    'a4' => "Top up the same eSIM from your account in a few taps, or buy a new plan. Nothing to re-scan or reinstall.",
+                    'q5' => 'What if something goes wrong with my order?',
+                    'a5' => "If an order fails, your wallet is refunded automatically. If a verification number never receives its code, it is refunded too. No ticket needed.",
+                    'q6' => 'How do I pay?',
+                    'a6' => "Top up your {$b} wallet once and spend it on anything, or pay at checkout with the methods shown there. The price you see is the price you pay, and every wallet movement is recorded.",
+                    'q7' => 'Can I get a number for verification codes?',
+                    'a7' => "Yes. Choose a country and a service, receive the code in seconds, and get an automatic refund if it does not arrive.",
+                    'q8' => 'Is my data safe?',
+                    'a8' => "Your account is protected with modern sign-in security, and we never show or share your payment details. You can download or delete your data from your account settings.",
+                    'q9' => 'How do I reach a real person?',
+                    'a9' => "Open the chat from any page or write to us from the Contact page. A person reads every message, and a ticket stays open until your problem is solved.",
                     'cta' => 'Still stuck? A person will answer within the hour.',
                 ],
                 'cta' => [
@@ -183,9 +202,9 @@ class ForkCopy
                 'team' => [
                     'headline' => "The people behind {$b}",
                     'founder_name' => "The {$b} team",
-                    'founder_title' => $co,
+                    'founder_title' => $same ? 'Support and engineering' : $co,
                     'founder_bio' => "A small group of engineers, support specialists and travellers who use the product themselves and fix what annoys them.",
-                    'company' => "{$b} is operated by {$co}.",
+                    'company' => $same ? '' : "{$b} is operated by {$co}.",
                 ],
             ],
             'how-it-works' => [

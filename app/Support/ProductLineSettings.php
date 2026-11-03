@@ -149,7 +149,21 @@ class ProductLineSettings
                 'modal_gallery' => $p['modal_gallery'] ?? [],
                 'modal_blocks' => $p['modal_blocks'] ?? [],
             ];
-        }, self::products());
+        }, self::advertised());
+    }
+
+    /** The products a visitor may be shown: a feature this licence does not include is never advertised (the page would only answer "Licence required"). */
+    public static function advertised(): array
+    {
+        $locked = [];
+        if (FeatureEntitlements::locked(FeatureLocks::F_GIFT_CARDS)) {
+            $locked[] = 'naara-gift';
+        }
+        if (FeatureEntitlements::locked(FeatureLocks::F_ESIM_VOICE)) {
+            $locked[] = 'naara-connect';
+        }
+
+        return array_values(array_filter(self::products(), fn ($p) => ! in_array($p['slug'] ?? '', $locked, true)));
     }
 
     /** Resolve a product's CTA route name to a URL, with sensible guards. */

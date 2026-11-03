@@ -12,7 +12,7 @@
         ['Licence key', 'Paste the key you were sent.', $s['status'] !== 'none'],
         ['Register', 'This site tells the platform its brand, domain and version.', $s['status'] !== 'none'],
         ['Features unlock', 'Your plan\'s features switch on straight away.', $s['status'] === 'active'],
-        ['Stays in touch', 'A check-in every six hours keeps the record live.', $s['status'] === 'active' && $s['lastCheckin']],
+        ['Stays in touch', 'A check-in every hour keeps the record live, and the platform nudges you the moment your licence changes.', $s['status'] === 'active' && $s['lastCheckin']],
     ];
 @endphp
 <div class="mx-auto max-w-5xl" data-tour="license-activation" @if ($s['status'] !== 'none') wire:poll.30s @endif>
