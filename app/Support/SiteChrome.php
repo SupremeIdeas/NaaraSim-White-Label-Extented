@@ -29,6 +29,7 @@ class SiteChrome
 {
     private const CACHE_KEY = 'site.chrome.v1';
 
+    /** Kept for old callers; the credited company is now the licensee's own (BrandSettings::company()). */
     public const AGENCY_NAME = 'Supreme Ideas Agency';
 
     public const AGENCY_URL = 'https://supremeideas.agency';

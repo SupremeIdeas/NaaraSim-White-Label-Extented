@@ -1,4 +1,4 @@
-/* NaaraSim service worker — self-hosted web push (no third-party service).
+/* Service worker — self-hosted web push (no third-party service).
    Shows OS notifications from our own VAPID-signed pushes and focuses/opens the
    right in-app page when the user taps one. */
 
@@ -7,10 +7,10 @@ self.addEventListener('push', function (event) {
     try {
         data = event.data ? event.data.json() : {};
     } catch (e) {
-        data = { title: 'NaaraSim', body: event.data ? event.data.text() : '' };
+        data = { title: 'New notification', body: event.data ? event.data.text() : '' };
     }
 
-    var title = data.title || 'NaaraSim';
+    var title = data.title || 'New notification';
     var options = {
         body: data.body || '',
         icon: data.icon || '/favicon.ico',

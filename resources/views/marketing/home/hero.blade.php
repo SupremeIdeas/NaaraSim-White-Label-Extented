@@ -83,14 +83,15 @@
         <p data-reveal style="--reveal-delay:.32s" class="mt-6 text-xs {{ empty($s['image']) ? 'text-slate-400' : 'text-slate-300' }}">{{ $s['social_proof'] }}</p>
 
         <dl data-reveal style="--reveal-delay:.4s" class="mx-auto mt-12 grid max-w-3xl grid-cols-2 gap-4 sm:grid-cols-4">
-            @foreach (['stat_1', 'stat_2', 'stat_3', 'stat_4'] as $stat)
+            @foreach (['stat_1', 'stat_2', 'stat_3', 'stat_4'] as $i => $stat)
                 @php [$value, $label] = array_pad(explode(' ', $s[$stat], 2), 2, ''); @endphp
                 @php($numeric = preg_match('/^(\d+)(\+?)$/', $value, $m))
-                <div class="nx-card !p-4 text-center">
+                <div class="nx-aurora-card">
                     <dt class="sr-only">{{ $label }}</dt>
-                    <dd class="font-display text-2xl font-bold text-primary dark:text-teal-300"
+                    <span class="nx-aurora-card__icon"><x-glyph :name="['globe', 'clock', 'sim', 'headset'][$i]" :size="38" tile /></span>
+                    <dd class="font-display text-2xl font-bold text-slate-900 dark:text-white"
                         @if ($numeric) data-countup="{{ $m[1] }}" data-suffix="{{ $m[2] }}" @endif>{{ $value }}</dd>
-                    <dd class="mt-1 text-xs text-slate-500 dark:text-slate-400">{{ $label }}</dd>
+                    <dd class="mt-1 text-xs font-medium text-slate-600 dark:text-slate-300">{{ $label }}</dd>
                 </div>
             @endforeach
         </dl>

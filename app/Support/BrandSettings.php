@@ -19,9 +19,16 @@ class BrandSettings
 {
     private const CACHE_KEY = 'brand.settings';
 
+    /** What a freshly installed, not yet activated white label calls itself. The licensee sets their own in Admin > Activation and branding. */
+    public const SHIPPED_NAME = 'Orbit';
+
+    public const SHIPPED_WORD = 'Orbit';
+
     /** Setting keys this feature owns (for upload + cache-bust). */
     public const KEYS = [
         'brand.name',
+        'brand.tagline', 'brand.legal_name', 'brand.agency_name', 'brand.agency_url', 'brand.support_email', 'brand.support_phone', 'brand.address', 'brand.website',
+        'brand.social_x', 'brand.social_instagram', 'brand.social_facebook', 'brand.social_linkedin', 'brand.social_youtube', 'brand.social_tiktok', 'brand.powered_by', 'brand.setup_done',
         'brand.word',
         'brand.logo_family_light',
         'brand.logo_family_dark',
@@ -78,20 +85,7 @@ class BrandSettings
      * always wins, but a fresh install renders the real NaaraSim + Supreme Ideas
      * Agency marks out of the box instead of the text wordmark.
      */
-    public const LOGO_DEFAULTS = [
-        // family = the umbrella "Naara" mark (home dashboard, marketing, Aurora
-        // welcome); product = NaaraSim (eSIM + number surfaces); gift = Naara
-        // Gift (the gift storefront); agency = Supreme Ideas Agency.
-        'family_light' => '/brand/naara-family-light.png',
-        'family_dark' => '/brand/naara-family-dark.png',
-        'product_light' => '/brand/naarasim-product-light.png',
-        'product_dark' => '/brand/naarasim-product-dark.png',
-        'gift_light' => '/brand/naara-gift-light.png',
-        'gift_dark' => '/brand/naara-gift-dark.png',
-        'agency_light' => '/brand/supreme-ideas-light.png',
-        'agency_dark' => '/brand/supreme-ideas-dark.png',
-        'favicon' => '/brand/naarasim-favicon.png',
-    ];
+    public const LOGO_DEFAULTS = [];
 
     /** @return array<string, string> */
     public static function current(): array
@@ -99,10 +93,26 @@ class BrandSettings
         return Cache::rememberForever(self::CACHE_KEY, function () {
             try {
                 return [
-                    'name' => (string) (Setting::getValue('brand.name') ?: config('app.name', 'NaaraSim')),
+                    'name' => (string) (Setting::getValue('brand.name') ?: self::configName()),
                     // White-label brand WORD — the token swapped into product /
                     // sub-brand names ("Naara Rent" → "{word} Rent"). Default 'Naara'.
-                    'word' => (string) (Setting::getValue('brand.word') ?: 'Naara'),
+                    'word' => (string) (Setting::getValue('brand.word') ?: self::SHIPPED_WORD),
+                    'tagline' => (string) Setting::getValue('brand.tagline', ''),
+                    'legal_name' => (string) Setting::getValue('brand.legal_name', ''),
+                    'agency_name' => (string) Setting::getValue('brand.agency_name', ''),
+                    'agency_url' => (string) Setting::getValue('brand.agency_url', ''),
+                    'support_email' => (string) Setting::getValue('brand.support_email', ''),
+                    'support_phone' => (string) Setting::getValue('brand.support_phone', ''),
+                    'address' => (string) Setting::getValue('brand.address', ''),
+                    'website' => (string) Setting::getValue('brand.website', ''),
+                    'social_x' => (string) Setting::getValue('brand.social_x', ''),
+                    'social_instagram' => (string) Setting::getValue('brand.social_instagram', ''),
+                    'social_facebook' => (string) Setting::getValue('brand.social_facebook', ''),
+                    'social_linkedin' => (string) Setting::getValue('brand.social_linkedin', ''),
+                    'social_youtube' => (string) Setting::getValue('brand.social_youtube', ''),
+                    'social_tiktok' => (string) Setting::getValue('brand.social_tiktok', ''),
+                    'powered_by' => (string) Setting::getValue('brand.powered_by', ''),
+                    'setup_done' => (string) Setting::getValue('brand.setup_done', ''),
                     'family_light' => (string) Setting::getValue('brand.logo_family_light', ''),
                     'family_dark' => (string) Setting::getValue('brand.logo_family_dark', ''),
                     'product_light' => (string) Setting::getValue('brand.logo_product_light', ''),
@@ -142,8 +152,10 @@ class BrandSettings
     private static function defaults(): array
     {
         return [
-            'name' => config('app.name', 'NaaraSim'),
-            'word' => 'Naara',
+            'name' => self::configName(),
+            'word' => self::SHIPPED_WORD,
+            'tagline' => '', 'legal_name' => '', 'agency_name' => '', 'agency_url' => '', 'support_email' => '', 'support_phone' => '', 'address' => '', 'website' => '',
+            'social_x' => '', 'social_instagram' => '', 'social_facebook' => '', 'social_linkedin' => '', 'social_youtube' => '', 'social_tiktok' => '', 'powered_by' => '', 'setup_done' => '',
             'family_light' => '', 'family_dark' => '',
             'product_light' => '', 'product_dark' => '',
             'agency_light' => '', 'agency_dark' => '',
@@ -196,7 +208,52 @@ class BrandSettings
             return $text;
         }
 
-        return str_replace(self::DEFAULT_WORD, $word, $text);
+        // "NaaraSim" is the product name; every other "Naara" is the brand word ("Naara Rent" becomes "Orbit Rent").
+        return str_replace([self::DEFAULT_WORD.'Sim', self::DEFAULT_WORD], [self::name(), $word], $text);
+    }
+
+    /** The app name from config, unless it is still one of the shipped placeholders. */
+    private static function configName(): string
+    {
+        $n = (string) config('app.name', '');
+
+        return ($n === '' || in_array($n, ['Laravel', 'NaaraSim', 'Naara'], true)) ? self::SHIPPED_NAME : $n;
+    }
+
+    /** One profile value (tagline, legal_name, support_email, ...). Empty string when not set. */
+    public static function profile(string $key): string
+    {
+        return (string) (self::current()[$key] ?? '');
+    }
+
+    /** The line under the name: the licensee's tagline, else a neutral one. */
+    public static function tagline(): string
+    {
+        return self::profile('tagline') ?: 'Data and numbers for people on the move.';
+    }
+
+    /** The company credited in footers and emails: the licensee's own, else the brand name. */
+    public static function company(): string
+    {
+        return self::profile('agency_name') ?: (self::profile('legal_name') ?: self::name());
+    }
+
+    public static function companyUrl(): string
+    {
+        return self::profile('agency_url') ?: (self::profile('website') ?: url('/'));
+    }
+
+    /** @return array<string, string> network => url, only the ones that are set */
+    public static function socials(): array
+    {
+        $out = [];
+        foreach (['x', 'instagram', 'facebook', 'linkedin', 'youtube', 'tiktok'] as $n) {
+            if (($u = self::profile('social_'.$n)) !== '') {
+                $out[$n] = $u;
+            }
+        }
+
+        return $out;
     }
 
     /**
@@ -547,7 +604,7 @@ class BrandSettings
     {
         $f = self::current()['favicon'] ?? '';
 
-        return $f !== '' ? $f : self::LOGO_DEFAULTS['favicon'];
+        return $f !== '' ? $f : url('/brand-mark.svg');
     }
 
     public static function flush(): void

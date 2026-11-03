@@ -34,7 +34,7 @@ class SiteChromeTest extends TestCase
             $this->get($path)
                 ->assertOk()
                 ->assertSee('Stay Connected. No Borders. No Swaps.')
-                ->assertSee('Supreme Ideas Agency');
+                ->assertSee(\App\Support\BrandSettings::company());
         }
     }
 
@@ -84,7 +84,7 @@ class SiteChromeTest extends TestCase
             ->assertOk()
             ->assertSee('Explore')
             ->assertSee('https://blog.example.com', false)
-            ->assertSee('Supreme Ideas Agency');
+            ->assertSee(\App\Support\BrandSettings::company());
     }
 
     public function test_footer_links_reject_non_path_non_url_values(): void

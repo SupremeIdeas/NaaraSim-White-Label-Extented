@@ -67,8 +67,8 @@ class FooterCreditTest extends TestCase
     {
         $this->get('/')
             ->assertOk()
-            ->assertSee('href="https://supremeideas.agency"', false)
-            ->assertSee('Supreme Ideas Agency');
+            ->assertSee('href="'.\App\Support\BrandSettings::companyUrl().'"', false)
+            ->assertSee(\App\Support\BrandSettings::company());
     }
 
     // --- admin can change the phrasing, and every footer reflects it ---
@@ -85,7 +85,7 @@ class FooterCreditTest extends TestCase
         $this->get('/')
             ->assertOk()
             ->assertSee('Made with love by')
-            ->assertSee('href="https://supremeideas.agency"', false);
+            ->assertSee('href="'.\App\Support\BrandSettings::companyUrl().'"', false);
     }
 
     public function test_admin_sets_custom_phrasing_with_the_agency_placeholder(): void

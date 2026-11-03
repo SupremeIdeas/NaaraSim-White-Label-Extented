@@ -81,6 +81,8 @@ class LegalContent
         // silently drift out of sync with what the job actually does.
         $replacements = [
             '{brand}' => $brand,
+            '{company}' => BrandSettings::company(),
+            '{support_email}' => BrandSettings::profile('support_email') ?: 'the support address on our contact page',
             '{otp_timeout_minutes}' => (string) \App\Jobs\PollSmsOtpJob::TIMEOUT_MINUTES,
         ];
         $merged['title'] = strtr($merged['title'], $replacements);
@@ -99,7 +101,7 @@ class LegalContent
 {brand} ("we", "us") respects your privacy. This policy explains what we collect, why, and your rights.
 
 ## Who we are
-{brand} is a travel-connectivity service operated by Supreme Ideas Agency, Onitsha, Nigeria. We sell eSIM data plans and virtual/verification phone numbers.
+{brand} is a travel-connectivity service operated by {company}. We sell eSIM data plans and virtual/verification phone numbers.
 
 ## What we collect
 Account data you give us: your name, email address, and password (stored hashed). Transaction data: wallet top-ups, orders, and balances. Technical data: IP address, device and browser information, and security logs. If you sign in with Google, we receive your name, email, and profile identifier from Google — nothing more.

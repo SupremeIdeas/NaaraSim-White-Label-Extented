@@ -32,7 +32,7 @@
                     <tr>
                         <td style="padding:20px 32px;background-color:#f8fafc;border-top:1px solid #e2e8f0;">
                             <p style="margin:0;color:#64748b;font-size:12px;line-height:1.5;">
-                                {{ $appName }} — Stay Connected. No Borders. No Swaps.<br>
+                                {{ $appName }} — {{ \App\Support\BrandSettings::tagline() }}<br>
                                 You received this email because you have an account with {{ $appName }}.
                                 If you didn't expect it, you can safely ignore it.
                             </p>

@@ -37,10 +37,7 @@
             <div class="md:col-span-2">
                 <x-brand-logo variant="family" size="lg" />
                 <p class="mt-5 max-w-md text-sm leading-relaxed text-slate-500 dark:text-slate-400">
-                    {{ $brand }} — Stay Connected. No Borders. No Swaps. One
-                    reconciled ledger for eSIM data and phone numbers across
-                    190+ countries — the rate you're quoted is the rate you
-                    pay, itemised, every time.
+                    {{ $brand }} — {{ \App\Support\BrandSettings::tagline() }} 190+ countries, instant activation, prices you can read before you pay.
                 </p>
             </div>
             @foreach ($columns as $col)

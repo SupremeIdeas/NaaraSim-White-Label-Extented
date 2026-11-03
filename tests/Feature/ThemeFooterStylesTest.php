@@ -130,7 +130,7 @@ class ThemeFooterStylesTest extends TestCase
 
         $this->get('/')
             ->assertOk()
-            ->assertSee('href="https://supremeideas.agency"', false)
-            ->assertSee('Supreme Ideas Agency');
+            ->assertSee('href="'.\App\Support\BrandSettings::companyUrl().'"', false)
+            ->assertSee(\App\Support\BrandSettings::company());
     }
 }

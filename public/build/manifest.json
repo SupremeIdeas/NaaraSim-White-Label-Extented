@@ -2199,7 +2199,7 @@
     "src": "node_modules/flag-icons/flags/4x3/zw.svg"
   },
   "resources/css/app.css": {
-    "file": "assets/app-DpYPwoBG.css",
+    "file": "assets/app-2jig9AV6.css",
     "src": "resources/css/app.css",
     "isEntry": true
   },
@@ -2246,7 +2246,7 @@
     "isDynamicEntry": true
   },
   "resources/js/app.js": {
-    "file": "assets/app-CJ4cMqb5.js",
+    "file": "assets/app-C3pmt0rW.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
@@ -2264,19 +2264,11 @@
       "node_modules/chart.js/dist/chart.js",
       "resources/js/webgl/globe-lite.js",
       "resources/js/webgl/hero-scene.js",
-      "resources/js/manifesto.js",
-      "resources/js/bento-diagnosis.js",
       "resources/js/dialer.js"
     ]
   },
-  "resources/js/bento-diagnosis.js": {
-    "file": "assets/bento-diagnosis-BkAsCISS.js",
-    "name": "bento-diagnosis",
-    "src": "resources/js/bento-diagnosis.js",
-    "isDynamicEntry": true
-  },
   "resources/js/composer/composer.js": {
-    "file": "assets/composer-CoZ1oHym.js",
+    "file": "assets/composer-Bl2P0gbm.js",
     "name": "composer",
     "src": "resources/js/composer/composer.js",
     "isDynamicEntry": true,
@@ -2294,7 +2286,7 @@
     "isDynamicEntry": true
   },
   "resources/js/dialer.js": {
-    "file": "assets/dialer-n_6WpuQS.js",
+    "file": "assets/dialer-tsVD04y2.js",
     "name": "dialer",
     "src": "resources/js/dialer.js",
     "isDynamicEntry": true,
@@ -2305,14 +2297,8 @@
       "node_modules/@twilio/voice-sdk/esm/twilio.js"
     ]
   },
-  "resources/js/manifesto.js": {
-    "file": "assets/manifesto-CLc5MvgH.js",
-    "name": "manifesto",
-    "src": "resources/js/manifesto.js",
-    "isDynamicEntry": true
-  },
   "resources/js/webgl/globe-lite.js": {
-    "file": "assets/globe-lite-CV1dPLr7.js",
+    "file": "assets/globe-lite-9hduLCqt.js",
     "name": "globe-lite",
     "src": "resources/js/webgl/globe-lite.js",
     "isDynamicEntry": true,
@@ -2321,7 +2307,7 @@
     ]
   },
   "resources/js/webgl/hero-scene.js": {
-    "file": "assets/hero-scene-tPC8PKRr.js",
+    "file": "assets/hero-scene-LLzgY7VS.js",
     "name": "hero-scene",
     "src": "resources/js/webgl/hero-scene.js",
     "isDynamicEntry": true,

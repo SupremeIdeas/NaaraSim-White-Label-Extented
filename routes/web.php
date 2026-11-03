@@ -466,6 +466,7 @@ Route::middleware(['admin.gateway', 'admin', 'throttle:admin'])
             Route::get('/skins', App\Livewire\Admin\SkinSelection::class)->name('skins');
             // Theme picker — switch the platform-wide visual skin (Theme Batch 2 §4).
             Route::get('/theme', ThemePicker::class)->name('theme');
+            Route::get('/activation-branding', App\Livewire\Admin\ActivationBranding::class)->name('activation-branding');
             Route::get('/branding', Branding::class)->name('branding');
             Route::get('/link-previews', LinkPreviews::class)->name('link-previews');
             Route::get('/site', SiteEditor::class)->name('site');
@@ -657,3 +658,12 @@ Route::post('/webhooks/giftcards/{provider}', GiftCardWebhookController::class)
 // X-Hub-Signature-256-verified POST for delivery status and STOP opt-outs.
 Route::match(['get', 'post'], '/webhooks/whatsapp', WhatsAppWebhookController::class)
     ->name('webhooks.whatsapp');
+
+// The default brand mark (favicon and app icon) before a logo is uploaded: the first letter of the brand on its primary colour.
+Route::get('/brand-mark.svg', function () {
+    $letter = mb_strtoupper(mb_substr(\App\Support\BrandSettings::name(), 0, 1)) ?: 'O';
+    $rgb = \App\Support\BrandSettings::hexToChannels(\App\Support\BrandSettings::color('primary')) ?? '35 39 45';
+    $svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="16" fill="rgb('.str_replace(' ', ',', $rgb).')"/><text x="32" y="44" text-anchor="middle" font-family="system-ui,Segoe UI,Helvetica,Arial,sans-serif" font-size="36" font-weight="700" fill="#fff">'.e($letter).'</text></svg>';
+
+    return response($svg, 200, ['Content-Type' => 'image/svg+xml', 'Cache-Control' => 'public, max-age=300']);
+})->name('brand.mark');

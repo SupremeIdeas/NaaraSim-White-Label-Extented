@@ -67,6 +67,8 @@ return Application::configure(basePath: dirname(__DIR__))
         // Security headers on every web response (blueprint Section 19.2; the
         // full CSP matrix is Module 19).
         $middleware->web(append: [
+            // Last to see the response: says the licensee's brand on every page and Livewire update.
+            \App\Http\Middleware\RebrandResponse::class,
             \App\Http\Middleware\SecurityHeaders::class,
             // Turnstile bot check on the auth POSTs (self-gates; no-op unless
             // active — blueprint Section 33).

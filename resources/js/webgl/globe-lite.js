@@ -139,8 +139,8 @@ export function mountGlobeLite(canvas, { mode = 'hero' } = {}) {
         flagLayer.className = 'pointer-events-none absolute inset-0';
         canvas.parentElement.appendChild(flagLayer);
     }
-    const portMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.95 });
-    const portGeo = new THREE.SphereGeometry(0.03, 12, 12);
+    const portMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.55 });
+    const portGeo = new THREE.SphereGeometry(0.016, 10, 10);
     const ringGeo = new THREE.RingGeometry(0.05, 0.062, 40);
     const ringMat = new THREE.MeshBasicMaterial({ color: pop, transparent: true, opacity: 0, side: THREE.DoubleSide, depthWrite: false });
     const ports = PORTS.map(([cc, country, lat, lon]) => {
@@ -166,7 +166,7 @@ export function mountGlobeLite(canvas, { mode = 'hero' } = {}) {
     // Routes: a handful of great-circle arcs between real cities, each with a soft comet that loops.
     const routes = [];
     const lineVerts = [];
-    const want = small ? 14 : 24;
+    const want = small ? 22 : 42;
     let guard = 0;
     while (routes.length < want && guard++ < 400) {
         const pool = Math.random() < 0.6 ? PORTS.map((p) => [p[2], p[3]]) : CITIES;
@@ -176,7 +176,7 @@ export function mountGlobeLite(canvas, { mode = 'hero' } = {}) {
         const pa = latLon(a[0], a[1], R * 1.004), pb = latLon(b[0], b[1], R * 1.004);
         const chord = pa.distanceTo(pb);
         if (chord < 1.4 || chord > 4.0) continue;
-        const mid = pa.clone().add(pb).multiplyScalar(0.5).setLength(R + 0.1 + chord * 0.2);
+        const mid = pa.clone().add(pb).multiplyScalar(0.5).setLength(R + 0.035 + chord * 0.085);
         const curve = new THREE.QuadraticBezierCurve3(pa, mid, pb);
         const pts = curve.getPoints(40);
         for (let i = 1; i < pts.length; i++) lineVerts.push(pts[i - 1].x, pts[i - 1].y, pts[i - 1].z, pts[i].x, pts[i].y, pts[i].z);
@@ -184,7 +184,7 @@ export function mountGlobeLite(canvas, { mode = 'hero' } = {}) {
     }
     const lineGeo = new THREE.BufferGeometry();
     lineGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(lineVerts), 3));
-    const lineMat = new THREE.LineBasicMaterial({ color: dark ? popLight : pop, transparent: true, opacity: dark ? 0.34 : 0.4, depthWrite: false });
+    const lineMat = new THREE.LineBasicMaterial({ color: dark ? popLight : pop, transparent: true, opacity: dark ? 0.16 : 0.2, depthWrite: false });
     globe.add(new THREE.LineSegments(lineGeo, lineMat));
 
     const TRAIL = 7;
@@ -202,7 +202,7 @@ export function mountGlobeLite(canvas, { mode = 'hero' } = {}) {
         sea.color.setHex(dark ? 0x0d0f12 : 0xeceef1);
         dots.material.color.setHex(dark ? 0xd6dce6 : 0x2b3038);
         rimMat.uniforms.uK.value = dark ? 1.15 : 0.55; haloMat.opacity = dark ? 0.5 : 0.35; haloMat.blending = dark ? THREE.AdditiveBlending : THREE.NormalBlending; haloMat.needsUpdate = true;
-        lineMat.opacity = dark ? 0.34 : 0.4; lineMat.color.copy(dark ? popLight : pop);
+        lineMat.opacity = dark ? 0.16 : 0.2; lineMat.color.copy(dark ? popLight : pop);
         cMat.uniforms.uC.value.copy(dark ? popLight : pop);
     };
     const stopTheme = login ? () => {} : watchTheme(apply);
@@ -251,7 +251,7 @@ export function mountGlobeLite(canvas, { mode = 'hero' } = {}) {
                 cPos[idx * 3] = tmp.x; cPos[idx * 3 + 1] = tmp.y; cPos[idx * 3 + 2] = tmp.z;
                 const edge = Math.min(u, 1 - u) * 9;
                 cA[idx] = Math.min(1, edge) * (1 - k / TRAIL) * 0.95;
-                cS[idx] = (k === 0 ? 0.07 : 0.045) * (1 - k / (TRAIL * 1.4));
+                cS[idx] = (k === 0 ? 0.042 : 0.026) * (1 - k / (TRAIL * 1.4));
             }
         });
         const w = canvas.clientWidth, h = canvas.clientHeight;
