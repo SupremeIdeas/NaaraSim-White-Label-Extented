@@ -29,7 +29,7 @@ class MarketingHeroTest extends TestCase
     public function test_the_hero_renders_without_a_showcase_image_by_default(): void
     {
         $res = $this->get('/')->assertOk();
-        $res->assertSee('Land Anywhere.', false); // hero still there
+        $res->assertSee('Touch down.', false); // hero still there
         // The CTA row is a locked two-column grid, not a wrapping flex.
         $res->assertSee('grid max-w-md grid-cols-2', false);
     }

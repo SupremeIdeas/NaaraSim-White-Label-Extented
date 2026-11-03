@@ -52,7 +52,7 @@ class ReusableSectionsTest extends TestCase
         SiteContent::copySection('audiences', SiteContent::portableDefaults('audiences'), 'about');
 
         $this->get('/about')->assertOk()
-            ->assertSee('Who Naara Is For', false)
+            ->assertSee('Whoever you travel as', false)
             ->assertSee('Travel Smarter. Stay Connected Everywhere.', false);
     }
 

@@ -126,7 +126,7 @@ class BrandThemeTest extends TestCase
         BrandSettings::flush();
         $this->get('/login')->assertOk()
             ->assertSee('nx-pulse', false)
-            ->assertSee('naarasim-favicon.png', false);
+            ->assertSee('brand-mark.svg', false);
     }
 
     public function test_admin_can_choose_the_preloader_style_and_it_is_validated(): void

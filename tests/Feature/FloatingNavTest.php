@@ -78,7 +78,7 @@ class FloatingNavTest extends TestCase
     public function test_marketing_page_renders_the_floating_nav(): void
     {
         $this->get('/')->assertOk()
-            ->assertSee('Ask NaaraSim')   // the glowing centrepiece
+            ->assertSee(\App\Support\BrandSettings::rebrand('Ask NaaraSim'))   // the glowing centrepiece
             ->assertSee('Home');          // a regular slot
     }
 

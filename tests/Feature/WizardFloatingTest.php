@@ -53,7 +53,7 @@ class WizardFloatingTest extends TestCase
     public function test_home_shows_the_resting_launcher(): void
     {
         $res = $this->actingAs($this->user())->get('/dashboard')->assertOk();
-        $res->assertSee('Ask NaaraSim');
+        $res->assertSee(\App\Support\BrandSettings::rebrand('Ask NaaraSim'));
         $res->assertDontSee('Confused? Use The Wizard');
         $res->assertDontSee('nx-wiz-swell', false);
     }

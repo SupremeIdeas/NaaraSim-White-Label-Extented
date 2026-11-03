@@ -54,7 +54,7 @@ class MyLinesTest extends TestCase
         ]);
 
         $res = $this->actingAs($user)->get('/numbers/lines')->assertOk();
-        $res->assertSee('USA 3GB')->assertSee('Naara Data')->assertDontSee('esimgo');
+        $res->assertSee('USA 3GB')->assertSee(\App\Support\BrandSettings::rebrand('Naara Data'))->assertDontSee('esimgo');
     }
 
     // ---- Prompt 10: Naara Line billing surfaced + auto-renew toggle --------
@@ -81,7 +81,7 @@ class MyLinesTest extends TestCase
         $vn = $this->line($user);
 
         $res = $this->actingAs($user)->get('/numbers/lines')->assertOk();
-        $res->assertSee($vn->phone_number)->assertSee('Naara Line')->assertDontSee('twilio');
+        $res->assertSee($vn->phone_number)->assertSee(\App\Support\BrandSettings::rebrand('Naara Line'))->assertDontSee('twilio');
     }
 
     public function test_a_renewing_line_shows_its_price_and_next_billing_date(): void

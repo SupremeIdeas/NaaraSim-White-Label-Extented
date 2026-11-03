@@ -82,12 +82,12 @@ class ProviderModelsTest extends TestCase
     public function test_the_model_badge_shows_the_public_model_not_the_supplier(): void
     {
         $otp = Blade::render('<x-model-badge type="otp" provider="fivesim" />');
-        $this->assertStringContainsString('Naara Verify', $otp);
+        $this->assertStringContainsString(\App\Support\BrandSettings::rebrand('Naara Verify'), $otp);
         $this->assertStringNotContainsString('fivesim', $otp);
         $this->assertStringNotContainsString('5sim', $otp);
 
         $esim = Blade::render('<x-model-badge :esim="true" />');
-        $this->assertStringContainsString('Naara Data', $esim);
+        $this->assertStringContainsString(\App\Support\BrandSettings::rebrand('Naara Data'), $esim);
         $this->assertStringNotContainsString('esimgo', $esim);
     }
 

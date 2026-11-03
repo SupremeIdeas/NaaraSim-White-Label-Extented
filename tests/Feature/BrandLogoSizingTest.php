@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Blade;
 use Tests\TestCase;
 
@@ -11,6 +12,18 @@ use Tests\TestCase;
  */
 class BrandLogoSizingTest extends TestCase
 {
+    use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        // The size map applies to an uploaded image mark (the monogram fallback has its own fixed size).
+        foreach (['product', 'family', 'gift'] as $v) {
+            \App\Models\Setting::setValue('brand.logo_'.$v.'_light', 'https://cdn.test/'.$v.'.png', 'brand');
+        }
+        \App\Support\BrandSettings::flush();
+    }
+
     public function test_named_sizes_map_to_consistent_dimensions(): void
     {
         // The product (NaaraSim) wordmark is wide (~4:1) — the height map is a

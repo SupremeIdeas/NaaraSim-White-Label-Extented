@@ -81,6 +81,7 @@ class LivewireGatesPersistTest extends TestCase
             RedirectIfNotInstalled::class, SetLocale::class, CaptureReferral::class,
             SecurityHeaders::class, VerifyTurnstile::class,
             ThrottleUnprotectedAuthRoutes::class, LogWebhookDelivery::class,
+            \App\Http\Middleware\RebrandResponse::class,   // rewrites output wording only
         ];
         $persistent = app(PersistentMiddleware::class)->getPersistentMiddleware();
         $router = app('router');

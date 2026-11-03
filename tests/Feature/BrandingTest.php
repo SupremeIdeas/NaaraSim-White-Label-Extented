@@ -27,19 +27,16 @@ class BrandingTest extends TestCase
         BrandSettings::flush();
     }
 
-    public function test_ships_default_brand_logos_but_no_admin_override(): void
+    public function test_ships_no_brand_logos_so_a_fresh_install_wears_the_monogram(): void
     {
-        $this->assertSame(config('app.name'), BrandSettings::name());
-        // The official logos ship as defaults (public/brand/*), so a product
-        // logo always displays — no admin upload is set yet, though.
-        $this->assertTrue(BrandSettings::hasProductLogo());
-        $this->assertNull(BrandSettings::logo('product', 'light')); // no admin override
-        $this->assertSame('/brand/naarasim-product-light.png', BrandSettings::resolvedLogo('product', 'light'));
-        $this->assertSame('/brand/naarasim-favicon.png', BrandSettings::favicon());
-        // Each sub-brand ships its own mark: family (Naara umbrella) + gift.
-        $this->assertSame('/brand/naara-family-light.png', BrandSettings::resolvedLogo('family', 'light'));
-        $this->assertSame('/brand/naara-family-dark.png', BrandSettings::resolvedLogo('family', 'dark'));
-        $this->assertSame('/brand/naara-gift-light.png', BrandSettings::resolvedLogo('gift', 'light'));
+        $this->assertSame(BrandSettings::SHIPPED_NAME, BrandSettings::name());
+        // A white-label install ships NO logos (the Naara marks are not part of it): a name monogram stands in until the owner uploads their own.
+        $this->assertFalse(BrandSettings::hasProductLogo());
+        $this->assertNull(BrandSettings::logo('product', 'light'));
+        $this->assertNull(BrandSettings::resolvedLogo('product', 'light'));
+        $this->assertNull(BrandSettings::resolvedLogo('family', 'light'));
+        $this->assertNull(BrandSettings::resolvedLogo('gift', 'light'));
+        $this->assertStringContainsString('/brand-mark.svg', (string) BrandSettings::favicon());
     }
 
     public function test_a_saved_logo_url_is_returned_and_theme_variants_fall_back(): void
@@ -60,7 +57,7 @@ class BrandingTest extends TestCase
     public function test_brand_logo_component_falls_back_to_the_wordmark(): void
     {
         $html = view('components.brand-logo', ['variant' => 'product', 'class' => 'h-8', 'fallbackIcon' => 'signal'])->render();
-        $this->assertStringContainsString(config('app.name'), $html); // wordmark text present
+        $this->assertStringContainsString(BrandSettings::word(), $html); // monogram + wordmark text present
     }
 
     public function test_branding_page_is_admin_only_and_saves_the_brand_name(): void
@@ -82,9 +79,8 @@ class BrandingTest extends TestCase
 
     public function test_naara_gift_has_its_own_admin_settable_logo(): void
     {
-        // The Naara Gift mark ships as a default; an admin upload overrides it.
-        $this->assertSame('/brand/naara-gift-light.png', BrandSettings::resolvedLogo('gift', 'light'));
-        $this->assertNull(BrandSettings::logo('gift', 'light')); // no admin override yet
+        // No gift mark ships; an admin upload provides it.
+        $this->assertNull(BrandSettings::resolvedLogo('gift', 'light'));
 
         Setting::setValue('brand.logo_gift_light', 'https://cdn.test/naara-gift.png', 'brand');
         BrandSettings::flush();
@@ -97,12 +93,10 @@ class BrandingTest extends TestCase
         $this->assertStringContainsString('naara-gift.png', $html);
     }
 
-    public function test_the_naara_family_mark_is_admin_settable_and_overrides_the_default(): void
+    public function test_the_family_mark_is_admin_settable(): void
     {
-        // The umbrella Naara mark ships as a default (home dashboard, marketing,
-        // Aurora welcome) and an admin upload overrides it.
-        $this->assertSame('/brand/naara-family-light.png', BrandSettings::resolvedLogo('family', 'light'));
-        $this->assertNull(BrandSettings::logo('family', 'light'));
+        // No umbrella mark ships; an admin upload provides it.
+        $this->assertNull(BrandSettings::resolvedLogo('family', 'light'));
 
         Setting::setValue('brand.logo_family_dark', 'https://cdn.test/naara.png', 'brand');
         BrandSettings::flush();

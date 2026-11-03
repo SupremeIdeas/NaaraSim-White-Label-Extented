@@ -27,7 +27,7 @@ class DeveloperDocsPageTest extends TestCase
         $res = $this->get('/developers')->assertOk();
 
         $res->assertSee('Developer API', false)
-            ->assertSee('Build on NaaraSim', false)     // the page hero
+            ->assertSee(\App\Support\BrandSettings::rebrand('Build on NaaraSim'), false)     // the page hero
             ->assertSee('Authentication', false)        // a reference heading
             ->assertSee('<table', false)                // GFM tables rendered
             ->assertSee('/api/v1/catalogue', false);    // an endpoint example

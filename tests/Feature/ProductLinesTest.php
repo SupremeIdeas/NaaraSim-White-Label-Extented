@@ -62,7 +62,7 @@ class ProductLinesTest extends TestCase
     {
         // Guest: CTA resolves to register (matching the old panel behaviour).
         $slides = ProductLineSettings::slides();
-        $this->assertSame('Naara Data', $slides[0]['title']);
+        $this->assertSame(\App\Support\BrandSettings::rebrand('Naara Data'), $slides[0]['title']);
         $this->assertStringContainsString('/register', $slides[0]['cta_url']);
         // Slide shape carries the modal payload for the FAB.
         $this->assertNotEmpty($slides[0]['modal_blocks']);
@@ -75,7 +75,7 @@ class ProductLinesTest extends TestCase
 
         $this->assertStringContainsString('storytellingCarousel(', $html);
         $this->assertStringContainsString("key: 'product-lines'", $html);
-        $this->assertStringContainsString('Naara Data', $html);
+        $this->assertStringContainsString(\App\Support\BrandSettings::rebrand('Naara Data'), $html);
     }
 
     public function test_admin_page_is_admin_only(): void

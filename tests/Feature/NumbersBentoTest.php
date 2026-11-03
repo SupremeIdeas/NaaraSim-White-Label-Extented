@@ -74,7 +74,7 @@ class NumbersBentoTest extends TestCase
             ->assertSee('Receive OTPs and verification codes')
             ->assertSee('permanent international number')
             ->assertSee('address book')
-            ->assertSeeInOrder(['Naara', 'Verify']);
+            ->assertSeeInOrder([\App\Support\BrandSettings::word(), 'Verify']);
     }
 
     public function test_a_deep_linked_modal_opens_with_the_right_request_type(): void

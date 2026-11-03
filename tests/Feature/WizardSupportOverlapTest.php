@@ -25,7 +25,7 @@ class WizardSupportOverlapTest extends TestCase
         $this->actingAs($this->activeUser())
             ->get('/support')
             ->assertOk()
-            ->assertDontSee('Open the NaaraSim helper'); // the wizard launcher aria-label
+            ->assertDontSee(\App\Support\BrandSettings::rebrand('Open the NaaraSim helper')); // the wizard launcher aria-label
     }
 
     public function test_the_wizard_still_renders_on_other_customer_pages(): void
@@ -33,6 +33,6 @@ class WizardSupportOverlapTest extends TestCase
         $this->actingAs($this->activeUser())
             ->get('/notifications')
             ->assertOk()
-            ->assertSee('Open the NaaraSim helper');
+            ->assertSee(\App\Support\BrandSettings::rebrand('Open the NaaraSim helper'));
     }
 }
