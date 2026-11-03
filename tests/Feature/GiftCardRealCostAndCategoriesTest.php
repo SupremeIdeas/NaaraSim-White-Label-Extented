@@ -135,4 +135,35 @@ class GiftCardRealCostAndCategoriesTest extends TestCase
 
         $this->assertLessThan(10.0, app(GiftCardPricing::class)->retail($p, 5000.0));   // ~$3.46, not $5,000
     }
+
+    public function test_our_own_logos_load_from_the_current_site_whatever_host_the_sync_stored(): void
+    {
+        $own = $this->zendit(10, 0.02, ['logo_url' => 'http://localhost/images/giftcards/logos/uber.webp']);
+        $stor = $this->zendit(10, 0.02, ['logo_url' => 'https://old-staging.example:8125/storage/giftcards/logos/x.webp']);
+        $ext = $this->zendit(10, 0.02, ['logo_url' => 'https://cdn.example.com/amazon.png']);
+        $none = $this->zendit(10, 0.02, ['logo_url' => null]);
+
+        $this->assertSame('/images/giftcards/logos/uber.webp', $own->fresh()->logo_url);       // a stale host never breaks our own files
+        $this->assertSame('/storage/giftcards/logos/x.webp', $stor->fresh()->logo_url);
+        $this->assertSame('https://cdn.example.com/amazon.png', $ext->fresh()->logo_url);      // a third-party address is left alone
+        $this->assertNull($none->fresh()->logo_url);
+    }
+
+    public function test_pill_counts_equal_the_cards_you_get_and_follow_the_search(): void
+    {
+        config(['services.reloadly.client_id' => 'id', 'services.reloadly.client_secret' => 'secret']);
+        Setting::setValue('features.naara_gift.enabled', true);
+        Cache::forget('features.enabled.naara_gift');
+        foreach ([['Airbnb', 'travel'], ['Air Canada', 'travel'], ['Zorblax Arcade', 'games']] as [$n, $k]) {
+            $this->zendit(10, 0.02, ['brand_name' => $n, 'brand_key' => str($n)->slug()->toString(), 'category_key' => $k]);
+        }
+
+        $c = Livewire::test(GiftCards::class);
+        $this->assertSame(3, $c->viewData('categoryTotal'));
+        $this->assertSame(['games' => 1, 'travel' => 2], collect($c->viewData('categories'))->pluck('n', 'key')->all());
+
+        $c->set('search', 'air');                                  // typing narrows the pills too: Games disappears, Travel keeps both
+        $this->assertSame(['travel' => 2], collect($c->viewData('categories'))->pluck('n', 'key')->all());
+        $this->assertSame(2, $c->viewData('categoryTotal'));
+    }
 }

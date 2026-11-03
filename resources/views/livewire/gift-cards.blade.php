@@ -48,15 +48,25 @@
     </div>
 
 
-    {{-- Type chips: sort by what the card is (games, food, travel...), on top of the country and the search. --}}
+    {{-- Type pills: sort by what the card is (games, food, travel...). Counts follow the search and country, so a pill's number is exactly what tapping it shows. --}}
     @if (! empty($categories))
-        <div class="ns-gf__chips" role="group" aria-label="Gift card type">
-            <button type="button" wire:click="pickCategory(null)" class="ns-gf__chip {{ $category ? '' : 'is-on' }}" aria-pressed="{{ $category ? 'false' : 'true' }}">All</button>
-            @foreach ($categories as $c)
-                <button type="button" wire:click="pickCategory('{{ $c['key'] }}')" wire:key="gcat-{{ $c['key'] }}" class="ns-gf__chip {{ $category === $c['key'] ? 'is-on' : '' }}" aria-pressed="{{ $category === $c['key'] ? 'true' : 'false' }}">
-                    <x-nx.icon :name="$c['icon']" /> {{ $c['label'] }} <small>{{ $c['n'] }}</small>
+        <div class="ns-gf__pills" x-data="{ l: false, r: false,
+                 sync() { const t = this.$refs.track; this.l = t.scrollLeft > 4; this.r = t.scrollLeft + t.clientWidth < t.scrollWidth - 4; },
+                 go(d) { this.$refs.track.scrollBy({ left: d * Math.max(160, this.$refs.track.clientWidth * .6), behavior: 'smooth' }); },
+                 reveal() { this.$nextTick(() => { const on = this.$refs.track.querySelector('.is-on'); if (on) { on.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' }); } this.sync(); }); } }"
+             x-init="reveal()" @gf-pills-changed.window="setTimeout(() => reveal(), 80)" @resize.window.debounce.150ms="sync()" wire:key="gf-pills">
+            <button type="button" class="ns-gf__arrow ns-gf__arrow--l" x-show="l" x-cloak @click="go(-1)" aria-label="Scroll types left"><x-nx.icon name="chevron-left" /></button>
+            <div class="ns-gf__track" x-ref="track" @scroll.passive="sync()" role="group" aria-label="Gift card type" :class="{ 'fade-l': l, 'fade-r': r }">
+                <button type="button" wire:click="pickCategory(null)" class="ns-gf__pill {{ $category ? '' : 'is-on' }}" aria-pressed="{{ $category ? 'false' : 'true' }}">
+                    <span class="ns-gf__pi"><x-nx.icon name="grid" /></span><span class="ns-gf__pl">All</span><span class="ns-gf__pn">{{ $categoryTotal }}</span>
                 </button>
-            @endforeach
+                @foreach ($categories as $c)
+                    <button type="button" wire:click="pickCategory('{{ $c['key'] }}')" wire:key="gcat-{{ $c['key'] }}" class="ns-gf__pill {{ $category === $c['key'] ? 'is-on' : '' }}" aria-pressed="{{ $category === $c['key'] ? 'true' : 'false' }}">
+                        <span class="ns-gf__pi"><x-nx.icon :name="$c['icon']" /></span><span class="ns-gf__pl">{{ $c['label'] }}</span><span class="ns-gf__pn">{{ $c['n'] }}</span>
+                    </button>
+                @endforeach
+            </div>
+            <button type="button" class="ns-gf__arrow ns-gf__arrow--r" x-show="r" x-cloak @click="go(1)" aria-label="Scroll types right"><x-nx.icon name="chevron-right" /></button>
         </div>
     @endif
 

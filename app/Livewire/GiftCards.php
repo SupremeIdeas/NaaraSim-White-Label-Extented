@@ -75,11 +75,16 @@ class GiftCards extends Component
         $this->resetPage();
     }
 
+    public function updatedSearch(): void { $this->dispatch('gf-pills-changed'); }
+
+    public function updatedCountry(): void { $this->dispatch('gf-pills-changed'); }
+
     /** Tap a category chip; tapping the active one clears it. */
     public function pickCategory(?string $key): void
     {
         $this->category = ($key === null || $key === $this->category || ! isset(GiftCardCategories::ALL[$key])) ? null : $key;
         $this->resetPage();
+        $this->dispatch('gf-pills-changed');   // the pill row re-centres on the active pill once the new list is drawn
     }
 
     public function select(int $id): void
@@ -123,29 +128,34 @@ class GiftCards extends Component
         // Coming-Soon mode (no keys yet): skip the catalogue queries entirely.
         if (! $this->live) {
             return view('livewire.gift-cards', [
-                'products' => null, 'countries' => [], 'categories' => [], 'selected' => null, 'denominations' => null,
+                'products' => null, 'countries' => [], 'categories' => [], 'categoryTotal' => 0, 'selected' => null, 'denominations' => null,
             ]);
         }
 
-        $products = GiftCardProduct::storefrontCards()
-            ->when($this->search !== '', function ($q) {
-                // The search box finds a brand by name OR a country by its full name ("united kingdom" shows that country's cards).
-                $needle = mb_strtolower(trim($this->search));
-                $codes = GiftCardProduct::storefront()->whereNotNull('country')->distinct()->pluck('country')
-                    ->filter(fn ($c) => str_contains(mb_strtolower(\App\Support\CountryNames::name($c)), $needle))->values()->all();
-                $q->where(fn ($w) => $w->where('brand_name', 'like', '%'.$this->search.'%')->orWhereIn('country', $codes));
-            })
-            ->when($this->country, fn ($q) => $q->where('country', $this->country))
+        // The search and the country narrow BOTH the cards and the pill counts, so a pill's number always equals the cards you get by tapping it.
+        $narrow = function ($q) {
+            return $q
+                ->when($this->search !== '', function ($q) {
+                    // The search box finds a brand by name OR a country by its full name ("united kingdom" shows that country's cards).
+                    $needle = mb_strtolower(trim($this->search));
+                    $codes = GiftCardProduct::storefront()->whereNotNull('country')->distinct()->pluck('country')
+                        ->filter(fn ($c) => str_contains(mb_strtolower(\App\Support\CountryNames::name($c)), $needle))->values()->all();
+                    $q->where(fn ($w) => $w->where('brand_name', 'like', '%'.$this->search.'%')->orWhereIn('country', $codes));
+                })
+                ->when($this->country, fn ($q) => $q->where('country', $this->country));
+        };
+
+        $products = $narrow(GiftCardProduct::storefrontCards())
             ->when($this->category && isset(GiftCardCategories::ALL[$this->category]), fn ($q) => $q->where('category_key', $this->category))
             ->tap(fn ($q) => \App\Support\GiftPopularity::order($q))   // featured, then what people buy most, then A-Z
             ->paginate(18);
 
-        // Chips: only categories that have cards (in the chosen country), with how many brands each holds.
-        $counts = GiftCardProduct::storefront()->whereNotNull('category_key')
-            ->when($this->country, fn ($q) => $q->where('country', $this->country))
-            ->selectRaw('category_key, count(distinct brand_key) as n')->groupBy('category_key')->pluck('n', 'category_key');
-        $chips = collect(GiftCardCategories::ALL)->filter(fn ($v, $k) => ($counts[$k] ?? 0) > 0)
-            ->map(fn ($v, $k) => ['key' => $k, 'label' => $v[0], 'icon' => $v[1], 'n' => (int) $counts[$k]])->values()->all();
+        // Pills: only types that have cards for the current search and country (the chosen one always stays), in the fixed platform order.
+        $counts = $narrow(GiftCardProduct::storefrontCards())->whereNotNull('category_key')
+            ->selectRaw('category_key, count(*) as n')->groupBy('category_key')->pluck('n', 'category_key');
+        $total = (int) $counts->sum();
+        $chips = collect(GiftCardCategories::ALL)->filter(fn ($v, $k) => ($counts[$k] ?? 0) > 0 || $k === $this->category)
+            ->map(fn ($v, $k) => ['key' => $k, 'label' => $v[0], 'icon' => $v[1], 'n' => (int) ($counts[$k] ?? 0)])->values()->all();
 
         $selected = $this->selectedId ? GiftCardProduct::storefront()->find($this->selectedId) : null;
         $denominations = $selected ? app(GiftCardPricing::class)->denominations($selected) : null;
@@ -156,6 +166,7 @@ class GiftCards extends Component
             'countries' => GiftCardProduct::storefront()->whereNotNull('country')->distinct()->pluck('country')
                 ->mapWithKeys(fn ($c) => [$c => \App\Support\CountryNames::name($c)])->sort()->all(),
             'categories' => $chips,
+            'categoryTotal' => $total,
             'selected' => $selected,
             'denominations' => $denominations,
         ]);
