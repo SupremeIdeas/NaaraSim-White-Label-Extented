@@ -15,9 +15,9 @@ export default {
         extend: {
             fontFamily: {
                 // Body copy (Module 26).
-                sans: ['Didact Gothic', 'Figtree', ...defaultTheme.fontFamily.sans],
+                sans: ['Manrope', 'Figtree', ...defaultTheme.fontFamily.sans],
                 // Titles & headings — the Supreme Ideas Agency custom font.
-                display: ['Supreme Display', 'Figtree', ...defaultTheme.fontFamily.sans],
+                display: ['Bricolage Grotesque', 'Figtree', ...defaultTheme.fontFamily.sans],
             },
             // Brand palette (blueprint Section 2.1 / 4.1). Driven by CSS variables
             // so the admin can recolour the whole platform at runtime with NO

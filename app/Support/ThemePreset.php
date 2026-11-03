@@ -185,7 +185,7 @@ class ThemePreset
      * presets' fonts; Batch 1 ships only what the current look already uses.
      */
     private const FONT_ALLOW = [
-        'Supreme Display', 'Didact Gothic', 'Figtree',
+        'Bricolage Grotesque', 'Manrope', 'Supreme Display', 'Didact Gothic', 'Figtree',
     ];
 
     /**

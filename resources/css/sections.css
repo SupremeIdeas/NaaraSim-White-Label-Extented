@@ -41,7 +41,7 @@
     color: rgb(var(--brand-primary-dark));
 }
 .nx-sechero__headline {
-    font-family: 'Supreme Display', system-ui, sans-serif;
+    font-family: 'Bricolage Grotesque', system-ui, sans-serif;
     font-weight: 800;
     line-height: 1.05;
     font-size: clamp(1.9rem, 5.2vw, 3.6rem);

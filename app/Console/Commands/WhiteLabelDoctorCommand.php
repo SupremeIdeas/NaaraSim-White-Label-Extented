@@ -159,8 +159,8 @@ class WhiteLabelDoctorCommand extends Command
 
     private function licence(): void
     {
-        $has = (string) config('updater.api_token') !== '';
-        $this->line('       Licence: '.($has ? 'activation token present' : 'not activated yet (Admin > White Label Activation)').'; platform URL '.((string) config('updater.original_platform_base_url') !== '' ? 'set' : 'not set'));
+        $has = \App\Support\Activation\LicenseState::isActivated();
+        $this->line('       Licence: '.($has ? 'activation token present' : 'not activated yet (Admin > White Label Activation)').'; platform URL '.(\App\Support\Activation\LicenseState::platformUrl() !== '' ? 'set' : 'not set'));
     }
 
     private function adopt(): int

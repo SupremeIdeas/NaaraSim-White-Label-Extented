@@ -140,11 +140,11 @@ class BrandingTest extends TestCase
 
     public function test_the_brand_fonts_are_present_and_wired(): void
     {
-        $this->assertFileExists(public_path('fonts/supreme-display.ttf'));
-        $this->assertFileExists(public_path('fonts/didact-gothic.woff2'));
+        $this->assertFileExists(public_path('fonts/bricolage-grotesque.woff2'));
+        $this->assertFileExists(public_path('fonts/manrope.woff2'));
         $css = file_get_contents(resource_path('css/app.css'));
-        $this->assertStringContainsString('Supreme Display', $css);
-        $this->assertStringContainsString('Didact Gothic', $css);
+        $this->assertStringContainsString('Bricolage Grotesque', $css);
+        $this->assertStringContainsString('Manrope', $css);
         // app.css must actually read the override variable, not just theme() —
         // this is the dead-CSS-variable bug the admin font system depends on.
         $this->assertStringContainsString('var(--font-sans)', $css);

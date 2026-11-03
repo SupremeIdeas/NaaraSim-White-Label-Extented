@@ -467,6 +467,8 @@ Route::middleware(['admin.gateway', 'admin', 'throttle:admin'])
             // Theme picker — switch the platform-wide visual skin (Theme Batch 2 §4).
             Route::get('/theme', ThemePicker::class)->name('theme');
             Route::get('/activation-branding', App\Livewire\Admin\ActivationBranding::class)->name('activation-branding');
+            // Licence activation: key in, install registered with the platform, features unlocked, live heartbeat.
+            Route::get('/license', App\Livewire\Admin\LicenseActivation::class)->name('license');
             Route::get('/branding', Branding::class)->name('branding');
             Route::get('/link-previews', LinkPreviews::class)->name('link-previews');
             Route::get('/site', SiteEditor::class)->name('site');

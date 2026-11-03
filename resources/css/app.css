@@ -34,22 +34,36 @@
 @import 'flag-icons/css/flag-icons.min.css';
 @import './tours.css';
 
-/* --- Brand fonts (self-hosted; no external CDN, CSP-safe). Module 26. -----
-   Titles & headings: "Supreme Display" (the Supreme Ideas Agency custom font).
-   Body text:          "Didact Gothic" (Google, self-hosted woff2).
-   Swap either file in public/fonts and keep these names to re-brand. */
+/* --- Brand fonts (self-hosted; no external CDN, CSP-safe). -----------------
+   White-label builds ship their own pair, distinct from the Naara master:
+   Titles & headings: "Bricolage Grotesque" (variable, SIL OFL).
+   Body text:          "Manrope" (variable, SIL OFL).
+   The legacy names "Supreme Display" / "Didact Gothic" stay as aliases so a
+   saved preset or admin choice that still names them renders in the new pair. */
 @font-face {
-    font-family: 'Supreme Display';
-    src: url('/fonts/supreme-display.ttf') format('truetype');
-    font-weight: 400 900;
+    font-family: 'Bricolage Grotesque';
+    src: url('/fonts/bricolage-grotesque.woff2') format('woff2');
+    font-weight: 200 800;
     font-style: normal;
     font-display: swap;
 }
 @font-face {
-    font-family: 'Didact Gothic';
-    src: url('/fonts/didact-gothic.woff2') format('woff2');
-    font-weight: 400;
+    font-family: 'Manrope';
+    src: url('/fonts/manrope.woff2') format('woff2');
+    font-weight: 200 800;
     font-style: normal;
+    font-display: swap;
+}
+@font-face {
+    font-family: 'Supreme Display';
+    src: url('/fonts/bricolage-grotesque.woff2') format('woff2');
+    font-weight: 200 800;
+    font-display: swap;
+}
+@font-face {
+    font-family: 'Didact Gothic';
+    src: url('/fonts/manrope.woff2') format('woff2');
+    font-weight: 200 800;
     font-display: swap;
 }
 
@@ -81,8 +95,8 @@
     /* Site-wide font override (admin Branding page). Defaults to the shipped
        Naara fonts so an unconfigured install is byte-identical to before —
        the quoted names match the @font-face declarations above exactly. */
-    --font-display: 'Supreme Display';
-    --font-sans: 'Didact Gothic';
+    --font-display: 'Bricolage Grotesque';
+    --font-sans: 'Manrope';
 
     /* Dark-mode card-surface tones (theme-coverage audit, owner request: card
        containers site-wide must repaint with the active theme instead of
@@ -115,7 +129,7 @@
 @tailwind utilities;
 
 @layer base {
-    /* Body copy defaults to Didact Gothic (the `sans` family). The CSS variable
+    /* Body copy defaults to Manrope (the `sans` family). The CSS variable
        is read first so the admin font system (site-wide override) can repaint
        every element at runtime; theme('fontFamily.sans') is the static
        fallback stack if --font-sans is ever unset. */

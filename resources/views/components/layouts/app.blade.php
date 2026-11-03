@@ -55,7 +55,7 @@
     {{-- Preload the body font (compressed WOFF2) only. The display font loads via
          @font-face with font-display:swap — never preload the uncompressed TTF
          (it's a heavy download that blocks the critical path for no benefit). --}}
-    <link rel="preload" href="/fonts/didact-gothic.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="/fonts/manrope.woff2" as="font" type="font/woff2" crossorigin>
 
     {{-- Admin font system (Branding page): loads a Google Font's stylesheet only
          when one is actually selected for the title or body font. CSP is widened
@@ -154,7 +154,7 @@
          so it wins over any theme-preset font variable — this is the single
          authoritative source for the platform's rendered font, regardless of
          which of the 40 themes is active. Empty on an unconfigured install, so
-         the shipped Naara fonts (Supreme Display / Didact Gothic) are untouched. --}}
+         the shipped Naara fonts (Bricolage Grotesque / Manrope) are untouched. --}}
     @php($fontCss = \App\Support\BrandSettings::fontCss())
     @if ($fontCss)<style id="brand-font-vars">{!! $fontCss !!}</style>@endif
     {{-- Member's custom accent colour (both mode variants; the `.dark` class picks one). Empty unless they chose Custom. --}}

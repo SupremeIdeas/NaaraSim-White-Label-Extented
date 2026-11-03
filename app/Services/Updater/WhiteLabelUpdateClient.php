@@ -106,14 +106,21 @@ class WhiteLabelUpdateClient
         try {
             $response = $client->get('v1/white-label/entitlement');
         } catch (ConnectionException $e) {
+            \App\Support\Activation\LicenseState::recordCheckIn(false, 0, 'Could not reach the original platform.');
+
             return $this->entitlementFailure('Could not reach the original platform: '.$e->getMessage());
         }
 
         if ($response->status() === 404) {
+            \App\Support\Activation\LicenseState::recordCheckIn(false, 404, 'The licence service is switched off on the platform right now.');
+
             return $this->entitlementFailure('The distribution API is not enabled on the original platform right now.');
         }
         if (! $response->successful()) {
-            return $this->entitlementFailure('The original platform rejected the entitlement check: '.($response->json('message') ?? $response->status()));
+            $why = (string) ($response->json('message') ?? $response->status());
+            \App\Support\Activation\LicenseState::recordCheckIn(false, $response->status(), $why);
+
+            return $this->entitlementFailure('The original platform rejected the entitlement check: '.$why);
         }
 
         $locks = $response->json('locks');
@@ -127,6 +134,7 @@ class WhiteLabelUpdateClient
         FeatureEntitlements::store($locks);
 
         $level = $response->json('level');
+        \App\Support\Activation\LicenseState::recordCheckIn(true, 200, null, is_string($level) ? $level : null);
 
         // Skin allowance (Prompt 22): master alone decides how many skins this licence unlocks; we store the number and obey it. A missing
         // or malformed `skins` block (an older master) changes nothing, and a failure above never reaches here, so the last-known value stays.
@@ -241,8 +249,8 @@ class WhiteLabelUpdateClient
     /** Null when this instance isn't configured to reach the original platform yet. */
     private function client(): ?PendingRequest
     {
-        $baseUrl = config('updater.original_platform_base_url');
-        $token = config('updater.api_token');
+        $baseUrl = \App\Support\Activation\LicenseState::platformUrl();
+        $token = \App\Support\Activation\LicenseState::token();
 
         if (empty($baseUrl) || empty($token)) {
             return null;
@@ -254,6 +262,12 @@ class WhiteLabelUpdateClient
         return Http::baseUrl(rtrim($baseUrl, '/').'/api/')
             ->timeout(30)->connectTimeout(5)
             ->withToken($token)
+            // Where this install lives, so the original platform's oversight list always shows the live domain, version and last contact.
+            ->withHeaders(array_filter([
+                'X-Instance-Domain' => \App\Support\Activation\LicenseState::domain(),
+                'X-Instance-Version' => $this->currentVersion(),
+                'X-Instance-Id' => \App\Support\InstanceIdentity::id(),
+            ]))
             ->acceptJson();
     }
 

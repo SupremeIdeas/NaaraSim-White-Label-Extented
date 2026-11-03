@@ -134,7 +134,7 @@ class BrandSettings
                     'logo_scale_product' => (string) Setting::getValue('brand.logo_scale_product', ''),
                     'logo_scale_gift' => (string) Setting::getValue('brand.logo_scale_gift', ''),
                     // Site-wide font override (title + body). '' source = the
-                    // shipped Naara default (Supreme Display / Didact Gothic).
+                    // shipped Naara default (Bricolage Grotesque / Manrope).
                     'font_display_source' => (string) Setting::getValue('brand.font_display_source', ''),
                     'font_display_google' => (string) Setting::getValue('brand.font_display_google', ''),
                     'font_display_custom' => (string) Setting::getValue('brand.font_display_custom', ''),

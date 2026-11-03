@@ -325,7 +325,7 @@ for WhatsApp/Google/etc. — so gateway branding is never "left in the dark".
 - **Icons: SVG sprite only — no emoji anywhere** (enforced by `IconSystemTest`).
 - **Dark mode on every element**; **loading state on every action**; money
   actions disable their button in flight.
-- Fonts: "Supreme Display" (headings) + "Didact Gothic" (body), self-hosted.
+- Fonts: "Bricolage Grotesque" (headings) + "Manrope" (body), self-hosted.
 
 **Motion:** GSAP (npm-bundled, CSP-safe, reduced-motion-aware) for the marketing
 hero/parallax/pinned-products/timeline/count-ups; IntersectionObserver reveals.

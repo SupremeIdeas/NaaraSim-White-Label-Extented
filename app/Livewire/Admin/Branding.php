@@ -93,7 +93,7 @@ class Branding extends Component
     public string $hero_cta_size = HeroBackground::DEFAULT_CTA_SIZE;
 
     // Site-wide font system (owner request): '' keeps the shipped Naara default
-    // (Supreme Display / Didact Gothic); 'google' picks a Google Font by name;
+    // (Bricolage Grotesque / Manrope); 'google' picks a Google Font by name;
     // 'custom' uses an uploaded web font file. One source per slot.
     public string $font_display_source = '';
 

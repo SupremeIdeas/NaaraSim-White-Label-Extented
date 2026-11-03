@@ -72,7 +72,8 @@
 
         // Website (public front end + branding).
         $more[] = ['heading' => 'Website'];
-        $more[] = ['route' => 'admin.activation-branding', 'label' => 'Activation and branding', 'icon' => 'badge-check'];
+        $more[] = ['route' => 'admin.license', 'label' => 'Licence activation', 'icon' => 'key'];
+        $more[] = ['route' => 'admin.activation-branding', 'label' => 'Name and branding', 'icon' => 'badge-check'];
         $more[] = ['route' => 'admin.builder', 'label' => 'Page builder', 'icon' => 'grid'];
         $more[] = ['route' => 'admin.copy-studio', 'label' => 'Copy Studio (AI)', 'icon' => 'zap'];
         $more[] = ['route' => 'admin.nav', 'label' => 'Floating nav', 'icon' => 'grid'];

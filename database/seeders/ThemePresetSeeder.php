@@ -53,7 +53,7 @@ class ThemePresetSeeder extends Seeder
      */
     private function newPresets(): array
     {
-        $display = 'Supreme Display';
+        $display = 'Bricolage Grotesque';
 
         return [
             ['slug' => 'verdant-pulse', 'name' => 'Verdant Pulse', 'sort_order' => 16,
@@ -68,7 +68,7 @@ class ThemePresetSeeder extends Seeder
                 'persona' => 'Icy cobalt blue with a sky-blue pop, crisp winter-clean minimalism.',
                 'colors' => ['primary' => '30 86 160', 'primary_dark' => '20 60 112', 'accent' => '56 189 248', 'accent_dark' => '36 123 161', 'navy' => '10 20 35', 'action' => '230 60 45'],
                 'radius' => ['control' => '0.5rem', 'card' => '1.25rem', 'pill' => '9999px'],
-                'typography' => ['display' => $display, 'sans' => 'Didact Gothic'],
+                'typography' => ['display' => $display, 'sans' => 'Manrope'],
                 'surface' => ['card_shadow' => 'sm', 'card_border_opacity' => '0.6'],
                 'hero' => 'portal-gateway'],
 
@@ -84,7 +84,7 @@ class ThemePresetSeeder extends Seeder
                 'persona' => 'Cool, calm teal with a slate-blue accent — a quieter, icier cousin of the house teal.',
                 'colors' => ['primary' => '20 110 120', 'primary_dark' => '14 80 88', 'accent' => '148 163 184', 'accent_dark' => '104 114 129', 'navy' => '15 20 24', 'action' => '225 65 50'],
                 'radius' => ['control' => '0.5rem', 'card' => '1rem', 'pill' => '9999px'],
-                'typography' => ['display' => $display, 'sans' => 'Didact Gothic'],
+                'typography' => ['display' => $display, 'sans' => 'Manrope'],
                 'surface' => ['card_shadow' => 'sm', 'card_border_opacity' => '0.6'],
                 'hero' => 'worldwide'],
 
@@ -109,7 +109,7 @@ class ThemePresetSeeder extends Seeder
                 'tokens' => [
                     'colors' => ['primary' => '35 39 45', 'primary_dark' => '16 18 21', 'accent' => '148 160 176', 'accent_dark' => '71 80 94', 'navy' => '10 11 13', 'action' => '61 90 254'],
                     'radius' => ['control' => '0.5rem', 'card' => '1.5rem', 'pill' => '9999px'],
-                    'typography' => ['display' => 'Supreme Display', 'sans' => 'Didact Gothic'],
+                    'typography' => ['display' => 'Bricolage Grotesque', 'sans' => 'Manrope'],
                     'surface' => ['card_shadow' => 'sm', 'card_border_opacity' => '0.6'],
                 ],
                 'icon_family' => ['style' => '3d', 'set' => 'default'],
@@ -129,7 +129,7 @@ class ThemePresetSeeder extends Seeder
             'tokens' => [
                 'colors' => ['primary' => '162 28 175', 'primary_dark' => '134 25 143', 'accent' => '132 204 22', 'accent_dark' => '77 124 15', 'navy' => '13 27 42', 'action' => '232 65 42'],
                 'radius' => ['control' => '0.5rem', 'card' => '1.5rem', 'pill' => '9999px'],
-                'typography' => ['display' => 'Supreme Display', 'sans' => 'Didact Gothic'],
+                'typography' => ['display' => 'Bricolage Grotesque', 'sans' => 'Manrope'],
                 'surface' => ['card_shadow' => 'sm', 'card_border_opacity' => '0.6'],
             ],
             'icon_family' => ['style' => '3d', 'set' => 'default'],
@@ -358,7 +358,7 @@ class ThemePresetSeeder extends Seeder
      */
     private function presets(): array
     {
-        $display = 'Supreme Display';
+        $display = 'Bricolage Grotesque';
 
         return [
             ['slug' => 'aurora-shift', 'name' => 'Indigo Current', 'sort_order' => 2,
@@ -372,7 +372,7 @@ class ThemePresetSeeder extends Seeder
                 'persona' => 'Airline-ticket navy with a warm coral pop — departures-board energy for a travel brand.',
                 'colors' => ['primary' => '30 58 95', 'primary_dark' => '20 41 66', 'accent' => '242 132 107', 'accent_dark' => '169 92 75', 'navy' => '22 34 58', 'action' => '216 70 48'],
                 'radius' => ['control' => '0.5rem', 'card' => '1.75rem', 'pill' => '9999px'],
-                'typography' => ['display' => $display, 'sans' => 'Didact Gothic'],
+                'typography' => ['display' => $display, 'sans' => 'Manrope'],
                 'surface' => ['card_shadow' => 'lg', 'card_border_opacity' => '0.5']],
 
             ['slug' => 'midnight-signal', 'name' => 'Midnight Signal', 'sort_order' => 4,
@@ -386,7 +386,7 @@ class ThemePresetSeeder extends Seeder
                 'persona' => 'Ultra-light, high-whitespace, ink-black type on paper — minimal, editorial, zero noise.',
                 'colors' => ['primary' => '17 18 20', 'primary_dark' => '0 0 0', 'accent' => '139 139 150', 'accent_dark' => '111 111 120', 'navy' => '28 28 31', 'action' => '185 55 40'],
                 'radius' => ['control' => '0.375rem', 'card' => '0.75rem', 'pill' => '9999px'],
-                'typography' => ['display' => $display, 'sans' => 'Didact Gothic'],
+                'typography' => ['display' => $display, 'sans' => 'Manrope'],
                 'surface' => ['card_shadow' => 'none', 'card_border_opacity' => '0.8']],
 
             ['slug' => 'fintra-clean', 'name' => 'Ledger', 'sort_order' => 6,
@@ -407,7 +407,7 @@ class ThemePresetSeeder extends Seeder
                 'persona' => 'Near-black monochrome with a single neon-lime accent — restrained by day, electric by night.',
                 'colors' => ['primary' => '22 24 26', 'primary_dark' => '0 0 0', 'accent' => '198 255 0', 'accent_dark' => '99 128 0', 'navy' => '10 10 10', 'action' => '220 60 45'],
                 'radius' => ['control' => '0.375rem', 'card' => '1rem', 'pill' => '9999px'],
-                'typography' => ['display' => $display, 'sans' => 'Didact Gothic'],
+                'typography' => ['display' => $display, 'sans' => 'Manrope'],
                 'surface' => ['card_shadow' => 'sm', 'card_border_opacity' => '0.6']],
 
             ['slug' => 'waitlisty-soft', 'name' => 'Horizon', 'sort_order' => 9,
@@ -435,14 +435,14 @@ class ThemePresetSeeder extends Seeder
                 'persona' => 'High-contrast black, white and gold, sharp corners — live-odds, luxury-travel energy.',
                 'colors' => ['primary' => '10 10 10', 'primary_dark' => '0 0 0', 'accent' => '245 197 24', 'accent_dark' => '135 108 13', 'navy' => '8 8 10', 'action' => '200 50 40'],
                 'radius' => ['control' => '0.125rem', 'card' => '0.25rem', 'pill' => '0.25rem'],
-                'typography' => ['display' => $display, 'sans' => 'Didact Gothic'],
+                'typography' => ['display' => $display, 'sans' => 'Manrope'],
                 'surface' => ['card_shadow' => 'md', 'card_border_opacity' => '0.8']],
 
             ['slug' => 'emerald-route', 'name' => 'Emerald Route', 'sort_order' => 13,
                 'persona' => 'Deep forest green with a warm terracotta accent, spa-fresh route/map motif.',
                 'colors' => ['primary' => '31 61 43', 'primary_dark' => '20 42 30', 'accent' => '216 150 61', 'accent_dark' => '151 105 43', 'navy' => '14 26 18', 'action' => '220 70 50'],
                 'radius' => ['control' => '0.5rem', 'card' => '1.5rem', 'pill' => '9999px'],
-                'typography' => ['display' => $display, 'sans' => 'Didact Gothic'],
+                'typography' => ['display' => $display, 'sans' => 'Manrope'],
                 'surface' => ['card_shadow' => 'md', 'card_border_opacity' => '0.5']],
 
             ['slug' => 'coral-current', 'name' => 'Crimson Current', 'sort_order' => 14,
@@ -456,7 +456,7 @@ class ThemePresetSeeder extends Seeder
                 'persona' => 'Deep wine-maroon with champagne-gold accents — premium, exclusive, after-hours feel.',
                 'colors' => ['primary' => '67 20 36', 'primary_dark' => '46 14 25', 'accent' => '224 168 64', 'accent_dark' => '146 109 42', 'navy' => '20 10 14', 'action' => '220 60 45'],
                 'radius' => ['control' => '0.5rem', 'card' => '1.25rem', 'pill' => '9999px'],
-                'typography' => ['display' => $display, 'sans' => 'Didact Gothic'],
+                'typography' => ['display' => $display, 'sans' => 'Manrope'],
                 'surface' => ['card_shadow' => 'sm', 'card_border_opacity' => '0.6']],
         ];
     }
@@ -481,7 +481,7 @@ class ThemePresetSeeder extends Seeder
      */
     private function phase2Presets(): array
     {
-        $display = 'Supreme Display';
+        $display = 'Bricolage Grotesque';
 
         return [
             ['slug' => 'solar-flare', 'name' => 'Solar Flare', 'sort_order' => 21,
@@ -496,7 +496,7 @@ class ThemePresetSeeder extends Seeder
                 'persona' => 'Cool steel-blue with an icy teal accent on near-black — crisp, glacial, high-trust fintech feel.',
                 'colors' => ['primary' => '50 130 184', 'primary_dark' => '36 94 132', 'accent' => '0 144 158', 'accent_dark' => '0 130 142', 'navy' => '5 5 35', 'action' => '225 65 70'],
                 'radius' => ['control' => '0.5rem', 'card' => '1rem', 'pill' => '9999px'],
-                'typography' => ['display' => $display, 'sans' => 'Didact Gothic'],
+                'typography' => ['display' => $display, 'sans' => 'Manrope'],
                 'surface' => ['card_shadow' => 'sm', 'card_border_opacity' => '0.6'],
                 'hero' => 'portal-gateway'],
 
@@ -512,7 +512,7 @@ class ThemePresetSeeder extends Seeder
                 'persona' => 'Deep ultraviolet with a hot-pink flash on near-black — nightlife, electronic, after-hours energy.',
                 'colors' => ['primary' => '61 8 123', 'primary_dark' => '44 6 89', 'accent' => '244 59 134', 'accent_dark' => '207 50 114', 'navy' => '14 5 30', 'action' => '236 72 100'],
                 'radius' => ['control' => '0.375rem', 'card' => '1rem', 'pill' => '9999px'],
-                'typography' => ['display' => $display, 'sans' => 'Didact Gothic'],
+                'typography' => ['display' => $display, 'sans' => 'Manrope'],
                 'surface' => ['card_shadow' => 'md', 'card_border_opacity' => '0.4'],
                 'hero' => 'app-ui-phone'],
 
@@ -520,7 +520,7 @@ class ThemePresetSeeder extends Seeder
                 'persona' => 'Forest green with a warm terracotta pop — outdoor, eco-conscious, grounded travel feel.',
                 'colors' => ['primary' => '11 132 87', 'primary_dark' => '8 95 63', 'accent' => '201 125 75', 'accent_dark' => '161 100 60', 'navy' => '10 26 18', 'action' => '210 75 55'],
                 'radius' => ['control' => '0.625rem', 'card' => '1.5rem', 'pill' => '9999px'],
-                'typography' => ['display' => $display, 'sans' => 'Didact Gothic'],
+                'typography' => ['display' => $display, 'sans' => 'Manrope'],
                 'surface' => ['card_shadow' => 'md', 'card_border_opacity' => '0.5'],
                 'hero' => 'worldwide'],
 
@@ -544,7 +544,7 @@ class ThemePresetSeeder extends Seeder
                 'persona' => 'Rose-pink with a sky-blue pop on deep indigo — fashion-editorial, expressive, youthful.',
                 'colors' => ['primary' => '227 99 135', 'primary_dark' => '163 71 97', 'accent' => '95 168 211', 'accent_dark' => '66 118 148', 'navy' => '28 20 36', 'action' => '225 80 100'],
                 'radius' => ['control' => '0.75rem', 'card' => '1.75rem', 'pill' => '9999px'],
-                'typography' => ['display' => $display, 'sans' => 'Didact Gothic'],
+                'typography' => ['display' => $display, 'sans' => 'Manrope'],
                 'surface' => ['card_shadow' => 'lg', 'card_border_opacity' => '0.4'],
                 'hero' => 'islands-female'],
 
@@ -560,7 +560,7 @@ class ThemePresetSeeder extends Seeder
                 'persona' => 'Deep forest-teal with a terracotta pop — institutional, established, rooted in place.',
                 'colors' => ['primary' => '58 99 81', 'primary_dark' => '42 71 58', 'accent' => '228 130 87', 'accent_dark' => '171 98 65', 'navy' => '20 18 18', 'action' => '205 70 55'],
                 'radius' => ['control' => '0.375rem', 'card' => '0.75rem', 'pill' => '0.5rem'],
-                'typography' => ['display' => $display, 'sans' => 'Didact Gothic'],
+                'typography' => ['display' => $display, 'sans' => 'Manrope'],
                 'surface' => ['card_shadow' => 'sm', 'card_border_opacity' => '0.7'],
                 'hero' => 'worldwide'],
 
@@ -576,7 +576,7 @@ class ThemePresetSeeder extends Seeder
                 'persona' => 'Electric cobalt blue with a warm amber pop — modern SaaS dashboard energy.',
                 'colors' => ['primary' => '61 126 252', 'primary_dark' => '44 91 181', 'accent' => '251 191 36', 'accent_dark' => '138 105 20', 'navy' => '24 25 35', 'action' => '230 65 55'],
                 'radius' => ['control' => '0.5rem', 'card' => '1.25rem', 'pill' => '9999px'],
-                'typography' => ['display' => $display, 'sans' => 'Didact Gothic'],
+                'typography' => ['display' => $display, 'sans' => 'Manrope'],
                 'surface' => ['card_shadow' => 'sm', 'card_border_opacity' => '0.6'],
                 'hero' => 'portal-gateway'],
 
@@ -600,7 +600,7 @@ class ThemePresetSeeder extends Seeder
                 'persona' => 'Steel-blue with a warm burnt-orange pop — cinematic dusk-to-dawn travel mood.',
                 'colors' => ['primary' => '84 119 146', 'primary_dark' => '60 86 105', 'accent' => '217 125 61', 'accent_dark' => '163 94 46', 'navy' => '17 26 36', 'action' => '215 70 50'],
                 'radius' => ['control' => '0.625rem', 'card' => '1.5rem', 'pill' => '9999px'],
-                'typography' => ['display' => $display, 'sans' => 'Didact Gothic'],
+                'typography' => ['display' => $display, 'sans' => 'Manrope'],
                 'surface' => ['card_shadow' => 'lg', 'card_border_opacity' => '0.5'],
                 'hero' => 'islands-male'],
 
@@ -616,7 +616,7 @@ class ThemePresetSeeder extends Seeder
                 'persona' => 'Cool graphite-grey with a vivid signal-red accent — high-alert, bold editorial focus.',
                 'colors' => ['primary' => '131 134 143', 'primary_dark' => '94 96 103', 'accent' => '255 19 19', 'accent_dark' => '230 17 17', 'navy' => '5 5 8', 'action' => '220 40 40'],
                 'radius' => ['control' => '0.125rem', 'card' => '0.25rem', 'pill' => '0.25rem'],
-                'typography' => ['display' => $display, 'sans' => 'Didact Gothic'],
+                'typography' => ['display' => $display, 'sans' => 'Manrope'],
                 'surface' => ['card_shadow' => 'md', 'card_border_opacity' => '0.8'],
                 'hero' => 'app-ui-phone'],
 
@@ -632,7 +632,7 @@ class ThemePresetSeeder extends Seeder
                 'persona' => 'Deep teal with a violet flash — northern-lights inspired, cool and otherworldly.',
                 'colors' => ['primary' => '31 111 120', 'primary_dark' => '22 80 86', 'accent' => '139 92 246', 'accent_dark' => '132 87 234', 'navy' => '10 25 28', 'action' => '220 65 90'],
                 'radius' => ['control' => '0.625rem', 'card' => '1.5rem', 'pill' => '9999px'],
-                'typography' => ['display' => $display, 'sans' => 'Didact Gothic'],
+                'typography' => ['display' => $display, 'sans' => 'Manrope'],
                 'surface' => ['card_shadow' => 'md', 'card_border_opacity' => '0.5'],
                 'hero' => 'worldwide'],
 

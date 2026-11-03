@@ -327,7 +327,7 @@
 
     {{-- Site-wide font system (owner request): pick a Google Font or upload a
          custom web font, per slot. Left blank, the shipped Naara default
-         (Supreme Display for titles, Didact Gothic for body) stays untouched —
+         (Bricolage Grotesque for titles, Manrope for body) stays untouched —
          this whole section is a purely additive override. --}}
     <form wire:submit="saveFonts" class="mt-8 space-y-6 border-t border-slate-200 pt-8 dark:border-[#2A2E34]">
         <div class="flex items-center justify-between">
@@ -340,8 +340,8 @@
         </div>
 
         @php($fontSlots = [
-            ['display', 'Titles & headings', 'Used for every heading and the wordmark. Default: Supreme Display.'],
-            ['sans', 'Body text', 'Used for paragraphs, labels and buttons across the platform. Default: Didact Gothic.'],
+            ['display', 'Titles & headings', 'Used for every heading and the wordmark. Default: Bricolage Grotesque.'],
+            ['sans', 'Body text', 'Used for paragraphs, labels and buttons across the platform. Default: Manrope.'],
         ])
         @foreach ($fontSlots as [$slot, $label, $hint])
             @php($sourceField = "font_{$slot}_source")
