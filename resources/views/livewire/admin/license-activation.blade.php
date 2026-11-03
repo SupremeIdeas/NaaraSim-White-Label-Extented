@@ -4,8 +4,9 @@
         'none' => ['label' => 'Not activated', 'dot' => 'bg-amber-500', 'ring' => 'ring-amber-500/30'],
         'active' => ['label' => 'Active', 'dot' => 'bg-emerald-500', 'ring' => 'ring-emerald-500/30'],
         'suspended' => ['label' => 'Suspended by the platform', 'dot' => 'bg-red-500', 'ring' => 'ring-red-500/30'],
-        'revoked' => ['label' => 'Token no longer accepted', 'dot' => 'bg-red-500', 'ring' => 'ring-red-500/30'],
+        'revoked' => ['label' => 'Platform no longer accepts this install', 'dot' => 'bg-red-500', 'ring' => 'ring-red-500/30'],
         'unreachable' => ['label' => 'Platform not reachable', 'dot' => 'bg-amber-500', 'ring' => 'ring-amber-500/30'],
+        'unverified' => ['label' => 'Answer could not be verified', 'dot' => 'bg-red-500', 'ring' => 'ring-red-500/30'],
     ][$s['status']];
     $steps = [
         ['Licence key', 'Paste the key you were sent.', $s['status'] !== 'none'],
@@ -122,8 +123,12 @@
                     <div class="flex justify-between gap-3"><dt class="text-slate-500 dark:text-slate-400">Key</dt><dd class="font-mono text-xs text-slate-800 dark:text-slate-100">{{ $s['keyLast4'] ? '••••'.$s['keyLast4'] : '—' }}</dd></div>
                     <div class="flex justify-between gap-3"><dt class="text-slate-500 dark:text-slate-400">Activated</dt><dd class="text-slate-800 dark:text-slate-100">{{ $s['activatedAt']?->diffForHumans() ?? '—' }}</dd></div>
                     <div class="flex justify-between gap-3"><dt class="text-slate-500 dark:text-slate-400">Last check-in</dt><dd class="text-slate-800 dark:text-slate-100" data-license-last>{{ $s['lastCheckin']?->diffForHumans() ?? '—' }}</dd></div>
+                    <div class="flex justify-between gap-3"><dt class="text-slate-500 dark:text-slate-400">Proof</dt><dd class="text-right text-xs {{ $s['verified'] ? 'text-emerald-700 dark:text-emerald-400' : 'text-amber-700 dark:text-amber-400' }}" data-license-proof="{{ $s['verified'] ? 'verified' : ($s['keyInstalled'] ? 'unverified' : 'nokey') }}">@if ($s['verified']) Signed by the platform @if ($s['validUntil'])<span class="block text-slate-500">valid to {{ $s['validUntil']->format('j M Y') }}</span>@endif @elseif ($s['keyInstalled']) Not verified yet @else No platform key installed @endif</dd></div>
                     <div class="flex justify-between gap-3"><dt class="text-slate-500 dark:text-slate-400">Platform</dt><dd class="truncate text-xs text-slate-800 dark:text-slate-100">{{ $s['platform'] ? parse_url($s['platform'], PHP_URL_HOST) : '—' }}</dd></div>
                 </dl>
+                @if (! $s['keyInstalled'])
+                    <p class="mt-3 rounded-lg bg-amber-50 p-2 text-xs text-amber-800 dark:bg-amber-950/30 dark:text-amber-200" data-license-nokey>This install has no platform verification key (<code>NAARA_LICENCE_PUBLIC_KEY</code>), so it cannot tell a real licence answer from a forged one. Ask the platform operator for it.</p>
+                @endif
                 @if ($s['viaEnv'])
                     <p class="mt-3 text-xs text-slate-500">Connected through the server's .env file. Activate here to manage it from the admin.</p>
                 @endif

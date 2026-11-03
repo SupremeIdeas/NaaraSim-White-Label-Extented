@@ -60,6 +60,12 @@ class LicenseActivation extends Component
             return;
         }
         $this->licenseKey = '';
+        if (LicenseState::status() !== 'active') {
+            // The platform accepted the key, but its entitlement answer could not be trusted: never show a success banner over a failed proof.
+            $this->error = 'The key was accepted, but the platform\'s answer could not be verified, so nothing was unlocked. '.(string) LicenseState::get('last_error', '');
+
+            return;
+        }
         $this->notice = 'Activated. This install is registered and its licence is live.';
     }
 
@@ -98,6 +104,10 @@ class LicenseActivation extends Component
             'lastAttempt' => $at('last_attempt_at'),
             'lastError' => (string) LicenseState::get('last_error', ''),
             'platform' => LicenseState::platformUrl(),
+            'keyInstalled' => \App\Support\Activation\EntitlementVerifier::configured(),
+            'verified' => ($v = \App\Support\Activation\LicenseState::verifiedEntitlement()) !== null,
+            'level' => (string) (($v ?? [])['level'] ?? ''),
+            'validUntil' => isset($v['exp']) ? \Illuminate\Support\Carbon::createFromTimestamp((int) $v['exp']) : null,
             'viaEnv' => (string) LicenseState::get('token', '') === '' && LicenseState::isActivated(),
         ];
     }

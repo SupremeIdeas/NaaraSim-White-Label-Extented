@@ -1,3 +1,8 @@
+## 2026-11-03: Activation security hardening (see docs/audit/WL-ACTIVATION-E2E.md on master)
+- Entitlements are **signed** by the platform (Ed25519, `NAARA_LICENCE_PUBLIC_KEY` here, private key on the master only). A fake platform, a replayed answer from another licence, an expired answer or an edited database cannot unlock anything. Normal installs with no verified answer are **closed** (entry-level locks), not open. A 401/403 from the platform drops the stored answer at once. Extended stays unlocked by owner design (decision D1 pending).
+- Licence screen shows the proof (signed by the platform, valid to), warns when no platform key is installed, never shows a success banner over a failed proof. `whitelabel:check-in` is monitored in System health.
+- Sends its instance id on activation and every check-in so the master can see a second install.
+
 ## 2026-11-03: Licence activation that works, fork fonts
 - **Admin > Licence activation** (`admin.license`): paste the licence key and the platform address; the install calls `/api/v1/white-label/activate` with brand, contact, version and **domain**, stores the token encrypted (the key is never stored, only its last four), pulls the entitlement straight away and shows status (not activated, active, suspended, token revoked, platform unreachable), plan, registered domain, last check-in, what the licence includes, and a super-admin Disconnect. No more curl and .env editing (an .env token still works as a fallback).
 - **Heartbeat**: `whitelabel:check-in` every six hours (monitored in System health) and every update/entitlement call carries `X-Instance-Domain`, `X-Instance-Version` and `X-Instance-Id`. A failed check-in is shown on the screen and never locks the site.

@@ -20,7 +20,7 @@ class LockedFeaturesAreAbsentTest extends TestCase
 
     protected function tearDown(): void
     {
-        Cache::forget('white_label.entitlement_locks.local');
+        FeatureEntitlements::bust();
         parent::tearDown();
     }
 
@@ -28,7 +28,7 @@ class LockedFeaturesAreAbsentTest extends TestCase
     {
         config(['updater.product_identifier' => 'naarasim-whitelabel']);
         Setting::setValue(FeatureEntitlements::STORE_KEY, $keys, 'white_label');
-        Cache::forget('white_label.entitlement_locks.local');
+        FeatureEntitlements::bust();
     }
 
     public function test_extended_ignores_a_lock_list_so_nothing_is_ever_locked(): void

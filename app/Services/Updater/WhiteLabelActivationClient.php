@@ -35,6 +35,7 @@ class WhiteLabelActivationClient
                     'contact_email' => $contactEmail ?: (BrandSettings::profile('support_email') ?: null),
                     'current_version' => $this->version(),
                     'domain' => LicenseState::domain(),
+                    'instance_id' => \App\Support\InstanceIdentity::id(),
                 ], fn ($v) => $v !== null && $v !== ''));
         } catch (ConnectionException $e) {
             return $this->fail('Could not reach the platform at '.$url.'. Check the address and your server\'s outbound connection.');

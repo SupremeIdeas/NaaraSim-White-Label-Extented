@@ -14,7 +14,7 @@ final class LicenseState
 {
     public const GROUP = 'white_label';
 
-    public const STATUSES = ['none', 'active', 'suspended', 'revoked', 'unreachable'];
+    public const STATUSES = ['none', 'active', 'suspended', 'revoked', 'unreachable', 'unverified'];
 
     public static function get(string $key, mixed $default = null): mixed
     {
@@ -107,19 +107,34 @@ final class LicenseState
             return;
         }
         self::put('last_error', (string) $error);
-        if ($http === 401) {
-            self::put('status', 'revoked');
-        } elseif ($http === 403) {
-            self::put('status', 'suspended');
+        if ($http === -1) {
+            self::put('status', 'unverified');   // the platform answered, but not with a signature this install can trust
+        } elseif ($http === 401 || $http === 403) {
+            self::put('status', $http === 401 ? 'revoked' : 'suspended');
+            // The platform itself said no (revoked, suspended, token killed): what it signed earlier stops counting at once, not at its expiry.
+            self::put('entitlement_signed', '');
+            \App\Support\FeatureEntitlements::bust();
         } elseif ($http === 0) {
             self::put('status', 'unreachable');
         }
         // Any other failure (5xx, 404 while the distribution API is off) leaves the last known status alone: a licence is never taken away by a blip.
     }
 
+    /** The signed entitlement last accepted from the platform, re-verified on every read so editing the database cannot change what is unlocked. */
+    public static function verifiedEntitlement(): ?array
+    {
+        $raw = (string) self::get('entitlement_signed', '');
+        $signed = $raw !== '' ? json_decode($raw, true) : null;
+        if (! is_array($signed)) {
+            return null;
+        }
+
+        return EntitlementVerifier::verify($signed, (string) self::get('reference', ''));
+    }
+
     public static function clear(): void
     {
-        foreach (['token', 'key_last4', 'reference', 'tier', 'registered_brand', 'domain', 'activated_at', 'status', 'last_error', 'last_checkin_at', 'last_attempt_at'] as $k) {
+        foreach (['entitlement_signed', 'verified_at', 'token', 'key_last4', 'reference', 'tier', 'registered_brand', 'domain', 'activated_at', 'status', 'last_error', 'last_checkin_at', 'last_attempt_at'] as $k) {
             self::put($k, '');
         }
     }

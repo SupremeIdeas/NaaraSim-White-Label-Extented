@@ -131,14 +131,35 @@ class WhiteLabelUpdateClient
         }
 
         $locks = array_values(array_filter($locks, 'is_string'));
-        FeatureEntitlements::store($locks);
-
         $level = $response->json('level');
+        $skinsBlock = $response->json('skins');
+
+        if (\App\Support\Activation\EntitlementVerifier::configured()) {
+            // Only a signed answer for THIS licence is believed. The plain fields next to it are ignored: they are what a fake platform would forge.
+            $signed = $response->json('signed');
+            $ref = (string) \App\Support\Activation\LicenseState::get('reference', '');
+            $p = is_array($signed) ? \App\Support\Activation\EntitlementVerifier::verify($signed, $ref) : null;
+            if ($p === null) {
+                \App\Support\Activation\LicenseState::recordCheckIn(false, -1, 'The answer was not signed by the platform that licensed this install, so it was not trusted. Nothing was unlocked.');
+
+                return $this->entitlementFailure('The platform answer could not be verified (missing or invalid signature).');
+            }
+            if ($ref === '' && is_string($p['ref'] ?? null)) {
+                \App\Support\Activation\LicenseState::put('reference', $p['ref']);   // first signed answer binds this install to its licence
+            }
+            $locks = array_values(array_filter($p['locks'], 'is_string'));
+            $level = is_string($p['level'] ?? null) ? $p['level'] : null;
+            $skinsBlock = ['allowance' => (int) ($p['skins'] ?? 0)];
+            \App\Support\Activation\LicenseState::put('entitlement_signed', json_encode($signed));
+            \App\Support\Activation\LicenseState::put('verified_at', now()->toIso8601String());
+        }
+
+        FeatureEntitlements::store($locks);
         \App\Support\Activation\LicenseState::recordCheckIn(true, 200, null, is_string($level) ? $level : null);
 
         // Skin allowance (Prompt 22): master alone decides how many skins this licence unlocks; we store the number and obey it. A missing
         // or malformed `skins` block (an older master) changes nothing, and a failure above never reaches here, so the last-known value stays.
-        $skins = $response->json('skins');
+        $skins = $skinsBlock;
         $allowance = null;
         if (is_array($skins) && \App\Support\Appearance\LicensedSkins::storeAllowance($skins['allowance'] ?? null)) {
             $allowance = \App\Support\Appearance\LicensedSkins::allowance();
