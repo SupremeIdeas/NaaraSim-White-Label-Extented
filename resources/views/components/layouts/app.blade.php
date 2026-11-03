@@ -166,6 +166,9 @@
     @stack('head')
     <x-trust.invite-script />
     @include('partials.tracking')
+    @php($icLight = \App\Support\IconPacks\IconPacks::colors(\App\Support\IconPacks\IconPacks::activeSlug(), 'light')['ac'])
+    @php($icDark = \App\Support\IconPacks\IconPacks::colors(\App\Support\IconPacks\IconPacks::activeSlug(), 'dark')['ac'])
+    <style id="ic-accent-vars">:root{--ic-accent:{{ $icLight }}}.dark{--ic-accent:{{ $icDark }}}</style>
 </head>
 {{--
     is-admin-surface (header editor, 2026-09-07): app-shell.blade.php's

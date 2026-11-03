@@ -24,7 +24,7 @@
              so it never covers content. It collapses to a tiny restore bubble
              (persisted for the session), one tap to bring it back. --}}
         <button type="button" x-show="wizHidden" x-cloak @click="wizHidden = false"
-                aria-label="Show the NaaraSim helper"
+                aria-label="Show the {{ \App\Support\BrandSettings::name() }} helper"
                 class="flex h-11 w-11 items-center justify-center rounded-full bg-[rgb(var(--nx-surface))] p-px shadow-lg shadow-[rgb(var(--nx-teal)/0.2)] ring-1 ring-[rgb(var(--nx-teal)/0.2)] transition hover:shadow-[rgb(var(--nx-teal)/0.3)]">
             <span class="flex h-full w-full items-center justify-center rounded-full bg-[rgb(var(--nx-cta-b)/0.1)] text-[rgb(var(--nx-teal-ink))]">
                 <x-icon name="message-circle" class="h-5 w-5" />
@@ -57,7 +57,7 @@
              feel) instead of a generic icon. --}}
         @php $naaraAvatar = \App\Support\SupportSettings::avatar(); @endphp
         <button type="button" wire:click="toggle"
-                aria-label="{{ $wizAttention ? 'Confused? Use The Wizard' : 'Open the NaaraSim helper' }}"
+                aria-label="{{ $wizAttention ? 'Confused? Use The Wizard' : 'Open the '.\App\Support\BrandSettings::name().' helper' }}"
                 class="group relative rounded-full p-px shadow-lg shadow-[rgb(var(--nx-teal)/0.15)] transition hover:shadow-[rgb(var(--nx-teal)/0.25)]{{ $wizAttention ? 'nx-wiz-swell' : '' }}">
             {{-- A fine gradient edge + a single restrained, soft halo (professional,
                  not heavy — no second rotating aurora that fought Nia's glow).

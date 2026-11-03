@@ -1,3 +1,8 @@
+## 2026-11-03: One licence per site, two-tone icons, brand proof
+- Brand engine proof (24 pages, guest and admin): visible "Naara" 0 before and after; the owner's name replaces the shipped one everywhere (250 occurrences, 0 left). Fixed the last leaks: support email default no longer the platform's, the wizard helper labels, the banner eyebrow.
+- Icons: every line icon now carries one tiny accent detail (`--ic-accent`, from the active icon pack; default graphite line with warm gold). The ash tint inside pack icons is gone (clean line art). Fixed a giant stray icon at the bottom of the sidebar (a caller's `shrink-0` class replaced the icon size).
+- Activation is now bound to one site (see docs/audit/WL-ACTIVATION-E2E.md section 6).
+
 ## 2026-11-03: Activation security hardening (see docs/audit/WL-ACTIVATION-E2E.md on master)
 - Entitlements are **signed** by the platform (Ed25519, `NAARA_LICENCE_PUBLIC_KEY` here, private key on the master only). A fake platform, a replayed answer from another licence, an expired answer or an edited database cannot unlock anything. Normal installs with no verified answer are **closed** (entry-level locks), not open. A 401/403 from the platform drops the stored answer at once. Extended stays unlocked by owner design (decision D1 pending).
 - Licence screen shows the proof (signed by the platform, valid to), warns when no platform key is installed, never shows a success banner over a failed proof. `whitelabel:check-in` is monitored in System health.

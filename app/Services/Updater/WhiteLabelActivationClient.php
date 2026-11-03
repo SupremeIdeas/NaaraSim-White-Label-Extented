@@ -47,6 +47,9 @@ class WhiteLabelActivationClient
         if ($response->status() === 429) {
             return $this->fail('Too many attempts. Wait a minute and try again.');
         }
+        if ($response->status() === 409) {
+            return $this->fail((string) ($response->json('message') ?: 'This licence is already activated on another site. Ask the platform operator to release it, then activate again.'));
+        }
         if ($response->status() === 403) {
             return $this->fail('That key was not accepted. It may be mistyped, revoked, or not active yet. Check it with the platform operator.');
         }

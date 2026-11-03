@@ -122,4 +122,13 @@ class LicenseActivationTest extends TestCase
             ->call('disconnect')->assertForbidden();
         $this->assertSame('active', LicenseState::status());
     }
+
+    public function test_a_licence_bound_to_another_site_is_refused_with_a_clear_message(): void
+    {
+        Http::fake(['*' => Http::response(['message' => 'This licence is already activated on another site. Ask the platform operator to release it, then activate again.', 'code' => 'licence_bound'], 409)]);
+        Livewire::actingAs($this->admin())->test(LicenseActivation::class)
+            ->set('licenseKey', 'K-1234')->set('platformUrl', 'https://platform.example')->call('activate')
+            ->assertSee('already activated on another site');
+        $this->assertSame('none', LicenseState::status());
+    }
 }

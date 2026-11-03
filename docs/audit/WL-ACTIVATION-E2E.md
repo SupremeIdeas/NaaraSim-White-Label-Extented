@@ -54,6 +54,15 @@ Attack matrix (live master; image `attack-matrix.png`): no token 401; invented t
 2. Put the printed `NAARA_LICENCE_PUBLIC_KEY` into every white-label build's `.env` (or ship it as the config default in the next build). Without it the install is not protected.
 3. Existing installs: activate once from Admin > Licence activation (or keep the old `.env` token; then the signed answer binds on its first check-in).
 
+
+## 6. Purchase flow, one licence per site, key reveal (added 2026-11-03)
+
+* **Buying.** The buyer pays (wallet, card or approved transfer) and lands on "See your licence". The page shows **Activation credentials**: status, platform address, the key masked (`NAARA-••••-••••-XXXX`), the site it is activated on and last check-in. **Reveal key** needs the buyer's account password (5 tries per 10 minutes), lasts 2 minutes, is audited, and the key is not in the page until revealed.
+* **Admin.** Master > White-label oversight shows the same key masked in each row with an **eye**: click to show (audited, super admin only), click again to hide; it hides itself after 2 minutes. A newly issued key is still shown once in the banner.
+* **Domain proof.** Activation sends the install's domain and id; the oversight row shows the domain (searchable by domain), version and last check-in the moment it activates.
+* **One licence, one site.** After the first activation the licence is bound to that domain and install. Any other domain, another install, a disguised domain, or an activation that leaves them out answers **409 "already activated on another site"**, is recorded and alerted. A token copied to another server is refused on check-in (403). The same site can activate again. Moving servers is an admin action: **Release site** (super admin) clears the binding and kills the token; the next activation binds the new site and the old site is then refused. Proven in the run: second site refused, original unaffected, release, new site active, old site "Platform no longer accepts this install".
+* Activation now requires `domain` and `instance_id` (setting `white_label.require_domain_on_activation`, on by default).
+
 ## 5b. Decisions for the owner (recommended default first)
 
 * D1: an **unactivated Extended** install currently runs fully with no gate at all. Recommended: 14 days grace, then a persistent admin banner and updates/themes withheld (never a hard lock).

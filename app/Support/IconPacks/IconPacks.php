@@ -83,7 +83,8 @@ final class IconPacks
         $p = self::all()[$slug] ?? self::all()[self::defaultSlug()] ?? ['ic' => '#0F766E', 'ac' => '#F5A524'];
         $surface = $mode === 'dark' ? '#0B1624' : '#FFFFFF';
 
-        return ['ic' => self::readable($p['ic'], $surface), 'ac' => self::readable($p['ac'], $surface)];
+        // The line must read (3:1). The accent is a tiny decorative detail, so it only has to stay clearly visible (2:1): that keeps gold bright instead of turning it mustard.
+        return ['ic' => self::readable($p['ic'], $surface), 'ac' => self::readable($p['ac'], $surface, 2.0)];
     }
 
     /** Rewrites the palette rule of one canonical icon with a pack's colours. */
@@ -106,18 +107,18 @@ final class IconPacks
         return substr(md5(json_encode(self::all())), 0, 8);
     }
 
-    private static function readable(string $hex, string $surface): string
+    private static function readable(string $hex, string $surface, float $min = 3.0): string
     {
         $fg = self::rgb($hex);
         $bg = self::rgb($surface);
-        if (self::contrast($fg, $bg) >= 3.0) {
+        if (self::contrast($fg, $bg) >= $min) {
             return strtoupper($hex);
         }
         // Move toward white on a dark surface and toward black on a light one, a little at a time, keeping the hue.
         $target = self::luminance($bg) < 0.5 ? [255, 255, 255] : [0, 0, 0];
         for ($t = 0.1; $t <= 1.0; $t += 0.05) {
             $mix = [(int) round($fg[0] + ($target[0] - $fg[0]) * $t), (int) round($fg[1] + ($target[1] - $fg[1]) * $t), (int) round($fg[2] + ($target[2] - $fg[2]) * $t)];
-            if (self::contrast($mix, $bg) >= 3.0) {
+            if (self::contrast($mix, $bg) >= $min) {
                 return sprintf('#%02X%02X%02X', ...$mix);
             }
         }

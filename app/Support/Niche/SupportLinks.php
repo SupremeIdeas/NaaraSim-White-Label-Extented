@@ -38,6 +38,20 @@ class SupportLinks
             $typed = '';
         }
 
-        return filter_var($typed, FILTER_VALIDATE_EMAIL) ? $typed : (string) config('naara.support.email', 'support@naarasim.com');
+        if (filter_var($typed, FILTER_VALIDATE_EMAIL)) {
+            return $typed;
+        }
+        $owner = \App\Support\BrandSettings::profile('support_email');
+        if (filter_var($owner, FILTER_VALIDATE_EMAIL)) {
+            return $owner;
+        }
+        $env = (string) config('naara.support.email', '');
+        // Never the original platform's address: until the owner sets one, support@ their own domain.
+        if (filter_var($env, FILTER_VALIDATE_EMAIL) && ! str_ends_with(strtolower($env), '@naarasim.com')) {
+            return $env;
+        }
+        $host = preg_replace('/^www\./', '', (string) (parse_url((string) config('app.url'), PHP_URL_HOST) ?: 'example.com'));
+
+        return 'support@'.$host;
     }
 }
