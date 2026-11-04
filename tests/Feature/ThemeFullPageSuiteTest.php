@@ -62,7 +62,7 @@ class ThemeFullPageSuiteTest extends TestCase
 
         $this->get('/about')
             ->assertOk()
-            ->assertSee(ThemePageLibrary::defaultsFor('about_page', 'neon-vertex')['intro']);
+            ->assertSee(\App\Support\BrandSettings::rebrand(ThemePageLibrary::defaultsFor('about_page', 'neon-vertex')['intro']), false);
     }
 
     public function test_neon_vertex_renders_its_custom_how_it_works_page(): void

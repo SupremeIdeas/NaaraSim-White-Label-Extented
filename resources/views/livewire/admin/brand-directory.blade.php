@@ -1,5 +1,5 @@
 <div class="mx-auto max-w-4xl">
-    @php($input = 'w-full rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-sm dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100')
+    @php($input = 'w-full rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-sm dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100')
     <div class="mb-6">
         <h1 class="text-xl font-bold text-slate-900 dark:text-white">Brand directory</h1>
         <p class="text-sm text-slate-500 dark:text-slate-400">Subscription plans and the self-service brand listings. Admin-placed brands (via Social Hunt) are always featured and sit above these.</p>
@@ -8,7 +8,7 @@
     @if ($saved)<div class="mb-4 rounded-lg border border-green-200 bg-green-50 px-4 py-2.5 text-sm text-green-800 dark:border-green-900/40 dark:bg-green-950/30 dark:text-green-300">{{ $saved }}</div>@endif
 
     {{-- Plans --}}
-    <section class="mb-8 rounded-xl border border-slate-200 bg-white p-5 dark:border-[#2D4060] dark:bg-[#1B2A44]">
+    <section class="mb-8 rounded-xl border border-slate-200 bg-white p-5 dark:border-[#2A2E34] dark:bg-[#1D2024]">
         <h2 class="mb-3 text-sm font-bold text-slate-900 dark:text-white">Subscription plans</h2>
         <div class="space-y-3">
             @foreach ($planModels as $p)
@@ -35,12 +35,12 @@
             <input wire:model="newPlan.guaranteed_followers_per_handle_per_month" type="number" class="{{ $input }}" placeholder="Guar./handle">
             <input wire:model="newPlan.video_previews_allowed" type="number" class="{{ $input }}" placeholder="Videos">
             <input wire:model="newPlan.credit_reward_per_follow" type="number" step="0.5" class="{{ $input }}" placeholder="Credits/follow">
-            <button wire:click="addPlan" class="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50 sm:col-span-7 dark:border-[#2D4060] dark:text-slate-200">Add plan</button>
+            <button wire:click="addPlan" class="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50 sm:col-span-7 dark:border-[#2A2E34] dark:text-slate-200">Add plan</button>
         </div>
     </section>
 
     {{-- Self-service brands --}}
-    <section class="rounded-xl border border-slate-200 bg-white p-5 dark:border-[#2D4060] dark:bg-[#1B2A44]">
+    <section class="rounded-xl border border-slate-200 bg-white p-5 dark:border-[#2A2E34] dark:bg-[#1D2024]">
         <h2 class="mb-3 text-sm font-bold text-slate-900 dark:text-white">Self-service listings</h2>
         <div class="space-y-2">
             @forelse ($brands as $b)

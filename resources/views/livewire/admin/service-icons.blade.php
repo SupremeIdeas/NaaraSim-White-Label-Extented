@@ -14,11 +14,11 @@
     @endif
 
     {{-- Upload / add --}}
-    <div class="mb-6 rounded-2xl border border-slate-200 bg-white p-5 dark:border-[#2D4060] dark:bg-[#1A2840]">
+    <div class="mb-6 rounded-2xl border border-slate-200 bg-white p-5 dark:border-[#2A2E34] dark:bg-[#17191C]">
         <div class="grid gap-4 sm:grid-cols-[1fr_1fr_auto] sm:items-end">
             <div>
                 <label class="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-300">Service</label>
-                <select wire:model="uploadSlug" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm capitalize dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                <select wire:model="uploadSlug" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm capitalize dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
                     <option value="">Add a new one…</option>
                     @foreach ($rows as $row)
                         <option value="{{ $row['slug'] }}">{{ $row['slug'] }}</option>
@@ -26,7 +26,7 @@
                 </select>
                 @if ($uploadSlug === '')
                     <input type="text" wire:model="newSlug" placeholder="e.g. bumble"
-                           class="mt-2 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                           class="mt-2 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
                     @error('newSlug') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
                 @endif
             </div>

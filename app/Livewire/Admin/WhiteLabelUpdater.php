@@ -117,6 +117,11 @@ class WhiteLabelUpdater extends Component
     public function pullAndApply(string $packageId, WhiteLabelUpdateClient $client): void
     {
         abort_unless(Auth::user()->hasRole('super_admin'), 403);
+        if (! \App\Support\Activation\Enforcement::updatesAllowed()) {
+            $this->pullStatus = \App\Support\Activation\Enforcement::stage()['message'];
+
+            return;
+        }
 
         try {
             $path = $client->download($packageId, 'code');
@@ -188,6 +193,11 @@ class WhiteLabelUpdater extends Component
     public function applyPackage(): void
     {
         abort_unless(Auth::user()->hasRole('super_admin'), 403);
+        if (! \App\Support\Activation\Enforcement::updatesAllowed()) {
+            $this->verifyError = \App\Support\Activation\Enforcement::stage()['message'];
+
+            return;
+        }
 
         if ($this->stagedPath === null || ! is_file($this->stagedPath)) {
             $this->verifyError = 'No verified package is staged — upload and verify one first.';

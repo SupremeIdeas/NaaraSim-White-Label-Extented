@@ -37,10 +37,12 @@ class SupplierScrub
 
         // Tidy up: collapse whitespace and any separator now left dangling
         // (leading/trailing/doubled "—", "-", "|", ":").
-        $clean = preg_replace('/\s+/', ' ', $clean) ?? $clean;
-        $clean = preg_replace('/\s*([—\-|:])\s*\1*/', ' $1 ', $clean) ?? $clean;
-        $clean = trim($clean, " \t—-|:");
-        $clean = preg_replace('/\s+/', ' ', $clean) ?? $clean;
+        // Every pattern here carries /u: the em dash is THREE bytes, and without it the class would match (and put spaces between) the individual bytes,
+        // leaving invalid UTF-8 that MySQL rejects and that blanks any JSON response carrying the name.
+        $clean = preg_replace('/\s+/u', ' ', $clean) ?? $clean;
+        $clean = preg_replace('/\s*([—\-|:])\s*\1*/u', ' $1 ', $clean) ?? $clean;
+        $clean = preg_replace('/^[\s—\-|:]+|[\s—\-|:]+$/u', '', $clean) ?? $clean;
+        $clean = preg_replace('/\s+/u', ' ', $clean) ?? $clean;
 
         // If scrubbing emptied the name, fall back to a neutral label.
         return trim($clean) !== '' ? trim($clean) : 'eSIM plan';

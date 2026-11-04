@@ -4,7 +4,7 @@
      only when the admin enabled it. Uses the existing [data-reveal] infra
      (JS-gated + reduced-motion-safe), so no-JS users still see the content. --}}
 @if (\App\Support\HomeStory::isVisible())
-    <section class="relative overflow-hidden bg-white py-20 sm:py-28 dark:bg-[#0D1B2A]">
+    <section class="relative overflow-hidden bg-white py-20 sm:py-28 dark:bg-[#0b0b0c]">
         {{-- Soft brand aura, matching the site's glow treatment. --}}
         <div class="pointer-events-none absolute -left-24 top-10 h-72 w-72 rounded-full bg-primary/10 blur-3xl dark:bg-teal-500/10" aria-hidden="true"></div>
         <div class="pointer-events-none absolute -right-24 bottom-0 h-72 w-72 rounded-full bg-accent/10 blur-3xl dark:bg-accent/10" aria-hidden="true"></div>

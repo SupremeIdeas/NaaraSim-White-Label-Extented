@@ -45,7 +45,7 @@
          edge), else (2) the active Theme Preset's primary colour so the
          chrome repaints with whichever theme is active, else (3) the
          admin-configured App Export PWA colour on the default theme. --}}
-    <meta name="theme-color" content="{{ \App\Support\ThemePreset::headerColorHex() ?? \App\Support\ThemePreset::browserThemeColor() ?? \App\Support\AppExport::get('theme_color', '#A21CAF') }}">
+    <meta name="theme-color" content="{{ \App\Support\ThemePreset::headerColorHex() ?? \App\Support\ThemePreset::browserThemeColor() ?? \App\Support\AppExport::get('theme_color', '#23272D') }}">
 
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -55,7 +55,7 @@
     {{-- Preload the body font (compressed WOFF2) only. The display font loads via
          @font-face with font-display:swap — never preload the uncompressed TTF
          (it's a heavy download that blocks the critical path for no benefit). --}}
-    <link rel="preload" href="/fonts/didact-gothic.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="/fonts/manrope.woff2" as="font" type="font/woff2" crossorigin>
 
     {{-- Admin font system (Branding page): loads a Google Font's stylesheet only
          when one is actually selected for the title or body font. CSP is widened
@@ -154,7 +154,7 @@
          so it wins over any theme-preset font variable — this is the single
          authoritative source for the platform's rendered font, regardless of
          which of the 40 themes is active. Empty on an unconfigured install, so
-         the shipped Naara fonts (Supreme Display / Didact Gothic) are untouched. --}}
+         the shipped Naara fonts (Bricolage Grotesque / Manrope) are untouched. --}}
     @php($fontCss = \App\Support\BrandSettings::fontCss())
     @if ($fontCss)<style id="brand-font-vars">{!! $fontCss !!}</style>@endif
     {{-- Member's custom accent colour (both mode variants; the `.dark` class picks one). Empty unless they chose Custom. --}}
@@ -166,6 +166,9 @@
     @stack('head')
     <x-trust.invite-script />
     @include('partials.tracking')
+    @php($icLight = \App\Support\IconPacks\IconPacks::colors(\App\Support\IconPacks\IconPacks::activeSlug(), 'light')['ac'])
+    @php($icDark = \App\Support\IconPacks\IconPacks::colors(\App\Support\IconPacks\IconPacks::activeSlug(), 'dark')['ac'])
+    <style id="ic-accent-vars">:root{--ic-accent:{{ $icLight }}}.dark{--ic-accent:{{ $icDark }}}</style>
 </head>
 {{--
     is-admin-surface (header editor, 2026-09-07): app-shell.blade.php's
@@ -176,7 +179,7 @@
     /adminmaster's own chrome (see the `body:not(.is-admin-surface)` scope
     in that method).
 --}}
-<body class="min-h-screen text-[#0F172A] antialiased dark:text-slate-100 {{ \App\Support\ThemePreset::bodyClass() }} {{ $bodyClass ?? 'bg-[#F8F9FA] dark:bg-navy' }} {{ request()->is(\App\Support\AdminPath::current(), \App\Support\AdminPath::current().'/*') ? 'is-admin-surface' : '' }}">
+<body class="min-h-screen text-[#1b1c1e] antialiased dark:text-slate-100 {{ \App\Support\ThemePreset::bodyClass() }} {{ $bodyClass ?? 'bg-[#F8F9FA] dark:bg-navy' }} {{ request()->is(\App\Support\AdminPath::current(), \App\Support\AdminPath::current().'/*') ? 'is-admin-surface' : '' }}">
     @include('partials.icon-sprite')
     @include('partials.service-icon-sprite')
     @include('partials.nx-icon-sprite')

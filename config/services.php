@@ -488,4 +488,19 @@ return [
         'auth_url' => env('SONETEL_AUTH_URL', 'https://api.sonetel.com/SonetelAuth/oauth/token'),
     ],
 
+
+    // Grey Business API (global bank + mobile-money payouts). Bearer secret key; the base URL selects
+    // sandbox (https://businessapi-sandbox.grey.co) or production (https://businessapi.grey.co). Webhook
+    // secret signs deliveries (X-Webhook-Signature, HMAC-SHA256 of the raw body).
+    'grey' => [
+        'api_secret' => env('GREY_API_SECRET_KEY'),
+        'webhook_secret' => env('GREY_WEBHOOK_SECRET'),
+        // Blank = follow the payout mode (live -> production host, otherwise sandbox), so a fresh install never needs this set by hand.
+        'base_url' => env('GREY_BASE_URL'),
+        'payment_purpose' => env('GREY_PAYMENT_PURPOSE', 'Other'),
+        'source_of_funds' => env('GREY_SOURCE_OF_FUNDS', 'BUSINESS_INCOME'),
+        // Currencies with no Grey wallet are paid from this wallet through a quoted conversion, capped at the reserved USD plus this %.
+        'convert_from' => env('GREY_CONVERT_FROM', 'USD'),
+        'max_slippage_pct' => (float) env('GREY_MAX_SLIPPAGE_PCT', 3),
+    ],
 ];

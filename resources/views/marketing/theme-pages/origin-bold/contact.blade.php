@@ -43,24 +43,24 @@
                 <div class="grid grid-cols-2 gap-4">
                     <a href="{{ auth()->check() ? route('support') : route('login') }}"
                        class="group flex flex-col items-center justify-center gap-2.5 border-4 border-white/20 bg-white/5 p-6 text-center transition hover:border-primary hover:bg-primary">
-                        <x-icon name="message-circle" class="h-7 w-7 text-white" />
+                        <x-glyph name="message-circle" class="h-7 w-7 text-white" />
                         <span class="text-xs font-black uppercase tracking-wide text-white">Live chat</span>
                     </a>
                     <a href="mailto:{{ \App\Support\Niche\SupportLinks::email() }}"
                        class="group flex flex-col items-center justify-center gap-2.5 border-4 border-white/20 bg-white/5 p-6 text-center transition hover:border-primary hover:bg-primary">
-                        <x-icon name="mail" class="h-7 w-7 text-white" />
+                        <x-glyph name="mail" class="h-7 w-7 text-white" />
                         <span class="text-xs font-black uppercase tracking-wide text-white">Email</span>
                     </a>
                     @if (\App\Support\Niche\SupportLinks::hasWhatsapp())
                         <a href="{{ \App\Support\Niche\SupportLinks::whatsappUrl() }}" target="_blank" rel="noopener"
                            class="group flex flex-col items-center justify-center gap-2.5 border-4 border-white/20 bg-white/5 p-6 text-center transition hover:border-primary hover:bg-primary">
-                            <x-icon name="phone" class="h-7 w-7 text-white" />
+                            <x-glyph name="phone" class="h-7 w-7 text-white" />
                             <span class="text-xs font-black uppercase tracking-wide text-white">WhatsApp</span>
                         </a>
                     @endif
                     <a href="{{ route('how-it-works') }}" wire:navigate
                        class="group flex flex-col items-center justify-center gap-2.5 border-4 border-white/20 bg-white/5 p-6 text-center transition hover:border-primary hover:bg-primary">
-                        <x-icon name="help-circle" class="h-7 w-7 text-white" />
+                        <x-glyph name="help-circle" class="h-7 w-7 text-white" />
                         <span class="text-xs font-black uppercase tracking-wide text-white">Help centre</span>
                     </a>
                 </div>

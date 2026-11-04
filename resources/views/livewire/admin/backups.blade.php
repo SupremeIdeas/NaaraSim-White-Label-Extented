@@ -16,7 +16,7 @@
     @endif
 
     {{-- Backups --}}
-    <section class="mb-8 rounded-2xl border border-slate-200 bg-white p-6 dark:border-[#2D4060] dark:bg-[#1A2840]">
+    <section class="mb-8 rounded-2xl border border-slate-200 bg-white p-6 dark:border-[#2A2E34] dark:bg-[#17191C]">
         <div class="mb-4 flex items-center justify-between">
             <h2 class="flex items-center gap-2 text-sm font-semibold text-slate-800 dark:text-slate-100">
                 <x-icon name="package" class="h-4 w-4 text-primary" /> Database backups
@@ -28,7 +28,7 @@
             </button>
         </div>
 
-        <div class="divide-y divide-slate-100 dark:divide-[#243352]">
+        <div class="divide-y divide-slate-100 dark:divide-[#373a3f]">
             @forelse ($backups as $b)
                 <div wire:key="bk-{{ $b['name'] }}" class="flex items-center justify-between gap-3 py-3">
                     <div class="min-w-0">
@@ -36,7 +36,7 @@
                         <p class="text-xs text-slate-400 dark:text-slate-500">{{ number_format($b['size'] / 1048576, 2) }} MB · {{ \Carbon\Carbon::createFromTimestamp($b['last_modified'])->diffForHumans() }}</p>
                     </div>
                     <div class="flex shrink-0 items-center gap-1.5">
-                        <button type="button" wire:click="download('{{ $b['path'] }}')" class="inline-flex items-center gap-1 rounded-lg border border-slate-300 px-2.5 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50 dark:border-[#2D4060] dark:text-slate-300 dark:hover:bg-[#243352]">
+                        <button type="button" wire:click="download('{{ $b['path'] }}')" class="inline-flex items-center gap-1 rounded-lg border border-slate-300 px-2.5 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50 dark:border-[#2A2E34] dark:text-slate-300 dark:hover:bg-[#373a3f]">
                             <x-icon name="download" class="h-3.5 w-3.5" /> Download
                         </button>
                         <button type="button" wire:click="restore('{{ $b['path'] }}')"
@@ -108,7 +108,7 @@
     </section>
 
     {{-- Dataset export / import --}}
-    <section class="rounded-2xl border border-slate-200 bg-white p-6 dark:border-[#2D4060] dark:bg-[#1A2840]">
+    <section class="rounded-2xl border border-slate-200 bg-white p-6 dark:border-[#2A2E34] dark:bg-[#17191C]">
         <h2 class="mb-1 flex items-center gap-2 text-sm font-semibold text-slate-800 dark:text-slate-100">
             <x-icon name="file-text" class="h-4 w-4 text-primary" /> Portable datasets
         </h2>
@@ -119,30 +119,30 @@
             <label class="mb-2 block text-xs font-medium text-slate-500 dark:text-slate-400">Export tables</label>
             <div class="flex flex-wrap gap-2">
                 @foreach ($exportable as $table)
-                    <label class="flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-1.5 text-sm text-slate-700 dark:border-[#2D4060] dark:text-slate-200">
+                    <label class="flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-1.5 text-sm text-slate-700 dark:border-[#2A2E34] dark:text-slate-200">
                         <input type="checkbox" wire:model="exportTables" value="{{ $table }}" class="rounded text-primary"> {{ $table }}
                     </label>
                 @endforeach
                 <button type="button" wire:click="exportDataset" @disabled(empty($exportTables))
-                        class="inline-flex items-center gap-2 rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50 dark:border-[#2D4060] dark:text-slate-200 dark:hover:bg-[#243352]">
+                        class="inline-flex items-center gap-2 rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50 dark:border-[#2A2E34] dark:text-slate-200 dark:hover:bg-[#373a3f]">
                     <x-icon name="download" class="h-4 w-4" /> Export selected
                 </button>
             </div>
         </div>
 
         {{-- Import --}}
-        <div class="border-t border-slate-100 pt-4 dark:border-[#243352]">
+        <div class="border-t border-slate-100 pt-4 dark:border-[#373a3f]">
             <label class="mb-2 block text-xs font-medium text-slate-500 dark:text-slate-400">Import a dataset (.json)</label>
             <div class="flex flex-wrap items-center gap-3">
                 <input type="file" wire:model="datasetFile" accept="application/json,.json" class="text-sm text-slate-600 dark:text-slate-300">
                 <button type="button" wire:click="analyzeImport" wire:loading.attr="disabled" wire:target="analyzeImport,datasetFile" @disabled(! $datasetFile)
-                        class="inline-flex items-center gap-2 rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50 dark:border-[#2D4060] dark:text-slate-200 dark:hover:bg-[#243352]">
+                        class="inline-flex items-center gap-2 rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50 dark:border-[#2A2E34] dark:text-slate-200 dark:hover:bg-[#373a3f]">
                     Preview changes
                 </button>
             </div>
 
             @if ($dryRun !== null)
-                <div class="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-[#2D4060] dark:bg-[#243352]">
+                <div class="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-[#2A2E34] dark:bg-[#373a3f]">
                     <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Dry-run — nothing written yet</p>
                     <ul class="space-y-1 text-sm text-slate-700 dark:text-slate-200">
                         @foreach ($dryRun as $table => $counts)

@@ -19,7 +19,8 @@
             {{-- Legibility scrim: clean at the top where the headline/subhead sit,
                  the planet stays vivid lower down. Matches the page bg in both
                  themes — firmer in light where the planet is a mid-tone. --}}
-            <div class="absolute inset-0 bg-gradient-to-b from-[#F8F9FA] via-[#F8F9FA]/55 to-[#F8F9FA]/70 dark:from-[#0D1B2A] dark:via-[#0D1B2A]/15 dark:to-[#0D1B2A]/65"></div>
+            <div class="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-[#F8F9FA] to-transparent dark:from-[#0A0B0D]"></div>
+            <div class="absolute inset-0 bg-gradient-to-b from-[#F8F9FA] via-[#F8F9FA]/20 to-[#F8F9FA]/30 dark:from-[#0b0b0c] dark:via-[#0b0b0c]/15 dark:to-[#0b0b0c]/65"></div>
         </div>
         {{-- Flag + comms nodes over the planet: our brand's "connect across
              borders" message, above the scrim so they read clearly.
@@ -34,7 +35,6 @@
              information loss if hidden; `lg:` is where the hero is short
              enough for the periphery these positions assume to actually
              exist. --}}
-        <x-flag-orbit tone="light" class="z-[1] hidden lg:block" />
     @endif
     <div class="relative z-10 mx-auto max-w-6xl px-4 pb-20 pt-16 text-center sm:pt-24 {{ ! empty($s['image']) ? 'text-white' : '' }}">
         {{-- Admin image branch sits on a dark navy scrim regardless of the
@@ -83,14 +83,15 @@
         <p data-reveal style="--reveal-delay:.32s" class="mt-6 text-xs {{ empty($s['image']) ? 'text-slate-400' : 'text-slate-300' }}">{{ $s['social_proof'] }}</p>
 
         <dl data-reveal style="--reveal-delay:.4s" class="mx-auto mt-12 grid max-w-3xl grid-cols-2 gap-4 sm:grid-cols-4">
-            @foreach (['stat_1', 'stat_2', 'stat_3', 'stat_4'] as $stat)
+            @foreach (['stat_1', 'stat_2', 'stat_3', 'stat_4'] as $i => $stat)
                 @php [$value, $label] = array_pad(explode(' ', $s[$stat], 2), 2, ''); @endphp
                 @php($numeric = preg_match('/^(\d+)(\+?)$/', $value, $m))
-                <div class="nx-card !p-4 text-center">
+                <div class="nx-aurora-card">
                     <dt class="sr-only">{{ $label }}</dt>
-                    <dd class="font-display text-2xl font-bold text-primary dark:text-teal-300"
+                    <span class="nx-aurora-card__icon"><x-glyph :name="['globe', 'clock', 'sim', 'headset'][$i]" :size="38" tile /></span>
+                    <dd class="font-display text-2xl font-bold text-slate-900 dark:text-white"
                         @if ($numeric) data-countup="{{ $m[1] }}" data-suffix="{{ $m[2] }}" @endif>{{ $value }}</dd>
-                    <dd class="mt-1 text-xs text-slate-500 dark:text-slate-400">{{ $label }}</dd>
+                    <dd class="mt-1 text-xs font-medium text-slate-600 dark:text-slate-300">{{ $label }}</dd>
                 </div>
             @endforeach
         </dl>

@@ -78,4 +78,12 @@ return [
     */
     'shipped_version' => env('NAARA_SHIPPED_VERSION', '2026.10.13-1'),
 
+
+    /*
+    | The platform's licence PUBLIC key (Ed25519, base64). With it set, this install believes only signed entitlement answers: a fake platform, a replayed
+    | answer from another licence or an expired answer all fail closed. Safe to ship; the matching private key stays on the platform. Get it from the
+    | platform operator (or `php artisan licence:keygen` on the platform).
+    */
+    'licence_public_key' => env('NAARA_LICENCE_PUBLIC_KEY'),
+
 ];

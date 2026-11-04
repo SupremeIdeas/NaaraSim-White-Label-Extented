@@ -5,7 +5,7 @@
     </div>
 
     {{-- Disputes --}}
-    <div class="mb-8 rounded-2xl border border-slate-200 bg-white p-5 dark:border-[#2D4060] dark:bg-[#1A2840]">
+    <div class="mb-8 rounded-2xl border border-slate-200 bg-white p-5 dark:border-[#2A2E34] dark:bg-[#17191C]">
         <h2 class="mb-3 text-sm font-semibold text-slate-700 dark:text-slate-200">Card disputes</h2>
         @if ($disputes->isEmpty())
             <p class="text-sm text-slate-400 dark:text-slate-500">No disputes. Contested charges appear here and their funds are frozen until resolved.</p>
@@ -40,11 +40,11 @@
     </div>
 
     {{-- Top-ups (refundable) --}}
-    <div class="rounded-2xl border border-slate-200 bg-white p-5 dark:border-[#2D4060] dark:bg-[#1A2840]">
+    <div class="rounded-2xl border border-slate-200 bg-white p-5 dark:border-[#2A2E34] dark:bg-[#17191C]">
         <div class="mb-3 flex items-center justify-between gap-3">
             <h2 class="text-sm font-semibold text-slate-700 dark:text-slate-200">Wallet top-ups</h2>
             <input type="text" wire:model.live.debounce.300ms="search" placeholder="Search email or reference…"
-                   class="w-64 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                   class="w-64 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
         </div>
         <div class="overflow-x-auto">
             <table class="w-full text-left text-sm">
@@ -83,7 +83,7 @@
     {{-- Refund confirm sheet --}}
     <div x-show="refund" x-cloak class="fixed inset-0 z-[60] flex items-end justify-center sm:items-center" @keydown.escape.window="refund = false" role="dialog" aria-modal="true">
         <div class="absolute inset-0 bg-black/60" @click="refund = false"></div>
-        <div x-show="refund" x-transition class="relative w-full max-w-md rounded-t-3xl bg-white p-5 shadow-2xl dark:bg-[#0D1B2A] sm:rounded-3xl">
+        <div x-show="refund" x-transition class="relative w-full max-w-md rounded-t-3xl bg-white p-5 shadow-2xl dark:bg-[#0b0b0c] sm:rounded-3xl">
             @if ($refundTxn)
                 <h2 class="mb-1 text-base font-bold text-slate-900 dark:text-white">Refund this top-up?</h2>
                 <p class="mb-4 text-xs text-slate-500 dark:text-slate-400">
@@ -92,7 +92,7 @@
                 </p>
                 <label class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">Reason (audited)</label>
                 <input type="text" wire:model="refundReason" placeholder="e.g. duplicate charge"
-                       class="mb-4 w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm dark:border-white/10 dark:bg-[#243352] dark:text-slate-100">
+                       class="mb-4 w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm dark:border-white/10 dark:bg-[#373a3f] dark:text-slate-100">
                 <button type="button" wire:click="refund" wire:loading.attr="disabled" wire:target="refund"
                         class="flex w-full items-center justify-center gap-2 rounded-2xl bg-red-600 py-3 text-sm font-semibold text-white transition hover:bg-red-700 disabled:opacity-60">
                     <span wire:loading.remove wire:target="refund">Refund now</span>

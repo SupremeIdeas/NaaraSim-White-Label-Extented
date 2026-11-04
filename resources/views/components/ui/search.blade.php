@@ -16,7 +16,7 @@
                wire:model.live.debounce.{{ $debounce }}="{{ $wire }}"
                aria-label="{{ $label }}"
                placeholder="{{ $placeholder }}"
-               class="w-full rounded-lg border border-slate-300 bg-white py-2 pl-9 pr-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-primary dark:border-[var(--brand-card-border-dark)] dark:bg-[#243352] dark:text-slate-100">
+               class="w-full rounded-lg border border-slate-300 bg-white py-2 pl-9 pr-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-primary dark:border-[var(--brand-card-border-dark)] dark:bg-[#373a3f] dark:text-slate-100">
     @else
         <input type="search"
                x-data="{ term: '' }"
@@ -24,6 +24,6 @@
                x-on:input.debounce.{{ $debounce }}="$dispatch('{{ $event }}', { term })"
                aria-label="{{ $label }}"
                placeholder="{{ $placeholder }}"
-               class="w-full rounded-lg border border-slate-300 bg-white py-2 pl-9 pr-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-primary dark:border-[var(--brand-card-border-dark)] dark:bg-[#243352] dark:text-slate-100">
+               class="w-full rounded-lg border border-slate-300 bg-white py-2 pl-9 pr-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-primary dark:border-[var(--brand-card-border-dark)] dark:bg-[#373a3f] dark:text-slate-100">
     @endif
 </div>

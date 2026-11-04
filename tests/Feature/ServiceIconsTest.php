@@ -120,8 +120,8 @@ class ServiceIconsTest extends TestCase
         $this->get('/')->assertOk()
             ->assertSee('storytellingCarousel(', false) // the reusable carousel
             ->assertSee("key: 'product-lines'", false)
-            ->assertSee('What Naara Gives You')          // admin-editable section header
-            ->assertSee('Naara Gift')                    // a product line advertised on the front end
+            ->assertSee('Everything in one wallet')      // admin-editable section header
+            ->assertSee(\App\Support\BrandSettings::rebrand('Naara Gift'))                    // a product line advertised on the front end
             ->assertSee('data-countup="190"', false);
     }
 

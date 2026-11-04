@@ -16,27 +16,27 @@
                         class="w-full rounded-xl border p-3 text-left transition
                         {{ $selected && $selected->id === $t->id
                             ? 'border-primary bg-primary/5 dark:bg-primary/10'
-                            : 'border-slate-200 bg-white hover:bg-slate-50 dark:border-[#2D4060] dark:bg-[#1A2840] dark:hover:bg-[#243352]' }}">
+                            : 'border-slate-200 bg-white hover:bg-slate-50 dark:border-[#2A2E34] dark:bg-[#17191C] dark:hover:bg-[#373a3f]' }}">
                     <div class="flex items-center justify-between gap-2">
                         <span class="truncate text-sm font-semibold text-slate-800 dark:text-slate-100">{{ $t->user->name }}</span>
                         <span class="shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium
-                            {{ $t->status === 'assigned' ? 'bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300' : 'bg-slate-100 text-slate-500 dark:bg-[#243352] dark:text-slate-400' }}">
+                            {{ $t->status === 'assigned' ? 'bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300' : 'bg-slate-100 text-slate-500 dark:bg-[#373a3f] dark:text-slate-400' }}">
                             {{ $t->status }}
                         </span>
                     </div>
                     <p class="mt-1 truncate text-xs text-slate-500 dark:text-slate-400">{{ $t->escalation_reason ?: 'Escalated to a human' }}</p>
                 </button>
             @empty
-                <div class="rounded-xl border border-dashed border-slate-200 p-6 text-center text-sm text-slate-400 dark:border-[#2D4060]">No open tickets. Nice.</div>
+                <div class="rounded-xl border border-dashed border-slate-200 p-6 text-center text-sm text-slate-400 dark:border-[#2A2E34]">No open tickets. Nice.</div>
             @endforelse
         </div>
 
         {{-- Thread --}}
-        <div class="rounded-2xl border border-slate-200 bg-white p-5 dark:border-[#2D4060] dark:bg-[#1A2840]">
+        <div class="rounded-2xl border border-slate-200 bg-white p-5 dark:border-[#2A2E34] dark:bg-[#17191C]">
             @if (! $selected)
                 <div class="flex h-64 items-center justify-center text-sm text-slate-400">Select a ticket to view the conversation.</div>
             @else
-                <div class="mb-3 flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3 dark:border-[#2D4060]">
+                <div class="mb-3 flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3 dark:border-[#2A2E34]">
                     <div>
                         <p class="text-sm font-semibold text-slate-800 dark:text-slate-100">{{ $selected->user->name }} — {{ $selected->user->email }}</p>
                         <p class="text-xs text-slate-400">
@@ -47,7 +47,7 @@
                         @if (is_null($selected->assigned_to))
                             <button wire:click="assignToMe({{ $selected->id }})" class="rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-white hover:bg-primary-dark">Assign to me</button>
                         @endif
-                        <button wire:click="resolve({{ $selected->id }})" wire:confirm="Mark this ticket resolved?" class="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50 dark:border-[#2D4060] dark:text-slate-300 dark:hover:bg-[#243352]">Resolve</button>
+                        <button wire:click="resolve({{ $selected->id }})" wire:confirm="Mark this ticket resolved?" class="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50 dark:border-[#2A2E34] dark:text-slate-300 dark:hover:bg-[#373a3f]">Resolve</button>
                     </div>
                 </div>
 
@@ -76,7 +76,7 @@
                                 </p>
                                 <div class="whitespace-pre-line rounded-2xl px-3 py-2 text-sm
                                     {{ $m['role'] === 'user'
-                                        ? 'bg-slate-100 text-slate-800 dark:bg-[#243352] dark:text-slate-100'
+                                        ? 'bg-slate-100 text-slate-800 dark:bg-[#373a3f] dark:text-slate-100'
                                         : ($m['role'] === 'staff' ? 'bg-primary text-white' : 'bg-accent/10 text-slate-800 dark:text-slate-100') }}">
                                     {{ $m['body'] }}
                                     @if ($m['voice'])
@@ -85,11 +85,11 @@
                                     @if (! empty($m['attachment']))
                                         @if ($m['attachment_image'])
                                             <a href="{{ $m['attachment'] }}" target="_blank" rel="noopener">
-                                                <img src="{{ $m['attachment'] }}" alt="{{ $m['attachment_name'] }}" class="mt-2 max-h-56 rounded-lg border border-slate-200 dark:border-[#2D4060]" />
+                                                <img src="{{ $m['attachment'] }}" alt="{{ $m['attachment_name'] }}" class="mt-2 max-h-56 rounded-lg border border-slate-200 dark:border-[#2A2E34]" />
                                             </a>
                                         @else
                                             <a href="{{ $m['attachment'] }}" target="_blank" rel="noopener"
-                                               class="mt-2 inline-flex items-center gap-1 rounded-lg border border-slate-200 px-2 py-1 text-xs dark:border-[#2D4060]">
+                                               class="mt-2 inline-flex items-center gap-1 rounded-lg border border-slate-200 px-2 py-1 text-xs dark:border-[#2A2E34]">
                                                 <x-icon name="file-text" class="h-4 w-4" /> {{ $m['attachment_name'] ?: 'Attachment' }}
                                             </a>
                                         @endif
@@ -103,7 +103,7 @@
                 {{-- Staff reply: Chat Composer Pro (text + emoji; the server's sendReply() takes text only, so nothing else is offered). The
                      wire:key remounts the composer per ticket so a draft never leaks into another customer's conversation. --}}
                 @if (config('composer.surfaces.staff_reply'))
-                    <div class="mt-4 border-t border-slate-100 pt-3 dark:border-[#2D4060]" wire:key="reply-composer-{{ $selectedId }}"
+                    <div class="mt-4 border-t border-slate-100 pt-3 dark:border-[#2A2E34]" wire:key="reply-composer-{{ $selectedId }}"
                          x-data="{
                             async send(p) {
                                 await $wire.set('reply', p.text, false);

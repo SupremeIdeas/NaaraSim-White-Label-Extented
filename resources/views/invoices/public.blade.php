@@ -11,7 +11,7 @@
         };
     @endphp
     <div class="mx-auto flex min-h-screen max-w-lg flex-col justify-center px-4 py-10">
-        <div class="rounded-3xl border border-slate-200 bg-white p-6 shadow-xl shadow-slate-900/5 dark:border-white/10 dark:bg-[#16233d]">
+        <div class="rounded-3xl border border-slate-200 bg-white p-6 shadow-xl shadow-slate-900/5 dark:border-white/10 dark:bg-[#27292c]">
             <div class="mb-5 flex items-center gap-3">
                 @if ($merchant->logo_url)
                     <img src="{{ $merchant->logo_url }}" alt="{{ $merchant->business_name }}" class="h-11 w-11 rounded-xl object-cover">

@@ -13,7 +13,7 @@
                 You’ve completed the smart installation. Sign in to your admin panel with the default account below.
             </p>
 
-            <div class="mt-6 rounded-xl border border-slate-200 bg-slate-50 p-5 text-left dark:border-[#2D4060] dark:bg-[#243352]">
+            <div class="mt-6 rounded-xl border border-slate-200 bg-slate-50 p-5 text-left dark:border-[#2A2E34] dark:bg-[#373a3f]">
                 <p class="mb-2 text-sm font-semibold text-slate-700 dark:text-slate-200">Default login credentials:</p>
                 <p class="text-sm text-slate-600 dark:text-slate-300">Admin panel:
                     <span class="rounded bg-red-50 px-2 py-0.5 font-mono text-red-600 dark:bg-red-950/40 dark:text-red-300">/{{ $adminPath }}</span>

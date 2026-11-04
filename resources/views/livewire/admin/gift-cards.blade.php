@@ -10,7 +10,7 @@
     {{-- Providers side by side --}}
     <div class="mt-5 grid gap-4 sm:grid-cols-2">
         @foreach ($providers as $p)
-            <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-[#2D4060] dark:bg-[#1A2840]" wire:key="prov-{{ $p['key'] }}">
+            <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-[#2A2E34] dark:bg-[#17191C]" wire:key="prov-{{ $p['key'] }}">
                 <div class="flex items-start justify-between gap-3">
                     <div>
                         <div class="flex items-center gap-2">
@@ -23,7 +23,7 @@
                     </div>
                     <div class="flex shrink-0 items-center gap-2">
                         <button type="button" wire:click="preflight('{{ $p['key'] }}')" wire:loading.attr="disabled" wire:target="preflight('{{ $p['key'] }}')"
-                                class="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:border-primary hover:text-primary disabled:opacity-60 dark:border-[#2D4060] dark:text-slate-300">
+                                class="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:border-primary hover:text-primary disabled:opacity-60 dark:border-[#2A2E34] dark:text-slate-300">
                             <span wire:loading.remove wire:target="preflight('{{ $p['key'] }}')">Test</span>
                             <span wire:loading wire:target="preflight('{{ $p['key'] }}')">Testing…</span>
                         </button>
@@ -48,11 +48,11 @@
                     </div>
                 @endif
                 <dl class="mt-4 grid grid-cols-2 gap-3 text-sm">
-                    <div class="rounded-xl bg-slate-50 p-3 dark:bg-[#243352]">
+                    <div class="rounded-xl bg-slate-50 p-3 dark:bg-[#373a3f]">
                         <dt class="text-[11px] uppercase tracking-wide text-slate-400">Products</dt>
                         <dd class="mt-0.5 font-bold text-slate-900 dark:text-slate-100">{{ number_format($p['total']) }}</dd>
                     </div>
-                    <div class="rounded-xl bg-slate-50 p-3 dark:bg-[#243352]">
+                    <div class="rounded-xl bg-slate-50 p-3 dark:bg-[#373a3f]">
                         <dt class="text-[11px] uppercase tracking-wide text-slate-400">Live in store</dt>
                         <dd class="mt-0.5 font-bold text-slate-900 dark:text-slate-100">{{ number_format($p['live']) }}</dd>
                     </div>
@@ -76,10 +76,10 @@
         @if ($review->isNotEmpty())<span class="rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-semibold text-amber-700 dark:bg-amber-500/15 dark:text-amber-300">{{ $review->count() }}</span>@endif
     </h2>
     <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">High-value purchases are held here — the buyer's wallet is already debited. Approve to deliver, reject to refund.</p>
-    <div class="mt-3 overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-[#2D4060] dark:bg-[#1A2840]">
+    <div class="mt-3 overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-[#2A2E34] dark:bg-[#17191C]">
         <table class="w-full text-sm">
             <thead>
-                <tr class="border-b border-slate-100 text-left text-xs uppercase tracking-wide text-slate-400 dark:border-[#2D4060]">
+                <tr class="border-b border-slate-100 text-left text-xs uppercase tracking-wide text-slate-400 dark:border-[#2A2E34]">
                     <th class="px-4 py-3">Buyer</th>
                     <th class="px-4 py-3">Brand</th>
                     <th class="px-4 py-3">Face</th>
@@ -89,7 +89,7 @@
             </thead>
             <tbody>
                 @forelse ($review as $o)
-                    <tr class="border-b border-slate-50 dark:border-[#22314e]" wire:key="rev-{{ $o->id }}">
+                    <tr class="border-b border-slate-50 dark:border-[#34373c]" wire:key="rev-{{ $o->id }}">
                         <td class="px-4 py-3 text-slate-600 dark:text-slate-300">{{ $o->user?->email ?? '—' }}</td>
                         <td class="px-4 py-3 text-slate-600 dark:text-slate-300">{{ $o->brand_name }}</td>
                         <td class="px-4 py-3 text-slate-500 dark:text-slate-400">{{ $o->currency }} {{ number_format((float) $o->face_value, 2) }}</td>
@@ -99,7 +99,7 @@
                                 <button type="button" wire:click="approve({{ $o->id }})" wire:confirm="Approve and deliver this gift card?"
                                         class="rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-white hover:bg-primary-dark">Approve</button>
                                 <button type="button" wire:click="reject({{ $o->id }})" wire:confirm="Reject and refund this order?"
-                                        class="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:border-red-300 hover:text-red-600 dark:border-[#2D4060] dark:text-slate-300">Reject</button>
+                                        class="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:border-red-300 hover:text-red-600 dark:border-[#2A2E34] dark:text-slate-300">Reject</button>
                             </div>
                         </td>
                     </tr>
@@ -113,7 +113,7 @@
     {{-- Fraud controls --}}
     <h2 class="mt-8 text-sm font-semibold text-slate-900 dark:text-slate-100">Fraud controls</h2>
     <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Per-account limits. Purchases at or above the review threshold hold for manual approval.</p>
-    <div class="mt-3 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-[#2D4060] dark:bg-[#1A2840]">
+    <div class="mt-3 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-[#2A2E34] dark:bg-[#17191C]">
         <div class="grid gap-4 sm:grid-cols-3">
             @php $labels = [
                 'max_amount_24h' => ['Max spend / 24h (USD)', 'number', '0.01'],
@@ -127,7 +127,7 @@
                 <div wire:key="fraud-{{ $field }}">
                     <label class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">{{ $meta[0] }}</label>
                     <input type="{{ $meta[1] }}" step="{{ $meta[2] }}" min="0" wire:model="{{ $field }}"
-                           class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100" />
+                           class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100" />
                     @error($field)<p class="mt-1 text-[11px] text-red-500">{{ $message }}</p>@enderror
                 </div>
             @endforeach
@@ -142,20 +142,20 @@
     <div class="mt-8 flex flex-wrap items-center justify-between gap-3">
         <h2 class="text-sm font-semibold text-slate-900 dark:text-slate-100">Catalogue</h2>
         <div class="flex items-center gap-2">
-            <select wire:model.live="providerFilter" class="rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs text-slate-900 dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+            <select wire:model.live="providerFilter" class="rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs text-slate-900 dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
                 <option value="">All providers</option>
                 @foreach ($providers as $p)
                     <option value="{{ $p['key'] }}">{{ $p['label'] }}</option>
                 @endforeach
             </select>
             <input type="search" wire:model.live.debounce.300ms="search" placeholder="Search brand…"
-                   class="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-900 dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100" />
+                   class="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-900 dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100" />
         </div>
     </div>
-    <div class="mt-3 overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-[#2D4060] dark:bg-[#1A2840]">
+    <div class="mt-3 overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-[#2A2E34] dark:bg-[#17191C]">
         <table class="w-full text-sm">
             <thead>
-                <tr class="border-b border-slate-100 text-left text-xs uppercase tracking-wide text-slate-400 dark:border-[#2D4060]">
+                <tr class="border-b border-slate-100 text-left text-xs uppercase tracking-wide text-slate-400 dark:border-[#2A2E34]">
                     <th class="px-4 py-3">Brand</th>
                     <th class="px-4 py-3">Provider</th>
                     <th class="px-4 py-3">Country</th>
@@ -166,7 +166,7 @@
             </thead>
             <tbody>
                 @forelse ($catalogue as $c)
-                    <tr class="border-b border-slate-50 dark:border-[#22314e]" wire:key="cat-{{ $c->id }}">
+                    <tr class="border-b border-slate-50 dark:border-[#34373c]" wire:key="cat-{{ $c->id }}">
                         <td class="px-4 py-3">
                             <div class="flex items-center gap-2">
                                 @if ($c->logo_url)
@@ -195,13 +195,13 @@
                         </td>
                         <td class="px-4 py-3 text-center">
                             <button type="button" wire:click="toggle({{ $c->id }}, 'admin_enabled')"
-                                    class="inline-flex h-6 w-11 items-center rounded-full transition {{ $c->admin_enabled ? 'bg-primary' : 'bg-slate-300 dark:bg-[#2D4060]' }}">
+                                    class="inline-flex h-6 w-11 items-center rounded-full transition {{ $c->admin_enabled ? 'bg-primary' : 'bg-slate-300 dark:bg-[#2A2E34]' }}">
                                 <span class="ml-0.5 inline-block h-5 w-5 rounded-full bg-white shadow transition {{ $c->admin_enabled ? 'translate-x-5' : '' }}"></span>
                             </button>
                         </td>
                         <td class="px-4 py-3 text-center">
                             <button type="button" wire:click="toggle({{ $c->id }}, 'featured')"
-                                    class="inline-flex items-center justify-center rounded-lg p-1.5 transition {{ $c->featured ? 'text-accent' : 'text-slate-300 hover:text-slate-400 dark:text-[#2D4060]' }}">
+                                    class="inline-flex items-center justify-center rounded-lg p-1.5 transition {{ $c->featured ? 'text-accent' : 'text-slate-300 hover:text-slate-400 dark:text-[#2A2E34]' }}">
                                 <x-icon name="star" class="h-4 w-4" />
                             </button>
                         </td>
@@ -218,14 +218,14 @@
     <div class="mt-8 flex items-center justify-between gap-3">
         <h2 class="text-sm font-semibold text-slate-900 dark:text-slate-100">Recent orders</h2>
         <button type="button" wire:click="exportCsv"
-                class="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:border-primary hover:text-primary dark:border-[#2D4060] dark:text-slate-300">
+                class="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:border-primary hover:text-primary dark:border-[#2A2E34] dark:text-slate-300">
             <x-icon name="file-text" class="h-3.5 w-3.5" /> Export CSV
         </button>
     </div>
-    <div class="mt-3 overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-[#2D4060] dark:bg-[#1A2840]">
+    <div class="mt-3 overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-[#2A2E34] dark:bg-[#17191C]">
         <table class="w-full text-sm">
             <thead>
-                <tr class="border-b border-slate-100 text-left text-xs uppercase tracking-wide text-slate-400 dark:border-[#2D4060]">
+                <tr class="border-b border-slate-100 text-left text-xs uppercase tracking-wide text-slate-400 dark:border-[#2A2E34]">
                     <th class="px-4 py-3">Buyer</th>
                     <th class="px-4 py-3">Brand</th>
                     <th class="px-4 py-3">Charged</th>
@@ -236,7 +236,7 @@
             <tbody>
                 @forelse ($recent as $o)
                     @php $tone = match($o->status){ 'delivered' => 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300', 'failed','refunded' => 'bg-red-100 text-red-700 dark:bg-red-500/15 dark:text-red-300', default => 'bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300' }; @endphp
-                    <tr class="border-b border-slate-50 dark:border-[#22314e]" wire:key="ord-{{ $o->id }}">
+                    <tr class="border-b border-slate-50 dark:border-[#34373c]" wire:key="ord-{{ $o->id }}">
                         <td class="px-4 py-3 text-slate-600 dark:text-slate-300">{{ $o->user?->email ?? '—' }}</td>
                         <td class="px-4 py-3 text-slate-600 dark:text-slate-300">{{ $o->brand_name }}</td>
                         <td class="px-4 py-3 font-medium text-slate-700 dark:text-slate-200">${{ number_format((float) $o->price_charged, 2) }}</td>

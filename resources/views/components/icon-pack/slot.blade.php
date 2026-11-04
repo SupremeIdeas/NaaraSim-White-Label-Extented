@@ -9,5 +9,6 @@
 @elseif ($nx)
     <x-nx.icon :name="$fallback" {{ $attributes->only('class') }} />
 @else
-    <x-icon :name="$fallback" :class="$class ?: 'h-5 w-5'" />
+    {{-- A caller's class (eg shrink-0) must not replace the size: without h-/w- the sprite icon renders huge. --}}
+    <x-icon :name="$fallback" :class="preg_match('/(^|\s)(h|w|size)-/', (string) $class) ? $class : trim($class.' h-5 w-5')" />
 @endif

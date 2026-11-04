@@ -14,7 +14,7 @@
                 <span class="h-1.5 w-1.5 rounded-full bg-green-500"></span> Claude active
             </span>
         @else
-            <span class="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-500 dark:bg-[#243352] dark:text-slate-400">
+            <span class="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-500 dark:bg-[#373a3f] dark:text-slate-400">
                 <span class="h-1.5 w-1.5 rounded-full bg-slate-400"></span> Claude off
             </span>
         @endif
@@ -32,7 +32,7 @@
     @endif
 
     {{-- Always-on margin monitor (no API call). --}}
-    <div class="mb-6 rounded-2xl border border-slate-200 bg-white p-5 dark:border-[#2D4060] dark:bg-[#1A2840]">
+    <div class="mb-6 rounded-2xl border border-slate-200 bg-white p-5 dark:border-[#2A2E34] dark:bg-[#17191C]">
         <h2 class="mb-3 flex items-center gap-2 text-base font-semibold text-slate-900 dark:text-slate-100">
             <x-icon name="signal" class="h-5 w-5 text-primary" /> Live margin monitor
         </h2>
@@ -58,7 +58,7 @@
     </div>
 
     {{-- Market competitiveness (always-on, admin-tunable model — owner request). --}}
-    <div class="mb-6 rounded-2xl border border-slate-200 bg-white p-5 dark:border-[#2D4060] dark:bg-[#1A2840]">
+    <div class="mb-6 rounded-2xl border border-slate-200 bg-white p-5 dark:border-[#2A2E34] dark:bg-[#17191C]">
         <h2 class="mb-1 flex items-center gap-2 text-base font-semibold text-slate-900 dark:text-slate-100">
             <x-icon name="globe" class="h-5 w-5 text-primary" /> Market competitiveness
         </h2>
@@ -83,7 +83,7 @@
                     <thead class="text-xs uppercase tracking-wide text-slate-400">
                         <tr><th class="py-2">Plan</th><th class="py-2 text-right">Our price</th><th class="py-2 text-right">Est. market</th><th class="py-2 text-right">vs market</th><th class="py-2 text-right">Position</th></tr>
                     </thead>
-                    <tbody class="divide-y divide-slate-100 dark:divide-[#243352]">
+                    <tbody class="divide-y divide-slate-100 dark:divide-[#373a3f]">
                         @foreach (collect($market['rows'])->take(8) as $r)
                             <tr wire:key="mkt-{{ $r['plan_id'] }}">
                                 <td class="py-2 text-slate-700 dark:text-slate-200">{{ $r['name'] }}</td>
@@ -138,7 +138,7 @@
         </div>
     @else
         {{-- Pending proposal review --}}
-        <div class="mb-6 rounded-2xl border border-slate-200 bg-white p-5 dark:border-[#2D4060] dark:bg-[#1A2840]">
+        <div class="mb-6 rounded-2xl border border-slate-200 bg-white p-5 dark:border-[#2A2E34] dark:bg-[#17191C]">
             <div class="mb-4 flex items-center justify-between gap-2">
                 <h2 class="flex items-center gap-2 text-base font-semibold text-slate-900 dark:text-slate-100">
                     <x-icon name="zap" class="h-5 w-5 text-primary" /> Claude’s proposal
@@ -147,7 +147,7 @@
             </div>
 
             @if ($proposal->summary)
-                <p class="mb-3 rounded-xl bg-slate-50 p-3 text-sm text-slate-600 dark:bg-[#243352] dark:text-slate-300">{{ $proposal->summary }}</p>
+                <p class="mb-3 rounded-xl bg-slate-50 p-3 text-sm text-slate-600 dark:bg-[#373a3f] dark:text-slate-300">{{ $proposal->summary }}</p>
             @endif
 
             @php($meta = $proposal->meta ?? [])
@@ -165,7 +165,7 @@
             <div class="overflow-x-auto">
                 <table class="w-full min-w-[640px] text-left text-sm">
                     <thead>
-                        <tr class="border-b border-slate-200 text-xs uppercase tracking-wide text-slate-400 dark:border-[#2D4060]">
+                        <tr class="border-b border-slate-200 text-xs uppercase tracking-wide text-slate-400 dark:border-[#2A2E34]">
                             <th class="py-2 pr-2">Apply</th>
                             <th class="py-2 pr-2">Plan</th>
                             <th class="py-2 pr-2 text-right">Cost</th>
@@ -177,7 +177,7 @@
                     </thead>
                     <tbody>
                         @foreach ($proposal->lines as $line)
-                            <tr class="border-b border-slate-100 dark:border-[#243352] {{ $line->accepted ? '' : 'opacity-40' }}">
+                            <tr class="border-b border-slate-100 dark:border-[#373a3f] {{ $line->accepted ? '' : 'opacity-40' }}">
                                 <td class="py-2 pr-2">
                                     <input type="checkbox" @checked($line->accepted) wire:click="toggleLine({{ $line->id }})"
                                            class="rounded text-primary focus:ring-primary/40">
@@ -219,7 +219,7 @@
                     <span wire:loading wire:target="approve" class="inline-flex items-center gap-2"><x-ui.spinner class="h-4 w-4" /> Applying…</span>
                 </button>
                 <button type="button" wire:click="reject"
-                        class="inline-flex items-center gap-2 rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 dark:border-[#2D4060] dark:text-slate-300 dark:hover:bg-[#243352]">
+                        class="inline-flex items-center gap-2 rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 dark:border-[#2A2E34] dark:text-slate-300 dark:hover:bg-[#373a3f]">
                     <x-icon name="x" class="h-4 w-4" /> Dismiss
                 </button>
             </div>

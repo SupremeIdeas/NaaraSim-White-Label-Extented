@@ -8,15 +8,15 @@
         <div class="mb-4 rounded-lg border border-green-200 bg-green-50 px-4 py-2.5 text-sm text-green-800 dark:border-green-900/40 dark:bg-green-950/30 dark:text-green-300">{{ $saved }}</div>
     @endif
 
-    <div class="rounded-xl border border-slate-200 bg-white p-5 dark:border-[#2D4060] dark:bg-[#1B2A44]">
+    <div class="rounded-xl border border-slate-200 bg-white p-5 dark:border-[#2A2E34] dark:bg-[#1D2024]">
         <div class="space-y-2">
             @foreach ($rows as $i => $row)
                 <div wire:key="tax-{{ $i }}" class="flex items-center gap-2">
                     <input wire:model="rows.{{ $i }}.country" placeholder="ISO (GB)" maxlength="2"
-                           class="w-28 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm uppercase dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                           class="w-28 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm uppercase dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
                     <div class="relative flex-1">
                         <input wire:model="rows.{{ $i }}.rate" type="number" step="0.001" min="0" max="100" placeholder="Rate"
-                               class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 pr-8 text-sm dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                               class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 pr-8 text-sm dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
                         <span class="pointer-events-none absolute right-3 top-2 text-sm text-slate-400">%</span>
                     </div>
                     <button wire:click="removeRow({{ $i }})" class="text-slate-400 hover:text-red-500"><x-icon name="trash" class="h-4 w-4" /></button>

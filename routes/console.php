@@ -34,6 +34,7 @@ if (config('queue.default') === 'database') {
 // Payout engine safety (Addendum C fix A): resolve payouts whose provider outcome is
 // unknown by asking the PROVIDER — never by guessing. Cheap when idle.
 Schedule::command('payouts:reconcile-unknown')->everyTwoMinutes()->withoutOverlapping();
+Schedule::command('whitelabel:check-in')->hourly()->withoutOverlapping();   // heartbeat: tells the original platform where this install lives
 Schedule::command('cookies:prune')->daily()->withoutOverlapping();   // consent proof older than the retention period
 
 // Payout Guardian (Addendum C §6). The sweeper only CLAIMS and DISPATCHES; evaluation

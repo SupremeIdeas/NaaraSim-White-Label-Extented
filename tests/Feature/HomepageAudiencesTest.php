@@ -20,7 +20,7 @@ class HomepageAudiencesTest extends TestCase
         $res = $this->get('/')->assertOk();
 
         // Section header + a sample of each panel's verbatim copy.
-        $res->assertSee('Who Naara Is For', false);
+        $res->assertSee('Whoever you travel as', false);
         $res->assertSee('Travel Smarter. Stay Connected Everywhere.', false);
         $res->assertSee('Power Your Business Across Borders', false);
         $res->assertSee('Build Without Boundaries', false);

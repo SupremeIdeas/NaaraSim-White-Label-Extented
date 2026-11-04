@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -16,7 +17,7 @@ class GiftCardProduct extends Model
     protected $fillable = [
         'provider', 'provider_product_id', 'brand_key', 'brand_name', 'country', 'currency',
         'denomination_type', 'fixed_denominations', 'min_amount', 'max_amount', 'logo_url',
-        'brand_color', 'category', 'required_fields', 'redeem_instruction', 'cost_meta',
+        'brand_color', 'category', 'category_key', 'required_fields', 'redeem_instruction', 'cost_meta',
         'provider_enabled', 'admin_enabled', 'is_primary', 'is_lead', 'featured', 'priceable',
     ];
 
@@ -68,6 +69,23 @@ class GiftCardProduct extends Model
     {
         return static::query()->storefront()->where('brand_key', $this->brand_key)->where('country', $this->country)
             ->where('provider', $this->provider)->where('denomination_type', $this->denomination_type);
+    }
+
+    /**
+     * A logo of OURS (/images/... the shipped pack, /storage/... the media disk) is served from whatever address this site answers on now. The sync
+     * stores a full address, and one saved while the app ran on another host (localhost, staging, an old APP_URL) would otherwise break every logo
+     * although the file is there. A third-party address is returned as it is.
+     */
+    protected function logoUrl(): Attribute
+    {
+        return Attribute::get(function ($value) {
+            $value = trim((string) $value);
+            if ($value === '' || ! preg_match('#^https?://[^/]+(/(?:images|storage)/.*)$#i', $value, $m)) {
+                return $value === '' ? null : $value;
+            }
+
+            return $m[1];
+        });
     }
 
     public function isRange(): bool

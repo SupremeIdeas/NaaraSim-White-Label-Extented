@@ -12,7 +12,7 @@
          flat border line (no flat dividers — CLAUDE.md). --}}
     <div x-data="{ show: (() => { try { return sessionStorage.getItem('nx-verify-dismissed') !== '1'; } catch (e) { return true; } })() }"
          x-show="show" x-cloak
-         class="relative z-10 bg-white/95 px-4 pb-4 pt-2.5 text-sm backdrop-blur-sm dark:bg-[#0F1D33]/95">
+         class="relative z-10 bg-white/95 px-4 pb-4 pt-2.5 text-sm backdrop-blur-sm dark:bg-[#1f2023]/95">
         <div class="mx-auto flex max-w-6xl items-center gap-3">
             <x-icon name="mail" class="h-4 w-4 shrink-0 text-accent-dark dark:text-accent" />
             <p class="flex-1 text-slate-700 dark:text-slate-200">
@@ -27,6 +27,6 @@
                 <x-icon name="x" class="h-4 w-4" />
             </button>
         </div>
-        <div class="pointer-events-none absolute inset-x-0 -bottom-3 h-3 bg-gradient-to-b from-white/95 to-transparent dark:from-[#0F1D33]/95"></div>
+        <div class="pointer-events-none absolute inset-x-0 -bottom-3 h-3 bg-gradient-to-b from-white/95 to-transparent dark:from-[#1f2023]/95"></div>
     </div>
 @endif

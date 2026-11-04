@@ -53,7 +53,7 @@
            :class="navCollapsed ? 'lg:!w-24' : ''">
         <div @class([
                 'nx-sidebar flex h-full flex-col rounded-3xl border border-slate-200/70 bg-gradient-to-b from-primary/5 via-slate-50 to-slate-100 shadow-sm dark:border-white/10',
-                'dark:from-[#16233d] dark:via-[#141f36] dark:to-[#111a2e]' => \App\Support\ThemePreset::slug() === \App\Support\ThemePreset::DEFAULT_SLUG,
+                'dark:from-[#27292c] dark:via-[#222428] dark:to-[#1d1f22]' => \App\Support\ThemePreset::slug() === \App\Support\ThemePreset::DEFAULT_SLUG,
                 'dark:bg-none dark:bg-navy' => \App\Support\ThemePreset::slug() !== \App\Support\ThemePreset::DEFAULT_SLUG,
              ])>
             <div class="flex items-center py-5" :class="navCollapsed ? 'flex-col justify-center gap-3 px-3' : 'justify-between px-5'">
@@ -192,7 +192,7 @@
     {{-- Numbers section nav (Numbers overhaul §2) — shown ONLY on /numbers/*,
          mutually exclusive with the global nav above via the same $inNumbers. --}}
     @if ($inNumbers)
-    <nav class="nx-bottomnav ns-ring fixed inset-x-3 bottom-3 z-40 rounded-[1.75rem] border border-slate-200/70 bg-white shadow-[0_10px_40px_rgba(13,27,42,0.16)] lg:hidden dark:border-white/10 dark:bg-navy dark:shadow-[0_10px_40px_rgba(0,0,0,0.5)]"
+    <nav class="nx-bottomnav ns-ring fixed inset-x-3 bottom-3 z-40 rounded-[1.75rem] border border-slate-200/70 bg-white shadow-[0_10px_40px_rgba(26,27,29,0.16)] lg:hidden dark:border-white/10 dark:bg-navy dark:shadow-[0_10px_40px_rgba(0,0,0,0.5)]"
          style="padding-bottom: env(safe-area-inset-bottom);">
         <div class="mx-auto grid max-w-md grid-cols-5 items-center px-1 pt-1.5">
             @foreach ([$numbersNav[0], $numbersNav[1]] as $item)

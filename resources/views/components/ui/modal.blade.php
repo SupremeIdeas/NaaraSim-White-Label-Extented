@@ -73,7 +73,7 @@
         <div class="flex items-start justify-between gap-4">
             <h2 id="{{ $id }}-title" class="text-lg font-bold text-slate-900 dark:text-slate-100">{{ $title }}</h2>
             <button type="button" @click="open = false" aria-label="Close"
-                    class="shrink-0 rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-[#243352] dark:hover:text-slate-200">
+                    class="shrink-0 rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-[#373a3f] dark:hover:text-slate-200">
                 <x-icon name="x" class="h-5 w-5" />
             </button>
         </div>

@@ -35,8 +35,8 @@ export function registerUsageCharts() {
                         datasets: [{
                             label: 'Data used (MB)',
                             data: points.map((p) => p.used_mb),
-                            borderColor: '#A21CAF',
-                            backgroundColor: 'rgba(10, 110, 110, 0.15)',
+                            borderColor: '#23272D',
+                            backgroundColor: 'rgba(55, 58, 65, 0.15)',
                             fill: true,
                             tension: 0.35,
                             pointRadius: 0,

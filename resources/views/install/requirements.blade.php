@@ -3,7 +3,7 @@
         <h2 class="mb-4 text-center text-lg font-bold text-slate-900 dark:text-slate-100">Server Requirements</h2>
         <ul class="space-y-2">
             @foreach ($requirements as $req)
-                <li class="flex items-center justify-between rounded-lg border border-slate-100 px-3 py-2 text-sm dark:border-[#243352]">
+                <li class="flex items-center justify-between rounded-lg border border-slate-100 px-3 py-2 text-sm dark:border-[#373a3f]">
                     <span class="text-slate-700 dark:text-slate-200">{{ $req['label'] }}
                         @unless ($req['required']) <span class="text-xs text-slate-400">(optional)</span> @endunless
                     </span>
@@ -25,7 +25,7 @@
                     Next <x-icon name="chevron-right" class="h-4 w-4" />
                 </a>
             @else
-                <span class="rounded-lg bg-slate-100 px-4 py-2.5 font-semibold text-slate-400 dark:bg-[#243352]">Fix the required items</span>
+                <span class="rounded-lg bg-slate-100 px-4 py-2.5 font-semibold text-slate-400 dark:bg-[#373a3f]">Fix the required items</span>
             @endif
         </div>
     </x-install-shell>

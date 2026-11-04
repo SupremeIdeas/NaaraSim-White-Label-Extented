@@ -15,7 +15,7 @@
 
     <div class="relative mx-auto max-w-3xl px-4 text-center">
         <span class="inline-flex items-center gap-2 rounded-full border border-dashed border-accent/50 bg-accent/10 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.2em] text-accent">
-            <x-icon name="plane" class="h-3 w-3 -rotate-45" /> {{ $content['eyebrow'] }}
+            <x-glyph name="plane" class="h-3 w-3 -rotate-45" /> {{ $content['eyebrow'] }}
         </span>
         <h1 class="mx-auto mt-6 max-w-2xl font-display text-3xl font-bold leading-[1.15] text-white sm:text-4xl lg:text-[2.65rem]">
             {{ $content['headline'] }}
@@ -38,7 +38,7 @@
                     <span class="rounded-full bg-primary px-2 py-0.5 text-white">Leg 1</span> Mission
                 </div>
                 <span class="mt-4 flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-white">
-                    <x-icon name="target" class="h-5 w-5" />
+                    <x-glyph name="target" class="h-5 w-5" />
                 </span>
                 <p class="mt-4 font-display text-xl font-bold leading-snug text-[#1B2A47] dark:text-white sm:text-2xl">{{ $content['mission'] }}</p>
             </div>
@@ -49,7 +49,7 @@
                     <span class="rounded-full bg-accent px-2 py-0.5 text-white">Leg 2</span> Vision
                 </div>
                 <span class="mt-4 flex h-10 w-10 items-center justify-center rounded-xl bg-accent text-white">
-                    <x-icon name="eye" class="h-5 w-5" />
+                    <x-glyph name="eye" class="h-5 w-5" />
                 </span>
                 <p class="mt-4 font-display text-xl font-bold leading-snug sm:text-2xl">{{ $content['vision'] }}</p>
             </div>
@@ -71,7 +71,7 @@
 
             <div class="mt-4 min-w-0 sm:mt-0">
                 <div class="hidden items-center gap-2 sm:flex">
-                    <x-icon name="id-card" class="h-4 w-4 text-primary dark:text-white" />
+                    <x-glyph name="id-card" class="h-4 w-4 text-primary dark:text-white" />
                     <p class="font-display text-base font-bold text-[#1B2A47] dark:text-white">{{ $content['founder_name'] }}</p>
                     <span class="text-stone-400" aria-hidden="true">&middot;</span>
                     <p class="text-xs font-semibold uppercase tracking-wide text-accent">{{ $content['founder_title'] }}</p>

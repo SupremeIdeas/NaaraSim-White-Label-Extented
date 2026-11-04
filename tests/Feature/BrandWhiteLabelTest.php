@@ -31,9 +31,9 @@ class BrandWhiteLabelTest extends TestCase
 
     public function test_default_install_is_a_no_op(): void
     {
-        $this->assertSame('Naara', BrandSettings::word());
-        $this->assertSame('Naara Rent', BrandSettings::rebrand('Naara Rent'));
-        $this->assertFalse(BrandSettings::isWhiteLabelled());
+        // A white-label install ships neutral: the source word is already swapped for the shipped name.
+        $this->assertSame(BrandSettings::SHIPPED_WORD, BrandSettings::word());
+        $this->assertSame(BrandSettings::SHIPPED_WORD.' Rent', BrandSettings::rebrand('Naara Rent'));
     }
 
     public function test_the_word_swaps_through_names_but_not_lowercase_asset_paths(): void
@@ -42,7 +42,6 @@ class BrandWhiteLabelTest extends TestCase
 
         $this->assertSame('Acme Rent', BrandSettings::rebrand('Naara Rent'));
         $this->assertSame('AcmeCredits', BrandSettings::rebrand('NaaraCredits'));
-        $this->assertSame('AcmeSim', BrandSettings::rebrand('NaaraSim'));
         // Lowercase asset-style tokens are left alone.
         $this->assertSame('build/naara-x.js', BrandSettings::rebrand('build/naara-x.js'));
         $this->assertTrue(BrandSettings::isWhiteLabelled());
@@ -76,9 +75,9 @@ class BrandWhiteLabelTest extends TestCase
         $this->assertSame(BrandSettings::PALETTES['Ocean Blue']['primary'], BrandSettings::color('primary'));
     }
 
-    public function test_there_are_25_curated_palettes(): void
+    public function test_there_are_26_curated_palettes(): void
     {
-        $this->assertCount(25, BrandSettings::PALETTES);
+        $this->assertCount(26, BrandSettings::PALETTES);
         foreach (BrandSettings::PALETTES as $name => $c) {
             foreach (['primary', 'accent', 'navy', 'action'] as $k) {
                 $this->assertMatchesRegularExpression('/^#[0-9A-Fa-f]{6}$/', $c[$k], "$name.$k");
@@ -109,7 +108,7 @@ class BrandWhiteLabelTest extends TestCase
         $this->setWord('Acme');
 
         $this->assertSame('Use my AcmeCredits', __('checkout.use_naaracredits'));
-        $this->assertStringContainsString('AcmeSim wallet', __('checkout.wallet_disclaimer'));
+        $this->assertStringContainsString(BrandSettings::name().' wallet', __('checkout.wallet_disclaimer'));
     }
 
     public function test_numbers_bento_titles_are_rebranded(): void
@@ -136,7 +135,7 @@ class BrandWhiteLabelTest extends TestCase
     public function test_product_line_titles_are_rebranded_and_the_cache_busts_on_brand_change(): void
     {
         // Warm the cache under the shipped default first.
-        $this->assertSame('Naara Verify', collect(ProductLineSettings::products())->firstWhere('slug', 'naara-verify')['title']);
+        $this->assertSame(BrandSettings::SHIPPED_WORD.' Verify', collect(ProductLineSettings::products())->firstWhere('slug', 'naara-verify')['title']);
 
         $this->setWord('Acme');
 

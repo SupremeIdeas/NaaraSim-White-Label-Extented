@@ -7,7 +7,7 @@
         @foreach (range(1, 12) as $n)
             @continue(empty($s["q{$n}"] ?? null))
             <details data-reveal style="--reveal-delay: {{ ($n - 1) * 0.05 }}s"
-                     class="group rounded-2xl border border-slate-200 bg-white p-5 dark:border-[var(--brand-card-border-dark)] dark:bg-[#16233d]">
+                     class="group rounded-2xl border border-slate-200 bg-white p-5 dark:border-[var(--brand-card-border-dark)] dark:bg-[#27292c]">
                 <summary class="flex cursor-pointer list-none items-center justify-between gap-3 font-semibold text-slate-900 dark:text-white">
                     {{ $s["q{$n}"] }}
                     <x-icon name="chevron-right" class="h-4 w-4 shrink-0 text-slate-400 transition group-open:rotate-90" />

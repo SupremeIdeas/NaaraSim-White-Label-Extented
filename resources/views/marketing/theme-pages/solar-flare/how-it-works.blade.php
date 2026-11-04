@@ -73,7 +73,7 @@
         ] as $btn)
             <a href="{{ auth()->check() ? route('catalogue') : route('register') }}" wire:navigate
                class="group inline-flex items-center gap-2 bg-gradient-to-r from-primary to-accent px-6 py-3 text-sm font-bold uppercase tracking-wide text-white shadow-lg shadow-accent/30 transition group-hover:opacity-90 [clip-path:polygon(8%_0,100%_0,92%_100%,0_100%)]">
-                <x-icon :name="$btn['icon']" class="h-4 w-4" /> {{ $btn['label'] }}
+                <x-glyph :name="$btn['icon']" class="h-4 w-4" /> {{ $btn['label'] }}
             </a>
         @endforeach
     </div>

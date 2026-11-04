@@ -35,7 +35,7 @@ class SupportTools
         'security' => '/account/security',
         'estimator' => '/data-estimator',
         'refund-policy' => '/refund-policy',
-        'faq' => '/faq',
+        'faq' => '/contact',   // a white label has no dedicated FAQ page: the assistant points at Contact instead
     ];
 
     /** @return array<int, array<string, mixed>> Anthropic tool schemas. */

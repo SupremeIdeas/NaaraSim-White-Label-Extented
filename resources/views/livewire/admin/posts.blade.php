@@ -15,20 +15,20 @@
     @endif
 
     {{-- Blog hero (4-image reveal) — admin-managed. --}}
-    <div class="mb-6 rounded-2xl border border-slate-200 bg-white p-4 dark:border-[#2D4060] dark:bg-[#1A2840]">
+    <div class="mb-6 rounded-2xl border border-slate-200 bg-white p-4 dark:border-[#2A2E34] dark:bg-[#17191C]">
         <h2 class="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-800 dark:text-slate-100"><x-icon name="image" class="h-4 w-4 text-primary" /> Blog hero</h2>
         <div class="grid gap-3 sm:grid-cols-2">
             <div><label class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">Title</label>
-                <input type="text" wire:model="heroTitle" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100"></div>
+                <input type="text" wire:model="heroTitle" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100"></div>
             <div><label class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">Subtitle</label>
-                <input type="text" wire:model="heroSubtitle" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100"></div>
+                <input type="text" wire:model="heroSubtitle" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100"></div>
         </div>
         <div class="mt-3">
             <label class="mb-1.5 block text-xs font-medium text-slate-500 dark:text-slate-400">Hero images (up to 4, interchanging)</label>
             @if ($heroImages)
                 <div class="mb-2 grid grid-cols-4 gap-2">
                     @foreach ($heroImages as $i => $img)
-                        <div class="group relative aspect-video overflow-hidden rounded-lg border border-slate-200 dark:border-[#2D4060]">
+                        <div class="group relative aspect-video overflow-hidden rounded-lg border border-slate-200 dark:border-[#2A2E34]">
                             <img src="{{ $img }}" class="h-full w-full object-cover">
                             <button type="button" wire:click="removeHeroImage({{ $i }})" class="absolute right-1 top-1 rounded-full bg-black/60 p-1 text-white opacity-0 transition group-hover:opacity-100"><x-icon name="x" class="h-3 w-3" /></button>
                         </div>
@@ -48,7 +48,7 @@
 
     {{-- Claude assist: suggest the next article to write. --}}
     @if ($aiEnabled)
-        <div class="mb-6 rounded-2xl border border-slate-200 bg-white p-4 dark:border-[#2D4060] dark:bg-[#1A2840]">
+        <div class="mb-6 rounded-2xl border border-slate-200 bg-white p-4 dark:border-[#2A2E34] dark:bg-[#17191C]">
             <div class="flex flex-wrap items-center justify-between gap-2">
                 <h2 class="flex items-center gap-2 text-sm font-semibold text-slate-800 dark:text-slate-100">
                     <x-icon name="zap" class="h-4 w-4 text-primary" /> Write with Claude
@@ -73,7 +73,7 @@
     @endif
 
     @if ($showForm)
-        <form wire:submit="save" class="space-y-4 rounded-2xl border border-slate-200 bg-white p-6 dark:border-[#2D4060] dark:bg-[#1A2840]">
+        <form wire:submit="save" class="space-y-4 rounded-2xl border border-slate-200 bg-white p-6 dark:border-[#2A2E34] dark:bg-[#17191C]">
             <div class="flex items-center justify-between">
                 <h2 class="text-sm font-semibold text-slate-800 dark:text-slate-100">{{ $editingId ? 'Edit post' : 'New post' }}</h2>
                 <button type="button" wire:click="resetForm" class="text-xs text-slate-400 underline hover:text-slate-600 dark:hover:text-slate-300">Cancel</button>
@@ -82,21 +82,21 @@
             <div class="grid gap-4 sm:grid-cols-2">
                 <div>
                     <label class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">Title</label>
-                    <input wire:model.blur="title" type="text" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                    <input wire:model.blur="title" type="text" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
                     @error('title') <span class="mt-1 block text-xs text-red-600 dark:text-red-400">{{ $message }}</span> @enderror
                 </div>
                 <div>
                     <label class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">Slug <span class="font-normal text-slate-400">(URL)</span></label>
-                    <input wire:model="slug" type="text" placeholder="auto from title" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                    <input wire:model="slug" type="text" placeholder="auto from title" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
                     @error('slug') <span class="mt-1 block text-xs text-red-600 dark:text-red-400">{{ $message }}</span> @enderror
                 </div>
                 <div>
                     <label class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">Category</label>
-                    <input wire:model="category" type="text" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                    <input wire:model="category" type="text" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
                 </div>
                 <div>
                     <label class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">Status</label>
-                    <select wire:model="status" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                    <select wire:model="status" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
                         <option value="draft">Draft (hidden)</option>
                         <option value="published">Published (public)</option>
                     </select>
@@ -106,19 +106,19 @@
             <div>
                 <label class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">Cover image <span class="font-normal text-slate-400">(WebP/JPEG, ≤ 2 MB)</span></label>
                 <input wire:model="cover" type="file" accept="image/webp,image/jpeg,image/png"
-                       class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-600 file:mr-3 file:rounded-md file:border-0 file:bg-primary/10 file:px-3 file:py-1 file:text-xs file:font-semibold file:text-primary dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-300">
+                       class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-600 file:mr-3 file:rounded-md file:border-0 file:bg-primary/10 file:px-3 file:py-1 file:text-xs file:font-semibold file:text-primary dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-300">
                 <div wire:loading wire:target="cover" class="mt-1 text-[11px] text-slate-400">Uploading…</div>
                 @error('cover') <span class="mt-1 block text-xs text-red-600 dark:text-red-400">{{ $message }}</span> @enderror
                 @if ($coverUrl)
-                    <img src="{{ $coverUrl }}" alt="" class="mt-2 h-24 w-40 rounded-lg border border-slate-200 object-cover dark:border-[#2D4060]">
+                    <img src="{{ $coverUrl }}" alt="" class="mt-2 h-24 w-40 rounded-lg border border-slate-200 object-cover dark:border-[#2A2E34]">
                 @endif
             </div>
 
             <div>
                 <label class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">Accent colour <span class="font-normal text-slate-400">(scroll-tint; blank = auto from category)</span></label>
                 <div class="flex items-center gap-2">
-                    <input type="color" wire:model="accent_color" class="h-9 w-14 rounded-lg border border-slate-300 dark:border-[#2D4060]">
-                    <input type="text" wire:model="accent_color" placeholder="#A21CAF" class="w-32 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                    <input type="color" wire:model="accent_color" class="h-9 w-14 rounded-lg border border-slate-300 dark:border-[#2A2E34]">
+                    <input type="text" wire:model="accent_color" placeholder="#23272D" class="w-32 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
                     @if ($accent_color)<button type="button" wire:click="$set('accent_color', '')" class="text-xs text-slate-400 hover:text-slate-600">Clear</button>@endif
                 </div>
                 @error('accent_color') <span class="mt-1 block text-xs text-red-600">{{ $message }}</span> @enderror
@@ -126,7 +126,7 @@
 
             <div>
                 <label class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">Excerpt <span class="font-normal text-slate-400">(short summary)</span></label>
-                <textarea wire:model="excerpt" rows="2" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100"></textarea>
+                <textarea wire:model="excerpt" rows="2" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100"></textarea>
                 @error('excerpt') <span class="mt-1 block text-xs text-red-600 dark:text-red-400">{{ $message }}</span> @enderror
             </div>
 
@@ -147,11 +147,11 @@
                     @endif
                 </div>
                 <p class="mb-1 text-[11px] text-slate-400 dark:text-slate-500">Use <code class="font-mono">## Heading</code>, <code class="font-mono">- bullet</code>, and blank lines between paragraphs. HTML is rendered as plain text for safety.</p>
-                <textarea wire:model="body" rows="14" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm leading-relaxed text-slate-900 dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100"></textarea>
+                <textarea wire:model="body" rows="14" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm leading-relaxed text-slate-900 dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100"></textarea>
                 @error('body') <span class="mt-1 block text-xs text-red-600 dark:text-red-400">{{ $message }}</span> @enderror
 
                 @if ($aiEnabled)
-                    <div class="mt-2 rounded-lg border border-slate-200 p-3 dark:border-[#2D4060]">
+                    <div class="mt-2 rounded-lg border border-slate-200 p-3 dark:border-[#2A2E34]">
                         <div class="flex items-center justify-between">
                             <span class="text-xs font-semibold text-slate-500 dark:text-slate-400">Cover image prompt</span>
                             <button type="button" wire:click="getImagePrompt" wire:loading.attr="disabled" wire:target="getImagePrompt"
@@ -173,16 +173,16 @@
                 @endif
             </div>
 
-            <details class="rounded-lg border border-slate-200 p-3 dark:border-[#2D4060]">
+            <details class="rounded-lg border border-slate-200 p-3 dark:border-[#2A2E34]">
                 <summary class="cursor-pointer text-xs font-semibold text-slate-500 dark:text-slate-400">SEO (optional)</summary>
                 <div class="mt-3 space-y-3">
                     <div>
                         <label class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">Meta title <span class="font-normal text-slate-400">(defaults to title)</span></label>
-                        <input wire:model="meta_title" type="text" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                        <input wire:model="meta_title" type="text" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
                     </div>
                     <div>
                         <label class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">Meta description <span class="font-normal text-slate-400">(defaults to excerpt)</span></label>
-                        <textarea wire:model="meta_description" rows="2" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100"></textarea>
+                        <textarea wire:model="meta_description" rows="2" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100"></textarea>
                     </div>
                 </div>
             </details>
@@ -194,9 +194,9 @@
             </button>
         </form>
     @else
-        <div class="overflow-hidden rounded-xl border border-slate-200 dark:border-[#2D4060]">
+        <div class="overflow-hidden rounded-xl border border-slate-200 dark:border-[#2A2E34]">
             <table class="w-full text-left text-sm">
-                <thead class="bg-slate-50 text-slate-500 dark:bg-[#243352] dark:text-slate-400">
+                <thead class="bg-slate-50 text-slate-500 dark:bg-[#373a3f] dark:text-slate-400">
                     <tr>
                         <th class="px-4 py-2 font-medium">Title</th>
                         <th class="px-4 py-2 font-medium">Category</th>
@@ -205,7 +205,7 @@
                         <th class="px-4 py-2"></th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-100 bg-white dark:divide-[#243352] dark:bg-[#1A2840]">
+                <tbody class="divide-y divide-slate-100 bg-white dark:divide-[#373a3f] dark:bg-[#17191C]">
                     @forelse ($posts as $post)
                         <tr wire:key="post-{{ $post->id }}" class="text-slate-700 dark:text-slate-200">
                             <td class="px-4 py-2.5 font-medium">{{ $post->title }}</td>

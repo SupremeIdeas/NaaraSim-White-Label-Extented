@@ -10,19 +10,19 @@
         </div>
     @endif
 
-    <form wire:submit="save" class="space-y-5 rounded-xl border border-slate-200 bg-white p-5 dark:border-[#2D4060] dark:bg-[#1B2A44]">
+    <form wire:submit="save" class="space-y-5 rounded-xl border border-slate-200 bg-white p-5 dark:border-[#2A2E34] dark:bg-[#1D2024]">
         <div class="grid gap-4 sm:grid-cols-[1fr,10rem]">
             <div>
                 <label class="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-300">Hero title</label>
                 <input type="text" wire:model="title" maxlength="40"
                        placeholder="{{ \App\Support\GiftHeroBackground::DEFAULT_TITLE }}"
-                       class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                       class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
                 <p class="mt-1 text-[11px] text-slate-400">Leave blank for the default. The first word renders plain; the rest renders in the accent gradient.</p>
                 @error('title') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
             </div>
             <div>
                 <label class="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-300">Title size</label>
-                <select wire:model="title_size" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                <select wire:model="title_size" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
                     @foreach (\App\Support\GiftHeroBackground::TITLE_SIZES as $value => $label)
                         <option value="{{ $value }}">{{ $label }}</option>
                     @endforeach
@@ -35,12 +35,12 @@
             <label class="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-300">Description line under the title</label>
             <input type="text" wire:model="description" maxlength="120"
                    placeholder="{{ \App\Support\GiftHeroBackground::DEFAULT_DESCRIPTION }}"
-                   class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                   class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
             <p class="mt-1 text-[11px] text-slate-400">One short sentence. Leave blank to use the default.</p>
             @error('description') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
         </div>
 
-        <div class="flex items-center justify-between gap-4 rounded-lg border border-slate-200 p-3 dark:border-[#2D4060]">
+        <div class="flex items-center justify-between gap-4 rounded-lg border border-slate-200 p-3 dark:border-[#2A2E34]">
             <span>
                 <span class="block text-sm font-medium text-slate-800 dark:text-slate-100">Show hero image</span>
                 <span class="mt-0.5 block text-xs text-slate-500 dark:text-slate-400">Turn the image off without removing the uploaded art. With no image uploaded, the storefront shows the built-in looping gift-box reveal; uploading your own image replaces it.</span>
@@ -61,7 +61,7 @@
                 @foreach ([['hero_light', 'Light mode', $currentLight], ['hero_dark', 'Dark mode', $currentDark]] as [$field, $label, $current])
                     <div>
                         <label class="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-300">{{ $label }}</label>
-                        <div class="mb-2 flex aspect-[2/1] items-center justify-center overflow-hidden rounded-lg border border-slate-200 bg-slate-50 dark:border-[#2D4060] dark:bg-[#243352]">
+                        <div class="mb-2 flex aspect-[2/1] items-center justify-center overflow-hidden rounded-lg border border-slate-200 bg-slate-50 dark:border-[#2A2E34] dark:bg-[#373a3f]">
                             @if ($this->{$field} && $this->{$field}->isPreviewable())
                                 <img src="{{ $this->{$field}->temporaryUrl() }}" class="h-full w-full object-cover">
                             @elseif ($current)

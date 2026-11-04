@@ -26,7 +26,7 @@
         </div>
         <button type="button" wire:click="toggleAppExportEnabled" wire:loading.attr="disabled" wire:target="toggleAppExportEnabled"
                 role="switch" :aria-checked="'{{ ($form['app_export_enabled'] ?? true) ? 'true' : 'false' }}'"
-                class="relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition {{ ($form['app_export_enabled'] ?? true) ? 'bg-primary' : 'bg-slate-300 dark:bg-[#2D4060]' }}">
+                class="relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition {{ ($form['app_export_enabled'] ?? true) ? 'bg-primary' : 'bg-slate-300 dark:bg-[#2A2E34]' }}">
             <span class="inline-block h-5 w-5 transform rounded-full bg-white shadow transition {{ ($form['app_export_enabled'] ?? true) ? 'translate-x-5' : 'translate-x-0.5' }}"></span>
         </button>
     </div>

@@ -84,7 +84,7 @@
             <x-icon name="chevron-right" class="hidden h-4 w-4 transition-transform group-hover:translate-x-0.5 sm:inline-block" />
         </a>
         <a href="{{ route('numbers') }}" wire:navigate
-           class="group inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border border-slate-200 bg-white {{ $heroCtaPillClasses }} font-bold text-slate-900 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md dark:border-white/10 dark:bg-[#16233d] dark:text-white">
+           class="group inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border border-slate-200 bg-white {{ $heroCtaPillClasses }} font-bold text-slate-900 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md dark:border-white/10 dark:bg-[#27292c] dark:text-white">
             <x-icon name="hash" class="{{ $heroCtaIconClasses }} text-primary dark:text-teal-300" /> Get Number
             <x-icon name="chevron-right" class="hidden h-4 w-4 text-slate-400 transition-transform group-hover:translate-x-0.5 sm:inline-block" />
         </a>

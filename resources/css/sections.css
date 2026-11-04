@@ -41,7 +41,7 @@
     color: rgb(var(--brand-primary-dark));
 }
 .nx-sechero__headline {
-    font-family: 'Supreme Display', system-ui, sans-serif;
+    font-family: 'Bricolage Grotesque', system-ui, sans-serif;
     font-weight: 800;
     line-height: 1.05;
     font-size: clamp(1.9rem, 5.2vw, 3.6rem);
@@ -103,9 +103,9 @@
         radial-gradient(50% 50% at 85% 25%, rgb(var(--brand-accent) / 0.08), transparent 72%),
         radial-gradient(55% 55% at 50% 90%, rgb(var(--brand-primary) / 0.07), transparent 75%),
         #F6F8FA;
-    color: rgb(15 23 42);
+    color: rgb(27 28 30);
 }
-.nx-sechero.is-light .nx-sechero__cta.is-ghost { background: rgb(15 23 42 / 0.05); border-color: rgb(15 23 42 / 0.12); color: rgb(15 23 42); }
+.nx-sechero.is-light .nx-sechero__cta.is-ghost { background: rgb(27 28 30 / 0.05); border-color: rgb(27 28 30 / 0.12); color: rgb(27 28 30); }
 .nx-sechero.is-dark  { background: rgb(var(--brand-navy)); color: #fff; }
 .nx-sechero.is-dark .nx-sechero__eyebrow { background: rgb(255 255 255 / 0.14); color: #fff; }
 .nx-sechero.is-brand {
@@ -262,3 +262,70 @@
         radial-gradient(55% 55% at 50% 90%, rgb(var(--brand-primary) / 0.14), transparent 75%);
 }
 @media (prefers-reduced-motion: reduce) { .nx-ambient::before { animation: none; } }
+
+
+/* ── Aurora cards: glass surface lit from behind by the brand's own colours (action, accent, primary), so they follow any palette ── */
+.nx-aurora-card { position: relative; isolation: isolate; overflow: hidden; border-radius: 1.25rem; padding: 1rem; text-align: center;
+    background: color-mix(in srgb, #fff 72%, transparent); border: 1px solid rgb(0 0 0 / .07);
+    box-shadow: 0 18px 40px -26px rgb(var(--brand-primary) / .45), inset 0 1px 0 rgb(255 255 255 / .8); backdrop-filter: blur(14px); }
+.nx-aurora-card::before { content: ''; position: absolute; inset: -40% -20% auto -20%; height: 120%; z-index: -1; opacity: .55; filter: blur(26px);
+    background: radial-gradient(60% 60% at 20% 30%, rgb(var(--brand-action) / .45), transparent 70%), radial-gradient(55% 55% at 80% 20%, rgb(var(--brand-accent) / .5), transparent 70%), radial-gradient(60% 60% at 50% 90%, rgb(var(--brand-primary) / .25), transparent 70%); animation: nx-aurora-drift 14s ease-in-out infinite alternate; }
+.dark .nx-aurora-card { background: color-mix(in srgb, #fff 6%, transparent); border-color: rgb(255 255 255 / .1); box-shadow: 0 18px 40px -26px rgb(0 0 0 / .8), inset 0 1px 0 rgb(255 255 255 / .08); }
+.dark .nx-aurora-card::before { opacity: .5; }
+.nx-aurora-card__icon { display: inline-flex; margin-bottom: .5rem; }
+@keyframes nx-aurora-drift { from { transform: translate3d(-4%, 0, 0) scale(1); } to { transform: translate3d(4%, 3%, 0) scale(1.08); } }
+@media (prefers-reduced-motion: reduce) { .nx-aurora-card::before { animation: none; } }
+
+/* ── Stacking journey cards: still sticky and stacking, now a split card with a coded device on one side ── */
+.nx-journey { display: grid; gap: 1.5rem; }
+.nx-journey__card { position: sticky; border-radius: 2rem; overflow: hidden; padding: 1.5rem; display: grid; gap: 1.5rem; align-items: center;
+    background: #fff; border: 1px solid rgb(0 0 0 / .07); box-shadow: 0 30px 60px -34px rgb(var(--brand-primary) / .5); }
+.dark .nx-journey__card { background: var(--brand-card-dark); border-color: var(--brand-card-border-dark); box-shadow: 0 30px 60px -34px rgb(0 0 0 / .9); }
+@media (min-width: 768px) { .nx-journey__card { grid-template-columns: 1.05fr .95fr; padding: 2.25rem 2.5rem; } .nx-journey__card:nth-child(even) .nx-journey__visual { order: -1; } }
+.nx-journey__num { font: 700 clamp(3.5rem, 9vw, 6.5rem)/1 var(--font-display); letter-spacing: -.04em; background: linear-gradient(180deg, rgb(var(--brand-primary)), rgb(var(--brand-primary) / .15)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.dark .nx-journey__num { background-image: linear-gradient(180deg, #fff, rgb(255 255 255 / .1)); }
+.nx-journey__chips { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: 1.25rem; }
+.nx-journey__chip { border-radius: 999px; padding: .3rem .8rem; font-size: .75rem; font-weight: 600; background: rgb(var(--brand-primary) / .08); color: rgb(var(--brand-primary)); }
+.dark .nx-journey__chip { background: rgb(255 255 255 / .08); color: #e5e9ef; }
+.nx-journey__visual { position: relative; display: grid; place-items: center; min-height: 18rem; border-radius: 1.5rem; overflow: hidden; background: radial-gradient(80% 70% at 30% 20%, rgb(var(--brand-action) / .22), transparent 70%), radial-gradient(70% 70% at 80% 80%, rgb(var(--brand-accent) / .3), transparent 70%), rgb(var(--brand-primary) / .06); }
+.nx-journey__visual > img { width: 100%; height: 100%; object-fit: cover; position: absolute; inset: 0; }
+
+/* A coded phone: real interface pieces, so it always wears the brand's own name and colours */
+.nx-phone { position: relative; width: 13rem; border-radius: 2.1rem; padding: .55rem; background: #0b0b0c; box-shadow: 0 26px 50px -20px rgb(0 0 0 / .55), inset 0 0 0 1.5px rgb(255 255 255 / .18); transform: rotate(-3deg); }
+.nx-phone__screen { border-radius: 1.65rem; background: #f6f7f9; padding: 1.1rem .8rem .9rem; min-height: 15.5rem; color: #14171b; }
+.dark .nx-phone__screen { background: #15171a; color: #eef0f3; }
+.nx-phone__notch { position: absolute; top: .75rem; left: 50%; width: 3.4rem; height: .9rem; transform: translateX(-50%); border-radius: 999px; background: #0b0b0c; z-index: 2; }
+.nx-phone__row { display: flex; align-items: center; gap: .5rem; border-radius: .8rem; padding: .45rem .55rem; margin-top: .4rem; font-size: .68rem; font-weight: 600; background: #fff; box-shadow: 0 1px 0 rgb(0 0 0 / .05); }
+.dark .nx-phone__row { background: rgb(255 255 255 / .07); box-shadow: none; }
+.nx-phone__row--on { outline: 2px solid rgb(var(--brand-action)); }
+.nx-phone__cta { margin-top: .7rem; border-radius: .8rem; padding: .5rem; text-align: center; font-size: .7rem; font-weight: 700; color: #fff; background: rgb(var(--brand-primary)); box-shadow: 0 8px 16px -8px rgb(var(--brand-action) / .8); }
+.nx-phone__title { font-size: .62rem; letter-spacing: .12em; text-transform: uppercase; font-weight: 700; opacity: .55; }
+.nx-phone__big { font: 700 1.5rem/1.1 var(--font-display); margin-top: .2rem; }
+.nx-phone__qr { display: grid; grid-template-columns: repeat(9, 1fr); gap: 2px; width: 6.4rem; margin: .8rem auto; padding: .4rem; border-radius: .6rem; background: #fff; }
+.nx-phone__qr i { aspect-ratio: 1; background: #0b0b0c; border-radius: 1px; } .nx-phone__qr i.o { background: transparent; }
+.nx-phone__bars { display: flex; align-items: flex-end; gap: 3px; height: 1.1rem; } .nx-phone__bars b { width: 4px; border-radius: 2px; background: rgb(var(--brand-action)); }
+
+/* ── Statement ticker ── */
+.nx-ticker { padding: 4.5rem 1rem 3rem; overflow: hidden; }
+.nx-ticker__rail { overflow: hidden; mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); }
+.nx-ticker__track { display: flex; width: max-content; animation: nx-ticker 38s linear infinite; }
+.nx-ticker__track ul { display: flex; gap: 2.5rem; padding-right: 2.5rem; margin: 0; list-style: none; }
+.nx-ticker__track li { white-space: nowrap; font: 700 clamp(2.4rem, 7vw, 5.5rem)/1.05 var(--font-display); letter-spacing: -.03em; color: transparent; -webkit-text-stroke: 1.5px rgb(var(--brand-primary) / .55); }
+.nx-ticker__track li:nth-child(even) { color: rgb(var(--brand-primary)); -webkit-text-stroke: 0; }
+.dark .nx-ticker__track li { -webkit-text-stroke-color: rgb(255 255 255 / .5); } .dark .nx-ticker__track li:nth-child(even) { color: #fff; }
+.nx-ticker__track li::after { content: '/'; margin-left: 2.5rem; color: rgb(var(--brand-action)); -webkit-text-stroke: 0; }
+@keyframes nx-ticker { to { transform: translateX(-50%); } }
+@media (prefers-reduced-motion: reduce) { .nx-ticker__track { animation: none; } }
+
+/* ── Capabilities list ── */
+.nx-cap { border-top: 1px solid rgb(0 0 0 / .1); } .dark .nx-cap { border-color: rgb(255 255 255 / .14); }
+.nx-cap__row { border-bottom: 1px solid rgb(0 0 0 / .1); transition: background-color .3s ease; } .dark .nx-cap__row { border-color: rgb(255 255 255 / .14); }
+.nx-cap__row.is-open { background: linear-gradient(90deg, rgb(var(--brand-action) / .06), transparent 70%); }
+.nx-cap__head { display: grid; grid-template-columns: 3rem 1fr auto; align-items: center; gap: 1rem; width: 100%; padding: 1.4rem .25rem; text-align: left; cursor: pointer; }
+.nx-cap__no { font: 600 .8rem/1 var(--font-display); letter-spacing: .12em; color: rgb(100 116 139); }
+.nx-cap__title { font: 700 clamp(1.5rem, 3.4vw, 2.4rem)/1.1 var(--font-display); letter-spacing: -.02em; color: #0f1216; transition: transform .3s ease, color .3s ease; }
+.dark .nx-cap__title { color: #fff; }
+.nx-cap__row.is-open .nx-cap__title { transform: translateX(.5rem); color: rgb(var(--brand-primary)); } .dark .nx-cap__row.is-open .nx-cap__title { color: #fff; }
+.nx-cap__icon { opacity: .55; transition: opacity .3s ease, transform .3s ease; } .nx-cap__row.is-open .nx-cap__icon { opacity: 1; transform: rotate(-6deg) scale(1.05); }
+.nx-cap__panel { padding-left: 4rem; }
+@media (max-width: 640px) { .nx-cap__panel { padding-left: 0; } .nx-cap__head { grid-template-columns: 2.2rem 1fr auto; } }

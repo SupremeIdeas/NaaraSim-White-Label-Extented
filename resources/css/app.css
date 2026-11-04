@@ -34,22 +34,36 @@
 @import 'flag-icons/css/flag-icons.min.css';
 @import './tours.css';
 
-/* --- Brand fonts (self-hosted; no external CDN, CSP-safe). Module 26. -----
-   Titles & headings: "Supreme Display" (the Supreme Ideas Agency custom font).
-   Body text:          "Didact Gothic" (Google, self-hosted woff2).
-   Swap either file in public/fonts and keep these names to re-brand. */
+/* --- Brand fonts (self-hosted; no external CDN, CSP-safe). -----------------
+   White-label builds ship their own pair, distinct from the Naara master:
+   Titles & headings: "Bricolage Grotesque" (variable, SIL OFL).
+   Body text:          "Manrope" (variable, SIL OFL).
+   The legacy names "Supreme Display" / "Didact Gothic" stay as aliases so a
+   saved preset or admin choice that still names them renders in the new pair. */
 @font-face {
-    font-family: 'Supreme Display';
-    src: url('/fonts/supreme-display.ttf') format('truetype');
-    font-weight: 400 900;
+    font-family: 'Bricolage Grotesque';
+    src: url('/fonts/bricolage-grotesque.woff2') format('woff2');
+    font-weight: 200 800;
     font-style: normal;
     font-display: swap;
 }
 @font-face {
-    font-family: 'Didact Gothic';
-    src: url('/fonts/didact-gothic.woff2') format('woff2');
-    font-weight: 400;
+    font-family: 'Manrope';
+    src: url('/fonts/manrope.woff2') format('woff2');
+    font-weight: 200 800;
     font-style: normal;
+    font-display: swap;
+}
+@font-face {
+    font-family: 'Supreme Display';
+    src: url('/fonts/bricolage-grotesque.woff2') format('woff2');
+    font-weight: 200 800;
+    font-display: swap;
+}
+@font-face {
+    font-family: 'Didact Gothic';
+    src: url('/fonts/manrope.woff2') format('woff2');
+    font-weight: 200 800;
     font-display: swap;
 }
 
@@ -59,9 +73,9 @@
    whole platform at runtime — no rebuild. --brand-radius scales button/input
    roundness. */
 :root {
-    --brand-primary: 162 28 175;      /* Deep Teal   #A21CAF */
-    --brand-primary-dark: 134 25 143;    /* Teal Dark   #86198F */
-    --brand-accent: 132 204 22;       /* Warm Gold   #84CC16 */
+    --brand-primary: 35 39 45;      /* Deep Teal   #23272D */
+    --brand-primary-dark: 16 18 21;    /* Teal Dark   #111214 */
+    --brand-accent: 148 160 176;       /* Warm Gold   #94A0B0 */
     /* Text/icon-safe darkened accent (color-system skill, §05 "Badges, tags
        and status pills"): the raw accent value is tuned to look good as a
        FILL (buttons, gradient orbs, hero glows), not as small text or an
@@ -73,16 +87,16 @@
        plain or lightly-tinted light surface should use `-dark` instead,
        reserving the bare accent for use on dark/saturated backgrounds
        (navy cards, primary gradients) where it already contrasts well. */
-    --brand-accent-dark: 77 124 15;
-    --brand-navy: 13 27 42;           /* Midnight Navy #0D1B2A */
-    --brand-action: 232 65 42;        /* Coral Red   #E8412A */
+    --brand-accent-dark: 71 80 94;
+    --brand-navy: 10 11 13;           /* Core Black  #0b0b0c */
+    --brand-action: 61 90 254;        /* Signal Cobalt #3D5AFE: the one colour that pops on black, white and grey */
     --brand-radius: 0.5rem;           /* default control roundness */
 
     /* Site-wide font override (admin Branding page). Defaults to the shipped
        Naara fonts so an unconfigured install is byte-identical to before —
        the quoted names match the @font-face declarations above exactly. */
-    --font-display: 'Supreme Display';
-    --font-sans: 'Didact Gothic';
+    --font-display: 'Bricolage Grotesque';
+    --font-sans: 'Manrope';
 
     /* Dark-mode card-surface tones (theme-coverage audit, owner request: card
        containers site-wide must repaint with the active theme instead of
@@ -96,10 +110,10 @@
        card surfaces always match the sidebar/nav chrome instead of clashing
        with it. Approximate, not pixel-identical to the original hex — see
        .nx-hero-accent for the same documented tradeoff. */
-    --brand-card-dark: #1A2840;         /* card fill, was dark:bg-[#1A2840] */
-    --brand-card-border-dark: #2D4060;  /* card border, was dark:border-[#2D4060] */
-    --brand-card-inner-dark: #152238;   /* nested/inner tile, was dark:bg-[#152238] */
-    --brand-card-hover-dark: #1B2A44;   /* hover tint, was dark:hover:bg-[#1B2A44] */
+    --brand-card-dark: #17191C;         /* card fill, was dark:bg-[#17191C] */
+    --brand-card-border-dark: #2A2E34;  /* card border, was dark:border-[#2A2E34] */
+    --brand-card-inner-dark: #131416;   /* nested/inner tile, was dark:bg-[#131416] */
+    --brand-card-hover-dark: #1D2024;   /* hover tint, was dark:hover:bg-[#1D2024] */
 }
 @supports (color: color-mix(in srgb, red, blue)) {
     :root {
@@ -115,7 +129,7 @@
 @tailwind utilities;
 
 @layer base {
-    /* Body copy defaults to Didact Gothic (the `sans` family). The CSS variable
+    /* Body copy defaults to Manrope (the `sans` family). The CSS variable
        is read first so the admin font system (site-wide override) can repaint
        every element at runtime; theme('fontFamily.sans') is the static
        fallback stack if --font-sans is ever unset. */
@@ -164,7 +178,7 @@
     background-clip: content-box;
 }
 *::-webkit-scrollbar-thumb:hover {
-    background-color: rgb(162 28 175 / 0.65);            /* brand teal on hover */
+    background-color: rgb(37 39 43 / 0.65);            /* brand teal on hover */
     background-clip: content-box;
 }
 *::-webkit-scrollbar-corner {
@@ -179,7 +193,7 @@
     background-clip: content-box;
 }
 .dark *::-webkit-scrollbar-thumb:hover {
-    background-color: rgb(45 212 191 / 0.55);           /* bright teal on hover */
+    background-color: rgb(182 189 200 / 0.55);           /* bright teal on hover */
     background-clip: content-box;
 }
 
@@ -204,3 +218,41 @@ html {
 /* Tell the browser which scheme the page is actually in, so it never re-darkens it. */
 html { color-scheme: light; }
 html.dark { color-scheme: dark; }
+
+/* Globe flags (lite globe): the chip that opens over a port when a route lands on it. Graphite glass, white hairline, no coloured glow. */
+.nx-globe-flag { position: absolute; left: 0; top: 0; transform: translate(var(--x, -99px), var(--y, -99px)); pointer-events: none; z-index: 2; }
+.nx-globe-flag > .fi { position: absolute; left: 0; top: 0; width: 34px; height: 25px; border-radius: 5px; background-size: cover; box-shadow: 0 0 0 1.5px rgb(255 255 255 / .9), 0 10px 22px -8px rgb(0 0 0 / .6), 0 0 26px rgb(255 255 255 / .22);
+    transform: translate(-50%, -150%) scale(0) rotate(-8deg); transform-origin: 50% 100%; opacity: 0; transition: transform .55s cubic-bezier(.2, 1.5, .35, 1), opacity .3s ease; }
+.nx-globe-flag > i { position: absolute; left: 0; top: 0; width: 2px; height: 14px; background: linear-gradient(rgb(255 255 255 / .9), transparent); transform: translate(-50%, -100%) scaleY(0); transform-origin: 50% 100%; transition: transform .35s ease .1s; }
+.nx-globe-flag.is-on > .fi { transform: translate(-50%, -150%) scale(1) rotate(0); opacity: 1; }
+.nx-globe-flag.is-on > i { transform: translate(-50%, -100%) scaleY(1); }
+.nx-globe-flag > em { position: absolute; left: 0; top: 0; transform: translate(-50%, 6px); padding: 3px 10px; border-radius: 999px; font: 600 11px/1.2 var(--font-display, inherit); font-style: normal; letter-spacing: .04em; white-space: nowrap; color: #fff; background: rgb(10 11 13 / .85); box-shadow: 0 0 0 1px rgb(255 255 255 / .28); opacity: 0; transition: opacity .35s ease .15s; }
+.nx-globe-flag.is-focus > .fi { width: 52px; height: 38px; border-radius: 7px; transform: translate(-50%, -165%) scale(1); transition: width .5s ease, height .5s ease, transform .5s ease; }
+.nx-globe-flag.is-focus > i { height: 26px; }
+.nx-globe-flag.is-focus > em { opacity: 1; }
+@media (prefers-reduced-motion: reduce) { .nx-globe-flag > .fi, .nx-globe-flag > i { transition: none; } }
+
+/* Premium glyphs (x-glyph): duotone icon on a graphite glass tile. The accent stroke picks up the palette's silver, never a hard-coded hue. */
+.glyph { --glyph-accent: rgb(var(--brand-accent)); }
+.dark .glyph { --glyph-accent: rgb(var(--brand-accent)); }
+.glyph-tile { border-radius: 30%; color: #f4f5f7; background: linear-gradient(145deg, rgb(var(--brand-primary)), rgb(var(--brand-primary-dark)));
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / .16), 0 8px 18px -10px rgb(0 0 0 / .55); }
+.glyph-tile .glyph { --glyph-accent: #d9dee6; }
+.dark .glyph-tile { background: linear-gradient(145deg, rgb(255 255 255 / .12), rgb(255 255 255 / .05)); box-shadow: inset 0 0 0 1px rgb(255 255 255 / .14); }
+
+/* Two-tone icons: every line icon carries one tiny detail in the accent colour (--ic-accent). The active icon pack sets it per mode; these are the fallbacks. */
+:root { --ic-accent: #E39F00; }
+.dark { --ic-accent: #F5B301; }
+
+/* The pop: one signal colour (--brand-action, cobalt by default) on top of black, white and grey. Ink variants keep it readable as text and strokes on both surfaces. */
+:root { --pop: rgb(var(--brand-action)); --pop-ink: rgb(var(--brand-action)); }
+.dark { --pop-ink: color-mix(in srgb, rgb(var(--brand-action)) 52%, white); }
+:focus-visible { outline-color: var(--pop-ink); }
+.glyph { --glyph-accent: var(--pop-ink); }
+.glyph-tile .glyph { --glyph-accent: color-mix(in srgb, rgb(var(--brand-action)) 40%, white); }
+.dark .glyph { --glyph-accent: var(--pop-ink); }
+/* Sections carry their own backdrop so text never depends on the scroll-faded page colour (it lagged, leaving dark text on a dark page). */
+[data-bg="light"] { background-color: #F8F9FA; }
+.dark [data-bg="light"] { background-color: #0b0b0c; }
+[data-bg="navy"] { background-color: #0b0b0c; color: #e2e8f0; }
+[data-bg="teal"] { background-color: #212225; color: #e9ecf0; }

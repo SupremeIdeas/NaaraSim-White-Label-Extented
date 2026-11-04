@@ -194,9 +194,9 @@ function initLoginScene() {
     if (!canvas) return;
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
-    import('./webgl/login-scene.js')
-        .then(({ mountLoginScene }) => {
-            _loginSceneDestroy = mountLoginScene(canvas);
+    import('./webgl/globe-lite.js')
+        .then(({ mountGlobeLite }) => {
+            _loginSceneDestroy = mountGlobeLite(canvas, { mode: 'login' });
             canvas.classList.add('is-live'); // fades the canvas in over the fallback
         })
         .catch(() => { /* bundle/WebGL failure → CSS fallback stays */ });

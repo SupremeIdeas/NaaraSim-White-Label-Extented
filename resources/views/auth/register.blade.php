@@ -1,11 +1,12 @@
-<x-layouts.auth title="Create account — NaaraSim" heading="Join NaaraSim" subheading="One account for eSIM data and phone numbers, worldwide.">
+@php($c = \App\Support\SiteContent::page('sign-in')['register'] ?? [])
+<x-layouts.auth title="Create account — NaaraSim" :heading="str_replace('{brand}', \App\Support\BrandSettings::name(), $c['heading'] ?? 'Join')" :subheading="$c['subheading'] ?? ''">
     {{-- Merchant co-branding (ROADMAP §Layer 3.3): shown when signing up via a
          reseller invite. NaaraSim branding is never removed — the merchant sits
          alongside it with "Powered by NaaraSim". --}}
     @isset($inviteMerchant)
         @if ($inviteMerchant)
-            @php($accent = $inviteMerchant->brand_color ?: '#A21CAF')
-            <div class="mb-4 flex items-center gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-[#2D4060] dark:bg-[#1A2840]">
+            @php($accent = $inviteMerchant->brand_color ?: '#23272D')
+            <div class="mb-4 flex items-center gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-[#2A2E34] dark:bg-[#17191C]">
                 @if ($inviteMerchant->logo_url)
                     <img src="{{ $inviteMerchant->logo_url }}" alt="{{ $inviteMerchant->business_name }}" class="h-11 w-11 rounded-xl object-contain ring-1 ring-black/5 dark:ring-white/10">
                 @else
@@ -19,7 +20,7 @@
         @endif
     @endisset
     <form method="POST" action="/register"
-          class="space-y-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-[#2D4060] dark:bg-[#1A2840]">
+          class="space-y-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-[#2A2E34] dark:bg-[#17191C]">
         @csrf
         @if ($errors->any())
             <div class="rounded-lg bg-red-50 p-3 text-sm text-red-700 dark:bg-red-950/40 dark:text-red-300">
@@ -32,29 +33,29 @@
         <div>
             <label class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">Name</label>
             <input type="text" name="name" value="{{ old('name') }}" required autofocus
-                   class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                   class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
         </div>
         <div>
             <label class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">Email</label>
             <input type="email" name="email" value="{{ old('email') }}" required
-                   class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                   class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
         </div>
         <div>
             <label class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">Password</label>
             <x-ui.password name="password" required
-                   class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100" />
+                   class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100" />
         </div>
         <div>
             <label class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">Confirm password</label>
             <x-ui.password name="password_confirmation" required
-                   class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100" />
+                   class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100" />
         </div>
         <x-turnstile />
         <button type="submit" class="flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 font-semibold text-white hover:bg-primary-dark">
-            <x-icon name="badge-check" class="h-5 w-5" /> Create account
+            <x-icon name="badge-check" class="h-5 w-5" /> {{ $c['cta'] ?? 'Create account' }}
         </button>
         <p class="text-center text-sm text-slate-500 dark:text-slate-400">
-            Already have an account? <a href="/login" class="font-semibold text-primary hover:underline">Sign in</a>
+            {{ $c['switch_text'] ?? '' }} <a href="/login" class="font-semibold text-primary hover:underline">{{ $c['switch_link'] ?? '' }}</a>
         </p>
     </form>
     <x-trust.reviews placement="auth.badge" class="mt-4 text-center" />

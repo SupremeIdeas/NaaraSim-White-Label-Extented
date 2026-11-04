@@ -11,9 +11,9 @@
 import * as THREE from 'three';
 import { fatLattice, fatArc, recolour, arcPulse, syncResolution, isDarkPage, watchTheme } from './lines.js';
 
-const TEAL = 0x0a6e6e;
-const TEAL_LIGHT = 0x2dd4bf;
-const GOLD = 0xd4a017;
+const TEAL = 0x3a404a;
+const TEAL_LIGHT = 0xc4cbd6;
+const GOLD = 0x94a0b0;
 
 /** Shared bootstrap: renderer + rAF loop that pauses off-screen and when hidden. */
 function createStage(canvas) {
@@ -89,123 +89,6 @@ function pointerParallax(strength = 0.5) {
     return { target, dispose: () => window.removeEventListener('pointermove', onPointer) };
 }
 
-// ── Variant: connected planet (home hero) ───────────────────────────────────
-// The login planet, scaled up for a full-bleed hero: faceted teal world, gold
-// connectivity lattice, a field of orbiting nodes, animated gold connection
-// arcs that pulse between points, and a faint starfield for depth.
-function mountPlanet(canvas) {
-    const stage = createStage(canvas);
-    if (!stage) return () => {};
-    const { scene, camera } = stage;
-    camera.position.set(0, 0, 7.4);
-
-    const world = new THREE.Group();
-    world.position.y = -0.85;
-    scene.add(world);
-
-    const planetGeo = new THREE.IcosahedronGeometry(2.1, 3);
-    const planet = new THREE.Mesh(
-        planetGeo,
-        new THREE.MeshStandardMaterial({ color: TEAL, flatShading: true, roughness: 0.5, metalness: 0.25 }),
-    );
-    world.add(planet);
-
-    let dark = isDarkPage();
-    const latticeGeo = new THREE.EdgesGeometry(new THREE.IcosahedronGeometry(2.14, 3));
-    const lattice = fatLattice(latticeGeo, { dark, width: 1.6 });
-    world.add(lattice);
-
-    // Orbiting connectivity nodes.
-    const NODES = 320;
-    const nodePos = new Float32Array(NODES * 3);
-    for (let i = 0; i < NODES; i++) {
-        const a = Math.random() * Math.PI * 2;
-        const r = 3 + Math.random() * 2.2;
-        nodePos[i * 3] = Math.cos(a) * r;
-        nodePos[i * 3 + 1] = (Math.random() - 0.5) * 1.8;
-        nodePos[i * 3 + 2] = Math.sin(a) * r;
-    }
-    const nodeGeo = new THREE.BufferGeometry();
-    nodeGeo.setAttribute('position', new THREE.BufferAttribute(nodePos, 3));
-    const nodes = new THREE.Points(
-        nodeGeo,
-        new THREE.PointsMaterial({ color: TEAL_LIGHT, size: 0.045, transparent: true, opacity: 0.9, depthWrite: false }),
-    );
-    nodes.rotation.z = 0.4;
-    scene.add(nodes);
-
-    // Gold connection arcs that "route" over the planet surface.
-    const arcs = new THREE.Group();
-    world.add(arcs);
-    const arcMats = [];
-    const surfacePoint = () => new THREE.Vector3().setFromSphericalCoords(
-        2.12, Math.acos(2 * Math.random() - 1), Math.random() * Math.PI * 2,
-    );
-    for (let i = 0; i < 7; i++) {
-        const a = surfacePoint();
-        const b = surfacePoint();
-        const mid = a.clone().add(b).multiplyScalar(0.5).setLength(2.9);
-        const curve = new THREE.QuadraticBezierCurve3(a, mid, b);
-        const line = fatArc(curve.getPoints(40), { dark, width: 2.8 });
-        arcMats.push({ mat: line.material, phase: Math.random() * Math.PI * 2 });
-        arcs.add(line);
-    }
-
-    // Faint starfield for depth.
-    const STARS = 220;
-    const starPos = new Float32Array(STARS * 3);
-    for (let i = 0; i < STARS; i++) {
-        starPos[i * 3] = (Math.random() - 0.5) * 26;
-        starPos[i * 3 + 1] = (Math.random() - 0.5) * 16;
-        starPos[i * 3 + 2] = -6 - Math.random() * 10;
-    }
-    const starGeo = new THREE.BufferGeometry();
-    starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
-    const stars = new THREE.Points(
-        starGeo,
-        new THREE.PointsMaterial({ color: 0xffffff, size: 0.04, transparent: true, opacity: 0.35, depthWrite: false }),
-    );
-    scene.add(stars);
-
-    scene.add(new THREE.AmbientLight(0x0d1b2a, 1.1));
-    const key = new THREE.DirectionalLight(TEAL_LIGHT, 2.4);
-    key.position.set(-3, 2, 4);
-    scene.add(key);
-    const rim = new THREE.PointLight(GOLD, 9, 22);
-    rim.position.set(4, -1, 2);
-    scene.add(rim);
-
-    const { target, dispose: disposePointer } = pointerParallax(0.5);
-    // The lines follow the page theme: deep teal/amber on a light page, the light mint scent colour on a dark one.
-    const disposeTheme = watchTheme((d) => { dark = d; recolour(lattice, d); arcs.children.forEach((l) => recolour(l, d)); });
-    const fat = [lattice, ...arcs.children];
-
-    stage.setUpdate((t) => {
-        syncResolution(stage.renderer, fat);
-        world.rotation.y = t * 0.1;
-        world.rotation.x = Math.sin(t * 0.18) * 0.1;
-        nodes.rotation.y = -t * 0.05;
-        arcMats.forEach(({ mat, phase }) => { mat.opacity = arcPulse(dark, t, phase); });
-        camera.position.x += (target.x * 1.3 - camera.position.x) * 0.04;
-        camera.position.y += (-target.y * 1.3 - camera.position.y) * 0.04;
-        camera.lookAt(0, -0.85, 0);
-    });
-
-    return () => stage.teardown(() => {
-        disposePointer();
-        disposeTheme();
-        planetGeo.dispose();
-        planet.material.dispose();
-        latticeGeo.dispose();
-        lattice.material.dispose();
-        nodeGeo.dispose();
-        nodes.material.dispose();
-        starGeo.dispose();
-        stars.material.dispose();
-        arcs.children.forEach((l) => { l.geometry.dispose(); l.material.dispose(); });
-    });
-}
-
 // ── Variant: liquid morphology (about hero) ─────────────────────────────────
 // A slow, continuously morphing teal "liquid" orb with a gold fresnel rim —
 // organic brand motion for the story page. Displacement is a cheap sum of sine
@@ -242,7 +125,7 @@ function mountLiquid(canvas) {
     );
     blob.add(shell);
 
-    scene.add(new THREE.AmbientLight(0x0d1b2a, 1.0));
+    scene.add(new THREE.AmbientLight(0x0a0b0d, 1.0));
     const key = new THREE.DirectionalLight(TEAL_LIGHT, 2.6);
     key.position.set(-3, 2, 4);
     scene.add(key);
@@ -303,7 +186,7 @@ function mountWater(canvas) {
     const { scene, camera } = stage;
     camera.position.set(0, 2.4, 6);
     camera.lookAt(0, 0, -4);
-    scene.fog = new THREE.FogExp2(0x0d1b2a, 0.11);
+    scene.fog = new THREE.FogExp2(0x0a0b0d, 0.11);
 
     const COLS = 110, ROWS = 60, GAP = 0.34;
     const count = COLS * ROWS;
@@ -379,7 +262,7 @@ function mountCity(canvas) {
     const { scene, camera } = stage;
     camera.position.set(0, 5.5, 11);
     camera.lookAt(0, 1.2, 0);
-    scene.fog = new THREE.FogExp2(0x0d1b2a, 0.055);
+    scene.fog = new THREE.FogExp2(0x0a0b0d, 0.055);
 
     const GRID = 11, GAP = 1.5;
     const count = GRID * GRID;
@@ -404,7 +287,7 @@ function mountCity(canvas) {
     // Ground plane (dark) so buildings read as a skyline, not floating boxes.
     const ground = new THREE.Mesh(
         new THREE.PlaneGeometry(60, 60),
-        new THREE.MeshStandardMaterial({ color: 0x0a1524, roughness: 1 }),
+        new THREE.MeshStandardMaterial({ color: 0x0b0c0e, roughness: 1 }),
     );
     ground.rotation.x = -Math.PI / 2;
     scene.add(ground);
@@ -427,7 +310,7 @@ function mountCity(canvas) {
     }));
     scene.add(uplinks);
 
-    scene.add(new THREE.AmbientLight(0x0d1b2a, 1.2));
+    scene.add(new THREE.AmbientLight(0x0a0b0d, 1.2));
     const key = new THREE.DirectionalLight(TEAL_LIGHT, 2.2);
     key.position.set(-4, 6, 5);
     scene.add(key);
@@ -465,7 +348,15 @@ function mountCity(canvas) {
     });
 }
 
-const VARIANTS = { planet: mountPlanet, liquid: mountLiquid, water: mountWater, city: mountCity };
+/** The home hero: the lite globe, loaded as its own small chunk. Returns a destroy() straight away, even while the chunk is still loading. */
+function mountGlobeLiteLazy(canvas) {
+    let stop = () => {};
+    let dead = false;
+    import('./globe-lite.js').then((m) => { if (!dead) stop = m.mountGlobeLite(canvas, { mode: 'hero' }); }).catch(() => {});
+    return () => { dead = true; stop(); };
+}
+
+const VARIANTS = { planet: mountGlobeLiteLazy, liquid: mountLiquid, water: mountWater, city: mountCity };
 
 export function mountHeroScene(canvas, variant) {
     const mounter = VARIANTS[variant];

@@ -3,8 +3,8 @@
     "file": "assets/_commonjsHelpers-CqkleIqs.js",
     "name": "_commonjsHelpers"
   },
-  "_lines-N_6Cqf0Q.js": {
-    "file": "assets/lines-N_6Cqf0Q.js",
+  "_lines-DzzUxfo_.js": {
+    "file": "assets/lines-DzzUxfo_.js",
     "name": "lines"
   },
   "_lottie-DG5NakNH.js": {
@@ -2199,7 +2199,7 @@
     "src": "node_modules/flag-icons/flags/4x3/zw.svg"
   },
   "resources/css/app.css": {
-    "file": "assets/app-DGvGybE3.css",
+    "file": "assets/app-DXGQBgbn.css",
     "src": "resources/css/app.css",
     "isEntry": true
   },
@@ -2246,7 +2246,7 @@
     "isDynamicEntry": true
   },
   "resources/js/app.js": {
-    "file": "assets/app-CfFFp7HE.js",
+    "file": "assets/app-C3pmt0rW.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
@@ -2262,13 +2262,13 @@
       "resources/js/composer/composer.js",
       "node_modules/chart.js/dist/chart.js",
       "node_modules/chart.js/dist/chart.js",
-      "resources/js/webgl/login-scene.js",
+      "resources/js/webgl/globe-lite.js",
       "resources/js/webgl/hero-scene.js",
       "resources/js/dialer.js"
     ]
   },
   "resources/js/composer/composer.js": {
-    "file": "assets/composer-Cq2BQbyJ.js",
+    "file": "assets/composer-Bl2P0gbm.js",
     "name": "composer",
     "src": "resources/js/composer/composer.js",
     "isDynamicEntry": true,
@@ -2286,7 +2286,7 @@
     "isDynamicEntry": true
   },
   "resources/js/dialer.js": {
-    "file": "assets/dialer-BqIIpGeT.js",
+    "file": "assets/dialer-tsVD04y2.js",
     "name": "dialer",
     "src": "resources/js/dialer.js",
     "isDynamicEntry": true,
@@ -2297,22 +2297,26 @@
       "node_modules/@twilio/voice-sdk/esm/twilio.js"
     ]
   },
+  "resources/js/webgl/globe-lite.js": {
+    "file": "assets/globe-lite-9hduLCqt.js",
+    "name": "globe-lite",
+    "src": "resources/js/webgl/globe-lite.js",
+    "isDynamicEntry": true,
+    "imports": [
+      "_lines-DzzUxfo_.js"
+    ]
+  },
   "resources/js/webgl/hero-scene.js": {
-    "file": "assets/hero-scene-Bw3Pc6IK.js",
+    "file": "assets/hero-scene-LLzgY7VS.js",
     "name": "hero-scene",
     "src": "resources/js/webgl/hero-scene.js",
     "isDynamicEntry": true,
     "imports": [
-      "_lines-N_6Cqf0Q.js"
-    ]
-  },
-  "resources/js/webgl/login-scene.js": {
-    "file": "assets/login-scene-3Rq0bOAn.js",
-    "name": "login-scene",
-    "src": "resources/js/webgl/login-scene.js",
-    "isDynamicEntry": true,
-    "imports": [
-      "_lines-N_6Cqf0Q.js"
+      "resources/js/app.js",
+      "_lines-DzzUxfo_.js"
+    ],
+    "dynamicImports": [
+      "resources/js/webgl/globe-lite.js"
     ]
   }
 }

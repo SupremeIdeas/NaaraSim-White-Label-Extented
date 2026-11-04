@@ -39,7 +39,7 @@
     <div class="relative mx-auto flex max-w-2xl flex-wrap justify-center gap-3 px-4 pb-10 text-xs font-semibold text-slate-500 dark:text-slate-400">
         @foreach ([['icon' => 'globe', 'label' => '190+ countries'], ['icon' => 'clock', 'label' => '24/7 support'], ['icon' => 'shield-check', 'label' => 'Bank-grade security']] as $pill)
             <span class="inline-flex items-center gap-1.5 rounded-full border border-slate-200 px-3 py-1.5 dark:border-white/10">
-                <x-icon :name="$pill['icon']" class="h-3.5 w-3.5 text-primary" /> {{ $pill['label'] }}
+                <x-glyph :name="$pill['icon']" class="h-3.5 w-3.5 text-primary" /> {{ $pill['label'] }}
             </span>
         @endforeach
     </div>
@@ -48,7 +48,7 @@
 <section class="relative mx-auto max-w-3xl px-4 pb-24">
     <div class="relative rounded-[2.5rem] border border-slate-200 bg-white p-6 sm:p-8 dark:border-white/10 dark:bg-[#12172a]">
         <span class="mb-2 inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-primary to-accent px-3 py-1 text-[11px] font-semibold text-white sm:absolute sm:-top-4 sm:right-8">
-            <x-icon name="zap" class="h-3 w-3" /> Usually replies within the hour
+            <x-glyph name="zap" class="h-3 w-3" /> Usually replies within the hour
         </span>
         <h2 class="mb-5 mt-3 font-display text-xl font-bold text-slate-900 dark:text-white sm:mt-0">Send us a message</h2>
         <livewire:contact-form />
@@ -60,14 +60,14 @@
     <h2 class="px-4 text-center text-sm font-semibold uppercase tracking-widest text-slate-400">Other ways to reach us</h2>
     <div class="mt-6 flex snap-x snap-mandatory justify-center gap-4 overflow-x-auto px-4 pb-4">
         <div class="w-64 shrink-0 snap-start rounded-3xl border border-slate-200 bg-white p-5 dark:border-white/10 dark:bg-[#12172a]">
-            <span class="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-primary to-accent text-white"><x-icon name="message-circle" class="h-4 w-4" /></span>
+            <span class="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-primary to-accent text-white"><x-glyph name="message-circle" class="h-4 w-4" /></span>
             <h3 class="mt-3 font-bold text-slate-900 dark:text-white">Live chat</h3>
             <p class="mt-1.5 text-sm leading-relaxed text-slate-600 dark:text-slate-300">Usually online — get a real answer in minutes.</p>
             <a href="{{ auth()->check() ? route('support') : route('login') }}" class="mt-3 inline-block text-sm font-semibold text-primary hover:underline">Open the chat</a>
         </div>
 
         <div class="w-64 shrink-0 snap-start rounded-3xl border border-slate-200 bg-white p-5 dark:border-white/10 dark:bg-[#12172a]">
-            <span class="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-primary to-accent text-white"><x-icon name="mail" class="h-4 w-4" /></span>
+            <span class="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-primary to-accent text-white"><x-glyph name="mail" class="h-4 w-4" /></span>
             <h3 class="mt-3 font-bold text-slate-900 dark:text-white">Email</h3>
             <p class="mt-1.5 text-sm leading-relaxed text-slate-600 dark:text-slate-300">For anything that needs a paper trail.</p>
             <a href="mailto:{{ \App\Support\Niche\SupportLinks::email() }}" class="mt-3 inline-block text-sm font-semibold text-primary hover:underline">{{ \App\Support\Niche\SupportLinks::email() }}</a>
@@ -75,7 +75,7 @@
 
         @if (\App\Support\Niche\SupportLinks::hasWhatsapp())
             <div class="w-64 shrink-0 snap-start rounded-3xl border border-slate-200 bg-white p-5 dark:border-white/10 dark:bg-[#12172a]">
-                <span class="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-primary to-accent text-white"><x-icon name="phone" class="h-4 w-4" /></span>
+                <span class="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-primary to-accent text-white"><x-glyph name="phone" class="h-4 w-4" /></span>
                 <h3 class="mt-3 font-bold text-slate-900 dark:text-white">WhatsApp</h3>
                 <p class="mt-1.5 text-sm leading-relaxed text-slate-600 dark:text-slate-300">Message us directly for quick questions.</p>
                 <a href="{{ \App\Support\Niche\SupportLinks::whatsappUrl() }}" target="_blank" rel="noopener" class="mt-3 inline-block text-sm font-semibold text-primary hover:underline">Chat on WhatsApp</a>

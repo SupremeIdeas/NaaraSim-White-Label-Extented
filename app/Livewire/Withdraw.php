@@ -31,6 +31,13 @@ class Withdraw extends Component
     // Add-account form.
     public string $accountType = 'bank';
 
+    // International (Grey) account form. Fields are whatever Grey says the corridor needs.
+    public string $greyCountry = '';
+
+    /** @var array<string, string> */
+    public array $greyInput = [];
+
+
     public string $country = 'NG';
 
     public string $bankCode = '';
@@ -232,9 +239,40 @@ class Withdraw extends Component
         return ['NG' => 'NGN', 'GH' => 'GHS', 'KE' => 'KES', 'ZA' => 'ZAR'][strtoupper($country)] ?? 'USD';
     }
 
+    public function addGreyAccount(): void
+    {
+        $this->accountError = null;
+        if (! $this->greyAvailable()) {
+            return;
+        }
+        $this->validate(['greyCountry' => 'required|string|size:2', 'greyInput' => 'array']);
+
+        try {
+            $account = app(\App\PayoutRails\Grey\GreyAccountService::class)->add(Auth::user(), $this->greyCountry, $this->greyInput);
+        } catch (AccountResolutionException|PayoutException $e) {
+            $this->accountError = $e->getMessage();
+
+            return;
+        }
+
+        $this->reset('greyInput');
+        $this->accountId = $account->id;
+        $this->dispatch('nx-toast', type: 'success', message: 'Account saved. Payouts to it are reviewed by our team.');
+    }
+
+    private function greyAvailable(): bool
+    {
+        return class_exists(\App\PayoutRails\Grey\GreyAccountService::class)
+            && app(\App\Services\Payouts\PayoutService::class)
+            && app()->bound('payout.grey')
+            && app('payout.grey')->available();
+    }
+
     public function render(WithdrawalService $withdrawals, CreditService $credits, PayoutService $payouts, PayoutThreshold $threshold)
     {
         $user = Auth::user();
+
+        $greyCountries = $this->greyAvailable() ? app(\App\PayoutRails\Grey\GreyAccountService::class)->countries() : [];
 
         return view('livewire.withdraw', [
             'accounts' => PayoutAccount::where('user_id', $user->id)->latest()->get(),
@@ -244,6 +282,9 @@ class Withdraw extends Component
             'enabled' => PayoutSettings::enabled(),
             // §8: the volume-recommended payout rail (or null). Other rails still show.
             'recommendedGateway' => $payouts->recommendedGateway(),
+            'greyAvailable' => $greyCountries !== [],
+            'greyCountries' => $greyCountries,
+            'greyForm' => $this->greyAvailable() && $this->greyCountry !== '' ? app(\App\PayoutRails\Grey\GreyAccountService::class)->formFor($this->greyCountry) : null,
             'paypalAvailable' => ProviderStatus::isActive('paypal'),
             'stripeAvailable' => ProviderStatus::isActive('stripe'),
             'stripeAccount' => PayoutAccount::where('user_id', $user->id)->where('type', 'stripe')->first(),

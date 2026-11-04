@@ -56,20 +56,25 @@ class HeaderBrandContextTest extends TestCase
 
     public function test_the_catalogue_header_shows_the_naarasim_mark_not_the_family_mark(): void
     {
+        \App\Models\Setting::setValue('brand.logo_product_light', 'https://cdn.test/product-mark.png', 'brand');
+        \App\Models\Setting::setValue('brand.logo_family_light', 'https://cdn.test/family-mark.png', 'brand');
+        \App\Support\BrandSettings::flush();
         $user = User::factory()->create(['email_verified_at' => now(), 'is_active' => true]);
 
         $this->actingAs($user)->get(route('catalogue'))
             ->assertOk()
-            ->assertSee('naarasim-product', false)   // header swapped to the product mark
-            ->assertDontSee('naara-family', false);  // …and the umbrella mark is gone here
+            ->assertSee('product-mark.png', false)   // header swapped to the product mark
+            ->assertDontSee('family-mark.png', false);  // …and the umbrella mark is gone here
     }
 
     public function test_the_dashboard_header_shows_the_family_mark(): void
     {
+        \App\Models\Setting::setValue('brand.logo_family_light', 'https://cdn.test/family-mark.png', 'brand');
+        \App\Support\BrandSettings::flush();
         $user = User::factory()->create(['email_verified_at' => now(), 'is_active' => true]);
 
         $this->actingAs($user)->get(route('dashboard'))
             ->assertOk()
-            ->assertSee('naara-family', false);
+            ->assertSee('family-mark.png', false);
     }
 }

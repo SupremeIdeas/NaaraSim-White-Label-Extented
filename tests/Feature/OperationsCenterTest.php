@@ -43,7 +43,7 @@ class OperationsCenterTest extends TestCase
         Livewire::actingAs($this->admin())->test(ProviderRegistryPage::class)
             ->assertOk()
             ->assertSee('Provider Registry')
-            ->assertSee('Naara Data')      // family grouping
+            ->assertSee(\App\Support\BrandSettings::rebrand('Naara Data'))      // family grouping
             ->assertSee('esimgo')          // real provider name, never masked
             ->assertSee('twilio');
     }

@@ -12,7 +12,7 @@
     @endif
 
     {{-- Settings --}}
-    <div class="mt-5 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-[#2D4060] dark:bg-[#1A2840]">
+    <div class="mt-5 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-[#2A2E34] dark:bg-[#17191C]">
         <label class="flex items-center justify-between gap-4">
             <span>
                 <span class="block text-sm font-semibold text-slate-900 dark:text-slate-100">Enable payouts</span>
@@ -25,7 +25,7 @@
             <div>
                 <label class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">Settlement mode</label>
                 <select wire:model="mode"
-                        class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                        class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
                     <option value="manual">Manual — approve each request</option>
                     <option value="auto">Auto — the Guardian may approve (needs its own switches ON)</option>
                 </select>
@@ -34,7 +34,7 @@
             <div>
                 <label class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">Minimum withdrawal (USD)</label>
                 <input type="number" step="0.5" min="0" wire:model="minWithdrawal"
-                       class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                       class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
                 @error('minWithdrawal') <span class="text-xs text-red-600">{{ $message }}</span> @enderror
             </div>
         </div>
@@ -54,7 +54,7 @@
     </div>
 
     {{-- Tabs --}}
-    <div class="mt-5 flex flex-wrap gap-1 rounded-xl border border-slate-200 bg-white p-1 text-sm dark:border-[#2D4060] dark:bg-[#1A2840]" role="tablist">
+    <div class="mt-5 flex flex-wrap gap-1 rounded-xl border border-slate-200 bg-white p-1 text-sm dark:border-[#2A2E34] dark:bg-[#17191C]" role="tablist">
         @foreach (['queue' => 'Review queue', 'log' => 'Decision log', 'float' => 'Float', 'guardian' => 'Guardian', 'trust' => 'Trust', 'guide' => 'Rail guide'] as $key => $label)
             <button type="button" wire:click="$set('tab', '{{ $key }}')" role="tab" aria-selected="{{ $tab === $key ? 'true' : 'false' }}"
                     class="rounded-lg px-3 py-1.5 font-medium transition {{ $tab === $key ? 'bg-primary text-white' : 'text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-white/10' }}">
@@ -76,7 +76,7 @@
     <div class="mt-3 space-y-3">
         @forelse ($pending as $req)
             @php($op = $opinions[$req->id] ?? null)
-            <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-[#2D4060] dark:bg-[#1A2840]" wire:key="pending-{{ $req->id }}">
+            <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-[#2A2E34] dark:bg-[#17191C]" wire:key="pending-{{ $req->id }}">
                 <div class="flex flex-wrap items-start justify-between gap-3">
                     <div class="min-w-0">
                         <div class="text-sm font-semibold text-slate-900 dark:text-slate-100">{{ $req->user?->email ?? '—' }}</div>
@@ -102,7 +102,7 @@
                 </div>
 
                 @if ($op)
-                    <details class="mt-3 rounded-lg bg-slate-50 p-3 text-xs dark:bg-[#243352]">
+                    <details class="mt-3 rounded-lg bg-slate-50 p-3 text-xs dark:bg-[#373a3f]">
                         <summary class="cursor-pointer font-medium text-slate-700 dark:text-slate-200">
                             Guardian opinion: <span class="uppercase">{{ $op->decision }}</span>
                             @if ($op->reason) <span class="text-slate-500">({{ str_replace('_', ' ', $op->reason) }})</span> @endif
@@ -126,30 +126,30 @@
                 <div class="mt-3 flex flex-wrap items-start gap-2">
                     <div class="min-w-[12rem] flex-1">
                         <input type="text" wire:model="notes.{{ $req->id }}" placeholder="Note (required for any decision)"
-                               class="w-full rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-900 dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                               class="w-full rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-900 dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
                         @error('notes.'.$req->id) <span class="text-xs text-red-600">{{ $message }}</span> @enderror
                     </div>
                     <button type="button" wire:click="approve({{ $req->id }})" wire:loading.attr="disabled" wire:target="approve({{ $req->id }})"
                             wire:confirm="Approve and send this payout?"
                             class="rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-white hover:bg-primary-dark disabled:opacity-60">Approve</button>
                     <button type="button" wire:click="requestKyc({{ $req->id }})" wire:loading.attr="disabled" wire:target="requestKyc({{ $req->id }})"
-                            class="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:border-amber-300 hover:text-amber-600 disabled:opacity-60 dark:border-[#2D4060] dark:text-slate-300">Request KYC</button>
+                            class="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:border-amber-300 hover:text-amber-600 disabled:opacity-60 dark:border-[#2A2E34] dark:text-slate-300">Request KYC</button>
                     <button type="button" wire:click="reject({{ $req->id }})" wire:loading.attr="disabled" wire:target="reject({{ $req->id }})"
                             wire:confirm="Decline this payout and return the funds?"
-                            class="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:border-red-300 hover:text-red-600 disabled:opacity-60 dark:border-[#2D4060] dark:text-slate-300">Decline</button>
+                            class="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:border-red-300 hover:text-red-600 disabled:opacity-60 dark:border-[#2A2E34] dark:text-slate-300">Decline</button>
                 </div>
             </div>
         @empty
-            <div class="rounded-2xl border border-slate-200 bg-white px-4 py-8 text-center text-sm text-slate-400 dark:border-[#2D4060] dark:bg-[#1A2840]">Nothing awaiting approval.</div>
+            <div class="rounded-2xl border border-slate-200 bg-white px-4 py-8 text-center text-sm text-slate-400 dark:border-[#2A2E34] dark:bg-[#17191C]">Nothing awaiting approval.</div>
         @endforelse
     </div>
 
     {{-- Recent activity --}}
     <h2 class="mt-6 text-sm font-semibold text-slate-900 dark:text-slate-100">Recent payouts</h2>
-    <div class="mt-3 overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-[#2D4060] dark:bg-[#1A2840]">
+    <div class="mt-3 overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-[#2A2E34] dark:bg-[#17191C]">
         <table class="w-full text-sm">
             <thead>
-                <tr class="border-b border-slate-100 text-left text-xs uppercase tracking-wide text-slate-400 dark:border-[#2D4060]">
+                <tr class="border-b border-slate-100 text-left text-xs uppercase tracking-wide text-slate-400 dark:border-[#2A2E34]">
                     <th class="px-4 py-3">Payee</th>
                     <th class="px-4 py-3 text-right">Amount</th>
                     <th class="px-4 py-3">Status</th>
@@ -163,7 +163,7 @@
                         'processing' => 'bg-amber-100 text-amber-700 dark:bg-amber-950/50 dark:text-amber-300',
                         default => 'bg-red-100 text-red-700 dark:bg-red-950/50 dark:text-red-300',
                     })
-                    <tr class="border-b border-slate-50 dark:border-[#22314e]" wire:key="recent-{{ $req->id }}">
+                    <tr class="border-b border-slate-50 dark:border-[#34373c]" wire:key="recent-{{ $req->id }}">
                         <td class="px-4 py-3 text-slate-600 dark:text-slate-300">{{ $req->user?->email ?? '—' }}</td>
                         <td class="px-4 py-3 text-right font-semibold text-slate-900 dark:text-slate-100">{{ number_format((float) $req->amount, 2) }} {{ $req->currency }}</td>
                         <td class="px-4 py-3"><span class="rounded-full px-2 py-0.5 text-[11px] font-semibold capitalize {{ $badge }}">{{ $req->status }}</span></td>
@@ -180,7 +180,7 @@
     @if ($tab === 'log')
     <div class="mt-6 grid gap-3 sm:grid-cols-4">
         @foreach ([['Acted (24h)', array_sum($metrics['acted_24h'])], ['Advisory (24h)', array_sum($metrics['advisory_24h'])], ['In review', $metrics['manual_review']], ['Deferred', $metrics['deferred']]] as [$label, $val])
-            <div class="rounded-xl border border-slate-200 bg-white p-3 dark:border-[#2D4060] dark:bg-[#1A2840]">
+            <div class="rounded-xl border border-slate-200 bg-white p-3 dark:border-[#2A2E34] dark:bg-[#17191C]">
                 <div class="text-xs text-slate-500 dark:text-slate-400">{{ $label }}</div>
                 <div class="text-xl font-bold text-slate-900 dark:text-slate-100">{{ $val }}</div>
             </div>
@@ -191,21 +191,21 @@
     @endif
 
     <div class="mt-4 flex flex-wrap items-center justify-between gap-2">
-        <select wire:model.live="decisionFilter" class="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+        <select wire:model.live="decisionFilter" class="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
             <option value="">All decisions</option>
             @foreach (['approve', 'defer', 'hold', 'reject'] as $d) <option value="{{ $d }}">{{ ucfirst($d) }}</option> @endforeach
         </select>
         <button type="button" wire:click="exportLog" wire:loading.attr="disabled" wire:target="exportLog"
-                class="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 dark:border-[#2D4060] dark:text-slate-300">Export CSV</button>
+                class="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 dark:border-[#2A2E34] dark:text-slate-300">Export CSV</button>
     </div>
-    <div class="mt-3 overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-[#2D4060] dark:bg-[#1A2840]">
+    <div class="mt-3 overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-[#2A2E34] dark:bg-[#17191C]">
         <table class="w-full text-sm">
-            <thead><tr class="border-b border-slate-100 text-left text-xs uppercase tracking-wide text-slate-400 dark:border-[#2D4060]">
+            <thead><tr class="border-b border-slate-100 text-left text-xs uppercase tracking-wide text-slate-400 dark:border-[#2A2E34]">
                 <th class="px-4 py-3">When</th><th class="px-4 py-3">Payout</th><th class="px-4 py-3">Decision</th><th class="px-4 py-3">Reason</th><th class="px-4 py-3">Score</th><th class="px-4 py-3">By</th>
             </tr></thead>
             <tbody>
                 @forelse ($log as $d)
-                    <tr class="border-b border-slate-50 dark:border-[#22314e]" wire:key="log-{{ $d->id }}">
+                    <tr class="border-b border-slate-50 dark:border-[#34373c]" wire:key="log-{{ $d->id }}">
                         <td class="px-4 py-2 text-xs text-slate-400">{{ $d->decided_at?->diffForHumans() }}</td>
                         <td class="px-4 py-2 text-slate-600 dark:text-slate-300">#{{ $d->payout_request_id }}</td>
                         <td class="px-4 py-2 font-semibold uppercase text-slate-900 dark:text-slate-100">{{ $d->decision }} @if ($d->shadow)<span class="text-[10px] font-normal normal-case text-slate-400">advisory</span>@endif @if ($d->qa_sampled)<span class="text-[10px] font-normal normal-case text-amber-500">QA</span>@endif</td>
@@ -228,18 +228,18 @@
     @endif
 
     @if ($tab === 'float')
-    <div class="mt-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-[#2D4060] dark:bg-[#1A2840]">
+    <div class="mt-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-[#2A2E34] dark:bg-[#17191C]">
         <h2 class="text-sm font-semibold text-slate-900 dark:text-slate-100">Provider float</h2>
         <p class="text-xs text-slate-500 dark:text-slate-400">The money you have pre-funded at each provider. A tracked rail never sends past its float: payouts wait in "awaiting funds" (the user's money stays held) and resume, oldest first, when you record a top-up.</p>
 
         <div class="mt-4 overflow-x-auto">
             <table class="w-full text-sm">
-                <thead><tr class="border-b border-slate-100 text-left text-xs uppercase tracking-wide text-slate-400 dark:border-[#2D4060]">
+                <thead><tr class="border-b border-slate-100 text-left text-xs uppercase tracking-wide text-slate-400 dark:border-[#2A2E34]">
                     <th class="py-2 pr-4">Rail</th><th class="py-2 pr-4 text-right">Balance</th><th class="py-2 pr-4 text-right">Alert below</th><th class="py-2">Synced</th>
                 </tr></thead>
                 <tbody>
                     @forelse ($floats as $f)
-                        <tr class="border-b border-slate-50 dark:border-[#22314e]" wire:key="float-{{ $f->id }}">
+                        <tr class="border-b border-slate-50 dark:border-[#34373c]" wire:key="float-{{ $f->id }}">
                             <td class="py-2 pr-4 font-medium capitalize text-slate-900 dark:text-slate-100">{{ $f->provider }} <span class="text-slate-400">{{ $f->currency }}</span></td>
                             <td class="py-2 pr-4 text-right tabular-nums {{ (float) $f->balance < (float) $f->low_threshold ? 'text-red-600 dark:text-red-400' : 'text-slate-900 dark:text-slate-100' }}">{{ number_format((float) $f->balance, 2) }}</td>
                             <td class="py-2 pr-4 text-right tabular-nums text-slate-500">{{ number_format((float) $f->low_threshold, 2) }}</td>
@@ -253,21 +253,21 @@
         </div>
 
         <div class="mt-5 grid gap-3 sm:grid-cols-5">
-            <select wire:model="floatProvider" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm capitalize dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+            <select wire:model="floatProvider" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm capitalize dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
                 @foreach (\App\Livewire\Admin\Payouts::PROVIDERS as $p) <option value="{{ $p }}">{{ $p }}</option> @endforeach
             </select>
-            <input type="text" wire:model="floatCurrency" maxlength="3" placeholder="NGN" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm uppercase dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
-            <input type="number" step="any" wire:model="floatAmount" placeholder="Amount" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
-            <input type="number" step="any" wire:model="floatThreshold" placeholder="Alert below" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
-            <input type="text" wire:model="floatNote" placeholder="Note / bank reference" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+            <input type="text" wire:model="floatCurrency" maxlength="3" placeholder="NGN" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm uppercase dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
+            <input type="number" step="any" wire:model="floatAmount" placeholder="Amount" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
+            <input type="number" step="any" wire:model="floatThreshold" placeholder="Alert below" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
+            <input type="text" wire:model="floatNote" placeholder="Note / bank reference" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
         </div>
         @error('floatAmount') <span class="text-xs text-red-600">{{ $message }}</span> @enderror
         @error('floatNote') <span class="text-xs text-red-600">{{ $message }}</span> @enderror
         <div class="mt-3 flex flex-wrap gap-2">
             <button type="button" wire:click="topUp" wire:loading.attr="disabled" wire:target="topUp" class="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary-dark disabled:opacity-60">Record top-up</button>
-            <button type="button" wire:click="trackRail" wire:loading.attr="disabled" wire:target="trackRail" class="rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 disabled:opacity-60 dark:border-[#2D4060] dark:text-slate-300">Track this rail</button>
+            <button type="button" wire:click="trackRail" wire:loading.attr="disabled" wire:target="trackRail" class="rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 disabled:opacity-60 dark:border-[#2A2E34] dark:text-slate-300">Track this rail</button>
             @if ($isSuper)
-                <button type="button" wire:click="adjustFloat" wire:loading.attr="disabled" wire:target="adjustFloat" wire:confirm="Post a signed correction to the float ledger?" class="rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 disabled:opacity-60 dark:border-[#2D4060] dark:text-slate-300">Adjust (signed)</button>
+                <button type="button" wire:click="adjustFloat" wire:loading.attr="disabled" wire:target="adjustFloat" wire:confirm="Post a signed correction to the float ledger?" class="rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 disabled:opacity-60 dark:border-[#2A2E34] dark:text-slate-300">Adjust (signed)</button>
             @endif
         </div>
 
@@ -293,7 +293,7 @@
     @endif
 
     @if ($tab === 'guardian')
-    <div class="mt-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-[#2D4060] dark:bg-[#1A2840]">
+    <div class="mt-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-[#2A2E34] dark:bg-[#17191C]">
         <div class="flex flex-wrap items-center justify-between gap-3">
             <div>
                 <h2 class="text-sm font-semibold text-slate-900 dark:text-slate-100">Payout Guardian</h2>
@@ -326,7 +326,7 @@
                 <div>
                     <label class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">{{ $label }}</label>
                     <input type="number" step="any" min="0" wire:model="{{ $field }}" @disabled(! $isSuper)
-                           class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 disabled:opacity-60 dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                           class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 disabled:opacity-60 dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
                     @error($field) <span class="text-xs text-red-600">{{ $message }}</span> @enderror
                 </div>
             @endforeach
@@ -334,7 +334,7 @@
         <div class="mt-3">
             <label class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">Denied countries (ISO codes, comma-separated)</label>
             <input type="text" wire:model="deniedCountries" @disabled(! $isSuper)
-                   class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 disabled:opacity-60 dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                   class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 disabled:opacity-60 dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
         </div>
 
         @if ($isSuper)
@@ -351,17 +351,17 @@
     @endif
 
     @if ($tab === 'trust')
-    <div class="mt-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-[#2D4060] dark:bg-[#1A2840]">
+    <div class="mt-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-[#2A2E34] dark:bg-[#17191C]">
         <h2 class="text-sm font-semibold text-slate-900 dark:text-slate-100">Trust tier override</h2>
         <p class="text-xs text-slate-500 dark:text-slate-400">New users start at the lowest limit; the daily recompute promotes clean payees. An override here is never changed by the recompute. Super admin only.</p>
         <div class="mt-4 grid gap-3 sm:grid-cols-3">
             <input type="email" wire:model="trustEmail" placeholder="User email" @disabled(! $isSuper)
-                   class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
-            <select wire:model="trustTier" @disabled(! $isSuper) class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                   class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
+            <select wire:model="trustTier" @disabled(! $isSuper) class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
                 <option value="new">New</option><option value="trusted">Trusted</option><option value="vip">VIP</option>
             </select>
             <input type="text" wire:model="trustReason" placeholder="Reason (required)" @disabled(! $isSuper)
-                   class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                   class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
         </div>
         @error('trustEmail') <span class="text-xs text-red-600">{{ $message }}</span> @enderror
         @error('trustReason') <span class="text-xs text-red-600">{{ $message }}</span> @enderror

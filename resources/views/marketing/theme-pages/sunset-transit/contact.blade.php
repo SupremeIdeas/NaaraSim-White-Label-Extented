@@ -12,7 +12,7 @@
 
     <div class="relative mx-auto max-w-2xl px-4 text-center">
         <span class="inline-flex items-center gap-2 rounded-full border border-dashed border-accent/50 bg-accent/10 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.2em] text-accent">
-            <x-icon name="id-card" class="h-3 w-3" /> Gate desk
+            <x-glyph name="id-card" class="h-3 w-3" /> Gate desk
         </span>
         <h1 class="mx-auto mt-5 font-display text-3xl font-bold leading-[1.15] text-white sm:text-4xl lg:text-[2.65rem]">
             {{ $content['headline'] }}
@@ -57,7 +57,7 @@
             <div class="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
                 <div class="relative overflow-hidden rounded-2xl border-2 border-dashed border-primary/20 bg-white p-6 dark:border-white/10 dark:bg-white/5">
                     <span class="pointer-events-none absolute -left-2.5 top-6 h-5 w-5 rounded-full bg-[#FBF7F0] dark:bg-[#0F172A]" aria-hidden="true"></span>
-                    <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-white"><x-icon name="message-circle" class="h-5 w-5" /></span>
+                    <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-white"><x-glyph name="message-circle" class="h-5 w-5" /></span>
                     <h3 class="mt-4 font-display text-base font-bold text-[#1B2A47] dark:text-white">Live chat</h3>
                     <p class="mt-1.5 text-sm leading-relaxed text-stone-500 dark:text-slate-400">Usually online — get a real answer in minutes.</p>
                     <a href="{{ auth()->check() ? route('support') : route('login') }}" class="mt-3 inline-block text-sm font-bold text-primary hover:underline dark:text-accent">Open the chat</a>
@@ -65,7 +65,7 @@
 
                 <div class="relative overflow-hidden rounded-2xl border-2 border-dashed border-primary/20 bg-white p-6 dark:border-white/10 dark:bg-white/5">
                     <span class="pointer-events-none absolute -left-2.5 top-6 h-5 w-5 rounded-full bg-[#FBF7F0] dark:bg-[#0F172A]" aria-hidden="true"></span>
-                    <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-white"><x-icon name="mail" class="h-5 w-5" /></span>
+                    <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-white"><x-glyph name="mail" class="h-5 w-5" /></span>
                     <h3 class="mt-4 font-display text-base font-bold text-[#1B2A47] dark:text-white">Email</h3>
                     <p class="mt-1.5 text-sm leading-relaxed text-stone-500 dark:text-slate-400">For anything that needs a paper trail.</p>
                     <a href="mailto:{{ \App\Support\Niche\SupportLinks::email() }}" class="mt-3 inline-block text-sm font-bold text-primary hover:underline dark:text-accent">{{ \App\Support\Niche\SupportLinks::email() }}</a>
@@ -74,7 +74,7 @@
                 @if (\App\Support\Niche\SupportLinks::hasWhatsapp())
                     <div class="relative overflow-hidden rounded-2xl border-2 border-dashed border-primary/20 bg-white p-6 dark:border-white/10 dark:bg-white/5">
                         <span class="pointer-events-none absolute -left-2.5 top-6 h-5 w-5 rounded-full bg-[#FBF7F0] dark:bg-[#0F172A]" aria-hidden="true"></span>
-                        <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-white"><x-icon name="phone" class="h-5 w-5" /></span>
+                        <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-white"><x-glyph name="phone" class="h-5 w-5" /></span>
                         <h3 class="mt-4 font-display text-base font-bold text-[#1B2A47] dark:text-white">WhatsApp</h3>
                         <p class="mt-1.5 text-sm leading-relaxed text-stone-500 dark:text-slate-400">Message us directly for quick questions.</p>
                         <a href="{{ \App\Support\Niche\SupportLinks::whatsappUrl() }}" target="_blank" rel="noopener" class="mt-3 inline-block text-sm font-bold text-primary hover:underline dark:text-accent">Chat on WhatsApp</a>

@@ -49,7 +49,7 @@ class BrandSubscriptionService
                     'brand_name' => $owner->name ?: 'My brand',
                     'listing_status' => BrandPartner::STATUS_PENDING,
                     'is_featured' => false,
-                    'background_color' => '#A21CAF',
+                    'background_color' => '#23272D',
                     'current_plan_id' => $plan->id,
                     'is_active' => true,
                 ]);

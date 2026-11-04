@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\Cache;
  */
 class SiteContent
 {
-    public const PAGES = ['home', 'about', 'how-it-works', 'contact', 'faq'];
+    public const PAGES = ['home', 'about', 'how-it-works', 'pricing', 'contact', 'sign-in', 'faq'];
 
     /**
      * PAGES minus any page that's master-only. Today that's just 'faq'
@@ -74,6 +74,12 @@ class SiteContent
      */
     public static function defaults(): array
     {
+        return array_replace_recursive(self::baseDefaults(), ForkCopy::defaults());
+    }
+
+    /** The structural defaults (every key, images and list shapes); ForkCopy overlays the words. */
+    private static function baseDefaults(): array
+    {
         return [
             'home' => [
                 'hero' => [
@@ -89,6 +95,8 @@ class SiteContent
                     'showcase_image' => '',
                     'stat_1' => '190+ Countries', 'stat_2' => '3 Min Setup', 'stat_3' => '0 Physical SIM', 'stat_4' => '24/7 Support',
                 ],
+                'ticker' => [],
+                'capabilities' => [],
                 'how' => [
                     'eyebrow' => 'Simple by Design',
                     'headline' => 'Connected in Three Steps',
@@ -178,6 +186,12 @@ class SiteContent
                     't3_name' => 'Amara T.', 't3_route' => 'Nairobi → Toronto',
                     't3_quote' => 'The setup took literally two minutes. My previous experience with roaming was painful — surprise bills, dead zones, hours on the phone with customer service. NaaraSim solved all of that in one purchase.',
                 ],
+                'blogs' => [
+                    'eyebrow' => 'From the Blog',
+                    'headline' => 'Guides & news for border-crossers',
+                    'cta_label' => 'Read the blog',
+                    'card_cta' => 'Read more',
+                ],
                 'faq' => [
                     'headline' => 'Questions We Hear a Lot',
                     'q1' => 'Does my phone support eSIM?',
@@ -213,6 +227,40 @@ class SiteContent
                     'eyebrow' => 'Support',
                     'headline' => 'Frequently Asked Questions',
                     'subtext' => 'Everything you need to know about eSIMs, numbers, payments and more — the same answers as on our homepage, always in sync.',
+                ],
+            ],
+            'pricing' => [
+                'hero' => [
+                    'eyebrow' => 'Transparent pricing',
+                    'headline' => 'Plans that make sense',
+                    'subtext' => 'No monthly fees. No contracts. Pay for exactly what you need, a short pass or a full month. Every plan includes instant activation and round-the-clock support.',
+                    'estimate_note' => '"From" prices for guidance. The exact price of any plan is shown before you confirm.',
+                ],
+                'notes' => [
+                    'live_note' => '"From" prices are for guidance. You always pay the exact price shown at checkout before you confirm.',
+                    'refund_line' => 'Verification numbers are covered too: no code within {minutes} minutes means an automatic refund to your wallet, no ticket required.',
+                    'refund_link' => 'Refund and reliability policy',
+                ],
+                'estimator' => [
+                    'headline' => 'Not sure how much data you need?',
+                    'text' => 'Tell us about your trip and how you use your phone. We will estimate the right plan size so you never over- or under-buy.',
+                    'cta' => 'Try the data estimator',
+                ],
+            ],
+            'sign-in' => [
+                'login' => [
+                    'heading' => 'Welcome back',
+                    'subheading' => 'Sign in to manage your eSIMs, numbers and wallet.',
+                    'cta' => 'Sign in',
+                    'switch_text' => 'New here?',
+                    'switch_link' => 'Create an account',
+                ],
+                'register' => [
+                    'heading' => 'Join {brand}',
+                    'subheading' => 'One account for eSIM data and phone numbers, worldwide.',
+                    'cta' => 'Create account',
+                    'switch_text' => 'Already have an account?',
+                    'switch_link' => 'Sign in',
                 ],
             ],
             'about' => [

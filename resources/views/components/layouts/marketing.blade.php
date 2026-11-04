@@ -3,7 +3,7 @@
      get Sign in / Get Started; signed-in visitors go straight to their
      dashboard. --}}
 @props(['title' => null, 'description' => null, 'ogImage' => null, 'preloaderType' => 'marketing'])
-<x-layouts.app :title="$title ?? \App\Support\BrandSettings::name().' — Stay Connected. No Borders. No Swaps.'" :page-type="$preloaderType" :description="$description" :og-image="$ogImage">
+<x-layouts.app :title="$title ?? \App\Support\BrandSettings::name().' — '.\App\Support\BrandSettings::tagline()" :page-type="$preloaderType" :description="$description" :og-image="$ogImage">
     <div class="mkt-bg min-h-screen">
         {{-- Floating, curved, glass header (Webflow-inspired): a contained pill
              that never touches the edges, with a few primary links inline and a
@@ -16,7 +16,7 @@
                 ['route' => 'pricing', 'label' => 'eSIM Data Plans', 'desc' => 'Local data, 190+ countries', 'icon' => 'globe'],
                 ['route' => 'how-it-works', 'label' => 'How It Works', 'desc' => 'From purchase to connected', 'icon' => 'signal'],
             ];
-            if (\App\Support\FeatureFlags::adminEnabled('naara_gift')) {
+            if (\App\Support\FeatureFlags::adminEnabled('naara_gift') && ! \App\Support\FeatureEntitlements::locked(\App\Support\FeatureLocks::F_GIFT_CARDS)) {
                 $navProducts[] = ['route' => 'gift-cards', 'label' => 'Naara Gift', 'desc' => 'Gift cards for 1,000+ brands', 'icon' => 'gift',
                     'badge' => \App\Support\FeatureFlags::configured('naara_gift') ? null : 'Soon', 'authOnly' => true];
             }
@@ -36,7 +36,7 @@
             ];
         @endphp
         <header x-data="{ open: false }" class="pointer-events-none sticky top-0 z-50 px-3 pt-4 sm:px-4">
-            <nav class="pointer-events-auto mx-auto flex max-w-5xl items-center justify-between gap-3 rounded-2xl border border-slate-200/70 bg-white px-2.5 py-2 shadow-xl shadow-slate-900/5 ring-1 ring-black/5 dark:border-white/10 dark:bg-[#0D1B2A] dark:ring-white/10">
+            <nav class="pointer-events-auto mx-auto flex max-w-5xl items-center justify-between gap-3 rounded-2xl border border-slate-200/70 bg-white px-2.5 py-2 shadow-xl shadow-slate-900/5 ring-1 ring-black/5 dark:border-white/10 dark:bg-[#0b0b0c] dark:ring-white/10">
                 <a href="{{ route('home') }}" wire:navigate class="shrink-0 pl-1.5"><x-brand-logo variant="family" size="md" /></a>
 
                 <div class="hidden items-center gap-7 text-sm font-medium text-slate-600 lg:flex dark:text-slate-300">
@@ -72,7 +72,7 @@
                  {{-- HOTFIX §7: real scroll container (was overflow-hidden with
                       no max-h → tall content clipped off-viewport on mobile).
                       §5: raised opacity so it's legible without backdrop-blur. --}}
-                 class="pointer-events-auto mx-auto mt-2 max-h-[calc(100dvh-6rem)] max-w-5xl overflow-y-auto overscroll-contain rounded-2xl border border-slate-200/70 bg-white shadow-2xl shadow-slate-900/10 ring-1 ring-black/5 [-webkit-overflow-scrolling:touch] dark:border-white/10 dark:bg-[#0D1B2A] dark:ring-white/10">
+                 class="pointer-events-auto mx-auto mt-2 max-h-[calc(100dvh-6rem)] max-w-5xl overflow-y-auto overscroll-contain rounded-2xl border border-slate-200/70 bg-white shadow-2xl shadow-slate-900/10 ring-1 ring-black/5 [-webkit-overflow-scrolling:touch] dark:border-white/10 dark:bg-[#0b0b0c] dark:ring-white/10">
                 <div class="grid gap-6 p-5 sm:grid-cols-3 sm:p-6">
                     @foreach (['Products' => $navProducts, 'Developers' => $navDevelopers, 'Company' => $navCompany] as $heading => $items)
                         <div>

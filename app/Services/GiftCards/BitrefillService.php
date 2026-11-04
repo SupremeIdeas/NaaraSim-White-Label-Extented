@@ -98,6 +98,8 @@ class BitrefillService implements GiftCardProviderInterface, GiftCardStatusCheck
             'logo_url' => $this->imageUrl(data_get($p, 'image')) ?: data_get($p, 'logoImage.url'),
             'brand_color' => preg_match('/^#[0-9a-f]{6}$/i', (string) data_get($p, 'logo_background')) ? data_get($p, 'logo_background') : null,
             'category' => (string) (data_get($p, 'categories.0') ?? data_get($p, 'category', '')) ?: null,
+            // Bitrefill tags a card with SEVERAL categories ("pin" + "refill" is a phone top-up PIN): resolve from all of them, not just the first.
+            'category_key' => \App\Support\GiftCardCategories::resolve(implode(' ', array_map('strval', (array) data_get($p, 'categories', []))), $brandName),
             // Bitrefill's create-invoice payload (product_id, package_id/value,
             // quantity, payment_method, external_id) doesn't confirm a required
             // recipient field the way Reloadly's recipientEmail does — left

@@ -45,7 +45,7 @@
                 @foreach ($steps as $i => $step)
                     <div class="relative flex flex-col items-center text-center">
                         <span class="relative z-10 flex h-[4.25rem] w-[4.25rem] items-center justify-center rounded-full border-4 border-[#FBF7F0] text-white shadow-lg dark:border-[#0F172A] {{ $i % 2 === 0 ? 'bg-primary' : 'bg-accent' }}">
-                            <x-icon name="plane" class="h-6 w-6 -rotate-45" />
+                            <x-glyph name="plane" class="h-6 w-6 -rotate-45" />
                         </span>
                         <div class="relative mt-4 w-full rounded-2xl border-2 border-dashed border-primary/20 bg-white p-5 dark:border-white/10 dark:bg-white/5">
                             <p class="text-[10px] font-bold uppercase tracking-[0.2em] text-accent">Gate {{ $step['n'] }} &middot; {{ $step['gate'] }}</p>
@@ -63,7 +63,7 @@
                 <div class="relative flex gap-4">
                     <div class="flex flex-col items-center">
                         <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-white {{ $i % 2 === 0 ? 'bg-primary' : 'bg-accent' }}">
-                            <x-icon name="plane" class="h-5 w-5 -rotate-45" />
+                            <x-glyph name="plane" class="h-5 w-5 -rotate-45" />
                         </span>
                         @unless ($loop->last)
                             <span class="mt-1 w-px flex-1" aria-hidden="true"
@@ -92,7 +92,7 @@
                 ] as $btn)
                     <a href="{{ auth()->check() ? route('catalogue') : route('register') }}" wire:navigate
                        class="inline-flex items-center gap-2 rounded-full bg-accent px-6 py-3 text-sm font-bold text-white shadow-lg shadow-accent/30 transition hover:bg-accent-dark">
-                        <x-icon :name="$btn['icon']" class="h-4 w-4" /> {{ $btn['label'] }}
+                        <x-glyph :name="$btn['icon']" class="h-4 w-4" /> {{ $btn['label'] }}
                     </a>
                 @endforeach
             </div>

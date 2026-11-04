@@ -153,8 +153,8 @@ class AppStudio
     public static function defaultOfflineHtml(): string
     {
         $name = e(self::displayName());
-        $primary = BrandSettings::color('primary') ?: '#A21CAF';
-        $navy = BrandSettings::color('navy') ?: '#0D1B2A';
+        $primary = BrandSettings::color('primary') ?: '#23272D';
+        $navy = BrandSettings::color('navy') ?: '#0A0B0D';
 
         return <<<HTML
         <!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">

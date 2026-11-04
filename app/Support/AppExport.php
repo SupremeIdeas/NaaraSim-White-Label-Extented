@@ -61,8 +61,8 @@ class AppExport
             'download_enabled' => false,      // public /download page live
             'app_name' => config('app.name', 'NaaraSim'),
             'short_name' => 'NaaraSim',
-            'theme_color' => '#A21CAF',
-            'background_color' => '#0D1B2A',
+            'theme_color' => '#23272D',
+            'background_color' => '#0A0B0D',
             'version' => '1.0.0',
             'build_number' => 1,
             'changelog' => '',

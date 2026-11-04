@@ -12,7 +12,7 @@
     @endif
 
     {{-- Settings --}}
-    <div class="mt-5 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-[#2D4060] dark:bg-[#1A2840]">
+    <div class="mt-5 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-[#2A2E34] dark:bg-[#17191C]">
         <label class="flex items-center justify-between gap-4">
             <span>
                 <span class="block text-sm font-semibold text-slate-900 dark:text-slate-100">Enable the Developer API</span>
@@ -25,14 +25,14 @@
             <div>
                 <label class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">eSIM developer markup %</label>
                 <input type="number" step="0.1" min="0" wire:model="esimMarkup"
-                       class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                       class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
                 @error('esimMarkup') <span class="text-xs text-red-600">{{ $message }}</span> @enderror
                 <p class="mt-1 text-[11px] text-slate-400">Over wholesale cost. Keep below your retail markup so it stays a discount.</p>
             </div>
             <div>
                 <label class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">Number / SMS developer markup %</label>
                 <input type="number" step="0.1" min="0" wire:model="smsMarkup"
-                       class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                       class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
                 @error('smsMarkup') <span class="text-xs text-red-600">{{ $message }}</span> @enderror
                 <p class="mt-1 text-[11px] text-slate-400">MarginGuard still floors the price at cost + minimum profit.</p>
             </div>
@@ -54,10 +54,10 @@
         </div>
     </div>
 
-    <div class="mt-3 overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-[#2D4060] dark:bg-[#1A2840]">
+    <div class="mt-3 overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-[#2A2E34] dark:bg-[#17191C]">
         <table class="w-full text-sm">
             <thead>
-                <tr class="border-b border-slate-100 text-left text-xs uppercase tracking-wide text-slate-400 dark:border-[#2D4060]">
+                <tr class="border-b border-slate-100 text-left text-xs uppercase tracking-wide text-slate-400 dark:border-[#2A2E34]">
                     <th class="px-4 py-3">Client</th>
                     <th class="px-4 py-3">Owner</th>
                     <th class="px-4 py-3">Scopes</th>
@@ -68,7 +68,7 @@
             </thead>
             <tbody>
                 @forelse ($clients as $client)
-                    <tr class="border-b border-slate-50 dark:border-[#22314e]" wire:key="admin-client-{{ $client->id }}">
+                    <tr class="border-b border-slate-50 dark:border-[#34373c]" wire:key="admin-client-{{ $client->id }}">
                         <td class="px-4 py-3 font-medium text-slate-900 dark:text-slate-100">
                             {{ $client->name }} <span class="text-slate-400">…{{ $client->token_last_four ?? '----' }}</span>
                         </td>

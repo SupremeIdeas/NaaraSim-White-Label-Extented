@@ -40,7 +40,7 @@
         <div class="relative mb-6 overflow-hidden rounded-xl border border-slate-200 dark:border-white/10">
             <img src="{{ asset('images/themes/shared/coworking-desk.webp') }}" alt="" class="h-28 w-full object-cover sm:h-36">
             <span class="absolute bottom-2 left-2 inline-flex items-center gap-1 rounded-md bg-navy/90 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-white">
-                <x-icon name="check" class="h-2.5 w-2.5 text-accent" /> Support desk, live
+                <x-glyph name="check" class="h-2.5 w-2.5 text-accent" /> Support desk, live
             </span>
         </div>
 
@@ -52,7 +52,7 @@
         <div class="divide-y divide-slate-200 dark:divide-white/10">
             <div class="flex items-center gap-4 py-4">
                 <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary dark:bg-white/5 dark:text-slate-200">
-                    <x-icon name="message-circle" class="h-4 w-4" />
+                    <x-glyph name="message-circle" class="h-4 w-4" />
                 </span>
                 <div class="min-w-0 flex-1">
                     <p class="text-sm font-semibold text-slate-900 dark:text-white">Live chat</p>
@@ -62,7 +62,7 @@
             </div>
             <div class="flex items-center gap-4 py-4">
                 <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary dark:bg-white/5 dark:text-slate-200">
-                    <x-icon name="mail" class="h-4 w-4" />
+                    <x-glyph name="mail" class="h-4 w-4" />
                 </span>
                 <div class="min-w-0 flex-1">
                     <p class="text-sm font-semibold text-slate-900 dark:text-white">Email</p>
@@ -73,7 +73,7 @@
             @if (\App\Support\Niche\SupportLinks::hasWhatsapp())
                 <div class="flex items-center gap-4 py-4">
                     <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary dark:bg-white/5 dark:text-slate-200">
-                        <x-icon name="phone" class="h-4 w-4" />
+                        <x-glyph name="phone" class="h-4 w-4" />
                     </span>
                     <div class="min-w-0 flex-1">
                         <p class="text-sm font-semibold text-slate-900 dark:text-white">WhatsApp</p>
@@ -84,7 +84,7 @@
             @endif
             <div class="flex items-center gap-4 py-4">
                 <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary dark:bg-white/5 dark:text-slate-200">
-                    <x-icon name="help-circle" class="h-4 w-4" />
+                    <x-glyph name="help-circle" class="h-4 w-4" />
                 </span>
                 <div class="min-w-0 flex-1">
                     <p class="text-sm font-semibold text-slate-900 dark:text-white">Help centre</p>

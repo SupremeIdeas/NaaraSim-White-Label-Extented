@@ -13,7 +13,7 @@
             <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 @foreach ($presets as $slug => $meta)
                     <button type="button" wire:click="selectStyle('{{ $slug }}')" wire:key="tgl-preset-{{ $slug }}"
-                            class="group flex items-center justify-between gap-4 rounded-2xl border p-4 text-left transition {{ $style === $slug ? 'border-primary ring-2 ring-primary/40' : 'border-slate-200 hover:border-slate-300 dark:border-white/10 dark:hover:border-white/20' }} bg-white dark:bg-[#16233d]">
+                            class="group flex items-center justify-between gap-4 rounded-2xl border p-4 text-left transition {{ $style === $slug ? 'border-primary ring-2 ring-primary/40' : 'border-slate-200 hover:border-slate-300 dark:border-white/10 dark:hover:border-white/20' }} bg-white dark:bg-[#27292c]">
                         <span>
                             <span class="block text-sm font-semibold text-slate-800 dark:text-white">{{ $meta['label'] }}</span>
                             <span class="block text-xs text-slate-400 dark:text-slate-500">{{ $meta['category'] }}</span>
@@ -38,7 +38,7 @@
         {{-- Live preview pane --}}
         <div class="lg:sticky lg:top-6">
             <h2 class="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">Live preview</h2>
-            <div class="flex h-40 items-center justify-center gap-6 rounded-2xl border border-slate-200 bg-slate-50 dark:border-white/10 dark:bg-[#0D1B2A]" wire:key="tgl-preview-{{ $previewStyle }}">
+            <div class="flex h-40 items-center justify-center gap-6 rounded-2xl border border-slate-200 bg-slate-50 dark:border-white/10 dark:bg-[#0b0b0c]" wire:key="tgl-preview-{{ $previewStyle }}">
                 @include('components.theme-toggle.'.$previewStyle)
             </div>
             <p class="mt-2 text-xs text-slate-400 dark:text-slate-500">Click the switch above to preview both light and dark states — nothing is saved until you press Save.</p>

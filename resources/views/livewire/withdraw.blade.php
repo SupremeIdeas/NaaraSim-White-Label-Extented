@@ -72,11 +72,14 @@
     {{-- Add account --}}
     <x-nx.step icon="plus" style="margin-top:26px" title="Add a payout account" />
 
-    @if ($paypalAvailable || $stripeAvailable)
+    @if ($paypalAvailable || $stripeAvailable || $greyAvailable)
         <div class="ns-seg" style="margin-top:6px" role="group" aria-label="Account type">
             <button type="button" wire:click="$set('accountType', 'bank')" class="{{ $accountType === 'bank' ? 'is-on' : '' }}" aria-pressed="{{ $accountType === 'bank' ? 'true' : 'false' }}">Bank account</button>
             @if ($paypalAvailable)
                 <button type="button" wire:click="$set('accountType', 'paypal')" class="{{ $accountType === 'paypal' ? 'is-on' : '' }}" aria-pressed="{{ $accountType === 'paypal' ? 'true' : 'false' }}">PayPal</button>
+            @endif
+            @if ($greyAvailable)
+                <button type="button" wire:click="$set('accountType', 'grey')" class="{{ $accountType === 'grey' ? 'is-on' : '' }}" aria-pressed="{{ $accountType === 'grey' ? 'true' : 'false' }}">International bank</button>
             @endif
             @if ($stripeAvailable)
                 <button type="button" wire:click="$set('accountType', 'stripe')" class="{{ $accountType === 'stripe' ? 'is-on' : '' }}" aria-pressed="{{ $accountType === 'stripe' ? 'true' : 'false' }}">Stripe</button>
@@ -115,6 +118,34 @@
             <span wire:loading.remove wire:target="addAccount">Verify &amp; add account</span>
             <span wire:loading wire:target="addAccount" class="ns-cta__label"><x-ui.spinner class="h-4 w-4" /> Verifying…</span>
         </x-nx.cta>
+    @elseif ($accountType === 'grey' && $greyAvailable)
+        <p class="ns-sub" style="font-size:13px">Get paid into a bank account or mobile-money wallet abroad. Enter the details exactly as your bank shows them — payouts to a new account are reviewed by our team first.</p>
+        <label class="ns-lbl" for="wd-gcountry" style="display:block;margin-top:14px">Country</label>
+        <select id="wd-gcountry" wire:model.live="greyCountry" class="ns-select">
+            <option value="">Select a country</option>
+            @foreach ($greyCountries as $cc => $info)
+                <option value="{{ $cc }}">{{ \Locale::getDisplayRegion('-'.$cc, app()->getLocale()) ?: $cc }} ({{ $info['currency'] }})</option>
+            @endforeach
+        </select>
+        @if ($greyCountry !== '' && ! $greyForm)
+            <x-nx.note icon="info" variant="warn">Payouts to this country aren't available yet.</x-nx.note>
+        @elseif ($greyForm)
+            @foreach ($greyForm['fields'] as $f)
+                <label class="ns-lbl" for="wd-g-{{ $f }}" style="display:block;margin-top:14px">{{ ucfirst(str_replace('_', ' ', $f)) }}</label>
+                <label class="ns-search"><input id="wd-g-{{ $f }}" type="text" wire:model="greyInput.{{ $f }}" autocomplete="off" maxlength="64"></label>
+            @endforeach
+            @if (! empty($greyForm['optional']))
+                <p class="ns-sub" style="font-size:13px;margin-top:16px">Only if your bank asks for it:</p>
+                @foreach ($greyForm['optional'] as $f)
+                    <label class="ns-lbl" for="wd-g-{{ $f }}" style="display:block;margin-top:10px">{{ ucfirst(str_replace('_', ' ', $f)) }}</label>
+                    <label class="ns-search"><input id="wd-g-{{ $f }}" type="text" wire:model="greyInput.{{ $f }}" autocomplete="off" maxlength="64"></label>
+                @endforeach
+            @endif
+            <x-nx.cta icon="check" loading="addGreyAccount" wire:click="addGreyAccount" style="margin-top:18px">
+                <span wire:loading.remove wire:target="addGreyAccount">Save account</span>
+                <span wire:loading wire:target="addGreyAccount" class="ns-cta__label"><x-ui.spinner class="h-4 w-4" /> Saving…</span>
+            </x-nx.cta>
+        @endif
     @elseif ($accountType === 'paypal')
         {{-- PayPal has no bank-style resolve API to confirm a payout email before sending money — re-typing it is the guard against a
              mistyped destination. --}}

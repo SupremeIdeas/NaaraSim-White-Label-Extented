@@ -21,8 +21,8 @@
     @if ($refresh)<meta http-equiv="refresh" content="{{ $refresh }}">@endif
     <title>{{ $title }} — {{ config('app.name') }}</title>
     <style>
-        :root { --c1: #A21CAF; --c2: #7C3AED; --bg: #f4f6fa; --card: rgba(255,255,255,.82); --line: rgba(13,27,42,.09); --ink: #0D1B2A; --muted: #5b6b82; --chip: rgba(13,27,42,.05); --muted2: #8aa0ba; --paper: #ffffff; --paper2: #eef2f8; color-scheme: light dark; }
-        @media (prefers-color-scheme: dark) { :root { --bg: #08111f; --card: rgba(16,29,51,.78); --line: rgba(255,255,255,.09); --ink: #eaf0f8; --muted: #9db0c8; --chip: rgba(255,255,255,.06); --paper: #16263f; --paper2: #1d3150; } }
+        :root { --c1: #23272D; --c2: #7C3AED; --bg: #f4f6fa; --card: rgba(255,255,255,.82); --line: rgba(26,27,29,.09); --ink: #0b0b0c; --muted: #5b6b82; --chip: rgba(26,27,29,.05); --muted2: #8aa0ba; --paper: #ffffff; --paper2: #eef2f8; color-scheme: light dark; }
+        @media (prefers-color-scheme: dark) { :root { --bg: #121315; --card: rgba(31,33,36,.78); --line: rgba(255,255,255,.09); --ink: #eaf0f8; --muted: #9db0c8; --chip: rgba(255,255,255,.06); --paper: #282a2d; --paper2: #33353a; } }
         * { box-sizing: border-box; }
         html { -webkit-text-size-adjust: 100%; }
         body { margin: 0; min-height: 100vh; min-height: 100dvh; display: grid; place-items: center; position: relative; overflow-x: hidden;
@@ -37,7 +37,7 @@
         @keyframes drift { to { transform: translate3d(3vmax, 2vmax, 0) scale(1.08); } }
         main { position: relative; z-index: 1; width: min(100%, 31rem); text-align: center; background: var(--card); border: 1px solid var(--line); border-radius: 1.75rem;
             padding: clamp(1.75rem, 6vw, 2.75rem) clamp(1.25rem, 6vw, 2.5rem) clamp(1.5rem, 5vw, 2.25rem);
-            -webkit-backdrop-filter: blur(18px) saturate(1.2); backdrop-filter: blur(18px) saturate(1.2); box-shadow: 0 30px 80px -30px rgba(13,27,42,.35), 0 2px 0 rgba(255,255,255,.5) inset; overflow: hidden; }
+            -webkit-backdrop-filter: blur(18px) saturate(1.2); backdrop-filter: blur(18px) saturate(1.2); box-shadow: 0 30px 80px -30px rgba(26,27,29,.35), 0 2px 0 rgba(255,255,255,.5) inset; overflow: hidden; }
         .code { position: absolute; left: 50%; top: -.08em; transform: translateX(-50%); font-weight: 900; letter-spacing: -.06em; line-height: 1; font-size: clamp(4.6rem, 20vw, 7.4rem);
             background: linear-gradient(180deg, var(--c1), transparent 82%); -webkit-background-clip: text; background-clip: text; color: transparent; opacity: .22; user-select: none; pointer-events: none; white-space: nowrap; }
         .art { width: min(108%, 22rem); margin: clamp(2.2rem, 10vw, 3rem) -4% .3rem; position: relative; }

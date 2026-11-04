@@ -39,8 +39,8 @@ class DashboardOrganisationTest extends TestCase
         $this->number($u, 'herosms', 'otp', 'cancelled', 'google'); // archived (cancelled)
 
         Livewire::actingAs($u)->test(MyLines::class)
-            ->assertSee('Naara Verify')
-            ->assertSee('Naara Rent')
+            ->assertSee(\App\Support\BrandSettings::rebrand('Naara Verify'))
+            ->assertSee(\App\Support\BrandSettings::rebrand('Naara Rent'))
             ->assertSee('Archive (1)')          // the cancelled number
             // Suppliers are never rendered.
             ->assertDontSee('fivesim')
@@ -71,7 +71,7 @@ class DashboardOrganisationTest extends TestCase
         ]);
 
         Livewire::actingAs($u)->test(MyLines::class)
-            ->assertSee('Naara Data')
+            ->assertSee(\App\Support\BrandSettings::rebrand('Naara Data'))
             ->assertSee('Archive (1 expired)')
             ->assertDontSee('esimgo')
             ->assertDontSee('airalo');

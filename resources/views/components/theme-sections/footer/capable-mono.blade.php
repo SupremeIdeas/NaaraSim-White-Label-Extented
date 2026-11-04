@@ -34,9 +34,7 @@
             <div class="md:col-span-2">
                 <x-brand-logo variant="family" theme="dark" size="lg" />
                 <p class="mt-5 max-w-md text-sm leading-relaxed text-white/40">
-                    {{ $brand }} — Stay Connected. No Borders. No Swaps. Premium eSIM
-                    connectivity and phone numbers for African travellers and global
-                    professionals. 190+ countries, instant activation, no roaming surprises.
+                    {{ $brand }} — {{ \App\Support\BrandSettings::tagline() }} 190+ countries, instant activation, prices you can read before you pay.
                 </p>
             </div>
             @foreach ($columns as $col)

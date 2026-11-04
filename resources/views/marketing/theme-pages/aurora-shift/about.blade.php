@@ -29,7 +29,7 @@
 
     <div class="relative mx-auto max-w-3xl px-6 pb-16 pt-20 text-center sm:pt-24 lg:px-8">
         <span class="inline-flex items-center gap-1.5 rounded-[0.625rem] border border-accent/40 bg-accent/10 px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.15em] text-accent">
-            <x-icon name="trending-up" class="h-3 w-3" /> {{ $content['eyebrow'] }}
+            <x-glyph name="trending-up" class="h-3 w-3" /> {{ $content['eyebrow'] }}
         </span>
         <h1 class="mx-auto mt-6 max-w-2xl font-display text-3xl font-bold leading-[1.15] text-white sm:text-4xl">
             {{ $content['headline'] }}
@@ -116,7 +116,7 @@
                 ] as $card)
                     <div class="relative text-center">
                         <span class="relative z-10 mx-auto flex h-12 w-12 items-center justify-center bg-gradient-to-br from-primary to-accent text-white shadow-lg shadow-primary/30 [clip-path:polygon(50%_2%,95%_26%,95%_74%,50%_98%,5%_74%,5%_26%)]">
-                            <x-icon :name="$card['icon']" class="h-5 w-5" />
+                            <x-glyph :name="$card['icon']" class="h-5 w-5" />
                         </span>
                         <h3 class="mt-4 font-display text-base font-bold text-slate-900 dark:text-white">{{ $card['title'] }}</h3>
                         <p class="mx-auto mt-1.5 max-w-xs text-sm leading-relaxed text-slate-500 dark:text-slate-400">{{ $card['body'] }}</p>

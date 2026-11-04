@@ -5,7 +5,7 @@
      and torn down on close so playback stops. Self-hides when there are no
      active entries. --}}
 @if (\App\Support\HomeVideos::isVisible())
-    <section class="bg-[#F8F9FA] py-16 sm:py-24 dark:bg-[#0B1626]"
+    <section class="bg-[#F8F9FA] py-16 sm:py-24 dark:bg-[#17181a]"
              x-data="{ show: false, kind: '', src: '', title: '', orient: 'landscape',
                        play(d) { this.kind = d.kind; this.src = d.src; this.title = d.title; this.orient = d.orient; this.show = true; document.body.style.overflow = 'hidden'; },
                        close() { this.show = false; this.src = ''; document.body.style.overflow = ''; } }"
@@ -32,7 +32,7 @@
                         @endif
                         <span class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent"></span>
                         <span class="absolute left-1/2 top-1/2 flex h-14 w-14 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-primary shadow-lg backdrop-blur transition group-hover:scale-110 group-hover:bg-accent group-hover:text-navy">
-                            <x-icon name="play" class="h-6 w-6" />
+                            <x-glyph name="play" class="h-6 w-6" />
                         </span>
                         <span class="absolute inset-x-0 bottom-0 p-3 text-left text-sm font-semibold text-white">{{ $v->title }}</span>
                     </button>
@@ -61,7 +61,7 @@
                         {{-- Self-hosted: native controls tinted to the brand (progress
                              bar), inside a clean brand frame — no page chrome. --}}
                         <video :src="src" class="h-full w-full bg-black" controls autoplay playsinline
-                               style="accent-color: var(--nia-glow-1, #A21CAF)"></video>
+                               style="accent-color: var(--nia-glow-1, #23272D)"></video>
                     </template>
                 </div>
             </div>

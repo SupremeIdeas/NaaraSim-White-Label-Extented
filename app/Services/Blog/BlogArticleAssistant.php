@@ -25,8 +25,8 @@ class BlogArticleAssistant
 
     private function platformContext(): string
     {
-        return <<<'TXT'
-        NaaraSim is a Pan-African travel-connectivity SaaS. Tagline: "Stay Connected. No Borders. No Swaps."
+        return strtr(<<<'TXT'
+        {brand} is a travel-connectivity service for eSIM data and phone numbers. Tagline: "{tagline}"
         It uniquely sells BOTH data AND numbers in one app. Real, built features:
         - eSIM Data Plans for 190+ countries (instant activation, no SIM swap).
         - Naara Connect: Full eSIMs (calls + data).
@@ -37,7 +37,7 @@ class BlogArticleAssistant
         - Multi-currency wallet, NaaraCredits loyalty, a merchant/reseller program, a Developer API.
         Audience: African travellers, diaspora, remote workers, and global professionals.
         Never invent features that aren't listed. Never mention supplier/provider brand names.
-        TXT;
+        TXT, ['{brand}' => \App\Support\BrandSettings::name(), '{tagline}' => \App\Support\BrandSettings::tagline()]);
     }
 
     /**
@@ -104,7 +104,7 @@ class BlogArticleAssistant
     /** A cover-image generation prompt tailored to the article (admin copies it). */
     public function imagePrompt(string $title, string $body): string
     {
-        $system = 'You write vivid, specific prompts for a text-to-image model to create a premium blog COVER image. No text/words in the image. Brand palette: deep teal #A21CAF, warm gold #84CC16, midnight navy #0D1B2A. 16:9. Return ONLY the prompt text, no preamble.';
+        $system = 'You write vivid, specific prompts for a text-to-image model to create a premium blog COVER image. No text/words in the image. Brand palette: deep teal #23272D, warm gold #94A0B0, midnight navy #0D1B2A. 16:9. Return ONLY the prompt text, no preamble.';
 
         return trim($this->ai->complete($system, [[
             'role' => 'user',

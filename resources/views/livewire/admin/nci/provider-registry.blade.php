@@ -11,7 +11,7 @@
                 'circuit' => ['' => 'All circuits', 'closed' => 'Closed', 'half_open' => 'Half-open', 'open' => 'Open'],
                 'tier' => ['' => 'All tiers', 'self_service' => 'Self-service', 'individual_kyc' => 'Individual KYC', 'small_business' => 'Business', 'enterprise' => 'Enterprise'],
             ] as $field => $opts)
-                <select wire:model.live="{{ $field }}" class="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs text-slate-700 dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-200">
+                <select wire:model.live="{{ $field }}" class="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs text-slate-700 dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-200">
                     @foreach ($opts as $val => $label)<option value="{{ $val }}">{{ $label }}</option>@endforeach
                 </select>
             @endforeach
@@ -25,9 +25,9 @@
                 <x-icon name="package" class="h-4 w-4" /> {{ $group['name'] }}
                 <span class="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-500 dark:bg-white/10 dark:text-slate-300">{{ count($group['rows']) }}</span>
             </h2>
-            <div class="overflow-x-auto rounded-2xl border border-slate-200 bg-white dark:border-[#2D4060] dark:bg-[#1A2840]">
+            <div class="overflow-x-auto rounded-2xl border border-slate-200 bg-white dark:border-[#2A2E34] dark:bg-[#17191C]">
                 <table class="w-full min-w-[840px] text-left text-sm">
-                    <thead class="border-b border-slate-100 text-[11px] uppercase tracking-wide text-slate-400 dark:border-[#243352]">
+                    <thead class="border-b border-slate-100 text-[11px] uppercase tracking-wide text-slate-400 dark:border-[#373a3f]">
                         <tr>
                             <th class="px-4 py-2.5 font-medium">Provider</th>
                             <th class="px-3 py-2.5 font-medium">Tier</th>
@@ -40,9 +40,9 @@
                             <th class="px-3 py-2.5 font-medium text-right">Links</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-slate-50 dark:divide-[#243352]/70">
+                    <tbody class="divide-y divide-slate-50 dark:divide-[#373a3f]/70">
                         @foreach ($group['rows'] as $r)
-                            <tr wire:key="row-{{ $familyKey }}-{{ $r['provider_key'] }}" class="hover:bg-slate-50 dark:hover:bg-[#243352]/40">
+                            <tr wire:key="row-{{ $familyKey }}-{{ $r['provider_key'] }}" class="hover:bg-slate-50 dark:hover:bg-[#373a3f]/40">
                                 <td class="px-4 py-2.5">
                                     <a href="{{ route('admin.nci.provider', $r['provider_key']) }}" wire:navigate class="font-semibold capitalize text-primary hover:underline dark:text-teal-300">{{ $r['provider_key'] }}</a>
                                     <span class="ml-1 text-[10px] uppercase text-slate-400">{{ $r['stack'] }}</span>
@@ -73,7 +73,7 @@
                                 <td class="px-3 py-2.5 text-right">
                                     @if ($r['dashboard_login_url'])
                                         <a href="{{ $r['dashboard_login_url'] }}" target="_blank" rel="noopener"
-                                           class="inline-flex items-center gap-1 rounded-lg border border-slate-200 px-2 py-1 text-xs font-medium text-slate-600 hover:border-primary/40 hover:text-primary dark:border-[#2D4060] dark:text-slate-300" title="Open provider dashboard">
+                                           class="inline-flex items-center gap-1 rounded-lg border border-slate-200 px-2 py-1 text-xs font-medium text-slate-600 hover:border-primary/40 hover:text-primary dark:border-[#2A2E34] dark:text-slate-300" title="Open provider dashboard">
                                             Dashboard <x-icon name="chevron-right" class="h-3 w-3 -rotate-45" />
                                         </a>
                                     @else
@@ -87,7 +87,7 @@
             </div>
         </div>
     @empty
-        <div class="rounded-2xl border border-dashed border-slate-300 p-10 text-center text-sm text-slate-400 dark:border-[#2D4060]">
+        <div class="rounded-2xl border border-dashed border-slate-300 p-10 text-center text-sm text-slate-400 dark:border-[#2A2E34]">
             No providers match. The registry fills after the first <code>providers:health-check</code> cycle runs.
         </div>
     @endforelse

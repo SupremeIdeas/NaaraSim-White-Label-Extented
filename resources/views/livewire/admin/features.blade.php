@@ -9,7 +9,7 @@
         <h2 class="mb-2 mt-6 text-xs font-semibold uppercase tracking-wide text-slate-400">{{ $group }}</h2>
         <div class="space-y-2">
             @foreach ($items as $f)
-                <div wire:key="feat-{{ $f['key'] }}" class="rounded-xl border border-slate-200 bg-white p-4 dark:border-[#2D4060] dark:bg-[#1B2A44]">
+                <div wire:key="feat-{{ $f['key'] }}" class="rounded-xl border border-slate-200 bg-white p-4 dark:border-[#2A2E34] dark:bg-[#1D2024]">
                     <div class="flex items-start gap-3">
                         <span class="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary dark:bg-primary/20">
                             <x-icon :name="$f['icon']" class="h-4 w-4" />
@@ -23,7 +23,7 @@
                                 @elseif ($f['admin_enabled'] && $f['needs_keys'] && ! $f['configured'])
                                     <span class="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold text-amber-700 dark:bg-amber-900/40 dark:text-amber-300">Coming soon · needs keys</span>
                                 @else
-                                    <span class="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-500 dark:bg-[#243352] dark:text-slate-400">Off</span>
+                                    <span class="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-500 dark:bg-[#373a3f] dark:text-slate-400">Off</span>
                                 @endif
                             </div>
                             <p class="mt-0.5 text-sm text-slate-500 dark:text-slate-400">{{ $f['description'] }}</p>
@@ -45,24 +45,24 @@
 
                         {{-- On/off toggle (works even without keys) --}}
                         <button type="button" wire:click="toggle('{{ $f['key'] }}')" role="switch" :aria-checked="'{{ $f['admin_enabled'] ? 'true' : 'false' }}'"
-                                class="relative mt-0.5 inline-flex h-6 w-11 shrink-0 items-center rounded-full transition {{ $f['admin_enabled'] ? 'bg-primary' : 'bg-slate-300 dark:bg-[#2D4060]' }}">
+                                class="relative mt-0.5 inline-flex h-6 w-11 shrink-0 items-center rounded-full transition {{ $f['admin_enabled'] ? 'bg-primary' : 'bg-slate-300 dark:bg-[#2A2E34]' }}">
                             <span class="inline-block h-5 w-5 transform rounded-full bg-white shadow transition {{ $f['admin_enabled'] ? 'translate-x-5' : 'translate-x-0.5' }}"></span>
                         </button>
                     </div>
 
                     {{-- Inline setup guide --}}
                     @if ($openGuide === $f['key'] && ! empty($f['guide']))
-                        <div class="mt-3 rounded-lg border border-slate-200 bg-slate-50 p-3 text-xs text-slate-600 dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-300">
+                        <div class="mt-3 rounded-lg border border-slate-200 bg-slate-50 p-3 text-xs text-slate-600 dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-300">
                             @if ($f['guide'] === 'webpush')
                                 <p class="mb-2 font-semibold text-slate-700 dark:text-slate-200">Enable Naara Push (self-hosted, no third-party service)</p>
                                 <ol class="list-inside list-decimal space-y-1.5">
                                     <li>On your server, from the app root, generate a VAPID key pair:
                                         <code class="mt-1 block rounded bg-slate-900 px-2 py-1 font-mono text-[11px] text-teal-200">php artisan webpush:vapid</code>
                                     </li>
-                                    <li>Copy the two printed lines into your <code class="rounded bg-slate-200 px-1 font-mono dark:bg-[#1B2A44]">.env</code> file:
+                                    <li>Copy the two printed lines into your <code class="rounded bg-slate-200 px-1 font-mono dark:bg-[#1D2024]">.env</code> file:
                                         <code class="mt-1 block rounded bg-slate-900 px-2 py-1 font-mono text-[11px] text-teal-200">VAPID_PUBLIC_KEY=…<br>VAPID_PRIVATE_KEY=…</code>
                                     </li>
-                                    <li>Optionally set <code class="rounded bg-slate-200 px-1 font-mono dark:bg-[#1B2A44]">VAPID_SUBJECT</code> to a <code>mailto:</code> or your site URL (defaults to <code>{{ $appUrl }}</code>).</li>
+                                    <li>Optionally set <code class="rounded bg-slate-200 px-1 font-mono dark:bg-[#1D2024]">VAPID_SUBJECT</code> to a <code>mailto:</code> or your site URL (defaults to <code>{{ $appUrl }}</code>).</li>
                                     <li>Clear config cache: <code class="rounded bg-slate-900 px-2 py-1 font-mono text-[11px] text-teal-200">php artisan config:clear</code>, then keep this feature switched on. Users will see the “Turn on notifications” prompt.</li>
                                 </ol>
                                 <p class="mt-2 text-[11px] text-slate-400">The private key is a secret — it lives only in .env, never in code or the browser.</p>

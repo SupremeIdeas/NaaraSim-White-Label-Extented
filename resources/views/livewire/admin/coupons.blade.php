@@ -4,7 +4,7 @@
 
     {{-- Marketing nudges toggle (owner request): friendly first-purchase /
          comeback offers shown on the dashboard of not-yet-purchased accounts. --}}
-    <div class="mb-6 flex items-center justify-between gap-4 rounded-2xl border border-slate-200 bg-white p-4 dark:border-[#2D4060] dark:bg-[#1A2840]">
+    <div class="mb-6 flex items-center justify-between gap-4 rounded-2xl border border-slate-200 bg-white p-4 dark:border-[#2A2E34] dark:bg-[#17191C]">
         <div class="flex items-center gap-3">
             <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-accent/15 text-accent dark:bg-accent/25"><x-icon name="gift" class="h-5 w-5" /></span>
             <div>
@@ -16,7 +16,7 @@
                 @class([
                     'relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition',
                     'bg-primary' => $nudgesOn,
-                    'bg-slate-300 dark:bg-[#2D4060]' => ! $nudgesOn,
+                    'bg-slate-300 dark:bg-[#2A2E34]' => ! $nudgesOn,
                 ])>
             <span @class(['inline-block h-5 w-5 transform rounded-full bg-white transition', 'translate-x-5' => $nudgesOn, 'translate-x-0.5' => ! $nudgesOn])></span>
         </button>
@@ -29,7 +29,7 @@
     @endif
 
     {{-- Create --}}
-    <section class="mb-8 rounded-2xl border border-slate-200 bg-white p-6 dark:border-[#2D4060] dark:bg-[#1A2840]">
+    <section class="mb-8 rounded-2xl border border-slate-200 bg-white p-6 dark:border-[#2A2E34] dark:bg-[#17191C]">
         <h2 class="flex items-center gap-2 text-sm font-semibold text-slate-800 dark:text-slate-100">
             <x-icon name="gift" class="h-4 w-4 text-primary" /> New coupon
         </h2>
@@ -39,21 +39,21 @@
                 <label class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">Code</label>
                 <div class="flex gap-2">
                     <input wire:model="code" type="text" placeholder="WELCOME10"
-                           class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm uppercase tracking-wider text-slate-900 dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
-                    <button type="button" wire:click="generateCode" class="shrink-0 rounded-lg border border-slate-300 px-3 py-2 text-xs font-medium text-slate-600 hover:bg-slate-50 dark:border-[#2D4060] dark:text-slate-300 dark:hover:bg-[#243352]">Generate</button>
+                           class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm uppercase tracking-wider text-slate-900 dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
+                    <button type="button" wire:click="generateCode" class="shrink-0 rounded-lg border border-slate-300 px-3 py-2 text-xs font-medium text-slate-600 hover:bg-slate-50 dark:border-[#2A2E34] dark:text-slate-300 dark:hover:bg-[#373a3f]">Generate</button>
                 </div>
                 @error('code') <span class="mt-1 block text-xs text-red-600 dark:text-red-400">{{ $message }}</span> @enderror
             </div>
             <div>
                 <label class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">Discount %</label>
                 <input wire:model="percent_off" type="number" min="1" max="90" step="0.5"
-                       class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                       class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
                 @error('percent_off') <span class="mt-1 block text-xs text-red-600 dark:text-red-400">{{ $message }}</span> @enderror
                 <p class="mt-1 text-[11px] text-slate-400 dark:text-slate-500">Whatever the percent, the price never drops below cost + minimum profit.</p>
             </div>
             <div>
                 <label class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">Applies to</label>
-                <select wire:model="applies_to" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                <select wire:model="applies_to" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
                     <option value="all">Everything</option>
                     <option value="esim">eSIM plans only</option>
                     <option value="number">Numbers only</option>
@@ -63,20 +63,20 @@
                 <div>
                     <label class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">Total uses <span class="font-normal text-slate-400">(blank = ∞)</span></label>
                     <input wire:model="max_redemptions" type="number" min="1"
-                           class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                           class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
                     @error('max_redemptions') <span class="mt-1 block text-xs text-red-600 dark:text-red-400">{{ $message }}</span> @enderror
                 </div>
                 <div>
                     <label class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">Per-user limit</label>
                     <input wire:model="per_user_limit" type="number" min="1" max="100"
-                           class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                           class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
                     @error('per_user_limit') <span class="mt-1 block text-xs text-red-600 dark:text-red-400">{{ $message }}</span> @enderror
                 </div>
             </div>
             <div>
                 <label class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">Expires <span class="font-normal text-slate-400">(optional)</span></label>
                 <input wire:model="expires_at" type="datetime-local"
-                       class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                       class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
                 @error('expires_at') <span class="mt-1 block text-xs text-red-600 dark:text-red-400">{{ $message }}</span> @enderror
             </div>
             <div class="flex items-end">
@@ -90,9 +90,9 @@
     </section>
 
     {{-- List --}}
-    <div class="overflow-hidden rounded-xl border border-slate-200 dark:border-[#2D4060]">
+    <div class="overflow-hidden rounded-xl border border-slate-200 dark:border-[#2A2E34]">
         <table class="w-full text-left text-sm">
-            <thead class="bg-slate-50 text-slate-500 dark:bg-[#243352] dark:text-slate-400">
+            <thead class="bg-slate-50 text-slate-500 dark:bg-[#373a3f] dark:text-slate-400">
                 <tr>
                     <th class="px-4 py-2 font-medium">Code</th>
                     <th class="px-4 py-2 font-medium">Discount</th>
@@ -103,7 +103,7 @@
                     <th class="px-4 py-2"></th>
                 </tr>
             </thead>
-            <tbody class="divide-y divide-slate-100 bg-white dark:divide-[#243352] dark:bg-[#1A2840]">
+            <tbody class="divide-y divide-slate-100 bg-white dark:divide-[#373a3f] dark:bg-[#17191C]">
                 @forelse ($coupons as $coupon)
                     <tr wire:key="coupon-{{ $coupon->id }}" class="text-slate-700 dark:text-slate-200">
                         <td class="px-4 py-2.5 font-mono font-semibold uppercase">{{ $coupon->code }}</td>

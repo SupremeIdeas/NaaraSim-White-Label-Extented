@@ -100,7 +100,7 @@ class NumbersBentoDisplayModeTest extends TestCase
     public function test_the_numbers_page_hides_the_bento_grid_while_a_page_mode_flow_is_open(): void
     {
         NumbersBentoCard::create([
-            'key' => 'verify', 'title' => 'Naara Verify', 'subtitle' => 'x',
+            'key' => 'verify', 'title' => \App\Support\BrandSettings::rebrand('Naara Verify'), 'subtitle' => 'x',
             'is_active' => true, 'display_mode' => 'page',
         ]);
         NumbersBento::flush();
@@ -112,7 +112,7 @@ class NumbersBentoDisplayModeTest extends TestCase
         // grid itself is gone, not a string that trivially never appears.
         Livewire::actingAs($user)->test(GetNumber::class, ['modal' => 'verify'])
             ->assertDontSee('Make Internet Calls')
-            ->assertSee('Naara Verify');
+            ->assertSee(\App\Support\BrandSettings::rebrand('Naara Verify'));
     }
 
     public function test_the_numbers_page_still_overlays_the_modal_on_top_of_the_bento_grid_when_left_as_modal(): void

@@ -13,25 +13,25 @@
         <div class="mb-4 rounded-xl border border-green-200 bg-green-50 px-4 py-2.5 text-sm font-medium text-green-700 dark:border-green-500/30 dark:bg-green-500/10 dark:text-green-300">{{ $sent }}</div>
     @endif
 
-    <div class="space-y-4 rounded-2xl border border-slate-200 bg-white p-5 dark:border-white/10 dark:bg-[#16233d]">
+    <div class="space-y-4 rounded-2xl border border-slate-200 bg-white p-5 dark:border-white/10 dark:bg-[#27292c]">
         <label class="block"><span class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-400">Subject</span>
-            <input type="text" wire:model="subject" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm dark:border-white/10 dark:bg-[#0D1B2A] dark:text-white">
+            <input type="text" wire:model="subject" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm dark:border-white/10 dark:bg-[#0b0b0c] dark:text-white">
             @error('subject') <span class="text-xs text-red-500">{{ $message }}</span> @enderror
         </label>
         <label class="block"><span class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-400">Body (basic HTML allowed; sanitized on send)</span>
-            <textarea rows="8" wire:model="body" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm dark:border-white/10 dark:bg-[#0D1B2A] dark:text-white"></textarea>
+            <textarea rows="8" wire:model="body" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm dark:border-white/10 dark:bg-[#0b0b0c] dark:text-white"></textarea>
             @error('body') <span class="text-xs text-red-500">{{ $message }}</span> @enderror
         </label>
 
         <div class="grid gap-4 sm:grid-cols-2">
             <label class="block"><span class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-400">Audience</span>
-                <select wire:model.live="audienceType" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm dark:border-white/10 dark:bg-[#0D1B2A] dark:text-white">
+                <select wire:model.live="audienceType" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm dark:border-white/10 dark:bg-[#0b0b0c] dark:text-white">
                     @foreach ($types as $val => $label)<option value="{{ $val }}">{{ $label }}</option>@endforeach
                 </select>
             </label>
             @if ($audienceType !== 'all')
                 <label class="block"><span class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-400">Which</span>
-                    <select wire:model.live="audienceValue" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm dark:border-white/10 dark:bg-[#0D1B2A] dark:text-white">
+                    <select wire:model.live="audienceValue" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm dark:border-white/10 dark:bg-[#0b0b0c] dark:text-white">
                         <option value="">Choose…</option>
                         @foreach (($audienceType === 'role' ? $roles : ($audienceType === 'account' ? $accounts : $segments)) as $val => $label)
                             <option value="{{ $val }}">{{ $label }}</option>

@@ -40,9 +40,7 @@
             <div class="md:col-span-2">
                 <x-brand-logo variant="family" theme="dark" size="lg" />
                 <p class="mt-5 max-w-md text-sm leading-relaxed text-slate-400">
-                    {{ $brand }} — Stay Connected. No Borders. No Swaps. Premium eSIM
-                    connectivity and phone numbers for African travellers and global
-                    professionals. 190+ countries, instant activation, no roaming surprises.
+                    {{ $brand }} — {{ \App\Support\BrandSettings::tagline() }} 190+ countries, instant activation, prices you can read before you pay.
                 </p>
                 <p class="mt-5 inline-flex items-center gap-1.5 rounded-[0.625rem] border border-accent/30 bg-accent/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-accent">
                     <x-icon name="trending-up" class="h-3 w-3" /> Rates live-priced, 24/7

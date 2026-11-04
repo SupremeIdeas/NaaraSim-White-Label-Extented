@@ -73,12 +73,13 @@ class GiftCardCatalogueSyncService
                 if (($p['provider_product_id'] ?? '') === '') {
                     continue;
                 }
+                $p['category_key'] ??= \App\Support\GiftCardCategories::resolve($p['category'] ?? null, $p['brand_name'] ?? null);
                 GiftCardProduct::updateOrCreate(
                     ['provider' => $p['provider'], 'provider_product_id' => $p['provider_product_id']],
                     collect($p)->only([
                         'brand_key', 'brand_name', 'country', 'currency', 'denomination_type',
                         'fixed_denominations', 'min_amount', 'max_amount', 'logo_url', 'brand_color',
-                        'category', 'required_fields', 'redeem_instruction', 'cost_meta', 'provider_enabled',
+                        'category', 'category_key', 'required_fields', 'redeem_instruction', 'cost_meta', 'provider_enabled',
                         'priceable',
                     ])->all(),
                 );

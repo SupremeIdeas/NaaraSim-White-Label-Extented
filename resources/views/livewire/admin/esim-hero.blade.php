@@ -10,7 +10,7 @@
         </div>
     @endif
 
-    <form wire:submit="save" class="space-y-5 rounded-xl border border-slate-200 bg-white p-5 dark:border-[#2D4060] dark:bg-[#1B2A44]">
+    <form wire:submit="save" class="space-y-5 rounded-xl border border-slate-200 bg-white p-5 dark:border-[#2A2E34] dark:bg-[#1D2024]">
         {{-- Catalogue section heading + subheading (below the hero banner). --}}
         <div class="grid gap-4 rounded-lg border border-slate-100 bg-slate-50 p-4 dark:border-white/5 dark:bg-white/[0.03] sm:grid-cols-2">
             <div class="sm:col-span-2">
@@ -19,24 +19,24 @@
             </div>
             <div>
                 <label class="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-300">Section heading</label>
-                <input type="text" wire:model="section_title" maxlength="60" placeholder="eSIM Plans" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                <input type="text" wire:model="section_title" maxlength="60" placeholder="eSIM Plans" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
                 @error('section_title') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
             </div>
             <div>
                 <label class="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-300">Section subheading</label>
-                <input type="text" wire:model="section_subtitle" maxlength="160" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                <input type="text" wire:model="section_subtitle" maxlength="160" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
                 @error('section_subtitle') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
             </div>
         </div>
 
         <div>
             <label class="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-300">Hero title</label>
-            <input type="text" wire:model="title" maxlength="120" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+            <input type="text" wire:model="title" maxlength="120" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
             @error('title') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
         </div>
         <div>
             <label class="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-300">Description</label>
-            <textarea wire:model="description" rows="2" maxlength="250" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100"></textarea>
+            <textarea wire:model="description" rows="2" maxlength="250" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100"></textarea>
             @error('description') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
         </div>
 
@@ -44,7 +44,7 @@
             <p class="mb-2 text-xs font-medium text-slate-600 dark:text-slate-300">Current images ({{ count($images) }}/{{ $maxImages }})</p>
             <div class="grid grid-cols-2 gap-3 sm:grid-cols-4">
                 @foreach ($images as $i => $src)
-                    <div class="group relative aspect-[16/10] overflow-hidden rounded-lg border border-slate-200 dark:border-[#2D4060]">
+                    <div class="group relative aspect-[16/10] overflow-hidden rounded-lg border border-slate-200 dark:border-[#2A2E34]">
                         <img src="{{ $src }}" class="h-full w-full object-cover">
                         <button type="button" wire:click="removeImage({{ $i }})" class="absolute right-1 top-1 flex h-6 w-6 items-center justify-center rounded-full bg-black/60 text-white opacity-0 transition group-hover:opacity-100"><x-icon name="x" class="h-3.5 w-3.5" /></button>
                         <span class="absolute bottom-1 left-1 rounded bg-black/60 px-1.5 text-[10px] font-semibold text-white">{{ $i + 1 }}</span>

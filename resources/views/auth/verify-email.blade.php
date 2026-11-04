@@ -1,5 +1,5 @@
 <x-layouts.auth title="Confirm your email — NaaraSim" heading="Confirm your email" subheading="One quick step to activate your account.">
-            <div class="space-y-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-[#2D4060] dark:bg-[#1A2840]">
+            <div class="space-y-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-[#2A2E34] dark:bg-[#17191C]">
                 @if (session('status') == 'verification-link-sent')
                     <div class="flex items-start gap-2 rounded-lg bg-green-50 p-3 text-sm text-green-700 dark:bg-green-950/40 dark:text-green-300">
                         <x-icon name="badge-check" class="mt-0.5 h-4 w-4 shrink-0" />

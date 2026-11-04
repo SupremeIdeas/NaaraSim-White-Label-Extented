@@ -135,6 +135,14 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
+        // Language lines say the licensee's brand, not the shipped one.
+        $this->app->extend('translator', function ($translator, $app) {
+            $branded = new \App\Support\BrandedTranslator($app['translation.loader'], $app->getLocale());
+            $branded->setFallback($app->getFallbackLocale());
+
+            return $branded;
+        });
+
         // Fresh-upload safeguards (blueprint S22): before the web installer runs,
         // seed an APP_KEY (else the encrypting middleware 500s with no .env) and
         // force file-based session/cache (else StartSession queries a database
@@ -276,6 +284,20 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Emails say the licensee's brand too.
+        \Illuminate\Support\Facades\Event::listen(\Illuminate\Mail\Events\MessageSending::class, function ($event) {
+            $m = $event->message;
+            if ($m instanceof \Symfony\Component\Mime\Email) {
+                if (is_string($html = $m->getHtmlBody())) {
+                    $m->html(\App\Support\BrandWordFilter::html($html));
+                }
+                if (is_string($text = $m->getTextBody())) {
+                    $m->text(\App\Support\BrandWordFilter::text($text));
+                }
+                $m->subject(\App\Support\BrandWordFilter::text((string) $m->getSubject()));
+            }
+        });
+
         // Gates that must hold on every Livewire action, not only on the page load: an action is a POST to /livewire/update, which re-runs only the route
         // middleware named here. Without this a demoted admin, a paused account or a verification-gated page keeps working after access is lost.
         // Each class is checked so this file is safe on any install.

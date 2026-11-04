@@ -21,7 +21,7 @@
     $base = 'nx-bento-tile group relative flex flex-col items-center justify-center gap-3 overflow-hidden rounded-2xl border p-5 text-center transition-all duration-300 hover:-translate-y-1 sm:p-6';
     $skin = $variant === 'primary'
         ? 'border-primary/30 bg-gradient-to-b from-primary/10 to-primary/5 text-primary shadow-sm hover:shadow-lg hover:shadow-primary/10 dark:border-primary/40 dark:from-primary/20 dark:to-primary/10 dark:text-teal-200'
-        : 'border-slate-200 bg-white text-slate-800 shadow-sm hover:bg-slate-50 hover:shadow-lg dark:border-white/10 dark:bg-[#16233d] dark:text-slate-100 dark:hover:bg-[#1b2c49]';
+        : 'border-slate-200 bg-white text-slate-800 shadow-sm hover:bg-slate-50 hover:shadow-lg dark:border-white/10 dark:bg-[#27292c] dark:text-slate-100 dark:hover:bg-[#2e3136]';
 @endphp
 @if ($href)
     <a href="{{ $href }}" {{ $attributes->merge(['class' => $base.' '.$skin]) }}>
@@ -34,9 +34,9 @@
         @if ($icon)
             {{-- 3D icon on a soft radial pedestal — floats up + brightens on hover. --}}
             <span class="relative flex items-center justify-center" aria-hidden="true">
-                <span class="absolute inset-0 -z-[1] rounded-full bg-[radial-gradient(circle_at_50%_45%,rgba(10,110,110,0.18),transparent_70%)] blur-md dark:bg-[radial-gradient(circle_at_50%_45%,rgba(45,212,191,0.22),transparent_70%)]"></span>
+                <span class="absolute inset-0 -z-[1] rounded-full bg-[radial-gradient(circle_at_50%_45%,rgba(55,58,65,0.18),transparent_70%)] blur-md dark:bg-[radial-gradient(circle_at_50%_45%,rgba(118,125,139,0.22),transparent_70%)]"></span>
                 <img src="{{ $icon }}" alt=""
-                     class="relative shrink-0 object-contain drop-shadow-[0_6px_14px_rgba(13,27,42,0.18)] transition-transform duration-300 ease-out group-hover:-translate-y-0.5 group-hover:scale-[1.07]"
+                     class="relative shrink-0 object-contain drop-shadow-[0_6px_14px_rgba(26,27,29,0.18)] transition-transform duration-300 ease-out group-hover:-translate-y-0.5 group-hover:scale-[1.07]"
                      style="width: {{ $iconPx }}px; height: {{ $iconPx }}px; opacity: {{ $op }};">
             </span>
         @endif

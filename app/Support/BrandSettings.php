@@ -19,9 +19,16 @@ class BrandSettings
 {
     private const CACHE_KEY = 'brand.settings';
 
+    /** What a freshly installed, not yet activated white label calls itself. The licensee sets their own in Admin > Activation and branding. */
+    public const SHIPPED_NAME = 'Orbit';
+
+    public const SHIPPED_WORD = 'Orbit';
+
     /** Setting keys this feature owns (for upload + cache-bust). */
     public const KEYS = [
         'brand.name',
+        'brand.tagline', 'brand.legal_name', 'brand.agency_name', 'brand.agency_url', 'brand.support_email', 'brand.support_phone', 'brand.address', 'brand.website',
+        'brand.social_x', 'brand.social_instagram', 'brand.social_facebook', 'brand.social_linkedin', 'brand.social_youtube', 'brand.social_tiktok', 'brand.powered_by', 'brand.setup_done',
         'brand.word',
         'brand.logo_family_light',
         'brand.logo_family_dark',
@@ -66,10 +73,10 @@ class BrandSettings
 
     /** Brand default hex palette (mirrors app.css :root — CLAUDE.md Section 2). */
     public const COLOR_DEFAULTS = [
-        'primary' => '#A21CAF',
-        'accent' => '#84CC16',
-        'navy' => '#0D1B2A',
-        'action' => '#E8412A',
+        'primary' => '#23272D',
+        'accent' => '#94A0B0',
+        'navy' => '#0A0B0D',
+        'action' => '#3D5AFE',
     ];
 
     /**
@@ -78,20 +85,7 @@ class BrandSettings
      * always wins, but a fresh install renders the real NaaraSim + Supreme Ideas
      * Agency marks out of the box instead of the text wordmark.
      */
-    public const LOGO_DEFAULTS = [
-        // family = the umbrella "Naara" mark (home dashboard, marketing, Aurora
-        // welcome); product = NaaraSim (eSIM + number surfaces); gift = Naara
-        // Gift (the gift storefront); agency = Supreme Ideas Agency.
-        'family_light' => '/brand/naara-family-light.png',
-        'family_dark' => '/brand/naara-family-dark.png',
-        'product_light' => '/brand/naarasim-product-light.png',
-        'product_dark' => '/brand/naarasim-product-dark.png',
-        'gift_light' => '/brand/naara-gift-light.png',
-        'gift_dark' => '/brand/naara-gift-dark.png',
-        'agency_light' => '/brand/supreme-ideas-light.png',
-        'agency_dark' => '/brand/supreme-ideas-dark.png',
-        'favicon' => '/brand/naarasim-favicon.png',
-    ];
+    public const LOGO_DEFAULTS = [];
 
     /** @return array<string, string> */
     public static function current(): array
@@ -99,10 +93,26 @@ class BrandSettings
         return Cache::rememberForever(self::CACHE_KEY, function () {
             try {
                 return [
-                    'name' => (string) (Setting::getValue('brand.name') ?: config('app.name', 'NaaraSim')),
+                    'name' => (string) (Setting::getValue('brand.name') ?: self::configName()),
                     // White-label brand WORD — the token swapped into product /
                     // sub-brand names ("Naara Rent" → "{word} Rent"). Default 'Naara'.
-                    'word' => (string) (Setting::getValue('brand.word') ?: 'Naara'),
+                    'word' => (string) (Setting::getValue('brand.word') ?: self::SHIPPED_WORD),
+                    'tagline' => (string) Setting::getValue('brand.tagline', ''),
+                    'legal_name' => (string) Setting::getValue('brand.legal_name', ''),
+                    'agency_name' => (string) Setting::getValue('brand.agency_name', ''),
+                    'agency_url' => (string) Setting::getValue('brand.agency_url', ''),
+                    'support_email' => (string) Setting::getValue('brand.support_email', ''),
+                    'support_phone' => (string) Setting::getValue('brand.support_phone', ''),
+                    'address' => (string) Setting::getValue('brand.address', ''),
+                    'website' => (string) Setting::getValue('brand.website', ''),
+                    'social_x' => (string) Setting::getValue('brand.social_x', ''),
+                    'social_instagram' => (string) Setting::getValue('brand.social_instagram', ''),
+                    'social_facebook' => (string) Setting::getValue('brand.social_facebook', ''),
+                    'social_linkedin' => (string) Setting::getValue('brand.social_linkedin', ''),
+                    'social_youtube' => (string) Setting::getValue('brand.social_youtube', ''),
+                    'social_tiktok' => (string) Setting::getValue('brand.social_tiktok', ''),
+                    'powered_by' => (string) Setting::getValue('brand.powered_by', ''),
+                    'setup_done' => (string) Setting::getValue('brand.setup_done', ''),
                     'family_light' => (string) Setting::getValue('brand.logo_family_light', ''),
                     'family_dark' => (string) Setting::getValue('brand.logo_family_dark', ''),
                     'product_light' => (string) Setting::getValue('brand.logo_product_light', ''),
@@ -124,7 +134,7 @@ class BrandSettings
                     'logo_scale_product' => (string) Setting::getValue('brand.logo_scale_product', ''),
                     'logo_scale_gift' => (string) Setting::getValue('brand.logo_scale_gift', ''),
                     // Site-wide font override (title + body). '' source = the
-                    // shipped Naara default (Supreme Display / Didact Gothic).
+                    // shipped Naara default (Bricolage Grotesque / Manrope).
                     'font_display_source' => (string) Setting::getValue('brand.font_display_source', ''),
                     'font_display_google' => (string) Setting::getValue('brand.font_display_google', ''),
                     'font_display_custom' => (string) Setting::getValue('brand.font_display_custom', ''),
@@ -142,8 +152,10 @@ class BrandSettings
     private static function defaults(): array
     {
         return [
-            'name' => config('app.name', 'NaaraSim'),
-            'word' => 'Naara',
+            'name' => self::configName(),
+            'word' => self::SHIPPED_WORD,
+            'tagline' => '', 'legal_name' => '', 'agency_name' => '', 'agency_url' => '', 'support_email' => '', 'support_phone' => '', 'address' => '', 'website' => '',
+            'social_x' => '', 'social_instagram' => '', 'social_facebook' => '', 'social_linkedin' => '', 'social_youtube' => '', 'social_tiktok' => '', 'powered_by' => '', 'setup_done' => '',
             'family_light' => '', 'family_dark' => '',
             'product_light' => '', 'product_dark' => '',
             'agency_light' => '', 'agency_dark' => '',
@@ -196,7 +208,52 @@ class BrandSettings
             return $text;
         }
 
-        return str_replace(self::DEFAULT_WORD, $word, $text);
+        // "NaaraSim" is the product name; every other "Naara" is the brand word ("Naara Rent" becomes "Orbit Rent").
+        return str_replace([self::DEFAULT_WORD.'Sim', self::DEFAULT_WORD], [self::name(), $word], $text);
+    }
+
+    /** The app name from config, unless it is still one of the shipped placeholders. */
+    private static function configName(): string
+    {
+        $n = (string) config('app.name', '');
+
+        return ($n === '' || in_array($n, ['Laravel', 'NaaraSim', 'Naara'], true)) ? self::SHIPPED_NAME : $n;
+    }
+
+    /** One profile value (tagline, legal_name, support_email, ...). Empty string when not set. */
+    public static function profile(string $key): string
+    {
+        return (string) (self::current()[$key] ?? '');
+    }
+
+    /** The line under the name: the licensee's tagline, else a neutral one. */
+    public static function tagline(): string
+    {
+        return self::profile('tagline') ?: 'Data and numbers for people on the move.';
+    }
+
+    /** The company credited in footers and emails: the licensee's own, else the brand name. */
+    public static function company(): string
+    {
+        return self::profile('agency_name') ?: (self::profile('legal_name') ?: self::name());
+    }
+
+    public static function companyUrl(): string
+    {
+        return self::profile('agency_url') ?: (self::profile('website') ?: url('/'));
+    }
+
+    /** @return array<string, string> network => url, only the ones that are set */
+    public static function socials(): array
+    {
+        $out = [];
+        foreach (['x', 'instagram', 'facebook', 'linkedin', 'youtube', 'tiktok'] as $n) {
+            if (($u = self::profile('social_'.$n)) !== '') {
+                $out[$n] = $u;
+            }
+        }
+
+        return $out;
     }
 
     /**
@@ -208,29 +265,30 @@ class BrandSettings
      * @var array<string, array{primary:string, accent:string, navy:string, action:string}>
      */
     public const PALETTES = [
+        'Graphite' => ['primary' => '#23272D', 'accent' => '#94A0B0', 'navy' => '#0A0B0D', 'action' => '#3D5AFE'],
         'Orchid Lime' => ['primary' => '#A21CAF', 'accent' => '#84CC16', 'navy' => '#0D1B2A', 'action' => '#E8412A'],
         'Midnight Indigo' => ['primary' => '#4F46E5', 'accent' => '#F59E0B', 'navy' => '#111827', 'action' => '#EF4444'],
         'Royal Violet' => ['primary' => '#7C3AED', 'accent' => '#F5B301', 'navy' => '#1E1B2E', 'action' => '#EC4899'],
         'Emerald Forest' => ['primary' => '#047857', 'accent' => '#F59E0B', 'navy' => '#0B1F17', 'action' => '#DC2626'],
         'Ocean Blue' => ['primary' => '#0369A1', 'accent' => '#FBBF24', 'navy' => '#0C1A2B', 'action' => '#F43F5E'],
-        'Sunset Coral' => ['primary' => '#E11D48', 'accent' => '#F59E0B', 'navy' => '#1B1113', 'action' => '#FB7185'],
+        'Sunset Coral' => ['primary' => '#E11D48', 'accent' => '#F59E0B', 'navy' => '#1B1113', 'action' => '#E7687A'],
         'Amber Gold' => ['primary' => '#B45309', 'accent' => '#0EA5E9', 'navy' => '#1C1508', 'action' => '#EA580C'],
-        'Slate Pro' => ['primary' => '#334155', 'accent' => '#F59E0B', 'navy' => '#0F172A', 'action' => '#0EA5E9'],
-        'Crimson Noir' => ['primary' => '#B91C1C', 'accent' => '#FBBF24', 'navy' => '#180B0B', 'action' => '#F97316'],
-        'Cyber Lime' => ['primary' => '#3F6212', 'accent' => '#84CC16', 'navy' => '#0E1406', 'action' => '#22D3EE'],
-        'Deep Purple' => ['primary' => '#6D28D9', 'accent' => '#22D3EE', 'navy' => '#14101F', 'action' => '#F472B6'],
-        'Rose Quartz' => ['primary' => '#BE185D', 'accent' => '#FBBF24', 'navy' => '#1A0E15', 'action' => '#FB7185'],
-        'Steel Blue' => ['primary' => '#1D4ED8', 'accent' => '#F59E0B', 'navy' => '#0B1220', 'action' => '#06B6D4'],
+        'Slate Pro' => ['primary' => '#334155', 'accent' => '#F59E0B', 'navy' => '#0F172A', 'action' => '#0D9EE0'],
+        'Crimson Noir' => ['primary' => '#B91C1C', 'accent' => '#FBBF24', 'navy' => '#180B0B', 'action' => '#EF6E15'],
+        'Cyber Lime' => ['primary' => '#3F6212', 'accent' => '#84CC16', 'navy' => '#0E1406', 'action' => '#1AA0B5'],
+        'Deep Purple' => ['primary' => '#6D28D9', 'accent' => '#22D3EE', 'navy' => '#14101F', 'action' => '#E069A7'],
+        'Rose Quartz' => ['primary' => '#BE185D', 'accent' => '#FBBF24', 'navy' => '#1A0E15', 'action' => '#E7687A'],
+        'Steel Blue' => ['primary' => '#1D4ED8', 'accent' => '#F59E0B', 'navy' => '#0B1220', 'action' => '#05A0BB'],
         'Jade Mint' => ['primary' => '#0D9488', 'accent' => '#F59E0B', 'navy' => '#0A1A18', 'action' => '#F43F5E'],
         'Copper Rust' => ['primary' => '#9A3412', 'accent' => '#FACC15', 'navy' => '#1A0F08', 'action' => '#DC2626'],
-        'Sky Fresh' => ['primary' => '#0284C7', 'accent' => '#FACC15', 'navy' => '#0B1725', 'action' => '#F97316'],
+        'Sky Fresh' => ['primary' => '#0284C7', 'accent' => '#FACC15', 'navy' => '#0B1725', 'action' => '#EF6E15'],
         'Plum Wine' => ['primary' => '#86198F', 'accent' => '#FBBF24', 'navy' => '#170A18', 'action' => '#E11D48'],
         'Olive Earth' => ['primary' => '#4D7C0F', 'accent' => '#EAB308', 'navy' => '#12160A', 'action' => '#EA580C'],
         'Graphite Gold' => ['primary' => '#1F2937', 'accent' => '#84CC16', 'navy' => '#0B0F17', 'action' => '#EF4444'],
         'Turquoise Pop' => ['primary' => '#0891B2', 'accent' => '#F59E0B', 'navy' => '#0A1A1E', 'action' => '#F43F5E'],
-        'Berry Bold' => ['primary' => '#9D174D', 'accent' => '#FBBF24', 'navy' => '#180912', 'action' => '#FB923C'],
-        'Pine Green' => ['primary' => '#065F46', 'accent' => '#FCD34D', 'navy' => '#08160F', 'action' => '#F87171'],
-        'Cobalt Night' => ['primary' => '#1E40AF', 'accent' => '#FACC15', 'navy' => '#0A0F1F', 'action' => '#F97316'],
+        'Berry Bold' => ['primary' => '#9D174D', 'accent' => '#FBBF24', 'navy' => '#180912', 'action' => '#D37B32'],
+        'Pine Green' => ['primary' => '#065F46', 'accent' => '#FCD34D', 'navy' => '#08160F', 'action' => '#EE6C6C'],
+        'Cobalt Night' => ['primary' => '#1E40AF', 'accent' => '#FACC15', 'navy' => '#0A0F1F', 'action' => '#EF6E15'],
         'Terracotta' => ['primary' => '#C2410C', 'accent' => '#0D9488', 'navy' => '#1A0F0A', 'action' => '#DC2626'],
         'Monochrome Ink' => ['primary' => '#111827', 'accent' => '#6B7280', 'navy' => '#030712', 'action' => '#2563EB'],
     ];
@@ -302,6 +360,9 @@ class BrandSettings
         foreach ($map as $settingKey => $cssVar) {
             $hex = $c[$settingKey] ?? '';
             if ($hex !== '' && ($rgb = self::hexToChannels($hex)) !== null) {
+                if ($cssVar === 'brand-action') {
+                    $rgb = ColorContrast::darkenToContrast($rgb, '#FFFFFF', 3.0); // a CTA colour must carry white text
+                }
                 $lines[] = "--{$cssVar}: {$rgb};";
                 if ($cssVar === 'brand-primary') {
                     $lines[] = '--brand-primary-dark: '.self::darken($hex).';';
@@ -312,7 +373,18 @@ class BrandSettings
             $lines[] = '--brand-radius: '.self::sanitizeRadius($c['radius']).';';
         }
 
-        return $lines === [] ? '' : ':root{'.implode('', $lines).'}';
+        $css = $lines === [] ? '' : ':root{'.implode('', $lines).'}';
+
+        // The raw accent also paints text and icons on the dark surface in dark mode: lift a too-dark one so it stays readable there.
+        $accentRgb = self::hexToChannels((string) ($c['color_accent'] ?? ''));
+        if ($accentRgb !== null) {
+            $navy = self::hexToChannels((string) (($c['color_navy'] ?? '') !== '' ? $c['color_navy'] : self::COLOR_DEFAULTS['navy'])) ?? '10 11 13';
+            if (ColorContrast::ratio($accentRgb, $navy) < 4.5) {
+                $css .= '.dark{--brand-accent: '.ColorContrast::lightenToContrast($accentRgb, $navy, 4.5).';}';
+            }
+        }
+
+        return $css;
     }
 
     /** "#A21CAF" => "162 28 175" (channel triple), or null if malformed. */
@@ -532,7 +604,7 @@ class BrandSettings
     {
         $f = self::current()['favicon'] ?? '';
 
-        return $f !== '' ? $f : self::LOGO_DEFAULTS['favicon'];
+        return $f !== '' ? $f : url('/brand-mark.svg');
     }
 
     public static function flush(): void

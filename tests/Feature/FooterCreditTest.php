@@ -67,14 +67,17 @@ class FooterCreditTest extends TestCase
     {
         $this->get('/')
             ->assertOk()
-            ->assertSee('href="https://supremeideas.agency"', false)
-            ->assertSee('Supreme Ideas Agency');
+            ->assertSee('href="'.\App\Support\BrandSettings::companyUrl().'"', false)
+            ->assertSee(\App\Support\BrandSettings::company());
     }
 
     // --- admin can change the phrasing, and every footer reflects it ---
 
     public function test_admin_switches_to_made_with_love_and_it_renders_site_wide(): void
     {
+        // A licensee whose company differs from the brand (when they are the same the credit line is hidden on purpose).
+        \App\Models\Setting::setValue('brand.agency_name', 'Acme Holdings Ltd', 'brand');
+        \App\Support\BrandSettings::flush();
         Livewire::actingAs($this->admin())->test(SiteChromePage::class)
             ->set('credit_phrasing', SiteChrome::CREDIT_MADE_WITH_LOVE)
             ->call('save')
@@ -85,7 +88,7 @@ class FooterCreditTest extends TestCase
         $this->get('/')
             ->assertOk()
             ->assertSee('Made with love by')
-            ->assertSee('href="https://supremeideas.agency"', false);
+            ->assertSee('href="'.\App\Support\BrandSettings::companyUrl().'"', false);
     }
 
     public function test_admin_sets_custom_phrasing_with_the_agency_placeholder(): void

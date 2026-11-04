@@ -93,7 +93,7 @@ class Branding extends Component
     public string $hero_cta_size = HeroBackground::DEFAULT_CTA_SIZE;
 
     // Site-wide font system (owner request): '' keeps the shipped Naara default
-    // (Supreme Display / Didact Gothic); 'google' picks a Google Font by name;
+    // (Bricolage Grotesque / Manrope); 'google' picks a Google Font by name;
     // 'custom' uses an uploaded web font file. One source per slot.
     public string $font_display_source = '';
 
@@ -164,8 +164,8 @@ class Branding extends Component
             'preloader_style' => 'required|in:'.implode(',', BrandSettings::PRELOADER_STYLES),
         ], [
             'brand_word.regex' => 'Use a plain brand word (letters, numbers, spaces).',
-            'color_primary.regex' => 'Use a 6-digit hex colour like #A21CAF.',
-            'color_accent.regex' => 'Use a 6-digit hex colour like #84CC16.',
+            'color_primary.regex' => 'Use a 6-digit hex colour like #23272D.',
+            'color_accent.regex' => 'Use a 6-digit hex colour like #94A0B0.',
             'color_navy.regex' => 'Use a 6-digit hex colour like #0D1B2A.',
             'color_action.regex' => 'Use a 6-digit hex colour like #E8412A.',
         ]);

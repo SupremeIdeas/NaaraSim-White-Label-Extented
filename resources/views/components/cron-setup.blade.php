@@ -25,7 +25,7 @@
     <div x-data="{ copied: false, cmd: @js($cronLine) }" class="mt-4">
         <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-400">Add this cron job</label>
         <div class="flex items-stretch gap-2">
-            <code class="flex-1 overflow-x-auto rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 font-mono text-xs text-slate-700 dark:border-[var(--brand-card-border-dark)] dark:bg-[#243352] dark:text-slate-200">{{ $cronLine }}</code>
+            <code class="flex-1 overflow-x-auto rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 font-mono text-xs text-slate-700 dark:border-[var(--brand-card-border-dark)] dark:bg-[#373a3f] dark:text-slate-200">{{ $cronLine }}</code>
             <button type="button"
                     @click="navigator.clipboard.writeText(cmd); copied = true; setTimeout(() => copied = false, 1800)"
                     class="shrink-0 inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-xs font-semibold text-white hover:bg-primary-dark">
@@ -47,7 +47,7 @@
                 <li>Under “Common Settings” pick <span class="font-mono">Once Per Minute (* * * * *)</span>.</li>
                 <li>Paste the command part into the Command box:</li>
             </ol>
-            <code class="mt-2 block overflow-x-auto rounded-lg bg-slate-50 px-3 py-2 font-mono text-[11px] text-slate-600 dark:bg-[#243352] dark:text-slate-300">{{ \App\Support\Installer::cronCommandOnly() }}</code>
+            <code class="mt-2 block overflow-x-auto rounded-lg bg-slate-50 px-3 py-2 font-mono text-[11px] text-slate-600 dark:bg-[#373a3f] dark:text-slate-300">{{ \App\Support\Installer::cronCommandOnly() }}</code>
             <p class="mt-1.5 text-[11px] text-slate-400">If your host offers multiple PHP versions, replace <span class="font-mono">php</span> with the full path shown in cPanel (e.g. <span class="font-mono">/usr/local/bin/ea-php82</span>). No Redis needed — the queue drains through this same cron.</p>
         </div>
 
@@ -59,7 +59,7 @@
                 <li>Run <span class="font-mono">crontab -e</span> and add the cron line above.</li>
                 <li>Run the queue worker as a daemon (Redis is used for queue/cache/session):</li>
             </ol>
-            <code class="mt-2 block overflow-x-auto rounded-lg bg-slate-50 px-3 py-2 font-mono text-[11px] text-slate-600 dark:bg-[#243352] dark:text-slate-300">{{ $workerCmd }}</code>
+            <code class="mt-2 block overflow-x-auto rounded-lg bg-slate-50 px-3 py-2 font-mono text-[11px] text-slate-600 dark:bg-[#373a3f] dark:text-slate-300">{{ $workerCmd }}</code>
             <p class="mt-1.5 text-[11px] text-slate-400">Keep Horizon alive with <span class="font-mono">supervisor</span> or a <span class="font-mono">systemd</span> service so it restarts on boot/crash. Full steps are in <span class="font-mono">docs/INSTALLATION.md</span>.</p>
         </div>
     </div>

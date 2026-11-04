@@ -83,7 +83,7 @@
 .ns-search input::placeholder { color: rgb(var(--nx-text-3)); opacity: 1; }
 .ns-select:focus-visible { outline: 2px solid rgb(var(--nx-teal-ink)); outline-offset: 2px; }
 /* The "pick any colour" swatch: a colour wheel, not a brand colour. */
-.ns-swatch i.ns-swatch__wheel { background: conic-gradient(#f43f5e, #f59e0b, #22c55e, #06b6d4, #8b5cf6, #f43f5e); }
+.ns-swatch i.ns-swatch__wheel { background: conic-gradient(#f43f5e, #f59e0b, #22c55e, #646a76, #8b5cf6, #f43f5e); }
 
 /* Balance hero / stat tones / cta pill / spark lines */
 .ns-balance { padding: 16px; }
@@ -288,7 +288,7 @@ html[data-nx-skin] .nx-sidebar { background: rgb(var(--nx-surface) / .72); backg
 
 /* Collapsed side menu: the platform favicon as a square tile (the wordmark does not fit a 96px rail). Skin tokens drive the tile so every
    skin gives it the same premium surface as the rest of the menu; the plain-theme fallback keeps a neutral tile. */
-.nx-rail-mark { display: grid; place-items: center; width: 52px; height: 52px; border-radius: 16px; background: rgb(255 255 255 / .9); box-shadow: 0 0 0 1px rgb(15 23 42 / .08), 0 6px 16px -10px rgb(15 23 42 / .4); transition: transform .2s ease; }
+.nx-rail-mark { display: grid; place-items: center; width: 52px; height: 52px; border-radius: 16px; background: rgb(255 255 255 / .9); box-shadow: 0 0 0 1px rgb(27 28 30 / .08), 0 6px 16px -10px rgb(27 28 30 / .4); transition: transform .2s ease; }
 .dark .nx-rail-mark { background: rgb(255 255 255 / .06); box-shadow: 0 0 0 1px rgb(255 255 255 / .12), 0 8px 20px -12px rgb(0 0 0 / .7); }
 html[data-nx-skin] .nx-rail-mark { background: rgb(var(--nx-surface-3)); box-shadow: inset 0 0 0 1px rgb(var(--nx-line)), var(--nx-e1); }
 .nx-rail-mark:hover { transform: translateY(-1px); }
@@ -592,19 +592,19 @@ body.ns-msg-dragging { cursor: col-resize; user-select: none; }
 .ns-nt__hero { display: block; width: 100%; aspect-ratio: 2 / 1; object-fit: cover; }
 .ns-nt__body { padding: 14px; }
 /* The "dark feature" offer is a deliberate dark brand card in every skin and mode: its own fixed ink pair, like the primary card. */
-.ns-nt__card--dark { padding: 14px; background: rgb(8 20 34); box-shadow: inset 0 0 0 1px rgb(255 255 255 / .1), var(--nx-e1); color: rgb(238 246 250); }
+.ns-nt__card--dark { padding: 14px; background: rgb(20 21 22); box-shadow: inset 0 0 0 1px rgb(255 255 255 / .1), var(--nx-e1); color: rgb(238 246 250); }
 .ns-nt__card--dark.is-unread { box-shadow: inset 0 0 0 1.5px rgb(var(--nx-teal) / .7), var(--nx-e1); }
 .ns-nt__card--dark .ns-nt__title { color: rgb(255 255 255); }
 .ns-nt__card--dark .ns-nt__text, .ns-nt__card--dark .ns-nt__bullets li { color: rgb(203 218 228); }
 .ns-nt__card--dark .ns-small, .ns-nt__card--dark .ns-nt__link { color: rgb(176 196 208); }
 .ns-nt__card--dark .ns-nt__link:hover { color: #fff; }
-.ns-nt__card--dark .ns-nt__dot { box-shadow: 0 0 0 2px rgb(8 20 34); }
+.ns-nt__card--dark .ns-nt__dot { box-shadow: 0 0 0 2px rgb(20 21 22); }
 .ns-nt__darkrow { display: flex; align-items: flex-start; gap: 14px; }
 .ns-nt__darkmain { min-width: 0; flex: 1; }
 .ns-nt__thumb { width: 64px; height: 64px; flex: none; border-radius: 12px; object-fit: cover; }
 .ns-nt__bullets { margin: 10px 0 0; padding: 0; list-style: none; display: grid; gap: 4px; }
 .ns-nt__bullets li { display: flex; align-items: flex-start; gap: 6px; font-size: 13.5px; }
-.ns-nt__bullets .ns-i { flex: none; margin-top: 2px; font-size: 14px; color: rgb(110 220 210); }
+.ns-nt__bullets .ns-i { flex: none; margin-top: 2px; font-size: 14px; color: rgb(158 163 172); }
 .ns-nt__pages { margin-top: 16px; }
 .ns-nt__pages nav { display: flex; justify-content: center; }
 .ns-nt__pages a, .ns-nt__pages span[aria-current] > span, .ns-nt__pages span[aria-disabled] > span { color: rgb(var(--nx-text-2)); }
@@ -622,6 +622,27 @@ select.ns-input { appearance: none; padding-inline-end: 34px; background-image: 
 .ns-gf__tools { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 18px; }
 .ns-gf__search { flex: 1 1 200px; min-width: 0; margin-top: 0; height: 48px; }
 .ns-gf__country { width: auto; flex: none; height: 48px; max-width: 100%; }
+/* Type pills (Games, Food & Beverage, Travel...): one scrollable row with edge fades and arrows; the active pill is filled with the skin's own button gradient. */
+.ns-gf__pills { position: relative; margin-top: 14px; }
+.ns-gf__track { display: flex; gap: 8px; overflow-x: auto; padding: 4px 2px 8px; scrollbar-width: none; -webkit-overflow-scrolling: touch; scroll-snap-type: x proximity; }
+.ns-gf__track::-webkit-scrollbar { display: none; }
+.ns-gf__track.fade-l { -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 36px); mask-image: linear-gradient(90deg, transparent 0, #000 36px); }
+.ns-gf__track.fade-r { -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 36px), transparent); mask-image: linear-gradient(90deg, #000 calc(100% - 36px), transparent); }
+.ns-gf__track.fade-l.fade-r { -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 36px, #000 calc(100% - 36px), transparent); mask-image: linear-gradient(90deg, transparent 0, #000 36px, #000 calc(100% - 36px), transparent); }
+.ns-gf__pill { flex: none; scroll-snap-align: center; display: inline-flex; align-items: center; gap: 8px; height: 44px; padding: 0 8px 0 6px; border-radius: 99px; font-size: 14px; font-weight: 600; letter-spacing: -.005em; white-space: nowrap; color: rgb(var(--nx-text)); background: rgb(var(--nx-surface)); box-shadow: inset 0 0 0 1px rgb(var(--nx-line-strong)); transition: background .18s, color .18s, box-shadow .18s, transform .18s; }
+.ns-gf__pill:hover { transform: translateY(-1px); box-shadow: inset 0 0 0 1px rgb(var(--nx-teal) / .7); }
+.ns-gf__pi { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; background: rgb(var(--nx-teal) / .14); color: rgb(var(--nx-teal-ink)); transition: background .18s, color .18s; }
+.ns-gf__pi .ns-i { width: 17px; height: 17px; }
+.ns-gf__pl { padding-inline: 1px; }
+.ns-gf__pn { display: inline-grid; place-items: center; min-width: 26px; height: 26px; padding: 0 8px; border-radius: 99px; font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; background: rgb(var(--nx-surface-3)); color: rgb(var(--nx-text-2)); transition: background .18s, color .18s; }
+.ns-gf__pill.is-on { background: linear-gradient(180deg, rgb(var(--nx-cta-a)), rgb(var(--nx-cta-b)) 10px); color: #fff; box-shadow: inset 0 1px 0 rgb(255 255 255 / .25), 0 8px 18px -10px rgb(var(--nx-cta-b)); }
+.ns-gf__pill.is-on .ns-gf__pi { background: rgb(255 255 255 / .2); color: #fff; }
+.ns-gf__pill.is-on .ns-gf__pn { background: rgb(255 255 255 / .22); color: #fff; }
+.ns-gf__pill:focus-visible, .ns-gf__arrow:focus-visible { outline: 2px solid rgb(var(--nx-teal-ink)); outline-offset: 2px; }
+.ns-gf__arrow { position: absolute; top: 4px; z-index: 2; display: none; place-items: center; width: 44px; height: 44px; border-radius: 50%; color: rgb(var(--nx-text)); background: rgb(var(--nx-surface)); box-shadow: inset 0 0 0 1px rgb(var(--nx-line-strong)), 0 10px 20px -12px rgb(0 0 0 / .5); }
+.ns-gf__arrow--l { left: 0; } .ns-gf__arrow--r { right: 0; }
+@media (hover: hover) and (min-width: 768px) { .ns-gf__arrow { display: grid; } .ns-gf__arrow[x-cloak] { display: none; } }
+@media (prefers-reduced-motion: reduce) { .ns-gf__pill, .ns-gf__pill:hover { transition: none; transform: none; } }
 .ns-gf__brands { margin-top: 16px; display: grid; gap: 12px; }
 .ns-gf__brands.is-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 @media (min-width: 640px) { .ns-gf__brands.is-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
@@ -747,7 +768,7 @@ select.ns-input { appearance: none; padding-inline-end: 34px; background-image: 
 .ns-pg__act--link { color: rgb(var(--nx-teal-ink)); }
 .ns-pg__act--bad { color: rgb(var(--nx-bad)); }
 .ns-pg__act:focus-visible { outline: 2px solid rgb(var(--nx-teal-ink)); outline-offset: 2px; }
-.ns-pg__code { display: block; overflow-x: auto; padding: 11px 13px; border-radius: 10px; font: 12.5px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; color: rgb(226 238 244); background: rgb(8 20 34); }
+.ns-pg__code { display: block; overflow-x: auto; padding: 11px 13px; border-radius: 10px; font: 12.5px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; color: rgb(226 238 244); background: rgb(20 21 22); }
 .ns-pg__reveal { margin-top: 16px; padding: 18px; border-radius: calc(var(--nx-r-card) * var(--nx-rs)); background: rgb(var(--nx-surface-2)); box-shadow: inset 0 0 0 2px rgb(var(--nx-teal-ink)); }
 .ns-pg__err { display: flex; align-items: flex-start; gap: 8px; margin-top: 14px; padding: 12px; border-radius: 12px; font-size: 14px; color: rgb(var(--nx-bad)); background: rgb(var(--nx-bad) / .12); box-shadow: inset 0 0 0 1px rgb(var(--nx-bad) / .35); }
 .ns-pg__fielderr { display: block; margin-top: 4px; font-size: 13px; color: rgb(var(--nx-bad)); }
@@ -858,7 +879,7 @@ select.ns-input.ns-input--list { background-image: none; padding-inline-end: 6px
 .ns-pg__cols3 { display: grid; gap: 14px; }
 @media (min-width: 640px) { .ns-pg__cols3 { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 /* Marketing-style hero for business pages: a deliberate dark brand panel in every skin and mode. */
-.ns-pg__hero { padding: 48px 20px 64px; text-align: center; color: rgb(238 246 250); background: linear-gradient(135deg, rgb(13 27 42), rgb(13 27 42) 45%, rgb(162 28 175)); }
+.ns-pg__hero { padding: 48px 20px 64px; text-align: center; color: rgb(238 246 250); background: linear-gradient(135deg, rgb(11 11 12), rgb(11 11 12) 45%, rgb(37 39 43)); }
 .ns-pg__hero h1 { margin: 12px auto 0; max-width: 46rem; font-size: clamp(28px, 6vw, 46px); line-height: 1.12; font-weight: 800; color: #fff; }
 .ns-pg__hero p { margin: 18px auto 0; max-width: 40rem; font-size: 16px; line-height: 1.6; color: rgb(214 228 236); }
 .ns-pg__hero .ns-pg__kicker { color: rgb(242 185 59); }
@@ -883,7 +904,7 @@ select.ns-input.ns-input--list { background-image: none; padding-inline-end: 6px
 
 /* ===== Brand Hunt / brand pages ===== */
 .ns-bh__handle { min-width: 0; display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: calc(var(--nx-r-row) * var(--nx-rs)); background: rgb(var(--nx-surface)); }
-.ns-bh__icon { flex: none; width: 40px; height: 40px; display: grid; place-items: center; border-radius: 12px; background: rgb(244 247 249); color: rgb(20 30 40); box-shadow: inset 0 0 0 1px rgb(0 0 0 / .08); }
+.ns-bh__icon { flex: none; width: 40px; height: 40px; display: grid; place-items: center; border-radius: 12px; background: rgb(244 247 249); color: rgb(28 29 32); box-shadow: inset 0 0 0 1px rgb(0 0 0 / .08); }
 .ns-bh__handle b { display: block; font-size: 15px; font-weight: 600; color: rgb(var(--nx-text)); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .ns-bh__handle small { display: block; font-size: 12px; font-weight: 600; color: rgb(var(--nx-text-2)); }
 .ns-bh__handle small.is-ver { color: color-mix(in srgb, rgb(var(--nx-teal-ink)) 62%, rgb(var(--nx-text))); }
@@ -919,7 +940,7 @@ select.ns-input.ns-input--list { background-image: none; padding-inline-end: 6px
 @media (min-width: 640px) { .ns-bh__strip > div { width: 380px; } }
 .ns-bh__catrow { display: flex; align-items: center; justify-content: space-between; margin: 0 0 10px; }
 .ns-bh__catrow small { font-size: 12.5px; color: rgb(var(--nx-text-2)); }
-.ns-bh__cta { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 8px; padding: 18px; border-radius: calc(var(--nx-r-card) * var(--nx-rs)); color: #fff; background: rgb(13 27 42); }
+.ns-bh__cta { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 8px; padding: 18px; border-radius: calc(var(--nx-r-card) * var(--nx-rs)); color: #fff; background: rgb(11 11 12); }
 .ns-bh__cta b { display: block; font-size: 15px; }
 .ns-bh__cta small { display: block; margin-top: 2px; font-size: 13px; color: rgb(205 220 229); }
 .ns-bh__cta .ns-i { flex: none; font-size: 20px; }
@@ -966,7 +987,7 @@ select.ns-input.ns-input--list { background-image: none; padding-inline-end: 6px
 html[data-nx-skin] .nx-lang-chip { height: 36px; color: rgb(var(--nx-text-2)); border-color: rgb(var(--nx-line)); background: rgb(var(--nx-surface) / .72); }
 html[data-nx-skin] .nx-lang-chip:hover { color: rgb(var(--nx-text)); border-color: rgb(var(--nx-teal) / .6); }
 html[data-nx-skin] .nx-lang-chip:focus-visible, html[data-nx-skin] .nx-lang__opt:focus-visible { outline: 2px solid rgb(var(--nx-teal-ink)); outline-offset: 2px; }
-.nx-lang__opt:focus-visible { outline: 2px solid rgb(var(--color-primary, 162 28 175)); outline-offset: 2px; }
+.nx-lang__opt:focus-visible { outline: 2px solid rgb(var(--color-primary, 35 39 45)); outline-offset: 2px; }
 
 /* ------------------------------------------------------------------ Admin overview (S3 Batch 5) */
 .ns-adm { padding-bottom: 24px; }
@@ -1024,7 +1045,7 @@ html[data-nx-skin] .nx-lang-chip:focus-visible, html[data-nx-skin] .nx-lang__opt
 .ns-adm__meter span i { display: block; height: 100%; border-radius: 99px; background: linear-gradient(90deg, rgb(var(--nx-cta-a)), rgb(var(--nx-cta-b))); }
 .ns-adm__meter b { width: 2rem; flex: none; text-align: end; font-size: 12px; color: rgb(var(--nx-text-2)); }
 /* revenue hero: its own dark scrim + explicit label colours, so it reads on every skin */
-.ns-adm__rev { position: relative; overflow: hidden; padding: 20px; color: #fff; border-radius: calc(var(--nx-r-card, 22px) * var(--nx-rs, 1)); background: linear-gradient(150deg, rgb(var(--nx-cta-b)) 0%, rgb(var(--nx-ink-bg, 13 27 42)) 78%); box-shadow: 0 18px 34px -22px rgb(var(--nx-teal) / .7); }
+.ns-adm__rev { position: relative; overflow: hidden; padding: 20px; color: #fff; border-radius: calc(var(--nx-r-card, 22px) * var(--nx-rs, 1)); background: linear-gradient(150deg, rgb(var(--nx-cta-b)) 0%, rgb(var(--nx-ink-bg, 10 11 13)) 78%); box-shadow: 0 18px 34px -22px rgb(var(--nx-teal) / .7); }
 .ns-adm__rev::after { content: ""; position: absolute; inset: 0; background: linear-gradient(0deg, rgb(0 0 0 / .28), rgb(0 0 0 / .28)); pointer-events: none; }
 .ns-adm__rev > * { position: relative; z-index: 1; }
 .ns-adm__rev-top { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 14px; }
@@ -1095,7 +1116,7 @@ html[data-nx-skin] .nx-lang-chip:focus-visible, html[data-nx-skin] .nx-lang__opt
 .ck { --_bg: var(--ck-bg, rgb(var(--nx-surface))); --_tx: var(--ck-text, rgb(var(--nx-text))); --_mut: color-mix(in srgb, var(--_tx) 72%, transparent); --_line: color-mix(in srgb, var(--_tx) 16%, transparent);
       --_btn: var(--ck-btn, rgb(var(--nx-teal))); --_btn-tx: var(--ck-btn-text, #fff); position: fixed; z-index: 2147483000; inset: auto 0 0 0; padding: 12px; pointer-events: none; font-size: 14px; line-height: 1.45; }
 .ck[hidden] { display: none; }
-.ck__scrim { position: fixed; inset: 0; background: rgb(2 8 16 / .55); pointer-events: auto; }
+.ck__scrim { position: fixed; inset: 0; background: rgb(8 9 10 / .55); pointer-events: auto; }
 .ck__box { pointer-events: auto; position: relative; background: var(--_bg); color: var(--_tx); border-radius: 20px; padding: 18px; box-shadow: 0 18px 50px rgb(0 0 0 / .28), inset 0 0 0 1px var(--_line); max-height: calc(100dvh - 24px); overflow: auto; }
 .ck--card .ck__box { max-width: 26rem; margin-inline-start: auto; }
 .ck--card.ck--left .ck__box { margin-inline-start: 0; margin-inline-end: auto; }
@@ -1156,7 +1177,7 @@ html.ck-open { overflow: hidden; }
 .ncr__quiet { border: 0; background: none; color: rgb(var(--nx-teal-ink, var(--nx-teal))); font: inherit; font-weight: 600; font-size: 17px; padding: 14px 18px; cursor: pointer; border-radius: 99px; }
 .ncr__go { border: 0; min-width: 44%; padding: 14px 22px; border-radius: 99px; font: inherit; font-weight: 700; font-size: 17px; cursor: pointer; color: #fff; background: rgb(var(--nx-teal)); transition: opacity .15s; }
 .ncr__go:disabled { cursor: default; color: rgb(var(--nx-text-2)); background: rgb(var(--nx-surface-2, var(--nx-line)) / .8); opacity: .8; }
-.ncr__tp { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 22px; padding: 16px 20px; border-radius: 99px; background: #00b67a; color: #fff; font-weight: 700; font-size: 17px; text-decoration: none; }
+.ncr__tp { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 22px; padding: 16px 20px; border-radius: 99px; background: #545962; color: #fff; font-weight: 700; font-size: 17px; text-decoration: none; }
 .ncr__tp .ns-i { font-size: 22px; fill: currentColor; }
 .ncr__help { display: block; margin: 16px auto 0; text-align: center; color: rgb(var(--nx-text-2)); text-decoration: underline; font-size: 15px; }
 .ncr__help[hidden] { display: none; }

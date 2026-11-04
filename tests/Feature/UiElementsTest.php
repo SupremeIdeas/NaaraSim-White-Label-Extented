@@ -97,25 +97,19 @@ class UiElementsTest extends TestCase
     }
 
     /**
-     * Frontend-UX-fix blueprint Phase C — root-caused via Playwright at 375px:
-     * <x-flag-orbit>'s node positions are percentages of the hero section's
-     * own height, tuned for a short/wide desktop hero. On a narrow phone the
-     * same hero reflows much taller, so those percentages land the flag
-     * chips directly on top of the headline/paragraph/CTA/stat numbers
-     * (reproduced live — screenshot showed the chips scattered across all of
-     * that text). `hidden lg:block` keeps the effect only where the hero is
-     * short enough for it to have been designed for. A fitness guard: if
-     * this class is ever dropped, the overlap silently comes back on every
-     * phone visiting the homepage.
+     * The old decorative flag orbit (percent-positioned chips that landed on the headline at phone width) is retired: the hero globe itself opens
+     * real flags over real ports, positioned from the 3D scene. A guard so the orbit never comes back into the hero or the login panel.
      */
-    public function test_the_homepage_flag_orbit_is_hidden_below_the_desktop_breakpoint(): void
+    public function test_the_retired_flag_orbit_is_gone_and_the_hero_carries_the_globe(): void
     {
-        $html = file_get_contents(resource_path('views/marketing/home/hero.blade.php'));
+        $hero = file_get_contents(resource_path('views/marketing/home/hero.blade.php'));
+        $login = file_get_contents(resource_path('views/components/layouts/theme-sections/login/default.blade.php'));
 
-        $this->assertMatchesRegularExpression(
-            '/<x-flag-orbit[^>]*class="[^"]*hidden lg:block[^"]*"/',
-            $html,
-        );
+        $this->assertStringNotContainsString('x-flag-orbit', $hero);
+        $this->assertStringNotContainsString('x-flag-orbit', $login);
+        $this->assertStringContainsString('data-webgl-hero="planet"', $hero);
+        $this->assertStringContainsString('data-webgl="login"', $login);
+        $this->assertFileDoesNotExist(resource_path('views/components/flag-orbit.blade.php'));
     }
 
     /**

@@ -18,7 +18,7 @@
 
     {{-- Inherit-from-default (non-default types only) --}}
     @if ($type !== 'default')
-        <label class="mb-5 flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 dark:border-white/10 dark:bg-[#16233d]">
+        <label class="mb-5 flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 dark:border-white/10 dark:bg-[#27292c]">
             <input type="checkbox" wire:model.live="inherit" class="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary">
             <span class="text-sm font-medium text-slate-700 dark:text-slate-200">Inherit from Default — use the same preloader as every other page</span>
         </label>
@@ -38,7 +38,7 @@
                 <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
                     @foreach ($presets as $slug => $meta)
                         <button type="button" wire:click="selectPreset('{{ $slug }}')" wire:key="preset-{{ $slug }}"
-                                class="group relative flex h-28 flex-col items-center justify-center gap-1 overflow-hidden rounded-2xl border p-2 transition {{ $preset === $slug ? 'border-primary ring-2 ring-primary/40' : 'border-slate-200 hover:border-slate-300 dark:border-white/10 dark:hover:border-white/20' }} bg-[#0D1B2A]">
+                                class="group relative flex h-28 flex-col items-center justify-center gap-1 overflow-hidden rounded-2xl border p-2 transition {{ $preset === $slug ? 'border-primary ring-2 ring-primary/40' : 'border-slate-200 hover:border-slate-300 dark:border-white/10 dark:hover:border-white/20' }} bg-[#0b0b0c]">
                             <div class="flex flex-1 items-center justify-center">
                                 <div class="nx-pl nx-pl--{{ $slug }}" style="transform:scale(.5)">
                                     @includeIf('components.preloaders.'.$slug, ['cfg' => ['loading_text' => 'Naara']])
@@ -56,7 +56,7 @@
 
                     {{-- Your own animation (GIF / WebP / Lottie JSON, per light + dark mode) --}}
                     <button type="button" wire:click="selectPreset('custom')" wire:key="preset-custom"
-                            class="group relative flex h-28 flex-col items-center justify-center gap-1 overflow-hidden rounded-2xl border border-dashed p-2 transition {{ $isCustom ? 'border-primary ring-2 ring-primary/40' : 'border-slate-300 hover:border-slate-400 dark:border-white/20 dark:hover:border-white/30' }} bg-[#0D1B2A]">
+                            class="group relative flex h-28 flex-col items-center justify-center gap-1 overflow-hidden rounded-2xl border border-dashed p-2 transition {{ $isCustom ? 'border-primary ring-2 ring-primary/40' : 'border-slate-300 hover:border-slate-400 dark:border-white/20 dark:hover:border-white/30' }} bg-[#0b0b0c]">
                         <span class="flex flex-1 items-center justify-center text-white/80"><x-icon name="upload" class="h-7 w-7" /></span>
                         <span class="relative z-10 text-[10px] font-semibold text-white/90">Your own animation</span>
                         @if ($custom !== [])
@@ -69,7 +69,7 @@
 
             {{-- Upload panel: one file per mode --}}
             @if ($isCustom)
-                <div class="space-y-4 rounded-2xl border border-slate-200 bg-white p-5 dark:border-white/10 dark:bg-[#16233d]" wire:key="custom-panel">
+                <div class="space-y-4 rounded-2xl border border-slate-200 bg-white p-5 dark:border-white/10 dark:bg-[#27292c]" wire:key="custom-panel">
                     <div>
                         <h2 class="text-sm font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">Your own animation</h2>
                         <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
@@ -94,7 +94,7 @@
                                         <span class="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold uppercase text-slate-500 dark:bg-white/10 dark:text-slate-300">{{ $meta['kind'] === 'lottie' ? 'Lottie' : strtoupper($meta['kind']) }}</span>
                                     @endif
                                 </div>
-                                <div class="flex h-32 items-center justify-center overflow-hidden rounded-xl {{ $variant === 'dark' ? 'bg-[#0D1B2A]' : 'bg-white ring-1 ring-slate-200' }}"
+                                <div class="flex h-32 items-center justify-center overflow-hidden rounded-xl {{ $variant === 'dark' ? 'bg-[#0b0b0c]' : 'bg-white ring-1 ring-slate-200' }}"
                                      @if ($variant === 'light') style="background:#fff" @endif>
                                     @if ($meta)
                                         <div class="nx-pl nx-pl--custom" style="transform:scale(.75)"
@@ -128,7 +128,7 @@
             @endif
 
             {{-- Customization panel --}}
-            <div class="space-y-5 rounded-2xl border border-slate-200 bg-white p-5 dark:border-white/10 dark:bg-[#16233d]">
+            <div class="space-y-5 rounded-2xl border border-slate-200 bg-white p-5 dark:border-white/10 dark:bg-[#27292c]">
                 <h2 class="text-sm font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">Customize</h2>
 
                 {{-- Brand colours (artwork you upload keeps its own colours) --}}
@@ -163,7 +163,7 @@
                     <label class="block">
                         <span class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">Loading text</span>
                         <input type="text" maxlength="24" wire:model.live="loadingText"
-                               class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm dark:border-white/10 dark:bg-[#0D1B2A] dark:text-white">
+                               class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm dark:border-white/10 dark:bg-[#0b0b0c] dark:text-white">
                         @error('loadingText') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
                     </label>
                 @endif
@@ -172,7 +172,7 @@
                     {{-- Size --}}
                     <label class="block">
                         <span class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">Size</span>
-                        <select wire:model.live="size" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm dark:border-white/10 dark:bg-[#0D1B2A] dark:text-white">
+                        <select wire:model.live="size" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm dark:border-white/10 dark:bg-[#0b0b0c] dark:text-white">
                             <option value="sm">Small</option>
                             <option value="md">Medium</option>
                             <option value="lg">Large</option>
@@ -212,7 +212,7 @@
                         <span class="text-sm font-medium text-slate-700 dark:text-slate-200">Blur the page behind</span>
                     </label>
                     @if ($blur)
-                        <select wire:model.live="blurStyle" class="rounded-xl border border-slate-200 bg-white px-2 py-1 text-xs dark:border-white/10 dark:bg-[#0D1B2A] dark:text-white">
+                        <select wire:model.live="blurStyle" class="rounded-xl border border-slate-200 bg-white px-2 py-1 text-xs dark:border-white/10 dark:bg-[#0b0b0c] dark:text-white">
                             <option value="light">Light</option>
                             <option value="medium">Medium</option>
                             <option value="heavy">Heavy</option>
@@ -242,7 +242,7 @@
                 @if ($isCustom)
                     {{-- Both modes side by side, each on the surface a visitor in that mode would see. --}}
                     <div class="grid gap-3">
-                        @foreach (['light' => '#ffffff', 'dark' => '#0D1B2A'] as $mode => $surface)
+                        @foreach (['light' => '#ffffff', 'dark' => '#0b0b0c'] as $mode => $surface)
                             <div>
                                 <span class="mb-1 block text-[11px] font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">{{ ucfirst($mode) }} mode</span>
                                 <div class="flex h-36 items-center justify-center overflow-hidden rounded-2xl border border-slate-200 dark:border-white/10" style="background:{{ $pvBgRgb ? $pvBg : $surface }}">

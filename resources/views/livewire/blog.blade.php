@@ -38,7 +38,7 @@
                             @if ($post->cover_image_url)
                                 <img src="{{ $post->cover_image_url }}" alt="" loading="lazy" class="absolute inset-0 h-full w-full object-cover">
                             @else
-                                <div class="absolute inset-0" style="background: linear-gradient(135deg, {{ $post->accentColor() }}, #0D1B2A);"></div>
+                                <div class="absolute inset-0" style="background: linear-gradient(135deg, {{ $post->accentColor() }}, #0b0b0c);"></div>
                             @endif
                             <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/10 to-black/40"></div>
                             <div class="absolute inset-x-0 bottom-0 p-4">

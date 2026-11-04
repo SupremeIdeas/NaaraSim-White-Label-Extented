@@ -72,6 +72,8 @@
 
         // Website (public front end + branding).
         $more[] = ['heading' => 'Website'];
+        $more[] = ['route' => 'admin.license', 'label' => 'Licence activation', 'icon' => 'key'];
+        $more[] = ['route' => 'admin.activation-branding', 'label' => 'Name and branding', 'icon' => 'badge-check'];
         $more[] = ['route' => 'admin.builder', 'label' => 'Page builder', 'icon' => 'grid'];
         $more[] = ['route' => 'admin.copy-studio', 'label' => 'Copy Studio (AI)', 'icon' => 'zap'];
         $more[] = ['route' => 'admin.nav', 'label' => 'Floating nav', 'icon' => 'grid'];
@@ -178,6 +180,7 @@
 
 <x-layouts.app :title="($title ?? 'Admin').' — NaaraSim'" :page-type="$preloaderType" :body-class="\App\Support\PlatformTheme::bodyClass()">
     <x-app-shell :primary="$primary" :more="$more" brand-label="NaaraSim Admin" brand-icon="settings" :brand-route="route('admin.dashboard')">
+        <x-admin.licence-banner />
         {{ $slot }}
     </x-app-shell>
 

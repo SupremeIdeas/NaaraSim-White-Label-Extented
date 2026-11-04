@@ -1,16 +1,12 @@
 <div class="mx-auto max-w-6xl px-4 py-16">
     {{-- Header --}}
     <div class="mx-auto max-w-2xl text-center">
-        <p class="text-xs font-semibold uppercase tracking-[0.25em] text-accent-dark dark:text-accent">Transparent Pricing</p>
-        <h1 class="mt-3 font-display text-3xl font-bold text-slate-900 sm:text-4xl dark:text-white">Plans That Make Sense</h1>
-        <p class="mx-auto mt-4 leading-relaxed text-slate-600 dark:text-slate-300">
-            No monthly fees. No contracts. Pay for exactly what you need — a short pass or a full month.
-            Every plan includes instant activation and 24/7 support.
-        </p>
+        <p class="text-xs font-semibold uppercase tracking-[0.25em] text-accent-dark dark:text-accent">{{ $copy['hero']['eyebrow'] ?? '' }}</p>
+        <h1 class="mt-3 font-display text-3xl font-bold text-slate-900 sm:text-4xl dark:text-white">{{ $copy['hero']['headline'] ?? '' }}</h1>
+        <p class="mx-auto mt-4 leading-relaxed text-slate-600 dark:text-slate-300">{{ $copy['hero']['subtext'] ?? '' }}</p>
         @if ($mode === 'estimate')
             <p class="mx-auto mt-5 inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-1.5 text-xs font-medium text-primary dark:bg-primary/20 dark:text-teal-300">
-                <x-icon name="signal" class="h-3.5 w-3.5" /> Indicative “from” pricing — live plans and exact prices appear here the moment our catalogue is connected.
-            </p>
+                <x-icon name="signal" class="h-3.5 w-3.5" /> {{ $copy['hero']['estimate_note'] ?? '' }}</p>
         @endif
     </div>
 
@@ -102,7 +98,7 @@
         </div>
 
         <p class="mt-8 text-center text-xs text-slate-400 dark:text-slate-500">
-            Estimates only, for guidance. Final prices are set live at checkout the moment our catalogue is connected — you always pay the price shown before you confirm.
+            {{ $copy['notes']['live_note'] ?? '' }}
         </p>
     @endif
 
@@ -113,15 +109,14 @@
          from PollSmsOtpJob's own constant, never hardcoded. --}}
     <div class="mt-10 flex items-center justify-center gap-2 text-center text-sm text-slate-500 dark:text-slate-400">
         <x-icon name="shield-check" class="h-4 w-4 shrink-0 text-primary" />
-        Verification numbers are covered too: no code within {{ \App\Jobs\PollSmsOtpJob::TIMEOUT_MINUTES }} minutes
-        → automatic refund to your wallet, no ticket required.
-        <a href="{{ route('refund-policy') }}" class="font-semibold text-primary hover:underline">Refund &amp; reliability policy</a>
+        {{ str_replace('{minutes}', (string) \App\Jobs\PollSmsOtpJob::TIMEOUT_MINUTES, $copy['notes']['refund_line'] ?? '') }}
+        <a href="{{ route('refund-policy') }}" class="font-semibold text-primary hover:underline">{{ $copy['notes']['refund_link'] ?? '' }}</a>
     </div>
 
     {{-- Not sure? -> data estimator --}}
     <div class="mt-14 rounded-3xl bg-gradient-to-br from-primary via-primary-dark to-navy p-8 text-center text-white sm:p-10">
-        <h2 class="font-display text-2xl font-bold">Not sure how much data you need?</h2>
-        <p class="mx-auto mt-2 max-w-xl text-sm text-teal-100/90">Tell us your trip and how you use your phone — we’ll estimate the right plan size so you never over- or under-buy.</p>
-        <a href="{{ auth()->check() ? route('data-estimator') : route('register') }}" class="nx-btn nx-btn--gold mt-6 !px-8 !py-3">Try the data estimator</a>
+        <h2 class="font-display text-2xl font-bold">{{ $copy['estimator']['headline'] ?? '' }}</h2>
+        <p class="mx-auto mt-2 max-w-xl text-sm text-teal-100/90">{{ $copy['estimator']['text'] ?? '' }}</p>
+        <a href="{{ auth()->check() ? route('data-estimator') : route('register') }}" class="nx-btn nx-btn--gold mt-6 !px-8 !py-3">{{ $copy['estimator']['cta'] ?? '' }}</a>
     </div>
 </div>

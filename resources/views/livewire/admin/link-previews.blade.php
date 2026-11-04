@@ -10,22 +10,22 @@
             ['field' => 'invoice_image', 'context' => 'invoice', 'label' => 'Invoice links', 'help' => 'Shown when a merchant\'s invoice link (/i/...) is shared with a client.'],
             ['field' => 'referral_image', 'context' => 'referral', 'label' => 'Referral links', 'help' => 'Shown when the homepage is opened via a referral link.'],
         ] as $slot)
-            <div class="rounded-2xl border border-slate-200 bg-white p-5 dark:border-[#2D4060] dark:bg-[#1B2A45]">
+            <div class="rounded-2xl border border-slate-200 bg-white p-5 dark:border-[#2A2E34] dark:bg-[#2d2f33]">
                 <h2 class="text-sm font-semibold text-slate-800 dark:text-slate-100">{{ $slot['label'] }}</h2>
                 <p class="mt-0.5 text-xs text-slate-500 dark:text-slate-400">{{ $slot['help'] }}</p>
 
                 <div class="mt-3 flex items-center gap-4">
-                    <img src="{{ $this->current[$slot['context']] }}" alt="" class="h-20 w-36 shrink-0 rounded-lg border border-slate-200 object-cover dark:border-[#2D4060]">
+                    <img src="{{ $this->current[$slot['context']] }}" alt="" class="h-20 w-36 shrink-0 rounded-lg border border-slate-200 object-cover dark:border-[#2A2E34]">
                     <div class="min-w-0 flex-1">
                         <input type="file" wire:model="{{ $slot['field'] }}" accept="image/webp,image/jpeg,image/png"
                             class="block w-full text-sm text-slate-600 file:mr-3 file:rounded-lg file:border-0 file:bg-primary/10 file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-primary dark:text-slate-300 dark:file:bg-teal-500/15 dark:file:text-teal-300">
                         @error($slot['field']) <span class="mt-1 block text-xs text-red-500">{{ $message }}</span> @enderror
                         @if ($this->{$slot['field']})
-                            <img src="{{ $this->{$slot['field']}->temporaryUrl() }}" alt="" class="mt-2 h-16 w-28 rounded-lg border border-slate-200 object-cover dark:border-[#2D4060]">
+                            <img src="{{ $this->{$slot['field']}->temporaryUrl() }}" alt="" class="mt-2 h-16 w-28 rounded-lg border border-slate-200 object-cover dark:border-[#2A2E34]">
                         @endif
                     </div>
                     <button type="button" wire:click="resetContext('{{ $slot['context'] }}')" wire:confirm="Revert to the default banner for this context?"
-                        class="shrink-0 rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50 dark:border-[#2D4060] dark:text-slate-300 dark:hover:bg-[#243352]">
+                        class="shrink-0 rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50 dark:border-[#2A2E34] dark:text-slate-300 dark:hover:bg-[#373a3f]">
                         Reset
                     </button>
                 </div>

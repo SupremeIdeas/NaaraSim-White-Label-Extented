@@ -1,7 +1,7 @@
 <div class="mx-auto max-w-6xl" @if (in_array($tab, ['overview', 'live'], true)) wire:poll.15s @endif>
     @php
-        $inp = 'rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100';
-        $card = 'rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-[#2D4060] dark:bg-[#1A2840]';
+        $inp = 'rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100';
+        $card = 'rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-[#2A2E34] dark:bg-[#17191C]';
         $usd = fn ($v) => '$'.number_format((float) $v, 2);
     @endphp
 
@@ -24,7 +24,7 @@
         <input type="text" wire:model.live.debounce.400ms="currency" maxlength="3" placeholder="Currency" class="{{ $inp }} w-24 uppercase" aria-label="Currency">
     </div>
 
-    <div class="mt-4 flex flex-wrap gap-1 rounded-xl border border-slate-200 bg-white p-1 text-sm dark:border-[#2D4060] dark:bg-[#1A2840]" role="tablist">
+    <div class="mt-4 flex flex-wrap gap-1 rounded-xl border border-slate-200 bg-white p-1 text-sm dark:border-[#2A2E34] dark:bg-[#17191C]" role="tablist">
         @foreach (['overview' => 'Overview', 'users' => 'Users', 'live' => 'Live analytics', 'planner' => 'Funding planner', 'unserved' => 'Unserved demand'] as $key => $label)
             <button type="button" wire:click="$set('tab', '{{ $key }}')" role="tab" aria-selected="{{ $tab === $key ? 'true' : 'false' }}"
                     class="rounded-lg px-3 py-1.5 font-medium transition {{ $tab === $key ? 'bg-primary text-white' : 'text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-white/10' }}">{{ $label }}</button>
@@ -71,12 +71,12 @@
             <input type="number" step="any" wire:model.live.debounce.500ms="maxBalance" placeholder="Max $" class="{{ $inp }} w-24" aria-label="Maximum balance">
             <label class="flex items-center gap-1 text-xs text-slate-600 dark:text-slate-300"><input type="checkbox" wire:model.live="sweepOnly"> Swept next run</label>
             <label class="flex items-center gap-1 text-xs text-slate-600 dark:text-slate-300"><input type="checkbox" wire:model.live="kycBlockedOnly"> KYC blocked</label>
-            <button type="button" wire:click="export" wire:loading.attr="disabled" wire:target="export" class="ml-auto rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-600 disabled:opacity-60 dark:border-[#2D4060] dark:text-slate-300">Export CSV</button>
+            <button type="button" wire:click="export" wire:loading.attr="disabled" wire:target="export" class="ml-auto rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-600 disabled:opacity-60 dark:border-[#2A2E34] dark:text-slate-300">Export CSV</button>
         </div>
 
-        <div class="mt-3 overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-[#2D4060] dark:bg-[#1A2840]">
+        <div class="mt-3 overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-[#2A2E34] dark:bg-[#17191C]">
             <table class="w-full text-sm">
-                <thead><tr class="border-b border-slate-100 text-left text-xs uppercase tracking-wide text-slate-400 dark:border-[#2D4060]">
+                <thead><tr class="border-b border-slate-100 text-left text-xs uppercase tracking-wide text-slate-400 dark:border-[#2A2E34]">
                     @foreach (['name' => 'User', 'country' => 'Country', 'status' => 'Status'] as $col => $label)
                         <th class="px-3 py-3"><button type="button" wire:click="sortBy('{{ $col }}')" class="uppercase">{{ $label }}{{ $sort === $col ? ($desc ? ' ↓' : ' ↑') : '' }}</button></th>
                     @endforeach
@@ -89,7 +89,7 @@
                 </tr></thead>
                 <tbody>
                     @forelse ($rows as $r)
-                        <tr class="border-b border-slate-50 dark:border-[#22314e]" wire:key="rail-user-{{ $r['enrollment_id'] }}">
+                        <tr class="border-b border-slate-50 dark:border-[#34373c]" wire:key="rail-user-{{ $r['enrollment_id'] }}">
                             <td class="px-3 py-2"><div class="font-medium text-slate-900 dark:text-slate-100">{{ $r['name'] }}</div><div class="text-[11px] text-slate-400">#{{ $r['user_id'] }} · {{ $r['currency'] }} · {{ $r['masked'] }}</div></td>
                             <td class="px-3 py-2 text-slate-600 dark:text-slate-300">{{ $r['country'] }}</td>
                             <td class="px-3 py-2 capitalize text-slate-600 dark:text-slate-300">{{ $r['status'] }}</td>
@@ -117,7 +117,7 @@
                     @endforelse
                 </tbody>
                 @if ($totals['users'] > 0)
-                    <tfoot><tr class="border-t-2 border-slate-200 text-sm font-semibold text-slate-900 dark:border-[#2D4060] dark:text-slate-100">
+                    <tfoot><tr class="border-t-2 border-slate-200 text-sm font-semibold text-slate-900 dark:border-[#2A2E34] dark:text-slate-100">
                         <td class="px-3 py-3" colspan="4">Filtered total · {{ $totals['users'] }} users</td>
                         @foreach (['credits', 'referral', 'merchant', 'partner', 'staff', 'total', 'committed'] as $k) <td class="px-3 py-3 text-right tabular-nums" data-total="{{ $k }}">{{ number_format((float) $totals[$k], 2) }}</td> @endforeach
                         <td colspan="4"></td>
@@ -127,9 +127,9 @@
         </div>
         @if ($pages > 1)
             <div class="mt-3 flex items-center justify-center gap-2 text-sm">
-                <button type="button" wire:click="$set('page', {{ max(1, $page - 1) }})" @disabled($page <= 1) class="rounded-lg border border-slate-200 px-3 py-1 disabled:opacity-40 dark:border-[#2D4060] dark:text-slate-300">Prev</button>
+                <button type="button" wire:click="$set('page', {{ max(1, $page - 1) }})" @disabled($page <= 1) class="rounded-lg border border-slate-200 px-3 py-1 disabled:opacity-40 dark:border-[#2A2E34] dark:text-slate-300">Prev</button>
                 <span class="text-slate-500 dark:text-slate-400">Page {{ $page }} of {{ $pages }}</span>
-                <button type="button" wire:click="$set('page', {{ min($pages, $page + 1) }})" @disabled($page >= $pages) class="rounded-lg border border-slate-200 px-3 py-1 disabled:opacity-40 dark:border-[#2D4060] dark:text-slate-300">Next</button>
+                <button type="button" wire:click="$set('page', {{ min($pages, $page + 1) }})" @disabled($page >= $pages) class="rounded-lg border border-slate-200 px-3 py-1 disabled:opacity-40 dark:border-[#2A2E34] dark:text-slate-300">Next</button>
             </div>
         @endif
     @endif
@@ -183,11 +183,11 @@
             </div>
         </div>
 
-        <div class="mt-4 overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-[#2D4060] dark:bg-[#1A2840]">
+        <div class="mt-4 overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-[#2A2E34] dark:bg-[#17191C]">
             <h2 class="px-4 pt-4 text-sm font-semibold text-slate-900 dark:text-slate-100">Latest withdrawals</h2>
             <table class="mt-2 w-full text-sm"><tbody>
                 @forelse ($feed as $f)
-                    <tr class="border-t border-slate-50 dark:border-[#22314e]"><td class="px-4 py-2 text-xs text-slate-400">{{ $f['at']->diffForHumans() }}</td><td class="px-4 py-2 text-slate-600 dark:text-slate-300">{{ $f['user'] }}</td><td class="px-4 py-2 text-slate-500">{{ $f['country'] }}</td>
+                    <tr class="border-t border-slate-50 dark:border-[#34373c]"><td class="px-4 py-2 text-xs text-slate-400">{{ $f['at']->diffForHumans() }}</td><td class="px-4 py-2 text-slate-600 dark:text-slate-300">{{ $f['user'] }}</td><td class="px-4 py-2 text-slate-500">{{ $f['country'] }}</td>
                         <td class="px-4 py-2 text-right tabular-nums text-slate-900 dark:text-slate-100">{{ $usd($f['usd']) }} <span class="text-xs text-slate-400">({{ $f['local'] }})</span></td><td class="px-4 py-2 text-xs capitalize text-slate-500">{{ str_replace('_', ' ', $f['status']) }}</td></tr>
                 @empty <tr><td class="px-4 py-6 text-center text-slate-400">No withdrawals yet.</td></tr> @endforelse
             </tbody></table>
@@ -202,7 +202,7 @@
                 <thead><tr class="text-left text-xs uppercase tracking-wide text-slate-400"><th class="py-2">Currency</th><th class="py-2 text-right">Exposure (USD)</th><th class="py-2 text-right">Top-up p50 (USD)</th><th class="py-2 text-right">Top-up p90 (USD)</th><th class="py-2 text-right">p50 in currency</th></tr></thead>
                 <tbody>
                     @forelse ($planner['by_currency'] as $ccy => $row)
-                        <tr class="border-t border-slate-50 dark:border-[#22314e]"><td class="py-2 font-medium text-slate-900 dark:text-slate-100">{{ $ccy }}</td><td class="py-2 text-right tabular-nums text-slate-500">{{ number_format((float) $row['max_exposure_usd'], 2) }}</td>
+                        <tr class="border-t border-slate-50 dark:border-[#34373c]"><td class="py-2 font-medium text-slate-900 dark:text-slate-100">{{ $ccy }}</td><td class="py-2 text-right tabular-nums text-slate-500">{{ number_format((float) $row['max_exposure_usd'], 2) }}</td>
                             <td class="py-2 text-right tabular-nums text-slate-900 dark:text-slate-100">{{ number_format((float) $row['topup_p50_usd'], 2) }}</td><td class="py-2 text-right tabular-nums text-slate-500">{{ number_format((float) $row['topup_p90_usd'], 2) }}</td>
                             <td class="py-2 text-right tabular-nums text-slate-500">{{ isset($row['topup_p50_local']) ? number_format((float) $row['topup_p50_local'], 2) : 'no live rate' }}</td></tr>
                     @empty <tr><td colspan="5" class="py-6 text-center text-slate-400">No exposure on this rail yet.</td></tr> @endforelse
@@ -248,7 +248,7 @@
                 <thead><tr class="text-left text-xs uppercase tracking-wide text-slate-400"><th class="py-2">Country</th><th class="py-2 text-right">Users</th><th class="py-2 text-right">Withdrawable (USD)</th><th class="py-2 text-right">Asked to be notified</th></tr></thead>
                 <tbody>
                     @forelse ($unserved as $u)
-                        <tr class="border-t border-slate-50 dark:border-[#22314e]" wire:key="unserved-{{ $u['country'] }}"><td class="py-2 font-medium text-slate-900 dark:text-slate-100">{{ $u['country'] }}</td><td class="py-2 text-right">{{ $u['users'] }}</td><td class="py-2 text-right tabular-nums">{{ number_format((float) $u['usd'], 2) }}</td><td class="py-2 text-right">{{ $u['notify_requests'] }}</td></tr>
+                        <tr class="border-t border-slate-50 dark:border-[#34373c]" wire:key="unserved-{{ $u['country'] }}"><td class="py-2 font-medium text-slate-900 dark:text-slate-100">{{ $u['country'] }}</td><td class="py-2 text-right">{{ $u['users'] }}</td><td class="py-2 text-right tabular-nums">{{ number_format((float) $u['usd'], 2) }}</td><td class="py-2 text-right">{{ $u['notify_requests'] }}</td></tr>
                     @empty <tr><td colspan="4" class="py-6 text-center text-slate-400">No unserved demand found.</td></tr> @endforelse
                 </tbody>
             </table>

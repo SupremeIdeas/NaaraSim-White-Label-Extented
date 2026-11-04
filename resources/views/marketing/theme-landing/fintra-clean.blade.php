@@ -31,7 +31,7 @@
         <div class="grid items-center gap-10 lg:grid-cols-2 lg:gap-14">
             <div class="{{ $imageOnLeft ? 'lg:order-2' : '' }} {{ $imageCentered ? 'text-center lg:col-span-2' : '' }}">
                 <span class="inline-flex items-center gap-2 rounded-md border border-primary/20 bg-primary/5 px-3 py-1.5 font-mono text-[11px] font-semibold uppercase tracking-[0.15em] text-primary dark:border-white/10 dark:bg-white/5 dark:text-slate-300">
-                    <x-icon name="file-text" class="h-3.5 w-3.5" /> {{ $content['eyebrow'] }}
+                    <x-glyph name="file-text" class="h-3.5 w-3.5" /> {{ $content['eyebrow'] }}
                 </span>
 
                 <h1 class="mx-auto mt-6 max-w-xl font-display text-4xl font-bold leading-[1.1] text-slate-900 sm:text-5xl {{ $imageCentered ? '' : 'lg:mx-0' }} dark:text-white">
@@ -48,7 +48,7 @@
                     </a>
                     <a href="{{ route('how-it-works') }}" wire:navigate
                        class="inline-flex items-center justify-center gap-2 rounded-md border border-slate-300 px-6 py-3 text-sm font-semibold text-slate-700 transition hover:border-primary hover:text-primary dark:border-white/15 dark:text-slate-200">
-                        <x-icon name="list" class="h-4 w-4" /> How it works
+                        <x-glyph name="list" class="h-4 w-4" /> How it works
                     </a>
                 </div>
             </div>
@@ -90,7 +90,7 @@
                 <div class="grid grid-cols-[2rem_1fr_auto] items-center gap-4 py-5 sm:grid-cols-[2.5rem_2.75rem_1fr_auto]">
                     <span class="font-mono text-sm font-semibold text-slate-300 dark:text-slate-600">{{ $row['n'] }}</span>
                     <span class="hidden h-9 w-9 items-center justify-center rounded-md bg-primary/10 text-primary sm:flex dark:bg-white/5 dark:text-slate-200">
-                        <x-icon :name="$row['icon']" class="h-4 w-4" />
+                        <x-glyph :name="$row['icon']" class="h-4 w-4" />
                     </span>
                     <div class="min-w-0">
                         <p class="text-sm font-semibold text-slate-900 dark:text-white">{{ $row['title'] }}</p>

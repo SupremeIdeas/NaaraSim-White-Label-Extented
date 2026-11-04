@@ -34,18 +34,18 @@ class MarketingSiteTest extends TestCase
         $this->get('/')->assertOk()
             // The hero headline's last word is wrapped in a gradient <span>, so
             // assert the visible text (assertSeeText strips the inline markup).
-            ->assertSeeText('Land Anywhere. Connect Instantly.')
-            ->assertSee('Connected in Three Steps')
-            ->assertSee('Why Travelers Choose NaaraSim')
-            ->assertSee('Your Next Trip Starts Here')
-            ->assertSee('Supreme Ideas Agency'); // footer attribution
+            ->assertSeeText('Touch down. Already online.')
+            ->assertSee('From tap to signal')
+            ->assertSee('What makes '.\App\Support\BrandSettings::name().' different')
+            ->assertSee('Your next trip starts online')
+            ->assertSee(\App\Support\BrandSettings::company()); // footer attribution
     }
 
     public function test_about_how_it_works_and_contact_render(): void
     {
-        $this->get('/about')->assertOk()->assertSee('We Built the eSIM We Wished Existed');
-        $this->get('/how-it-works')->assertOk()->assertSee('From Purchase to Connected in Under 3 Minutes');
-        $this->get('/contact')->assertOk()->assertSee('We Actually Respond');
+        $this->get('/about')->assertOk()->assertSee('We make getting online the easy part');
+        $this->get('/how-it-works')->assertOk()->assertSee('From checkout to connected in minutes');
+        $this->get('/contact')->assertOk()->assertSee('Talk to a person');
     }
 
     /**
@@ -66,9 +66,9 @@ class MarketingSiteTest extends TestCase
         config()->set('updater.product_identifier', 'naarasim-core');
 
         $this->get('/faq')->assertOk()
-            ->assertSee('Frequently Asked Questions')
+            ->assertSee('Questions, answered')
             ->assertSee('Does my phone support eSIM?') // home.faq's q1, proves it's the same source
-            ->assertSee('Questions We Hear a Lot');     // home.faq's own headline field
+            ->assertSee('Quick answers');     // home.faq's own headline field
 
         config()->set('updater.product_identifier', 'naarasim-whitelabel');
     }
@@ -142,7 +142,7 @@ class MarketingSiteTest extends TestCase
 
         $this->get('/')->assertOk()
             ->assertSeeText('Fly Now. Connect Faster.')
-            ->assertDontSeeText('Land Anywhere. Connect Instantly.');
+            ->assertDontSeeText('Touch down. Already online.');
     }
 
     public function test_a_hidden_section_disappears_from_the_public_page(): void
@@ -209,13 +209,12 @@ class MarketingSiteTest extends TestCase
     public function test_the_three_step_showcase_renders_its_artwork(): void
     {
         $this->get('/')->assertOk()
-            ->assertSee('Pick Your Destination')
-            ->assertSee('Select Your Data Plan')
-            ->assertSee('Activate on Your Phone')
-            // Each stacking card shows its shipped step render.
-            ->assertSee('/images/steps/choose-destination.webp', false)
-            ->assertSee('/images/steps/select-data-plan.webp', false)
-            ->assertSee('/images/steps/activate-on-phone.webp', false);
+            ->assertSee('Choose where you are going')
+            ->assertSee('Pay once, get a QR code')
+            ->assertSee('Scan and fly')
+            // Each stacking card shows its coded phone mockup until a picture is uploaded.
+            ->assertSee('nx-phone', false)
+            ->assertDontSee('/images/steps/', false);
     }
 
     public function test_admin_can_swap_a_step_image_and_reset_it(): void
@@ -233,16 +232,18 @@ class MarketingSiteTest extends TestCase
             ->call('save')
             ->assertHasNoErrors();
 
-        // The public page now shows the uploaded artwork, not the shipped default.
-        $this->get('/')->assertOk()->assertDontSee('/images/steps/choose-destination.webp', false);
+        // The public page now shows the uploaded picture in the first card (two coded phones remain for the others).
+        $html = $this->get('/')->assertOk()->getContent();
+        $this->assertStringContainsString('nx-journey__visual', $html);
+        $this->assertSame(2, substr_count($html, 'nx-phone__notch'));
 
-        // Reset returns the shipped default.
+        // Reset returns the coded phone.
         Livewire::actingAs($admin)->test(SiteEditor::class)
             ->call('removeFieldImage', 'how', 'step_1_image')
             ->call('save')
             ->assertHasNoErrors();
 
-        $this->get('/')->assertOk()->assertSee('/images/steps/choose-destination.webp', false);
+        $this->assertSame(3, substr_count($this->get('/')->assertOk()->getContent(), 'nx-phone__notch'));
     }
 
     public function test_a_non_image_field_cannot_be_swapped_as_artwork(): void

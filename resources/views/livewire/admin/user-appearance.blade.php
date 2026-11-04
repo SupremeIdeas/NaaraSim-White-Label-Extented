@@ -1,5 +1,5 @@
 @php
-    $card = 'rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-[#2D4060] dark:bg-[#1A2840]';
+    $card = 'rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-[#2A2E34] dark:bg-[#17191C]';
     $btn = 'rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:bg-slate-50 disabled:opacity-50 dark:border-white/15 dark:text-slate-200 dark:hover:bg-white/5';
     $toggle = fn (bool $on) => 'relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition '.($on ? 'bg-primary' : 'bg-slate-300 dark:bg-slate-600');
 @endphp

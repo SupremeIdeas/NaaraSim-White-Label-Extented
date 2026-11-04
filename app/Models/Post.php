@@ -48,7 +48,7 @@ class Post extends Model
         // Deterministic pleasant hue from the category name (HSL → hex).
         $cat = trim((string) $this->category);
         if ($cat === '') {
-            return '#A21CAF';
+            return '#23272D';
         }
         $hue = crc32(mb_strtolower($cat)) % 360;
 

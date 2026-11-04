@@ -1,7 +1,7 @@
 {{-- Branded transactional-email shell (Module 22). Inline styles only — email
      clients strip <style>/external CSS and don't support dark: variants, so we
      use a light, high-contrast brand palette that renders everywhere. Brand:
-     Orchid #A21CAF, Lime #84CC16, Midnight Navy #0D1B2A. --}}
+     Graphite #23272D, Silver #94A0B0, Core Black #0b0b0c. --}}
 @props(['heading' => null, 'accent' => null, 'templateKey' => 'global'])
 @php($appName = config('app.name', 'NaaraSim'))
 @php($accentColor = $accent ?: \App\Support\MailTemplates::accent($templateKey))
@@ -25,14 +25,14 @@
                         </td>
                     </tr>
                     <tr>
-                        <td style="padding:32px;color:#0D1B2A;font-size:15px;line-height:1.6;">
+                        <td style="padding:32px;color:#0b0b0c;font-size:15px;line-height:1.6;">
                             {{ $slot }}
                         </td>
                     </tr>
                     <tr>
                         <td style="padding:20px 32px;background-color:#f8fafc;border-top:1px solid #e2e8f0;">
                             <p style="margin:0;color:#64748b;font-size:12px;line-height:1.5;">
-                                {{ $appName }} — Stay Connected. No Borders. No Swaps.<br>
+                                {{ $appName }} — {{ \App\Support\BrandSettings::tagline() }}<br>
                                 You received this email because you have an account with {{ $appName }}.
                                 If you didn't expect it, you can safely ignore it.
                             </p>

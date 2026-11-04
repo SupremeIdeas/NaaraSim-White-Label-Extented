@@ -10,7 +10,7 @@
 
     <div class="space-y-4">
         @foreach ($gateways as $g)
-            <div wire:key="gw-{{ $g['key'] }}" class="rounded-2xl border border-slate-200 bg-white p-5 dark:border-[#2D4060] dark:bg-[#1A2840]"
+            <div wire:key="gw-{{ $g['key'] }}" class="rounded-2xl border border-slate-200 bg-white p-5 dark:border-[#2A2E34] dark:bg-[#17191C]"
                  x-data="{ copied: '' }">
                 <div class="flex flex-wrap items-center justify-between gap-3">
                     <div class="flex items-center gap-2.5">
@@ -52,7 +52,7 @@
                             <label class="mb-1 block text-[11px] font-semibold uppercase tracking-wide text-slate-400">{{ $label }}</label>
                             <div class="flex items-center gap-2">
                                 <input type="text" readonly value="{{ $urlValue }}"
-                                       class="min-w-0 flex-1 rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1.5 font-mono text-[11px] text-slate-600 dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-300">
+                                       class="min-w-0 flex-1 rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1.5 font-mono text-[11px] text-slate-600 dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-300">
                                 <button type="button"
                                         @click="navigator.clipboard.writeText(@js($urlValue)); copied = '{{ $tag }}'; setTimeout(() => copied = '', 1500)"
                                         class="shrink-0 rounded-lg border border-slate-300 p-1.5 text-slate-500 hover:bg-slate-50 dark:border-white/10 dark:hover:bg-white/5" aria-label="Copy {{ $label }}">
@@ -105,7 +105,7 @@
 
         <div class="space-y-4">
             @foreach ($credGateways as $cg)
-                <div wire:key="cred-{{ $cg['key'] }}" class="rounded-2xl border border-slate-200 bg-white p-5 dark:border-[#2D4060] dark:bg-[#1A2840]">
+                <div wire:key="cred-{{ $cg['key'] }}" class="rounded-2xl border border-slate-200 bg-white p-5 dark:border-[#2A2E34] dark:bg-[#17191C]">
                     <div class="mb-3 flex items-center justify-between">
                         <span class="font-semibold text-slate-900 dark:text-slate-100">{{ $cg['label'] }}</span>
                         <span @class([
@@ -116,13 +116,13 @@
                     </div>
                     <div class="grid gap-4 sm:grid-cols-2">
                         @foreach (['sandbox' => 'Sandbox', 'live' => 'Live'] as $mode => $modeLabel)
-                            <div class="rounded-xl border border-slate-100 p-3 dark:border-[#243352]">
+                            <div class="rounded-xl border border-slate-100 p-3 dark:border-[#373a3f]">
                                 <p class="mb-2 text-xs font-semibold uppercase tracking-wide {{ $cg['mode'] === $mode ? 'text-primary dark:text-teal-300' : 'text-slate-400' }}">{{ $modeLabel }}{{ $cg['mode'] === $mode ? ' · active' : '' }}</p>
                                 @foreach ($cg['types'] as $type)
                                     <label class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">{{ $type === 'secret_key' ? 'Secret key' : 'Public key' }}</label>
                                     <input type="password" autocomplete="off" wire:model="creds.{{ $cg['key'] }}.{{ $mode }}.{{ $type }}"
                                            placeholder="{{ $cg['previews'][$mode][$type] ?? 'Not set' }}"
-                                           class="mb-2 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                                           class="mb-2 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
                                 @endforeach
                             </div>
                         @endforeach

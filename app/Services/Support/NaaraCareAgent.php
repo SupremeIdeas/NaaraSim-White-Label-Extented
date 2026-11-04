@@ -119,13 +119,15 @@ class NaaraCareAgent
     private function systemPrompt(User $user): string
     {
         $name = SupportSettings::name();
+        $brand = \App\Support\BrandSettings::name();
+        $promise = rtrim(\App\Support\BrandSettings::tagline(), '.');
         $persona = SupportSettings::persona();
         $knowledge = SupportSettings::knowledge();
 
         $prompt = <<<PROMPT
-        You are {$name}, the customer support specialist for NaaraSim — a Pan-African
+        You are {$name}, the customer support specialist for {$brand}, a
         travel-connectivity service that sells eSIM data plans for 190+ countries and
-        virtual/verification phone numbers. Brand promise: "Stay Connected. No Borders. No Swaps."
+        virtual/verification phone numbers. Brand promise: "{$promise}"
 
         {$persona}
 

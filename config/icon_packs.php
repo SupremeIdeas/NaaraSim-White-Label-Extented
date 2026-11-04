@@ -7,17 +7,18 @@
  * Source: the owner's Naara Icons bundles (39 packs), measured: every pack differs from the others by these two colours alone.
  */
 return [
-    'default' => 'orchid-lime',
+    'default' => 'graphite-mono',
     // Where the canonical (uncoloured-by-pack) SVG set lives, per group, relative to public/. A white-label install lists only the groups it ships.
     'dirs' => [
         'more' => 'images/icon-packs/more/svg',
         'admin' => 'images/icon-packs/admin/svg',
     ],
     'packs' => [
-        // The install's own default colourway (its brand), not a copy of the Naara one.
-        'orchid-lime' => ['label' => 'Orchid Lime (default)', 'ic' => '#A21CAF', 'ac' => '#84CC16'],
+        // The install's own default colourway (graphite line with a tiny warm-gold detail on every icon), not a copy of the Naara one. Orchid Lime is the saved previous default.
+        'graphite-mono' => ['label' => 'Graphite (default)', 'ic' => '#23272D', 'ac' => '#F5B301'],
+        'orchid-lime' => ['label' => 'Orchid Lime', 'ic' => '#A21CAF', 'ac' => '#84CC16'],
         'afterdark-plum' => ['label' => 'Afterdark Plum', 'ic' => '#311D3F', 'ac' => '#CA3E47'],
-        'arctic-teal' => ['label' => 'Arctic Teal', 'ic' => '#146E78', 'ac' => '#94A3B8'],
+        'arctic-teal' => ['label' => 'Arctic Teal', 'ic' => '#146E78', 'ac' => '#F5B301'],
         'aries-contrast' => ['label' => 'Aries Contrast', 'ic' => '#0A0A0A', 'ac' => '#F5C518'],
         'aurora-borealis' => ['label' => 'Aurora Borealis', 'ic' => '#1F6F78', 'ac' => '#8B5CF6'],
         'aurora-shift' => ['label' => 'Aurora Shift', 'ic' => '#3B3F8C', 'ac' => '#4C6FFF'],
@@ -37,15 +38,15 @@ return [
         'founding' => ['label' => 'Founding', 'ic' => '#3A6351', 'ac' => '#E48257'],
         'frostbite' => ['label' => 'Frostbite', 'ic' => '#3282B8', 'ac' => '#00909E'],
         'genius-grid' => ['label' => 'Genius Grid', 'ic' => '#292540', 'ac' => '#FACC15'],
-        'heirloom-taupe' => ['label' => 'Heirloom Taupe', 'ic' => '#766161', 'ac' => '#6E929F'],
+        'heirloom-taupe' => ['label' => 'Heirloom Taupe', 'ic' => '#766161', 'ac' => '#E0A526'],
         'lander-hero' => ['label' => 'Lander Hero', 'ic' => '#273256', 'ac' => '#F2846B'],
         'lavender-ink' => ['label' => 'Lavender Ink', 'ic' => '#A579F2', 'ac' => '#E0A8D8'],
         'mango-burst' => ['label' => 'Mango Burst', 'ic' => '#C65A0A', 'ac' => '#7C3A8C'],
         'midnight-signal' => ['label' => 'Midnight Signal', 'ic' => '#107C84', 'ac' => '#22D3EE'],
         'neon-vertex' => ['label' => 'Neon Vertex', 'ic' => '#3D087B', 'ac' => '#F43B86'],
         'noir-reserve' => ['label' => 'Noir Reserve', 'ic' => '#5C3D2E', 'ac' => '#B85C38'],
-        'origin-bold' => ['label' => 'Origin Bold', 'ic' => '#D6581A', 'ac' => '#171717'],
-        'paperwhite' => ['label' => 'Paperwhite', 'ic' => '#111214', 'ac' => '#8B8B96'],
+        'origin-bold' => ['label' => 'Origin Bold', 'ic' => '#D6581A', 'ac' => '#FFD23F'],
+        'paperwhite' => ['label' => 'Paperwhite', 'ic' => '#111214', 'ac' => '#F5B301'],
         'rosewood-luxe' => ['label' => 'Rosewood Luxe', 'ic' => '#7A2436', 'ac' => '#E6C48C'],
         'sandstone-route' => ['label' => 'Sandstone Route', 'ic' => '#A67C52', 'ac' => '#3E7C59'],
         'signal-grey' => ['label' => 'Signal Grey', 'ic' => '#83868F', 'ac' => '#FF1313'],

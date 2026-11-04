@@ -23,11 +23,11 @@ class IconPacksTest extends TestCase
 
     public function test_the_registry_has_every_pack_and_the_default(): void
     {
-        $this->assertCount(40, IconPacks::all());
-        $this->assertTrue(IconPacks::exists('orchid-lime'));
+        $this->assertCount(41, IconPacks::all());
+        $this->assertTrue(IconPacks::exists('graphite-mono'));
         $this->assertTrue(IconPacks::exists('arctic-teal'));
         $this->assertFalse(IconPacks::exists('naara-official'), 'the Naara Official colourway must not ship in a white label');
-        $this->assertSame('orchid-lime', IconPacks::defaultSlug());
+        $this->assertSame('graphite-mono', IconPacks::defaultSlug());
         foreach (IconPacks::all() as $slug => $p) {
             $this->assertMatchesRegularExpression('/^#[0-9A-F]{6}$/', $p['ic'], $slug);
             $this->assertMatchesRegularExpression('/^#[0-9A-F]{6}$/', $p['ac'], $slug);
@@ -73,7 +73,7 @@ class IconPacksTest extends TestCase
     {
         $this->assertSame('follow-theme', IconPacks::choice());
         $d = SlotIcons::resolve('numbers', 'app');
-        $this->assertStringContainsString('/icon-pack/orchid-lime/more/app-more-numbers.svg', $d['light']);
+        $this->assertStringContainsString('/icon-pack/graphite-mono/more/app-more-numbers.svg', $d['light']);
 
         IconPacks::setChoice('arctic-teal');
         $a = SlotIcons::resolve('numbers', 'app');
@@ -116,7 +116,7 @@ class IconPacksTest extends TestCase
         \App\Support\ThemePreset::bust();
         $this->assertSame('follow-theme', IconPacks::choice());
         $slug = \App\Support\ThemePreset::slug();
-        $this->assertSame(IconPacks::exists($slug) ? $slug : 'orchid-lime', IconPacks::activeSlug());
+        $this->assertSame(IconPacks::exists($slug) ? $slug : 'graphite-mono', IconPacks::activeSlug());
     }
 
     private function ratio(string $a, string $b): float

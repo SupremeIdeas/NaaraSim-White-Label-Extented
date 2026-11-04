@@ -43,7 +43,7 @@
 
     <div class="relative mx-auto max-w-3xl px-4 pb-16 pt-20 text-center sm:pt-24">
         <span class="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-xs font-semibold text-primary dark:border-primary/30 dark:bg-primary/10 dark:text-teal-300">
-            <x-icon name="zap" class="h-3.5 w-3.5" /> {{ $content['eyebrow'] }}
+            <x-glyph name="zap" class="h-3.5 w-3.5" /> {{ $content['eyebrow'] }}
         </span>
 
         <div class="relative mt-6">
@@ -75,7 +75,7 @@
                     <div>
                         <p class="text-sm font-semibold text-slate-800 dark:text-white">{{ $point['label'] }}</p>
                     </div>
-                    <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary dark:bg-primary/20 dark:text-teal-300"><x-icon :name="$point['icon']" class="h-4 w-4" /></span>
+                    <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary dark:bg-primary/20 dark:text-teal-300"><x-glyph :name="$point['icon']" class="h-4 w-4" /></span>
                     <span class="h-px w-10 bg-gradient-to-r from-primary/60 to-transparent"></span>
                 </div>
             @endforeach
@@ -89,7 +89,7 @@
         <div class="flex w-64 flex-col gap-10">
             <div class="flex items-center gap-3">
                 <span class="h-px w-10 bg-gradient-to-l from-accent/60 to-transparent"></span>
-                <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent/10 text-accent-dark dark:bg-accent/20 dark:text-accent"><x-icon name="wallet" class="h-4 w-4" /></span>
+                <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent/10 text-accent-dark dark:bg-accent/20 dark:text-accent"><x-glyph name="wallet" class="h-4 w-4" /></span>
                 <p class="text-sm font-semibold text-slate-800 dark:text-white">One wallet, one price</p>
             </div>
         </div>
@@ -103,7 +103,7 @@
             ['icon' => 'wallet', 'label' => 'One wallet, one price'],
         ] as $point)
             <div class="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white p-4 dark:border-white/10 dark:bg-[#12172a]">
-                <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary dark:bg-primary/20 dark:text-teal-300"><x-icon :name="$point['icon']" class="h-4 w-4" /></span>
+                <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary dark:bg-primary/20 dark:text-teal-300"><x-glyph :name="$point['icon']" class="h-4 w-4" /></span>
                 <p class="text-sm font-semibold text-slate-800 dark:text-white">{{ $point['label'] }}</p>
             </div>
         @endforeach
@@ -118,14 +118,14 @@
     <div class="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-center sm:gap-6">
         <div class="rounded-[2rem] border border-slate-200 bg-white p-7 shadow-lg dark:border-white/10 dark:bg-[#12172a] sm:w-72 sm:-rotate-6 sm:shadow-2xl">
             <span class="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-primary to-accent text-white">
-                <x-icon name="target" class="h-5 w-5" />
+                <x-glyph name="target" class="h-5 w-5" />
             </span>
             <h2 class="mt-4 font-display text-lg font-bold text-slate-900 dark:text-white">Our mission</h2>
             <p class="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-300">{{ $content['mission'] }}</p>
         </div>
         <div class="rounded-[2rem] border border-slate-200 bg-white p-7 shadow-lg dark:border-white/10 dark:bg-[#12172a] sm:mt-10 sm:w-72 sm:rotate-6">
             <span class="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-accent to-primary text-white">
-                <x-icon name="eye" class="h-5 w-5" />
+                <x-glyph name="eye" class="h-5 w-5" />
             </span>
             <h2 class="mt-4 font-display text-lg font-bold text-slate-900 dark:text-white">Our vision</h2>
             <p class="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-300">{{ $content['vision'] }}</p>
@@ -144,7 +144,7 @@
         ] as $card)
             <div class="w-72 shrink-0 snap-start rounded-3xl border border-slate-200 bg-white p-6 dark:border-white/10 dark:bg-[#12172a]">
                 <span class="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-primary to-accent text-white">
-                    <x-icon :name="$card['icon']" class="h-5 w-5" />
+                    <x-glyph :name="$card['icon']" class="h-5 w-5" />
                 </span>
                 <h3 class="mt-4 font-display text-lg font-bold text-slate-900 dark:text-white">{{ $card['title'] }}</h3>
                 <p class="mt-1.5 text-sm leading-relaxed text-slate-500 dark:text-slate-400">{{ $card['body'] }}</p>

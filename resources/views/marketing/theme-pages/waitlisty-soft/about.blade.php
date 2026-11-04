@@ -70,7 +70,7 @@
         ] as $point)
             <div class="rounded-[1.75rem] bg-white p-5 text-center shadow-[0_14px_30px_-20px_rgba(109,63,160,0.4)] dark:bg-[#1c1329]">
                 <span class="mx-auto flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-br from-primary to-accent text-white">
-                    <x-icon :name="$point['icon']" class="h-5 w-5" />
+                    <x-glyph :name="$point['icon']" class="h-5 w-5" />
                 </span>
                 <h3 class="mt-3 text-sm font-bold text-slate-900 dark:text-white">{{ $point['title'] }}</h3>
                 <p class="mt-1 text-xs leading-relaxed text-slate-500 dark:text-slate-400">{{ $point['body'] }}</p>

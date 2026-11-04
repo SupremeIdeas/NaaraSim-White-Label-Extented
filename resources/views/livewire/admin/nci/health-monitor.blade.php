@@ -16,7 +16,7 @@
     <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
         @forelse ($rows as $r)
             <a href="{{ route('admin.nci.provider', $r->provider_key) }}" wire:navigate wire:key="hm-{{ $r->provider_key }}"
-               class="rounded-2xl border border-slate-200 bg-white p-4 transition hover:border-primary/40 hover:shadow-sm dark:border-[#2D4060] dark:bg-[#1A2840]">
+               class="rounded-2xl border border-slate-200 bg-white p-4 transition hover:border-primary/40 hover:shadow-sm dark:border-[#2A2E34] dark:bg-[#17191C]">
                 <div class="flex items-center justify-between">
                     <span class="font-semibold capitalize text-slate-800 dark:text-slate-100">{{ $r->provider_key }}</span>
                     <span class="h-3 w-3 rounded-full {{ ['ok' => 'bg-green-500', 'low' => 'bg-amber-500', 'down' => 'bg-red-500'][$r->status] ?? 'bg-slate-300 dark:bg-white/20' }}"></span>
@@ -28,7 +28,7 @@
                 <p class="mt-2 text-[11px] text-slate-400">{{ $r->last_checked_at?->diffForHumans() ?? 'never checked' }}</p>
             </a>
         @empty
-            <p class="col-span-full rounded-2xl border border-dashed border-slate-300 p-8 text-center text-sm text-slate-400 dark:border-[#2D4060]">No providers yet — fills after the first health-check cycle.</p>
+            <p class="col-span-full rounded-2xl border border-dashed border-slate-300 p-8 text-center text-sm text-slate-400 dark:border-[#2A2E34]">No providers yet — fills after the first health-check cycle.</p>
         @endforelse
     </div>
 </div>

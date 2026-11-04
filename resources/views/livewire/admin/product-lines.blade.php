@@ -23,7 +23,7 @@
 
     <div class="space-y-5">
         @foreach ($products as $i => $p)
-            <div class="rounded-2xl border border-slate-200 bg-white p-5 dark:border-white/10 dark:bg-[#16233d]" wire:key="prod-{{ $i }}">
+            <div class="rounded-2xl border border-slate-200 bg-white p-5 dark:border-white/10 dark:bg-[#27292c]" wire:key="prod-{{ $i }}">
                 <div class="mb-4 flex items-center justify-between gap-3">
                     <div class="flex items-center gap-2">
                         <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10 text-primary dark:bg-primary/20 dark:text-teal-300"><x-icon :name="$p['icon'] ?? 'signal'" class="h-5 w-5" /></span>
@@ -41,20 +41,20 @@
 
                 <div class="grid gap-4 sm:grid-cols-2">
                     <label class="block"><span class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-400">Title</span>
-                        <input type="text" wire:model="products.{{ $i }}.title" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm dark:border-white/10 dark:bg-[#0D1B2A] dark:text-white">
+                        <input type="text" wire:model="products.{{ $i }}.title" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm dark:border-white/10 dark:bg-[#0b0b0c] dark:text-white">
                         @error("products.{$i}.title") <span class="text-xs text-red-500">{{ $message }}</span> @enderror
                     </label>
                     <label class="block"><span class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-400">Eyebrow</span>
-                        <input type="text" wire:model="products.{{ $i }}.eyebrow" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm dark:border-white/10 dark:bg-[#0D1B2A] dark:text-white">
+                        <input type="text" wire:model="products.{{ $i }}.eyebrow" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm dark:border-white/10 dark:bg-[#0b0b0c] dark:text-white">
                     </label>
                     <label class="block sm:col-span-2"><span class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-400">Summary (shown on the slide)</span>
-                        <textarea rows="2" wire:model="products.{{ $i }}.summary" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm dark:border-white/10 dark:bg-[#0D1B2A] dark:text-white"></textarea>
+                        <textarea rows="2" wire:model="products.{{ $i }}.summary" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm dark:border-white/10 dark:bg-[#0b0b0c] dark:text-white"></textarea>
                     </label>
                     <label class="block"><span class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-400">CTA label</span>
-                        <input type="text" wire:model="products.{{ $i }}.cta_label" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm dark:border-white/10 dark:bg-[#0D1B2A] dark:text-white">
+                        <input type="text" wire:model="products.{{ $i }}.cta_label" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm dark:border-white/10 dark:bg-[#0b0b0c] dark:text-white">
                     </label>
                     <label class="block"><span class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-400">CTA route name</span>
-                        <input type="text" wire:model="products.{{ $i }}.cta_route" placeholder="catalogue / numbers / gift-cards" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm dark:border-white/10 dark:bg-[#0D1B2A] dark:text-white">
+                        <input type="text" wire:model="products.{{ $i }}.cta_route" placeholder="catalogue / numbers / gift-cards" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm dark:border-white/10 dark:bg-[#0b0b0c] dark:text-white">
                     </label>
                     <label class="flex items-center gap-2 sm:col-span-2">
                         <input type="checkbox" wire:model="products.{{ $i }}.is_draft" class="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary">
@@ -84,10 +84,10 @@
                         @foreach ($p['modal_blocks'] ?? [] as $j => $block)
                             <div class="rounded-xl border border-slate-100 bg-slate-50 p-3 dark:border-white/5 dark:bg-white/5" wire:key="block-{{ $i }}-{{ $j }}">
                                 <div class="flex items-center gap-2">
-                                    <input type="text" wire:model="products.{{ $i }}.modal_blocks.{{ $j }}.heading" placeholder="Heading" class="flex-1 rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm dark:border-white/10 dark:bg-[#0D1B2A] dark:text-white">
+                                    <input type="text" wire:model="products.{{ $i }}.modal_blocks.{{ $j }}.heading" placeholder="Heading" class="flex-1 rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm dark:border-white/10 dark:bg-[#0b0b0c] dark:text-white">
                                     <button type="button" wire:click="removeBlock({{ $i }}, {{ $j }})" aria-label="Remove block" class="rounded-lg p-1.5 text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10"><x-icon name="x" class="h-4 w-4" /></button>
                                 </div>
-                                <textarea rows="2" wire:model="products.{{ $i }}.modal_blocks.{{ $j }}.text" placeholder="Text" class="mt-2 w-full rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm dark:border-white/10 dark:bg-[#0D1B2A] dark:text-white"></textarea>
+                                <textarea rows="2" wire:model="products.{{ $i }}.modal_blocks.{{ $j }}.text" placeholder="Text" class="mt-2 w-full rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm dark:border-white/10 dark:bg-[#0b0b0c] dark:text-white"></textarea>
                             </div>
                         @endforeach
                     </div>

@@ -40,7 +40,7 @@
                 <p class="text-xs font-semibold uppercase tracking-[0.3em] text-accent-dark dark:text-accent">Other ways to reach us</p>
                 <ul class="mt-5 divide-y divide-accent/15">
                     <li class="flex items-start gap-3 py-4 first:pt-0">
-                        <x-icon name="message-circle" class="mt-0.5 h-4 w-4 shrink-0 text-accent-dark dark:text-accent" />
+                        <x-glyph name="message-circle" class="mt-0.5 h-4 w-4 shrink-0 text-accent-dark dark:text-accent" />
                         <div>
                             <p class="text-sm font-semibold text-[#241D1A] dark:text-white">Live chat</p>
                             <p class="mt-0.5 text-sm leading-relaxed text-stone-500 dark:text-slate-400">Usually online — a real answer in minutes.</p>
@@ -48,7 +48,7 @@
                         </div>
                     </li>
                     <li class="flex items-start gap-3 py-4">
-                        <x-icon name="mail" class="mt-0.5 h-4 w-4 shrink-0 text-accent-dark dark:text-accent" />
+                        <x-glyph name="mail" class="mt-0.5 h-4 w-4 shrink-0 text-accent-dark dark:text-accent" />
                         <div>
                             <p class="text-sm font-semibold text-[#241D1A] dark:text-white">Email</p>
                             <p class="mt-0.5 text-sm leading-relaxed text-stone-500 dark:text-slate-400">For anything that needs a paper trail.</p>
@@ -57,7 +57,7 @@
                     </li>
                     @if (\App\Support\Niche\SupportLinks::hasWhatsapp())
                         <li class="flex items-start gap-3 py-4">
-                            <x-icon name="phone" class="mt-0.5 h-4 w-4 shrink-0 text-accent-dark dark:text-accent" />
+                            <x-glyph name="phone" class="mt-0.5 h-4 w-4 shrink-0 text-accent-dark dark:text-accent" />
                             <div>
                                 <p class="text-sm font-semibold text-[#241D1A] dark:text-white">WhatsApp</p>
                                 <p class="mt-0.5 text-sm leading-relaxed text-stone-500 dark:text-slate-400">Message us directly for quick questions.</p>
@@ -66,7 +66,7 @@
                         </li>
                     @endif
                     <li class="flex items-start gap-3 py-4 last:pb-0">
-                        <x-icon name="clock" class="mt-0.5 h-4 w-4 shrink-0 text-accent-dark dark:text-accent" />
+                        <x-glyph name="clock" class="mt-0.5 h-4 w-4 shrink-0 text-accent-dark dark:text-accent" />
                         <div>
                             <p class="text-sm font-semibold text-[#241D1A] dark:text-white">Reply time</p>
                             <p class="mt-0.5 text-sm leading-relaxed text-stone-500 dark:text-slate-400">Considered replies, usually within the hour.</p>

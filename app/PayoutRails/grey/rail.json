@@ -1,0 +1,10 @@
+{
+  "slug": "grey",
+  "label": "Grey",
+  "provider": "grey",
+  "gateway": "App\\PayoutRails\\Grey\\GreyPayoutGateway",
+  "version": "1.0.0",
+  "min_core": "1.0.0",
+  "rail": "global",
+  "files": ["GreyClient.php", "GreyBeneficiaryMapper.php", "GreyPayoutGateway.php", "GreyAccountService.php"]
+}

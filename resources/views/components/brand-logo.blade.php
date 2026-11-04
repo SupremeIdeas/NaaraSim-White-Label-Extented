@@ -46,8 +46,9 @@
         @endif
     </span>
 @else
-    <span {{ $attributes->only('class')->merge(['class' => 'inline-flex items-center gap-2']) }}>
-        <x-icon name="{{ $fallbackIcon }}" class="h-6 w-6 text-primary" />
-        <span class="font-display text-lg font-bold text-primary-dark dark:text-primary">{{ $name }}</span>
+    {{-- No logo uploaded yet: a clean monogram tile and the name, in the brand's own colours. --}}
+    <span {{ $attributes->only('class')->merge(['class' => 'inline-flex items-center gap-2.5']) }}>
+        <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-[10px] bg-gradient-to-br from-primary to-primary-dark font-display text-base font-bold text-white shadow-sm ring-1 ring-black/10 dark:ring-white/15">{{ mb_strtoupper(mb_substr($name, 0, 1)) }}</span>
+        <span class="font-display text-lg font-bold tracking-tight {{ $theme === 'dark' ? 'text-white' : 'text-slate-900 dark:text-white' }}">{{ $name }}</span>
     </span>
 @endif

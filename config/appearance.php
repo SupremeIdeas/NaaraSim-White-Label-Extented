@@ -61,7 +61,9 @@ return [
 
     // Accent presets (Prompt 20 §16). Dark values; `light` overrides only what differs in light mode.
     'accents' => [
-        'teal' => ['label' => 'Orchid', 'dark' => ['teal' => '232 121 249', 'cta_a' => '162 28 175', 'cta_b' => '134 25 143', 'teal_ink' => '240 171 252', 'acc_a' => '217 70 239', 'acc_b' => '162 28 175', 'acc_c' => '112 26 117'],
+        'teal' => ['label' => 'Graphite', 'dark' => ['teal' => '190 200 214', 'cta_a' => '82 91 105', 'cta_b' => '52 58 68', 'teal_ink' => '214 221 231', 'acc_a' => '120 131 147', 'acc_b' => '82 91 105', 'acc_c' => '50 56 66'],
+            'light' => ['teal' => '55 61 71', 'cta_a' => '55 61 71', 'cta_b' => '28 31 36', 'teal_ink' => '40 46 55'], 'access' => 'free'],
+        'orchid' => ['label' => 'Orchid', 'dark' => ['teal' => '232 121 249', 'cta_a' => '162 28 175', 'cta_b' => '134 25 143', 'teal_ink' => '240 171 252', 'acc_a' => '217 70 239', 'acc_b' => '162 28 175', 'acc_c' => '112 26 117'],
             'light' => ['teal' => '192 38 211', 'cta_a' => '162 28 175', 'cta_b' => '134 25 143', 'teal_ink' => '134 25 143'], 'access' => 'free'],
         'ocean' => ['label' => 'Ocean', 'dark' => ['teal' => '40 150 235', 'cta_a' => '36 132 220', 'cta_b' => '22 96 184', 'teal_ink' => '125 194 255', 'acc_a' => '38 140 226', 'acc_b' => '22 96 176', 'acc_c' => '14 64 128'],
             'light' => ['teal_ink' => '16 96 176', 'cta_a' => '30 120 208', 'cta_b' => '18 88 170'], 'access' => 'pro'],
@@ -71,7 +73,7 @@ return [
             'light' => ['teal_ink' => '10 112 55', 'cta_a' => '18 140 70', 'cta_b' => '10 106 52'], 'access' => 'pro'],
         'rose' => ['label' => 'Rose', 'dark' => ['teal' => '240 84 120', 'cta_a' => '226 70 108', 'cta_b' => '182 38 76', 'teal_ink' => '255 150 176', 'acc_a' => '220 64 102', 'acc_b' => '170 36 72', 'acc_c' => '116 24 52'],
             'light' => ['teal_ink' => '178 30 68', 'cta_a' => '206 54 90', 'cta_b' => '166 34 70'], 'access' => 'pro'],
-        'graphite' => ['label' => 'Graphite', 'dark' => ['teal' => '130 150 170', 'cta_a' => '104 124 146', 'cta_b' => '66 84 104', 'teal_ink' => '190 206 220', 'acc_a' => '96 116 138', 'acc_b' => '62 80 100', 'acc_c' => '40 54 68'],
+        'steel' => ['label' => 'Steel', 'dark' => ['teal' => '130 150 170', 'cta_a' => '104 124 146', 'cta_b' => '66 84 104', 'teal_ink' => '190 206 220', 'acc_a' => '96 116 138', 'acc_b' => '62 80 100', 'acc_c' => '40 54 68'],
             'light' => ['teal_ink' => '50 72 90', 'cta_a' => '84 104 126', 'cta_b' => '56 74 94'], 'access' => 'pro'],
     ],
 

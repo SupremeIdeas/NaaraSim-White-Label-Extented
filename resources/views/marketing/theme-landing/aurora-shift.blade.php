@@ -70,7 +70,7 @@
                     </a>
                     <a href="{{ route('how-it-works') }}" wire:navigate
                        class="inline-flex items-center justify-center gap-2 rounded-[0.625rem] border border-white/15 px-7 py-3.5 text-sm font-semibold text-white transition hover:bg-white/5">
-                        <x-icon name="play" class="h-4 w-4" /> How it works
+                        <x-glyph name="play" class="h-4 w-4" /> How it works
                     </a>
                 </div>
             </div>
@@ -153,7 +153,7 @@
                 ] as $card)
                     <div class="relative text-center">
                         <span class="relative z-10 mx-auto flex h-12 w-12 items-center justify-center bg-gradient-to-br from-primary to-accent text-white shadow-lg shadow-primary/30 [clip-path:polygon(50%_2%,95%_26%,95%_74%,50%_98%,5%_74%,5%_26%)]">
-                            <x-icon :name="$card['icon']" class="h-5 w-5" />
+                            <x-glyph :name="$card['icon']" class="h-5 w-5" />
                         </span>
                         <h3 class="mt-4 font-display text-lg font-bold text-slate-900 dark:text-white">{{ $card['title'] }}</h3>
                         <p class="mx-auto mt-1.5 max-w-xs text-sm leading-relaxed text-slate-500 dark:text-slate-400">{{ $card['body'] }}</p>

@@ -4,7 +4,7 @@
     </a>
 
     {{-- Header: real name + the primary "Open Provider Dashboard" action --}}
-    <div class="mb-6 flex flex-wrap items-start justify-between gap-4 rounded-2xl border border-slate-200 bg-white p-5 dark:border-[#2D4060] dark:bg-[#1A2840]">
+    <div class="mb-6 flex flex-wrap items-start justify-between gap-4 rounded-2xl border border-slate-200 bg-white p-5 dark:border-[#2A2E34] dark:bg-[#17191C]">
         <div>
             <div class="flex flex-wrap items-center gap-2">
                 <h1 class="text-2xl font-bold capitalize text-slate-900 dark:text-slate-100">{{ $row->provider_key }}</h1>
@@ -43,7 +43,7 @@
                 @else
                     <div class="flex items-center gap-2">
                         <input type="text" wire:model="pauseReason" placeholder="Reason (optional)"
-                               class="w-40 rounded-lg border border-slate-200 px-2 py-1.5 text-xs dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                               class="w-40 rounded-lg border border-slate-200 px-2 py-1.5 text-xs dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
                         <button type="button" wire:click="pause" wire:confirm="Pause {{ $row->provider_key }}? It is excluded from routing until you resume it — no auto-recovery."
                                 class="inline-flex items-center gap-2 rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 dark:border-white/20 dark:text-slate-300 dark:hover:bg-white/5">
                             <x-icon name="moon" class="h-4 w-4" /> Pause provider
@@ -55,7 +55,7 @@
     </div>
 
     {{-- Tabs --}}
-    <div class="mb-4 flex flex-wrap gap-1 border-b border-slate-200 dark:border-[#2D4060]">
+    <div class="mb-4 flex flex-wrap gap-1 border-b border-slate-200 dark:border-[#2A2E34]">
         @foreach (['overview' => 'Overview', 'circuit' => 'Circuit & Outcomes', 'nci' => 'NCI Intelligence', 'config' => 'Config'] as $key => $label)
             <button type="button" wire:click="$set('tab', '{{ $key }}')"
                     class="-mb-px border-b-2 px-3 py-2 text-sm font-medium transition {{ $tab === $key ? 'border-primary text-primary dark:text-teal-300' : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400' }}">
@@ -67,22 +67,22 @@
     {{-- OVERVIEW --}}
     @if ($tab === 'overview')
         <div class="grid gap-3 sm:grid-cols-4">
-            <div class="rounded-xl border border-slate-200 bg-white p-3 dark:border-[#2D4060] dark:bg-[#1A2840]">
+            <div class="rounded-xl border border-slate-200 bg-white p-3 dark:border-[#2A2E34] dark:bg-[#17191C]">
                 <p class="text-[11px] uppercase tracking-wide text-slate-400">Status</p><div class="mt-1"><x-nci.pill kind="status" :value="$row->status" /></div>
             </div>
-            <div class="rounded-xl border border-slate-200 bg-white p-3 dark:border-[#2D4060] dark:bg-[#1A2840]">
+            <div class="rounded-xl border border-slate-200 bg-white p-3 dark:border-[#2A2E34] dark:bg-[#17191C]">
                 <p class="text-[11px] uppercase tracking-wide text-slate-400">Balance</p><p class="mt-1 text-sm font-semibold text-slate-800 dark:text-slate-100">{{ is_null($row->balance) ? '—' : '$'.number_format((float) $row->balance, 2) }}</p>
             </div>
-            <div class="rounded-xl border border-slate-200 bg-white p-3 dark:border-[#2D4060] dark:bg-[#1A2840]">
+            <div class="rounded-xl border border-slate-200 bg-white p-3 dark:border-[#2A2E34] dark:bg-[#17191C]">
                 <p class="text-[11px] uppercase tracking-wide text-slate-400">Latency</p><p class="mt-1 text-sm font-semibold text-slate-800 dark:text-slate-100">{{ is_null($row->latency_ms) ? '—' : $row->latency_ms.'ms' }}</p>
             </div>
-            <div class="rounded-xl border border-slate-200 bg-white p-3 dark:border-[#2D4060] dark:bg-[#1A2840]">
+            <div class="rounded-xl border border-slate-200 bg-white p-3 dark:border-[#2A2E34] dark:bg-[#17191C]">
                 <p class="text-[11px] uppercase tracking-wide text-slate-400">Last checked</p><p class="mt-1 text-sm font-semibold text-slate-800 dark:text-slate-100">{{ $row->last_checked_at?->diffForHumans() ?? '—' }}</p>
             </div>
         </div>
 
         {{-- Credentials — masked; reveal requires the admin's password --}}
-        <div class="mt-4 rounded-2xl border border-slate-200 bg-white p-5 dark:border-[#2D4060] dark:bg-[#1A2840]">
+        <div class="mt-4 rounded-2xl border border-slate-200 bg-white p-5 dark:border-[#2A2E34] dark:bg-[#17191C]">
             <div class="flex items-center justify-between">
                 <h2 class="text-sm font-semibold text-slate-700 dark:text-slate-200">Credentials</h2>
                 <div class="flex items-center gap-3">
@@ -99,7 +99,7 @@
                 </div>
             </div>
             @forelse ($credentials as $c)
-                <div class="mt-3 flex items-center justify-between gap-3 border-t border-slate-100 pt-3 dark:border-[#243352]">
+                <div class="mt-3 flex items-center justify-between gap-3 border-t border-slate-100 pt-3 dark:border-[#373a3f]">
                     <div class="min-w-0">
                         <p class="truncate text-sm text-slate-700 dark:text-slate-200">{{ $c['label'] }}</p>
                         <p class="font-mono text-xs text-slate-500 dark:text-slate-400">
@@ -119,7 +119,7 @@
                     <div class="flex-1">
                         <label class="mb-1 block text-[11px] font-medium uppercase tracking-wide text-slate-400">Re-enter your password to reveal secrets</label>
                         <input type="password" wire:model="revealPassword" autocomplete="current-password"
-                               class="w-full max-w-xs rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-[#2D4060] dark:bg-[#243352] dark:text-slate-100">
+                               class="w-full max-w-xs rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
                         @error('revealPassword') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
                     </div>
                     <button type="submit" class="rounded-lg bg-slate-800 px-3 py-2 text-sm font-semibold text-white hover:bg-slate-900 dark:bg-white/10 dark:hover:bg-white/15">Reveal</button>
@@ -130,7 +130,7 @@
 
     {{-- CIRCUIT & OUTCOMES --}}
     @if ($tab === 'circuit')
-        <div class="rounded-2xl border border-slate-200 bg-white p-5 dark:border-[#2D4060] dark:bg-[#1A2840]">
+        <div class="rounded-2xl border border-slate-200 bg-white p-5 dark:border-[#2A2E34] dark:bg-[#17191C]">
             <div class="flex flex-wrap items-center justify-between gap-3">
                 <div class="flex items-center gap-2">
                     <span class="text-sm font-semibold text-slate-700 dark:text-slate-200">Circuit</span>
@@ -151,9 +151,9 @@
                 @endif
             </div>
         </div>
-        <div class="mt-4 overflow-hidden rounded-2xl border border-slate-200 bg-white dark:border-[#2D4060] dark:bg-[#1A2840]">
-            <div class="border-b border-slate-100 p-4 dark:border-[#243352]"><h2 class="text-sm font-semibold text-slate-700 dark:text-slate-200">Recent outcomes</h2></div>
-            <div class="divide-y divide-slate-50 dark:divide-[#243352]/70">
+        <div class="mt-4 overflow-hidden rounded-2xl border border-slate-200 bg-white dark:border-[#2A2E34] dark:bg-[#17191C]">
+            <div class="border-b border-slate-100 p-4 dark:border-[#373a3f]"><h2 class="text-sm font-semibold text-slate-700 dark:text-slate-200">Recent outcomes</h2></div>
+            <div class="divide-y divide-slate-50 dark:divide-[#373a3f]/70">
                 @forelse ($outcomes as $o)
                     <div class="flex items-center justify-between px-4 py-2 text-sm">
                         <span class="flex items-center gap-2">
@@ -172,7 +172,7 @@
 
     {{-- NCI INTELLIGENCE (read-only) --}}
     @if ($tab === 'nci')
-        <div class="rounded-2xl border border-slate-200 bg-white p-5 dark:border-[#2D4060] dark:bg-[#1A2840]">
+        <div class="rounded-2xl border border-slate-200 bg-white p-5 dark:border-[#2A2E34] dark:bg-[#17191C]">
             <p class="mb-3 text-xs text-slate-400">NCI's output is read-only here — the learning engine owns these; admin only views them.</p>
             <div class="grid gap-3 sm:grid-cols-4">
                 <div><p class="text-[11px] uppercase tracking-wide text-slate-400">Score</p><p class="mt-1 text-lg font-bold text-slate-800 dark:text-slate-100">{{ is_null($row->nci_score) ? '—' : round($row->nci_score * 100) }}</p></div>
@@ -186,7 +186,7 @@
 
     {{-- CONFIG (links to the existing settings — never duplicated) --}}
     @if ($tab === 'config')
-        <div class="space-y-2 rounded-2xl border border-slate-200 bg-white p-5 text-sm dark:border-[#2D4060] dark:bg-[#1A2840]">
+        <div class="space-y-2 rounded-2xl border border-slate-200 bg-white p-5 text-sm dark:border-[#2A2E34] dark:bg-[#17191C]">
             <p class="text-slate-500 dark:text-slate-400">Per-provider configuration lives in its existing admin home — this tab links there rather than duplicating it:</p>
             <a href="{{ route('admin.integrations') }}" wire:navigate class="block text-primary hover:underline dark:text-teal-300">→ API keys & credentials (Integrations)</a>
             <a href="{{ route('admin.pricing') }}" wire:navigate class="block text-primary hover:underline dark:text-teal-300">→ Pricing & margin rules</a>

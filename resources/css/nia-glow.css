@@ -3,13 +3,13 @@
    signup, forms, filters, admin inputs, or the Wizard.
 
    The three colours are pulled from the main Naara brand gradient:
-     --nia-glow-1  Orchid      #A21CAF  (brand primary)
-     --nia-glow-2  Lime        #84CC16  (brand accent)
-     --nia-glow-3  Bright Teal #2dd4bf  (gradient highlight) */
+     --nia-glow-1  Graphite    #23272D  (brand primary)
+     --nia-glow-2  Silver      #94A0B0  (brand accent)
+     --nia-glow-3  Pale Silver  #b6bdc8  (gradient highlight) */
 :root {
-    --nia-glow-1: #A21CAF;
-    --nia-glow-2: #84CC16;
-    --nia-glow-3: #2dd4bf;
+    --nia-glow-1: #23272D;
+    --nia-glow-2: #94A0B0;
+    --nia-glow-3: #b6bdc8;
 }
 
 /* Animate the gradient ANGLE, not the element: rotating a wide, short pseudo-

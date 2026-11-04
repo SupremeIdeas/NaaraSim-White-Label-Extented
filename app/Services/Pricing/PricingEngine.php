@@ -108,10 +108,19 @@ class PricingEngine
      * applied, and MarginGuard floors it at cost + minimum profit. Cost is never
      * returned or exposed — only this retail is shown to the customer.
      */
-    public function giftCardRetail(float $cost, string $provider = 'giftcard', bool $log = true): float
+    public function giftCardRetail(float $cost, string $provider = 'giftcard', bool $log = true, ?float $face = null): float
     {
-        $markup = (float) Setting::getValue('pricing.giftcard_markup_pct', 8);
-        $computed = round($cost * (1 + $markup / 100), 2);
+        // Two ways to price a card. 'face' (the default, how Grey-style competitors sell): the customer pays the card's own value plus an optional
+        // small fee, and our profit is the provider's wholesale discount. 'cost_plus': cost plus a markup on top. Either way MarginGuard below floors
+        // the result at real cost + minimum profit, so a card whose real cost is ABOVE face is never sold at a loss.
+        $mode = (string) Setting::getValue('pricing.giftcard_mode', 'face');
+        if ($mode === 'face' && $face !== null && $face > 0) {
+            $markup = (float) Setting::getValue('pricing.giftcard_face_markup_pct', 0);
+            $computed = round($face * (1 + $markup / 100), 2);
+        } else {
+            $markup = (float) Setting::getValue('pricing.giftcard_markup_pct', 8);
+            $computed = round($cost * (1 + $markup / 100), 2);
+        }
 
         $minProfit = (float) Setting::getValue('pricing.giftcard_min_profit', 0.25);
         $final = max($computed, round($cost + $minProfit, 2));

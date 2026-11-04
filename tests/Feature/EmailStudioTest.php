@@ -44,7 +44,7 @@ class EmailStudioTest extends TestCase
         // Nothing saved -> the Blade default subject is used.
         $this->assertSame('Confirm your email', MailTemplates::subject('verify', 'Confirm your email'));
         $this->assertNull(MailTemplates::intro('verify'));
-        $this->assertSame('#A21CAF', MailTemplates::accent('verify'));
+        $this->assertSame('#23272D', MailTemplates::accent('verify'));
 
         MailTemplates::save('verify', ['subject' => 'Verify now', 'intro' => 'Hi there', 'accent_color' => '#123456']);
         $this->assertSame('Verify now', MailTemplates::subject('verify', 'Confirm your email'));
@@ -128,7 +128,7 @@ class EmailStudioTest extends TestCase
         config()->set('updater.product_identifier', 'naarasim-core');
         $html = Blade::render('@include(\'emails.welcome\', [\'name\' => \'Ada\', \'url\' => \'https://x/y\'])');
         $this->assertStringContainsString('A product of', $html);
-        $this->assertStringContainsString(SiteChrome::AGENCY_NAME, $html);
+        $this->assertStringContainsString(\App\Support\BrandSettings::company(), \App\Support\BrandSettings::rebrand($html));   // the mail filter swaps the source credit at send time
 
         Setting::setValue('site.footer.credit_phrasing', SiteChrome::CREDIT_MADE_WITH_LOVE, 'site');
         SiteChrome::flush();

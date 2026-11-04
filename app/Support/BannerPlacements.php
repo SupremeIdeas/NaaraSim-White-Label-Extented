@@ -94,7 +94,7 @@ class BannerPlacements
             ],
             [
                 'image' => asset('images/marketing/banners/become-a-merchant-banner.webp'),
-                'eyebrow' => 'Sell on Naara',
+                'eyebrow' => \App\Support\BrandSettings::rebrand('Sell on Naara'),
                 'title' => 'Become a merchant',
                 'body' => 'One-time registration, then sell eSIM to your own customers and earn on every sale, forever.',
                 'cta_label' => 'Apply now',
