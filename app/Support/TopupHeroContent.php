@@ -18,7 +18,7 @@ class TopupHeroContent
 
     public const DEFAULTS = [
         'title' => 'Top up any phone, anywhere.',
-        'description' => 'Airtime and data in seconds. We find the network from the number, and show every offer for that line.',
+        'description' => 'Airtime and data in seconds, on any network.',
         'enabled' => true,
         'autoplay' => true,
         'interval' => 5,

@@ -20,7 +20,7 @@
      x-on:tp-tint.window="apply($event.detail.c, $event.detail.k, $event.detail.p)">
     <span class="ns-tp__aurora" aria-hidden="true"></span>
     <div class="ns-tp__heroTxt">
-        <div class="ns-tp__kickrow"><span class="ns-tp__kicker"><x-nx.icon name="zap" /> Airtime and data</span><i class="ns-tp__rule" aria-hidden="true"></i></div>
+        <div class="ns-tp__kickrow"><span class="ns-tp__kicker"><x-nx.icon name="zap" /> Airtime and data</span></div>
         @php
             $words = preg_split('/\s+/', trim($hero['title'])) ?: [];
             $last = array_pop($words);
@@ -28,9 +28,8 @@
         <h1 class="ns-h1 ns-tp__h1">{{ implode(' ', $words) }} <span class="ns-tp__hl">{{ $last }}</span></h1>
         <p class="ns-sub">{{ $hero['description'] }}</p>
         <ul class="ns-tp__points">
-            <li><span class="ns-tp__ico"><x-nx.icon name="shield-check" /></span><span>Finds the network from the number</span></li>
-            <li><span class="ns-tp__ico"><x-nx.icon name="signal" /></span><span>Every airtime and data offer for that line</span></li>
-            <li><span class="ns-tp__ico"><x-nx.icon name="refresh" /></span><span>Auto-reload daily, weekly or monthly</span></li>
+            <li><span class="ns-tp__ico"><x-nx.icon name="shield-check" /></span><span>Finds the network for you</span></li>
+            <li><span class="ns-tp__ico"><x-nx.icon name="signal" /></span><span>Every airtime and data offer</span></li>
         </ul>
     </div>
     @if (count(\App\Support\Topup\TopupStage::data()['countries']) > 0)
