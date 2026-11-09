@@ -1577,3 +1577,9 @@ html.dark .ns-tp__aurora { --a: color-mix(in oklab, var(--tp-bg) 52%, rgb(var(--
 .ns-tp__heroCard .ns-tp__cta { font-weight: 800; }
 .ns-tp__offbody p { font-weight: 600; } .ns-tp__offtop strong { font-weight: 800; }
 .ns-tp__heroCard .ns-tp__points .ns-tp__ico .ns-i, .ns-tp__heroCard .ns-tp__points .ns-tp__ico svg { color: var(--h-base); stroke: var(--h-base); filter: none; stroke-width: 2.7; }
+
+/* fork top-up hero: tight, even rhythm now the points list is gone */
+.ns-tp__heroCard { row-gap: 0; }
+.ns-tp__heroCard .ns-tp__heroTxt { gap: 12px; align-content: center; }
+.ns-tp__heroCard .ns-tp__art--stage { padding-block: 0 4px; }
+.ns-tp__heroCard > .ns-tp__ctas { margin-top: 0; padding-top: 14px; }

@@ -27,10 +27,6 @@
         @endphp
         <h1 class="ns-h1 ns-tp__h1">{{ implode(' ', $words) }} <span class="ns-tp__hl">{{ $last }}</span></h1>
         <p class="ns-sub">{{ $hero['description'] }}</p>
-        <ul class="ns-tp__points">
-            <li><span class="ns-tp__ico"><x-nx.icon name="shield-check" /></span><span>Finds the network for you</span></li>
-            <li><span class="ns-tp__ico"><x-nx.icon name="signal" /></span><span>Every airtime and data offer</span></li>
-        </ul>
     </div>
     @if (count(\App\Support\Topup\TopupStage::data()['countries']) > 0)
         <div class="ns-tp__art ns-tp__art--stage" wire:ignore><x-topup.logo-stage :compact="true" /></div>
