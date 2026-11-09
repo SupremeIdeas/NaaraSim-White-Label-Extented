@@ -5,7 +5,7 @@
     $lbl = 'mb-1 block text-xs font-medium text-[rgb(var(--nx-text-2))]';
     $btn = 'rounded-lg bg-[rgb(var(--nx-teal))] px-4 py-2 text-sm font-semibold text-white disabled:opacity-60';
     $btn2 = 'rounded-lg border border-[rgb(var(--nx-line-strong))] px-3 py-1.5 text-xs font-semibold text-[rgb(var(--nx-text))] disabled:opacity-60';
-    $tabs = ['overview' => 'Overview', 'suppliers' => 'Suppliers', 'routes' => 'Routes', 'pricing' => 'Pricing', 'limits' => 'Limits', 'rates' => 'Rates', 'catalogue' => 'Catalogue', 'logos' => 'Logos', 'hero' => 'Hero & banners', 'orders' => 'Orders', 'logs' => 'Supplier logs'];
+    $tabs = ['overview' => 'Overview', 'suppliers' => 'Suppliers', 'routes' => 'Routes', 'pricing' => 'Pricing', 'limits' => 'Limits', 'rates' => 'Rates', 'catalogue' => 'Catalogue', 'logos' => 'Logos', 'offers' => 'Offers', 'hero' => 'Hero & banners', 'orders' => 'Orders', 'logs' => 'Supplier logs'];
     $statusColor = fn ($s) => match ($s) { 'delivered' => '--nx-ok', 'refunded', 'failed', 'payment_failed' => '--nx-bad', default => '--nx-warn' };
 @endphp
 <div class="mx-auto max-w-6xl">
@@ -258,6 +258,35 @@
                 </div>
             @endforeach
             </div>
+        </section>
+    @endif
+
+    {{-- OFFERS --}}
+    @if ($tab === 'offers')
+        @php $adminOffers = app(\App\Services\Topup\TopupOffers::class)->for($offerCountry ?: 'NG', 24, true); @endphp
+        <section class="{{ $card }} mt-4 grid gap-4">
+            <div><h2 class="text-base font-semibold text-[rgb(var(--nx-text))]">Offers strip</h2><p class="mt-1 text-xs text-[rgb(var(--nx-text-2))]">Real data bundles from the live catalogue, bought in one tap from the Top-up page. They appear on their own once a supplier key is saved and the catalogue has synced; nothing to upload. The price is the standard price, or the offer markup below when you set one (the minimum profit still applies). Customers who pay with credit get a small slice of our profit back, never more than the margin allows.</p></div>
+            <form wire:submit="saveOffers" class="grid gap-3 sm:grid-cols-4 items-end">
+                <label class="flex items-center gap-2 text-sm sm:col-span-4"><input type="checkbox" wire:model="s.offers_enabled" class="h-4 w-4"> Show the offers strip</label>
+                <div><label class="{{ $lbl }}" for="om">Offer markup over cost (%)</label><input id="om" type="number" step="0.1" min="0" max="100" wire:model="s.offers_markup_pct" placeholder="standard" class="{{ $inp }}">@error('s.offers_markup_pct')<span class="text-xs text-[rgb(var(--nx-bad))]">{{ $message }}</span>@enderror</div>
+                <div><label class="{{ $lbl }}" for="omx">Offers shown</label><input id="omx" type="number" min="1" max="24" wire:model="s.offers_max" class="{{ $inp }}"></div>
+                <div><label class="{{ $lbl }}" for="oc">Preview country</label><input id="oc" maxlength="2" wire:model.live.debounce.400ms="offerCountry" class="{{ $inp }} uppercase"></div>
+                <button type="submit" class="{{ $btn }}" wire:loading.attr="disabled" wire:target="saveOffers">Save offers</button>
+            </form>
+            <div class="overflow-x-auto"><table class="w-full text-sm">
+                <thead><tr class="text-left text-xs text-[rgb(var(--nx-text-2))]"><th class="py-1 pr-3">Bundle</th><th class="pr-3">Network</th><th class="pr-3">Price</th><th class="pr-3">Credit saving</th><th></th></tr></thead>
+                <tbody>
+                @forelse ($adminOffers as $o)
+                    <tr class="border-t border-[rgb(var(--nx-line))] {{ $o['hidden'] ? 'opacity-50' : '' }}" wire:key="ao{{ $o['id'] }}">
+                        <td class="py-2 pr-3 font-semibold">{{ $o['title'] }} <span class="text-xs font-normal text-[rgb(var(--nx-text-2))]">{{ $o['validity'] }}</span></td>
+                        <td class="pr-3">{{ $o['operator'] }}</td><td class="pr-3">${{ number_format($o['price'], 2) }}</td><td class="pr-3">${{ number_format($o['save'], 2) }} ({{ $o['pct'] }}%)</td>
+                        <td class="flex gap-2 py-2"><button type="button" wire:click="toggleOfferPinned({{ $o['id'] }})" class="{{ $btn2 }}">{{ $o['pinned'] ? 'Unpin' : 'Pin first' }}</button><button type="button" wire:click="toggleOfferHidden({{ $o['id'] }})" class="{{ $btn2 }}">{{ $o['hidden'] ? 'Show' : 'Hide' }}</button></td>
+                    </tr>
+                @empty
+                    <tr><td colspan="5" class="py-4 text-[rgb(var(--nx-text-2))]">No data bundles for this country yet. Save a supplier key and run Catalogue &gt; Sync now.</td></tr>
+                @endforelse
+                </tbody>
+            </table></div>
         </section>
     @endif
 

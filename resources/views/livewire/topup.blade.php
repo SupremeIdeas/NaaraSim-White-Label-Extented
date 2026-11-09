@@ -9,6 +9,7 @@
 <div>
 <x-nx.page class="ns-tp">
     @include('livewire.partials.topup._hero')
+    @includeIf('livewire.partials.topup._offers')
 
     {{-- Saved beneficiaries --}}
     @if ($beneficiaries->isNotEmpty())
@@ -26,7 +27,7 @@
     @endif
 
     {{-- 1. Number --}}
-    <section class="ns-card ns-tp__step" data-tour="topup-number">
+    <section id="step-number" class="ns-card ns-tp__step" data-tour="topup-number">
         <div class="ns-tp__num"><b>1</b> Whose phone?</div>
         <div class="ns-tp__row">
             <label class="ns-tp__field">

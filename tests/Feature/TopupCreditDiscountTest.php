@@ -72,11 +72,12 @@ class TopupCreditDiscountTest extends TestCase
         return $u;
     }
 
-    public function test_the_discount_is_off_by_default_and_never_touches_airtime(): void
+    public function test_the_discount_can_be_switched_off_and_never_touches_airtime(): void
     {
         $u = $this->user();
+        \App\Support\TopupSettings::set('credit_discount_enabled', false);
         $q = app(QuoteService::class)->create($u, $this->product('data'), '+2348031234567', 3000);
-        $this->assertEquals(0, (float) $q->credit_usd, 'off until the admin switches it on');
+        $this->assertEquals(0, (float) $q->credit_usd, 'the admin can switch it off');
 
         $this->enable();
         $air = app(QuoteService::class)->create($u, $this->product('airtime'), '+2348031234567', 3000);

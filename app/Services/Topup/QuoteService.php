@@ -35,11 +35,19 @@ class QuoteService
         return round($usd * (1 + TopupSettings::float('fx_buffer_pct') / 100), 4);
     }
 
+    /** The admin's special margin for offers (Admin > Top-ups > Offers); null = the standard pricing. */
+    public function offerMarkup(): ?float
+    {
+        $v = TopupSettings::get('offers_markup_pct');
+
+        return is_numeric($v) && (string) $v !== '' ? max(0.0, (float) $v) : null;
+    }
+
     /** Customer-facing price for a product at an amount (no persistence). */
-    public function price(TopupProduct $p, float $sendAmount, bool $log = false): array
+    public function price(TopupProduct $p, float $sendAmount, bool $log = false, bool $offer = false): array
     {
         $cost = $this->costUsd($p, $sendAmount);
-        $r = $this->pricing->topupRetail($cost, $p->provider_code, $p->country_iso, $p->operator_name, $log);
+        $r = $this->pricing->topupRetail($cost, $p->provider_code, $p->country_iso, $p->operator_name, $log, $offer ? $this->offerMarkup() : null);
 
         return ['cost' => $cost, 'price' => $r['price'], 'markup_pct' => $r['markup_pct']];
     }
@@ -91,14 +99,14 @@ class QuoteService
         return $amount;
     }
 
-    public function create(User $user, TopupProduct $p, string $phoneE164, float $sendAmount, bool $useCredits = true): TopupQuote
+    public function create(User $user, TopupProduct $p, string $phoneE164, float $sendAmount, bool $useCredits = true, bool $offer = false): TopupQuote
     {
         if (! $p->active) {
             throw new TopupException('That top-up is no longer available. Please pick another.');
         }
         $amount = $this->assertAmount($p, $sendAmount);
-        $q = $this->price($p, $amount, log: true);
-        // Naara Credit discount (data only, a small slice of our profit, see TopupCredit). price_usd is what the customer pays from the wallet.
+        $q = $this->price($p, $amount, log: true, offer: $offer);
+        // Credit discount (data only, a small slice of our profit, see TopupCredit). price_usd is what the customer pays from the wallet.
         $disc = $useCredits ? TopupCredit::quote($user, $p, (float) $q['price'], (float) $q['cost']) : ['usd' => 0.0, 'credits' => 0.0];
         $pay = round((float) $q['price'] - $disc['usd'], 4);
 

@@ -32,11 +32,17 @@ class TopupSettings
         'notify_receipts' => true,
         'max_autoreloads_per_user' => 5,
         'autoreload_enabled' => true,
-        // Naara Credit discount on DATA bundles only. OFF until switched on; always a small slice of OUR profit (see TopupCredit).
-        'credit_discount_enabled' => false,
+        // Credit discount on DATA bundles only. OFF until switched on; always a small slice of OUR profit (see TopupCredit).
+        'credit_discount_enabled' => true,
         'credit_profit_share_pct' => 20,   // at most this % of our profit on the sale may be given back as credit discount
         'credit_max_discount_usd' => 0.5,  // and never more than this per order
         'credit_min_profit_usd' => 0.05,   // profit that must remain after the discount
+        // The offers strip on the top-up page (real data bundles, one tap to buy). Prices come from the same engine; the markup below, when set, replaces the standard markup for offers only.
+        'offers_enabled' => true,
+        'offers_max' => 8,
+        'offers_markup_pct' => '',         // blank = standard pricing
+        'offers_hidden' => '',             // comma-separated product ids the admin removed from the strip
+        'offers_pinned' => '',             // comma-separated product ids shown first
     ];
 
     public static function get(string $key): mixed

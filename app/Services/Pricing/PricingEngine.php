@@ -149,12 +149,13 @@ class PricingEngine
      *
      * @return array{price: float, markup_pct: float, guard: bool}
      */
-    public function topupRetail(float $costUsd, string $provider, ?string $country = null, ?string $operator = null, bool $log = false): array
+    public function topupRetail(float $costUsd, string $provider, ?string $country = null, ?string $operator = null, bool $log = false, ?float $markupOverridePct = null): array
     {
         $overrides = (array) Setting::getValue('topup.markup_overrides', []);
         $op = $operator !== null ? strtolower(($country ? strtoupper($country).':' : '').$operator) : null;
         $markup = (float) ($overrides[$op] ?? ($country ? ($overrides[strtoupper($country)] ?? null) : null) ?? Setting::getValue('topup.markup_pct', 6));
 
+        $markup = $markupOverridePct ?? $markup;   // an admin-set offer margin; the minimum-profit floor below still applies
         $computed = round($costUsd * (1 + $markup / 100), 2);
         // Round the floor UP to the cent: rounding to nearest could leave the margin half a cent under the minimum profit (seen live: cost 0.7511 -> price 0.80, profit 0.0489 < 0.05).
         $floor = ceil(round(($costUsd + (float) Setting::getValue('topup.min_profit_usd', 0.05)) * 100, 6)) / 100;

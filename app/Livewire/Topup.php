@@ -31,7 +31,7 @@ use libphonenumber\PhoneNumberUtil;
 use Throwable;
 
 /**
- * The Naara Top-Up section: country -> number -> confirm the operator -> pick airtime or a data bundle -> locked price -> pay from the
+ * The Top-Up section: country -> number -> confirm the operator -> pick airtime or a data bundle -> locked price -> pay from the
  * wallet. Offers come LIVE from the routed supplier(s) (App\Services\Topup\TopupCatalogue). Provider identity and our cost never reach
  * this view: a product is shown with what the recipient gets and what the customer pays.
  */
@@ -75,7 +75,7 @@ class Topup extends Component
     /** Data bundle window filter: all | daily | weekly | monthly (like the daily / weekly / monthly tabs people know from bank apps). */
     public string $window = 'all';
 
-    /** Use Naara Credit for the small data discount when the admin has it on (see TopupCredit). */
+    /** Use credit for the small data discount when the admin has it on (see TopupCredit). */
     public bool $useCredits = true;
 
     public bool $saveBeneficiary = false;
@@ -235,6 +235,125 @@ class Topup extends Component
         if ($p->is_fixed) {
             $this->makeQuote();
         }
+    }
+
+    // ── One-tap offers: the sheet has its own state so it never disturbs the widget behind it ─────────────
+    /** The country whose offers the strip shows (its own choice; it starts from the customer's country). */
+    public string $offerCountry = '';
+
+    public ?int $offerId = null;
+
+    public string $offerPhone = '';
+
+    public string $offerE164 = '';
+
+    public ?string $offerError = null;
+
+    public ?int $offerQuoteId = null;
+
+    public string $offerIdem = '';
+
+    public function setOfferCountry(string $iso): void
+    {
+        $iso = strtoupper(trim($iso));
+        $this->offerCountry = preg_match('/^[A-Z]{2}$/', $iso) ? $iso : '';
+    }
+
+    /** Tap Claim: open the buy sheet for that bundle, number prefilled from the last top-up in that country. */
+    public function openOffer(int $id): void
+    {
+        $p = TopupProduct::where('active', true)->where('type', 'data')->find($id);
+        if (! $p) {
+            return;
+        }
+        $this->offerId = $p->id;
+        $this->offerError = null;
+        $this->offerQuoteId = null;
+        $this->offerE164 = '';
+        $this->offerIdem = (string) Str::uuid();
+        $last = \App\Models\TopupOrder::where('user_id', Auth::id())->where('country_iso', $p->country_iso)->latest('id')->value('phone_e164');
+        $this->offerPhone = (string) ($last ?? '');
+        if ($this->offerPhone !== '') {
+            $this->updatedOfferPhone();
+        }
+    }
+
+    public function closeOffer(): void
+    {
+        $this->offerId = null;
+        $this->offerPhone = $this->offerE164 = '';
+        $this->offerError = null;
+        $this->offerQuoteId = null;
+    }
+
+    /** Validate the number against the bundle's country and network, then price it (same engine, same quote, same margin floor as the widget). */
+    public function updatedOfferPhone(): void
+    {
+        $this->offerError = null;
+        $this->offerQuoteId = null;
+        $this->offerE164 = '';
+        $p = $this->offerId ? TopupProduct::where('active', true)->find($this->offerId) : null;
+        if (! $p || trim($this->offerPhone) === '') {
+            return;
+        }
+        $r = app(NumberResolver::class)->resolve($this->offerPhone, $p->country_iso, Auth::id());
+        if (! $r['valid']) {
+            $this->offerError = $r['error'] ?: 'Check the phone number.';
+
+            return;
+        }
+        if ($r['country'] && strtoupper($r['country']) !== strtoupper($p->country_iso)) {
+            $this->offerError = 'This offer is for numbers in '.\App\Support\CountryNames::name($p->country_iso).'.';
+
+            return;
+        }
+        if ($r['operator'] && ! $this->sameNetwork($r['operator'], $p->operator_name)) {
+            $this->offerError = 'That number is on '.$r['operator'].', and this bundle is for '.$p->operator_name.'.';
+
+            return;
+        }
+        try {
+            $q = app(QuoteService::class)->create(Auth::user(), $p, $r['e164'], (float) $p->fixed_amount, true, offer: true);
+            $this->offerE164 = $r['e164'];
+            $this->offerQuoteId = $q->id;
+        } catch (TopupException $e) {
+            $this->offerError = $e->getMessage();
+        } catch (Throwable) {
+            $this->offerError = 'We could not price that right now. Please try again.';
+        }
+    }
+
+    private function sameNetwork(string $a, string $b): bool
+    {
+        $n = fn (string $x) => preg_replace('/[^a-z0-9]/', '', strtolower(preg_replace('/\s*\(.*?\)\s*/', '', $x) ?? $x));
+        [$a, $b] = [$n($a), $n($b)];
+
+        return $a === $b || str_contains($a, $b) || str_contains($b, $a);
+    }
+
+    /** Pay the offer from the wallet: the same order service and idempotency as the widget, so a double tap can never charge twice. */
+    public function payOffer()
+    {
+        $this->offerError = null;
+        try {
+            $quote = TopupQuote::where('user_id', Auth::id())->findOrFail($this->offerQuoteId);
+            if ($quote->expired()) {
+                $this->updatedOfferPhone();
+                $this->offerError = 'The price timed out, so we refreshed it. Please confirm again.';
+
+                return null;
+            }
+            $order = app(TopupOrderService::class)->place(Auth::user(), $quote, $this->offerIdem);
+
+            return $this->redirectRoute('topup.order', ['uuid' => $order->uuid], navigate: true);
+        } catch (TopupException $e) {
+            $this->offerError = $e->getMessage();
+        } catch (Throwable $e) {
+            report($e);
+            $this->offerError = 'Something went wrong. You have not been charged twice: check My top-ups before trying again.';
+        }
+
+        return null;
     }
 
     public function updatedUseCredits(): void
@@ -404,6 +523,22 @@ class Topup extends Component
         $dataCount = $this->operator ? $cat->products($this->country, 'data', $this->operator)->count() : 0;
         $hasData = $dataCount > 0;
 
-        return view('livewire.topup', compact('dataCount', 'beneficiaries', 'autoCount', 'airtimeCount', 'popular', 'total', 'countries', 'sellable', 'operators', 'products', 'selected', 'quote', 'prices', 'stale', 'hasData', 'windowCounts', 'tilePrices', 'rateLine'));
+        $offerQuote = $this->offerQuoteId ? TopupQuote::with('product')->where('user_id', Auth::id())->find($this->offerQuoteId) : null;
+        $offerProduct = $this->offerId ? TopupProduct::find($this->offerId) : null;
+        $offers = [];
+        $offerCountries = [];
+        $oc = '';
+        if (class_exists(\App\Support\Topup\TopupBrandTint::class)) {
+            try {
+                $svcOffers = app(\App\Services\Topup\TopupOffers::class);
+                $offerCountries = $svcOffers->countries();
+                $oc = $this->offerCountry !== '' ? $this->offerCountry : (in_array($this->country, $offerCountries, true) ? $this->country : ($offerCountries[0] ?? 'NG'));
+                $offers = $svcOffers->for($oc);
+            } catch (Throwable) {
+                $offers = [];
+            }
+        }
+
+        return view('livewire.topup', compact('dataCount', 'beneficiaries', 'autoCount', 'airtimeCount', 'popular', 'total', 'countries', 'sellable', 'operators', 'products', 'selected', 'quote', 'prices', 'stale', 'hasData', 'windowCounts', 'tilePrices', 'rateLine', 'offers', 'offerQuote', 'offerProduct', 'offerCountries', 'oc'));
     }
 }

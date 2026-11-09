@@ -338,6 +338,43 @@ class TopupControls extends Component
         }
     }
 
+    // ── Offers strip (data bundles, one tap to buy) ──
+    public string $offerCountry = 'NG';
+
+    public function saveOffers(): void
+    {
+        $this->validate([
+            's.offers_max' => ['required', 'integer', 'min:1', 'max:24'],
+            's.offers_markup_pct' => ['nullable', 'numeric', 'min:0', 'max:100'],
+            'offerCountry' => ['required', 'alpha', 'size:2'],
+        ]);
+        TopupSettings::set('offers_enabled', (bool) ($this->s['offers_enabled'] ?? true));
+        TopupSettings::set('offers_max', (int) $this->s['offers_max']);
+        $m = trim((string) ($this->s['offers_markup_pct'] ?? ''));
+        TopupSettings::set('offers_markup_pct', $m === '' ? '' : (float) $m);
+        \App\Services\Topup\TopupOffers::flush();
+        Auditor::log('topup.offers_saved', null, null, ['markup' => $m === '' ? 'standard' : $m, 'max' => $this->s['offers_max']]);
+        $this->ok('Offers saved. The strip refreshes straight away.');
+    }
+
+    private function flipOffer(string $key, int $id): void
+    {
+        $ids = array_values(array_filter(array_map('intval', preg_split('/[\s,]+/', (string) TopupSettings::get($key)) ?: [])));
+        $ids = in_array($id, $ids, true) ? array_values(array_diff($ids, [$id])) : array_merge($ids, [$id]);
+        TopupSettings::set($key, implode(',', $ids));
+        \App\Services\Topup\TopupOffers::flush();
+    }
+
+    public function toggleOfferHidden(int $id): void
+    {
+        $this->flipOffer('offers_hidden', $id);
+    }
+
+    public function toggleOfferPinned(int $id): void
+    {
+        $this->flipOffer('offers_pinned', $id);
+    }
+
     public function saveHero(): void
     {
         $this->validate([
