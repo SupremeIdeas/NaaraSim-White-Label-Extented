@@ -1583,3 +1583,4 @@ html.dark .ns-tp__aurora { --a: color-mix(in oklab, var(--tp-bg) 52%, rgb(var(--
 .ns-tp__heroCard .ns-tp__heroTxt { gap: 12px; align-content: center; }
 .ns-tp__heroCard .ns-tp__art--stage { padding-block: 0 4px; }
 .ns-tp__heroCard > .ns-tp__ctas { margin-top: 0; padding-top: 14px; }
+.ns-tp__heroCard { padding-top: clamp(26px, 6.5vw, 34px); }
