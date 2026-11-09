@@ -22,12 +22,7 @@ class TopupHeroContent
         'enabled' => true,
         'autoplay' => true,
         'interval' => 5,
-        'slides' => [
-            ['image' => '/img/topup/banner-1.webp', 'title' => '', 'link' => ''],
-            ['image' => '/img/topup/banner-2.webp', 'title' => '', 'link' => ''],
-            ['image' => '/img/topup/banner-3.webp', 'title' => '', 'link' => ''],
-            ['image' => '/img/topup/banner-4.webp', 'title' => '', 'link' => ''],
-        ],
+        'slides' => [],   // the simple hero stands alone; an admin can add their own banners (the shipped ones carry the Naara mark)
     ];
 
     /** @return array{title: string, description: string, enabled: bool, autoplay: bool, interval: int, slides: list<array{image: string, title: string, link: string}>} */

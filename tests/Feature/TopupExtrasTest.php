@@ -293,10 +293,7 @@ class TopupExtrasTest extends TestCase
     public function test_hero_defaults_to_the_numbers_banners_and_admin_save_overrides(): void
     {
         $h = TopupHeroContent::current();
-        $this->assertCount(4, $h['slides']);
-        foreach ($h['slides'] as $s) {
-            $this->assertFileExists(public_path(ltrim($s['image'], '/')));
-        }
+        $this->assertSame([], $h['slides'], 'the fork ships the simple hero with no branded banners');
         TopupHeroContent::save(['title' => 'Big offer', 'description' => 'x', 'enabled' => true, 'autoplay' => false, 'interval' => 7, 'slides' => [['image' => '/storage/a.webp', 'title' => 'T', 'link' => '/top-up']]]);
         $h = TopupHeroContent::current();
         $this->assertSame('Big offer', $h['title']);
@@ -307,7 +304,7 @@ class TopupExtrasTest extends TestCase
     {
         $this->ng();
         config(['services.zendit.api_key' => 'k']);
-        $this->actingAs($this->user())->get(route('topup'))->assertOk()->assertSee('ns-tp__art', false)->assertSee('ns-tp__car', false)->assertSee('img/topup/banner-1.webp', false);
+        $this->actingAs($this->user())->get(route('topup'))->assertOk()->assertSee('ns-tp__art', false)->assertDontSee('ns-tp__car', false);
     }
 
     // ── Dashboard card ──────────────────────────────────────────────────────
