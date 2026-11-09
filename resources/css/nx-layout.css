@@ -1586,3 +1586,8 @@ html.dark .ns-tp__aurora { --a: color-mix(in oklab, var(--tp-bg) 52%, rgb(var(--
 .ns-tp__heroCard { padding-top: clamp(20px, 5vw, 28px); }
 .ns-tp__heroCard .ns-tp__heroTxt { gap: 8px; }
 @media (min-width: 761px) { .ns-tp__heroCard .ns-tp__heroTxt { align-self: center; } }
+/* hero spacing discipline: the text block centres against the phone column, two flag rows at most, one even gap above the buttons */
+.ns-tp__heroCard .ns-tp__heroTxt { align-self: center; }
+.ns-tp__heroCard .tls__ticker { margin-top: 8px; }
+@media (max-width: 760px) { .ns-tp__heroCard .tls__ticker li:nth-child(n+11) { display: none; } }
+.ns-tp__offers { margin-top: 14px; }
