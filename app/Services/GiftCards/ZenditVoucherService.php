@@ -233,7 +233,7 @@ class ZenditVoucherService implements GiftCardProviderInterface
     {
         return collect($required)->map(fn ($f) => [
             'key' => is_array($f) ? ($f['key'] ?? $f['name'] ?? 'field') : (string) $f,
-            'label' => is_array($f) ? ($f['label'] ?? ucfirst((string) ($f['key'] ?? 'Field'))) : ucfirst((string) $f),
+            'label' => \App\Livewire\GiftCards::fieldLabel(is_array($f) ? $f : ['key' => (string) $f]),
             'type' => 'text',
             'required' => true,
         ])->values()->all();

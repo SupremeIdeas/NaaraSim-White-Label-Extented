@@ -167,3 +167,12 @@ if (\App\Support\FeatureEntitlements::allowedAtBoot(\App\Support\FeatureLocks::F
 
 // Prompt 21-EXT2 §6: complete an in_progress white-label project intake once
 // its admin-set deploy timeline has elapsed, and email the merchant.
+
+// Top-up (airtime + data): requery pending orders, poll supplier float, nightly catalogue sync, reconcile, prune logs. Cheap no-ops when no supplier is enabled.
+Schedule::job(new \App\Jobs\Topup\RequeryPendingJob)->everyMinute()->name('topup-requery')->withoutOverlapping();
+Schedule::command('topup:run autoreload')->everyFiveMinutes()->withoutOverlapping();
+Schedule::command('topup:run float')->everyFiveMinutes()->withoutOverlapping();
+Schedule::command('topup:run autopilot')->everyTenMinutes()->withoutOverlapping();
+Schedule::command('topup:run sync')->dailyAt('03:40')->withoutOverlapping();
+Schedule::command('topup:run reconcile')->dailyAt('04:10')->withoutOverlapping();
+Schedule::command('topup:run prune')->dailyAt('04:30');

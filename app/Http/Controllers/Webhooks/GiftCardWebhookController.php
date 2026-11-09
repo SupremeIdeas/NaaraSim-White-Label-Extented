@@ -28,6 +28,8 @@ class GiftCardWebhookController extends Controller
         $data = $request->json()->all();
         $norm = $this->normalize($provider, $data);
         $order = $norm['ref'] !== '' ? GiftCardOrder::where('transaction_ref', $norm['ref'])->first() : null;
+        // A provider that does not echo our reference (Bitrefill's invoice carries only its own id) is matched on the id it gave us at order time.
+        $order ??= ! empty($norm['provider_tx_id']) ? GiftCardOrder::where('provider', $provider)->where('provider_tx_id', (string) $norm['provider_tx_id'])->first() : null;
         abort_unless($order, 404);
 
         // Never resurrect/downgrade a finished order.
@@ -104,23 +106,14 @@ class GiftCardWebhookController extends Controller
     /** Bitrefill's real invoice-completed webhook posts the invoice/order object. */
     private function normalizeBitrefill(array $data): array
     {
-        $status = (string) ($data['status'] ?? '');
-        $order = (array) (data_get($data, 'orders.0') ?? []);
+        $inv = (array) ($data['invoice'] ?? (isset($data['data']['id']) ? $data['data'] : $data));
+        $resolved = app(\App\Services\GiftCards\BitrefillService::class)->resolveInvoice($inv);
 
         return [
-            'ref' => (string) ($data['external_id'] ?? ''),
-            'status' => match ($status) {
-                'complete' => 'delivered',
-                'expired', 'error', 'refunded' => 'failed',
-                default => 'processing',
-            },
-            'receipt' => array_filter([
-                'code' => data_get($order, 'code'),
-                'epin' => data_get($order, 'pin'),
-                'redemption_url' => data_get($order, 'link'),
-                'instructions' => data_get($order, 'instructions'),
-            ], fn ($v) => $v !== null && $v !== ''),
-            'provider_tx_id' => $data['id'] ?? null,
+            'ref' => (string) ($inv['external_id'] ?? ''),
+            'status' => $resolved['status'],
+            'receipt' => $resolved['receipt'],
+            'provider_tx_id' => $inv['id'] ?? null,
         ];
     }
 

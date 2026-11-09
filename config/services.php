@@ -409,12 +409,45 @@ return [
     // Reloadly Gift Cards (Naara Gift — primary gift-card provider). OAuth2
     // client-credentials; the gift-card API is a separate audience/host from
     // Reloadly's other products. Sandbox by default (real keys go in last).
+    // Paga (Nigeria: cards, bank transfer, USSD, Paga wallet, agents) via Paga Checkout. Keys from Paga Business -> Developer Tools -> API Keys.
+    // Sandbox (beta-*) and live keys are different; the Payment Gateways screen swaps base_url by mode. collect_url is derived from base_url.
+    'paga' => [
+        'public_key' => env('PAGA_PUBLIC_KEY'),   // checkout public key (also the Basic-auth user)
+        'secret_key' => env('PAGA_SECRET_KEY'),   // Basic-auth password for verify/refund
+        'hash_key' => env('PAGA_HASH_KEY'),       // HMAC/hash key: signs webhooks and refunds
+        'base_url' => env('PAGA_BASE_URL', 'https://checkout.paga.com'),
+        'funding_sources' => env('PAGA_FUNDING_SOURCES', 'CARD,PAGA,TRANSFER,AGENT,USSD'),
+        'business_url' => env('PAGA_BUSINESS_URL'),                                   // Business API host override (default: www.mypaga.com live, beta.mypaga.com in sandbox)
+        'airtime_discount_pct' => env('PAGA_AIRTIME_DISCOUNT_PCT', 0),             // our commission on airtime/data from the Paga agreement; 0 = assume none
+    ],
+
     'reloadly' => [
         'client_id' => env('RELOADLY_CLIENT_ID'),
         'client_secret' => env('RELOADLY_CLIENT_SECRET'),
         'sandbox' => env('RELOADLY_SANDBOX', true),
         'auth_url' => env('RELOADLY_AUTH_URL', 'https://auth.reloadly.com/oauth/token'),
         'webhook_secret' => env('RELOADLY_WEBHOOK_SECRET'),
+    ],
+
+    // Naara Top-Up (airtime + data). Reloadly top-ups reuse the client id/secret above but a different audience/host. VTpass + Ding are
+    // top-up-only suppliers. Sandbox by default; live URLs/audiences are taken from each dashboard (see docs/topup/README.md).
+    'reloadly_topup' => [
+        'base_url' => env('RELOADLY_TOPUP_URL', env('RELOADLY_SANDBOX', true) ? 'https://topups-sandbox.reloadly.com' : 'https://topups.reloadly.com'),
+        'audience' => env('RELOADLY_TOPUP_AUDIENCE', env('RELOADLY_SANDBOX', true) ? 'https://topups-sandbox.reloadly.com' : 'https://topups.reloadly.com'),
+        'accept' => env('RELOADLY_TOPUP_ACCEPT', 'application/com.reloadly.topups-v1+json'),
+    ],
+    'vtpass' => [
+        'api_key' => env('VTPASS_API_KEY'),
+        'public_key' => env('VTPASS_PUBLIC_KEY'),
+        'secret_key' => env('VTPASS_SECRET_KEY'),
+        'sandbox' => env('VTPASS_SANDBOX', true),
+        'base_url' => env('VTPASS_BASE_URL', env('VTPASS_SANDBOX', true) ? 'https://sandbox.vtpass.com/api' : 'https://vtpass.com/api'),
+        'webhook_secret' => env('VTPASS_WEBHOOK_SECRET'),
+        'airtime_discount_pct' => env('VTPASS_AIRTIME_DISCOUNT_PCT', 3),
+    ],
+    'ding' => [
+        'api_key' => env('DING_API_KEY'),
+        'base_url' => env('DING_BASE_URL', 'https://api.dingconnect.com/api/V1'),
     ],
 
     // ── NAARA-BUILD-18: Provider Expansion. All ship enabled=false; keys go in
@@ -461,6 +494,10 @@ return [
         'api_key' => env('BITREFILL_API_KEY'),   // personal access token, sent as a Bearer token (the v2 API rejects Basic auth)
         'base_url' => env('BITREFILL_BASE_URL', 'https://api.bitrefill.com/v2'),
         'webhook_secret' => env('BITREFILL_WEBHOOK_SECRET'),
+        'api_id' => env('BITREFILL_API_ID'),          // legacy Basic auth pair, used only when no personal access token is set
+        'api_secret' => env('BITREFILL_API_SECRET'),
+        'poll_tries' => env('BITREFILL_POLL_TRIES', 8),   // eSIM delivery read-back (bounded)
+        'poll_wait_ms' => env('BITREFILL_POLL_WAIT_MS', 2000),
     ],
     'esimaccess' => [
         'api_key' => env('ESIMACCESS_API_KEY'),

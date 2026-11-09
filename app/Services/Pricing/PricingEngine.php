@@ -143,6 +143,31 @@ class PricingEngine
     }
 
     /**
+     * Retail (USD) for an airtime / data top-up (Naara Top-Up). COST in, retail out; the markup resolves operator override, then country
+     * override, then the global default (Admin > Top-ups > Pricing), and MarginGuard floors the result at cost + a minimum profit so an
+     * order can never be sold at or below what the supplier charges us. Cost is never returned to the buyer.
+     *
+     * @return array{price: float, markup_pct: float, guard: bool}
+     */
+    public function topupRetail(float $costUsd, string $provider, ?string $country = null, ?string $operator = null, bool $log = false): array
+    {
+        $overrides = (array) Setting::getValue('topup.markup_overrides', []);
+        $op = $operator !== null ? strtolower(($country ? strtoupper($country).':' : '').$operator) : null;
+        $markup = (float) ($overrides[$op] ?? ($country ? ($overrides[strtoupper($country)] ?? null) : null) ?? Setting::getValue('topup.markup_pct', 6));
+
+        $computed = round($costUsd * (1 + $markup / 100), 2);
+        // Round the floor UP to the cent: rounding to nearest could leave the margin half a cent under the minimum profit (seen live: cost 0.7511 -> price 0.80, profit 0.0489 < 0.05).
+        $floor = ceil(round(($costUsd + (float) Setting::getValue('topup.min_profit_usd', 0.05)) * 100, 6)) / 100;
+        $final = max($computed, $floor);
+
+        if ($log) {
+            $this->log(planId: null, provider: 'topup:'.$provider, cost: $costUsd, markup: $markup, computed: $computed, final: $final, guard: $final > $computed ? 'margin_guard' : 'none');
+        }
+
+        return ['price' => $final, 'markup_pct' => $markup, 'guard' => $final > $computed];
+    }
+
+    /**
      * Retail (USD) per-MINUTE for an outbound in-browser call (Live Voice —
      * Part B). Live wholesale cost in, per-provider voice markup applied, floored
      * by a per-minute minimum-profit MarginGuard. Same discipline as SMS: cost is

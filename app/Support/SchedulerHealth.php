@@ -61,6 +61,7 @@ class SchedulerHealth
         'fx:sync' => ['FX rate sync', 86400],
         'partners:payout-run' => ['Partner payouts', 86400],
         'merchant:client-subscriptions' => ['Merchant client subscriptions', 86400],
+        'topup:run' => ['Top-up scheduler (auto-reload, float, sync, reconcile)', 900],
         'giftcards:sync' => ['Naara Gift catalogue sync', 86400],
         'giftcards:reconcile-processing' => ['Naara Gift stuck-order reconcile', 900],
         'numbers:catalogue-sync' => ['Number catalogue sync', 604800],

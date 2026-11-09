@@ -31,6 +31,14 @@ return [
         'message.delivery_failed' => ['pending' => true] + ['category' => 'services', 'channels' => ['in_app', 'toast'], 'dedupe' => true, 'icon' => 'alert-triangle', 'route' => 'messages', 'title' => 'A message was not delivered', 'body' => 'Your message to {to} could not be delivered. {reason}'],
         'line.issue' => ['pending' => true] + ['category' => 'services', 'channels' => ['in_app', 'push', 'email'], 'dedupe' => true, 'icon' => 'alert-triangle', 'route' => 'numbers', 'title' => 'There is a problem with your line', 'body' => '{what}'],
 
+
+        // Top-ups (airtime + data)
+        'topup.delivered' => ['category' => 'services', 'channels' => ['in_app', 'toast', 'push'], 'dedupe' => true, 'icon' => 'signal', 'route' => 'topup.orders', 'title' => 'Top-up delivered', 'body' => '{what} was sent to {to}.'],
+        'topup.failed' => ['category' => 'services', 'channels' => ['in_app', 'toast', 'email'], 'dedupe' => true, 'icon' => 'alert-triangle', 'route' => 'topup.orders', 'title' => 'Top-up could not be delivered', 'body' => '{what} to {to} did not go through. Your money is back in your wallet.'],
+
+        'topup.autoreload_failed' => ['category' => 'services', 'channels' => ['in_app', 'toast', 'email'], 'dedupe' => true, 'icon' => 'alert-triangle', 'route' => 'topup.beneficiaries', 'title' => 'An auto top-up was skipped', 'body' => 'We could not send the auto top-up for {to}: {why}'],
+        'topup.autoreload_paused' => ['category' => 'services', 'channels' => ['in_app', 'email', 'push'], 'dedupe' => true, 'icon' => 'alert-triangle', 'route' => 'topup.beneficiaries', 'title' => 'Auto top-up paused', 'body' => 'We paused the auto top-up for {to} after repeated problems: {why} Turn it back on when you are ready.'],
+        'topup.autoreload_low_balance' => ['category' => 'services', 'channels' => ['in_app', 'push'], 'dedupe' => true, 'icon' => 'wallet', 'route' => 'wallet', 'title' => 'Add funds for your auto top-up', 'body' => 'Tomorrow\'s auto top-up for {to} needs {amount} and your wallet is short.'],
     ],
 
     /** Events delivered by their own notification class: event => [class, what it covers]. */

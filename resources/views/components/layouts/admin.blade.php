@@ -49,6 +49,7 @@
         $more[] = ['route' => 'admin.social-hunt', 'label' => 'Social Hunt', 'icon' => 'star'];
         $more[] = ['route' => 'admin.brand-directory', 'label' => 'Brand Directory', 'icon' => 'grid'];
         $more[] = ['route' => 'admin.gift-cards', 'label' => 'Naara Gift', 'icon' => 'gift'];
+        $more[] = ['route' => 'admin.topup', 'label' => 'Top-ups', 'icon' => 'signal'];
         $more[] = ['route' => 'admin.gift-hero', 'label' => 'Gift hero', 'icon' => 'gift'];
 
         // Money & partners.

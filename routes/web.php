@@ -276,6 +276,11 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::get('/gift-cards/orders', [GiftCardOrderController::class, 'index'])->middleware('feature.allowed:gift_cards')->name('gift-cards.orders');
         Route::get('/gift-cards/orders/{order}', [GiftCardOrderController::class, 'show'])->middleware('feature.allowed:gift_cards')->name('gift-cards.order');
         Route::post('/gift-cards/orders/{order}/balance', [GiftCardOrderController::class, 'balance'])->middleware('feature.allowed:gift_cards')->name('gift-cards.order.balance');
+        // Top-up (airtime + data): opens when the admin has it on and a supplier is enabled.
+        Route::get('/top-up', \App\Livewire\Topup::class)->name('topup');
+        Route::get('/top-up/people', \App\Livewire\TopupBeneficiaries::class)->name('topup.beneficiaries');
+        Route::get('/top-up/orders', \App\Livewire\TopupOrders::class)->name('topup.orders');
+        Route::get('/top-up/orders/{uuid}', \App\Livewire\TopupOrders::class)->name('topup.order');
         Route::get('/checkout/{plan}', Checkout::class)->name('checkout');
         Route::get('/wallet', Wallet::class)->name('wallet');
         Route::get('/numbers', GetNumber::class)->name('numbers');
@@ -508,6 +513,7 @@ Route::middleware(['admin.gateway', 'admin', 'throttle:admin'])
             Route::get('/social-hunt', SocialHunt::class)->middleware('feature.allowed:brand_hunt')->name('social-hunt');
             Route::get('/brand-directory', BrandDirectory::class)->middleware('feature.allowed:brand_hunt')->name('brand-directory');
             Route::get('/gift-cards', App\Livewire\Admin\GiftCards::class)->middleware('feature.allowed:gift_cards')->name('gift-cards');
+            Route::get('/topup', App\Livewire\Admin\TopupControls::class)->name('topup');
             // Naara Gift storefront hero — same system as the dashboard home hero.
             Route::get('/gift-hero', GiftHero::class)->middleware('feature.allowed:gift_cards')->name('gift-hero');
             Route::get('/developer-api', DeveloperApi::class)->name('developer-api');
@@ -655,6 +661,10 @@ Route::post('/webhooks/appbuild/{provider}', AppBuildWebhookController::class)
 // idempotent, fills the three-state receipt so the redemption screen updates.
 Route::post('/webhooks/giftcards/{provider}', GiftCardWebhookController::class)
     ->name('webhooks.giftcards');
+
+// Top-up supplier callbacks (VTpass / Zendit / Reloadly): shared-secret verified with hash_equals, queued, and the supplier is re-asked before any money moves.
+Route::post('/webhooks/topup/{provider}', \App\Http\Controllers\TopupWebhookController::class)
+    ->middleware('throttle:120,1')->name('webhooks.topup');
 
 // WhatsApp Cloud API webhook (WhatsApp Autopilot §7): GET verify handshake +
 // X-Hub-Signature-256-verified POST for delivery status and STOP opt-outs.

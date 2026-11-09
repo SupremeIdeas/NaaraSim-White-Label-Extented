@@ -1,0 +1,1063 @@
+[
+ {
+  "key": "9mobile",
+  "name": "9Mobile",
+  "file": "9mobile.webp",
+  "source": "github:PaystackHQ/nigerialogos"
+ },
+ {
+  "key": "afghan",
+  "name": "Afghan",
+  "file": "afghan.webp",
+  "source": "gstatic-www"
+ },
+ {
+  "key": "africell",
+  "name": "Africell",
+  "file": "africell.webp",
+  "source": "gstatic-www",
+  "bg": "#241d46"
+ },
+ {
+  "key": "airtel",
+  "name": "Airtel",
+  "file": "airtel.webp",
+  "source": "github:PaystackHQ/nigerialogos"
+ },
+ {
+  "key": "ais",
+  "name": "AIS",
+  "file": "ais.webp",
+  "source": "wikimedia:Advanced_Info_Service_logo.svg"
+ },
+ {
+  "key": "alfa",
+  "name": "Alfa",
+  "file": "alfa.webp",
+  "source": "site-icon"
+ },
+ {
+  "key": "algartelecom",
+  "name": "Algar Telecom",
+  "file": "algartelecom.webp",
+  "source": "gstatic-www"
+ },
+ {
+  "key": "altice",
+  "name": "Altice",
+  "file": "altice.webp",
+  "source": "gstatic-www",
+  "bg": "#000000"
+ },
+ {
+  "key": "asiacell",
+  "name": "AsiaCell",
+  "file": "asiacell.webp",
+  "source": "wikimedia:Asiacell_logo.svg"
+ },
+ {
+  "key": "atom",
+  "name": "ATOM",
+  "file": "atom.webp",
+  "source": "gstatic-www"
+ },
+ {
+  "key": "att",
+  "name": "AT&T",
+  "file": "att.webp",
+  "source": "wikimedia:AT&T_logo.svg"
+ },
+ {
+  "key": "axis",
+  "name": "Axis",
+  "file": "axis.webp",
+  "source": "gstatic-www"
+ },
+ {
+  "key": "ayyildiz",
+  "name": "AyYildiz",
+  "file": "ayyildiz.webp",
+  "source": "site-icon"
+ },
+ {
+  "key": "bait",
+  "name": "Bait",
+  "file": "bait.webp",
+  "source": "site-icon"
+ },
+ {
+  "key": "banglalink",
+  "name": "Banglalink",
+  "file": "banglalink.webp",
+  "source": "gstatic-www"
+ },
+ {
+  "key": "beeline",
+  "name": "Beeline",
+  "file": "beeline.webp",
+  "source": "gstatic-www"
+ },
+ {
+  "key": "bitel",
+  "name": "Bitel",
+  "file": "bitel.webp",
+  "source": "gstatic-www"
+ },
+ {
+  "key": "blau",
+  "name": "Blau",
+  "file": "blau.webp",
+  "source": "gstatic-www"
+ },
+ {
+  "key": "bmobile",
+  "name": "BMobile",
+  "file": "bmobile.webp",
+  "source": "gstatic-www",
+  "bg": "#00e961"
+ },
+ {
+  "key": "boostmobile",
+  "name": "Boost Mobile",
+  "file": "boostmobile.webp",
+  "source": "gstatic-www"
+ },
+ {
+  "key": "btc",
+  "name": "BTC",
+  "file": "btc.webp",
+  "source": "gstatic-www"
+ },
+ {
+  "key": "camtel",
+  "name": "Camtel",
+  "file": "camtel.webp",
+  "source": "gstatic-www"
+ },
+ {
+  "key": "celcomdigi",
+  "name": "CelcomDigi",
+  "file": "celcomdigi.webp",
+  "source": "gstatic-www"
+ },
+ {
+  "key": "cellc",
+  "name": "CellC",
+  "file": "cellc.webp",
+  "source": "gstatic-www",
+  "bg": "#000000"
+ },
+ {
+  "key": "cellcard",
+  "name": "Cellcard",
+  "file": "cellcard.webp",
+  "source": "gstatic-www",
+  "bg": "#fe9d18"
+ },
+ {
+  "key": "cellcom",
+  "name": "Cellcom",
+  "file": "cellcom.webp",
+  "source": "wikimedia:Cellcom_Logo.svg"
+ },
+ {
+  "key": "chinamobile",
+  "name": "ChinaMobile",
+  "file": "chinamobile.webp",
+  "source": "site-icon"
+ },
+ {
+  "key": "chinatelecom",
+  "name": "ChinaTelecom",
+  "file": "chinatelecom.webp",
+  "source": "gstatic-www"
+ },
+ {
+  "key": "chinaunicom",
+  "name": "ChinaUnicom",
+  "file": "chinaunicom.webp",
+  "source": "site-icon"
+ },
+ {
+  "key": "chinguitel",
+  "name": "Chinguitel",
+  "file": "chinguitel.webp",
+  "source": "gstatic-www"
+ },
+ {
+  "key": "claro",
+  "name": "Claro",
+  "file": "claro.webp",
+  "source": "wikimedia:Claro_logo.png"
+ },
+ {
+  "key": "cnt",
+  "name": "CNT",
+  "file": "cnt.webp",
+  "source": "site-icon"
+ },
+ {
+  "key": "congstar",
+  "name": "Congstar",
+  "file": "congstar.webp",
+  "source": "gstatic-www"
+ },
+ {
+  "key": "cricketmobile",
+  "name": "Cricket Mobile",
+  "file": "cricketmobile.webp",
+  "source": "gstatic-www"
+ },
+ {
+  "key": "cubacel",
+  "name": "Cubacel",
+  "file": "cubacel.webp",
+  "source": "site-icon"
+ },
+ {
+  "key": "dialog",
+  "name": "Dialog",
+  "file": "dialog.webp",
+  "source": "gstatic-www"
+ },
+ {
+  "key": "digi",
+  "name": "DiGi",
+  "file": "digi.webp",
+  "source": "gstatic-www"
+ },
+ {
+  "key": "digicel",
+  "name": "Digicel",
+  "file": "digicel.webp",
+  "source": "gstatic-www"
+ },
+ {
+  "key": "digicell",
+  "name": "Digicell",
+  "file": "digicell.webp",
+  "source": "wikimedia:Digicel_logo.svg"
+ },
+ {
+  "key": "digimobil",
+  "name": "Digimobil",
+  "file": "digimobil.webp",
+  "source": "gstatic-www"
+ },
+ {
+  "key": "digitel",
+  "name": "Digitel",
+  "file": "digitel.webp",
+  "source": "gstatic-www"
+ },
+ {
+  "key": "dito",
+  "name": "Dito",
+  "file": "dito.webp",
+  "source": "gstatic-www"
+ },
+ {
+  "key": "djezzy",
+  "name": "DJEZZY",
+  "file": "djezzy.webp",
+  "source": "wikimedia:Djezzy_Logo.svg"
+ },
+ {
+  "key": "dtac",
+  "name": "Dtac",
+  "file": "dtac.webp",
+  "source": "gstatic-www"
+ },
+ {
+  "key": "du",
+  "name": "Du",
+  "file": "du.webp",
+  "source": "site-icon"
+ },
+ {
+  "key": "econet",
+  "name": "Econet",
+  "file": "econet.webp",
+  "source": "gstatic-www"
+ },
+ {
+  "key": "entel",
+  "name": "Entel",
+  "file": "entel.webp",
+  "source": "gstatic-www"
+ },
+ {
+  "key": "eplus",
+  "name": "Eplus",
+  "file": "eplus.webp",
+  "source": "gstatic-www"
+ },
+ {
+  "key": "ethiotelecom",
+  "name": "Ethiotelecom",
+  "file": "ethiotelecom.webp",
+  "source": "gstatic-www"
+ },
+ {
+  "key": "etisalat",
+  "name": "Etisalat",
+  "file": "etisalat.webp",
+  "source": "gstatic-www"
+ },
+ {
+  "key": "euskaltel",
+  "name": "Euskaltel",
+  "file": "euskaltel.webp",
+  "source": "gstatic-www"
+ },
+ {
+  "key": "expresso",
+  "name": "Expresso",
+  "file": "expresso.webp",
+  "source": "site-icon"
+ },
+ {
+  "key": "flow",
+  "name": "Flow",
+  "file": "flow.webp",
+  "source": "site-icon"
+ },
+ {
+  "key": "freedompop",
+  "name": "FreedomPop",
+  "file": "freedompop.webp",
+  "source": "gstatic-www"
+ },
+ {
+  "key": "glo",
+  "name": "Glo",
+  "file": "glo.webp",
+  "source": "github:PaystackHQ/nigerialogos"
+ },
+ {
+  "key": "globe",
+  "name": "Globe",
+  "file": "globe.webp",
+  "source": "gstatic-www"
+ },
+ {
+  "key": "gmobile",
+  "name": "Gmobile",
+  "file": "gmobile.webp",
+  "source": "site-icon"
+ },
+ {
+  "key": "grameenphone",
+  "name": "Grameen Phone",
+  "file": "grameenphone.webp",
+  "source": "gstatic-www"
+ },
+ {
+  "key": "gtt",
+  "name": "GTT",
+  "file": "gtt.webp",
+  "source": "site-icon"
+ },
+ {
+  "key": "h2omobile",
+  "name": "H2O Mobile",
+  "file": "h2omobile.webp",
+  "source": "site-icon"
+ },
+ {
+  "key": "halotel",
+  "name": "Halotel",
+  "file": "halotel.webp",
+  "source": "gstatic-www"
+ },
+ {
+  "key": "heyah",
+  "name": "Heyah",
+  "file": "heyah.webp",
+  "source": "gstatic-www"
+ },
+ {
+  "key": "hormuudtelecom",
+  "name": "HormuudTelecom",
+  "file": "hormuudtelecom.webp",
+  "source": "gstatic-www"
+ },
+ {
+  "key": "hotlink",
+  "name": "Hotlink",
+  "file": "hotlink.webp",
+  "source": "gstatic-www"
+ },
+ {
+  "key": "hutch",
+  "name": "Hutch",
+  "file": "hutch.webp",
+  "source": "wikimedia:Hutch_logo.svg"
+ },
+ {
+  "key": "iliad",
+  "name": "Iliad",
+  "file": "iliad.webp",
+  "source": "gstatic-www"
+ },
+ {
+  "key": "indosat",
+  "name": "Indosat",
+  "file": "indosat.webp",
+  "source": "wikimedia:Indosat_Ooredoo_logo.svg"
+ },
+ {
+  "key": "inwi",
+  "name": "Inwi",
+  "file": "inwi.webp",
+  "source": "site-icon"
+ },
+ {
+  "key": "jazz",
+  "name": "Jazz",
+  "file": "jazz.webp",
+  "source": "gstatic-www"
+ },
+ {
+  "key": "jio",
+  "name": "Jio",
+  "file": "jio.webp",
+  "source": "gstatic-www"
+ },
+ {
+  "key": "kenyatelkom",
+  "name": "Kenya Telkom",
+  "file": "kenyatelkom.webp",
+  "source": "gstatic",
+  "bg": "#02aaca"
+ },
+ {
+  "key": "kolbi",
+  "name": "Kolbi",
+  "file": "kolbi.webp",
+  "source": "gstatic-www"
+ },
+ {
+  "key": "koodo",
+  "name": "Koodo",
+  "file": "koodo.webp",
+  "source": "gstatic-www"
+ },
+ {
+  "key": "lebaramobile",
+  "name": "Lebara Mobile",
+  "file": "lebaramobile.webp",
+  "source": "gstatic-www"
+ },
+ {
+  "key": "liberty",
+  "name": "Liberty",
+  "file": "liberty.webp",
+  "source": "gstatic-www",
+  "bg": "#111111"
+ },
+ {
+  "key": "llamaya",
+  "name": "LlamaYa",
+  "file": "llamaya.webp",
+  "source": "gstatic-www"
+ },
+ {
+  "key": "lyca",
+  "name": "Lyca",
+  "file": "lyca.webp",
+  "source": "gstatic-www"
+ },
+ {
+  "key": "lycamobile",
+  "name": "LYCAMOBILE",
+  "file": "lycamobile.webp",
+  "source": "gstatic-www"
+ },
+ {
+  "key": "maroctel",
+  "name": "MarocTel",
+  "file": "maroctel.webp",
+  "source": "wikimedia:Maroc_Telecom.svg"
+ },
+ {
+  "key": "mascom",
+  "name": "Mascom",
+  "file": "mascom.webp",
+  "source": "gstatic-www"
+ },
+ {
+  "key": "mattel",
+  "name": "Mattel",
+  "file": "mattel.webp",
+  "source": "gstatic-www"
+ },
+ {
+  "key": "mauritel",
+  "name": "Mauritel",
+  "file": "mauritel.webp",
+  "source": "site-icon"
+ },
+ {
+  "key": "megafon",
+  "name": "Megafon",
+  "file": "megafon.webp",
+  "source": "gstatic-www"
+ },
+ {
+  "key": "metfone",
+  "name": "Metfone",
+  "file": "metfone.webp",
+  "source": "gstatic-www"
+ },
+ {
+  "key": "metropcs",
+  "name": "Metro PCS",
+  "file": "metropcs.webp",
+  "source": "wikimedia:MetroPCS_logo.svg"
+ },
+ {
+  "key": "mimovil",
+  "name": "MiMovil",
+  "file": "mimovil.webp",
+  "source": "gstatic",
+  "bg": "#022d58"
+ },
+ {
+  "key": "mobifone",
+  "name": "Mobifone",
+  "file": "mobifone.webp",
+  "source": "gstatic-www"
+ },
+ {
+  "key": "mobilis",
+  "name": "MOBILIS",
+  "file": "mobilis.webp",
+  "source": "wikimedia:Mobilis_Logo.svg"
+ },
+ {
+  "key": "mobitel",
+  "name": "Mobitel",
+  "file": "mobitel.webp",
+  "source": "gstatic-www"
+ },
+ {
+  "key": "moov",
+  "name": "Moov",
+  "file": "moov.webp",
+  "source": "site-icon"
+ },
+ {
+  "key": "movicel",
+  "name": "Movicel",
+  "file": "movicel.webp",
+  "source": "site-icon"
+ },
+ {
+  "key": "movilnet",
+  "name": "Movilnet",
+  "file": "movilnet.webp",
+  "source": "site-icon"
+ },
+ {
+  "key": "movistar",
+  "name": "Movistar",
+  "file": "movistar.webp",
+  "source": "gstatic-www",
+  "bg": "#0066fe"
+ },
+ {
+  "key": "mpt",
+  "name": "MPT",
+  "file": "mpt.webp",
+  "source": "gstatic-www"
+ },
+ {
+  "key": "mtn",
+  "name": "MTN",
+  "file": "mtn.webp",
+  "source": "github:PaystackHQ/nigerialogos",
+  "bg": "#ffcb04"
+ },
+ {
+  "key": "mts",
+  "name": "MTS",
+  "file": "mts.webp",
+  "source": "gstatic-www",
+  "bg": "#fe0030"
+ },
+ {
+  "key": "mytel",
+  "name": "Mytel",
+  "file": "mytel.webp",
+  "source": "gstatic-www"
+ },
+ {
+  "key": "natcom",
+  "name": "Natcom",
+  "file": "natcom.webp",
+  "source": "gstatic"
+ },
+ {
+  "key": "ncell",
+  "name": "NCell",
+  "file": "ncell.webp",
+  "source": "wikimedia:Ncell_logo.svg"
+ },
+ {
+  "key": "nemi",
+  "name": "Nemi",
+  "file": "nemi.webp",
+  "source": "gstatic-www"
+ },
+ {
+  "key": "nepaltelecom",
+  "name": "Nepal Telecom",
+  "file": "nepaltelecom.webp",
+  "source": "gstatic-www"
+ },
+ {
+  "key": "net10mobile",
+  "name": "Net10 Mobile",
+  "file": "net10mobile.webp",
+  "source": "wikimedia:NET10_Wireless_logo.png"
+ },
+ {
+  "key": "ninemobile",
+  "name": "Nine Mobile",
+  "file": "ninemobile.webp",
+  "source": "github:PaystackHQ/nigerialogos"
+ },
+ {
+  "key": "ntel",
+  "name": "Ntel",
+  "file": "ntel.webp",
+  "source": "github:PaystackHQ/nigerialogos"
+ },
+ {
+  "key": "o2",
+  "name": "O2",
+  "file": "o2.webp",
+  "source": "gstatic-www"
+ },
+ {
+  "key": "ooredoo",
+  "name": "OOREDOO",
+  "file": "ooredoo.webp",
+  "source": "gstatic-www"
+ },
+ {
+  "key": "orange",
+  "name": "Orange",
+  "file": "orange.webp",
+  "source": "wikimedia:Orange_logo.svg",
+  "bg": "#ff7903"
+ },
+ {
+  "key": "ortel",
+  "name": "Ortel",
+  "file": "ortel.webp",
+  "source": "gstatic-www"
+ },
+ {
+  "key": "otelo",
+  "name": "OTELO",
+  "file": "otelo.webp",
+  "source": "gstatic-www",
+  "bg": "#000000"
+ },
+ {
+  "key": "pageplus",
+  "name": "Page Plus",
+  "file": "pageplus.webp",
+  "source": "gstatic-www"
+ },
+ {
+  "key": "pelephone",
+  "name": "Pelephone",
+  "file": "pelephone.webp",
+  "source": "gstatic-www"
+ },
+ {
+  "key": "perfectum",
+  "name": "Perfectum",
+  "file": "perfectum.webp",
+  "source": "gstatic-www"
+ },
+ {
+  "key": "personal",
+  "name": "Personal",
+  "file": "personal.webp",
+  "source": "gstatic-www"
+ },
+ {
+  "key": "play",
+  "name": "Play",
+  "file": "play.webp",
+  "source": "gstatic-www"
+ },
+ {
+  "key": "plus",
+  "name": "Plus",
+  "file": "plus.webp",
+  "source": "site-icon"
+ },
+ {
+  "key": "polkomtel",
+  "name": "Polkomtel",
+  "file": "polkomtel.webp",
+  "source": "site-icon"
+ },
+ {
+  "key": "public",
+  "name": "Public",
+  "file": "public.webp",
+  "source": "gstatic-www"
+ },
+ {
+  "key": "qcell",
+  "name": "QCell",
+  "file": "qcell.webp",
+  "source": "gstatic-www",
+  "bg": "#f88f21"
+ },
+ {
+  "key": "robi",
+  "name": "Robi",
+  "file": "robi.webp",
+  "source": "gstatic-www"
+ },
+ {
+  "key": "roshan",
+  "name": "Roshan",
+  "file": "roshan.webp",
+  "source": "gstatic-www"
+ },
+ {
+  "key": "sabafon",
+  "name": "Sabafon",
+  "file": "sabafon.webp",
+  "source": "site-icon"
+ },
+ {
+  "key": "safaricom",
+  "name": "Safaricom",
+  "file": "safaricom.webp",
+  "source": "site-icon"
+ },
+ {
+  "key": "salaam",
+  "name": "SALAAM",
+  "file": "salaam.webp",
+  "source": "wikimedia:Salaam_Somali_Bank.png"
+ },
+ {
+  "key": "simplemobile",
+  "name": "Simple Mobile",
+  "file": "simplemobile.webp",
+  "source": "gstatic-www"
+ },
+ {
+  "key": "smartfren",
+  "name": "SmartFren",
+  "file": "smartfren.webp",
+  "source": "gstatic-www"
+ },
+ {
+  "key": "smile",
+  "name": "Smile",
+  "file": "smile.webp",
+  "source": "github:PaystackHQ/nigerialogos"
+ },
+ {
+  "key": "spectranet",
+  "name": "Spectranet",
+  "file": "spectranet.webp",
+  "source": "github:PaystackHQ/nigerialogos"
+ },
+ {
+  "key": "stc",
+  "name": "STC",
+  "file": "stc.webp",
+  "source": "gstatic-www"
+ },
+ {
+  "key": "straighttalk",
+  "name": "Straight Talk",
+  "file": "straighttalk.webp",
+  "source": "site-icon"
+ },
+ {
+  "key": "sudani",
+  "name": "Sudani",
+  "file": "sudani.webp",
+  "source": "gstatic-www"
+ },
+ {
+  "key": "telcelbundlesinternet",
+  "name": "Telcel Bundles - Internet",
+  "file": "telcelbundlesinternet.webp",
+  "source": "wikimedia:Telcel_logo.svg"
+ },
+ {
+  "key": "telcelbundlespaquete",
+  "name": "Telcel Bundles/Paquete",
+  "file": "telcelbundlespaquete.webp",
+  "source": "wikimedia:Telcel_logo.svg"
+ },
+ {
+  "key": "telcelregularrecharge",
+  "name": "Telcel Regular Recharge",
+  "file": "telcelregularrecharge.webp",
+  "source": "wikimedia:Telcel_logo.svg"
+ },
+ {
+  "key": "telecel",
+  "name": "Telecel",
+  "file": "telecel.webp",
+  "source": "gstatic-www"
+ },
+ {
+  "key": "telecom",
+  "name": "Telecom",
+  "file": "telecom.webp",
+  "source": "gstatic-www"
+ },
+ {
+  "key": "telekom",
+  "name": "Telekom",
+  "file": "telekom.webp",
+  "source": "gstatic-www"
+ },
+ {
+  "key": "telenor",
+  "name": "Telenor",
+  "file": "telenor.webp",
+  "source": "gstatic-www"
+ },
+ {
+  "key": "teletalk",
+  "name": "TeleTalk",
+  "file": "teletalk.webp",
+  "source": "site-icon"
+ },
+ {
+  "key": "telkommobile",
+  "name": "TelkomMobile",
+  "file": "telkommobile.webp",
+  "source": "gstatic-www"
+ },
+ {
+  "key": "telkomsel",
+  "name": "TelkomSel",
+  "file": "telkomsel.webp",
+  "source": "gstatic-www"
+ },
+ {
+  "key": "tigo",
+  "name": "Tigo",
+  "file": "tigo.webp",
+  "source": "site-icon",
+  "bg": "#021eb2"
+ },
+ {
+  "key": "tim",
+  "name": "TIM",
+  "file": "tim.webp",
+  "source": "gstatic-www"
+ },
+ {
+  "key": "tmobile",
+  "name": "T-Mobile",
+  "file": "tmobile.webp",
+  "source": "wikimedia:T-Mobile_logo.svg"
+ },
+ {
+  "key": "tnm",
+  "name": "TNM",
+  "file": "tnm.webp",
+  "source": "gstatic-www"
+ },
+ {
+  "key": "totalwireless",
+  "name": "Total Wireless",
+  "file": "totalwireless.webp",
+  "source": "gstatic-www"
+ },
+ {
+  "key": "tritelecom",
+  "name": "Tri Telecom",
+  "file": "tritelecom.webp",
+  "source": "gstatic-www"
+ },
+ {
+  "key": "truemove",
+  "name": "TrueMove",
+  "file": "truemove.webp",
+  "source": "gstatic-www"
+ },
+ {
+  "key": "tuenti",
+  "name": "Tuenti",
+  "file": "tuenti.webp",
+  "source": "site-icon"
+ },
+ {
+  "key": "turktelekom",
+  "name": "TurkTelekom",
+  "file": "turktelekom.webp",
+  "source": "wikimedia:T\u00fcrk_Telekom_logo.svg"
+ },
+ {
+  "key": "ucell",
+  "name": "Ucell",
+  "file": "ucell.webp",
+  "source": "gstatic-www"
+ },
+ {
+  "key": "ultramobile",
+  "name": "Ultra Mobile",
+  "file": "ultramobile.webp",
+  "source": "gstatic-www"
+ },
+ {
+  "key": "umobile",
+  "name": "UMobile",
+  "file": "umobile.webp",
+  "source": "site-icon"
+ },
+ {
+  "key": "unitel",
+  "name": "Unitel",
+  "file": "unitel.webp",
+  "source": "gstatic-www"
+ },
+ {
+  "key": "uzmobile",
+  "name": "UzMobile",
+  "file": "uzmobile.webp",
+  "source": "site-icon"
+ },
+ {
+  "key": "verizon",
+  "name": "Verizon",
+  "file": "verizon.webp",
+  "source": "wikimedia:Verizon_logo.svg"
+ },
+ {
+  "key": "verizonwireless",
+  "name": "Verizon Wireless",
+  "file": "verizonwireless.webp",
+  "source": "wikimedia:Verizon_logo.svg"
+ },
+ {
+  "key": "vietnammobile",
+  "name": "Vietnam Mobile",
+  "file": "vietnammobile.webp",
+  "source": "gstatic-www"
+ },
+ {
+  "key": "viettel",
+  "name": "Viettel",
+  "file": "viettel.webp",
+  "source": "site-icon"
+ },
+ {
+  "key": "vinaphone",
+  "name": "Vinaphone",
+  "file": "vinaphone.webp",
+  "source": "gstatic-www"
+ },
+ {
+  "key": "virginmobile",
+  "name": "Virgin Mobile",
+  "file": "virginmobile.webp",
+  "source": "wikimedia:Virgin_Mobile_logo.svg"
+ },
+ {
+  "key": "viva",
+  "name": "Viva",
+  "file": "viva.webp",
+  "source": "site-icon"
+ },
+ {
+  "key": "vodacom",
+  "name": "Vodacom",
+  "file": "vodacom.webp",
+  "source": "site-icon"
+ },
+ {
+  "key": "vodafone",
+  "name": "VODAFONE",
+  "file": "vodafone.webp",
+  "source": "wikimedia:Vodafone_Logo.svg"
+ },
+ {
+  "key": "vodafoneideavi",
+  "name": "VodafoneIdea Vi",
+  "file": "vodafoneideavi.webp",
+  "source": "gstatic-www"
+ },
+ {
+  "key": "vox",
+  "name": "Vox",
+  "file": "vox.webp",
+  "source": "gstatic-www",
+  "bg": "#fef303"
+ },
+ {
+  "key": "windtre",
+  "name": "WindTre",
+  "file": "windtre.webp",
+  "source": "gstatic-www"
+ },
+ {
+  "key": "wom",
+  "name": "WOM",
+  "file": "wom.webp",
+  "source": "wikimedia:WOM_Chile.svg"
+ },
+ {
+  "key": "xlaxiata",
+  "name": "XLAxiata",
+  "file": "xlaxiata.webp",
+  "source": "gstatic-www"
+ },
+ {
+  "key": "yas",
+  "name": "YAS",
+  "file": "yas.webp",
+  "source": "site-icon"
+ },
+ {
+  "key": "yemenmobile",
+  "name": "YemenMobile",
+  "file": "yemenmobile.webp",
+  "source": "site-icon"
+ },
+ {
+  "key": "yoigo",
+  "name": "Yoigo",
+  "file": "yoigo.webp",
+  "source": "site-icon"
+ },
+ {
+  "key": "youmobile",
+  "name": "You Mobile",
+  "file": "youmobile.webp",
+  "source": "gstatic",
+  "bg": "#111111"
+ },
+ {
+  "key": "zain",
+  "name": "Zain",
+  "file": "zain.webp",
+  "source": "site-icon"
+ },
+ {
+  "key": "zamtel",
+  "name": "Zamtel",
+  "file": "zamtel.webp",
+  "source": "gstatic-www"
+ }
+]

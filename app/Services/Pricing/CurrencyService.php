@@ -3,6 +3,7 @@
 namespace App\Services\Pricing;
 
 use App\Models\Setting;
+use App\Services\Pricing\Fx\FxRates;
 use App\Services\Payouts\PayoutException;
 use Illuminate\Support\Facades\Cache;
 
@@ -47,9 +48,22 @@ class CurrencyService
      * official base to track that parallel premium. Manual mode + 0% markup = the
      * exact rate the admin types. Cached 1h; busted on any pricing.* / manual save.
      */
+    /** Display and top-up rates are re-read every 10 minutes, so a price never rests on an hour-old exchange rate. */
+    public const LIVE_TTL = 600;
+
+    /** When the rate for a currency was last read from its source (unix time), or null before the first read. Used to show "updated N minutes ago". */
+    public function rateAsOf(string $currency): ?int
+    {
+        $this->rate($currency);   // makes sure the rate (and its stamp) exists
+        $t = Cache::get(strtoupper($currency) === 'NGN' ? 'fx.asof.NGN' : 'fx.asof.DISPLAY');
+
+        return is_numeric($t) ? (int) $t : null;
+    }
+
     public function getUsdToNgn(): float
     {
-        return Cache::remember('usd_ngn_rate', 3600, function () {
+        return Cache::remember('usd_ngn_rate', self::LIVE_TTL, function () {
+            Cache::put('fx.asof.NGN', time(), self::LIVE_TTL + 60);
             $base = $this->baseUsdToNgn();
             $markup = (float) Setting::getValue('pricing.ngn_rate_markup_pct', 0);
             $markup = max(0.0, min(50.0, $markup)); // clamp 0–50%
@@ -68,17 +82,69 @@ class CurrencyService
         try {
             $rates = app('esim.airalo')->getExchangeRates();
             $ngn = collect($rates['rates'] ?? [])->firstWhere('to', 'NGN')['mid'] ?? null;
-
-            return $ngn ? (float) $ngn : self::FALLBACK_RATE;
         } catch (\Throwable $e) {
-            return (float) Setting::getValue('pricing.manual_ngn_rate', self::FALLBACK_RATE);
+            $ngn = null;
         }
+        if ($ngn) {
+            return (float) $ngn;
+        }
+
+        // Airalo gave nothing: the two feeds and the last good snapshot come before any typed-in or built-in number (display only).
+        $feed = (float) (app(FxRates::class)->display()['NGN'] ?? 0);
+
+        return $feed > 0 ? $feed : (float) Setting::getValue('pricing.manual_ngn_rate', self::FALLBACK_RATE);
+    }
+
+    /**
+     * The NGN base for MONEY: the admin's own rate in manual mode, else Airalo's live mid-rate, else a fresh/recent feed table.
+     * Never the built-in 1500: an admin rate only counts when it was really saved.
+     *
+     * @throws PayoutException when no trustworthy rate exists
+     */
+    private function strictBaseUsdToNgn(): float
+    {
+        if (Setting::getValue('pricing.ngn_rate_source', 'auto') === 'manual') {
+            $manual = (float) Setting::getValue('pricing.manual_ngn_rate', 0);
+            if ($manual > 0) {
+                return $manual;
+            }
+        }
+        try {
+            $rates = app('esim.airalo')->getExchangeRates();
+            $ngn = (float) (collect($rates['rates'] ?? [])->firstWhere('to', 'NGN')['mid'] ?? 0);
+            if ($ngn > 0) {
+                return $ngn;
+            }
+        } catch (\Throwable $e) {
+            // fall through to the feeds
+        }
+        $feed = (float) (app(FxRates::class)->money()['NGN'] ?? 0);
+        if ($feed > 0) {
+            return $feed;
+        }
+        $saved = Setting::getValue('pricing.manual_ngn_rate', null);
+        if ($saved !== null && (float) $saved > 0 && $saved != 1500) {
+            return (float) $saved;   // an admin-saved rate is a deliberate human number, usable when every feed is down
+        }
+
+        throw new PayoutException('Withdrawals to NGN are paused while we refresh exchange rates.');
+    }
+
+    /** The authoritative USD→NGN rate for money movement: strict base plus the parallel-market markup, cached 1h. */
+    private function strictUsdToNgn(): float
+    {
+        return Cache::remember('usd_ngn_rate.strict', 3600, function () {
+            $markup = max(0.0, min(50.0, (float) Setting::getValue('pricing.ngn_rate_markup_pct', 0)));
+
+            return round($this->strictBaseUsdToNgn() * (1 + $markup / 100), 2);
+        });
     }
 
     /** Bust the cached NGN rate so an admin rate/markup change takes effect at once. */
     public function flushNgnRate(): void
     {
         Cache::forget('usd_ngn_rate');
+        Cache::forget('usd_ngn_rate.strict');
     }
 
     /**
@@ -147,7 +213,7 @@ class CurrencyService
             return 1.0;
         }
         if ($currency === 'NGN') {
-            $ngn = $this->getUsdToNgn();
+            $ngn = $this->strictUsdToNgn();
             if ($ngn > 0) {
                 return $ngn;
             }
@@ -168,38 +234,26 @@ class CurrencyService
         return round($usd * $this->usdTo($currency), 2);
     }
 
-    /** All USD→code rates from the feed, or null when it is unreachable / malformed. */
+    /** All USD→code rates for money, or null when no fresh/recent trustworthy table exists (two feeds + snapshot, see FxRates). */
     private function fetchFeedRates(): ?array
     {
-        try {
-            $res = \Illuminate\Support\Facades\Http::timeout(10)->get('https://open.er-api.com/v6/latest/USD');
-            $rates = $res->json('rates');
-
-            return (is_array($rates) && $res->json('result') === 'success') ? $rates : null;
-        } catch (\Throwable $e) {
-            return null;
-        }
+        return app(FxRates::class)->money();
     }
 
     /** All USD→code rates for the supported set (for a rate table / switcher). */
     public function liveRates(): array
     {
-        return Cache::remember('fx.rates.usd', 3600, function () {
-            try {
-                $res = \Illuminate\Support\Facades\Http::timeout(10)
-                    ->get('https://open.er-api.com/v6/latest/USD');
-                $rates = $res->json('rates');
-                if (is_array($rates) && ($res->json('result') === 'success')) {
-                    // Keep only the currencies we display.
-                    return collect(self::SUPPORTED)
-                        ->keys()
-                        ->mapWithKeys(fn ($c) => [$c => (float) ($rates[$c] ?? self::SUPPORTED[$c][3])])
-                        ->all();
-                }
-            } catch (\Throwable $e) {
-                // fall through to the fallback table
+        return Cache::remember('fx.rates.usd', self::LIVE_TTL, function () {
+            Cache::put('fx.asof.DISPLAY', time(), self::LIVE_TTL + 60);
+            $rates = app(FxRates::class)->display();
+            if (is_array($rates)) {
+                return collect(self::SUPPORTED)
+                    ->keys()
+                    ->mapWithKeys(fn ($c) => [$c => (float) ($rates[$c] ?? self::SUPPORTED[$c][3])])
+                    ->all();
             }
 
+            // No feed and no snapshot yet: the static table, for display only (it is approximate).
             return collect(self::SUPPORTED)->mapWithKeys(fn ($v, $c) => [$c => $v[3]])->all();
         });
     }
@@ -218,7 +272,8 @@ class CurrencyService
      */
     public function toUsd(float $localAmount, string $currency): float
     {
-        $rate = $this->rate($currency);
+        // With `fx.money_strict` on (blueprint 10.6 phase C) a top-up is never converted at a built-in rate: no trustworthy table means PayoutException.
+        $rate = Setting::getValue('fx.money_strict', false) ? $this->usdTo($currency) : $this->rate($currency);
 
         return $rate > 0 ? round($localAmount / $rate, 2) : round($localAmount, 2);
     }

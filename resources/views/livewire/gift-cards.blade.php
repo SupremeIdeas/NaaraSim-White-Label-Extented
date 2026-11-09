@@ -135,8 +135,8 @@
                         <span class="ns-lbl" style="margin-top:18px">Recipient details</span>
                         <div class="ns-gf__fields">
                             @foreach ($selected->required_fields as $field)
-                                @php $k = $field['key'] ?? 'field'; @endphp
-                                <input type="{{ $field['type'] ?? 'text' }}" wire:model="fields.{{ $k }}" placeholder="{{ $field['label'] ?? ucfirst($k) }}" aria-label="{{ $field['label'] ?? ucfirst($k) }}" class="ns-input">
+                                @php $k = $field['key'] ?? 'field'; $lbl = \App\Livewire\GiftCards::fieldLabel($field); $typ = str_contains($k, 'msisdn') ? 'tel' : ($field['type'] ?? 'text'); @endphp
+                                <input type="{{ $typ }}" wire:model="fields.{{ \App\Livewire\GiftCards::fieldSlot($k) }}" placeholder="{{ $lbl }}" aria-label="{{ $lbl }}" autocomplete="off" class="ns-input">
                             @endforeach
                         </div>
                     @endif
