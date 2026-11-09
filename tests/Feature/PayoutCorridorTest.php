@@ -61,7 +61,7 @@ class PayoutCorridorTest extends TestCase
 
     private function fakeFeed(array $rates = ['GHS' => 15.5, 'GBP' => 0.8]): void
     {
-        Http::fake(['open.er-api.com/*' => Http::response(['result' => 'success', 'rates' => $rates])]);
+        Http::fake(['open.er-api.com/*' => Http::response(['result' => 'success', 'rates' => array_merge(['NGN' => 1500.0, 'GHS' => 15.0, 'KES' => 130.0, 'ZAR' => 18.0, 'GBP' => 0.79, 'EUR' => 0.92], $rates)]), 'cdn.jsdelivr.net/*' => Http::response('down', 500)]);
     }
 
     // ---- seed defaults ----
@@ -143,7 +143,7 @@ class PayoutCorridorTest extends TestCase
 
     public function test_feed_outage_refuses_instead_of_using_the_hardcoded_display_fallback(): void
     {
-        Http::fake(['open.er-api.com/*' => Http::response('boom', 500)]);
+        Http::fake(['open.er-api.com/*' => Http::response('boom', 500), 'cdn.jsdelivr.net/*' => Http::response('boom', 500)]);
 
         // GHS has a display fallback (15.0) — it must NOT be used for a payout.
         $this->expectException(PayoutException::class);

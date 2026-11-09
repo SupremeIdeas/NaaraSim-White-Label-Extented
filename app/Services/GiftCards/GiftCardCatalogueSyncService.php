@@ -62,6 +62,7 @@ class GiftCardCatalogueSyncService
 
         try {
             $count = 0;
+            $seen = [];
             // A logo the Logo Wizard already stored locally (or the shipped pack) wins over the provider's hot-link on every re-sync.
             app(GiftCardLogoWizard::class)->seedFromPack();
             $local = \App\Models\GiftCardBrandLogo::query()->whereNotNull('path')->get()->keyBy('brand_key');
@@ -83,7 +84,13 @@ class GiftCardCatalogueSyncService
                         'priceable',
                     ])->all(),
                 );
+                $seen[] = $p['provider_product_id'];
                 $count++;
+            }
+
+            // A product the provider no longer lists (or no longer sells as a plain gift card) stops being sold; it is switched off, never deleted, so past orders keep their link.
+            if ($seen !== []) {
+                GiftCardProduct::query()->where('provider', $provider)->whereNotIn('provider_product_id', $seen)->where('provider_enabled', true)->update(['provider_enabled' => false]);
             }
 
             $this->recomputePrimary();

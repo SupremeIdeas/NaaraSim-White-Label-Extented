@@ -14,6 +14,13 @@ class PaymentWebhookTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+        // The suite must not depend on the live exchange-rate feeds: both down means the display rate table (NGN 1500) is used.
+        \Illuminate\Support\Facades\Http::fake(['open.er-api.com/*' => \Illuminate\Support\Facades\Http::response('down', 500), 'cdn.jsdelivr.net/*' => \Illuminate\Support\Facades\Http::response('down', 500)]);
+    }
+
     /** Post a raw JSON body so signature bytes match exactly. */
     private function postRaw(string $uri, array $payload, array $headers = []): TestResponse
     {

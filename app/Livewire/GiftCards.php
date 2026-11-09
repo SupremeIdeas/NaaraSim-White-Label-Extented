@@ -93,7 +93,26 @@ class GiftCards extends Component
         $this->selectedId = $product->id;
         $this->amount = null;
         $this->fields = collect($product->required_fields ?? [])
-            ->mapWithKeys(fn ($f) => [($f['key'] ?? 'field') => ''])->all();
+            ->mapWithKeys(fn ($f) => [self::fieldSlot($f['key'] ?? 'field') => ''])->all();
+    }
+
+    /** The dot-free form key for a provider field key. */
+    public static function fieldSlot(string $key): string
+    {
+        return str_replace('.', '__', $key);
+    }
+
+    /** A person-friendly label: "recipient.firstName" reads "Recipient first name". */
+    public static function fieldLabel(array $field): string
+    {
+        $label = (string) ($field['label'] ?? '');
+        if ($label !== '' && ! str_contains($label, '.') && ! preg_match('/[a-z][A-Z]/', $label)) {
+            return $label;
+        }
+
+        $words = preg_replace('/(?<=[a-z0-9])(?=[A-Z])/', ' ', str_replace(['.', '_'], ' ', (string) ($field['key'] ?? ($label ?: 'field'))));
+
+        return ucfirst(strtolower(trim((string) preg_replace('/\s+/', ' ', $words))));
     }
 
     public function close(): void
@@ -113,7 +132,13 @@ class GiftCards extends Component
             $product = $product->siblings()->get()->first(fn ($p) => collect((array) $p->fixed_denominations)->contains(fn ($v) => abs((float) $v - (float) $this->amount) < 0.0001)) ?? $product;
         }
         try {
-            $order = $orders->purchase(Auth::user(), $product, (float) $this->amount, array_map('strval', $this->fields));
+            $real = [];
+            foreach ((array) $product->required_fields as $f) {
+                $key = (string) ($f['key'] ?? 'field');
+                $v = $this->fields[self::fieldSlot($key)] ?? '';
+                $real[$key] = trim(is_scalar($v) ? (string) $v : '');
+            }
+            $order = $orders->purchase(Auth::user(), $product, (float) $this->amount, $real);
         } catch (GiftCardException $e) {
             $this->dispatch('nx-toast', type: 'error', message: $e->getMessage());
 

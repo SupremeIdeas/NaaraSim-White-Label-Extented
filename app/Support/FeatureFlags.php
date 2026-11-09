@@ -85,6 +85,16 @@ class FeatureFlags
             'guide' => null,
             'default' => true,
         ],
+        'naara_topup' => [
+            'name' => 'Top-Up (airtime and data)',
+            'group' => 'Products',
+            'icon' => 'signal',
+            'description' => 'Airtime and data for physical SIMs, with a dedicated section for customers. Live offers from the suppliers you switch on (Zendit, VTpass, Reloadly, Ding). On by default; it opens when at least one supplier is enabled with keys saved.',
+            'requires' => [],
+            'requires_any' => [['services.zendit.api_key'], ['services.vtpass.api_key', 'services.vtpass.secret_key'], ['services.reloadly.client_id', 'services.reloadly.client_secret'], ['services.ding.api_key']],
+            'guide' => null,
+            'default' => true,
+        ],
     ];
 
     /** Admin's on/off switch for a feature (ignores whether keys are present). */

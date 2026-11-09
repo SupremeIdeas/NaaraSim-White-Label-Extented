@@ -111,6 +111,10 @@ class BottomNav
             ['route' => 'security', 'label' => 'Security', 'icon' => 'shield'],
         ];
 
+        if (FeatureFlags::adminEnabled('naara_topup') && ! FeatureEntitlements::locked(FeatureLocks::F_TOPUP) && \Illuminate\Support\Facades\Route::has('topup')) {
+            array_unshift($more, ['route' => 'topup', 'label' => 'Top-up', 'icon' => 'signal']);
+        }
+
         if (FeatureEntitlements::locked(FeatureLocks::F_BRAND_HUNT)) {
             $more = array_values(array_filter($more, fn ($item) => ($item['route'] ?? null) !== 'brand.get-listed'));
         }

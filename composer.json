@@ -9,6 +9,7 @@
         "php": "^8.2",
         "barryvdh/laravel-dompdf": "^3.1",
         "endroid/qr-code": "^6.0",
+        "giggsey/libphonenumber-for-php-lite": "^9.0",
         "ifsnop/mysqldump-php": "^2.12",
         "laravel/fortify": "^1.37",
         "laravel/framework": "^12.0",

@@ -24,6 +24,8 @@ class FeatureLocks
     // gate on via FeatureEntitlements::locked(self::F_*).
     public const F_GIFT_CARDS = 'gift_cards';
 
+    public const F_TOPUP = 'topup'; // Airtime and data top-ups
+
     public const F_ESIM_VOICE = 'esim_voice'; // full "Naara Connect" calls+SMS eSIM (data-only stays open)
 
     public const F_PRELOADER = 'preloader_customization';
@@ -35,6 +37,7 @@ class FeatureLocks
     {
         return [
             self::F_GIFT_CARDS => 'Gift cards',
+            self::F_TOPUP => 'Airtime and data top-ups',
             self::F_ESIM_VOICE => 'Full voice eSIM (Naara Connect — calls + SMS)',
             self::F_PRELOADER => 'Preloader customization',
             self::F_BRAND_HUNT => 'Brand Hunt / Brand Directory',

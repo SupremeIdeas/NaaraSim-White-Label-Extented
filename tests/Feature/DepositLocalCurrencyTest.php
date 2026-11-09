@@ -33,7 +33,8 @@ class DepositLocalCurrencyTest extends TestCase
         // actually support it.
         config(['services.flutterwave.secret_key' => 'flw_test_secret']);
         Http::fake([
-            'open.er-api.com/*' => Http::response(['result' => 'success', 'rates' => ['GBP' => 0.80, 'USD' => 1, 'NGN' => 1600]]),
+            'open.er-api.com/*' => Http::response(['result' => 'success', 'rates' => ['GBP' => 0.80, 'USD' => 1, 'NGN' => 1600, 'GHS' => 15.0, 'KES' => 130.0, 'ZAR' => 18.0, 'EUR' => 0.92]]),
+            'cdn.jsdelivr.net/*' => Http::response('down', 500),
             'api.paystack.co/*' => Http::response(['data' => ['authorization_url' => 'https://checkout.paystack.com/xyz', 'reference' => 'r']]),
             'api.flutterwave.com/*' => Http::response(['data' => ['link' => 'https://checkout.flutterwave.com/xyz']]),
         ]);

@@ -183,6 +183,19 @@ class ProviderKeys
                     'tillo_webhook_secret' => ['label' => 'Tillo — Webhook Secret', 'config' => 'services.tillo.webhook_secret', 'env' => 'TILLO_WEBHOOK_SECRET', 'secret' => true, 'hint' => 'Verifies Tillo\'s order webhook (/webhooks/giftcards/tillo).'],
                 ],
             ],
+            'topup' => [
+                'label' => 'Airtime and data top-ups',
+                'fields' => [
+                    'vtpass_api_key' => ['label' => 'VTpass — API Key', 'config' => 'services.vtpass.api_key', 'env' => 'VTPASS_API_KEY', 'secret' => true, 'hint' => 'vtpass.com → Profile → API settings. Nigeria airtime + data. Use VTPASS_SANDBOX=true first; live access may need your server IP whitelisted.'],
+                    'vtpass_public_key' => ['label' => 'VTpass — Public Key', 'config' => 'services.vtpass.public_key', 'env' => 'VTPASS_PUBLIC_KEY', 'secret' => false, 'hint' => 'Same page. Used for GET requests (catalogue, balance).'],
+                    'vtpass_secret_key' => ['label' => 'VTpass — Secret Key', 'config' => 'services.vtpass.secret_key', 'env' => 'VTPASS_SECRET_KEY', 'secret' => true, 'hint' => 'Same page, shown once. Used for POST requests (pay, requery).'],
+                    'vtpass_webhook_secret' => ['label' => 'VTpass — Webhook Secret', 'config' => 'services.vtpass.webhook_secret', 'env' => 'VTPASS_WEBHOOK_SECRET', 'secret' => true, 'hint' => 'Any long random string. Put the callback URL https://YOUR-SITE/webhooks/topup/vtpass?secret=THE-STRING in the VTpass dashboard.'],
+                    'ding_api_key' => ['label' => 'Ding — API Key', 'config' => 'services.ding.api_key', 'env' => 'DING_API_KEY', 'secret' => true, 'hint' => 'dingconnect.com → Account Settings → Developer. Global airtime + data with number lookup.'],
+                    'paga_public_key' => ['label' => 'Paga — Public Key', 'config' => 'services.paga.public_key', 'env' => 'PAGA_PUBLIC_KEY', 'secret' => false, 'hint' => 'business.paga.com → Developer Tools → API Keys (sandbox: beta-business.paga.com). Used in the checkout link, so it is not secret. Sandbox and live keys are different.'],
+                    'paga_secret_key' => ['label' => 'Paga — Secret Key', 'config' => 'services.paga.secret_key', 'env' => 'PAGA_SECRET_KEY', 'secret' => true, 'hint' => 'Same page (Reset to generate). Used to confirm every payment with Paga before the wallet is credited.'],
+                    'paga_hash_key' => ['label' => 'Paga — HMAC / Hash Key', 'config' => 'services.paga.hash_key', 'env' => 'PAGA_HASH_KEY', 'secret' => true, 'hint' => 'Same page. Signs Paga callbacks (SHA-512) and refunds. Register our payment webhook URL (shown on Admin > Payment gateways) as the callback in the checkout.'],
+                ],
+            ],
             'voice' => [
                 'label' => 'Voice (ElevenLabs)',
                 'fields' => [
