@@ -139,7 +139,7 @@ class BitrefillTopupProvider implements TopupProviderInterface
                 $out[] = new ProductDTO($pid, $iso, $op, 'airtime', $op.' '.$value.' '.$cur, $cur, isFixed: true, fixedAmount: (float) $value, operatorCode: (string) $p['id'],
                     costNative: $price, costCurrency: $cur, meta: ['product_id' => (string) $p['id']]);
             } else {
-                [$mb, $days, $unl] = \App\Services\eSIM\BitrefillEsimService::parseValue((string) $value);
+                [$mb, $days, $unl] = \App\Services\Topup\DataValue::parse((string) $value);
                 $out[] = new ProductDTO($pid, $iso, $op, 'data', (string) $value, $cur, isFixed: true, fixedAmount: null, operatorCode: (string) $p['id'],
                     validityText: $days ? $days.' day'.($days > 1 ? 's' : '') : null, dataMb: $mb, dataUnlimited: $unl, costNative: $price, costCurrency: $cur, meta: ['product_id' => (string) $p['id']]);
             }
