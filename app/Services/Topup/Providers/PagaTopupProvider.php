@@ -64,7 +64,21 @@ class PagaTopupProvider implements TopupProviderInterface
     }
 
     /** @param list<string> $hashFields values hashed in the documented order, before the hash key */
-    private function call(string $method, array $body, array $hashFields, int $timeout = 30, ?string $ref = null)
+    private function call(string $method, array $body, array $hashFields, int $timeout = 30, ?string $ref = null, bool $retryAuth = false)
+    {
+        // Paga's edge answers an intermittent 401 to a valid key (seen live on about half of reads). That is safe to repeat ONLY for read calls:
+        // $retryAuth is set by the catalogue and balance reads and NEVER by airtimePurchase, which must not be re-sent.
+        $attempts = $retryAuth ? 9 : 1;
+        for ($i = 1; ; $i++) {
+            $r = $this->callOnce($method, $body, $hashFields, $timeout, $ref);
+            if ($r->status() !== 401 || $i >= $attempts) {
+                return $r;
+            }
+            usleep(300000 * $i);
+        }
+    }
+
+    private function callOnce(string $method, array $body, array $hashFields, int $timeout, ?string $ref)
     {
         $hash = hash('sha512', implode('', $hashFields).(string) config('services.paga.hash_key'));
         $http = Http::acceptJson()->asJson()->timeout($timeout)->connectTimeout(5)->withHeaders([
@@ -90,7 +104,7 @@ class PagaTopupProvider implements TopupProviderInterface
     {
         return Cache::remember('paga.operators', 43200, function () {
             $ref = $this->newReference();
-            $r = $this->call('getMobileOperators', ['referenceNumber' => $ref], [$ref])->throw();
+            $r = $this->call('getMobileOperators', ['referenceNumber' => $ref], [$ref], 30, null, true)->throw();
             $out = [];
             foreach ((array) $r->json('mobileOperator', []) as $o) {
                 if (! empty($o['name']) && ! empty($o['mobileOperatorCode'])) {
@@ -119,16 +133,13 @@ class PagaTopupProvider implements TopupProviderInterface
         foreach ($this->operators() as $op => $uuid) {
             $out[] = new ProductDTO('air|'.$uuid, 'NG', $op, 'airtime', 'Airtime', 'NGN', isFixed: false, minAmount: 50, maxAmount: 50000, operatorCode: $uuid,
                 costRatio: round(1 - $disc / 100, 6), costCurrency: 'NGN', meta: ['operator_uuid' => $uuid]);
-            try {
-                $ref = $this->newReference();
-                $r = $this->call('getDataBundleByOperator', ['referenceNumber' => $ref, 'operatorPublicId' => $uuid], [$ref, $uuid])->throw();
-            } catch (Throwable) {
-                continue;
-            }
+            // A failed bundle list throws: a half-listed catalogue would retire real offers, so the last good snapshot stays instead.
+            $ref = $this->newReference();
+            $r = $this->call('getDataBundleByOperator', ['referenceNumber' => $ref, 'operatorPublicId' => $uuid], [$ref, $uuid], 30, null, true)->throw();
             foreach ((array) $r->json('mobileOperatorServices', []) as $s) {
                 $price = (float) ($s['servicePrice'] ?? 0);
                 $id = (string) ($s['serviceId'] ?? '');
-                $name = trim(preg_replace('/\s+/', ' ', (string) ($s['serviceName'] ?? '')));
+                $name = trim(preg_replace('/[\s_]+/', ' ', (string) ($s['serviceName'] ?? '')));
                 if ($price <= 0 || $id === '' || $name === '') {
                     continue;
                 }
@@ -200,7 +211,7 @@ class PagaTopupProvider implements TopupProviderInterface
     public function requery(string $reference, ?string $providerTxnId = null): PurchaseResult
     {
         try {
-            $r = $this->call('transactionStatus', ['referenceNumber' => $reference], [$reference], 30, $reference);
+            $r = $this->call('transactionStatus', ['referenceNumber' => $reference], [$reference], 30, $reference, true);
         } catch (Throwable) {
             return new PurchaseResult(PurchaseResult::PENDING, $reference, message: 'Network error.');
         }
@@ -255,7 +266,7 @@ class PagaTopupProvider implements TopupProviderInterface
     public function balance(): array
     {
         $ref = $this->newReference();
-        $r = $this->call('accountBalance', ['referenceNumber' => $ref], [$ref])->throw();
+        $r = $this->call('accountBalance', ['referenceNumber' => $ref], [$ref], 30, null, true)->throw();
 
         return ['amount' => (float) ($r->json('totalBalance') ?? $r->json('availableBalance') ?? 0), 'currency' => 'NGN'];
     }
