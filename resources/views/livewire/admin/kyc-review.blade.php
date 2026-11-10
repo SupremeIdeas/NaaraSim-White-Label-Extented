@@ -41,7 +41,11 @@
             <tbody>
                 @forelse ($pending as $v)
                     <tr class="border-b border-slate-50 dark:border-[#34373c]" wire:key="kyc-pending-{{ $v->id }}">
-                        <td class="px-4 py-3 text-slate-600 dark:text-slate-300">{{ $v->user?->email ?? '—' }}</td>
+                        <td class="px-4 py-3 text-slate-600 dark:text-slate-300">{{ $v->user?->email ?? '—' }}
+                            @if ($v->reason && $v->provider !== 'manual')
+                                <p class="mt-1 text-[11px] font-semibold text-amber-700 dark:text-amber-300" data-kyc-reason>{{ $v->reason }}</p>
+                            @endif
+                        </td>
                         <td class="px-4 py-3 text-slate-600 dark:text-slate-300">{{ $v->level === 3 ? 'Business (L3)' : 'Individual (L2)' }}</td>
                         <td class="px-4 py-3 text-xs text-slate-500 dark:text-slate-400 capitalize">{{ $v->provider }}</td>
                         <td class="px-4 py-3">
