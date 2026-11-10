@@ -50,12 +50,39 @@ class DingProvider implements TopupProviderInterface
             ->withHeaders(['api_key' => (string) config('services.ding.api_key')])->timeout($timeout);
     }
 
+    /**
+     * Read-only GET with a retry: Ding's edge answers an intermittent 401 AuthenticationFailed to a valid key (seen live, roughly every other
+     * call). Reads are safe to repeat; SendTransfer is NEVER sent through here.
+     *
+     * @param  array<string, mixed>  $query
+     */
+    private function read(string $path, array $query = [], int $timeout = 60): \Illuminate\Http\Client\Response
+    {
+        $r = null;
+        for ($i = 0; $i < 7; $i++) {
+            $r = $this->send($this->client($timeout), 'GET', $path, $query);
+            if ($r->status() !== 401 && (int) $r->json('ResultCode', 1) !== 4) {
+                return $r;
+            }
+            usleep(400000 * ($i + 1));
+        }
+
+        return $r;
+    }
+
     public function countries(): array
     {
         return Cache::remember('topup.ding.countries', 21600, function () {
             try {
-                return collect((array) $this->send($this->client(30), 'GET', '/GetCountries')->throw()->json('Items', []))->pluck('CountryIso')->filter()->map('strtoupper')->values()->all();
+                $list = collect((array) $this->read('/GetCountries', [], 30)->throw()->json('Items', []))->pluck('CountryIso')->filter()->map('strtoupper')->values()->all();
+                if (! $list) {
+                    Cache::forget('topup.ding.countries');
+                }
+
+                return $list;
             } catch (Throwable) {
+                Cache::forget('topup.ding.countries');
+
                 return [];
             }
         });
@@ -64,7 +91,7 @@ class DingProvider implements TopupProviderInterface
     public function lookupRecipient(string $e164Phone, ?string $countryIso = null): ?RecipientInfo
     {
         try {
-            $r = $this->send($this->client(30), 'GET', '/GetAccountLookup', ['accountNumber' => $e164Phone]);
+            $r = $this->read('/GetAccountLookup', ['accountNumber' => $e164Phone], 30);
         } catch (Throwable) {
             return null;
         }
@@ -77,22 +104,32 @@ class DingProvider implements TopupProviderInterface
         return new RecipientInfo(strtoupper((string) ($item['RegionCode'] ?? $countryIso ?? '')), $names[$item['ProviderCode']] ?? (string) $item['ProviderCode'], (string) $item['ProviderCode']);
     }
 
-    /** @return array<string, string> ProviderCode => display name */
+    /** @return array<string, string> ProviderCode => display name, per country; a failed or empty answer is never cached */
     private function providerNames(?string $iso = null): array
     {
-        return Cache::remember('topup.ding.providers', 21600, function () {
-            try {
-                return collect((array) $this->send($this->client(30), 'GET', '/GetProviders')->throw()->json('Items', []))->mapWithKeys(fn ($p) => [(string) $p['ProviderCode'] => (string) ($p['Name'] ?? $p['ProviderCode'])])->all();
-            } catch (Throwable) {
-                return [];
-            }
-        });
+        $iso = strtoupper((string) $iso);
+        $key = 'topup.ding.providers.'.($iso ?: 'all');
+        if (is_array($hit = Cache::get($key)) && $hit) {
+            return $hit;
+        }
+        try {
+            $r = $this->read('/GetProviders', $iso !== '' ? ['countryIsos' => $iso] : [], 90)->throw();
+            $cn = $iso !== '' ? $this->countryName($iso) : '';
+            $map = collect((array) $r->json('Items', []))->mapWithKeys(fn ($p) => [(string) $p['ProviderCode'] => $this->brand((string) ($p['Name'] ?? $p['ProviderCode']), $cn)])->all();
+        } catch (Throwable) {
+            return [];
+        }
+        if ($map) {
+            Cache::put($key, $map, 21600);
+        }
+
+        return $map;
     }
 
     public function listProducts(string $countryIso): array
     {
-        $r = $this->send($this->client(60), 'GET', '/GetProducts', ['countryIsos' => strtoupper($countryIso)])->throw();
-        $names = $this->providerNames();
+        $r = $this->read('/GetProducts', ['countryIsos' => strtoupper($countryIso)])->throw();
+        $names = $this->providerNames($countryIso);
         $out = [];
         foreach ((array) $r->json('Items', []) as $p) {
             $sku = (string) ($p['SkuCode'] ?? '');
@@ -125,6 +162,30 @@ class DingProvider implements TopupProviderInterface
         }
 
         return $out;
+    }
+
+    /** "MTN Nigeria Data" and "MTN Nigeria" are one brand to a customer: drop the Data suffix and the country name so the offer groups under "MTN". */
+    private function brand(string $name, string $country): string
+    {
+        $n = trim((string) preg_replace('/\s+Data$/i', '', trim($name)));
+        if ($country !== '' && preg_match('/^(.+?)\s+'.preg_quote($country, '/').'$/iu', $n, $m)) {
+            $n = trim($m[1]);
+        }
+
+        return $n !== '' ? $n : $name;
+    }
+
+    private function countryName(string $iso): string
+    {
+        $names = Cache::remember('topup.ding.countrynames', 86400, function () {
+            try {
+                return collect((array) $this->read('/GetCountries', [], 30)->json('Items', []))->mapWithKeys(fn ($c) => [strtoupper((string) ($c['CountryIso'] ?? '')) => (string) ($c['CountryName'] ?? '')])->all();
+            } catch (Throwable) {
+                return [];
+            }
+        });
+
+        return (string) ($names[strtoupper($iso)] ?? '');
     }
 
     private function validity(string $iso): ?string
@@ -206,7 +267,7 @@ class DingProvider implements TopupProviderInterface
 
     public function balance(): array
     {
-        $r = $this->send($this->client(30), 'GET', '/GetBalance')->throw();
+        $r = $this->read('/GetBalance', [], 30)->throw();
 
         return ['amount' => (float) $r->json('Balance', 0), 'currency' => (string) $r->json('CurrencyIso', 'USD')];
     }

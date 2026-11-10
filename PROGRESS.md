@@ -1,3 +1,6 @@
+## 2026-11-10: Ding and Paga airtime and data verified live; offers seeded for fresh installs
+Real read-only probes with the live Ding and Paga keys (no purchases). Both suppliers' edges answer an intermittent 401 to a valid key, so read calls now retry (purchases never do) and a half-listed catalogue throws instead of retiring real offers. Ding operator names resolve per country and collapse to the brand; a failed lookup is never cached. Paga bundle names are tidied. The shipped snapshot (database/seeders/topup-offers.json.gz) now carries Zendit, Ding and Paga offers so a fresh install starts complete. Ding float is $0 and Paga 100 NGN: fund before routing real orders.
+
 ## 2026-11-03: One licence per site, two-tone icons, brand proof
 - Brand engine proof (24 pages, guest and admin): visible "Naara" 0 before and after; the owner's name replaces the shipped one everywhere (250 occurrences, 0 left). Fixed the last leaks: support email default no longer the platform's, the wizard helper labels, the banner eyebrow.
 - Icons: every line icon now carries one tiny accent detail (`--ic-accent`, from the active icon pack; default graphite line with warm gold). The ash tint inside pack icons is gone (clean line art). Fixed a giant stray icon at the bottom of the sidebar (a caller's `shrink-0` class replaced the icon size).
