@@ -74,4 +74,14 @@ class DojahOutcomesTest extends TestCase
 
         $this->assertSame(KycVerification::PENDING, $v->status);
     }
+
+    public function test_the_admin_queue_shows_why_a_dojah_check_is_waiting(): void
+    {
+        $v = $this->nin(402, ['error' => 'Your balance is low']);
+        $admin = User::factory()->create();
+        $admin->assignRole('admin');
+
+        \Livewire\Livewire::actingAs($admin)->test(\App\Livewire\Admin\KycReview::class)->assertSee('Awaiting manual review.')->assertSeeHtml('data-kyc-reason');
+        $this->assertSame(KycVerification::PENDING, $v->status);
+    }
 }
