@@ -84,7 +84,7 @@ class KycTest extends TestCase
         Setting::setValue(KycSettings::PROVIDER, 'dojah', 'kyc');
         Http::fake(['*/api/v1/kyc/nin*' => Http::response(['entity' => ['first_name' => 'Jane']], 200)]);
 
-        $user = User::factory()->create();
+        $user = User::factory()->create(['name' => 'Jane Doe']);
         $v = $this->kyc()->submit($user, KycVerification::L2, ['id_number' => '12345678901']);
 
         $this->assertSame(KycVerification::APPROVED, $v->status);

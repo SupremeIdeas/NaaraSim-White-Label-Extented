@@ -1,3 +1,6 @@
+## 2026-11-10: Dojah KYC/KYB outcomes classified and name-matched
+Live probe with the real Dojah keys (read-only): credentials authenticate, but the Dojah wallet is NGN 0.00 so NIN and CAC lookups answer 402. An empty wallet now goes to manual review (never a customer failure) and logs critical; 400/404 reject, 401/403 fail loudly. A real NIN no longer approves any account: the name on the record must share a name with the account, else staff review it. Top up the Dojah wallet to turn automation on.
+
 ## 2026-11-10: Ding and Paga airtime and data verified live; offers seeded for fresh installs
 Real read-only probes with the live Ding and Paga keys (no purchases). Both suppliers' edges answer an intermittent 401 to a valid key, so read calls now retry (purchases never do) and a half-listed catalogue throws instead of retiring real offers. Ding operator names resolve per country and collapse to the brand; a failed lookup is never cached. Paga bundle names are tidied. The shipped snapshot (database/seeders/topup-offers.json.gz) now carries Zendit, Ding and Paga offers so a fresh install starts complete. Ding float is $0 and Paga 100 NGN: fund before routing real orders.
 
