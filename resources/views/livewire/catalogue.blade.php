@@ -108,12 +108,20 @@
                 </div>
             @endif
 
+            @if ($fx)
+                @include('livewire.catalogue._finder', ['fx' => $fx, 'finderKey' => $screen === 'country' ? 'c-'.$selCode : 'r-'.$selSlug])
+                <div style="margin-top:18px">@include('livewire.catalogue._finder-results', ['fx' => $fx, 'fmt' => $fmt, 'plans' => $plans])</div>
+            @endif
+            @if (! $fx || ! $fx['applied'])
             <div class="ns-nrow" style="margin-top:22px"><span class="ns-lbl" style="color:rgb(var(--nx-text));font-weight:600">{{ __('esim.choose_package') }}</span><span class="ns-sub" style="margin:0;font-size:13px">{{ trans_choice('esim.plans_count', $plans->total(), ['count' => $plans->total()]) }}</span></div>
             @include('livewire.catalogue._plan-list', ['plans' => $plans, 'fmt' => $fmt])
+            @endif
 
-            <x-nx.note icon="bars" variant="link" tag="a" :href="route('data-estimator')" wire:navigate>
-                <b>{{ __('esim.estimator_title') }}</b>{{ __('esim.estimator_cta') }}
-            </x-nx.note>
+            @if (! $fx)
+                <x-nx.note icon="bars" variant="link" tag="a" :href="route('data-estimator')" wire:navigate>
+                    <b>{{ __('esim.estimator_title') }}</b>{{ __('esim.estimator_cta') }}
+                </x-nx.note>
+            @endif
         </x-nx.page>
 
     {{-- =============================== FRONT =============================== --}}
@@ -194,7 +202,13 @@
                         <h2>{{ __('esim.global_title') }}</h2>
                         <p>{{ __('esim.global_body') }}</p>
                     </div>
-                    @include('livewire.catalogue._plan-list', ['plans' => $plans, 'fmt' => $fmt])
+                    @if ($fx)
+                        @include('livewire.catalogue._finder', ['fx' => $fx, 'finderKey' => 'global'])
+                        <div style="margin-top:18px">@include('livewire.catalogue._finder-results', ['fx' => $fx, 'fmt' => $fmt, 'plans' => $plans])</div>
+                    @endif
+                    @if (! $fx || ! $fx['applied'])
+                        @include('livewire.catalogue._plan-list', ['plans' => $plans, 'fmt' => $fmt])
+                    @endif
                 @else
                     <x-esim.empty-nav />
                 @endif
