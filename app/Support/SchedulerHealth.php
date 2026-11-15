@@ -28,6 +28,7 @@ class SchedulerHealth
      * @var array<string, array{0:string,1:int}>
      */
     public const TASKS = [
+        'ops:cron-tick' => ['Cron heartbeat', 60],
         'queue:work' => ['Queue drain (shared hosting)', 60],
         'cookies:prune' => ['Cookie consent log prune', 86400 + 3600],
         'whitelabel:check-in' => ['Licence check-in with the original platform', 3600 + 1800],
@@ -120,11 +121,12 @@ class SchedulerHealth
     public static function report(): array
     {
         $rows = [];
+        [$lasts, $latests] = self::heartbeatMaps();
         foreach (self::TASKS as $name => [$label, $expected]) {
-            $last = self::lastRun($name);
-            $latest = JobHeartbeats::latest($name);
+            $last = isset($lasts[$name]) ? Carbon::parse($lasts[$name]) : null;
+            $latest = $latests[$name] ?? null;
             $threshold = $expected + max((int) ($expected * 0.33), 300);
-            $overdue = $last === null || now()->diffInSeconds($last) > $threshold;
+            $overdue = $last === null || $last->diffInSeconds(now()) > $threshold;   // past to now: positive (Carbon 3 signs the difference)
 
             $rows[] = [
                 'name' => $name,
@@ -140,6 +142,24 @@ class SchedulerHealth
         }
 
         return $rows;
+    }
+
+    /**
+     * Two grouped queries instead of two per task, so the page can poll every few seconds: the last SUCCESS time and the latest attempt of every job.
+     *
+     * @return array{0: array<string, string>, 1: \Illuminate\Support\Collection}
+     */
+    private static function heartbeatMaps(): array
+    {
+        try {
+            $lasts = \App\Models\JobHeartbeat::query()->where('outcome', 'success')->selectRaw('job_name, MAX(finished_at) as last')->groupBy('job_name')->pluck('last', 'job_name')->all();
+            $ids = \App\Models\JobHeartbeat::query()->selectRaw('MAX(id) as id')->groupBy('job_name')->pluck('id');
+            $latests = \App\Models\JobHeartbeat::query()->whereIn('id', $ids)->get()->keyBy('job_name');
+        } catch (\Throwable) {
+            return [[], collect()];
+        }
+
+        return [$lasts, $latests];
     }
 
     /** Any monitored task overdue → the cron is probably not firing. */
