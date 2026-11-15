@@ -45,6 +45,9 @@ Schedule::command('ops:cron-tick')->everyMinute();
 Schedule::command('payouts:guard-sweep')->everyMinute()->withoutOverlapping();
 Schedule::command('payouts:float-retry')->everyFiveMinutes()->withoutOverlapping();
 Schedule::command('payouts:float-sync')->everyThirtyMinutes()->withoutOverlapping();
+// Grey is live: once its API key is set, its corridors are synced from Grey's own list and switched on without anyone touching Admin (an admin-edited corridor is left alone).
+Schedule::command('payouts:sync-corridors grey --enable --quiet')->hourly()->withoutOverlapping()
+    ->when(fn () => class_exists(\App\PayoutRails\Grey\GreyClient::class) && app(\App\PayoutRails\Grey\GreyClient::class)->configured());
 // Funding Radar (Addendum A): snapshot + hourly stats every 5 minutes, prune nightly.
 Schedule::command('payouts:radar-snapshot')->everyFiveMinutes()->withoutOverlapping();
 Schedule::command('payouts:stats-hourly')->everyFiveMinutes()->withoutOverlapping();

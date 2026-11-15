@@ -16,7 +16,7 @@ return [
     // installed they are shown as "coming soon" and are never offered to users. Core payouts never depend on them.
     'planned_rails' => [
         'payoneer' => ['label' => 'Payoneer', 'note' => 'Needs a Payoneer partner/mass-payout account and API access.'],
-        'grey' => ['label' => 'Grey', 'note' => 'Needs Grey business API access (no public API yet).'],
+        'grey' => ['label' => 'Grey', 'note' => 'Grey Business API rail: live, with its corridors synced and switched on automatically.'],
         'stripe_global' => ['label' => 'Stripe Global Payouts', 'note' => 'Needs a US-registered entity with Stripe Treasury and Global Payouts access.'],
     ],
 
@@ -26,7 +26,7 @@ return [
 
     // Rails that approve automatically (via the Payout Guardian) as soon as payouts are switched on. Everything else needs
     // an explicit admin switch. A rail only belongs here once it is built AND tested.
-    'auto_approve_default_providers' => ['paystack', 'flutterwave', 'stripe'],
+    'auto_approve_default_providers' => ['paystack', 'flutterwave', 'stripe', 'grey', 'nowpayments'],
 
     // Minor-unit digits per currency (ISO 4217). Anything not listed uses `default`. The admin can
     // override single currencies in Admin -> Payouts -> Controls without a deploy.

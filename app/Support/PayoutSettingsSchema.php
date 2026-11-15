@@ -21,7 +21,7 @@ class PayoutSettingsSchema
                 'title' => 'Basics',
                 'blurb' => 'The master switches. Payouts are OFF until you turn them on.',
                 'fields' => [
-                    self::f(PayoutSettings::FLAG, 'Payouts enabled', 'Master switch. When off, nobody can request or receive a withdrawal.', 'bool', false, danger: true),
+                    self::f(PayoutSettings::FLAG, 'Payouts enabled', 'Master switch. When off, nobody can request or receive a withdrawal.', 'bool', true, danger: true),
                     self::f(PayoutSettings::MODE, 'Settlement mode', 'Auto = the Guardian approves low-risk requests by itself and sends them (recommended). Manual = a person approves every request.', 'select', 'auto', options: ['manual' => 'Manual — approve each request', 'auto' => 'Auto — Guardian may approve'], danger: true),
                     self::f(PayoutSettings::ENV_MODE, 'Payout environment', 'Auto (recommended) follows where the app runs: a real HTTPS website sends real money with live keys, and a laptop or test box stays in sandbox. Live forces real money on a real website. Sandbox is only ever chosen here, on purpose: nothing locks you into it. Live keys are never used in sandbox and test keys are never used live.', 'select', 'auto', options: ['auto' => 'Auto: follow where the app runs (recommended)', 'live' => 'Live: real money', 'sandbox' => 'Sandbox: test money only'], danger: true),
                     self::f(PayoutSettings::MIN, 'Minimum withdrawal', 'Smallest amount a user can withdraw.', 'float', 5.0, min: 0, max: 100000, unit: 'USD'),
@@ -29,7 +29,7 @@ class PayoutSettingsSchema
                     self::f(PayoutSettings::MAX_OPEN, 'Open requests per user', 'How many withdrawals one user can have in progress at the same time.', 'int', 3, min: 1, max: 50),
                     self::f(PayoutSettings::QUOTE_HOURS, 'Quote lock', 'How long the exchange rate shown to the user is honoured.', 'int', 24, min: 1, max: 168, unit: 'hours'),
                     self::f(PayoutSettings::STRIPE_GLOBAL, 'Stripe Global Payouts available', 'Turn on ONLY if your Stripe account is US/UK-based with Treasury and Global Payouts access. Without it, Stripe payouts are limited to recipients in the US, UK, EEA, Canada and Switzerland (Stripe\'s own rule).', 'bool', false, danger: true),
-                    self::f(PayoutSettings::MANUAL_EXTERNAL, 'Manual rail (Plan B)', 'Lets you pay people yourself (bank/app) and record proof in Payout health. No provider is called. Use until a real provider is live.', 'bool', false),
+                    self::f(PayoutSettings::MANUAL_EXTERNAL, 'Manual rail (Plan B)', 'Lets you pay people yourself (bank/app) and record proof in Payout health. No provider is called. Use until a real provider is live.', 'bool', true),
                 ],
             ],
             'autoapproval' => [

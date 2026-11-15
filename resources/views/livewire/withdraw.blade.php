@@ -69,6 +69,26 @@
         <x-nx.empty art="es-bank" text="No payout accounts yet — add one below." />
     @endforelse
 
+    {{-- Grey, the global rail: one tap to set up, then withdrawals are approved and paid automatically (the Guardian still reviews a brand-new account first). --}}
+    @if ($greyAvailable && $enabled)
+        @if ($greyAccount)
+            <x-nx.note icon="check" data-grey-ready>
+                <b style="display:block;color:rgb(var(--nx-text));font-weight:600">Grey is set up: your withdrawals are automatic</b>
+                {{ $greyAccount->bank_name }} · {{ $greyAccount->masked_number }} · {{ $greyAccount->currency }}. Request a withdrawal and it is approved, sent and confirmed without anyone touching it. You get a notification at every step.
+            </x-nx.note>
+        @elseif ($greyMine)
+            <div class="ns-row" style="height:auto;padding:14px;margin-top:22px;flex-wrap:wrap;gap:12px;align-items:center" data-grey-offer>
+                <span class="ns-text" style="min-width:0;flex:1 1 14rem">
+                    <b style="display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-size:16px;font-weight:600">Get paid with Grey <x-nx.pill variant="rec"><x-nx.icon name="zap" /> Recommended for you</x-nx.pill></b>
+                    <small class="ns-small" style="display:block;margin-top:4px">Straight to your own {{ $greyMine['method'] === 'mobile_money' ? 'mobile-money wallet' : 'bank account' }} in {{ $greyMine['currency'] }}. Set it up once, then every withdrawal runs by itself.</small>
+                </span>
+                <button type="button" wire:click="startGrey" wire:loading.attr="disabled" wire:target="startGrey" class="ns-cta ns-cta--pill ns-cta--sm" style="flex:none"><span wire:loading.remove wire:target="startGrey">Set up in 1 minute</span><span wire:loading wire:target="startGrey">Opening...</span></button>
+            </div>
+        @else
+            <x-nx.note icon="info">Grey pays {{ count($greyCountries) }} countries directly. Yours is not on the list yet, so use the bank, PayPal or crypto option below.</x-nx.note>
+        @endif
+    @endif
+
     {{-- Add account --}}
     <x-nx.step icon="plus" style="margin-top:26px" title="Add a payout account" />
 
