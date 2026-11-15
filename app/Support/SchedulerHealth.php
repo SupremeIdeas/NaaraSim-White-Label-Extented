@@ -29,6 +29,8 @@ class SchedulerHealth
      */
     public const TASKS = [
         'ops:cron-tick' => ['Cron heartbeat', 60],
+        'crypto:scan' => ['Crypto top-up deposit scanner', 180],
+        'crypto:selftest' => ['Crypto top-up self-test', 4500],
         'queue:work' => ['Queue drain (shared hosting)', 60],
         'cookies:prune' => ['Cookie consent log prune', 86400 + 3600],
         'whitelabel:check-in' => ['Licence check-in with the original platform', 3600 + 1800],

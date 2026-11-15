@@ -283,6 +283,9 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::get('/top-up/orders/{uuid}', \App\Livewire\TopupOrders::class)->name('topup.order');
         Route::get('/checkout/{plan}', Checkout::class)->name('checkout');
         Route::get('/wallet', Wallet::class)->name('wallet');
+        if (class_exists(\App\Livewire\CryptoTopup::class)) {   // crypto top-up: USDC/USDT from a linked wallet; off until the admin switches it on
+            Route::get('/wallet/crypto', \App\Livewire\CryptoTopup::class)->name('crypto.topup');
+        }
         Route::get('/numbers', GetNumber::class)->name('numbers');
         // My Lines — the dedicated management hub for owned eSIMs + numbers
         // (active, grouped by Model, with an Archive). Numbers section home.
@@ -451,6 +454,9 @@ Route::middleware(['admin.gateway', 'admin', 'throttle:admin'])
             Route::get('/errors', ErrorLogViewer::class)->name('errors');
             // Feature toggles (owner request) — switch features on/off + setup guides.
             Route::get('/features', Features::class)->name('features');
+            if (class_exists(\App\Livewire\Admin\CryptoManage::class)) {
+                Route::get('/crypto-topup', \App\Livewire\Admin\CryptoManage::class)->name('crypto');
+            }
             // Port-in requests (Prompt 11) — ops workflow for customers bringing
             // a US/Canada number to Naara.
             Route::get('/port-in-requests', PortInRequests::class)->name('port-in-requests');

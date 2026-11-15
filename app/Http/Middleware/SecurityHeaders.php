@@ -43,6 +43,9 @@ class SecurityHeaders
             $policy = $this->policyWithConvai($policy);
             $policy = $this->policyWithGoogleFonts($policy);
             $policy = $this->policyWithTrustpilot($policy);
+            if (class_exists(\App\Support\Crypto\CryptoCsp::class)) {
+                $policy = \App\Support\Crypto\CryptoCsp::apply($policy, $request);   // crypto top-up: wallet-connect origins on that one page
+            }
             $headers['Content-Security-Policy'] = $policy;
         }
 

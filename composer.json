@@ -11,6 +11,7 @@
         "endroid/qr-code": "^6.0",
         "giggsey/libphonenumber-for-php-lite": "^9.0",
         "ifsnop/mysqldump-php": "^2.12",
+        "kornrunner/keccak": "1.1.0",
         "laravel/fortify": "^1.37",
         "laravel/framework": "^12.0",
         "laravel/horizon": "^5.47",
@@ -21,6 +22,7 @@
         "livewire/livewire": "^3.0",
         "minishlink/web-push": "^10.1",
         "sentry/sentry-laravel": "^4.26",
+        "simplito/elliptic-php": "1.0.12",
         "socialiteproviders/apple": "^5.10",
         "socialiteproviders/discord": "^4.2",
         "socialiteproviders/microsoft": "^4.9",
@@ -79,7 +81,8 @@
         "preferred-install": "dist",
         "sort-packages": true,
         "platform": {
-            "php": "8.2.32"
+            "php": "8.2.32",
+            "ext-gmp": "8.3.0"
         },
         "allow-plugins": {
             "pestphp/pest-plugin": true,

@@ -61,6 +61,7 @@ class Installer
             ['label' => 'curl extension', 'ok' => $ext('curl'), 'required' => true],
             ['label' => 'gd extension', 'ok' => $ext('gd'), 'required' => true],
             ['label' => 'zip extension', 'ok' => $ext('zip'), 'required' => true],
+            ['label' => 'gmp or bcmath extension (needed for crypto wallet top-ups; installable later from Admin)', 'ok' => $ext('gmp') || $ext('bcmath'), 'required' => false],
             ['label' => 'Redis extension (recommended)', 'ok' => $ext('redis'), 'required' => false],
             ['label' => 'storage/ is writable', 'ok' => is_writable(storage_path()), 'required' => true],
             ['label' => 'bootstrap/cache/ is writable', 'ok' => is_writable(base_path('bootstrap/cache')), 'required' => true],

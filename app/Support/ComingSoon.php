@@ -12,6 +12,7 @@ class ComingSoon
         }
 
         return match ($key) {
+            'crypto_topup' => class_exists(\App\Services\Crypto\Chain\ChainRegistry::class) && app(\App\Services\Crypto\Chain\ChainRegistry::class)->featureOn(),
             'naara_topup' => FeatureFlags::enabled($key) && \App\Models\TopupProvider::where('enabled', true)->exists(),
             default => FeatureFlags::enabled($key),
         };
