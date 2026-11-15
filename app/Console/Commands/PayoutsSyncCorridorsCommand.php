@@ -16,7 +16,11 @@ use Illuminate\Console\Command;
  */
 class PayoutsSyncCorridorsCommand extends Command
 {
-    protected $signature = 'payouts:sync-corridors {provider : grey}';
+    private const NOTE_DISABLED = 'Synced from Grey payout-methods. Enable after a sandbox payout.';
+
+    private const NOTE_LIVE = 'Synced from Grey payout-methods (live).';
+
+    protected $signature = 'payouts:sync-corridors {provider : grey} {--enable : create new corridors ENABLED and switch on the untouched ones from an earlier sync}';
 
     protected $description = 'Create DISABLED payout corridors for a rail from the provider\'s own method list';
 
@@ -59,22 +63,27 @@ class PayoutsSyncCorridorsCommand extends Command
 
                     continue;
                 }
-                $created += $this->make($country, $currency, 'grey', $method, (string) ($m['average_processing_time'] ?? ''), 'Synced from Grey payout-methods. Enable after a sandbox payout.');
+                $created += $this->make($country, $currency, 'grey', $method, (string) ($m['average_processing_time'] ?? ''), $this->option('enable') ? self::NOTE_LIVE : self::NOTE_DISABLED, (bool) $this->option('enable'));
             }
         }
-        $this->info("Grey: {$created} new corridor(s) created (disabled); {$skipped} country/currency pair(s) skipped (not the country's own currency).");
+        $switchedOn = 0;
+        if ($this->option('enable')) {
+            // Only rows still carrying the sync note: a corridor an admin edited (note changed) or switched off on purpose keeps its state.
+            $switchedOn = PayoutCorridor::query()->where('provider', 'grey')->where('enabled', false)->whereIn('notes', [self::NOTE_DISABLED])->update(['enabled' => true, 'notes' => self::NOTE_LIVE]);
+        }
+        $this->info("Grey: {$created} new corridor(s) created".($this->option('enable') ? " (enabled), {$switchedOn} earlier one(s) switched on" : ' (disabled)')."; {$skipped} country/currency pair(s) skipped (not the country's own currency).");
 
         return self::SUCCESS;
     }
 
 
-    private function make(string $country, string $currency, string $provider, string $method, string $eta, string $notes): int
+    private function make(string $country, string $currency, string $provider, string $method, string $eta, string $notes, bool $enabled = false): int
     {
         $row = PayoutCorridor::query()->where(compact('country', 'currency', 'provider', 'method'))->first();
         if ($row !== null) {
             return 0;
         }
-        PayoutCorridor::create(['country' => $country, 'currency' => $currency, 'provider' => $provider, 'method' => $method, 'enabled' => false, 'priority' => 100, 'eta_text' => $eta ?: null, 'notes' => $notes]);
+        PayoutCorridor::create(['country' => $country, 'currency' => $currency, 'provider' => $provider, 'method' => $method, 'enabled' => $enabled, 'priority' => 100, 'eta_text' => $eta ?: null, 'notes' => $notes]);
 
         return 1;
     }

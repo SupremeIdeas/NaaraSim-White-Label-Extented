@@ -12,7 +12,7 @@ use App\Models\Setting;
  */
 class PayoutSettings
 {
-    public const FLAG = 'payouts.enabled';
+    public const FLAG = 'payouts.enabled';                           // default ON (owner 2026-11-15: nothing payout-related ships switched off)
 
     /** auto (follow where the app runs: a real HTTPS domain is live) | live | sandbox. Chosen in Admin > Payout settings; beats the env file. */
     public const ENV_MODE = 'payouts.env_mode';
@@ -132,12 +132,12 @@ class PayoutSettings
         return max(0, (int) Setting::getValue(self::WITHDRAW_PER_DAY, 10));
     }
 
-    public const MANUAL_EXTERNAL = 'payouts.manual_external.enabled';          // default OFF
+    public const MANUAL_EXTERNAL = 'payouts.manual_external.enabled';          // default ON
 
     /** Plan-B rail: an admin pays outside the platform and records proof. */
     public static function manualExternalEnabled(): bool
     {
-        return (bool) Setting::getValue(self::MANUAL_EXTERNAL, false);
+        return (bool) Setting::getValue(self::MANUAL_EXTERNAL, true);
     }
 
     public const DUAL_CONTROL_USD = 'payouts.dual_control_usd';                // default 0 (off)
@@ -197,7 +197,7 @@ class PayoutSettings
 
     public static function enabled(): bool
     {
-        return (bool) Setting::getValue(self::FLAG, false);
+        return (bool) Setting::getValue(self::FLAG, true);
     }
 
     /**

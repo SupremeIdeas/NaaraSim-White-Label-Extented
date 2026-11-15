@@ -100,7 +100,7 @@ class PayoutAutomationTest extends TestCase
     public function test_none_of_the_optional_extras_stand_in_the_way(): void
     {
         $this->assertFalse(PayoutSettings::stepUpRequired());
-        $this->assertFalse(PayoutSettings::manualExternalEnabled());
+        $this->assertTrue(PayoutSettings::manualExternalEnabled(), 'the Plan B rail ships on (owner 2026-11-15)');
         $this->assertSame(0.0, PayoutSettings::dualControlUsd());
         $this->assertSame(0.0, PayoutSettings::taxFormOverUsd());
         $this->assertSame(0, PayoutSettings::sendDelayMinutes(false), 'no send delay on a local rail');
@@ -188,6 +188,6 @@ class PayoutAutomationTest extends TestCase
         $this->assertSame('auto', PayoutSettings::mode());
         $this->assertTrue(PayoutSettings::autoApprovalEnabled());
         $this->assertFalse(PayoutSettings::shadowMode());
-        $this->assertFalse(PayoutSettings::enabled(), 'but payouts themselves stay OFF until the owner switches them on');
+        $this->assertTrue(PayoutSettings::enabled(), 'payouts ship ON: nothing payout-related is off on a fresh install (owner 2026-11-15)');
     }
 }

@@ -12,7 +12,7 @@ use Throwable;
 /**
  * Updater-delivered payout rails (Payoneer, Grey, Stripe Global Payouts, ...).
  *
- * A rail ships as a signed `.naaraupdate` package that drops ONE folder into `app/PayoutRails/<Slug>/`:
+ * A rail ships as a signed `.naaraupdate` package that drops ONE folder into `app/PayoutRails/<Studly>/` (the folder name must equal the namespace segment, case included, e.g. `Grey` for `App\\PayoutRails\\Grey`):
  *
  *     rail.json                    the manifest (see below)
  *     <Something>PayoutGateway.php implements PayoutGatewayInterface + DeclaresCapabilities
@@ -33,7 +33,7 @@ use Throwable;
  *
  * rail.json:
  *   {
- *     "slug": "payoneer",                    folder name, lower-case
+ *     "slug": "payoneer",                    the folder name in lower-case (folder itself is PascalCase)
  *     "label": "Payoneer",
  *     "provider": "payoneer",                the gateway's name() and the corridor/account `provider` value
  *     "gateway": "App\\PayoutRails\\Payoneer\\PayoneerPayoutGateway",
@@ -83,7 +83,7 @@ class PayoutRailExtensions
         sort($files);
 
         foreach ($files as $file) {
-            $slug = basename(dirname($file));
+            $slug = strtolower(basename(dirname($file)));   // the folder is PascalCase (it must match the namespace on a case-sensitive server); the slug in rail.json stays lower-case
             try {
                 $manifest = self::validate($slug, $file);
                 self::$loaded[$manifest['provider']] = $manifest;

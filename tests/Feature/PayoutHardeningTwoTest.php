@@ -477,9 +477,11 @@ class PayoutHardeningTwoTest extends TestCase
         $svc->recordManualPayment($other, $admin, 'X', 'y');
     }
 
-    public function test_the_manual_rail_is_off_until_the_owner_switches_it_on_and_counts_as_a_global_rail(): void
+    public function test_the_manual_rail_ships_on_can_be_switched_off_and_counts_as_a_global_rail(): void
     {
         $gw = app(ManualExternalPayoutGateway::class);
+        $this->assertTrue($gw->available());
+        Setting::setValue(PayoutSettings::MANUAL_EXTERNAL, false);
         $this->assertFalse($gw->available());
         Setting::setValue(PayoutSettings::MANUAL_EXTERNAL, true);
         $this->assertTrue($gw->available());
