@@ -81,7 +81,7 @@ class WalletService
     {
         $localCurrency = strtoupper($localCurrency);
 
-        if (in_array($localCurrency, ['USD', 'USDT'], true)) {
+        if (in_array($localCurrency, ['USD', 'USDT', 'USDC'], true)) {
             $usdAmount = $localAmount;
         } elseif (isset(CurrencyService::SUPPORTED[$localCurrency])) {
             $usdAmount = app(CurrencyService::class)->toUsd($localAmount, $localCurrency);

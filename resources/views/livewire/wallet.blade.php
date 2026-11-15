@@ -76,6 +76,10 @@
                 <x-nx.note icon="info" variant="warn" role="alert">{{ $error }}</x-nx.note>
             @endif
 
+            @if (\Illuminate\Support\Facades\Route::has('crypto.topup') && \App\Support\ComingSoon::isLive('crypto_topup'))
+                <a href="{{ route('crypto.topup') }}" wire:navigate class="ns-btn" style="margin-bottom:12px" data-tour="wallet.crypto"><x-nx.icon name="wallet" /> Top up with crypto (USDC / USDT)</a>
+            @endif
+
             <form wire:submit="topUp">
                 {{-- Pay-in currency (owner request: a real dropdown) — every currency any configured gateway accepts. USD credits the
                      wallet directly; everything else is converted to a USD credit locked at the live rate. Changing this filters

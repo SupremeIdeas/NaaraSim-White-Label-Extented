@@ -44,6 +44,9 @@
         $more[] = ['route' => 'admin.numbers-hero', 'label' => 'Numbers hero', 'icon' => 'phone'];
         $more[] = ['route' => 'admin.numbers-cards', 'label' => 'Numbers cards', 'icon' => 'grid'];
         $more[] = ['route' => 'admin.bento-icons', 'label' => 'Bento icons', 'icon' => 'image'];
+        if (\Illuminate\Support\Facades\Route::has('admin.crypto')) {
+            $more[] = ['route' => 'admin.crypto', 'label' => 'Crypto top-up', 'icon' => 'wallet'];
+        }
         $more[] = ['route' => 'admin.credits', 'label' => 'NaaraCredits', 'icon' => 'gift'];
         $more[] = ['route' => 'admin.journey-goals', 'label' => 'Journey Goals', 'icon' => 'star'];
         $more[] = ['route' => 'admin.social-hunt', 'label' => 'Social Hunt', 'icon' => 'star'];

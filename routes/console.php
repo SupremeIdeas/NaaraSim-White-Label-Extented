@@ -41,6 +41,10 @@ Schedule::command('cookies:prune')->daily()->withoutOverlapping();   // consent 
 // runs on the `payout-guard` queue so a slow evaluation never blocks a scheduler tick.
 // The cron's own pulse: one row a minute proves `schedule:run` is firing; System health turns green on the first one (App\Support\CronPulse).
 Schedule::command('ops:cron-tick')->everyMinute();
+if (class_exists(\App\Console\Commands\CryptoScanCommand::class)) {   // crypto top-up scanner (idle while the feature is off) and hourly self-test
+    Schedule::command('crypto:scan')->everyMinute()->withoutOverlapping(10);
+    Schedule::command('crypto:selftest --quiet-ok')->hourlyAt(7)->withoutOverlapping(30);
+}
 
 Schedule::command('payouts:guard-sweep')->everyMinute()->withoutOverlapping();
 Schedule::command('payouts:float-retry')->everyFiveMinutes()->withoutOverlapping();
