@@ -103,6 +103,7 @@ class SystemHealth extends Component
     public function render()
     {
         return view('livewire.admin.system-health', [
+            'verdict' => \App\Support\CronPulse::verdict(),
             'pendingMigrations' => PendingMigrations::names(),
             'tasks' => SchedulerHealth::report(),
             'anyOverdue' => SchedulerHealth::anyOverdue(),
@@ -164,7 +165,7 @@ class SystemHealth extends Component
             'failed' => QueueHealth::nciListenerFailedCount(),
             'recompute_last' => $row['last_run'] ?? null,
             'recompute_ago' => $row['ago'] ?? null,
-            'recompute_overdue' => $row['overdue'] ?? true,
+            'recompute_overdue' => ($row['overdue'] ?? false) && ($row['last_run'] ?? null) !== null,
         ];
     }
 

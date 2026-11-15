@@ -1,58 +1,89 @@
-<div class="mx-auto max-w-4xl" wire:poll.10s>
+<div class="mx-auto max-w-4xl" wire:poll.4s.keep-alive data-system-health data-health-state="{{ $verdict['state'] }}">
     <div class="mb-6 flex items-start justify-between gap-4">
-        <div>
-            <h1 class="text-2xl font-bold text-slate-900 dark:text-slate-100">System health</h1>
-            <p class="text-sm text-slate-500 dark:text-slate-400">Is the live cron firing and the queue draining? If a task is overdue, fix the cPanel cron — not the code. This page refreshes itself every few seconds.</p>
+        <div class="flex items-start gap-3">
+            <span class="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-[rgb(var(--nx-teal)/0.14)] text-[rgb(var(--nx-teal-ink))]"><svg class="h-7 w-7" aria-hidden="true"><use href="#i-sh-pulse"></use></svg></span>
+            <div>
+                <h1 class="text-2xl font-bold text-[rgb(var(--nx-text))]">System health</h1>
+                <p class="text-sm text-[rgb(var(--nx-text-2))]">Is the live cron firing and the queue draining? It checks itself every few seconds and turns green the moment the cron runs.</p>
+            </div>
         </div>
-        <button type="button" wire:click="refreshHealth" class="rounded-lg border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-50 dark:border-[#2A2E34] dark:text-slate-300 dark:hover:bg-[#373a3f]">
-            <x-icon name="refresh" class="mr-1 inline h-4 w-4" /> Refresh
+        <button type="button" wire:click="refreshHealth" wire:loading.attr="disabled" wire:target="refreshHealth" class="ns-cta ns-cta--pill ns-cta--ghost ns-cta--sm shrink-0">
+            <x-icon name="refresh" class="h-4 w-4" /> Refresh
         </button>
     </div>
 
-    {{-- Headline verdict --}}
-    @if ($anyOverdue || $queueIsSync)
-        <div class="mb-5 rounded-2xl border border-red-300 bg-red-50 p-5 dark:border-red-900/50 dark:bg-red-950/30">
-            <p class="flex items-center gap-2 font-semibold text-red-700 dark:text-red-300">
-                <x-icon name="info" class="h-5 w-5" /> Something needs attention
-            </p>
-            <p class="mt-1 text-sm text-red-700 dark:text-red-300">
-                @if ($anyOverdue)
-                    A scheduled task is overdue — the live cron may not be running. Re-add or repair the cPanel cron:
-                    <code class="rounded bg-red-100 px-1 dark:bg-red-900/40">{{ $cronLine }}</code>
+    {{-- Headline verdict: live (green), waiting for the first cron run (amber), attention (red). --}}
+    @php
+        $pulse = $verdict['pulse'];
+        $tone = ['live' => 'ok', 'waiting' => 'warn', 'attention' => 'bad'][$verdict['state']];
+        $glyph = ['live' => 'i-sh-ok', 'waiting' => 'i-sh-wait', 'attention' => 'i-sh-alert'][$verdict['state']];
+    @endphp
+    <div class="mb-5 rounded-3xl border-2 p-5 sm:p-6" style="border-color:rgb(var(--nx-{{ $tone }}));background:rgb(var(--nx-surface))" role="status" aria-live="polite" data-health-banner="{{ $verdict['state'] }}">
+        <div class="flex items-start gap-4">
+            <span class="grid h-14 w-14 shrink-0 place-items-center rounded-2xl" style="background:rgb(var(--nx-{{ $tone }}));color:rgb(var(--nx-surface))"><svg class="h-8 w-8" aria-hidden="true"><use href="#{{ $glyph }}"></use></svg></span>
+            <div class="min-w-0 flex-1">
+                @if ($verdict['state'] === 'live')
+                    <p class="text-xl font-bold" style="color:rgb(var(--nx-ok))">All systems are running smoothly</p>
+                    <p class="mt-1 text-sm text-[rgb(var(--nx-text-2))]">Cron heartbeat {{ \App\Support\CronPulse::human($pulse['age']) }} ago. The queue is draining.@if (count($verdict['overdue']) === 0) No overdue tasks.@endif @if ($verdict['never_ran'] > 0)<span class="block text-xs">{{ $verdict['never_ran'] }} slower task{{ $verdict['never_ran'] === 1 ? '' : 's' }} (daily, weekly, monthly) will check in when their turn comes.</span>@endif</p>
+                @elseif ($verdict['state'] === 'waiting')
+                    <p class="text-xl font-bold" style="color:rgb(var(--nx-warn))">Waiting for your first cron run</p>
+                    <p class="mt-1 text-sm text-[rgb(var(--nx-text-2))]">No scheduled task has reported in yet. Add the cron below (cPanel, a VPS crontab or a Cloudways cron job). This page keeps checking every few seconds and turns green by itself within a minute of the first run.</p>
+                @else
+                    <p class="text-xl font-bold" style="color:rgb(var(--nx-bad))">Attention required</p>
+                    <ul class="mt-1 space-y-1 text-sm text-[rgb(var(--nx-text-2))]">
+                        @foreach ($verdict['issues'] as $issue)
+                            <li><b class="text-[rgb(var(--nx-text))]">{{ $issue['title'] }}.</b> {{ $issue['detail'] }}</li>
+                        @endforeach
+                    </ul>
                 @endif
-                @if ($queueIsSync) The queue is running synchronously in production. @endif
-            </p>
-        </div>
-    @else
-        <div class="mb-5 rounded-2xl border border-green-200 bg-green-50 p-5 dark:border-green-900/50 dark:bg-green-950/30">
-            <p class="flex items-center gap-2 font-semibold text-green-700 dark:text-green-300">
-                <x-icon name="check" class="h-5 w-5" /> Scheduler + queue look healthy
-            </p>
-        </div>
-    @endif
-
-    {{-- Queue --}}
-    <div class="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-3">
-        <div class="rounded-2xl border border-slate-200 bg-white p-4 dark:border-[#2A2E34] dark:bg-[#17191C]">
-            <p class="text-xs font-medium uppercase tracking-wide text-slate-400">Queue connection</p>
-            <p @class([
-                'mt-1 text-lg font-bold',
-                'text-red-600 dark:text-red-400' => $queueIsSync,
-                'text-slate-900 dark:text-slate-100' => ! $queueIsSync,
-            ])>{{ $queueConnection }}</p>
-            @if ($queueIsSync)
-                <p class="mt-0.5 text-[11px] text-red-600 dark:text-red-400">Should be database or redis in production.</p>
+            </div>
+            @if ($verdict['state'] !== 'live')
+                <a href="#health-details" class="ns-cta ns-cta--pill ns-cta--sm hidden shrink-0 sm:inline-flex">View details <x-icon name="chevron-right" class="h-4 w-4" /></a>
             @endif
         </div>
-        <div class="rounded-2xl border border-slate-200 bg-white p-4 dark:border-[#2A2E34] dark:bg-[#17191C]">
-            <p class="text-xs font-medium uppercase tracking-wide text-slate-400">Queue backlog</p>
-            <p class="mt-1 text-lg font-bold text-slate-900 dark:text-slate-100">{{ is_null($queueBacklog) ? '—' : number_format($queueBacklog) }}</p>
-            <p class="mt-0.5 text-[11px] text-slate-400">{{ is_null($queueBacklog) ? 'Not a database queue' : 'pending jobs' }}</p>
+        @if ($verdict['state'] !== 'live' && collect($verdict['issues'])->contains(fn ($i) => in_array($i['key'], ['cron_stopped', 'overdue'], true)) || $verdict['state'] === 'waiting')
+            <div class="mt-4 flex items-center gap-2 rounded-2xl bg-[rgb(var(--nx-surface-3))] px-3 py-2.5" x-data="{ done: false }">
+                <svg class="h-5 w-5 shrink-0 text-[rgb(var(--nx-teal-ink))]" aria-hidden="true"><use href="#i-sh-term"></use></svg>
+                <code class="min-w-0 flex-1 break-all text-xs text-[rgb(var(--nx-text))]" data-cron-line>{{ $cronLine }}</code>
+                <button type="button" class="ns-cta ns-cta--pill ns-cta--ghost ns-cta--sm shrink-0" @click="navigator.clipboard.writeText(@js($cronLine)).then(() => { done = true; setTimeout(() => done = false, 1800) })"><x-icon name="copy" class="h-4 w-4" /> <span x-text="done ? 'Copied' : 'Copy'"></span></button>
+            </div>
+        @endif
+        @if ($verdict['state'] === 'live')
+            <p class="mt-3 inline-flex items-center gap-2 text-xs text-[rgb(var(--nx-text-2))]"><span class="relative inline-flex h-2.5 w-2.5"><span class="absolute inline-flex h-full w-full animate-ping rounded-full opacity-60" style="background:rgb(var(--nx-ok))"></span><span class="relative inline-flex h-2.5 w-2.5 rounded-full" style="background:rgb(var(--nx-ok))"></span></span> Live: checked just now</p>
+        @endif
+    </div>
+
+    {{-- Queue --}}
+    <div class="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-3" id="health-details">
+        <div class="rounded-3xl border border-[rgb(var(--nx-line))] bg-[rgb(var(--nx-surface))] p-4">
+            <div class="flex items-center gap-3">
+                <span class="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-[rgb(var(--nx-teal)/0.14)] text-[rgb(var(--nx-teal-ink))]"><svg class="h-7 w-7" aria-hidden="true"><use href="#i-sh-db"></use></svg></span>
+                <div class="min-w-0">
+                    <p class="text-[11px] font-semibold uppercase tracking-wide text-[rgb(var(--nx-text-2))]">Queue connection</p>
+                    <p class="text-lg font-bold" style="color:rgb(var(--nx-{{ $queueIsSync ? 'bad' : 'text' }}))">{{ $queueConnection }}</p>
+                    <p class="flex items-center gap-1.5 text-xs text-[rgb(var(--nx-text-2))]"><span class="h-2 w-2 rounded-full" style="background:rgb(var(--nx-{{ $queueIsSync ? 'bad' : 'ok' }}))"></span>{{ $queueIsSync ? 'Should be database or redis' : 'Live' }}</p>
+                </div>
+            </div>
         </div>
-        <div class="rounded-2xl border border-slate-200 bg-white p-4 dark:border-[#2A2E34] dark:bg-[#17191C]">
-            <p class="text-xs font-medium uppercase tracking-wide text-slate-400">Oldest job</p>
-            <p class="mt-1 text-lg font-bold text-slate-900 dark:text-slate-100">{{ is_null($oldestJobAge) ? '—' : \Illuminate\Support\Carbon::now()->subSeconds($oldestJobAge)->diffForHumans(null, true) }}</p>
-            <p class="mt-0.5 text-[11px] text-slate-400">{{ is_null($oldestJobAge) ? 'queue empty' : 'waiting to drain' }}</p>
+        <div class="rounded-3xl border border-[rgb(var(--nx-line))] bg-[rgb(var(--nx-surface))] p-4">
+            <div class="flex items-center gap-3">
+                <span class="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-[rgb(var(--nx-teal)/0.14)] text-[rgb(var(--nx-teal-ink))]"><svg class="h-7 w-7" aria-hidden="true"><use href="#i-sh-stack"></use></svg></span>
+                <div class="min-w-0">
+                    <p class="text-[11px] font-semibold uppercase tracking-wide text-[rgb(var(--nx-text-2))]">Queue backlog</p>
+                    <p class="text-lg font-bold text-[rgb(var(--nx-text))]">{{ is_null($queueBacklog) ? '—' : number_format($queueBacklog) }}</p>
+                    <p class="text-xs text-[rgb(var(--nx-text-2))]">{{ is_null($queueBacklog) ? 'Not a database queue' : 'pending jobs' }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="rounded-3xl border border-[rgb(var(--nx-line))] bg-[rgb(var(--nx-surface))] p-4 col-span-2 sm:col-span-1">
+            <div class="flex items-center gap-3">
+                <span class="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-[rgb(var(--nx-teal)/0.14)] text-[rgb(var(--nx-teal-ink))]"><svg class="h-7 w-7" aria-hidden="true"><use href="#i-sh-timer"></use></svg></span>
+                <div class="min-w-0">
+                    <p class="text-[11px] font-semibold uppercase tracking-wide text-[rgb(var(--nx-text-2))]">Oldest job</p>
+                    <p class="text-lg font-bold text-[rgb(var(--nx-text))]">{{ is_null($oldestJobAge) ? '—' : \Illuminate\Support\Carbon::now()->subSeconds($oldestJobAge)->diffForHumans(null, true) }}</p>
+                    <p class="text-xs text-[rgb(var(--nx-text-2))]">{{ is_null($oldestJobAge) ? 'queue empty' : 'waiting to drain' }}</p>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -177,7 +208,7 @@
             <div class="rounded-xl border border-slate-100 p-3 dark:border-[#373a3f]">
                 <p class="text-xs font-medium uppercase tracking-wide text-slate-400">Nightly recompute</p>
                 <p @class(['mt-1 text-lg font-bold', 'text-red-600 dark:text-red-400' => $nci['recompute_overdue'], 'text-slate-900 dark:text-slate-100' => ! $nci['recompute_overdue']])>
-                    {{ $nci['recompute_ago'] ?? 'Never run' }}
+                    {{ $nci['recompute_ago'] ?? 'Not run yet' }}
                 </p>
                 <p class="mt-0.5 text-[11px] text-slate-500 dark:text-slate-400">
                     @if ($nci['recompute_overdue'])
@@ -328,7 +359,7 @@
         <div class="divide-y divide-slate-100 dark:divide-[#373a3f]">
             @foreach ($tasks as $task)
                 @php
-                    $state = $task['outcome'] === 'skipped' ? 'skipped' : ($task['overdue'] || $task['outcome'] === 'failed' ? 'broken' : 'ok');
+                    $state = $task['outcome'] === 'skipped' ? 'skipped' : ($task['outcome'] === 'failed' || ($task['overdue'] && $task['last_run'] !== null) ? 'broken' : ($task['last_run'] === null ? 'waiting' : 'ok'));
                 @endphp
                 <div class="flex items-center justify-between gap-3 p-4" wire:key="task-{{ $task['name'] }}">
                     <div class="min-w-0">
@@ -340,17 +371,12 @@
                     </div>
                     <div class="flex shrink-0 items-center gap-3 text-right">
                         <div>
-                            <p class="text-xs text-slate-500 dark:text-slate-400">{{ $task['ago'] ?? 'never run' }}</p>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">{{ $task['ago'] ?? 'not run yet' }}</p>
                             @if ($task['last_run'])
                                 <p class="text-[11px] text-slate-400">{{ $task['last_run'] }}</p>
                             @endif
                         </div>
-                        <span @class([
-                            'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold',
-                            'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300' => $state === 'broken',
-                            'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300' => $state === 'skipped',
-                            'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300' => $state === 'ok',
-                        ])>{{ match ($state) { 'broken' => $task['overdue'] ? 'Overdue' : 'Failing', 'skipped' => 'Not configured', default => 'OK' } }}</span>
+                        <span class="ns-pill" data-task-state="{{ $state }}">{{ match ($state) { 'broken' => $task['overdue'] ? 'Overdue' : 'Failing', 'skipped' => 'Not configured', 'waiting' => 'Waiting for its turn', default => 'OK' } }}</span>
                     </div>
                 </div>
             @endforeach

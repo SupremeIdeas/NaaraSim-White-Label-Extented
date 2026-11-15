@@ -39,6 +39,9 @@ Schedule::command('cookies:prune')->daily()->withoutOverlapping();   // consent 
 
 // Payout Guardian (Addendum C §6). The sweeper only CLAIMS and DISPATCHES; evaluation
 // runs on the `payout-guard` queue so a slow evaluation never blocks a scheduler tick.
+// The cron's own pulse: one row a minute proves `schedule:run` is firing; System health turns green on the first one (App\Support\CronPulse).
+Schedule::command('ops:cron-tick')->everyMinute();
+
 Schedule::command('payouts:guard-sweep')->everyMinute()->withoutOverlapping();
 Schedule::command('payouts:float-retry')->everyFiveMinutes()->withoutOverlapping();
 Schedule::command('payouts:float-sync')->everyThirtyMinutes()->withoutOverlapping();
