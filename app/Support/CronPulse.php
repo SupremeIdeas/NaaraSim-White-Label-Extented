@@ -26,6 +26,51 @@ class CronPulse
     /** A database-queue job older than this while the cron is alive means nothing is draining the queue. */
     public const STUCK_AFTER_SECONDS = 300;
 
+    private const ENV_KEY = 'ops.cron_env';
+
+    /**
+     * What the REAL cron looks like, written by the cron itself on every tick (only when it changed): which PHP binary and version ran it, from which
+     * folder, as which user. This is the ground truth the page compares the website against, so a cron that points at an old copy of the app, or at a
+     * different PHP than the site, is named instead of silently "working".
+     *
+     * @return array{php_binary: string, php_version: string, sapi: string, path: string, user: string}
+     */
+    public static function currentEnvironment(): array
+    {
+        return [
+            'php_binary' => (string) PHP_BINARY,
+            'php_version' => PHP_MAJOR_VERSION.'.'.PHP_MINOR_VERSION,
+            'sapi' => PHP_SAPI,
+            'path' => realpath(base_path()) ?: base_path(),
+            'user' => function_exists('get_current_user') ? (string) get_current_user() : '',
+        ];
+    }
+
+    public static function recordEnvironment(): void
+    {
+        try {
+            $now = self::currentEnvironment();
+            $stored = json_decode((string) \App\Models\Setting::getValue(self::ENV_KEY, ''), true);
+            if (! is_array($stored) || array_diff_assoc($now, $stored) !== []) {
+                \App\Models\Setting::setValue(self::ENV_KEY, json_encode($now + ['seen_at' => now()->toDateTimeString()]), 'ops');
+            }
+        } catch (\Throwable) {
+            // observability only
+        }
+    }
+
+    /** @return ?array{php_binary: string, php_version: string, sapi: string, path: string, user: string, seen_at?: string} as the cron last reported it */
+    public static function cronEnvironment(): ?array
+    {
+        try {
+            $v = json_decode((string) \App\Models\Setting::getValue(self::ENV_KEY, ''), true);
+
+            return is_array($v) && isset($v['path'], $v['php_version']) ? $v : null;
+        } catch (\Throwable) {
+            return null;
+        }
+    }
+
     /** @return array{state: string, last: ?Carbon, age: ?int} state: live | waiting | stopped */
     public static function pulse(): array
     {
@@ -44,7 +89,7 @@ class CronPulse
     }
 
     /**
-     * @return array{state: string, pulse: array, issues: list<array{key: string, title: string, detail: string}>, never_ran: int, overdue: list<string>}
+     * @return array{state: string, pulse: array, issues: list<array{key: string, title: string, detail: string}>, never_ran: int, overdue: list<string>, web: array, cron: ?array}
      */
     public static function verdict(): array
     {
@@ -63,6 +108,18 @@ class CronPulse
                 $issues[] = ['key' => 'workers', 'title' => 'Queue workers are down', 'detail' => (string) ($worker['reason'] ?? 'No worker is processing jobs.')];
             }
         }
+        // Compare the REAL cron with this website: a cron on an old copy of the app or on another PHP version is a silent, classic mistake.
+        $cron = $pulse['state'] === 'live' ? self::cronEnvironment() : null;
+        if ($cron !== null && ($seenAt = $cron['seen_at'] ?? null) !== null && Carbon::parse($seenAt)->diffInSeconds(now(), true) < 7 * 86400) {
+            $web = self::currentEnvironment();
+            if (realpath($cron['path']) !== false ? realpath($cron['path']) !== $web['path'] : $cron['path'] !== $web['path']) {
+                $issues[] = ['key' => 'cron_wrong_path', 'title' => 'The cron runs a different copy of the app', 'detail' => 'It runs from '.$cron['path'].' but this site lives in '.$web['path'].'. Use the command below.'];
+            }
+            if ($cron['php_version'] !== $web['php_version']) {
+                $issues[] = ['key' => 'cron_php_mismatch', 'title' => 'The cron uses a different PHP version', 'detail' => 'The cron runs PHP '.$cron['php_version'].' while the site runs PHP '.$web['php_version'].'. Point the cron at the same PHP: use the command below.'];
+            }
+        }
+
         $oldest = SchedulerHealth::oldestJobAgeSeconds();
         if ($pulse['state'] === 'live' && $oldest !== null && $oldest > self::STUCK_AFTER_SECONDS) {
             $issues[] = ['key' => 'queue_stuck', 'title' => 'The queue is not draining', 'detail' => 'The oldest job has waited '.self::human($oldest).' although the cron is alive. Check the queue worker line.'];
@@ -83,7 +140,7 @@ class CronPulse
 
         $state = $issues !== [] ? 'attention' : ($pulse['state'] === 'waiting' ? 'waiting' : 'live');
 
-        return ['state' => $state, 'pulse' => $pulse, 'issues' => $issues, 'never_ran' => $neverRan, 'overdue' => $overdue];
+        return ['state' => $state, 'pulse' => $pulse, 'issues' => $issues, 'never_ran' => $neverRan, 'overdue' => $overdue, 'web' => self::currentEnvironment(), 'cron' => self::cronEnvironment()];
     }
 
     public static function human(?int $seconds): string

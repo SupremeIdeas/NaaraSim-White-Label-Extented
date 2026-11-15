@@ -82,4 +82,40 @@ class CronPulseTest extends TestCase
         $this->beat(CronPulse::JOB, now()->subMinutes(20));
         Livewire::actingAs($admin)->test(SystemHealth::class)->assertSee('Attention required')->assertSee('The cron stopped');
     }
+
+    public function test_the_cron_environment_is_recorded_once_and_compared_with_the_website(): void
+    {
+        CronPulse::recordEnvironment();
+        $env = CronPulse::cronEnvironment();
+        $this->assertSame(realpath(base_path()), $env['path']);
+        $this->assertSame(PHP_MAJOR_VERSION.'.'.PHP_MINOR_VERSION, $env['php_version']);
+
+        $this->beat(CronPulse::JOB, now());
+        $this->assertSame('live', CronPulse::verdict()['state'], 'the same folder and the same PHP is healthy');
+
+        \App\Models\Setting::setValue('ops.cron_env', json_encode(['php_binary' => '/usr/bin/php8.1', 'php_version' => '8.1', 'sapi' => 'cli', 'path' => '/home/old/copy-of-the-app', 'user' => 'x', 'seen_at' => now()->toDateTimeString()]), 'ops');
+        $keys = array_column(CronPulse::verdict()['issues'], 'key');
+        $this->assertContains('cron_wrong_path', $keys, 'a cron on an old copy of the app must be named');
+        $this->assertContains('cron_php_mismatch', $keys, 'a cron on another PHP version must be named');
+    }
+
+    public function test_the_page_shows_the_detected_cron_command_in_both_forms_and_the_php_it_found(): void
+    {
+        $this->seed(RoleSeeder::class);
+        $admin = User::factory()->create();
+        $admin->assignRole('super_admin');
+
+        Livewire::actingAs($admin)->test(SystemHealth::class)
+            ->assertSeeHtml('data-cron-help')->assertSee('detected on this server')->assertSee(realpath(base_path()))
+            ->assertSee('schedule:run')->assertSee('cPanel or Cloudways cron form');
+    }
+
+    public function test_the_php_binary_for_the_cron_is_a_real_cli_and_never_fpm_or_cgi(): void
+    {
+        $bin = \App\Support\Installer::phpBinary();
+        $this->assertDoesNotMatchRegularExpression('/fpm|apache|cgi|httpd/i', basename($bin));
+        $this->assertTrue($bin === 'php' || (is_file($bin) && is_executable($bin)), 'a detected path must exist and run: '.$bin);
+        $this->assertStringContainsString(realpath(base_path()), \App\Support\Installer::cronLine());
+        $this->assertStringStartsWith('cd '.realpath(base_path()).' && ', \App\Support\Installer::cronCommandOnly());
+    }
 }

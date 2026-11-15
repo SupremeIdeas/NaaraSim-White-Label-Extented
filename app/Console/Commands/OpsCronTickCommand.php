@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Support\CronPulse;
 use App\Support\JobHeartbeats;
 use Illuminate\Console\Command;
 
@@ -18,6 +19,7 @@ class OpsCronTickCommand extends Command
     public function handle(): int
     {
         JobHeartbeats::note('ops:cron-tick', 'cron fired');
+        CronPulse::recordEnvironment();
 
         return self::SUCCESS;
     }

@@ -41,11 +41,24 @@
                 <a href="#health-details" class="ns-cta ns-cta--pill ns-cta--sm hidden shrink-0 sm:inline-flex">View details <x-icon name="chevron-right" class="h-4 w-4" /></a>
             @endif
         </div>
-        @if ($verdict['state'] !== 'live' && collect($verdict['issues'])->contains(fn ($i) => in_array($i['key'], ['cron_stopped', 'overdue'], true)) || $verdict['state'] === 'waiting')
-            <div class="mt-4 flex items-center gap-2 rounded-2xl bg-[rgb(var(--nx-surface-3))] px-3 py-2.5" x-data="{ done: false }">
-                <svg class="h-5 w-5 shrink-0 text-[rgb(var(--nx-teal-ink))]" aria-hidden="true"><use href="#i-sh-term"></use></svg>
-                <code class="min-w-0 flex-1 break-all text-xs text-[rgb(var(--nx-text))]" data-cron-line>{{ $cronLine }}</code>
-                <button type="button" class="ns-cta ns-cta--pill ns-cta--ghost ns-cta--sm shrink-0" @click="navigator.clipboard.writeText(@js($cronLine)).then(() => { done = true; setTimeout(() => done = false, 1800) })"><x-icon name="copy" class="h-4 w-4" /> <span x-text="done ? 'Copied' : 'Copy'"></span></button>
+        @php
+            $needsCommand = $verdict['state'] === 'waiting' || collect($verdict['issues'])->contains(fn ($i) => in_array($i['key'], ['cron_stopped', 'overdue', 'cron_wrong_path', 'cron_php_mismatch'], true));
+            $web = $verdict['web']; $cronEnv = $verdict['cron'];
+        @endphp
+        @if ($needsCommand)
+            <div class="mt-4 rounded-2xl bg-[rgb(var(--nx-surface-3))] px-3 py-3" x-data="{ done: false, split: false }" data-cron-help>
+                <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-[rgb(var(--nx-text-2))]">Cron command, detected on this server</p>
+                <div class="flex items-center gap-2">
+                    <svg class="h-5 w-5 shrink-0 text-[rgb(var(--nx-teal-ink))]" aria-hidden="true"><use href="#i-sh-term"></use></svg>
+                    <code class="min-w-0 flex-1 break-all text-xs text-[rgb(var(--nx-text))]" data-cron-line x-show="!split">{{ $cronLine }}</code>
+                    <code class="min-w-0 flex-1 break-all text-xs text-[rgb(var(--nx-text))]" data-cron-command x-show="split" x-cloak>{{ $cronCommand }}</code>
+                    <button type="button" class="ns-cta ns-cta--pill ns-cta--ghost ns-cta--sm shrink-0" @click="navigator.clipboard.writeText(split ? @js($cronCommand) : @js($cronLine)).then(() => { done = true; setTimeout(() => done = false, 1800) })"><x-icon name="copy" class="h-4 w-4" /> <span x-text="done ? 'Copied' : 'Copy'"></span></button>
+                </div>
+                <div class="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-[rgb(var(--nx-text-2))]">
+                    <button type="button" class="font-semibold text-[rgb(var(--nx-teal-ink))] underline" @click="split = !split" x-text="split ? 'Show the full crontab line' : 'cPanel or Cloudways cron form: schedule and command separately'"></button>
+                    <span x-show="split" x-cloak>Schedule: <b class="text-[rgb(var(--nx-text))]">* * * * *</b> (every minute)</span>
+                </div>
+                <p class="mt-2 text-xs text-[rgb(var(--nx-text-2))]" data-detected>Detected here: PHP {{ $web['php_version'] }} ({{ $web['sapi'] }}), app folder <b class="text-[rgb(var(--nx-text))]">{{ $web['path'] }}</b>, PHP binary <b class="text-[rgb(var(--nx-text))]">{{ $phpBinary }}</b>.@if ($cronEnv) Your cron last ran PHP {{ $cronEnv['php_version'] }} from {{ $cronEnv['path'] }}.@endif</p>
             </div>
         @endif
         @if ($verdict['state'] === 'live')
