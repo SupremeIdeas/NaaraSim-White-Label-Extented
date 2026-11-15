@@ -48,7 +48,7 @@
             @foreach ($rails as $r)
                 <li class="flex flex-wrap items-start justify-between gap-2 py-2">
                     <div class="min-w-0">
-                        <span class="font-semibold text-slate-900 dark:text-slate-100">{{ $r['label'] }}</span>
+                        <span class="font-semibold text-slate-900 dark:text-slate-100">{{ $r['label'] }}</span> <x-ui.tested-badge :provider="$r['provider'] ?? null" />
                         @if ($r['version'])<span class="ml-1 text-xs text-slate-500 dark:text-slate-400">v{{ $r['version'] }}</span>@endif
                         @if ($r['note'])<span class="block text-xs text-slate-500 dark:text-slate-400">{{ $r['note'] }}</span>@endif
                     </div>

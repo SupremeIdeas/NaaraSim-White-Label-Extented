@@ -141,7 +141,14 @@ class TopupCatalogue
                 $before = TopupProduct::where('provider_code', $code)->where('country_iso', $iso)->where('active', true)->count();
                 try {
                     $list = $p->listProducts($iso);
-                } catch (Throwable) {
+                } catch (Throwable $e) {
+                    // Never swallow a supplier failure: a 401 (key revoked, IP not allow-listed) used to look exactly like "no products". Log it, and tell the admin once per supplier per 6 hours.
+                    $msg = str_replace(["\n", "\r"], ' ', mb_substr($e->getMessage(), 0, 240));
+                    \Illuminate\Support\Facades\Log::warning("[topup] catalogue sync failed for {$code} {$iso}: {$msg}");
+                    if (Cache::add('topup:sync-alert:'.$code, 1, now()->addHours(6))) {
+                        \App\Jobs\AlertAdminJob::dispatch(code: 'topup_sync_failed', message: "Top-up catalogue sync for {$code} failed (first error: {$iso}): {$msg}", context: ['supplier' => $code, 'country' => $iso]);
+                    }
+
                     continue;
                 }
                 $this->store($code, $iso, $list);

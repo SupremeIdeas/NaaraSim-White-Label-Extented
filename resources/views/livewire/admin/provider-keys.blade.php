@@ -24,7 +24,7 @@
                         ? 'bg-green-50 text-green-700 dark:bg-green-950/40 dark:text-green-400'
                         : 'bg-slate-100 text-slate-500 dark:bg-[#373a3f] dark:text-slate-400' }}">
                     <span class="h-1.5 w-1.5 rounded-full {{ $active ? 'bg-green-500' : 'bg-slate-400' }}"></span>
-                    {{ ucfirst($provider) }} — {{ $label }}
+                    {{ ucfirst($provider) }} — {{ $label }} <x-ui.tested-badge :provider="$provider" />
                 </span>
             @endforeach
         </div>
