@@ -18,7 +18,7 @@ class TestedProvidersTest extends TestCase
         }
         $this->assertTrue(TestedProviders::recommended('grey'));
         $this->assertFalse(TestedProviders::recommended('twilio'), 'credentials alone are "Tested live", not "Recommended"');
-        $this->assertNull(TestedProviders::for('paystack'), 'a provider nobody has called live gets no badge');
+        $this->assertNull(TestedProviders::for('herosms'), 'a provider nobody has called live gets no badge');
     }
 
     public function test_the_badge_shows_recommended_only_for_proven_rails_and_nothing_for_untested_ones(): void
@@ -32,6 +32,6 @@ class TestedProvidersTest extends TestCase
         $connected = Blade::render('<x-ui.tested-badge provider="twilio" />');
         $this->assertStringNotContainsString('Recommended', $connected);
         $this->assertStringContainsString('Tested live', $connected);
-        $this->assertSame('', trim(Blade::render('<x-ui.tested-badge provider="paystack" />')));
+        $this->assertSame('', trim(Blade::render('<x-ui.tested-badge provider="herosms" />')));
     }
 }
