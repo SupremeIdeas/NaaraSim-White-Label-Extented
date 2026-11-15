@@ -36,7 +36,7 @@
             <div class="ns-find__sec ns-find__estrow">
                 <div><b>{{ __('esim.finder_est_q') }}</b><small>{{ __('esim.finder_est_hint') }}</small></div>
                 <button type="button" class="ns-cta ns-cta--pill ns-cta--sm ns-cta--ghost" @click="est = !est" :aria-expanded="est">
-                    <x-nx.icon name="sparkles" />
+                    <x-nx.icon name="estimator" style="font-size:22px" />
                     <span x-text="est ? @js(__('esim.finder_est_hide')) : @js(__('esim.finder_est_open'))"></span>
                 </button>
             </div>
