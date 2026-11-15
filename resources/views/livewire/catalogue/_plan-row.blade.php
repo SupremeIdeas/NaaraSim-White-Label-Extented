@@ -15,6 +15,9 @@
                     <x-icon name="zap" class="h-3 w-3" /> Popular
                 </span>
             @endif
+            @foreach (($finderMeta[$plan->id]['badges'] ?? []) as $badge)
+                <x-nx.pill :variant="['best' => 'best', 'cheapest' => 'rec', 'value' => null][$badge] ?? null">{{ __('esim.finder_badge_'.$badge) }}</x-nx.pill>
+            @endforeach
         </div>
         <div class="mt-1 flex items-center gap-1.5">
             <p class="truncate text-xs text-slate-500 dark:text-slate-400">{{ \App\Support\EsimCatalogue::cleanPlanName($plan->name) }}</p>
@@ -31,6 +34,7 @@
                 </span>
             @endif
         </div>
+        @if (! empty($finderMeta[$plan->id]['why']))<p class="mt-0.5 text-xs ns-find__why">{{ $finderMeta[$plan->id]['why'] }}</p>@endif
     </div>
     <div class="shrink-0 text-right">
         <div class="text-lg font-bold text-slate-900 dark:text-slate-100">{{ $price['usd'] }}</div>

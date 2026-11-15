@@ -5,6 +5,7 @@ namespace App\Livewire;
 use App\Models\EsimPlan;
 use App\Support\CountryNames;
 use App\Support\EsimCatalogue;
+use App\Support\EsimPlanFinder;
 use App\Support\EsimRegions;
 use App\Support\PendingCoupon;
 use Illuminate\Database\Eloquent\Builder;
@@ -56,6 +57,16 @@ class Catalogue extends Component
     /** A coupon claimed from an announcement (?claim=CODE) — stashed for checkout. */
     #[Url(as: 'claim')]
     public string $claim = '';
+
+    /**
+     * Plan Finder criteria (days, data, price range, estimate, sort). Remembered for the whole visit (session) so the same choices follow
+     * the visitor from country to country and region to region; results only show once "Sort best match" is pressed on THIS page.
+     *
+     * @var array<string, mixed>
+     */
+    public array $finder = [];
+
+    public bool $finderApplied = false;
 
     private const VIEWS = ['popular', 'local', 'regional', 'global'];
 
@@ -150,6 +161,7 @@ class Catalogue extends Component
 
     private function resetSelection(): void
     {
+        $this->finderApplied = false;
         $this->country = '';
         $this->region = '';
         $this->planId = null;
@@ -183,6 +195,84 @@ class Catalogue extends Component
         if ($this->voiceLocked) {
             $this->tab = 'data';
         }
+        $this->finder = EsimPlanFinder::sanitise((array) session('esim.finder', []));
+    }
+
+    /** "Sort best match": store the (sanitised) choices for the visit and show the ranked results. @param array<string, mixed> $criteria */
+    public function applyFinder(array $criteria): void
+    {
+        $this->finder = EsimPlanFinder::sanitise($criteria);
+        session(['esim.finder' => $this->finder]);
+        $this->finderApplied = true;
+        $this->resetPage();
+    }
+
+    public function setFinderSort(string $sort): void
+    {
+        $this->finder = EsimPlanFinder::sanitise(['sort' => $sort] + $this->finder);
+        session(['esim.finder' => $this->finder]);
+        $this->resetPage();
+    }
+
+    /** Back to the plain plan list; the remembered choices stay in the controls. */
+    public function clearFinderResults(): void
+    {
+        $this->finderApplied = false;
+        $this->resetPage();
+    }
+
+    public function resetFinder(): void
+    {
+        $this->finder = EsimPlanFinder::defaults();
+        session()->forget('esim.finder');
+        $this->finderApplied = false;
+        $this->resetPage();
+    }
+
+    /** One tap on a "nothing fits" suggestion (raise the price cap, any validity, any data amount). */
+    public function relaxFinder(string $key): void
+    {
+        $this->finder = EsimPlanFinder::sanitise(EsimPlanFinder::relax($this->finder, $key));
+        session(['esim.finder' => $this->finder]);
+        $this->resetPage();
+    }
+
+    /**
+     * The finder's data for one storefront context, or null when the finder should not show (too few plans to be worth it).
+     * $scoped is the context's query (country / region / global on the active line) BEFORE ordering and paginating.
+     *
+     * @param  Builder<EsimPlan>  $scoped
+     * @return array<string, mixed>|null
+     */
+    private function finderFor(Builder $scoped): ?array
+    {
+        $rows = EsimPlanFinder::rows($scoped);
+        if ($rows->count() < (int) config('esim_finder.min_plans', 6)) {
+            return null;
+        }
+        $c = EsimPlanFinder::sanitise($this->finder);
+        $out = [
+            'criteria' => $c,
+            'applied' => $this->finderApplied,
+            'total' => $rows->count(),
+            // Compact rows for the live "N plans fit" counter in the browser: [data MB or null, days or null, USD price]. No ids, no cost.
+            'live' => $rows->map(fn ($r) => [$r['mb'], $r['days'], round($r['price'], 2)])->all(),
+            'profiles' => collect(\App\Support\Niche\DataEstimator::PROFILES)->map(fn ($p) => ['label' => $p['label'], 'mb' => $p['mb_per_day']])->all(),
+            'meta' => [],
+            'fit' => 0,
+            'relax' => [],
+            'plans' => null,
+        ];
+        if ($this->finderApplied) {
+            $matched = EsimPlanFinder::match($rows, $c);
+            $scored = EsimPlanFinder::score($matched, $c);
+            $out['fit'] = $matched->count();
+            $out['meta'] = EsimPlanFinder::annotate($scored, $c);
+            $out['relax'] = $matched->isEmpty() ? EsimPlanFinder::relaxations($rows, $c) : [];
+            $out['plans'] = EsimPlanFinder::query($scoped, EsimPlanFinder::order($scored, $c['sort']))->paginate((int) config('esim_finder.per_page', 12));
+        }
+
+        return $out;
     }
 
     public function updatingSearch(): void
@@ -246,41 +336,47 @@ class Catalogue extends Component
 
         // 3) A selected local country — banner + its plan list (§3.3).
         if ($country !== '') {
+            $scoped = $this->lineQuery($hasVoice)
+                ->whereJsonContains('countries', $country)
+                ->where(fn ($q) => $q->where('coverage_type', EsimPlan::COVERAGE_LOCAL)->orWhereNull('coverage_type'));
+            $finder = $this->finderFor($scoped);
+
             return view('livewire.catalogue', array_merge($data, [
                 'screen' => 'country',
                 'selCode' => $country,
                 'selName' => CountryNames::name($country),
                 'banner' => EsimCatalogue::countryBanner($country),
-                'plans' => $this->lineQuery($hasVoice)
-                    ->whereJsonContains('countries', $country)
-                    ->where(fn ($q) => $q->where('coverage_type', EsimPlan::COVERAGE_LOCAL)->orWhereNull('coverage_type'))
-                    ->orderByDesc('is_featured')->orderBy('final_retail_usd')->paginate(12),
+                'fx' => $finder,
+                'plans' => $finder['plans'] ?? (clone $scoped)->orderByDesc('is_featured')->orderBy('final_retail_usd')->paginate(12),
             ]));
         }
 
         // 4) A selected region / global — banner + its plan list (§3.3).
         if ($region !== '') {
             $isGlobal = $region === EsimRegions::WORLD;
+            $scoped = $this->lineQuery($hasVoice)
+                ->when($isGlobal,
+                    fn ($q) => $q->where('coverage_type', EsimPlan::COVERAGE_GLOBAL),
+                    fn ($q) => $q->where('coverage_type', EsimPlan::COVERAGE_REGIONAL)
+                        ->when($region === EsimCatalogue::REGION_OTHER,
+                            fn ($q2) => $q2->whereNull('region_slug'),
+                            fn ($q2) => $q2->where('region_slug', $region)));
+            $finder = $this->finderFor($scoped);
 
             return view('livewire.catalogue', array_merge($data, [
                 'screen' => 'region',
                 'selSlug' => $region,
                 'selName' => $isGlobal ? 'Global' : ($region === EsimCatalogue::REGION_OTHER ? 'Other regions' : EsimRegions::label($region)),
                 'banner' => EsimCatalogue::regionBanner($isGlobal ? EsimRegions::WORLD : $region),
-                'plans' => $this->lineQuery($hasVoice)
-                    ->when($isGlobal,
-                        fn ($q) => $q->where('coverage_type', EsimPlan::COVERAGE_GLOBAL),
-                        fn ($q) => $q->where('coverage_type', EsimPlan::COVERAGE_REGIONAL)
-                            ->when($region === EsimCatalogue::REGION_OTHER,
-                                fn ($q2) => $q2->whereNull('region_slug'),
-                                fn ($q2) => $q2->where('region_slug', $region)))
-                    ->orderByDesc('is_featured')->orderBy('final_retail_usd')->paginate(12),
+                'fx' => $finder,
+                'plans' => $finder['plans'] ?? (clone $scoped)->orderByDesc('is_featured')->orderBy('final_retail_usd')->paginate(12),
             ]));
         }
 
         // 5) The default grid for the active segment (Popular/Local/Regional/Global).
         $plans = null;
         $globalBanner = null;
+        $finder = null;
         $popularDestinations = [];
         if ($view === 'popular') {
             $featured = $this->lineQuery($hasVoice)->where('is_featured', true);
@@ -294,8 +390,9 @@ class Catalogue extends Component
         } elseif ($view === 'global') {
             // Global goes straight to its banner + plan list (reference layout) —
             // there is only ever the one worldwide grouping, so no tile step.
-            $plans = $this->lineQuery($hasVoice)->where('coverage_type', EsimPlan::COVERAGE_GLOBAL)
-                ->orderByDesc('is_featured')->orderBy('final_retail_usd')->paginate(12);
+            $scoped = $this->lineQuery($hasVoice)->where('coverage_type', EsimPlan::COVERAGE_GLOBAL);
+            $finder = $this->finderFor($scoped);
+            $plans = $finder['plans'] ?? (clone $scoped)->orderByDesc('is_featured')->orderBy('final_retail_usd')->paginate(12);
             $globalBanner = EsimCatalogue::regionBanner(EsimRegions::WORLD);
         }
 
@@ -304,6 +401,7 @@ class Catalogue extends Component
             'grid' => $grid,
             'plans' => $plans,
             'globalBanner' => $globalBanner,
+            'fx' => $finder,
             'globalCount' => $grid['global']['count'] ?? 0,
             'popularDestinations' => $popularDestinations,
         ]));
