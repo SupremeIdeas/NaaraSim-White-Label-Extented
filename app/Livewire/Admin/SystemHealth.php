@@ -130,6 +130,8 @@ class SystemHealth extends Component
             'hostingMode' => HostingGuide::mode(),
             'hostingSteps' => HostingGuide::steps(),
             'cronLine' => HostingGuide::cronLine(),
+            'cronCommand' => \App\Support\Installer::cronCommandOnly(),
+            'phpBinary' => HostingGuide::phpBinary(),
             'workerCmd' => HostingGuide::queueWorkerCommand(),
             // Recent inbound webhook deliveries (readiness Domain 13/14) — lets an
             // operator confirm a provider (Paystack, Twilio…) is actually calling.

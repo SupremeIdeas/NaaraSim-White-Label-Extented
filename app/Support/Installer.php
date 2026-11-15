@@ -189,24 +189,53 @@ class Installer
      */
     public static function appPath(): string
     {
-        return base_path();
+        return realpath(base_path()) ?: base_path();   // the real folder, never a symlinked or relative alias
     }
 
     /**
-     * Best-guess absolute path to the PHP CLI binary for the cron line. THE single
-     * authority for the fpm/apache-safe fallback — every other surface delegates
-     * here rather than reading PHP_BINARY independently.
+     * The PHP CLI binary the cron line should call, DETECTED from this server rather than guessed. THE single authority (HostingGuide and System health
+     * delegate here).
+     *
+     * A web request often runs under php-fpm, php-cgi or lsphp, none of which is what a cron wants, so PHP_BINARY alone is not trusted. In order:
+     *  1. the `php` that sits in this PHP's own bin directory (PHP_BINDIR: cPanel EasyApache `/opt/cpanel/ea-phpNN/root/usr/bin/php`, Debian `/usr/bin/php`),
+     *  2. the `php` next to PHP_BINARY,
+     *  3. a versioned CLI for the SAME major.minor the site runs on (`/usr/bin/php8.3`, `/usr/local/bin/php83`, `/usr/local/bin/ea-php83`),
+     *  4. PHP_BINARY itself when it is a plain CLI or LiteSpeed (`lsphp`) binary that works from cron,
+     *  5. `php`.
+     * Every candidate must exist and be executable; a version mismatch is never silently accepted.
      */
     public static function phpBinary(): string
     {
-        // PHP_BINARY under a web SAPI can be php-fpm; fall back to a plain "php"
-        // which cPanel's cron UI resolves to the account's selected version.
-        $bin = PHP_BINARY ?: 'php';
-        if (str_contains($bin, 'fpm') || str_contains($bin, 'apache')) {
-            return 'php';
+        $mm = PHP_MAJOR_VERSION.'.'.PHP_MINOR_VERSION;
+        $nodot = PHP_MAJOR_VERSION.PHP_MINOR_VERSION;
+        $candidates = array_filter([
+            defined('PHP_BINDIR') ? rtrim(PHP_BINDIR, '/').'/php' : null,
+            PHP_BINARY ? dirname(PHP_BINARY).'/php' : null,
+            "/usr/bin/php{$mm}", "/usr/local/bin/php{$mm}", "/usr/bin/php{$nodot}", "/usr/local/bin/php{$nodot}",
+            "/usr/local/bin/ea-php{$nodot}", "/opt/cpanel/ea-php{$nodot}/root/usr/bin/php", "/opt/alt/php{$nodot}/usr/bin/php",
+            "/usr/local/lsws/lsphp{$nodot}/bin/php",
+        ]);
+        foreach ($candidates as $c) {
+            if (self::usableCli($c)) {
+                return $c;
+            }
+        }
+        $bin = (string) PHP_BINARY;
+        if ($bin !== '' && ! preg_match('/fpm|apache|cgi|httpd/i', basename($bin))) {
+            return $bin;   // a plain CLI or lsphp: it runs from cron as it runs the site
         }
 
-        return $bin;
+        return 'php';
+    }
+
+    /** An executable that is not the fpm/cgi/apache SAPI. @internal */
+    private static function usableCli(string $path): bool
+    {
+        try {
+            return $path !== '' && @is_file($path) && @is_executable($path) && ! preg_match('/fpm|apache|cgi|httpd/i', basename($path));
+        } catch (\Throwable) {
+            return false;
+        }
     }
 
     /**
