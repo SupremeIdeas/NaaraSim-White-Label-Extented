@@ -9,6 +9,13 @@
             </div>
         @endif
         <x-auth.social-buttons />
+        <div x-data="{ ok: false, busy: false, msg: '' }" x-init="window.nxPasskey && window.nxPasskey.platformReady().then(v => ok = v)" x-show="ok" x-cloak style="display:none" data-passkey-login>
+            <button type="button" :disabled="busy" @click="busy = true; msg = ''; window.nxPasskey.login(document.querySelector('[name=remember]')?.checked).then(r => { if (r.ok) { location.href = r.redirect } else { busy = false; msg = r.error === 'cancelled' ? '' : 'That did not work. Use your password instead.' } })" class="flex w-full items-center justify-center gap-2 rounded-lg border border-primary px-4 py-2.5 font-semibold text-primary hover:bg-primary/5 disabled:opacity-60">
+                <x-icon name="shield-check" class="h-5 w-5" /> <span x-text="busy ? 'Waiting for your fingerprint...' : 'Sign in with fingerprint or face'"></span>
+            </button>
+            <p x-show="msg" x-text="msg" class="mt-2 text-center text-xs text-red-600 dark:text-red-300" role="alert"></p>
+            <p class="mt-2 text-center text-xs text-slate-500 dark:text-slate-400">Or use your email and password below.</p>
+        </div>
         <div>
             <label class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">Email</label>
             <input type="email" name="email" value="{{ old('email') }}" required autofocus

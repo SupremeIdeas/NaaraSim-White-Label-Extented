@@ -20,6 +20,7 @@ import { registerLinesAnalyticsCharts } from './lines-analytics-charts';
 import { registerAppearance } from './nx-appearance';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import './passkeys';
 
 gsap.registerPlugin(ScrollTrigger);
 
