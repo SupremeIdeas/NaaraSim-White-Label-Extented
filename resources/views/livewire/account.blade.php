@@ -13,6 +13,9 @@
     <x-nx.note variant="link" icon="grid" tag="a" :href="route('account.appearance')" wire:navigate style="margin-top:14px">
         <b>{{ __('account.skin_link_title') }}</b>{{ __('account.skin_link') }}
     </x-nx.note>
+    <x-nx.note variant="link" icon="lock" tag="a" :href="route('account.app-lock')" wire:navigate style="margin-top:10px" data-app-lock-link>
+        <b>App lock</b>Open your account with your fingerprint, face or an app password.
+    </x-nx.note>
 
     {{-- nx:allow:start Day/night scene (Module 32 pick, rebuilt on brand): fixed brand artwork that drives the REAL theme; its sky colours are intentionally outside the skin tokens. --}}
     {{-- Appearance (Module 32 pick — witer33 sun/moon scene, rebuilt on brand):

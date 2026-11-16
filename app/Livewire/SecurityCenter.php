@@ -47,21 +47,8 @@ class SecurityCenter extends Component
 
     public ?string $flashType = 'success'; // success | error
 
-    public string $appLock = 'off';
-
-    public function updatedAppLock(string $v): void
-    {
-        $choices = array_keys(\App\Support\AppLock::CHOICES);
-        $mins = $v === 'off' ? null : (in_array((int) $v, $choices, true) ? (int) $v : null);
-        Auth::user()->forceFill(['app_lock_minutes' => $mins])->save();
-        \App\Support\AppLock::unlock(request()->session());
-        $this->dispatch('nx-toast', type: 'success', message: $mins === null ? 'App lock is off.' : 'App lock is on.');
-    }
-
     public function mount(): void
     {
-        $m = Auth::user()->app_lock_minutes;
-        $this->appLock = $m === null ? 'off' : (string) $m;
         $this->new_email = Auth::user()->email;
     }
 

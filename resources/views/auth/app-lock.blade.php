@@ -19,14 +19,14 @@
                 <div class="al__fp">
                     <h2>Fingerprint unlock</h2>
                     <button type="button" class="al__btn" :disabled="busy" @click="fp()" aria-label="Unlock with fingerprint or face">
-                        <svg viewBox="0 0 24 24" width="64" height="64" fill="none" aria-hidden="true" style="overflow:visible"><g transform="translate(1.200 1.200)" fill="rgb(var(--nx-gold, 212 160 23))" fill-opacity=".40" stroke="none"><path d="M8.500 12a3.500 3.500 0 0 1 7 0v1c0 3 .5 5 1.500 7H7.500c.7-1.500 1-3.200 1-5.500z"/></g><g stroke="rgb(var(--nx-teal-ink, 10 110 110))" stroke-width="1.600" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.500a8.500 8.500 0 0 0-8.500 8.500v1.500M20.500 12.500V12A8.500 8.500 0 0 0 12 3.500"/><path d="M7.500 20c.7-1.500 1-3.200 1-5.500V12a3.500 3.500 0 0 1 7 0v1c0 3 .5 5 1.500 7M12 12v3c0 2.500-.4 4.300-1.200 6M16 21c-.8-2-1-4-1-6"/></g></svg>
+                        <x-fingerprint :size="64" />
                     </button>
                     <p class="al__hint" x-text="busy ? 'Waiting for your fingerprint...' : 'Touch the sensor or look at your phone'"></p>
                 </div>
             </template>
             <template x-if="pw">
                 <form class="al__pw" @submit.prevent="submit()">
-                    <h2>Enter your password</h2>
+                    <h2>Enter your app password</h2>
                     <label class="sr-only" for="al-pw">Password</label>
                     <input id="al-pw" type="password" x-model="password" autocomplete="current-password" required class="ns-input" autofocus>
                     <button type="submit" :disabled="busy" class="ns-cta ns-cta--pill" style="width:100%;justify-content:center">Unlock</button>
@@ -35,7 +35,7 @@
             <p class="al__err" x-show="msg" x-text="msg" role="alert"></p>
         </div>
 
-        <button type="button" class="al__alt" @click="pw = !pw; msg = ''" x-text="pw ? 'Use fingerprint instead' : 'Use password instead'"></button>
+        <button type="button" class="al__alt" @click="pw = !pw; msg = ''" x-text="pw ? 'Use fingerprint instead' : 'Use app password instead'"></button>
         <form method="POST" action="{{ route('logout') }}" class="al__out">@csrf<button type="submit" class="al__link">Sign out</button></form>
     </section>
 </main>
