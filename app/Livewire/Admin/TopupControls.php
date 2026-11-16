@@ -184,7 +184,7 @@ class TopupControls extends Component
         } catch (Throwable $e) {
             TopupProvider::where('code', $code)->update(['last_error' => substr($e->getMessage(), 0, 250)]);
             $this->problem = str_contains(strtolower($e->getMessage()), 'whitelist')
-                ? $p->name().' refused this server: its IP is not on the supplier whitelist. Add this server\'s outbound IP '.(\App\Support\ServerEgressIp::get(true) ?: '(could not be detected, run "curl https://ifconfig.me" on the server)').' in the supplier dashboard (Paga: Developer Tools > IP Whitelist, Live environment), then test again.'
+                ? $p->name().' refused this server: its IP is not on the supplier whitelist. Open Admin > System > Server IP address (it asks for your password), copy the address and add it in the supplier dashboard (Paga: Developer Tools > IP Whitelist, Live environment), then test again.'
                 : $p->name().' did not answer: '.substr($e->getMessage(), 0, 160);
         }
     }

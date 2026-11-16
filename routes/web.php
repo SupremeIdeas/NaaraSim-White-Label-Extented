@@ -538,6 +538,7 @@ Route::middleware(['admin.gateway', 'admin', 'throttle:admin'])
             Route::get('/analytics', Analytics::class)->name('analytics');
             Route::get('/tax-rates', TaxRates::class)->name('tax-rates');
             Route::get('/system-health', SystemHealth::class)->name('system-health');
+            Route::get('/server-ip', \App\Livewire\Admin\ServerIpAddress::class)->middleware('role:super_admin')->name('server-ip');
             // NOTE: white-label OVERSIGHT (the registry of all instances) and the
             // project-intake PDF are master-only and were removed here (see
             // docs/architecture/WHITE-LABEL-LICENSE-BOUNDARY.md). This build keeps

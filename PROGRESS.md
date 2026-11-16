@@ -1,5 +1,6 @@
 ## 2026-11-16: Host trust follows this install's own domain; update history explains itself
 
+- 2026-11-16: **Server IP address in the admin panel.** Admin > System > Server IP address (super admin): the outbound IP suppliers must whitelist is hidden until the admin re-enters their password (5 tries per 10 minutes, audited), then shows for two minutes with a Copy button. The supplier-refused message points there. `ServerIpAddressTest` (6).
 - Trusted hosts follow this install's own domain (`App\Support\TrustedHosts`): its own domain with and without www is answered, other Host headers get a 400, and the check stays off for placeholder or empty `APP_URL`, or with `TRUSTED_HOSTS=*`. The installer pre-fills the URL with the domain it runs on and always trusts it.
 - Content-Security-Policy additions (additive): payment-gateway hosts for plain-form posts, analytics only while an ID is saved, and the S3 upload host when uploads go direct (voice notes, attachments). `CspCompatibilityTest`, `TrustedHostsTest`.
 - Each update record keeps the package changelog and the update history shows "What changed" under every successful update.
