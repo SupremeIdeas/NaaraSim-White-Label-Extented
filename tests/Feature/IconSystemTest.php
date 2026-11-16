@@ -14,9 +14,17 @@ class IconSystemTest extends TestCase
 
     public function test_icon_renders_the_inline_sprite_symbol_by_default(): void
     {
-        $this->blade('<x-icon name="wallet" />')
-            ->assertSee('href="#i-wallet"', false)
+        $this->blade('<x-icon name="check" />')
+            ->assertSee('href="#i-check"', false)
             ->assertSee('<use', false);
+    }
+
+    public function test_an_icon_with_a_hand_drawn_two_colour_drawing_renders_it_and_keeps_the_text_colour(): void
+    {
+        $this->blade('<x-icon name="wallet" class="h-5 w-5" />')
+            ->assertSee('nx-duo--drawn', false)
+            ->assertSee('stroke="currentColor"', false)
+            ->assertDontSee('<use', false);
     }
 
     public function test_admin_override_replaces_the_sprite_with_a_custom_image(): void
