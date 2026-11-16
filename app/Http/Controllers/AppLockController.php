@@ -23,12 +23,21 @@ class AppLockController extends Controller
     public function unlockWithPassword(Request $request): JsonResponse
     {
         $request->validate(['password' => ['required', 'string']]);
+        // The app password can be short, so guess attempts are capped per member: 8 wrong tries lock the password path for 15 minutes (the fingerprint still works).
+        $key = 'app-lock-fail:'.$request->user()->getAuthIdentifier();
+        if (\Illuminate\Support\Facades\RateLimiter::tooManyAttempts($key, 8)) {
+            $mins = max(1, (int) ceil(\Illuminate\Support\Facades\RateLimiter::availableIn($key) / 60));
+
+            return response()->json(['message' => "Too many wrong tries. Use your fingerprint, or try again in {$mins} minute(s).", 'errors' => ['password' => ["Too many wrong tries. Try again in {$mins} minute(s)."]]], 429);
+        }
         $u = $request->user();
         // The app password is its own secret; the account password is only the fallback for a member who has not set one yet.
         $hash = (string) ($u->app_lock_hash ?: $u->password);
         if (! Hash::check((string) $request->input('password'), $hash)) {
+            \Illuminate\Support\Facades\RateLimiter::hit($key, 900);
             return response()->json(['message' => 'That app password is not right.', 'errors' => ['password' => ['That app password is not right.']]], 422);
         }
+        \Illuminate\Support\Facades\RateLimiter::clear($key);
         AppLock::unlock($request->session());
 
         return response()->json(['redirect' => $this->back($request)]);
