@@ -453,10 +453,12 @@ class Topup extends Component
         $operators = collect();
         $products = collect();
         $stale = false;
+        $refreshing = false;
         if ($sellable) {
             try {
                 $operators = $cat->operators($this->country);
                 $products = $this->operator ? $cat->products($this->country, $this->type, $this->operator) : collect();
+                $refreshing = $cat->refreshing($this->country);
             } catch (Throwable) {
                 $stale = true;
             }
@@ -539,6 +541,6 @@ class Topup extends Component
             }
         }
 
-        return view('livewire.topup', compact('dataCount', 'beneficiaries', 'autoCount', 'airtimeCount', 'popular', 'total', 'countries', 'sellable', 'operators', 'products', 'selected', 'quote', 'prices', 'stale', 'hasData', 'windowCounts', 'tilePrices', 'rateLine', 'offers', 'offerQuote', 'offerProduct', 'offerCountries', 'oc'));
+        return view('livewire.topup', compact('dataCount', 'beneficiaries', 'autoCount', 'airtimeCount', 'popular', 'total', 'countries', 'sellable', 'operators', 'products', 'selected', 'quote', 'prices', 'stale', 'refreshing', 'hasData', 'windowCounts', 'tilePrices', 'rateLine', 'offers', 'offerQuote', 'offerProduct', 'offerCountries', 'oc'));
     }
 }
