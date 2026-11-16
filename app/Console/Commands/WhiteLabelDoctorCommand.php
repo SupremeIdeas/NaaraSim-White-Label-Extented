@@ -202,7 +202,8 @@ class WhiteLabelDoctorCommand extends Command
         $env = InstanceIdentity::envFor($id);
         $changed = [];
         foreach ($env as $k => $v) {
-            if ($k === 'INSTANCE_ID' || (string) env($k) === '') {
+            // Empty, or one of the generic names every copy ships with (shared by all installs on a server), is replaced; a name the owner chose is kept.
+            if ($k === 'INSTANCE_ID' || (string) env($k) === '' || in_array((string) env($k), InstanceIdentity::GENERIC_DEFAULTS, true)) {
                 $changed[$k] = $v;   // never replaces a value the owner already chose
             }
         }
