@@ -76,6 +76,29 @@
         </form>
     </section>
 
+    {{-- Fingerprint / Face / screen lock (passkeys) --}}
+    <section class="ns-pg__card ns-ring" data-passkeys x-data="{ ok: false, busy: false, msg: '', name: '',
+            go(r) { this.busy = false; if (r.ok) { this.msg = ''; this.name = ''; $wire.$refresh(); } else if (r.error === 'confirm') { location.href = @js(route('password.confirm')) } else if (r.error !== 'cancelled') { this.msg = 'That did not work. Try again, or use another device.' } } }"
+            x-init="window.nxPasskey && window.nxPasskey.platformReady().then(v => ok = v)">
+        <h2 class="ns-pg__h2" style="margin-bottom:4px">Fingerprint, face or screen lock</h2>
+        <p class="ns-small" style="margin:0 0 12px">Sign in with the lock you already use on this device. Your fingerprint never leaves your phone; we only store a public key. You can always use your password instead.</p>
+        @forelse ($passkeys as $pk)
+            <div class="ns-pg__head" style="flex-wrap:nowrap;align-items:center;margin-bottom:8px">
+                <span style="display:flex;align-items:center;gap:10px;font-weight:600;color:rgb(var(--nx-text))"><x-nx.icon name="lock" /> {{ $pk->name }} <small class="ns-small" style="font-weight:400">{{ $pk->last_used_at ? 'used '.$pk->last_used_at->diffForHumans() : 'not used yet' }}</small></span>
+                <button type="button" class="ns-cta ns-cta--pill ns-cta--ghost ns-cta--sm" @click="if (confirm('Remove this device?')) window.nxPasskey.remove({{ $pk->id }}).then(r => go(r))">Remove</button>
+            </div>
+        @empty
+            <p class="ns-small" style="margin:0 0 12px">No device added yet.</p>
+        @endforelse
+        <div x-show="ok" x-cloak style="display:none">
+            <label class="ns-lbl" for="pk-name">Name this device</label>
+            <input id="pk-name" type="text" x-model="name" maxlength="60" placeholder="My phone" class="ns-input" style="margin-bottom:10px">
+            <button type="button" :disabled="busy" @click="busy = true; window.nxPasskey.register(name || 'This device').then(r => go(r))" class="ns-cta ns-cta--pill"><x-nx.icon name="shield-check" /> <span x-text="busy ? 'Waiting for your fingerprint...' : 'Add this device'"></span></button>
+        </div>
+        <p x-show="!ok" class="ns-small" style="margin:0">This browser or device has no fingerprint, face or screen lock available. Open this site on your phone to add one.</p>
+        <p x-show="msg" x-text="msg" class="ns-small" style="color:rgb(var(--nx-danger,200 40 40));margin-top:8px" role="alert"></p>
+    </section>
+
     {{-- Connected accounts --}}
     <section class="ns-pg__card ns-ring">
         <h2 class="ns-pg__h2" style="margin-bottom:12px">Connected accounts</h2>

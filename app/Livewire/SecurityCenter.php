@@ -223,6 +223,7 @@ class SecurityCenter extends Component
             'recoveryCodes' => $recoveryCodes,
             'sessions' => $sessions,
             'googleLinked' => ! is_null($user->google_id),
+            'passkeys' => $user->passkeys()->latest()->get(),
         ]);
     }
 }
