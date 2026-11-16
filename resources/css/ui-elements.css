@@ -1739,3 +1739,7 @@
   .nx-gift-stage__box { animation: none; }
   .nx-gift-stage__halo { animation: none; opacity: .5; }
 }
+
+/* Fintech popup: clean card, no decorative top/bottom lines (owner request). The auto-close timer still runs; it just is not drawn. */
+.nx-hero::before, .nx-hero::after, .nx-hero--success::after { display: none !important; content: none !important; }
+.nx-hero__timer { display: none !important; }

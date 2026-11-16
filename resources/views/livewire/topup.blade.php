@@ -53,6 +53,7 @@
         @if ($phoneError)<p class="ns-tp__err" role="alert"><x-nx.icon name="alert-triangle" /> {{ $phoneError }}</p>@endif
         @if ($country !== '' && ! $sellable)<p class="ns-tp__err" role="status"><x-nx.icon name="info" /> Top-ups to {{ \App\Support\CountryNames::name($country) }} are not available yet.</p>@endif
         @if ($stale)<p class="ns-sub ns-small">Showing the last known offers while the operator updates.</p>@endif
+        @if ($refreshing)<p class="ns-sub ns-small" wire:poll.3s role="status" data-topup-refreshing>Checking the latest prices&hellip; what you see now is the last saved list.</p>@endif
 
         @if ($sellable && $e164 !== '')
             @if ($operator)

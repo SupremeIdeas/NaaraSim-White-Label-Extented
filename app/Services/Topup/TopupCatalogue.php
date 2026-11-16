@@ -46,6 +46,31 @@ class TopupCatalogue
         return $answered;
     }
 
+    /**
+     * The page-safe refresh: never calls a supplier. When the country's price window has lapsed it queues ONE background refresh and returns at once, so the
+     * customer always sees the stored catalogue immediately. @return bool true while a refresh for this country is queued or running
+     */
+    public function refreshInBackground(string $country): bool
+    {
+        $country = strtoupper($country);
+        if (Cache::has('topup.live.'.$country)) {
+            return false;
+        }
+        if (Cache::add('topup.live.queued.'.$country, 1, 90)) {
+            \App\Jobs\Topup\RefreshTopupCountryJob::dispatch($country);
+        }
+
+        return true;
+    }
+
+    /** True while a background refresh for this country has been queued and has not finished yet. */
+    public function refreshing(string $country): bool
+    {
+        $country = strtoupper($country);
+
+        return ! Cache::has('topup.live.'.$country) && Cache::has('topup.live.queued.'.$country);
+    }
+
     /** @param  list<\App\Services\Topup\DTO\ProductDTO>  $products */
     public function store(string $code, string $country, array $products): void
     {
@@ -69,12 +94,13 @@ class TopupCatalogue
             return collect();
         }
         $fromProducts = TopupProduct::whereIn('provider_code', $eligible)->where('active', true)->distinct()->pluck('country_iso');
-        // Suppliers also announce their countries (cached for hours), so a fresh install lists countries before the first sync has run.
+        // Suppliers also announce their countries, so a fresh install lists countries before the first sync has run. Read from the cache only: the warm job
+        // (and the autopilot) fills it, so a page view never waits on a supplier.
         foreach ($eligible as $code) {
-            try {
-                $fromProducts = $fromProducts->merge(TopupProviders::get($code)->countries());
-            } catch (Throwable) {
-            }
+            $fromProducts = $fromProducts->merge((array) Cache::get('topup.supplier.countries.'.$code, []));
+        }
+        if (! Cache::has('topup.supplier.countries.warm') && Cache::add('topup.supplier.countries.warm.queued', 1, 300)) {
+            \App\Jobs\Topup\WarmTopupCountriesJob::dispatch();
         }
 
         return $fromProducts->map('strtoupper')->unique()->filter(fn ($c) => $this->router->sellable($c))->sort()->values();
@@ -87,7 +113,7 @@ class TopupCatalogue
     public function products(string $country, ?string $type = null, ?string $operator = null): Collection
     {
         $country = strtoupper($country);
-        $this->refresh($country);
+        $this->refreshInBackground($country);   // never a live supplier call while the customer waits
 
         $rows = collect();
         foreach (['airtime', 'data'] as $t) {
