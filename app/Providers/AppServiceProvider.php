@@ -308,6 +308,7 @@ class AppServiceProvider extends ServiceProvider
                 \App\Http\Middleware\EnsureFeatureAllowed::class,
                 \App\Http\Middleware\EnsureAdmin::class,
                 \App\Http\Middleware\EnsureActive::class,
+            \App\Http\Middleware\EnforceAppLock::class,
                 \App\Http\Middleware\EnsureKycLevel::class,
                 \App\Http\Middleware\EnsureVerifiedWhenMailConfigured::class,
                 \App\Http\Middleware\EnsureDeveloperApiEnabled::class,

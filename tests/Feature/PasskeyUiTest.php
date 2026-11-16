@@ -30,4 +30,27 @@ class PasskeyUiTest extends TestCase
             $this->assertTrue(\Illuminate\Support\Facades\Route::has($r), $r);
         }
     }
+
+    public function test_a_locked_session_sees_only_the_lock_screen_until_the_password_unlocks_it(): void
+    {
+        $u = User::factory()->create(['password' => \Illuminate\Support\Facades\Hash::make('Secret123!')])->fresh();
+        $u->forceFill(['app_lock_minutes' => 5])->save();
+
+        $this->actingAs($u)->post('/app-lock/lock')->assertOk();
+        $this->actingAs($u)->get('/account/security')->assertStatus(423)->assertSee('Welcome back')->assertSee('data-app-lock', false);
+        $this->actingAs($u)->postJson('/app-lock/password', ['password' => 'wrong'])->assertStatus(422);
+        $this->actingAs($u)->get('/account/security')->assertStatus(423);
+        $this->actingAs($u)->postJson('/app-lock/password', ['password' => 'Secret123!'])->assertOk();
+        $this->actingAs($u)->get('/account/security')->assertOk();
+    }
+
+    public function test_the_lock_is_off_by_default_and_an_idle_session_locks_server_side(): void
+    {
+        $u = User::factory()->create()->fresh();
+        $this->actingAs($u)->get('/account/security')->assertOk();
+        $this->assertFalse(\App\Support\AppLock::enabled($u));
+
+        $u->forceFill(['app_lock_minutes' => 1])->save();
+        $this->actingAs($u)->withSession(['app_last_active' => time() - 3600])->get('/account/security')->assertStatus(423);
+    }
 }

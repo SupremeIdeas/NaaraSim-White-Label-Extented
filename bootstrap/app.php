@@ -31,6 +31,7 @@ return Application::configure(basePath: dirname(__DIR__))
         // Localization Phase A: resolve + apply the request's locale before
         // anything renders (session/user/country -> config('app.locale')).
         $middleware->web(append: [
+            \App\Http\Middleware\EnforceAppLock::class,
             \App\Http\Middleware\SetLocale::class,
         ]);
 

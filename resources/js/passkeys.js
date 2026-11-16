@@ -37,5 +37,24 @@ window.nxPasskey = {
             return res.ok ? { ok: true } : { ok: false, error: res.status === 423 ? 'confirm' : (res.body?.message || 'rejected') };
         } catch (e) { return { ok: false, error: fail(e) }; }
     },
+    post: (url, data) => json(url, { method: 'POST', body: JSON.stringify(data || {}) }),
+    /** Re-confirm with the device lock for the app lock screen, then open the lock on the server. */
+    async confirm() {
+        try {
+            const o = await json('/passkeys/confirm/options'); if (!o.ok) return { ok: false, error: 'Fingerprint is not set up on this account.' };
+            const c = await navigator.credentials.get({ publicKey: decodeGet(o.body.options.publicKey || o.body.options) });
+            const r = c.response;
+            const res = await json('/passkeys/confirm', { method: 'POST', body: JSON.stringify({ credential: { ...base(c), response: { clientDataJSON: bufToB64u(r.clientDataJSON), authenticatorData: bufToB64u(r.authenticatorData), signature: bufToB64u(r.signature), userHandle: r.userHandle ? bufToB64u(r.userHandle) : null } } }) });
+            if (!res.ok) return { ok: false, error: 'rejected' };
+            const u = await json('/app-lock/passkey', { method: 'POST', body: '{}' });
+            return u.ok ? { ok: true, redirect: u.body?.redirect || '/' } : { ok: false, error: u.body?.message || 'rejected' };
+        } catch (e) { return { ok: false, error: fail(e) }; }
+    },
     async remove(id) { const r = await json('/user/passkeys/' + id, { method: 'DELETE' }); return r.status === 423 ? { ok: false, error: 'confirm' } : { ok: r.ok }; },
+};
+
+/** Lock the app whenever it is left (the "Whenever I leave the app" choice); the server enforces the lock. */
+window.nxAppLock = (mode) => {
+    if (mode !== 0 || window.__nxAppLockOn) return; window.__nxAppLockOn = true;
+    document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') fetch('/app-lock/lock', { method: 'POST', credentials: 'same-origin', keepalive: true, headers: { 'X-XSRF-TOKEN': xsrf(), Accept: 'application/json' } }); });
 };
