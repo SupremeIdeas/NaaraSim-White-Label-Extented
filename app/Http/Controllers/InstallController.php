@@ -90,6 +90,8 @@ class InstallController extends Controller
             'APP_NAME' => $data['app_name'],
             'APP_URL' => $data['app_url'],
             'APP_ENV' => 'production',
+            // The domain the installer is being used on is always trusted, even if the typed APP_URL differs (a typo must not lock the owner out of their own site).
+            'TRUSTED_HOSTS' => (parse_url($data['app_url'], PHP_URL_HOST) !== $request->getHost()) ? $request->getHost() : null,
             'APP_DEBUG' => 'false',
             'DB_CONNECTION' => $data['db_connection'],
             'DB_HOST' => $data['db_host'] ?? null,

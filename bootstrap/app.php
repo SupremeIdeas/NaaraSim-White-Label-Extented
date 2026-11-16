@@ -24,17 +24,8 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->trustProxies(at: '*');
 
         // Host-header attacks (cache poisoning, poisoned absolute links, password-reset links to an attacker's domain): in production only this install's own host
-        // (APP_URL, with or without www.) and anything listed in TRUSTED_HOSTS is answered; every other Host gets a 400. Off when APP_URL is not set yet (installer).
-        $middleware->trustHosts(at: function (): array {
-            $host = parse_url((string) env('APP_URL', ''), PHP_URL_HOST);
-            if (! is_string($host) || $host === '' || ! in_array((string) env('APP_ENV', 'production'), ['production', 'staging'], true)) {
-                return [];
-            }
-            $extra = array_filter(array_map('trim', explode(',', (string) env('TRUSTED_HOSTS', ''))));
-            $bare = preg_replace('/^www\\./', '', $host);
-
-            return array_values(array_unique(array_merge(['^'.preg_quote($bare, '/').'$', '^www\\.'.preg_quote($bare, '/').'$'], array_map(fn ($h) => '^'.preg_quote($h, '/').'$', $extra))));
-        }, subdomains: false);
+        // (APP_URL, with or without www.) and anything listed in TRUSTED_HOSTS is answered; every other Host gets a 400. Off when APP_URL is not set, is a placeholder, or TRUSTED_HOSTS=* (see App\Support\TrustedHosts).
+        $middleware->trustHosts(at: fn (): array => \App\Support\TrustedHosts::patterns(), subdomains: false);
 
         // Fresh upload with no lock file -> web installer (blueprint S22.1).
         $middleware->web(append: [

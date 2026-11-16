@@ -124,6 +124,16 @@ class SecurityHeaders
             $add['script-src'][] = 'https://connect.facebook.net';
             $add['connect-src'] = array_merge($add['connect-src'] ?? [], ['https://www.facebook.com', 'https://connect.facebook.net']);
         }
+        // Uploads (voice notes, attachments, pictures): when the upload disk is S3/Wasabi, Livewire sends the file straight from the browser to the bucket, so that
+        // host must be reachable from the page or every upload fails silently. Same-origin (local disk) installs need nothing.
+        if (class_exists(\Livewire\Features\SupportFileUploads\FileUploadConfiguration::class) && \Livewire\Features\SupportFileUploads\FileUploadConfiguration::isUsingS3()) {
+            $disk = (string) (config('livewire.temporary_file_upload.disk') ?: config('filesystems.default'));
+            $cfg = (array) config('filesystems.disks.'.strtolower($disk), []);
+            $host = parse_url((string) ($cfg['endpoint'] ?? ''), PHP_URL_HOST) ?: (! empty($cfg['region']) ? 's3.'.$cfg['region'].'.amazonaws.com' : null);
+            if (is_string($host) && preg_match('/^[A-Za-z0-9.-]+$/', $host)) {
+                $add['connect-src'] = array_merge($add['connect-src'] ?? [], ['https://'.$host, 'https://*.'.$host]);
+            }
+        }
         $add['form-action'] = array_merge(self::GATEWAY_FORM_TARGETS, (array) config('security.csp.form_action_extra', []));
 
         $directives = array_map('trim', explode(';', $policy));
