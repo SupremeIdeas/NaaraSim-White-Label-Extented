@@ -15,7 +15,7 @@ use Illuminate\Support\Str;
  */
 class GreyWebhookRegistrar
 {
-    public const EVENTS = ['transaction.success', 'transaction.failed'];
+    public const EVENTS = ['transaction.success', 'transaction.failed', 'transaction.received'];
 
     public function __construct(private readonly GreyClient $client)
     {
