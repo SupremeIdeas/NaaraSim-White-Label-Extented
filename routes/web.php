@@ -264,6 +264,14 @@ Route::get('/merchant/{slug}/join', MerchantJoin::class)->name('merchant.join');
 // Authenticated customer app (blueprint Sections 4, 12, 14, 16). `active`
 // confines a self-paused account to the account page until it reactivates
 // (Section 26.1).
+// App lock (fingerprint / face / password "Welcome back" screen). Auth only: the lock page itself must stay reachable while locked.
+Route::middleware(['auth', 'throttle:20,1'])->prefix('app-lock')->name('app-lock.')->group(function () {
+    Route::post('/lock', [\App\Http\Controllers\AppLockController::class, 'lock'])->name('lock');
+    Route::post('/password', [\App\Http\Controllers\AppLockController::class, 'unlockWithPassword'])->name('password');
+    Route::post('/passkey', [\App\Http\Controllers\AppLockController::class, 'unlockWithPasskey'])->name('passkey');
+    Route::post('/secure', [\App\Http\Controllers\AppLockController::class, 'secure'])->name('secure');
+});
+
 Route::middleware(['auth', 'active'])->group(function () {
     // Money + core app routes require a verified email — but only once outgoing
     // mail is configured (owner request), so users are never trapped behind a

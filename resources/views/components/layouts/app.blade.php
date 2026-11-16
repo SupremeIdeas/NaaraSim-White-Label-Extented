@@ -195,6 +195,7 @@
     @endif
     {{ $slot ?? '' }}
     @yield('content')
+    @auth @if (\App\Support\AppLock::minutes(auth()->user()) === 0)<script>document.addEventListener('DOMContentLoaded', () => window.nxAppLock && window.nxAppLock(0));</script>@endif @endauth
     @livewireScripts
 </body>
 </html>

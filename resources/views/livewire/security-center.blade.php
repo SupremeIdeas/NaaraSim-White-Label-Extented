@@ -96,6 +96,14 @@
             <button type="button" :disabled="busy" @click="busy = true; window.nxPasskey.register(name || 'This device').then(r => go(r))" class="ns-cta ns-cta--pill"><x-nx.icon name="shield-check" /> <span x-text="busy ? 'Waiting for your fingerprint...' : 'Add this device'"></span></button>
         </div>
         <p x-show="!ok" class="ns-small" style="margin:0">This browser or device has no fingerprint, face or screen lock available. Open this site on your phone to add one.</p>
+        <div style="margin-top:16px;padding-top:14px;border-top:1px solid rgb(var(--nx-line))" data-app-lock-setting>
+            <label class="ns-lbl" for="al-mins">Lock the app</label>
+            <select id="al-mins" wire:model.live="appLock" class="ns-select">
+                <option value="off">Never (stay signed in)</option>
+                @foreach (\App\Support\AppLock::CHOICES as $m => $label)<option value="{{ $m }}">{{ $label }}</option>@endforeach
+            </select>
+            <p class="ns-small" style="margin:8px 0 0">When locked, you open the app again with your fingerprint, face or screen lock, or your password.</p>
+        </div>
         <p x-show="msg" x-text="msg" class="ns-small" style="color:rgb(var(--nx-danger,200 40 40));margin-top:8px" role="alert"></p>
     </section>
 
