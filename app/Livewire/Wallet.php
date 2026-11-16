@@ -53,6 +53,12 @@ class Wallet extends Component
     #[Validate('required|numeric|min:1')]
     public $amount = '';
 
+    /** Top-up tab: 'fiat' (cards, bank, mobile money) or 'crypto'. */
+    public string $method = 'fiat';
+
+    /** Gateways that take crypto; every other gateway is a fiat one. */
+    public const CRYPTO_GATEWAYS = ['binance', 'nowpayments', 'cryptomus', 'coinpayments'];
+
     #[Validate('required|in:paystack,flutterwave,stripe,paypal,binance,nowpayments,cryptomus,coinpayments,payssion')]
     public string $gateway = 'paystack';
 
@@ -105,7 +111,12 @@ class Wallet extends Component
         $this->loadPendingTopUp();
         // Default to the first Active gateway so the selector never opens on a
         // "Coming Soon" one; falls back to the first known if none configured yet.
-        $active = array_keys($this->availableGateways());
+        $fiat = array_keys($this->methodGateways('fiat'));
+        $crypto = array_keys($this->methodGateways('crypto'));
+        if ($fiat === [] && $crypto !== []) {
+            $this->method = 'crypto';
+        }
+        $active = $this->method === 'crypto' ? $crypto : $fiat;
         $this->gateway = $active[0] ?? array_key_first(self::GATEWAYS);
 
         $this->displayCurrency = LocaleCurrency::resolve(auth()->user());
@@ -210,10 +221,36 @@ class Wallet extends Component
      * own hosted page, and a Nigeria/South Africa customer is never told
      * "mobile money" is available when neither gateway offers it there.
      */
+    /** Gateways of the open tab only (fiat or crypto), before the currency filter. */
+    private function methodGateways(?string $method = null): array
+    {
+        $crypto = ($method ?? $this->method) === 'crypto';
+
+        return array_filter(
+            $this->availableGateways(),
+            fn ($slug) => in_array($slug, self::CRYPTO_GATEWAYS, true) === $crypto,
+            ARRAY_FILTER_USE_KEY,
+        );
+    }
+
+    public function setMethod(string $method): void
+    {
+        $this->method = $method === 'crypto' ? 'crypto' : 'fiat';
+        $this->error = null;
+        $options = GatewayCurrencyMatrix::allCurrencies(array_keys($this->methodGateways()));
+        if ($options !== [] && ! in_array($this->currency, $options, true)) {
+            $this->currency = in_array('USD', $options, true) ? 'USD' : $options[0];
+        }
+        $valid = array_keys($this->payGateways());
+        if ($valid !== [] && ! in_array($this->gateway, $valid, true)) {
+            $this->gateway = $valid[0];
+        }
+    }
+
     public function payGateways(): array
     {
         $matching = array_filter(
-            $this->availableGateways(),
+            $this->methodGateways(),
             fn ($slug) => GatewayCurrencyMatrix::supports($slug, $this->currency),
             ARRAY_FILTER_USE_KEY,
         );
@@ -521,10 +558,11 @@ class Wallet extends Component
             // Part B §3.6: only gateways that accept the CURRENTLY selected
             // top-up currency — never a pairing the gateway doesn't support.
             'gateways' => $this->payGateways(),
+            'cryptoGateways' => $this->methodGateways('crypto') !== [],
             // The full top-up currency picker (owner request: a real dropdown,
             // not a hardcoded NGN/USD pair) — every currency any configured
             // gateway accepts, restricted to what CurrencyService models.
-            'payCurrencyOptions' => collect(GatewayCurrencyMatrix::allCurrencies(array_keys($this->availableGateways())))
+            'payCurrencyOptions' => collect(GatewayCurrencyMatrix::allCurrencies(array_keys($this->methodGateways())))
                 ->mapWithKeys(fn ($code) => [$code => CurrencyService::SUPPORTED[$code][1]])
                 ->all(),
             // Localized display (owner request): the USD balance shown in the
