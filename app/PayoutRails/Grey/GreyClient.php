@@ -69,6 +69,18 @@ class GreyClient
         return $this->http($idempotencyKey)->post($this->baseUrl().'/v1/charge/payout', $body);
     }
 
+    /** Look a Grey Tag up (read-only). 200 with `is_valid` and the owner's name, or 400 when no such user. */
+    public function greyTag(string $tag): Response
+    {
+        return $this->http()->get($this->baseUrl().'/v1/grey-tags/'.rawurlencode($tag));
+    }
+
+    /** Send money to a Grey Tag (P2P). Same idempotency rules as a bank payout. */
+    public function postP2p(array $body, string $idempotencyKey): Response
+    {
+        return $this->http($idempotencyKey)->post($this->baseUrl().'/v1/charge/p2p', $body);
+    }
+
     public function transactionsByClientReference(string $reference): Response
     {
         return $this->http()->get($this->baseUrl().'/api/v1/transactions', ['client_reference' => $reference, 'limit' => 5]);

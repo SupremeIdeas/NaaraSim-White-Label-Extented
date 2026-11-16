@@ -250,6 +250,47 @@ class Withdraw extends Component
         return ['NG' => 'NGN', 'GH' => 'GHS', 'KE' => 'KES', 'ZA' => 'ZAR'][strtoupper($country)] ?? 'USD';
     }
 
+    public string $greyTag = '';
+
+    public ?string $greyTagName = null;
+
+    /** Look the tag up at Grey and show whose it is before anything is saved. */
+    public function checkGreyTag(): void
+    {
+        $this->accountError = null;
+        $this->greyTagName = null;
+        if (! $this->greyAvailable()) {
+            return;
+        }
+        try {
+            $found = app(\App\PayoutRails\Grey\GreyAccountService::class)->resolveTag($this->greyTag);
+        } catch (AccountResolutionException $e) {
+            $this->accountError = $e->getMessage();
+
+            return;
+        }
+        $this->greyTagName = $found['name'];
+    }
+
+    public function addGreyTag(): void
+    {
+        $this->accountError = null;
+        if (! $this->greyAvailable()) {
+            return;
+        }
+        $this->validate(['greyTag' => 'required|string|max:40']);
+        try {
+            $account = app(\App\PayoutRails\Grey\GreyAccountService::class)->addTag(Auth::user(), $this->greyTag);
+        } catch (AccountResolutionException|PayoutException $e) {
+            $this->accountError = $e->getMessage();
+
+            return;
+        }
+        $this->reset('greyTag', 'greyTagName');
+        $this->accountId = $account->id;
+        $this->dispatch('nx-toast', type: 'success', message: 'Grey Tag saved. Payouts to it are reviewed by our team.');
+    }
+
     public function addGreyAccount(): void
     {
         $this->accountError = null;
