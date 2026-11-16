@@ -139,6 +139,95 @@ class GreyAccountService
         });
     }
 
+    /** A Grey Tag as people type it: letters, digits, dot, underscore, dash; a leading @ is dropped. */
+    public static function cleanTag(string $tag): string
+    {
+        return strtolower(ltrim(trim($tag), '@'));
+    }
+
+    /**
+     * Resolve a Grey Tag against Grey itself: the one account-name check Grey's API offers. Read-only.
+     *
+     * @return array{tag: string, first_name: string, last_name: string, name: string}
+     *
+     * @throws AccountResolutionException
+     */
+    public function resolveTag(string $input): array
+    {
+        $tag = self::cleanTag($input);
+        if (! preg_match('/^[a-z0-9._-]{2,32}$/', $tag)) {
+            throw new AccountResolutionException('Enter the Grey Tag exactly as it shows in the Grey app, for example @yourname.');
+        }
+        try {
+            $r = $this->client->greyTag($tag);
+        } catch (\Throwable) {
+            throw new AccountResolutionException("We can't reach Grey right now. Please try again shortly.");
+        }
+        if ($r->status() >= 500 || $r->status() === 401 || $r->status() === 403 || $r->status() === 429) {
+            throw new AccountResolutionException("We can't confirm this Grey Tag right now. Please try again shortly.");
+        }
+        if (! $r->successful() || data_get($r->json(), 'data.is_valid') !== true) {
+            throw new AccountResolutionException('No Grey account has that tag. Check the spelling in the Grey app.');
+        }
+        $first = trim((string) data_get($r->json(), 'data.first_name', ''));
+        $last = trim((string) data_get($r->json(), 'data.last_name', ''));
+        if ($first === '' && $last === '') {
+            throw new AccountResolutionException('We could not confirm who owns that tag.');
+        }
+
+        return ['tag' => $tag, 'first_name' => $first, 'last_name' => $last, 'name' => trim($first.' '.$last)];
+    }
+
+    /** The tag must belong to the member: every word of the Grey name has to appear in the name on their Naara account. */
+    public static function nameMatches(string $greyName, string $accountName): bool
+    {
+        $norm = fn (string $v) => preg_split('/[^a-z0-9]+/', strtolower(\Illuminate\Support\Str::ascii($v)), -1, PREG_SPLIT_NO_EMPTY) ?: [];
+        $theirs = $norm($accountName);
+        $words = $norm($greyName);
+
+        return $words !== [] && count(array_diff($words, $theirs)) === 0;
+    }
+
+    /**
+     * Save a Grey Tag as a payout account: instant, free of bank rails, paid from the USD wallet by P2P transfer.
+     * The tag is resolved by Grey and must belong to the member (name match), so money can never be pointed at someone else's tag.
+     *
+     * @throws AccountResolutionException
+     */
+    public function addTag(User $user, string $input): PayoutAccount
+    {
+        $this->guard($user);
+        $found = $this->resolveTag($input);
+        if (! self::nameMatches($found['name'], (string) $user->name)) {
+            throw new AccountResolutionException('That Grey Tag is registered to a different name than your account. Use your own Grey Tag, or update the name on your account first.');
+        }
+        $country = strtoupper((string) ($user->country ?? ''));
+        $country = preg_match('/^[A-Z]{2}$/', $country) ? $country : 'US';
+
+        return DB::transaction(function () use ($user, $found, $country) {
+            $isFirst = ! PayoutAccount::query()->where('user_id', $user->id)->exists();
+            $account = PayoutAccount::create([
+                'user_id' => $user->id,
+                'type' => 'grey_tag',
+                'method' => 'grey_tag',
+                'country' => $country,
+                'currency' => 'USD',
+                'bank_code' => '',
+                'bank_name' => 'Grey Tag',
+                'account_number' => '@'.$found['tag'],
+                'account_name' => $found['name'],
+                'payee_kyc_name' => $user->name,
+                'provider' => 'grey',
+                'details' => ['grey_tag' => $found['tag']],
+                'is_verified' => true,
+                'is_default' => $isFirst,
+            ]);
+            Auditor::log('payout.account_added', 'PayoutAccount', $account->id, ['provider' => 'grey', 'method' => 'grey_tag']);
+
+            return $account;
+        });
+    }
+
     private function guard(User $user): void
     {
         if (PayoutFreeze::isFrozen($user->id)) {

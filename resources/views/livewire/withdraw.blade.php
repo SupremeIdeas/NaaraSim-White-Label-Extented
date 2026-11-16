@@ -166,6 +166,19 @@
                 <span wire:loading wire:target="addGreyAccount" class="ns-cta__label"><x-ui.spinner class="h-4 w-4" /> Saving…</span>
             </x-nx.cta>
         @endif
+        {{-- Grey Tag: the one account Grey can verify by name, so it is checked live and paid instantly --}}
+        <div class="wk-block" data-grey-tag style="margin-top:22px">
+            <div class="ns-lbl">Or use your Grey Tag</div>
+            <p class="ns-sub" style="font-size:13px;margin:4px 0 10px">Instant and checked live: we confirm the tag with Grey and make sure it is yours before saving.</p>
+            <label class="ns-search"><input type="text" wire:model="greyTag" wire:keydown.enter="checkGreyTag" placeholder="@yourname" autocomplete="off" maxlength="40" aria-label="Grey Tag"></label>
+            @if ($greyTagName)
+                <x-nx.note icon="check">This tag belongs to <b>{{ $greyTagName }}</b>.</x-nx.note>
+            @endif
+            <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
+                <x-nx.cta icon="search" loading="checkGreyTag" wire:click="checkGreyTag"><span>Check tag</span></x-nx.cta>
+                <x-nx.cta icon="check" variant="gold" loading="addGreyTag" wire:click="addGreyTag"><span>Save Grey Tag</span></x-nx.cta>
+            </div>
+        </div>
     @elseif ($accountType === 'paypal')
         {{-- PayPal has no bank-style resolve API to confirm a payout email before sending money — re-typing it is the guard against a
              mistyped destination. --}}

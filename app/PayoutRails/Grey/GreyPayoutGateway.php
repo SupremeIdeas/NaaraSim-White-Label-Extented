@@ -71,6 +71,14 @@ class GreyPayoutGateway implements PayoutGatewayInterface, DeclaresCapabilities,
      */
     public function createRecipient(PayoutAccount $account): string
     {
+        if ($account->method === 'grey_tag') {
+            $tag = (string) data_get($account->details, 'grey_tag', '');
+            if ($tag === '') {
+                throw new PayoutException('This Grey Tag account is missing its tag.');
+            }
+
+            return 'grey-tag:'.$tag;
+        }
         $mobile = $account->method === 'mobile_money' || $account->type === 'mobile_money';
         $methods = $this->client->payoutMethods();
         if ($methods === []) {
@@ -92,6 +100,9 @@ class GreyPayoutGateway implements PayoutGatewayInterface, DeclaresCapabilities,
 
     public function sendTransfer(PayoutRequest $request, PayoutAccount $account): PayoutTransferResult
     {
+        if ($account->method === 'grey_tag') {
+            return $this->sendToTag($request, $account);
+        }
         $mobile = $account->method === 'mobile_money' || $account->type === 'mobile_money';
         $method = $this->mapper->methodFor($this->client->payoutMethods(), (string) $account->currency, (string) $account->country, $mobile);
         $beneficiary = $this->mapper->map($account, $method);
@@ -130,6 +141,45 @@ class GreyPayoutGateway implements PayoutGatewayInterface, DeclaresCapabilities,
         return new PayoutTransferResult(status: 'failed', failureReason: $this->reason($response));
     }
 
+
+    /** Grey Tag payout: a P2P transfer from the USD wallet. Same money rules as a bank payout (idempotent reference, clear 4xx = failed, doubt = unknown). */
+    private function sendToTag(PayoutRequest $request, PayoutAccount $account): PayoutTransferResult
+    {
+        $tag = (string) data_get($account->details, 'grey_tag', '');
+        $found = $this->client->greyTag($tag);
+        if ($found->status() >= 500 || $found->status() === 429) {
+            $found->throw();   // can't tell: unknown, never a refund
+        }
+        if (! $found->successful() || data_get($found->json(), 'data.is_valid') !== true) {
+            return new PayoutTransferResult(status: 'failed', failureReason: 'That Grey Tag could not be confirmed any more.');
+        }
+        $plan = $this->plan($request);
+        if ($plan instanceof PayoutTransferResult) {
+            return $plan;
+        }
+        $reference = $request->wireReference();
+        $response = $this->client->postP2p([
+            'source_amount' => $plan['amount'],
+            'source_currency' => $plan['currency'],
+            'destination_currency' => strtoupper((string) $request->currency),
+            'username' => $tag,
+            'description' => 'Naara payout',
+            'reference' => $reference,
+        ], $reference);
+
+        if ($response->successful()) {
+            return $this->fromTransaction((array) data_get($response->json(), 'data', []));
+        }
+        $status = $response->status();
+        if ($status === 401 || $status === 403) {
+            AlertAdminJob::dispatch('grey_auth_failed', 'Grey rejected our API key (HTTP '.$status.'). Grey payouts will fail until it is fixed.', ['status' => $status]);
+        }
+        if ($status === 409 || $status === 429 || $status >= 500) {
+            $response->throw();
+        }
+
+        return new PayoutTransferResult(status: 'failed', failureReason: $this->reason($response));
+    }
 
     /**
      * Which wallet pays, and how much leaves it. Grey pays out of a wallet and converts to the destination
