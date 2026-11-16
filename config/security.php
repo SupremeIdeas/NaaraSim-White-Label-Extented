@@ -17,6 +17,8 @@ return [
 
     'csp' => [
         'enabled' => (bool) env('SECURITY_CSP_ENABLED', true),
+        // Extra hosts a plain HTML form may post to (comma-separated, e.g. https://pay.example.com). Gateways already covered are built in.
+        'form_action_extra' => array_values(array_filter(array_map('trim', explode(',', (string) env('SECURITY_FORM_ACTION_EXTRA', ''))))),
         'policy' => env('SECURITY_CSP', implode('; ', [
             "default-src 'self'",
             "base-uri 'self'",

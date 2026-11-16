@@ -29,7 +29,10 @@ class AdminLoginRateLimitTest extends TestCase
         $limiter = RateLimiter::limiter('login');
         $limit = $limiter(Request::create('/login', 'POST', ['email' => $email]));
 
-        return $limit->maxAttempts;
+        // The limiter returns the per-account limit first, then the IP-wide ceiling.
+        $first = is_array($limit) ? $limit[0] : $limit;
+
+        return $first->maxAttempts;
     }
 
     public function test_admin_gets_a_high_login_cap(): void

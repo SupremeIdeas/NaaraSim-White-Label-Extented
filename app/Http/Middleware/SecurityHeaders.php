@@ -43,6 +43,7 @@ class SecurityHeaders
             $policy = $this->policyWithConvai($policy);
             $policy = $this->policyWithGoogleFonts($policy);
             $policy = $this->policyWithTrustpilot($policy);
+            $policy = $this->policyWithTrackingAndGateways($policy);
             if (class_exists(\App\Support\Crypto\CryptoCsp::class)) {
                 $policy = \App\Support\Crypto\CryptoCsp::apply($policy, $request);   // crypto top-up: wallet-connect origins on that one page
             }
@@ -97,6 +98,54 @@ class SecurityHeaders
 
         if (! $sawFrame) {
             $directives[] = "frame-src 'self' ".$origin;
+        }
+
+        return implode('; ', array_filter($directives));
+    }
+
+    /** Payment-gateway checkout hosts a classic HTML form may post to (and be redirected to). Redirects issued from Livewire/JS are not affected by form-action; this keeps a plain form working too. */
+    private const GATEWAY_FORM_TARGETS = [
+        'https://*.paystack.com', 'https://*.flutterwave.com', 'https://*.fincra.com', 'https://*.paypal.com', 'https://*.stripe.com',
+        'https://*.nowpayments.io', 'https://*.cryptomus.com', 'https://*.binance.com', 'https://*.coinpayments.net', 'https://*.payssion.com', 'https://*.paga.com',
+    ];
+
+    /**
+     * Additive CSP allowances, each only while it is needed: Google Analytics / Meta Pixel origins once the admin saved an ID (the snippets are otherwise
+     * blocked), and the payment-gateway hosts a plain form may post to. Never removes or loosens anything else.
+     */
+    private function policyWithTrackingAndGateways(string $policy): string
+    {
+        $add = [];
+        if (\App\Support\Tracking::gaId()) {
+            $add['script-src'][] = 'https://www.googletagmanager.com';
+            $add['connect-src'] = array_merge($add['connect-src'] ?? [], ['https://www.google-analytics.com', 'https://*.google-analytics.com', 'https://*.analytics.google.com', 'https://*.googletagmanager.com']);
+        }
+        if (\App\Support\Tracking::pixelId()) {
+            $add['script-src'][] = 'https://connect.facebook.net';
+            $add['connect-src'] = array_merge($add['connect-src'] ?? [], ['https://www.facebook.com', 'https://connect.facebook.net']);
+        }
+        $add['form-action'] = array_merge(self::GATEWAY_FORM_TARGETS, (array) config('security.csp.form_action_extra', []));
+
+        $directives = array_map('trim', explode(';', $policy));
+        $seen = [];
+        foreach ($directives as $i => $directive) {
+            foreach ($add as $name => $origins) {
+                if (str_starts_with($directive, $name.' ')) {
+                    $seen[$name] = true;
+                    foreach ($origins as $origin) {
+                        if (! str_contains($directive, $origin)) {
+                            $directive .= ' '.$origin;
+                        }
+                    }
+                    $directives[$i] = $directive;
+                }
+            }
+        }
+        // A directive the base policy never set falls back to default-src, so only create the ones we must widen.
+        foreach (['script-src' => "'self'", 'connect-src' => "'self'"] as $name => $base) {
+            if (! isset($seen[$name]) && isset($add[$name])) {
+                $directives[] = $name.' '.$base.' '.implode(' ', $add[$name]);
+            }
         }
 
         return implode('; ', array_filter($directives));

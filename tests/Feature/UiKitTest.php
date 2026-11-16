@@ -23,7 +23,7 @@ class UiKitTest extends TestCase
         $this->blade('<x-ui.star-rating :value="4" />')
             ->assertSee('role="img"', false)
             ->assertSee('aria-label="Rating: 4 out of 5"', false)
-            ->assertSee('i-star', false);
+            ->assertSee('nx-duo', false);   // the star renders as a drawn two-colour icon
     }
 
     public function test_interactive_star_rating_is_a_keyboard_radiogroup(): void
