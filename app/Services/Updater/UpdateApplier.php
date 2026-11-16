@@ -110,6 +110,7 @@ class UpdateApplier
             'package_id' => $manifest->packageId,
             'from_version' => $currentVersion !== null ? (string) $currentVersion : null,
             'to_version' => $manifest->version,
+            'changelog' => $manifest->changelog,   // shown in the update history so each update explains what it changed
             'status' => PlatformUpdateAttempt::STATUS_APPLYING,
             'initiated_by_user_id' => $initiatedByUserId,
         ]);

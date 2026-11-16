@@ -231,6 +231,9 @@
                                     <td class="py-2 pr-4">{{ $a->migrations_run_count ?? '—' }}</td>
                                     <td class="py-2 pr-4">{{ $a->downtime_seconds !== null ? $a->downtime_seconds.'s' : '—' }}</td>
                                 </tr>
+                                @if ($a->status === 'succeeded' && filled($a->changelog))
+                                    <tr><td colspan="6" class="pb-2 text-xs text-slate-600 dark:text-slate-300" data-update-changelog><span class="font-semibold">What changed:</span> {!! nl2br(e($a->changelog)) !!}</td></tr>
+                                @endif
                                 @if ($a->failure_reason)
                                     <tr><td colspan="6" class="pb-2 text-xs text-red-600 dark:text-red-400">{{ $a->failure_reason }}</td></tr>
                                 @endif

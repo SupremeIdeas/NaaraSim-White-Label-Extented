@@ -119,6 +119,18 @@ class UpdateApplierTest extends TestCase
         $this->assertFalse(app()->isDownForMaintenance());
     }
 
+    public function test_a_green_update_keeps_its_changelog_so_the_history_explains_itself(): void
+    {
+        $this->mockBackups();
+        $restore = Mockery::mock(RestoreService::class);
+        $pkg = $this->buildPackage([['path' => 'app/New.php', 'action' => 'add', 'content' => '<?php // new']], ['changelog' => "Faster top-up\n- Voice notes upload on every host"]);
+
+        $attempt = $this->applier($restore)->apply($pkg, null);
+
+        $this->assertSame(PlatformUpdateAttempt::STATUS_SUCCEEDED, $attempt->status);
+        $this->assertSame("Faster top-up\n- Voice notes upload on every host", $attempt->fresh()->changelog);
+    }
+
     public function test_a_broken_migration_triggers_full_rollback(): void
     {
         File::put($this->appRoot.'/app/Existing.php', '<?php // old');
