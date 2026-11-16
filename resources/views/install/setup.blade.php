@@ -30,7 +30,7 @@
                 </div>
                 <div>
                     <label class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">App URL</label>
-                    <input name="app_url" value="{{ old('app_url', 'https://') }}" required
+                    <input name="app_url" value="{{ old('app_url', request()->getSchemeAndHttpHost()) }}" required
                            class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm dark:border-[#2A2E34] dark:bg-[#373a3f] dark:text-slate-100">
                     <p class="mt-1 rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-700 dark:bg-amber-950/40 dark:text-amber-300">
                         Please do not enter “/” at the end of the URL. Example: https://naarasim.com

@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Setting;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -48,11 +49,20 @@ class CspCompatibilityTest extends TestCase
     public function test_analytics_origins_are_allowed_only_once_an_id_is_saved(): void
     {
         $this->assertStringNotContainsString('googletagmanager', $this->csp());
-        \App\Support\Tracking::save('1234567890', 'G-ABCDE12345');
+        Setting::setValue('tracking.ga_id', 'G-ABCDE12345');
+        Setting::setValue('tracking.fb_pixel_id', '1234567890');
         $csp = $this->csp();
         $this->assertStringContainsString('https://www.googletagmanager.com', $this->directive($csp, 'script-src'));
         $this->assertStringContainsString('https://www.google-analytics.com', $this->directive($csp, 'connect-src'));
         $this->assertStringContainsString('https://connect.facebook.net', $this->directive($csp, 'script-src'));
         $this->assertStringContainsString("'self'", $this->directive($csp, 'connect-src'));
+    }
+
+    public function test_direct_to_bucket_uploads_keep_working_when_the_upload_disk_is_s3(): void
+    {
+        config(['livewire.temporary_file_upload.disk' => 's3', 'filesystems.default' => 's3', 'filesystems.disks.s3' => ['driver' => 's3', 'key' => 'k', 'secret' => 's', 'region' => 'eu-central-1', 'bucket' => 'b', 'endpoint' => 'https://s3.eu-central-1.wasabisys.com']]);
+        $connect = $this->directive($this->csp(), 'connect-src');
+        $this->assertStringContainsString('https://s3.eu-central-1.wasabisys.com', $connect);
+        $this->assertStringContainsString("'self'", $connect);
     }
 }
