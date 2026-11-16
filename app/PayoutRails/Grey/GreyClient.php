@@ -75,6 +75,12 @@ class GreyClient
         return $this->http()->get($this->baseUrl().'/v1/grey-tags/'.rawurlencode($tag));
     }
 
+    /** Register a webhook (Grey's own endpoint). `secret` signs every delivery with HMAC-SHA256. */
+    public function createWebhook(string $url, string $secret, array $events): Response
+    {
+        return $this->http()->post($this->baseUrl().'/v1/webhooks', ['url' => $url, 'secret' => $secret, 'event_types' => $events, 'description' => config('app.name').' payouts']);
+    }
+
     /** Send money to a Grey Tag (P2P). Same idempotency rules as a bank payout. */
     public function postP2p(array $body, string $idempotencyKey): Response
     {
