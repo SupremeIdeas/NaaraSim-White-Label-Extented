@@ -53,6 +53,7 @@ return [
             'secret' => env('AWS_SECRET_ACCESS_KEY'),
             'region' => env('AWS_DEFAULT_REGION'),
             'bucket' => env('AWS_BUCKET'),
+            'root' => env('AWS_ROOT', ''),
             'url' => env('AWS_URL'),
             'endpoint' => env('AWS_ENDPOINT'),
             'use_path_style_endpoint' => env('AWS_USE_PATH_STYLE_ENDPOINT', false),
@@ -69,6 +70,7 @@ return [
             'secret' => env('WASABI_SECRET_ACCESS_KEY'),
             'region' => env('WASABI_DEFAULT_REGION', 'us-east-1'),
             'bucket' => env('WASABI_BUCKET'),
+            'root' => env('WASABI_ROOT', ''),   // fresh installs get their own folder in a shared bucket (see InstanceIdentity::envFor)
             'endpoint' => env('WASABI_ENDPOINT', 'https://s3.wasabisys.com'),
             'use_path_style_endpoint' => env('WASABI_USE_PATH_STYLE_ENDPOINT', false),
             'visibility' => 'private',
@@ -87,6 +89,7 @@ return [
             'secret' => env('R2_SECRET_ACCESS_KEY'),
             'region' => 'auto',
             'bucket' => env('R2_BUCKET'),
+            'root' => env('R2_ROOT', ''),
             'endpoint' => env('R2_ENDPOINT'),
             'url' => env('R2_PUBLIC_URL'),
             'use_path_style_endpoint' => env('R2_USE_PATH_STYLE_ENDPOINT', false),

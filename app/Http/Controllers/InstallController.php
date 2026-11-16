@@ -103,7 +103,7 @@ class InstallController extends Controller
         ], fn ($v) => $v !== null);
 
         // A name for this install, and the cache / session / queue names derived from it, so nothing is shared with another install on the same server.
-        $env += InstanceIdentity::envFor($instanceId);
+        $env += InstanceIdentity::envFor($instanceId, true);
         if (! config('app.key')) {
             $env['APP_KEY'] = Installer::generateAppKey();
         }

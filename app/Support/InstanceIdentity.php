@@ -15,6 +15,9 @@ final class InstanceIdentity
 {
     public const TABLE = 'instance_identity';
 
+    /** Names every unmodified copy ships with. They are identical on every install, so they must never be kept as an install's own. */
+    public const GENERIC_DEFAULTS = ['naarasim_horizon:', 'naarasim_cache_', 'naarasim_database_', 'naarasim_session', 'laravel_cache_', 'laravel_session', 'laravel_database_', 'laravel_horizon:'];
+
     public const MIGRATION = 'database/migrations/2027_05_01_100000_create_instance_identity_table.php';
 
     public static function id(): ?string
@@ -30,15 +33,18 @@ final class InstanceIdentity
     }
 
     /** The per-install names for everything that could be shared on one server. */
-    public static function envFor(string $id): array
+    public static function envFor(string $id, bool $fresh = false): array
     {
-        return [
+        return array_filter([
             'INSTANCE_ID' => $id,
             'CACHE_PREFIX' => 'wl_'.$id.'_cache_',
             'REDIS_PREFIX' => 'wl_'.$id.'_db_',
             'HORIZON_PREFIX' => 'wl_'.$id.'_horizon:',
             'SESSION_COOKIE' => 'wl_'.$id.'_session',
-        ];
+            // A FRESH install keeps its files in its own folder of a shared bucket. Never set for an existing install (its files are already at the root).
+            'WASABI_ROOT' => $fresh ? 'wl_'.$id : null,
+            'R2_ROOT' => $fresh ? 'wl_'.$id : null,
+        ], fn ($v) => $v !== null);
     }
 
     /** A short hash of host + port + database NAME (never the user or password), so two installs pointed at one database show the same value. */

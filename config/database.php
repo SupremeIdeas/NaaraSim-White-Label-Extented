@@ -2,6 +2,12 @@
 
 use Illuminate\Support\Str;
 
+/*
+ * Per-install name for everything that could be shared on one server (cache, redis, horizon, session cookie). When the install has no INSTANCE_ID yet
+ * the name is derived from where it lives (path + URL), so two copies on one server still never share keys, even before `whitelabel:doctor --adopt`.
+ */
+$tenant = env('INSTANCE_ID') ?: substr(md5(base_path().'|'.env('APP_URL', '')), 0, 12);
+
 return [
 
     /*
@@ -147,7 +153,7 @@ return [
 
         'options' => [
             'cluster' => env('REDIS_CLUSTER', 'redis'),
-            'prefix' => env('REDIS_PREFIX', Str::slug(env('APP_NAME', 'laravel'), '_').'_database_'),
+            'prefix' => (env('REDIS_PREFIX') ?: 'wl_'.$tenant.'_db_'),
         ],
 
         'default' => [

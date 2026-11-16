@@ -97,4 +97,26 @@ class InstanceIdentityTest extends TestCase
             $this->assertStringNotContainsString($pw, $out);
         }
     }
+
+    public function test_a_fresh_install_gets_its_own_storage_folder_and_an_existing_one_never_does(): void
+    {
+        $fresh = InstanceIdentity::envFor('aaaaaaaaaaaaaaaa', true);
+        $this->assertSame('wl_aaaaaaaaaaaaaaaa', $fresh['WASABI_ROOT']);
+        $this->assertSame('wl_aaaaaaaaaaaaaaaa', $fresh['R2_ROOT']);
+        $adopt = InstanceIdentity::envFor('aaaaaaaaaaaaaaaa');
+        $this->assertArrayNotHasKey('WASABI_ROOT', $adopt, 'files of an existing install are already at the bucket root');
+    }
+
+    public function test_the_shipped_env_example_names_nothing_that_every_copy_would_share(): void
+    {
+        $env = file_get_contents(base_path('.env.example'));
+        foreach (['CACHE_PREFIX', 'REDIS_PREFIX', 'HORIZON_PREFIX', 'SESSION_COOKIE'] as $k) {
+            if (preg_match('/^'.$k.'=(.*)$/m', $env, $m)) {
+                $this->assertSame('', trim($m[1]), "$k must ship blank (or absent) so the install derives its own");
+            }
+        }
+        foreach (InstanceIdentity::GENERIC_DEFAULTS as $generic) {
+            $this->assertNotContains($generic, InstanceIdentity::envFor('aaaaaaaaaaaaaaaa'));
+        }
+    }
 }
