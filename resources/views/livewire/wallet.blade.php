@@ -76,11 +76,32 @@
                 <x-nx.note icon="info" variant="warn" role="alert">{{ $error }}</x-nx.note>
             @endif
 
-            @if (\Illuminate\Support\Facades\Route::has('crypto.topup') && \App\Support\ComingSoon::isLive('crypto_topup'))
-                <a href="{{ route('crypto.topup') }}" wire:navigate class="ns-btn" style="margin-bottom:12px" data-tour="wallet.crypto"><x-nx.icon name="wallet" /> Top up with crypto (USDC / USDT)</a>
+            @php
+                $cryptoPage = \Illuminate\Support\Facades\Route::has('crypto.topup') && \App\Support\ComingSoon::isLive('crypto_topup');
+            @endphp
+            @if ($cryptoPage || $cryptoGateways)
+                <div class="wk-seg" role="tablist" aria-label="Top up method" data-topup-method>
+                    <button type="button" role="tab" wire:click="setMethod('fiat')" aria-selected="{{ $method === 'fiat' ? 'true' : 'false' }}" class="{{ $method === 'fiat' ? 'is-on' : '' }}" data-topup-tab="fiat">
+                        <x-nx.icon name="cards" /> <span>Top up with Fiat</span><small>Card, bank, mobile money</small>
+                    </button>
+                    <button type="button" role="tab" wire:click="setMethod('crypto')" aria-selected="{{ $method === 'crypto' ? 'true' : 'false' }}" class="{{ $method === 'crypto' ? 'is-on' : '' }}" data-topup-tab="crypto" data-tour="wallet.crypto">
+                        <x-nx.icon name="wallet" /> <span>Top up with Crypto</span><small>USDC, USDT, Bitcoin</small>
+                    </button>
+                </div>
             @endif
 
-            <form wire:submit="topUp">
+            @if ($method === 'crypto' && $cryptoPage)
+                <div class="wk-block"><div class="wk-block__h"><b>Pay from your own wallet</b></div>
+                    <a href="{{ route('crypto.topup') }}" wire:navigate class="ns-btn" style="margin-top:10px">Open crypto top-up</a>
+                </div>
+            @endif
+
+            @if ($method === 'fiat' || $cryptoGateways)
+            <form wire:submit="topUp" wire:key="topup-form-{{ $method }}">
+                @if ($method === 'crypto')
+                    <div class="wk-block__h" style="margin-top:18px"><b>More ways to pay with crypto</b></div>
+                    <p class="ns-sub" style="font-size:13px;margin:4px 0 0">Bitcoin, USDT and 100+ coins through our crypto payment partners. You are sent to their secure page and your wallet is credited when the network confirms.</p>
+                @endif
                 {{-- Pay-in currency (owner request: a real dropdown) — every currency any configured gateway accepts. USD credits the
                      wallet directly; everything else is converted to a USD credit locked at the live rate. Changing this filters
                      "Pay with" below to only the gateways that actually accept it (updatedCurrency()). --}}
@@ -151,6 +172,7 @@
                 </div>
                 <p class="ns-sub" style="font-size:13px;text-align:center">You’ll be redirected to a secure payment page.</p>
             </form>
+            @endif
         @endif
     </div>
 
