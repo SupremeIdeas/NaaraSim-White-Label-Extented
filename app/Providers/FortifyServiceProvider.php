@@ -91,7 +91,12 @@ class FortifyServiceProvider extends ServiceProvider
                     ->exists()
             );
 
-            return Limit::perMinute($isAdmin ? 200 : 5)->by($throttleKey);
+            // Two layers: the per-account guard (5/min, admins high), plus an IP-wide ceiling so one address cannot spray a password list across thousands of
+            // different emails (credential stuffing). Generous enough for a shared office or mobile carrier NAT; admins get a higher one.
+            return [
+                Limit::perMinute($isAdmin ? 200 : 5)->by($throttleKey),
+                Limit::perMinute($isAdmin ? 300 : 40)->by('login-ip:'.$request->ip()),
+            ];
         });
 
         RateLimiter::for('two-factor', function (Request $request) {

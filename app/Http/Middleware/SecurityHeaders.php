@@ -53,6 +53,12 @@ class SecurityHeaders
             $headers['Strict-Transport-Security'] = 'max-age='.config('security.hsts.max_age').'; includeSubDomains';
         }
 
+        // Do not advertise the PHP version (attackers pick exploits by version).
+        if (! headers_sent()) {
+            @header_remove('X-Powered-By');
+        }
+        $response->headers->remove('X-Powered-By');
+
         foreach ($headers as $key => $value) {
             if (! $response->headers->has($key)) {
                 $response->headers->set($key, $value);
