@@ -23,8 +23,11 @@ class AppLockController extends Controller
     public function unlockWithPassword(Request $request): JsonResponse
     {
         $request->validate(['password' => ['required', 'string']]);
-        if (! Hash::check((string) $request->input('password'), (string) $request->user()->password)) {
-            return response()->json(['message' => 'That password is not right.', 'errors' => ['password' => ['That password is not right.']]], 422);
+        $u = $request->user();
+        // The app password is its own secret; the account password is only the fallback for a member who has not set one yet.
+        $hash = (string) ($u->app_lock_hash ?: $u->password);
+        if (! Hash::check((string) $request->input('password'), $hash)) {
+            return response()->json(['message' => 'That app password is not right.', 'errors' => ['password' => ['That app password is not right.']]], 422);
         }
         AppLock::unlock($request->session());
 

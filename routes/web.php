@@ -396,6 +396,7 @@ Route::middleware(['auth', 'active'])->group(function () {
         ->middleware('role:staff|super_admin')->name('staff.earnings');
     // Security Center (Module 23) — also reachable unverified (to change email).
     Route::get('/account/security', SecurityCenter::class)->name('security');
+    Route::get('/account/app-lock', \App\Livewire\Account\AppLockSettings::class)->name('account.app-lock');
     // Identity verification (ROADMAP §Layer 0.3) — KYC L2 gate for withdrawals.
     Route::get('/account/verify', IdentityVerification::class)->name('account.verify');
     // In-app notification centre (owner request) — the bell's "see all" page.

@@ -53,4 +53,25 @@ class PasskeyUiTest extends TestCase
         $u->forceFill(['app_lock_minutes' => 1])->save();
         $this->actingAs($u)->withSession(['app_last_active' => time() - 3600])->get('/account/security')->assertStatus(423);
     }
+
+    public function test_the_lock_needs_an_app_password_first_and_that_password_not_the_account_one_opens_it(): void
+    {
+        $u = User::factory()->create(['password' => \Illuminate\Support\Facades\Hash::make('Account123!')])->fresh();
+
+        \Livewire\Livewire::actingAs($u)->test(\App\Livewire\Account\AppLockSettings::class)
+            ->set('current', 'Account123!')->call('turnOn')->assertSet('error', 'Set your app password first, then turn the lock on.');
+        $this->assertFalse(\App\Support\AppLock::enabled($u->fresh()));
+
+        \Livewire\Livewire::actingAs($u)->test(\App\Livewire\Account\AppLockSettings::class)
+            ->set('current', 'wrong')->set('newPassword', 'AppPass1')->set('confirmPassword', 'AppPass1')->call('savePassword')->assertSet('error', 'Your account password is not right.')
+            ->set('current', 'Account123!')->call('savePassword')->set('minutes', '15')->call('turnOn')->assertSet('flash', 'App lock is on.');
+        $u = $u->fresh();
+        $this->assertSame(15, $u->app_lock_minutes);
+
+        $this->actingAs($u)->post('/app-lock/lock')->assertOk();
+        $this->actingAs($u)->postJson('/app-lock/password', ['password' => 'Account123!'])->assertStatus(422);
+        $this->actingAs($u)->postJson('/app-lock/password', ['password' => 'AppPass1'])->assertOk();
+        $this->actingAs($u)->get('/account/app-lock')->assertOk()->assertSee('App lock');
+        $this->actingAs($u)->get('/account')->assertOk()->assertSee('data-app-lock-link', false);
+    }
 }
