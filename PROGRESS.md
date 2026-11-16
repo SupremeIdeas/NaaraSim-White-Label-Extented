@@ -1,3 +1,9 @@
+## 2026-11-16: Host trust follows this install's own domain; update history explains itself
+
+- Trusted hosts follow this install's own domain (`App\Support\TrustedHosts`): its own domain with and without www is answered, other Host headers get a 400, and the check stays off for placeholder or empty `APP_URL`, or with `TRUSTED_HOSTS=*`. The installer pre-fills the URL with the domain it runs on and always trusts it.
+- Content-Security-Policy additions (additive): payment-gateway hosts for plain-form posts, analytics only while an ID is saved, and the S3 upload host when uploads go direct (voice notes, attachments). `CspCompatibilityTest`, `TrustedHostsTest`.
+- Each update record keeps the package changelog and the update history shows "What changed" under every successful update.
+
 ## 2026-11-10: Dojah KYC/KYB outcomes classified and name-matched
 Live probe with the real Dojah keys (read-only): credentials authenticate, but the Dojah wallet is NGN 0.00 so NIN and CAC lookups answer 402. An empty wallet now goes to manual review (never a customer failure) and logs critical; 400/404 reject, 401/403 fail loudly. A real NIN no longer approves any account: the name on the record must share a name with the account, else staff review it. Top up the Dojah wallet to turn automation on.
 

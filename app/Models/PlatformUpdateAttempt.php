@@ -23,6 +23,7 @@ class PlatformUpdateAttempt extends Model
     public const STATUS_FAILED_UNRECOVERABLE = 'failed_unrecoverable';
 
     protected $fillable = [
+        'changelog',
         'package_id',
         'from_version',
         'to_version',
