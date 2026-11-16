@@ -34,6 +34,18 @@ class PayoutWebhookController extends Controller
             return $native;
         }
 
+        // Grey: its own delivery id, else the transaction reference + event type (inflows carry no client reference of ours).
+        if ($provider === 'grey') {
+            $delivery = (string) $request->header('X-Webhook-Delivery-ID', '');
+            if ($delivery !== '') {
+                return 'grey:'.$delivery;
+            }
+            $tx = (string) $request->input('transaction_reference', '');
+            if ($tx !== '') {
+                return 'grey:'.$tx.':'.(string) $request->input('event_type', $request->header('X-Webhook-Event', ''));
+            }
+        }
+
         return hash('sha256', implode('|', [
             $provider, $event?->reference, $event?->status, $event?->providerRef,
             (string) ($request->input('event') ?? $request->input('type')),
@@ -53,7 +65,7 @@ class PayoutWebhookController extends Controller
 
         $log = WebhookLog::create([
             'provider' => 'payout:'.$provider,
-            'event_type' => $request->input('event') ?? $request->input('type'),
+            'event_type' => $request->input('event') ?? $request->input('type') ?? $request->input('event_type'),
             'payload' => $request->all(),
             'signature' => $request->header('x-paystack-signature') ?? $request->header('verif-hash') ?? $request->header('Stripe-Signature'),
             'verified' => $verified,
@@ -73,7 +85,7 @@ class PayoutWebhookController extends Controller
                 'provider' => $provider,
                 'provider_event_id' => $eventId,
                 'request_reference' => $event?->reference ?: null,
-                'event_type' => (string) ($request->input('event') ?? $request->input('type')),
+                'event_type' => (string) ($request->input('event') ?? $request->input('type') ?? $request->input('event_type')),
                 'received_at' => now(),
                 'payload_hash' => hash('sha256', $request->getContent()),
                 'raw_payload' => $request->getContent(),

@@ -329,7 +329,14 @@ class GreyPayoutGateway implements PayoutGatewayInterface, DeclaresCapabilities,
         $event = (string) ($request->header('X-Webhook-Event') ?: $request->input('event_type', ''));
         $reference = (string) $request->input('client_reference', '');
 
-        // Inflows (transaction.received) and created events carry nothing we act on; a payout we did not create
+        // A deposit landed in our Grey wallet: release the payouts that were waiting for funds at once.
+        if ($event === 'transaction.received') {
+            \App\Jobs\GreyInflowJob::dispatch();
+
+            return null;
+        }
+
+        // Created events carry nothing we act on; a payout we did not create
         // has no client_reference of ours.
         if ($reference === '' || ! in_array($event, ['transaction.success', 'transaction.failed'], true)) {
             return null;

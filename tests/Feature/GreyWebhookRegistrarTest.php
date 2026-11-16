@@ -31,7 +31,7 @@ class GreyWebhookRegistrarTest extends TestCase
             $secret = $b['secret'] ?? null;
 
             return str_ends_with($req->url(), '/v1/webhooks') && str_contains($b['url'], '/webhooks/payouts/grey')
-                && strlen((string) $secret) >= 8 && $b['event_types'] === ['transaction.success', 'transaction.failed'];
+                && strlen((string) $secret) >= 8 && $b['event_types'] === ['transaction.success', 'transaction.failed', 'transaction.received'];
         });
         $this->assertSame($secret, config('services.grey.webhook_secret'), 'the secret Grey was given is the one we verify with');
     }
