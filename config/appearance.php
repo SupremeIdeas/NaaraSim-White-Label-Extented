@@ -120,7 +120,7 @@ return [
             ],
             5 => [
                 'label' => 'Admin overview and admin sub-pages',
-                'views' => ['livewire/admin/dashboard', 'livewire/admin/cookie-settings', 'cookies/preferences', 'components/cookie-banner'],
+                'views' => ['livewire/admin/dashboard', 'livewire/admin/server-ip-address', 'livewire/admin/cookie-settings', 'cookies/preferences', 'components/cookie-banner'],
             ],
             6 => [
                 'label' => 'Remaining member pages (queued; registered so no page can ship un-skinned unnoticed)',
