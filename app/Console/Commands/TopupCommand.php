@@ -8,7 +8,7 @@ use Illuminate\Console\Command;
 
 class TopupCommand extends Command
 {
-    protected $signature = 'topup:run {task : seed|sync|float|reconcile|prune|margin|rates|live|ip|autopilot|autoreload|snapshot} {arg? : country for the rates and live tasks, e.g. NG}';
+    protected $signature = 'topup:run {task : seed|sync|float|reconcile|prune|margin|rates|live|ip|autopilot|autoreload|snapshot} {arg? : country for the rates and live tasks, e.g. NG} {--now : run the task here and print the result instead of queueing it (float)}';
 
     protected $description = 'Top-up operations: seed suppliers + routes, sync the catalogue, poll float, reconcile, prune logs, margin report';
 
@@ -24,9 +24,18 @@ class TopupCommand extends Command
                 $this->table(['Supplier', 'Products'], collect($catalogue->syncAll())->map(fn ($n, $c) => [$c, $n])->values()->all());
                 break;
             case 'float':
-                foreach ($ops->pollFloat() as $c => $r) {
-                    $this->line($c.': '.(($r['ok'] ?? false) ? $r['currency'].' '.number_format($r['amount'], 2) : 'ERROR '.($r['error'] ?? '')));
+                if ($this->option('now')) {
+                    foreach ($ops->pollFloat() as $c => $r) {
+                        $this->line($c.': '.(($r['ok'] ?? false) ? $r['currency'].' '.number_format($r['amount'], 2) : 'ERROR '.($r['error'] ?? '')));
+                    }
+                    break;
                 }
+                // Background: one queued job per supplier with keys, so a slow or refused supplier never holds up the rest or the scheduler.
+                $codes = $ops->pollableCodes();
+                foreach ($codes as $code) {
+                    \App\Jobs\Topup\PollSupplierFloatJob::dispatch($code);
+                }
+                $this->info('Float checks queued for '.count($codes).' supplier(s): '.(implode(', ', $codes) ?: 'none have keys yet').'. Results appear on Admin > Top-ups within a minute; add --now to run them here.');
                 break;
             case 'reconcile':
                 $r = $ops->reconcile();
