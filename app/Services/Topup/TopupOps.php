@@ -34,33 +34,62 @@ class TopupOps
         }
     }
 
-    /** Poll every configured supplier's float; alert once when it falls below the minimum, clear when topped up. @return array<string, array> */
+    /** Poll every configured supplier's float one after another (the admin button). The scheduler uses one background job per supplier instead: see PollSupplierFloatJob. @return array<string, array> */
     public function pollFloat(): array
     {
         $out = [];
         foreach (TopupProviders::all() as $code => $p) {
-            $row = TopupProvider::firstOrCreate(['code' => $code], ['name' => $p->name(), 'enabled' => true]);
-            if (! $p->configured()) {
-                continue;
-            }
-            try {
-                $b = $p->balance();
-                $row->update(['last_balance' => $b['amount'], 'currency' => $b['currency'], 'last_balance_at' => now(), 'last_error' => null]);
-                $low = (float) $row->min_float > 0 && $b['amount'] < (float) $row->min_float;
-                if ($low && ! $row->low_float_alerted && $row->enabled) {
-                    AlertAdminJob::dispatch(code: 'topup_low_float_'.$code, message: "{$row->name} float is {$b['currency']} ".number_format($b['amount'], 2).' (minimum '.number_format((float) $row->min_float, 2).'). It is skipped in routing until topped up.', context: ['provider' => $code]);
-                    $row->update(['low_float_alerted' => true]);
-                } elseif (! $low && $row->low_float_alerted) {
-                    $row->update(['low_float_alerted' => false]);
-                }
-                $out[$code] = ['ok' => true] + $b;
-            } catch (Throwable $e) {
-                $row->update(['last_error' => substr($e->getMessage(), 0, 250)]);
-                $out[$code] = ['ok' => false, 'error' => $e->getMessage()];
+            $r = $this->pollOne($code);
+            if ($r !== null) {
+                $out[$code] = $r;
             }
         }
 
         return $out;
+    }
+
+    /** Codes of the suppliers that have keys saved (the ones worth polling). @return list<string> */
+    public function pollableCodes(): array
+    {
+        $out = [];
+        foreach (TopupProviders::all() as $code => $p) {
+            TopupProvider::firstOrCreate(['code' => $code], ['name' => $p->name(), 'enabled' => true]);
+            if ($p->configured()) {
+                $out[] = $code;
+            }
+        }
+
+        return $out;
+    }
+
+    /**
+     * Poll ONE supplier's float: store the balance, alert once when it falls below the minimum, clear when topped up. Never throws: a supplier that fails is
+     * recorded (`last_error`) and reported in the result. Null when the supplier has no keys. @return array<string, mixed>|null
+     */
+    public function pollOne(string $code): ?array
+    {
+        $p = TopupProviders::get($code);
+        $row = TopupProvider::firstOrCreate(['code' => $code], ['name' => $p->name(), 'enabled' => true]);
+        if (! $p->configured()) {
+            return null;
+        }
+        try {
+            $b = $p->balance();
+            $row->update(['last_balance' => $b['amount'], 'currency' => $b['currency'], 'last_balance_at' => now(), 'last_error' => null]);
+            $low = (float) $row->min_float > 0 && $b['amount'] < (float) $row->min_float;
+            if ($low && ! $row->low_float_alerted && $row->enabled) {
+                AlertAdminJob::dispatch(code: 'topup_low_float_'.$code, message: "{$row->name} float is {$b['currency']} ".number_format($b['amount'], 2).' (minimum '.number_format((float) $row->min_float, 2).'). It is skipped in routing until topped up.', context: ['provider' => $code]);
+                $row->update(['low_float_alerted' => true]);
+            } elseif (! $low && $row->low_float_alerted) {
+                $row->update(['low_float_alerted' => false]);
+            }
+
+            return ['ok' => true] + $b;
+        } catch (Throwable $e) {
+            $row->update(['last_error' => substr($e->getMessage(), 0, 250)]);
+
+            return ['ok' => false, 'error' => $e->getMessage()];
+        }
     }
 
     /**

@@ -160,6 +160,8 @@ class TopupCatalogue
                 continue;
             }
             $p = TopupProviders::get($code);
+            $authFails = 0;      // consecutive "this server is refused" answers: after three the supplier is skipped for this run
+            $okCount = 0;
             foreach ($p->countries() as $iso) {
                 if (! $this->router->sellable($iso) || ! in_array($code, $this->router->routedCodes($iso), true)) {
                     continue;
@@ -171,12 +173,25 @@ class TopupCatalogue
                     // Never swallow a supplier failure: a 401 (key revoked, IP not allow-listed) used to look exactly like "no products". Log it, and tell the admin once per supplier per 6 hours.
                     $msg = str_replace(["\n", "\r"], ' ', mb_substr($e->getMessage(), 0, 240));
                     \Illuminate\Support\Facades\Log::warning("[topup] catalogue sync failed for {$code} {$iso}: {$msg}");
-                    if (Cache::add('topup:sync-alert:'.$code, 1, now()->addHours(6))) {
+                    $refused = self::isAuthRefusal($msg);
+                    $authFails = $refused ? $authFails + 1 : 0;
+                    if ($authFails >= 3) {
+                        // The supplier is refusing THIS SERVER (key revoked or outbound IP not on its allow-list). Asking for 200 more countries changes nothing: stop, tell the admin once, say what to check.
+                        if (Cache::add('topup:sync-alert:'.$code, 1, now()->addHours(6))) {
+                            $ip = \App\Support\ServerEgressIp::get() ?: 'unknown';
+                            \App\Jobs\AlertAdminJob::dispatch(code: 'topup_sync_failed', message: "{$code} refused this server three times in a row (HTTP 401/403), so its catalogue sync was skipped. Check the {$code} API key and that this server's outbound IP ({$ip}) is on the supplier's allow-list (Admin > More > System > Server IP address). It retries by itself.", context: ['supplier' => $code, 'ip' => $ip]);
+                        }
+
+                        break;
+                    }
+                    if (! $refused && Cache::add('topup:sync-alert:'.$code, 1, now()->addHours(6))) {
                         \App\Jobs\AlertAdminJob::dispatch(code: 'topup_sync_failed', message: "Top-up catalogue sync for {$code} failed (first error: {$iso}): {$msg}", context: ['supplier' => $code, 'country' => $iso]);
                     }
 
                     continue;
                 }
+                $authFails = 0;
+                $okCount++;
                 $this->store($code, $iso, $list);
                 $counts[$code] = ($counts[$code] ?? 0) + count($list);
                 $drop = TopupSettings::float('catalogue_drop_alert_pct');
@@ -184,9 +199,17 @@ class TopupCatalogue
                     \App\Jobs\AlertAdminJob::dispatch(code: 'topup_catalogue_drop', message: "Top-up catalogue for $iso from $code dropped from $before to ".count($list).' products.', context: ['country' => $iso, 'provider' => $code]);
                 }
             }
-            TopupProvider::where('code', $code)->update(['last_synced_at' => now()]);
+            if ($okCount > 0) {
+                TopupProvider::where('code', $code)->update(['last_synced_at' => now()]);
+            }
         }
 
         return $counts;
+    }
+
+    /** Does an error message mean the supplier refused our credentials or our server (401 / 403 / authentication failed)? */
+    public static function isAuthRefusal(string $message): bool
+    {
+        return (bool) preg_match('/\b(401|403)\b|AuthenticationFailed|Unauthori[sz]ed|Forbidden|not allowed|whitelist/i', $message);
     }
 }
