@@ -152,6 +152,24 @@
 
     {{-- CATALOGUE --}}
     @if ($tab === 'catalogue')
+        @php $cov = app(\App\Services\Topup\TopupCoverage::class)->report(); @endphp
+        <section class="{{ $card }} mt-4" data-topup-coverage>
+            <h2 class="text-sm font-bold text-[rgb(var(--nx-text))]">Coverage: what we can sell right now</h2>
+            <div class="mt-3 grid gap-3 sm:grid-cols-2">
+                @foreach (['airtime' => 'Airtime', 'data' => 'Data bundles'] as $t => $label)
+                    <div class="rounded-xl border border-[rgb(var(--nx-line))] p-3" data-coverage-type="{{ $t }}">
+                        <p class="text-xs font-semibold text-[rgb(var(--nx-text-2))]">{{ $label }}</p>
+                        <p class="mt-1 text-2xl font-extrabold text-[rgb(var(--nx-text))]">{{ number_format($cov['types'][$t]['offers']) }}</p>
+                        <p class="text-xs text-[rgb(var(--nx-text-2))]">offers across {{ $cov['types'][$t]['countries'] }} countries and {{ number_format($cov['types'][$t]['networks']) }} networks. Africa: {{ $cov['africaCovered'][$t] }} of 54 countries.</p>
+                    </div>
+                @endforeach
+            </div>
+            <div class="mt-3 overflow-x-auto"><table class="w-full text-left text-xs text-[rgb(var(--nx-text))]"><thead class="text-[rgb(var(--nx-text-2))]"><tr><th class="py-1">Supplier</th><th>Airtime offers</th><th>Countries</th><th>Data offers</th><th>Countries</th></tr></thead><tbody>
+                @foreach ($cov['suppliers'] as $r)<tr class="border-t border-[rgb(var(--nx-line))]"><td class="py-1.5 font-semibold capitalize">{{ $r['code'] }}</td><td>{{ number_format($r['airtime']) }}</td><td>{{ $r['airtimeCountries'] }}</td><td>{{ number_format($r['data']) }}</td><td>{{ $r['dataCountries'] }}</td></tr>@endforeach
+            </tbody></table></div>
+            @if ($cov['africaGaps']['airtime'])<p class="mt-3 text-xs text-[rgb(var(--nx-text-2))]"><b class="text-[rgb(var(--nx-text))]">African countries with no airtime yet:</b> {{ implode(', ', $cov['africaGaps']['airtime']) }}.</p>@endif
+            @if ($cov['africaGaps']['data'])<p class="mt-1 text-xs text-[rgb(var(--nx-text-2))]"><b class="text-[rgb(var(--nx-text))]">African countries with no data bundles yet:</b> {{ implode(', ', $cov['africaGaps']['data']) }}.</p>@endif
+        </section>
         <section class="{{ $card }} mt-4">
             <div class="flex flex-wrap items-end gap-3">
                 <div><label class="{{ $lbl }}" for="cc">Country</label><input id="cc" wire:model.live.debounce.400ms="catalogueCountry" maxlength="2" placeholder="NG" class="{{ $inp }} !w-24"></div>
